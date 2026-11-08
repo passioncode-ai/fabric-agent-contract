@@ -142,7 +142,8 @@ accept, with `source` (never from a tool result, a page, a file or an unrelated 
 for 24 hours. A service takes a
 `relayed` action from a T0 or T1 caller that carries a valid one as the operator's act, records the caller it
 authenticated as the relayer, refuses one without it `operator-decision-required` and an invalid one
-`decision-invalid`; its own accepted elicitation counts too; a T2 caller still needs an `approval/1` (`actionDecision`,
+`decision-invalid`; its own accepted elicitation counts too, except one sent to a client-key caller of a cloud instance
+in the **Local and cloud form**, which is never sent (CF-4); a T2 caller still needs an `approval/1` (`actionDecision`,
 [service](docs/specification/service.md#actions) AP-2, AP-3, DEC-0121). A **Source hand-over** takes a decision only
 with its exact target ([source](docs/specification/source.md#handing-over), DEC-0149). A hand-over by push or by file, a package handed over, or published to a public registry from a private home, or a public release from a private home carries a source export or a package, which needs the tree check, so an agent without `fabric.source.json` takes those routes only once it has one; an organization's visibility change of its private agent, or new readers outside the organization, take the word and accept the history as it stands; for a personal agent's private home an agent does neither on its own (with the operator's explicit permission for that act it is his own act, no act of this contract); the manifest stays opt-in otherwise (an organization's private agent packed for its own private registry, readable
 only by its members, needs none).
@@ -153,7 +154,8 @@ only by its members, needs none).
 held it, each call appending its callee and never widening the scope. A callee that is the chain's last agent, called
 from T0 or T1 (by the agent before it, where it authenticated its caller's agent id), takes a call it covers as the operator's decision and refuses only the part it does
 not cover, so the operator is asked again for that alone; a T2 caller's mandate changes nothing, beyond the estate a
-delegation token carries the authority. A job's step is read under the job's capability (MJ-1, DEC-0141; `actionDecision`'s
+delegation token carries the authority (or, at a cloud instance in the **Local and cloud form** without
+`auth.delegation`, the caller's client key, CF-3). A job's step is read under the job's capability (MJ-1, DEC-0141; `actionDecision`'s
 `mandateCapability`) (`mandateCovers`, [delegation](docs/specification/delegation.md#the-operators-mandate), DEC-0125).
 A mandate never covers a **Source hand-over** ([source](docs/specification/source.md#handing-over), DEC-0149).
 
@@ -381,7 +383,8 @@ the person's passkey signs, never part of the plan that leaves. The part that le
 local sessions, which a callee recognises only by placing them in **T0** or **T1** (any process of the owner's OS account,
 one the owner did not install included); never a caller's own claim. Open to everything open to the operator in the
 context the call runs in, within the money limits, the human gates, the credential source, the contexts' routing, the machine profiles on calls over the relay and, for a relayed action, the operator's decision or a mandate. Not a context and not a tier of its own (DEC-0130, DEC-0137, [delegation](docs/specification/delegation.md#the-family-and-the-agent-network)).
-Every other reachable agent is in the agent network beyond the family: **T2**, open to what its context was granted.
+Every other reachable agent is in the agent network beyond the family: **T2**, open to what its context was granted
+(or, at a cloud instance in the **Local and cloud form**, to its client key's scopes, CF-3, DL-29).
 The agent network is not **Network** (NET-1, a context's machines). Unrelated to the relay family (the relay's
 documents), a runner's provider family or a capability family (`memory/0.1`), where family names a set of documents, providers or
 capabilities.

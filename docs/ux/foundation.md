@@ -796,7 +796,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
   - Given the operator handed me my client key through a channel that keeps it out of chat and logs, I stored it in my own vault, and the operator told me `peer.endpoint`, when my coding agent calls a tool in my key's scopes, then the cloud instance answers with the provider keys it holds on the server (DEC-0159 CF-3, CF-5).
   - Given no key, a key the service does not hold or a revoked key, then my call is refused `unauthenticated` (`401`); given a tool outside my key's scopes, `scope-not-granted` (`403`) (CF-3, DL-19).
   - Given my key on the page's routes, then the page opens nothing for me and answers as to a request with no session (CF-4).
-  - Given a tool that reaches a person's step, on the operator's page or at the service's provider, then no link reaches me and the step goes to the operator: a job-backed tool answers with its job, which reads `working` until the operator acts and then goes on or ends as the operator's no ends it; another tool refuses my call `scope-not-granted` naming `operator-step`, its message telling me the operator was asked, or that the operator declined (CF-4).
+  - Given a tool that reaches a person's step, on the operator's page or at the service's provider, then no link reaches me and the step goes to the operator: a job-backed tool answers with its job, which reads `working` until the operator acts and then goes on or ends as the operator's no ends it; another tool refuses my call `scope-not-granted` naming `operator-step`, its message telling me the operator was asked; a decline ends the jobs waiting on the step and nothing else, so my later call raises the step again (CF-4).
   - Given my job needs a choice, then I am never asked it: the choice goes to the operator and my job reads `working` until the operator answers; a tool that is not job-backed and cannot go on without a choice refuses my call `scope-not-granted` naming `operator-step: choice` (CF-4).
   - Given the team's budget or my key's cap is reached, then my call is refused `limit-reached` naming its window, with no approval request, and I ask the operator (CF-3).
 - **Priority:** should
@@ -805,12 +805,12 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 
 ### ST-042: Operator gives the team keys and takes the steps their calls raise
 
-- **Story:** As P-02, I want to issue, rotate and revoke my team's client keys from my own terminal or my page, and to see each step or choice their calls raise once, named with the key it came from, so that the team uses my cloud agent without its provider keys and nothing of my account is decided by whoever holds a key.
+- **Story:** As P-02, I want to issue and rotate my team's client keys from my own terminal or my page, and have them revoked there or by my own agent on my word, and to see each step or choice their calls raise once, named with the key it came from, so that the team uses my cloud agent without its provider keys and nothing of my account is decided by whoever holds a key.
 - **Traces:** JTBD-16
 - **Acceptance criteria:**
   - Given I issue a key with the agent's CLI or on my page, then it is shown once, under the holder label I give it, which only my CLI and page show (DEC-0159 CF-3).
-  - Given a member's call reaches a person's step or a job's choice, then I get one ask naming the step and never the member, at most one a day while it stays open, also when my host starts after the step opened, and my page shows it with the holder label of every key waiting on it and records my answer as mine (CF-4).
-  - Given a member leaves, then no client key ends with the membership, and I revoke that member's keys by their holder label, or a key I issued with an expiry ends when it passes (CF-3, OM-5).
+  - Given a member's call reaches a person's step or a job's choice, then I get one ask naming the step and never the member, at most one a day from each host and channel while it stays open, also when my host starts after the step opened, and my page shows it with the holder label of every key waiting on it and records my answer as mine; a decline ends the jobs waiting on it and nothing else, so a later call asks me again (CF-4).
+  - Given a member leaves, then no client key ends with the membership, and that member's keys are revoked on my word, found by their holder label, or a key I issued with an expiry ends when it passes; either way the key's running and waiting jobs end `cancelled` and it leaves every step's waiting list (CF-3, OM-5).
 - **Priority:** should
 - **Status:** draft
 - **Product:** unobserved

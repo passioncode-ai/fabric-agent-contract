@@ -43,6 +43,10 @@ was deleted from `origin` and replaced by this squash. Commit-addressed referenc
   key, CF-4's daily repeat of an open step's event and its definition of one step, the page's answers as twins, the
   issuer-less reading for every `relayed` action, the limit window mapping, a key's optional expiry, SCR-36 and FLW-36
   for SCN-059's operator side (see *Rounds*).
+- Round 9: a client-key caller's `inputResponses` answered by the job step's own gate, a decline that answers only the
+  jobs waiting on its step, a revoked or expired key's jobs cancelled, the key split (issuing and rotating a member's
+  key the operator's own step, revoking the agent's on the operator's word), DL-19's header change named as a wire
+  change with its five dependants (see *Rounds*).
 - Round 7: CF-4 as one rule (a client-key caller is handed no person's step and no choice), SCN-059 for the operator's
   keys and the steps members' calls raise (ST-042), OM-5's sentence on client keys, `peer`'s schema description, and
   back-pointers to CF-3 in DL-26, DL-29 and source.md's T2 premise (see *Rounds*).
@@ -96,7 +100,17 @@ a client-key caller input for CF-4's `operator-step` (FAA-204).
   client key against the north star's (no grant, not metered by Observatory's meter, issued only by the service's
   operator), and the same landing changes fabric-workspace `knowledge/agents-first.md` line 291 from
   "(`peer`, client keys, the one-time code)" to "the operator's one-time code for the page", as source.md and CT-218
-  read.
+  read, restates `knowledge/authority.md` line 148's T2 row with a clause for a cloud instance in the form without
+  `auth.delegation` (the client key takes the token's place and the grant's, DL-26, CF-3), and the owed page says that
+  issuing a member's key through the north star's administrator agent puts the key in that agent's transcript (CF-3).
+  Tell Fabric Dashboards that its sample service (`test/fixtures/sample-service/fabric_delegation.py`) copies the
+  adapter's Python kit, whose no-credential `401` changes with DL-19's header sentence (DEC-0159 *Compatibility*).
+- At landing, DEC-0157 (branch `agent/ct216-usage-data-v2`) and DEC-0158 (branch `agent/ct215-on-demand-20261108`)
+  conflict with this branch in the registers: against DEC-0157 in `docs/DECISIONS.md` and `docs/handoffs/README.md`,
+  against DEC-0158 in `docs/DECISIONS.md`, `docs/backlog.md` and `docs/handoffs/README.md`, all adjacent appends; the
+  second lander keeps both sides, the decisions in DEC order. DEC-0157's lander is told that this branch amends AP-2's
+  elicitation clause and DL-26, so its note that DEC-0159 moves neither no longer holds, and UD-4 is re-read against
+  AP-2 and DL-26 as merged.
 - At landing, whichever of DEC-0156 (branch `agent/ct220-operators-word-v2`) and DEC-0159 lands second rebases
   SCN-044's *Alt paths* and *Coverage* lines in `docs/ux/scenarios.md`, which both rewrite, and keeps both texts:
   DEC-0156's update alt path and its `DEC-0156 OW-1 to OW-4` coverage, and this branch's one sentence for the cloud
@@ -108,14 +122,17 @@ a client-key caller input for CF-4's `operator-step` (FAA-204).
   docs/ux/scenarios.md` prints 3). `docs/DECISIONS.md`, `docs/backlog.md` and `docs/handoffs/README.md` conflict too,
   each keeping both sides' rows. `screens.md` no longer conflicts: since round 8 SCN-059's operator side is SCR-36's,
   and SCR-30 is as on `origin/main`.
-- The same landing carries DEC-0156's substantive question about client keys, whose home is now SCN-059 (DEC-0156's
-  landing note still points at SCN-044 and should point at SCN-059): whether issuing, rotating or revoking a client key
-  on the operator's word is the agent's step through the `relayed` twin (OW-2) or the step that hands out a secret
-  (OW-4). The resolution this branch proposes, to be written into SCN-059 when both have landed: issuing or rotating a
-  member's key hands out a secret and stays the operator's (OW-4), from their own terminal or the page, since the new
-  key would come back in the agent's answer and transcript (CF-3, FLW-36's rejected shape); revoking a key, and
-  issuing an agent its own key, are the agent's steps through the twin with the operator's decision (OW-2). DEC-0156's
-  branch is told to point its note at SCN-059.
+- DEC-0156's question about client keys has its home in SCN-059, where DEC-0156's own landing note already places it.
+  `docs/ux/screens.md` auto-merges with DEC-0156's branch: SCR-30's *Scenarios* line keeps "SCN-043, SCN-044, SCN-045,
+  SCN-046, SCN-057", and SCN-059 is SCR-36's and is added to no other screen. One key split, which both branches write
+  the same way and this branch has written since round 9 into CF-3, SCN-059, ST-042, SCR-36 and FLW-36: issuing and
+  rotating a member's key hand out a secret and are the operator's own step (DEC-0156's OW-4 secret step), in their
+  terminal or on the page, so the value never enters an agent's transcript (CF-3); revoking is the agent's step on the
+  operator's word (OW-2), through the `relayed` twin where the instance checks `approval/1`, else by the agent running
+  the agent's own CLI on the operator's computer (on an instance without the estate's issuer the twin answers a caller
+  carrying an approval `issuer-unavailable`, CF-4); issuing an agent its own key is the agent's step too. SCN-059
+  hands the operator no revoke command: each line `grep -n 'own terminal' docs/ux/scenarios.md` prints in it names
+  issuing or rotating a key, or the entry point, and none names revoking.
 
 ## Rounds
 
@@ -380,6 +397,61 @@ a client-key caller input for CF-4's `operator-step` (FAA-204).
   branch's added lines against `origin/main`: 0; `git merge-tree --write-tree HEAD origin/main`: exit 0. The full
   `pnpm run check` was not run here.
 
+- Round 9 (on `05dc64ec`), not clean: all three tiers failed. Folded by simplifying where a rule could go.
+  Breaks folded: (1) unit: round 8's "an `inputResponses` that caller sends is never taken as the answer" contradicted
+  CF-4's own *A `relayed` action keeps its gate*, the departure note under `actionDecision`'s table and
+  `FAC-SEM-142`, since AP-2 makes a job's input request a `relayed` action and `actionDecision` takes an accepted
+  `approval/1` on it (now the sentence is gone: such an `inputResponses` is the step's `relayed` action under its own
+  gate, refused `approval-required` with the step's digest without an accepted `approval/1` and taken as the
+  approver's decision with one where the instance takes `approval/1`, DL-18; no departure is added; a member's key
+  reaches `fabric.job.get` to read its job, so its `inputResponses` is refused `approval-required`; in CF-4, interop
+  C3.3, the conformance row, DEC-0159 item 4, SCN-058 and SCN-059); (2) product: a declined step had no way back, the
+  page listing open steps only (now a decline answers only the jobs waiting on the step and closes it; a later call
+  that reaches the same need opens a new step and asks again, and a need the operator met outside the page, a top-up
+  or a consent at the provider, is found met by the next call; the "declined" refusal message is gone; CF-4, ST-041,
+  ST-042, SCR-35, SCR-36, FLW-36 with an edge from the decline back to a member's call, SCN-058, SCN-059, DEC-0159
+  item 4, the conformance row); (3) product: a revoked or expired key's work in flight was undefined (now revoking a
+  key, or its expiry, cancels that key's running jobs and its jobs waiting on an operator step, which end `cancelled`,
+  interop C3.2; the page drops it from every step's waiting list and a step no remaining call or job waits on closes;
+  CF-3, CF-4's repeat, SCN-041's alt path, SCN-058, SCN-059, ST-042, SCR-35, SCR-36, DEC-0159 item 3, the conformance
+  row); (4) product: SCN-059's index row now reads "ST-042, FLW-36"; (5) seam: *Compatibility* said nothing on the
+  wire changes, but DL-19's header sentence changes every service's no-credential `401` (now it says so and names the
+  five dependants: the adapter's `fabric_delegation.py` line 915 and `fabric-delegation.mjs` line 548, its tests
+  `test/fabric-delegation.test.mjs` line 140 and `test/test_fabric_delegation.py` line 386, its reference
+  `references/delegation.md` line 106, and Fabric Dashboards' sample copy of the kit; FAA-204 carries the change for
+  the adapter although it is not specific to the form, rather than a second adapter row this repository cannot file,
+  and *Open* tells Fabric Dashboards that its sample copies the kit); (6) seam: the DEC-0156 rebase note was out of
+  step with that branch's own note (now *Open* says DEC-0156's note already homes the question in SCN-059, SCR-30 keeps
+  "SCN-043, SCN-044, SCN-045, SCN-046, SCN-057", and states the one key split both branches write: issuing and
+  rotating a member's key the operator's own step in their terminal or on the page, revoking the agent's step on the
+  operator's word through the twin where the instance checks `approval/1`, else with the agent's CLI on the operator's
+  computer; CF-3, SCN-059's entry point, alt paths and *Errors & recovery*, ST-042, SCR-36, FLW-36's rejected shape
+  and task analysis, the conformance row and DEC-0159 item 3 now carry it, and no SCN-059 line hands the operator a
+  revoke command).
+  Risks folded: the repeat of an open step's event is now no sooner than 25 hours after the previous raise (the
+  host's 24-hour ask hold, measured at the poll that read the event, plus its 60-second remote poll) and a new event
+  with a new `id` and the same `subject`, `kind` and `link` (CF-4, the conformance row, DEC-0159 item 4 and
+  *Compatibility*, SCN-059 step 3, SCR-36, FLW-36); one ask per raise from each host and each channel, the simpler of
+  the two offered (no marking mechanism), and the operator channel's OC-5 buttons named as a no-page route for choose
+  and decline (CF-4, SCN-059, ST-042, SCR-36, FLW-36, DEC-0159 item 4); L0 and client-key spend: the estate's meter
+  reserves none of it, L0 binds it at the call only through each provider key's own ceiling and the estate's month
+  sees it after the fact (CF-3, DL-26, DEC-0159 item 3); DL-26's clause scoped to a cloud instance in the form; landing
+  lines for the register conflicts with DEC-0157 and DEC-0158, and DEC-0157's lander told that AP-2 and DL-26 moved;
+  fabric-workspace `knowledge/authority.md` line 148's T2 row added to the landing's knowledge edits; `CONTEXT.md`
+  lines on the operator's decision, the mandate and the family now point to CF-3 or CF-4; CF-1's migration note (an
+  agent adopting the form re-keys its local gate to `<id>.default` and has grants naming the bare `id` re-issued;
+  CF-1, DEC-0159 item 1); the owed knowledge page says issuing a member's key through the north star's administrator
+  agent puts it in that agent's transcript (*Compatibility*, *Open*). None declined.
+
+- Checks run on the round-9 fold before its commit: `pnpm run docs:check` ("Documentation checks passed", markdownlint
+  0 errors over 271 files); `python3 docs/ux/lint.py` (passed: 42 stories, 36 flows, 36 screens, 58 scenarios);
+  `pnpm run privacy:check` (0 findings); `pnpm vectors:check` (32 vector files match their generators);
+  `pnpm typecheck` (exit 0); `pnpm --silent validate` on the three fixtures (exit 0 each); `pnpm vitest run
+  test/fixtures.test.ts test/consistency.test.ts test/actions.test.ts test/positive-sweep.test.ts
+  test/delegation.test.ts` (1499 passed); the private-name grep over the round's added lines: nothing; em dashes in the
+  branch's added lines against `origin/main`: 0; `git merge-tree --write-tree HEAD origin/main`: exit 0. The full
+  `pnpm run check` was not run here.
+
 ## Next task
 
-Round 9 of the blind readings of branch `agent/ct218-local-cloud-v2` (DEC-0159), all three tiers.
+Round 10 of the blind readings of branch `agent/ct218-local-cloud-v2` (DEC-0159), all three tiers.

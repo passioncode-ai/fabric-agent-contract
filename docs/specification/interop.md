@@ -294,7 +294,9 @@ DEC-0123), and a tool answer that names a page for a person MUST carry it in `op
 instance in the local and cloud form is never handed an input request, in either mode, nor sent an elicitation: answering
 one is a `relayed` action and that caller is not the operator, so the service raises a job's request to its operator
 while the job reads `working` to that caller, and a call that cannot go on without a choice is refused
-`scope-not-granted` ([service](service.md#the-local-and-cloud-form-of-one-agent) CF-4, DEC-0159).
+`scope-not-granted`; an `inputResponses` that caller sends anyway is the step's `relayed` action under its own gate
+(AP-2), refused `approval-required` without an accepted `approval/1`
+([service](service.md#the-local-and-cloud-form-of-one-agent) CF-4, DEC-0159).
 
 `inputRequests` is the MCP map of request key to `elicitation/create` request;
 `inputResponses` maps the same keys to `{action: accept | decline | cancel, content?}`.

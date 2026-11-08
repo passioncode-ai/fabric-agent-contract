@@ -486,11 +486,12 @@ delegation token, an `approval/1` or a grant record from a T0 or T1 caller, and 
 It MAY accept a token such a caller presents; it then verifies it as DL-13 says, refuses it when the verifier
 does (a present but invalid token is refused, never ignored, as DL-10), and uses an accepted one for
 attribution and narrowing. A T2 caller takes the whole profile: a token per call (DL-8, DL-13), an approval for
-each effect that needs one (DL-17), a grant with limits, an expiry and a payer; at a callee that declares no
-`auth.delegation` (DL-16), such as a cloud instance in the local and cloud form without it, the caller's own client key
-takes the token's place and the grant's: the service's own budgets ([service](service.md#limits) *Limits*, DEC-0027) are
-its limits, the key's revocation (and its expiry, where the operator set one) its end, and the service's operator its
-payer ([service](service.md#the-local-and-cloud-form-of-one-agent) CF-3, DEC-0159). At every tier the money limits
+each effect that needs one (DL-17), a grant with limits, an expiry and a payer; at a cloud instance in the local and
+cloud form that declares no `auth.delegation` (DL-16), the caller's own client key takes the token's place and the
+grant's: the service's own budgets ([service](service.md#limits) *Limits*, DEC-0027) are its limits, the key's
+revocation (and its expiry, where the operator set one) its end, and the service's operator its payer, with L0 binding
+that spend at the call only through each provider key's own ceiling and the estate's month seeing it after the fact
+([service](service.md#the-local-and-cloud-form-of-one-agent) CF-3, DEC-0159). At every tier the money limits
 bind — L0, the project's L1 and each provider key's own ceiling ([spend policy](spend-policy.md#levels)) — and so
 do the human gates: sign-ins, consents, payments and top-ups, a secret typed into a hidden prompt or a held one handed out (a peer share's export, DEC-0147), signatures by the
 person's passkey, a comparison of codes between two people or the choice to share without one (DEC-0142). A credential

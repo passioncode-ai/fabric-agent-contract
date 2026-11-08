@@ -11406,7 +11406,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      instance verifies a delegation token's and an `approval/1`'s `aud` against `<id>.<instance>` (DL-2, DL-13 step 8,
      DL-18; the `agentId` grammar admits it), so a token or an approval for one instance is not accepted by the other;
      a grant naming an instance in the form names `<id>.<instance>`, the local one's too, and the bare `id` is no
-     audience in the form (a token under it is refused `wrong-audience`, DL-13 step 8);
+     audience in the form (a token under it is refused `wrong-audience`, DL-13 step 8), so an agent adopting the form
+     re-keys its local gate from the bare `id` to `<id>.default` and has the grants that named the bare `id` re-issued;
      a host that groups by `id` shows them as one product; both run code from one source home, the cloud one a commit that
      passed that home's gate; a copy in another home under another `id` is a second agent, not the form. A manifest's
      service extension names one `<id>.<instance>` and a descriptor naming the manifest must be that one
@@ -11435,11 +11436,20 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      the page. The well-known fixture leaves the actions
      declaration out, so it shows neither the key action nor its twin. A key
      is shown once in the issuing answer and never again, held as a hash, labelled with its holder for the operator
-     alone, revoked one by one, and MAY carry an expiry the operator sets, past which it is treated as revoked; an agent that calls an issuing door (the twin, or the CLI run through that agent)
-     receives the key in its answer and so in its transcript. Usage counts a client key's spend in its days and rows
+     alone, revoked one by one, and MAY carry an expiry the operator sets, past which it is treated as revoked;
+     revoking a key, or its expiry, cancels that key's running jobs and its jobs waiting on an operator step (they end
+     `cancelled`), drops it from every step's waiting list on the page and closes a step no remaining call or job waits
+     on. An agent that calls an issuing door (the twin, or the CLI run through that agent) receives the key in its
+     answer and so in its transcript, so issuing or rotating a member's key, a secret handed out, is the operator's own
+     step in their terminal or on the page; revoking hands out no value, so the operator's agent revokes on the
+     operator's word, through the twin where its gate lets it through, else by running the agent's CLI on the operator's
+     computer, as it must on an issuer-less instance, whose twin answers a caller carrying an approval
+     `issuer-unavailable` (item 4). Usage counts a client key's spend in its days and rows
      and never in `byGrant`, which names only the grant a delegation token carried (DL-22); client-key spend reaches no
      `grant.usage` event and no grant limit, so the service's own budgets (Limits, DEC-0027) are the ceiling the
-     operator sets for the team; per-key spend and any per-key cap are the service's own and shown on the operator's
+     operator sets for the team; it reaches no grant check either, so the estate's meter reserves none of it: at the
+     call L0 binds it only through each provider key's own ceiling, and the estate's month sees it after the fact,
+     where a reader totals the usage report; per-key spend and any per-key cap are the service's own and shown on the operator's
      CLI and page only, as the holder label is, a per-key cap being no `budgets` entry; a call a budget or a per-key cap
      stops is refused `limit-reached` with its window (the budget's `period`, `task` for a `per_job` budget, the
      smallest of `day`, `week` and `month` covering a rolling window, else `total`), the service the refuser, with no
@@ -11470,22 +11480,26 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      action its call or job reaches (AP-4: a sign-in, a consent, a payment or a top-up, a secret, spend above a limit),
      on the operator's page or another party's, is the operator's, because the service acts with its own provider keys
      (CF-5) and a step for its account binds that account to whoever takes it; and so is every input request of its
-     job, since answering one is a `relayed` action and that caller's answer would be recorded as the operator's (AP-2,
-     C3.3); no elicitation is sent to it. One step is one account step for one provider account, one order's spend
+     job, since answering one is a `relayed` action that caller reaches only through its gate (AP-2, C3.3); no
+     elicitation is sent to it. One step is one account step for one provider account, one order's spend
      above a limit, or one job's input request, every call reaching it while open waiting on it. The service raises it
-     to its operator when it opens, however many calls reach it, and again under the same `subject` once a day while it
-     stays open, so that a host that holds an ask for 24 hours asks at most once a day and a host that was not running
-     when it opened, which reads its first poll as history, still asks: an events-feed event with `notify: true`, a `subject` naming the step by an opaque id (never
+     to its operator when it opens, however many calls reach it, and again while it stays open, each time no sooner than
+     25 hours after the previous raise (a host's 24-hour ask hold and its poll interval), as a new event with a new
+     `id` and the same `subject`, `kind` and `link`, so that each host and each channel asks at most once per raise and
+     a host that was not running when it opened, which reads its first poll as history, still asks: an events-feed event with `notify: true`, a `subject` naming the step by an opaque id (never
      the holder label), `link` the page's path, a `kind` the host reads as an ask (Fabric Dashboards: its ask pattern,
      such as `human_step.opened`) and `level` `notice` or higher (its default banner minimum), which its operator
      channel, where it has one, sends (OC-4); the page shows it with the holder label of every key whose call waits on
      it and records the operator's answer as theirs: taking a step is the step itself (AP-4), and choosing and declining
      are `relayed` page actions with agent twins (AP-1), reached as the key twin is, so an operator without the page
-     answers through their agent. The caller reads the outcome: a job reads `working`, its `statusMessage` saying the operator was asked and no
-     `inputResponses` of that caller taken as the answer, then goes on or ends as the operator's no ends it; a call to a
+     answers through their agent or the operator channel's buttons (OC-5). The caller reads the outcome: a job reads `working`, its `statusMessage` saying the operator was asked, then goes on
+     or ends as the operator's no ends it, an `inputResponses` that caller sends being the step's `relayed` action
+     under its gate (`approval-required` without an accepted `approval/1`, the approver's decision with one where the
+     instance takes one); a call to a
      job-backed tool answers with its job; a call to another tool is refused `scope-not-granted` with `data.detail`
-     `operator-step: <humanStep>` and a message saying the operator was asked, or declined (a declined step answering
-     every caller that reaches it so and raising no new event until the operator takes it), and a call to such a tool
+     `operator-step: <humanStep>` and a message saying the operator was asked (a decline answering only the jobs
+     waiting on the step and closing it, so a later call raises a new step, and a need met outside the page, a top-up
+     or a consent at the provider, is found met by the next call), and a call to such a tool
      that cannot go on without a choice `operator-step: choice`, raising nothing, since no later call carries the
      answer, its message saying the tool cannot wait for the operator's choice and the caller not repeating it; `human-step-required` does not
      fit, because it requires the `data.url` this caller is not given. A `relayed` action keeps its own gate after the
@@ -11494,10 +11508,13 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      refused `approval-required` (`verifyApproval`'s first refusal) and a caller carrying one `issuer-unavailable`
      (DL-13 row 1, DL-18), answered by the service itself or by `verifyApproval` given a jti store (with none it answers
      `unknown-state` first), final for the caller, the operator then acting on the page or with the CLI; a
-     member's key carries no scope that reaches one, so the operator takes such an action on the page or with the CLI.
+     member's key carries no scope that reaches one's tool, so the operator takes such an action on the page or with
+     the CLI, and a member's `inputResponses` on `fabric.job.get`, which its key reaches, is refused
+     `approval-required`.
      Where no host on the operator's computer signs the operator in to the page (Fabric Dashboards cannot show it,
      PL-3, and no other host, Fabric for one, mints a login code for a browser there), the operator manages keys with
-     the CLI and takes a step from another computer of theirs that shows the page. Only the operator sees the cloud
+     the CLI and takes a step from another computer of theirs that shows the page, or answers through the channel's
+     buttons. Only the operator sees the cloud
      instance in Fabric Dashboards; a member sees it as an MCP server. A page for members needs a per-person
      credential a later decision adds. AP-2's elicitation clause, AP-4, PL-4, the note under `actionDecision`'s table,
      `FAC-SEM-142`, interop C3.3 and its caller-action table, and DL-19's row say the same in one clause each.
@@ -11527,7 +11544,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `id` already marks it, and a host that shows products by `id` needs nothing more); a semantic rule that checks the
   cloud instance declares `own` (rejected for now: the declaration is in the well-known document behind the token, which
   a checker of descriptors does not read).
-- **Compatibility:** additive; nothing on the wire changes. Read on 2026-11-08 at each default branch. Fabric Dashboards
+- **Compatibility:** additive, with one change on the wire that reaches every service, not the form alone: DL-19's
+  header sentence now asks a bare `WWW-Authenticate: Bearer` on a `401` for a request that carried no credential,
+  where its old text put `error="invalid_token"` on every `401` (RFC 6750 section 3.1); its dependants are named below.
+  Read on 2026-11-08 at each default branch. Fabric Dashboards
   groups services by `id` and opens the `default` instance first (`src/core/products.ts`), never calls a remote `/mcp`
   with the descriptor's token, and its descriptor check admits both fixtures; it owes `peer.custody`
   `processor-hosted` (DEC-0099), which it refuses today. It raises an event with `notify: true` as an ask when its `kind`
@@ -11537,9 +11557,13 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (`episodeKey` and its ask cooldown in the same file), which is why CF-4's event names its step by an opaque id. It
   reads every event it finds at its first poll after it starts as history and asks nothing for them (`src/core/monitor.ts`
   line 582), so a step raised while the operator's Fabric Dashboards was not running would never become an ask; CF-4
-  therefore raises an open step's event again once a day under the same `subject`, which the host's 24-hour ask
-  cooldown (`notify.ts` lines 69 to 72) and its relay to the operator channel, which queues one ask per episode in 24
-  hours (`src/core/outage-alerts.ts` lines 66 and 182), keep to one ask a day. Fabric's agent registry refuses the
+  therefore raises an open step's event again under the same `subject`, as a new event (an event id increases), no
+  sooner than 25 hours after the previous raise: the host's 24-hour ask cooldown is measured from the poll that read
+  the event (`notify.ts` lines 69 to 72 and 99 to 101), it polls a remote instance every 60 seconds
+  (`src/core/monitor.ts` line 95), and its relay to the operator channel queues one ask per episode in 24 hours of
+  event time (`src/core/outage-alerts.ts` lines 66 and 182), so a repeat at exactly 24 hours would be muted on about
+  half of days. That relay and the service's own operator channel are two channels, and each computer holding the
+  descriptor is a host, so CF-4 promises one ask per raise from each host and each channel. Fabric's agent registry refuses the
   cloud descriptor today: its service fields list no `peer` or `runner` and it takes `installedBy` only as a string
   (`apps/desktop/src/main/agentRegistry.ts` lines 59, 161 and 179), the lag of DEC-0061 that Fabric tracks as CO-278,
   so until it re-pins an estate agent reaches the cloud instance by a direct call (DL-9), not through the hub's
@@ -11550,10 +11574,15 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   681), so for the cloud descriptor it finds none (CF-1). An older caller kit reads CF-4's operator step as a missing scope until it reads `data.detail`:
   the adapter's kits answer `scope-not-granted` with the token's message ("The called capability is not in the token's
   scope.", `fabric_delegation.py` line 81 and `fabric-delegation.mjs` line 45) and `refusal_from_action`
-  (`fabric_delegation.py` line 866) has no client-key caller, and their `refusal_http` sends
-  `WWW-Authenticate: Bearer error="invalid_token"` on every `401`, a no-token one included (`fabric_delegation.py`
-  line 915, asserted in `test/fabric-delegation.test.mjs` line 140), where DL-19's header sentence now asks a bare
-  challenge for no credential; under FAA-204 they owe that bare challenge, a message for `operator-step`,
+  (`fabric_delegation.py` line 866) has no client-key caller. DL-19's header change has five dependants, all still
+  sending or teaching `WWW-Authenticate: Bearer error="invalid_token"` on every `401`, a no-token one included: the
+  Python kit's `refusal_http` (`fabric_delegation.py` line 915), the JS kit's `refusalHttp` (`fabric-delegation.mjs`
+  line 548), the two kit tests that assert it on the no-token case (`test/fabric-delegation.test.mjs` line 140 and
+  `test/test_fabric_delegation.py` line 386), the adapter's reference for builders (`references/delegation.md` line
+  106), and Fabric Dashboards' sample service, a copy of the Python kit (`test/fixtures/sample-service/fabric_delegation.py`
+  line 915), which follows the kit once it is re-copied. FAA-204 carries the header change for the adapter although it
+  is not specific to the form, since it reaches every service built on the kits; Fabric Dashboards is told at landing
+  that its sample copies the kit. Under FAA-204 the kits also owe a message for `operator-step`,
   and a kit input marking a client-key caller so that the kit answers every `human` action and input request as
   CF-4 says (the job, or `scope-not-granted` with `operator-step: <humanStep>`) and raises the event once per open
   step; and, in the form, each instance's delegation gate configured with the audience `<id>.<instance>`, not the bare
@@ -11602,13 +11631,18 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   operator's CLI or page, and client-key spend has no per-member total in the organization record, which the page says
   too), and the same
   wording as source.md at `knowledge/agents-first.md` line 291, whose "(`peer`, client keys, the one-time code)" becomes
-  "the operator's one-time code for the page" in the landing. `contractVersion` stays `0.1.0`.
+  "the operator's one-time code for the page" in the landing. The same landing restates `knowledge/authority.md` line
+  148, whose T2 row needs a share grant, a token per call and an approval per effect, with a clause for a cloud
+  instance in the form without `auth.delegation`, where the client key takes the token's place and the grant's (DL-26,
+  CF-3), and the owed page says that issuing a member's key through the north star's administrator agent puts the key
+  in that agent's transcript (CF-3), so that agent revokes keys and the operator issues them. `contractVersion` stays
+  `0.1.0`.
 - **Consequences / affects:** `docs/specification/service.md` (the section *The local and cloud form of one agent*, the
   header line and AP-2's elicitation clause), `fixtures/positive/service-descriptor-cloud-form-local.json`,
   `fixtures/positive/service-descriptor-cloud-form-cloud.json`, `fixtures/positive/service-well-known-cloud-form.json`
   and their rows in `fixtures/catalogue.json`, `docs/specification/conformance.md` (one row, and a clause each in the
   actions row and the channel-agent row), `CONTEXT.md` (*Local and
-  cloud form*), `docs/ux/scenarios.md` (SCN-044's and SCN-041's alt paths and Coverage, the operator's key management
+  cloud form*, and a pointer to CF-3 or CF-4 in the entries on the operator's decision, the mandate and the family), `docs/ux/scenarios.md` (SCN-044's and SCN-041's alt paths and Coverage, the operator's key management
   moved from SCN-044 to SCN-059 in round 7; SCN-058, a member's
   scenario, and its index row), `docs/ux/foundation.md` (JTBD-16, ST-041), `docs/ux/flows.md` (FLW-35),
   `docs/ux/screens.md` (SCR-35), `docs/DOCMAP.md` (a row), `README.md` (a row of *Build an agent*), the service.md lines
