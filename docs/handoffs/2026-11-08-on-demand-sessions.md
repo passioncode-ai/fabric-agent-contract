@@ -49,14 +49,31 @@ package the run is handed, (b) its lifecycle and a dead run's request, (c) how i
   `mandate-not-for-this-call`, what `src/mandate.ts` answers, 84 tests); `comms-enroll.schema.json`'s description (a
   dispatched run ends instead of retrying; description only); DOCMAP's count of the board-request vectors; CONTEXT's
   counting; the adapter's effect-key debt named as new, not FAA-215's; backlog CT-215 and the handoffs index.
+- Round 6: OS-6 settles first and then writes the thread note (a participant's reply) and the operator's question by
+  the outcome (after `failed_known`, the operator submits it again; after a request left `in_progress`, nobody does and
+  it reaches the owner as `outcome_unknown`), in DEC-0158 item 6, SCN-025's human step and the dispatched run's
+  conformance row; SCR-19, SCN-025, OS-5, DEC-0158 item 5 and CT-175 name one actor for a shown request (the operator
+  through a session of the requesting Project they own, otherwise the requester on its own reading of the state, the
+  estate's rule, `agents-first.md` *When nobody answers* item 1), and "the host asks the requester on the thread" is
+  gone; "no time left" is limited to an `accepted` or `in_progress` request with no live holder in SCN-025, SCR-19 and
+  CONTEXT, a `queued` or `claimed` one with too short a deadline expiring; SCR-19 and SCN-025 tell a timed-out run
+  from one that ended empty and offer a session of the target Project after a timed-out one; `noResponder`'s paragraph
+  says a requester cannot observe whether a host can grant a run the slot and cites the receipts' `com.enroll` bullet;
+  OS-4 allows one immediate retry of a settling call refused `retryable` (not `held`), with the same idempotency key (item 4, the
+  run's row); OS-7 and item 7 name the onward caller id as the target's registry agent id; one more mandate vector (a
+  chain ending in the target, the run taking it with no authenticated caller id, what `src/mandate.ts` answers, 85
+  tests); DEC-0152 annotated with the wait of a question or an announcement to a Project only runs serve, filed as
+  CT-272; Compatibility gains the adapter's requester rule and mandate guidance, Switchboard's scrub limited to sessions
+  launched through it, and Fabric's delegation token's outermost actor; `comms-enroll.schema.json`'s description
+  reworded (description only); DOCMAP's and Consequences' vector counts.
 
 ## Decisions taken here
 
 - The request's states are not extended: a dead run's request keeps the state the extension gives it, and the next run
   or the owner settles it through existing operations (DEC-0158 Alternatives (a)).
 - A run never waits at a human step, another job's `input_required`, or a source hand-over without an exact decision:
-  it names the step in the thread and settles `failed_known` (`observed: false` before an effect began; after one,
-  only once it observed no effect) or leaves the request `in_progress` for the next holder (OS-6).
+  it settles `failed_known` (`observed: false` before an effect began; after one, only once it observed no effect) or
+  leaves the request `in_progress` for the next holder, then names the step in the thread by that outcome (OS-6).
 - A board request's mandate chain ends in the target's registry agent id; the run acts as that entry and appends only
   its onward callees, so no Project id or runner kind enters a chain (OS-7, MD-2).
 - A begun effect's idempotency key is kept in the host's record of the run and carried to the next run, which observes
@@ -76,7 +93,14 @@ package the run is handed, (b) its lifecycle and a dead run's request, (c) how i
   effect's key in the host's record of the run, a debt new with DEC-0158 and not FAA-215's, which covers closing the
   workflow, `observed: true` and the open checkpoint's reason; taking a board request's mandate only when its last
   entry is the target's registry agent id); Observatory's kept
-  reference form for an effect's key (its checkpoint redaction would destroy the key today).
+  reference form for an effect's key (its checkpoint redaction would destroy the key today). From round 6: the
+  adapter's requester rule (`references/project-board.md:123-136`, `SKILL.md:128-131`, a small change made by the
+  requester itself) restated beside the knowledge base's item 3, and its mandate guidance (`SKILL.md:250-254`) handing
+  a board request's mandate on only to the target's registry agent id; Switchboard's scrub covers sessions launched
+  through it, a shell-launched one being the adapter's; Fabric's delegation token for a run's onward call, once its hub
+  forwards one, carries the target's registry agent id as its outermost actor or is not sent.
+- The adapter's vector-count literals move at its next pin: `test/fabric-mandate.test.mjs:26` asserts 40 cases and
+  `:40` asserts 30 hand-overs at its main `2c0b1b18`; this branch's `fixtures/vectors/mandate.json` holds 44 and 32.
 - Fabric's specification at its main `eafcf2e4` also tells the run to append itself
   (`docs/evidence/specs/2026-11-04-on-demand-sessions.md:139-140` and `:148-149`): part of Fabric's OS-7 debt, with its
   packet text. Fabric's CO-409 also answers whether its home count of requests no agent answers excludes a request a
@@ -121,6 +145,16 @@ package the run is handed, (b) its lifecycle and a dead run's request, (c) how i
   `pnpm vitest run test/mandate.test.ts test/comms-tools.test.ts test/comms-hold.test.ts test/consistency.test.ts`
   exit 0 (4 files, 354 tests; `test/mandate.test.ts` alone 84); `git diff origin/main...HEAD | grep '^+' | grep -c` of
   U+2014 printed 0. The full `pnpm run check` was not run in this round.
+
+## Checks run on the round-6 commit
+
+- On the tree of the round-6 commit (parent `a2d386d5`): `pnpm run docs:check` exit 0 ("Documentation checks passed",
+  lint:md 271 files, 0 errors); `python3 docs/ux/lint.py` exit 0 (40 stories, 34 flows, 34 screens, 56 scenarios);
+  `pnpm run privacy:check` exit 0 (0 findings); `pnpm vectors:check` exit 0 (32 vector files match their generators);
+  `pnpm vitest run test/mandate.test.ts test/comms-tools.test.ts test/comms-hold.test.ts test/consistency.test.ts`
+  exit 0 (4 files, 355 tests; `test/mandate.test.ts` alone 85); `pnpm typecheck` exit 0;
+  `git diff origin/main...HEAD | grep '^+' | grep -c` of U+2014 printed 0. The full `pnpm run check` was not run in
+  this round.
 
 ## Rounds
 
@@ -190,9 +224,24 @@ package the run is handed, (b) its lifecycle and a dead run's request, (c) how i
   OS-2 handing that id, one more vector; the enroll schema's description; the adapter's key debt not FAA-215's; Fabric
   meets the held path from its next pin (CO-409, SCN-025).
 
+- Round 6 (on `a2d386d5`), not clean: product, OS-6 wrote the thread note and the operator's question ("the operator
+  submits it again once the step is taken") before it settled, so they asked for a resubmission even when the run then
+  left the request `in_progress`, which is not submitted again (now the run settles first and writes both by the
+  outcome, item 6, SCN-025 and the run's row); SCR-19 and SCN-025 offered "the host asks the requester on the thread"
+  while OS-5 and CT-175 have the host show the request only to its operator (now one actor everywhere: the operator
+  through a session of the requesting Project they own, otherwise the requester on its own reading of the state); "no
+  time left" listed `queued` and `claimed`, which OS-5, the host's row and CONTEXT never show for it (now `accepted`
+  and `in_progress` only, a `queued` or `claimed` request with too short a deadline expiring). Risks folded:
+  `noResponder`'s requester sentence (what a requester cannot observe; the receipts' `com.enroll` bullet); the wait of
+  a question or an announcement to a Project only runs serve (DEC-0152's annotation, CT-272); SCR-19's timed-out run
+  and the session of the target Project; the enroll schema's description; OS-4's one immediate retry of a settling
+  call; one positive mandate vector; OS-7's onward caller id; the adapter's requester rule and mandate guidance,
+  Switchboard's scrub scope and Fabric's delegation token in Compatibility; the adapter's count literals at its next
+  pin.
+
 ## Next task
 
-Round 6 of the blind readings of branch `agent/ct215-on-demand-20261108` (DEC-0158), all three tiers. At landing:
+Round 7 of the blind readings of branch `agent/ct215-on-demand-20261108` (DEC-0158), all three tiers. At landing:
 DEC-0158 Accepted with its rounds, the amendment line and DEC-0022's annotation without "proposed", CT-215 done, the
 North Star plan's wave 0 row, fabric-workspace `knowledge/agents-first.md` items 3, 5 and 8 landed with the merge (a
 merge condition, not a step after it), and a board post of the consumer debts to Fabric, Switchboard, the adapter,

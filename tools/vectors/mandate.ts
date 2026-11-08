@@ -57,6 +57,9 @@ function cases(): Array<[string, Json, Json]> {
     // DEC-0158 OS-7, MD-2: the requester did not hand the mandate on to the target, so the chain ends in the requester and
     // the run, acting as the target's registry agent id, is not its last entry: no mandate for it.
     ["a board request's chain that ends in the requester: the run acting as the target is not its last entry", call({ mandate: { ...base, chain: [{ agent: "example-developer", at: "2026-10-26T10:01:00Z" }, { agent: "example-requester", at: "2026-10-26T10:05:00Z" }] }, self: "example-target", callerAgent: undefined }), BAD("mandate-not-for-this-call")],
+    // DEC-0158 OS-7, MD-3: the requester handed the mandate on to the target's registry agent id, so the run, acting as
+    // that last entry, takes it; with no authenticated caller id the chain's end alone binds it.
+    ["a board request's chain that ends in the target: the run acting as the target's registry agent id takes it", call({ mandate: { ...base, chain: [{ agent: "example-requester", at: "2026-10-26T10:01:00Z" }, { agent: "example-target", at: "2026-10-26T10:05:00Z" }] }, self: "example-target", callerAgent: undefined }), OK(["example-requester", "example-target"])],
     // DEC-0126 OA-2, OA-6: the operator said it in another of their agents' sessions; where travels into the record.
     ["words relayed from another of the operator's agents: where they said them travels into the record", call({ mandate: { ...base, source: { project: "example-analyst", thread: "example-thread-3" } } }), { ...OK(), recordAs: { ...OK().recordAs, source: { project: "example-analyst", thread: "example-thread-3" } } }],
     ["a source naming neither the session nor the thread", call({ mandate: { ...base, source: { project: "example-analyst" } } }), BAD("mandate-malformed")],

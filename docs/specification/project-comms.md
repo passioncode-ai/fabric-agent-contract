@@ -172,9 +172,10 @@ stored, and the requester's own `com.submit` receipt carries `noResponder` with 
 sentence for a person: the target can still answer it with a reply, and a responder may come later. No other
 participant sees `noResponder`. A host that dispatches may take such a request after its grace
 ([on-demand sessions](#on-demand-sessions) OS-1) only where it can grant the run it starts that slot: the run's
-`com.enroll` is checked against the host's responder grant as any session's is (OS-4), and `noResponder` reads the
-board at submission, not a run the host may start. For such a target the requester leaves the request to it. What the requester does
-then is the estate's rule, not the board's: in PassionCode, fabric-workspace `knowledge/agents-first.md`, *When nobody
+`com.enroll` is checked against the host's responder grant as any session's is ([receipts](#receipts), `com.enroll`),
+and `noResponder` reads the board at submission, not a run the host may start. A requester cannot observe whether a
+host can grant such a run the slot: nothing on the board says so until a run holds it. What the requester does then is
+the estate's rule, not the board's: in PassionCode, fabric-workspace `knowledge/agents-first.md`, *When nobody
 answers*.
 
 **A reply to an announcement says its type** (DEC-0098). A participant's reply whose `replyTo` is an announcement MAY
@@ -916,7 +917,9 @@ board client of its Project and moves a request only through the operations of t
   reply alone is not. It then ends, leaving the session and with it the slot
   ([slots end with the session](#slots-end-with-the-session)). It ends also at `run-ends-at`; a run that cannot settle the request before
   then, and whose deadline falls before the host could start another, settles it `failed_known` as above rather than
-  leaving it `accepted`. A run never waits on a refusal and never retries one: one whose `com.enroll` is refused does
+  leaving it `accepted`. A run never waits on a refusal and never retries one, except one immediate retry of a settling call
+  (`com.complete`, `com.reconcile`) with the same idempotency key when its refusal is `retryable` and not `held` (the
+  key makes the retry safe, [idempotency](#idempotency)); a settling call refused again leaves the request as OS-5 says. One whose `com.enroll` is refused does
   what SA-6 says for that refusal ([answering in the same turn](#answering-in-the-same-turn)) except SA-6's retry once
   the cause is gone, and ends, the host's next start after the cause is gone being the retry (OS-5); one refused `held`,
   `fenced` or `lease_expired` on its work stops acting and ends, never retaking the slot.
@@ -942,8 +945,10 @@ board client of its Project and moves a request only through the operations of t
   grant: at `absent` generation 0 the run's SA-6 decline made the request `answered`, so the requester submits it
   again; at a generation of 1 or more the run sent no reply, so the request kept its state (a `queued` one stays
   queued), and the host may start a run for it again. The requester sees no signal from the host in the thread:
-  it reads the request's state and may cancel, while the operator is the one shown the request (the requester's side of
-  a lost holder is CT-175, a wait that outlives a session CT-150). An effect the earlier run began is never begun again
+  it reads the request's state and may cancel, while the operator is the one shown the request; the operator acts on
+  it through a session of the requesting Project they own, and otherwise the requester acts on its own reading of the
+  state (the estate's rule: in PassionCode, fabric-workspace `knowledge/agents-first.md`, *When nobody answers*, item
+  1). The requester's side of a lost holder is CT-175, a wait that outlives a session CT-150. An effect the earlier run began is never begun again
   without an observation: the run records the effect's own idempotency key in the host's record of the run (for Fabric,
   the workflow checkpoint's body; not the board's transfer checkpoint) before it acts outward (with its
   `com.effect_begin`, never after the outward call), the host carries that record into what it hands the next run, and
@@ -960,21 +965,23 @@ board client of its Project and moves a request only through the operations of t
   human step ([service](service.md#actions) AP-4: a sign-in, a consent, a payment, a typed secret, spend above a limit),
   and a source hand-over without a decision naming its exact target ([source](source.md#handing-over), DEC-0149; without
   the elicitation capability the service answers `operator-decision-required` with the detail `handover-needs-operator`)
-  are each named once in the thread with why no route avoided it. Only the first two have an exception: a job's question
-  or an `operator-decision-required` refusal that the request's mandate (MD-3) or a relayed decision (OA-1 to OA-3)
-  covers exactly is answered by it and is not a stop. A source hand-over goes ahead only on a decision naming its exact
-  target ([source](source.md#handing-over)), and a human step is never covered (MD-6, AP-4, OA-5). At a human step the
-  thread note carries the refusal's `humanStep` and `url` when the refusal gave them, and the run also asks the operator
-  through the host's question surface (`fabric_question_ask` or the host's equal), the question naming the operator as
-  the one who submits the request again once the step is taken, or, where the run has none, leaves the host to show the
-  request to its operator as OS-5 does. The thread note names the resubmitter too ("the operator submits it again once
-  the step is taken; leave it"), so the requester submits it again only when that note or the operator says so. Then the run settles: before an effect began,
-  `failed_known` with `observed: false`; after one, it cancels the waiting job with that job's own cancel and settles
+  are each a stop. Only the first two have an exception: a job's question or an `operator-decision-required` refusal
+  that the request's mandate (MD-3) or a relayed decision (OA-1 to OA-3) covers exactly is answered by it and is not a
+  stop. A source hand-over goes ahead only on a decision naming its exact target ([source](source.md#handing-over)), and
+  a human step is never covered (MD-6, AP-4, OA-5). At a stop the run settles first: before an effect began,
+  `failed_known` with `observed: false`; after one, it cancels a waiting job with that job's own cancel and settles
   `failed_known` once it has observed that the effect did not happen, or else leaves the request `in_progress`, so the
-  next holder's `lost_result` makes it `outcome_unknown`, which the host shows at once (OS-5). Once the person has taken
-  the step, the operator submits the request again by default, or the requester does when the note or the operator says
-  so (a requester's wake for it is CT-150); a request left `in_progress` is not submitted again, since a new request's
-  run gets no earlier effect key (OS-2, OS-5).
+  next holder's `lost_result` makes it `outcome_unknown`, which the host shows at once (OS-5). Then it names the stop
+  once in the thread, with why no route avoided it, as a participant's `com.reply` to the request (which moves only a
+  `queued` request, DEC-0102). At a human step the note carries the refusal's `humanStep` and `url` when the refusal
+  gave them, and the run also asks the operator through the host's question surface (`fabric_question_ask` or the
+  host's equal), or, where the run has none, leaves the host to show the request to its operator as OS-5 does. The
+  note and the question go by the outcome: after `failed_known`, "the operator submits it again once the step is taken;
+  leave it", naming the operator as the one who submits it again; after a request left `in_progress`, "do not submit
+  it again; it reaches the owner as `outcome_unknown`". So the requester submits it again only when that note or the
+  operator says so. Once the person has taken the step, the operator submits a `failed_known` request again by
+  default, or the requester does when the note or the operator says so (a requester's wake for it is CT-150); a request
+  left `in_progress` is not submitted again, since a new request's run gets no earlier effect key (OS-2, OS-5).
 - **OS-7, slots and mandates.** A dispatched run holds a slot only while it works: it never takes a slot from a live
   holder, uses `com.responder_replace` only to continue a held `accepted` request whose holder is gone (CT-175), and
   ends its session, and with it the slot, when it ends. While it holds the slot of `project.work` it is the Project's
@@ -989,8 +996,8 @@ board client of its Project and moves a request only through the operations of t
   folder's own record); otherwise it treats the request as carrying no mandate and names and settles as OS-6 does. It
   takes the mandate as that last entry (MD-3) and acts under it as that agent, appending only each onward call's callee (MD-2, `handOn`), never its own id;
   so no Project id (the board's server-issued `projectId`, not a registry `agentId`) and no runner kind of the run's
-  appears in the chain, and no agent is named twice. Its onward calls present the chain's last entry as their caller,
-  as the host's credential gives it (MD-3's authenticated agent id); where the credential cannot, the callee sees no
+  appears in the chain, and no agent is named twice. Its onward calls present the target's registry agent id (the entry the run took the
+  mandate as) as their caller, as the host's credential gives it (MD-3's authenticated agent id); where the credential cannot, the callee sees no
   authenticated caller id and the chain's end alone binds the mandate (MD-3). It never extends a mandate's `expiresAt`; a request whose mandate expires before the work is
   done is named and settled as OS-6 settles (a task longer than a mandate is CT-205). The run's outcome (finished, ended
   without an answer, timed out, failed to start) is the host's record, never a state of the request, and carries no text
