@@ -172,6 +172,16 @@ never later than 7 days after sign-in (`service.md` §The session's lifetime; ti
 a URI, RFC 8141 §3.1 for a URN, any other string as it is; writers SHOULD emit the normal form; readers MUST compare by it
 ([identifiers](docs/specification/identifiers.md), DEC-0076).
 
+**Usage data**: Anonymous data about how a product is used and about its errors, which the product collects about
+itself to improve it and, with a shared installation id, to count one installation once across the products that share
+it (DEC-0157's reading, pending the operator's answer, OQ-0013): on by default, sent only after a notice (not a
+question) shown once where the person reads it, or, where the platform's own consent or a market's privacy review
+needs an answer first, only after that answer (UD-1), stopped by the product's own switch, which never writes the shared file's `analytics` field, an earlier shared no given before the product first sends (or, for an install that already sent, before the first run of its conforming version) kept (UD-2), with no person, credential, path or file
+name from the person's machine or data, or any content or text a person wrote or received in it. Anonymous here
+means it names no person, not that it is unlinkable: an installation id ties an install's events together, a shared one ties the products that send it, and a session id, kept in memory and renewed after an idle hour, ties one session's; joined with an account or a purchase it is no longer anonymous (UD-1 to UD-6,
+DEC-0157). Not a usage report (a service's spend and calls), not activity telemetry (an organization's record of its
+people's sessions) and not an operations digest while it is sent to no one but the person (UD-6).
+
 **Usage report**: What a service publishes about its own spend at `surfaces.usage`, with every spending limit
 it applies, enforced or not (DEC-0021, DEC-0027), and MAY attribute its calls to projects and task runs, never
 to a caller (DEC-0065). Money is summed over its rows not on a subscription; a subscription row's cost is an

@@ -7,7 +7,7 @@ No open questions remain from stage 0. Later stages reserve `OQ-####` before add
 an entry. The coordination config declares no `OQ` id register, so an id is taken
 under the lease on this file, from the line below.
 
-**Next free ID:** `OQ-0013`
+**Next free ID:** `OQ-0014`
 
 The seven questions below were raised by module AR-1 (DEC-0016) about the contracts
 Fabric locked on 2026-09-29. Each names the part that is implemented and the part that
@@ -190,3 +190,17 @@ ruling; DEC-0017 states what holds now.
   `outcome-unknown`, the caller's act (`jobCallerAction`), the intent's key (`intentIdempotencyKey`), the provider's
   answer to a repeated key, `null` and `partial` in `usage` under the revision `fabric-interop/0.2` a caller names in
   `_meta.protocols`; `FAC-SEM-119`, `FAC-SEM-120`. C4 stays adapter guidance.
+
+### OQ-0013: Usage data: does "only for this" admit counting one installation once across the products?
+
+- **Status:** Open
+- **Raised:** 2026-11-08, the blind readings of DEC-0157 (CT-216), branch `agent/ct216-usage-data-20261107`
+- **Owner of the answer:** the operator.
+- **Question:** the operator's decision of 2026-11-04 names one purpose for anonymous usage and error data: «чтобы мы
+  улучшали наш продукт. Все, только для этого» (quoted in Fabric Switchboard's `docs/ANALYTICS.md`). DEC-0157 reads
+  it as admitting a second purpose, counting one installation once across the products that share its installation
+  id, as an accurate count serving the same improvement. Does it, or is a shared id's only use each product's own
+  improvement?
+- **Meanwhile:** [usage data](specification/usage-data.md) UD-1 and DEC-0157 item 1 state both purposes and mark the
+  second, and the notice wording that follows from it, as provisional; a narrower answer changes the notice's purposes
+  (UD-1) and is a new notice under its re-show rule.

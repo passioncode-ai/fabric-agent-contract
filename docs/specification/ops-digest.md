@@ -129,6 +129,10 @@ text among them, fails it.
   `hourly-YYYY-MM.jsonl` (the month of `from`) and `daily-YYYY-MM.jsonl` (the month of `day`), in a folder of its own
   on its own machine that only its user reads (files mode `0600` where the system has modes). A digest
   stays on the machine; the daily digest MAY be sent onward as a record (ADR-0188 §3), and how is not this page's.
+  Sent to anyone but the person (a product owner or another party; the operator reading his own machines counts as the
+  person), a product's digests are usage and error data under that product's own switch, and a collector sends them so
+  only for a product whose switch is on and whose notice was shown ([usage data](usage-data.md) UD-6, DEC-0157); the
+  condition binds the products under that page, and a hosted service's digests on its own server are its own.
   A reader reads line by line: it skips a line that is not JSON, that names another `schema` (a later revision
   included) or that fails the schema or a rule, never stopping at one; of two lines for one hour it reads the first,
   and of two daily lines for one day the first. A collector (OD-9) takes the first daily line of a day too.
@@ -266,7 +270,10 @@ A product with one folder of digests, `digests` in its data folder, writes in it
 - How a daily digest travels to Project Observatory (ADR-0188 §3), and how Observatory reads every product's digests:
   OD-9 says only where a collector in the same OS account (DEC-0154) reads the daily lines and which label
   it sends; who collects,
-  how often and over which call is the collector's and Observatory's.
+  how often and over which call is the collector's and Observatory's. When digests may be sent to anyone but the person
+  (a product owner or another party; the operator reading his own machines counts as the person) is not left open:
+  [usage data](usage-data.md) UD-6 (DEC-0157) conditions it on the product's switch and notice, for the products under
+  that page; a hosted service's digests on its own server are its own.
 - `pnpm validate` reading a `.jsonl` file whole.
 - Which act of each host's claim vocabulary is "a release recorded as done" for RW-1: each host names its own.
 - Counting the retros written, inside or outside a host (a lesson recorded straight in Project Observatory included):

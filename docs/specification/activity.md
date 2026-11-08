@@ -14,7 +14,9 @@ call used** — for debugging, for memory of how work went, and for spend reconc
 on a device reads what coding-agent runtimes already emit (OpenTelemetry exports, transcripts,
 rollout files, the desktop switchboard, process sampling). It turns that into telemetry events of
 this shape and sends them in batches to an organization server (the **receiver**). Only a receiver
-builds summaries.
+builds summaries. A product's own anonymous usage and error data is not activity telemetry: it
+never travels in this channel, nor activity telemetry in its ([usage data](usage-data.md) UD-6,
+DEC-0157).
 
 The contract names every field it defines and closes every object it defines. A collector MUST NOT
 add content or person attributes: no prompt, response, command line, window title or diff, and no
