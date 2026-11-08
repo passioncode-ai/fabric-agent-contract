@@ -167,13 +167,16 @@ while the request was claimed, or before the board took this decision), then exp
 whose deadline, its own or that default, has passed (DEC-0102). A responder's own messages never answer a request: after
 a responder is replaced, the request is the new responder's to claim. A [hold](#holds) does not stop that clock: a
 queued or claimed request held longer than its deadline expires (accepted work is kept, C4). A request whose target Project
-nobody can answer now (no slot of that capability has a holder and no live `board.respond` grant exists) is still
+nobody can answer now (no slot of that capability has a holder and no live `board.respond` grant exists: a grant the
+board holds now for that Project and capability, which would let a session's `com.enroll` take the slot; a grant a host
+gives a session only at its own `com.enroll` is not one until then) is still
 stored, and the requester's own `com.submit` receipt carries `noResponder` with the target, the capability and one
 sentence for a person: the target can still answer it with a reply, and a responder may come later. No other
 participant sees `noResponder`. A host that dispatches may take such a request after its grace
-([on-demand sessions](#on-demand-sessions) OS-1) only where it can grant the run it starts that slot: the run's
-`com.enroll` is checked against the host's responder grant as any session's is ([receipts](#receipts), `com.enroll`),
-and `noResponder` reads the board at submission, not a run the host may start. A requester cannot observe whether a
+([on-demand sessions](#on-demand-sessions) OS-1) only where it gives the run it starts that grant at the run's own
+`com.enroll`, which is checked against the host's responder grant as any session's is ([receipts](#receipts),
+`com.enroll`); a standing grant the board already held for the capability would have kept `noResponder` off the
+receipt. `noResponder` reads the board at submission, not a run the host may start. A requester cannot observe whether a
 host can grant such a run the slot: nothing on the board says so until a run holds it. What the requester does then is
 the estate's rule, not the board's: in PassionCode, fabric-workspace `knowledge/agents-first.md`, *When nobody
 answers*.
@@ -950,14 +953,17 @@ contract times.
   enrollment was refused `held` or `fenced`, when a hold refused its work, or when the operator's move of the slot
   fenced it; after a hold's lift the host may start again. Every other run that ends without settling the request
   counts toward the two, one that ended before its `com.enroll` included (a crash, OS-3's mismatch, a client that could
-  not reach the board), so no refusal and no failed start starts runs without end. A run refused `not_authorized` ends the host's starts for that request
+  not reach the board), so no refusal and no session that fails starts runs without end. A start the launcher refused
+  or could not make, where no session ran, is not a run: it counts for nothing, and the host's own back-off bounds such
+  starts until the request is no longer a candidate (OS-1's time left before the deadline). A run refused `not_authorized` ends the host's starts for that request
   until the operator grants, and the host shows the request to its operator (a grant is the operator's). A run whose
   enrollment is refused with any other code that is not `retryable` (`fenced` aside, which counts for nothing above)
   likewise ends the host's starts for that request
   and shows it to its operator. After the
   grant: at `absent` generation 0 the run's SA-6 decline made the request `answered`, so the requester submits it
   again; at a generation of 1 or more the run sent no reply, so the request kept its state (a `queued` one stays
-  queued), and the host may start a run for it again. The requester sees no signal from the host in the thread:
+  queued), and the host may start a run for it again: the grant starts the count of two again for that request, since
+the refused run's cause was the operator's to lift. The requester sees no signal from the host in the thread:
   it reads the request's state and may cancel, while the operator is the one shown the request; the operator acts on
   it through a session of the requesting Project they own, and otherwise the requester acts on its own reading of the
   state (the estate's rule: in PassionCode, fabric-workspace `knowledge/agents-first.md`, *When nobody answers*, item
@@ -970,8 +976,11 @@ contract times.
   `com.effect_begin`. The `accepted` branch covers a key the earlier run recorded before its `com.effect_begin`
   committed: the request then never left `accepted`, and the next run reuses that key, never a new one, so a service
   that already saw the key does the effect once. When the operator opens a session of the target Project for a request
-  the host shows to its operator, the host shows that session the earlier runs' record of a begun effect's key, as it would hand a next run (OS-2), so that session observes the effect before it
-  reconciles, or reuses the key, as a run does.
+  the host shows to its operator, the host shows that session the request's id and the earlier runs' record of a begun
+  effect's key, as it would hand a next run (OS-2), so that session observes the effect before it reconciles, or reuses
+  the key, as a run does. That session is an ordinary client (SA-6), not a run: what binds it to continue a request it
+  never held (a transfer of an `accepted` one, an observed reconcile of one its enrollment made `outcome_unknown`) is
+  the receiving client's part of CT-175, open.
 - **OS-6, no person in the run.** A dispatched run has no person at it and never waits for one. It declares no
   elicitation capability for its session, so no service asks it one: a cancel would read as the person's no
   ([C3.3](interop.md#c33-awaiting-a-choice)) and is never the operator's decision (AP-2); where the launcher's client
@@ -993,6 +1002,8 @@ contract times.
   `queued` request, DEC-0102). At a human step the note carries the refusal's `humanStep` and `url` when the refusal
   gave them, and the run also asks the operator through the host's question surface (`fabric_question_ask` or the
   host's equal), or, where the run has none, leaves the host to show the request to its operator as OS-5 does. The
+  question is a notice: it says the run has ended, names who submits the request again (below), and blocks nothing;
+  the run never reads an answer, so answering it continues nothing. The
   note and the question go by the outcome. After `failed_known`, the note names who submits it again: "the operator
   submits it again once the step is taken; leave it" only when the operator owns the requesting Project (the run reads
   it as a Project its own `com.directory` lists, the directory never listing another owner's Project,
