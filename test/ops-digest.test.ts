@@ -257,8 +257,10 @@ describe("the reference folds", () => {
 
   it("applies OD-2 in full: a name FAC-SEM-167 refuses makes no hourly and no daily digest, and is never echoed", () => {
     const slack = ["xo", "xb-", "notareal-0123"].join("");
+    // An sk- key at a word start, as DEC-0151 reads one (a digit and an upper-case letter with 16 or more).
+    const openai = ["ops.", "sk", "-", "A1b2C3d4E5f6G7h8J9"].join("");
     const H = "2026-11-04T01:00:00Z";
-    for (const op of ["ui.home/open", "queue.task-assigned-to-worker", slack]) {
+    for (const op of ["ui.home/open", openai, slack]) {
       expect(OP_NAME.test(op), op).toBe(true);
       let message = "";
       try { foldHour([{ op: "board.tick", ok: 1, failed: 0, unknown: 0 }, { op, ok: 0, failed: 12, unknown: 0 }], H, null); } catch (e) { message = (e as Error).message; }
@@ -285,12 +287,14 @@ describe("the reference folds", () => {
     }
   });
 
-  it("pins the shared detector's shapes the page states: sk- inside a word ending in sk (until DEC-0151), the JWT, akia", () => {
+  it("pins the shared detector's shapes the page states: no sk- inside a word ending in sk (DEC-0151), the JWT, AKIA in upper case only", () => {
     const jwt = (a: string, b: string) => ["a.", "ey", "J", a, ".", b, ".c"].join("");
-    const akia = ["ops.", "ak", "ia", "abcdefghijklmnop"].join("");
+    const akia = ["ops.", "AK", "IA", "ABCDEFGHIJKLMNOP"].join("");
+    const lowerAkia = ["ops.", "ak", "ia", "abcdefghijklmnop"].join("");
     for (const [op, refused] of [
-      ["ops.risk-assessment-completed", true], ["work.session-end-task-back", false],
-      [jwt("a", "bb"), false], [jwt("ab", "b"), false], [jwt("ab", "bb"), true], [akia, true]
+      ["ops.risk-assessment-completed", false], ["queue.task-assigned-to-worker", false], ["work.desk-booking-confirmed", false],
+      ["ui.disk-usage-refreshed-hourly", false], ["work.session-end-task-back", false],
+      [jwt("a", "bb"), false], [jwt("ab", "b"), false], [jwt("ab", "bb"), true], [akia, true], [lowerAkia, false]
     ] as const) {
       const value = hourlyOk();
       value.ops.push({ op, ok: 1, failed: 0, unknown: 0 });

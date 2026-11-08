@@ -1816,6 +1816,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Status:** Accepted source change (on merge of its pull request). Consumer adoption: Fabric Dashboards' outage
   watcher (FD-48) and Example Console read `setup`; the adapter checks Claude Code plugin configurations against LC-19 and
   LC-21 (its own row); Fabric starts provider entries' stdio servers by `scope`.
+- **Annotated (2026-11-08):** DEC-0151 has merged and changed the shared detector's `SECRET_VALUE`: its provider
+  prefixes take a word-start boundary (with escapes) and their canonical case only, and an `sk-` key needs a digit and
+  an upper-case letter with 16 or more characters, or a digit with 32 or more; every rule that reads it accepts
+  strictly more (CT-73, CT-213).
 - **Annotated (2026-11-07):** amended by DEC-0154 (LC-19: one copy per counted OS account on the computer, not one per machine, HA-1).
 - **Decision:**
   - a well-known `degraded` entry MAY carry `setup: true`: the source waits for a person to finish setting it up,
@@ -5969,6 +5973,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Annotated (2026-10-27):** DEC-0144 adds the optional `calibration` and `calibrationChecks` members at the same
   revision; a producer carries them once every reader of its feed it knows of has adopted DEC-0144, and a reader
   validating against an older copy refuses that day's `value` (DEC-0070).
+- **Annotated (2026-11-08):** DEC-0151 has merged: it adds the optional `project` and the ticket counts of the channel
+  agent standard (`arrived`, `ended`, `notATicket`, `open`, `outcomes`, `autonomy.answeredTickets`, `stability.safeReplyTurns` and
+  `safeReplyTickets`) at the same revision, under DEC-0144's producer rule, and lets a metric name in `notMeasured` carry
+  digits. It narrows item 2: the payload carries one id, the project's registry alias `project:<slug>`. It narrows
+  item 1 as support quality's [project section](specification/support-quality.md) says (rules 1 and 2).
 - **Decision:** in [support quality](specification/support-quality.md):
   1. An agent that answers people MAY publish, on its events feed, one event per closed UTC day and channel (`chat`,
      `mail`, `reviews`, `community`), of kind `support.quality_daily`, whose `data.value` (DEC-0070) is a
@@ -6054,6 +6063,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-10-21
 - **Status:** Accepted source change (on merge of its pull request). Consumer adoption: board row CT-70.
+- **Annotated (2026-11-08):** DEC-0151 has merged: the shared detector now has a word start (with escapes), the `sk-` strength and canonical-case prefixes, so item 3's "narrower by a word start, the `sk-` rules, case-sensitive prefixes" no longer holds. The remaining differences are the Bearer rule, the per-member long run, the Telegram bot token, the escapes (a connection reads none before a provider prefix) and the bound (a connection's `sk-` look-aheads are unbounded, CT-213), as [connections](specification/connections.md) lists them; CT-73 decides them.
 - **Decision:** in [connections](specification/connections.md):
   1. A service MAY declare, under the well-known document's `extensions`, the key
      `https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1` with at most 64 connections, each
@@ -8721,6 +8731,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-10-27
 - **Status:** Accepted (on merge of its pull request). A widening of DEC-0095's closed schema at the same revision: two
   optional members, which a reader validating against an older copy refuses. Consumer adoption: CT-188.
+- **Annotated (2026-11-08):** the schema's `calibration` description said "a week no later than day"; DEC-0151's
+  change of the schema corrects it to an ISO week that starts no later than `day`, as item 3 and FAC-SEM-126 read it.
+- **Annotated (2026-11-08):** with `project` (DEC-0151), the carry-forward holds per project's event and side: rule 6 of
+  support quality's project section.
 - **Context:** a project on the board asked (request `b05d8bc9`, thread `afd3dc71`, 2026-10-27) for a way to say on
   what share of the answers a person labelled the judge agreed with the person: without it a reader treats every
   judge as uncalibrated and never ranks or alerts on its checks, even when the producer calibrated it. One producer on the
@@ -9836,6 +9850,16 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-11-04
 - **Status:** Accepted, merged 2026-11-05, after two clean rounds of readings, 38 and 39 (unit, product and seam, at
   `f0feccbd`).
+- **Annotated (2026-11-08):** DEC-0151 has merged. CA-2's parenthetical (DEC-0151 in progress proposes the same
+  `projectAlias`) now holds as decided: `support-quality-daily/1` keys a day by the same alias. CA-5's detector is
+  DEC-0151's: a provider prefix counts at a word start in its canonical case, and an `sk-` run needs a digit with an
+  upper-case letter and 16 or more characters, or a digit and 32 or more; the advice to rename an id that starts with
+  `sk-` stays true, since a strong `sk-` run at a value's start is still found (the page's language-tag example
+  `sk-Latn-SK-u-ca-gregory` is no longer a key). The Compatibility's payload sentence is answered by DEC-0151 (its
+  ticket counts, its project rules and the channel kinds table on the support quality page; the escalation counts stay
+  in turns). The Source's counter sentence agrees with DEC-0151's Source: `ee67e35e` (key `support-quality-v2-dec`,
+  next 152) is DEC-0151's reservation and `d3da4336` (next 149) the value before it; DEC-0149's own reservation is
+  `e27a5441` (key `ct194-source-manifest`, next 150).
 - **Context:** a project on the board asked (request `437c404b`, thread `b6820b97`, 2026-11-04) for an extension key
   under which an agent that answers people on a channel (mail, Telegram, store reviews) declares what
   `channel-agent-standard/1` asks, checked statically by the Fabric Agent Adapter's service check (its row FAA-197),
@@ -10162,6 +10186,234 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   Rounds 38 and 39 of the readings were clean on unit, product and seam at `f0feccbd`, which accepted the decision; it
   merged with main at `08e24572` (DEC-0148) and landed on 2026-11-05.
 
+### DEC-0151: the channel agent standard's ticket counts in `support-quality-daily/1`
+
+- **Date:** 2026-11-04
+- **Status:** Accepted 2026-11-08, after clean rounds 19 (`071addf5`) and 20 (`f2d8a1ec`) of the coordinator's blind
+  readings (unit, seam, product). A widening of DEC-0095's closed schema at the same revision, by the path DEC-0144
+  took. Consumer adoption: CT-210. Closes CT-129 (item 3).
+- **Context:** the channel agent standard's v1 release candidate, received on the board (thread `b6820b97`; the copy
+  DEC-0150 added, [`2026-11-04-channel-agent-standard-v1-rc.md`](evidence/specs/2026-11-04-channel-agent-standard-v1-rc.md)), asks every agent that answers
+  people to publish `support.quality_daily` as `support-quality-daily/1` over the day's tickets (its section 5): what
+  arrived and ended, what is open at the cutoff, each outcome and two marks, the answered tickets and the fallbacks of
+  the checker (the model that gates an answer before it is sent). `/1` has no member for them, and its schema is
+  closed. The coordinator decided the amendment on the board (request `74105ca1`, thread `b6820b97`); a later copy of
+  the channel agent standard on the same thread already names the outcome counts as `outcomes.<metric>` and defers to
+  this decision. The channel agent standard's declaration names seven channel kinds where `/1` has four channels, and
+  the channel agent standard publishes per project where a `/1` reader keeps one event per service, channel and day,
+  so an agent serving two projects on one channel would have one day replace the other; the coordinator decided the
+  project member and its form on the same thread. Separately, FAC-SEM-126 asks a producer to name an unmeasured
+  `nobodyDropped.firstReplyP50Ms`, which the `notMeasured` pattern refused (no digits in a metric name; CT-129, the
+  finding X-4).
+- **Decision:** [support quality](specification/support-quality.md#the-ticket-counts-dec-0151):
+  1. Optional members, each a count (a non-negative integer) or `null`: at the top level `arrived` (the tickets that
+     arrived on the day), `ended` (the tickets that ended on it, the ending cohort) and `notATicket` (the day's
+     automated notices); `open {handedOpen, questionOpen, awaitingCustomer, awaitingApproval}` (the open tickets at the
+     cutoff by open outcome); `outcomes {handoffsClosedByPerson, referred, answeredElsewhere, noReplyOwed,
+     customerSilent, expiredByDecision, expired, unanswered, firstReplyLate, promotions}` (the ending cohort by
+     outcome, `firstReplyLate` and `promotions` being marks, `promotions` those of the day); `autonomy.answeredTickets` (the
+     ending cohort's tickets that ended answered or answered after a question; named for tickets, since the asker's v2
+     shape has `autonomy.answered` counting turns); `stability.safeReplyTurns` (the day's
+     turns answered with a safe reply after the checker refused twice in a row; not v2's `stability.fallbackTurns`,
+     which counts turns a fallback model answered) and `stability.safeReplyTickets` (the ending cohort's tickets with at
+     least one), neither of which is `recoveredByFallback`, the model-call fallback. `open` and `outcomes` are never
+     empty objects. `/1` keeps `autonomy.toPersonPolicy` and `toPersonInability` in turns, as FAC-SEM-126 bounds
+     them: a producer on the channel agent standard, which counts them in tickets, writes them in turns, or `null` and
+     named in `notMeasured`, until `/1` names a ticket unit.
+  2. FAC-SEM-126 reads each as it reads every metric: `null` and named in `notMeasured` when not measured, never `0`;
+     a top-level count is named by its own name (`arrived`), the others as `open.<metric>`, `outcomes.<metric>`,
+     `autonomy.answeredTickets`, `stability.safeReplyTurns`, `stability.safeReplyTickets`; naming one the payload does not carry
+     is a finding, and naming a top-level member that is no metric (`project`, `day`, `kind`, a family) is a finding
+     whose message says it is not a metric. An absent member is one the producer does not carry, read as unknown,
+     never as `0`. No sum among the counts is checked: the channel agent standard's section 5 states none.
+  3. A name in `notMeasured` may carry digits after the first letter of either part
+     (`^[a-z][A-Za-z0-9]{0,63}(\.[a-z][A-Za-z0-9_]{0,63})?$`): each part still starts with a lower-case letter, and
+     everything else of the pattern stays as it was (CT-129; the producer's X-4, board message `6a4e3757`, thread
+     `b6820b97`). So a no-reply day that names both `nobodyDropped.firstReplyP50Ms` and `firstReplyP90Ms`, as
+     FAC-SEM-126 asks, passes the schema it names (`fixtures/positive/support-quality-daily-no-reply.json`), and a
+     part that starts with a digit is refused (`fixtures/negative/support-quality-daily-not-measured-digit-first.json`,
+     `-family-digit-first.json`).
+  4. A producer carries the new members, `project` among them, and names a metric with a digit in `notMeasured`, only
+     once every reader of its feed it knows of has adopted DEC-0151, as DEC-0144 asks of the calibration: a reader on
+     an older copy refuses either. In the meantime each unmeasured first-reply metric (`firstReplyP50Ms` and/or
+     `firstReplyP90Ms`) is `null` and unnamed, so an older copy accepts the day; the validator reports one FAC-SEM-126
+     finding per unmeasured first-reply metric, a producer's gate accepts exactly those findings at those metrics and no
+     other, and the producer names the metrics once every reader has adopted. No producer carries
+     the counts until the channel agent standard's section 5.1 says that `/1` takes the escalation counts in turns and
+     its observed check accepts what the wait withholds (CT-210 step (d)). The channel agent standard's observed check is to accept (CT-210 (d), owed by its owner until its text lands), by period, what the wait withholds (the observed-check paragraph of support quality, under its ticket counts). Until `/1` names a ticket unit, a reader computes no "to a person" ticket share from
+     `autonomy.toPersonPolicy` and `toPersonInability`: it takes it from the channel agent standard's signal server or
+     leaves it out.
+  5. `/1` keeps its four channels. An agent on the channel agent standard publishes each of the declaration's seven
+     channel kinds under the closest one: `telegram_dm` and `account` as `chat`, `mail` as `mail`, `store_review` as
+     `reviews`, `telegram_group`, `public_comment` and `team_chat` as `community`; the kinds of one project that meet in
+     one `/1` channel make one event per day, channel and project, as two surfaces of one channel do; kinds of different
+     projects never merge (item 6 governs them). `community`'s latency and coverage figures then mix three
+     kinds with different limits, and a producer MAY leave `team_chat` out of `/1`, since a team's internal chat is not
+     customer support.
+  6. An optional top-level `project`: the project registry's alias `project:<slug>`
+     (`^project:[a-z0-9][a-z0-9._-]{0,127}$`), compared as written, the form DEC-0150's CA-2 gives the channel agent
+     declaration's `project`. Until every reader of its feed it knows of has adopted DEC-0151, a producer publishes no `project` and withholds every channel whose day holds tickets of two projects that enter `/1`, counting every project whose tickets the channel holds: by its channel agent declaration where the declaration names the project, by its own project mapping otherwise (no declaration, no alias, or an alias read as a credential); a project whose kind there is left out of `/1`, such as `team_chat`, does not count. The switch day of a channel moving from one project to another is one of them, and a withheld day is dropped, never published later.
+     Once every reader has adopted, it names `project` on every day it first publishes, whatever the number of
+     projects on the channel, except a project with no registry alias (rule 9).
+     A reader never attributes a day without `project` to a project, and does not read a producer's day missing before
+     that producer's adoption as an outage (it may be one rule 1 withholds): it keeps such a day (published before
+     adoption, a merged legacy day, or a rerun of one) per service, channel and day, and per-project history starts at adoption,
+     the same for every reader. A rerun republishes a day as first published. With `project` (DEC-0151), a project's event carries the latest calibration of the side whose judge and rubric judge its tickets, on every day it still holds for (DEC-0144's carry-forward), whether or not anything was judged that day; a project of a side with no calibration carries none, and a producer with no declaration carries its calibration likewise on each project's event. The rules are held by
+     [support quality](specification/support-quality.md#the-project-dec-0151). The top level then holds 19 members,
+     inside DEC-0070's 32.
+  7. The shared credential detector (`SECRET_VALUE` in `src/secret-shape.ts`, and its identical copy in
+     `src/session-handoff.ts`) takes a provider key's prefix (`sk-`, `gh?_`, `xox?-`, `AKIA`, `glpat-`) only at the
+     start of a value, after a character that is no ASCII letter or digit, or after an escape: a percent-escape (`%22`)
+     or a double one (`%2522`), a backslash escape (`\n`, `\t`, `\r`, a backslash and a double or single quote, `\b`,
+     `\f`, `\v`, `\0`, `\a`, `\e`), an octal escape of one to three digits (`\042`), a `\x` escape with two hex
+     digits, a `\u` escape with four, a raw ESC colour sequence (ESC, `[`, digits, `;` and `:` (ITU T.416), `m`) or an escaped one
+     (`\u001b[`, `\u001B[`, `\x1b[`, `\x1B[`, `\e[`, `\033[` or `\33[`, then digits, `;` and `:`, `m`). The boundary is a consuming group, not a
+     look-behind, so a port without look-behind (a Rust port, an older browser) reads it the same; `RegExp.test`
+     answers as a look-behind would. A key glued directly after an ASCII letter or digit is knowingly no longer found.
+     The pattern has no `i` flag: `Bearer` is spelled in any case by hand (`^[Bb][Ee][Aa][Rr][Ee][Rr]\s.+`), and the
+     prefixes are read in their canonical case only, so `SK-`, `GHP_`, `XOXB-`, `akia` and `GLPAT-` are no longer
+     found, and the `AKIA` body is read in upper case only, as an AWS key id is written. An `sk-` key also needs exactly what `src/connections.ts` asks of one: a digit and an upper-case letter with
+     16 or more characters, or a digit with 32 or more. Its two look-aheads are bounded to 255 characters, read lazily
+     (`(?=[A-Za-z0-9_-]{0,255}?\d)`, `(?=[A-Za-z0-9_-]{0,255}?[A-Z])`), so a long run of `sk-` prefixes is read in
+     linear time: `test/secret-shape.test.ts` reads `-sk` repeated 25000 and 100000 times, with or without a tail, and
+     asserts that 4 times the input takes under 8 times the CPU time (best of three runs, with a 40 ms floor for timer
+     granularity) and under a 500 ms ceiling, where the unbounded form took seconds; a digit or an upper-case letter beyond the
+     first 256 characters of a run no longer counts. A port whose regex has no look-ahead (Rust's `regex` crate) checks
+     that strength outside the regex. So `project:helpdesk-customer-support`,
+     `project:sk-learn-experiments`, `sk-learn-experiments-2026` and `project:sk-harbor-customer-care` are no keys,
+     while a mixed-case key, an `sk-proj-` key and `sk-or-v1-` with 64 lower-case hex digits still are, at the start of
+     a value, after a boundary character or after a listed escape. The residual: an alias with a slug word (a word
+     starts after `-`, `_`, `.` or `:`) that starts with a provider prefix and holds enough key characters is read as a
+     credential: for `sk-`, 32 or more letters, digits, `-` and `_` after it, holding a digit, as a lower-case
+     `sk-or-v1-` key does; for `ghp_` and its kin, 20 or more letters and digits; for `xox?-`, 10 or more letters,
+     digits and `-`; for `glpat-`, 20 or more letters, digits, `-` and `_` (19 pass). Prose writes such an alias as a
+     prefix and a count of characters, never whole; `test/secret-shape.test.ts` builds them. Knowingly not found
+     either: a key after a triple percent-escape (`%252522`), after an eight-digit `\U00000022` escape or a `%u0022`
+     escape, whose last character before the prefix is a digit, after a CSI sequence that is not a colour sequence (`ESC[K`,
+     `ESC[2J`), whose last character is a letter, or after a colour sequence opened by the 8-bit CSI (U+009B), brace escapes (`\x{1b}`, `\u{1b}`), `\E` and the caret `^[` form. Whether the registry issues no such alias is the
+     operator's open question until the registry's owner records the rule (CT-210 (g)), and this contract does not prove
+     it; the rule binds only a producer that carries `project` on a channel,
+     which checks its alias against the shared detector before publishing (the payload's own check does not run
+     `FAC-SEM-101`): one whose alias is read so publishes no event for that project, on any channel, until the
+     registry changes its alias; the other projects' events are unaffected. Under DEC-0150's rule (`FAC-SEM-165`) the
+     agent's declaration is refused while it holds that entry, so the agent leaves it out until the registry changes the
+     alias, and that project's channels still count
+     for item 6's rule 1. It keeps that project's days and, once the
+     registry changes the alias, publishes them naming the new alias. A weak `sk-` slug alias (`project:sk-learn-experiments`, `project:acme-sk-customer-support-eu`, `project:sk-harbor-customer-care`) passes `FAC-SEM-101` and `FAC-SEM-165`, but DEC-0149 (merged 2026-11-07, `v0.1.0+2026-11-07.2`) reads it as a `FAC-SEM-158` credential in a source tree, its tree check keeping its own unbounded, case-insensitive key shapes: a channel agent declaring such a project in `fabric-agent.json` cannot export its source (checked with DEC-0149's `checkSourceTree` at `8dd4d04f`). Whether the registry issues an alias with a provider prefix at a word start is the operator's open question until the registry's owner records a rule (CT-210 (g)); the agent never renames an alias.
+- **Why:** the channel agent standard's daily report counts tickets on its signal server and checks each agent's feed
+  against it; one `/1` home for the counts lets every reader read them the same way, and a closed schema needs that
+  home before any producer may send them. The digit fixes a rule the schema made impossible to keep. The registry
+  alias, not the board's server-issued id, is how the channel agent declaration names a project, so one name joins the
+  declaration to the days; its pattern also refuses a long mixed-case id, which FAC-SEM-101 reads as a credential,
+  and item 7 lets a weak `sk-` slug word pass, though a slug word that starts with a provider prefix and holds enough
+  key characters (for `sk-`, a run of 32 or more holding a digit) is still read as one.
+- **Alternatives considered:** the outcome counts at the top level, as the channel agent standard's field table lists
+  them (19 top members would become 28, the `outcomes` object giving way to its ten members, inside DEC-0070's 32, but outcomes mixed with the payload's own facts leave
+  little room for a later revision; one `outcomes` object keeps them together and the top level at 19); a sum rule
+  (each outcome at most `ended`, the open counts at most `arrived`: the channel agent standard states none, `open`
+  holds tickets of earlier days and a promotion falls on its own day, so the rule would refuse true payloads); a new
+  revision `support-quality-daily/2` (every producer and reader would move, where a widening leaves every `/1` payload
+  valid, DEC-0144's reasoning); a `0` for an unmeasured count (FAC-SEM-126); new channel values for the seven kinds (a
+  reader on an older copy would refuse every day of such a channel, and the reader's per-channel targets are set for
+  the four); the project in the event's `subject` instead of the payload (the subject is the event's, outside the
+  schema a reader validates the counts against, and a reader that keeps only `data.value` would lose it); one service
+  per project (an agent's deployment would follow the reader's key); the Fabric Project's server-issued id in
+  `comms-common`'s `projectId` pattern (the declaration names the registry alias, and that pattern admits the long
+  mixed-case ids FAC-SEM-101 flags); the ticket count named `autonomy.answered`, as the channel agent standard's
+  section 5.1 table has it (the asker's v2 shape already carries `autonomy.answered` counting turns, so a reader mapping
+  v2 by name would read tickets as turns); the safe-reply counts named `stability.fallbackTurns` and `fallbackTickets`,
+  as that table has them (v2's `stability.fallbackTurns` counts turns a fallback model answered, so the same name would
+  carry another meaning).
+- **Compatibility:** a widening of a closed object: a `/1` payload without the new members validates and reads as
+  before, and item 3's pattern is a widening too: every name the earlier pattern accepted it accepts, so every
+  earlier valid document stays valid, and `pnpm validate` reports the same for every existing support-quality fixture. A reader that validates
+  against an older copy refuses a day that carries a new member or a metric name with a digit, and keeps the event's
+  `text` (DEC-0070); a reader that only parses ignores the counts, but if it keys by channel and day it keeps one
+  project's day and drops the other's, so per-project publishing waits for every reader, parse-only ones included
+  (item 6 holds the producer to that). The bytes under the unchanged `$id` widen, so a reader validates against its own
+  pinned copy. FAC-SEM-126's messages change, never its code or which payloads it finds: a non-metric name in
+  `notMeasured` is reported as not a metric, and the autonomy sum now reads "the autonomy outcomes
+  (resolvedWithoutPerson, toPersonPolicy, toPersonInability) are more than the turns", and a `null`, unnamed
+  first-reply metric's message adds "until every reader of the feed has adopted DEC-0151, leave it null and unnamed:
+  support quality, the interim". Item 7 makes every rule that
+  uses the shared detector, `FAC-SEM-101` and DEC-0150's `FAC-SEM-165` among them, accept strictly more: a value it
+  finds is one the earlier pattern found too (`test/secret-shape.test.ts`). One vector input changes:
+  `fixtures/vectors/folder-attribution.json`'s case "AT-15: a remote whose kept part still has a secret's shape records
+  no origin" held a digit-free `sk-` user, which the `sk-` strength no longer reads as a key; its user now holds a digit
+  and an upper-case letter, so the case keeps testing what it names. Nine AT-15 cases are added. Six fail under the
+  earlier detector (three did before DEC-0151's round 14): a remote holding `-sk-` inside a word, one holding a weak
+  `sk-` slug, one holding a lower-case `sk-` slug of 16 to 31 characters with a digit, one holding a strong `sk-` run
+  glued after a letter (the word start: with the boundary group removed it fails), one whose user is an upper-case
+  `SK-` with a digit and a capital (the canonical case), and an `sk-` run whose only digit lies past 256 characters,
+  each recording its origin. A strong key after a percent-escape records none: it tells DEC-0151 from a port that takes
+  the boundary without its escapes, not from the earlier pattern. Two more pin a look-ahead-free port's reading: a
+  strong key at an inner boundary of a rejected `sk-` run records no origin, and a run whose digit and capital lie past
+  256 characters is still a long mixed run. A port re-syncs that file together with the detector. Two semantic
+  fixtures change for the canonical case: `fixtures/semantic/package-secret-shaped-name.json` and
+  `fixtures/semantic/estate-secret-value-as-slot.json` held an upper-case `GHP_` value as their credential-shaped slot
+  name, which is no longer a key; they now hold an `AKIA` value (an upper-case name that still is one), with their
+  digests recomputed, and their tests (`test/package.test.ts`, `test/estate-record.test.ts`) name the new value. Fabric
+  Dashboards, which vendors `src/session-handoff.ts`, re-vendors it to find the same, and every port of the detector takes the same
+  boundary, `sk-` strength (bounded look-aheads) and canonical-case prefixes (no `i` flag). The vendors that re-sync
+  include: the Fabric Agent Adapter kit's dashboard-link test sample (its lower-case `sk-` sample stops being a key
+  and is rebuilt from pieces as one DEC-0151 reads), its profiles test case (its query of `%zz`, a raw control
+  character and `KIA` with 16 more characters stops being found, since its `AKIA` borrowed the `A` of the encoded
+  `%1A`; it is rebuilt with a boundary before `AKIA`, from pieces), the Fabric Agent Adapter kit's detector ports (its Python and JS secrets modules, its dashboard-link
+  checkers, its connection ports and its dashboard button), its vendored vector files that change answer
+  (`connections-extra` and `feed-protocols`, and `estate-vectors.json` and `package-vectors.json`, re-vendored from the
+  two changed semantic fixtures), Fabric Switchboard's folder-attribution port (it has neither look-ahead nor
+  look-behind, so it checks the `sk-` strength outside its regex, and on a rejected run it retries at every inner `-` or `_` boundary inside it, the strength checked within 256 characters from that `sk-`, and re-syncs
+  `folder-attribution.json` at the merge commit), Project Observatory's folder-attribution port (with its attribution-vectors pin) and its estate-record port
+  (`FAC-SEM-075`), re-synced together with `folder-attribution.json`, and any template or agent that copies the kit;
+  whole-file vendors that pin `src/secret-shape.ts` by hash take DEC-0151 at their next re-pin, with their vectors;
+  any port that copies
+  `fixtures/vectors/folder-attribution.json` re-syncs it only together with the detector, since six of its nine new
+  AT-15 cases fail under the earlier detector, and the percent-escape case under a port that takes the boundary without
+  its escapes. Every port drops its case-insensitive flag (`re.I`, `(?i)`) and reads digits as ASCII (`re.ASCII`, `[0-9]` or `(?-u:\d)`): Project Observatory's folder-attribution and estate-record ports and Fabric Switchboard's folder-attribution port compile it case-insensitively today. Fabric vendors `src/secret-shape.ts` twice, one copy under a sha256 `pin.json` together with
+  `fixtures/vectors/folder-attribution.json`, so both are re-pinned together; Fabric Dashboards vendors
+  `src/session-handoff.ts` and `src/fabric-links.ts`, and its service host's connections hold a port; Fabric
+  Dashboards' sample-service kit copies hold the earlier pattern. One port is exempt from that instruction: the
+  adapter's source check (`fabric_source_check.py`) derives its provider-key shapes from
+  `fabric_secrets.SECRET_VALUE.pattern` and raises `ImportError` on DEC-0151's pattern, so it keeps the earlier
+  unbounded shapes as its own fixed list, for parity with DEC-0149's tree check, before or together with the detector's
+  port. The adapter's files whose answers change (adapter 0.62.0) also include: `test/fixtures/contract/profile-vectors.json`, regenerated at the merge commit, with `test_fabric_profiles.py` `SecretShapeTests` and `fabric-profiles.test.mjs`; the upper-case `SK-` case in `test_whitespace_dot_and_case_read_as_ecmascript` (both modules), beside the `%zz` and `KIA` case; `test/test_provider.py` "a key in an argument (LC-21)", rebuilt from pieces as a key DEC-0151 reads; the repository-credential rule's `test/repository_vectors.json` (its three credential vectors), `test_repository_credential.py` and `repository-credential.test.mjs`; and `test_check_service_dashboard_open.py` `test_a_repository_in_the_evidence_carries_no_key`. A port derives this list by patching `SECRET_VALUE` in its twins and running its suite, never by scanning literals (its samples are hex-encoded or built from pieces); a scratch run of the adapter's suites so patched named every failing test, listed in the handoff of CT-210. `repositoryName` and `repository_name` (the adapter's `fabric-secrets.mjs` and both `fabric_secrets.py`, and Fabric Dashboards' sample-service copy of `fabric_secrets.py`) must not compose DEC-0151's source after a separator look-behind with the `i` flag: the consuming boundary would need a second separator, so a key after `-`, `.` or `_` goes unfound, and `i` undoes the canonical case and the `sk-` strength. They keep their own boundary-free key shapes (as the source check keeps its own), with case-sensitive prefixes and no `i` flag, and the adapter pins a key after `-`, `.` and `_` in its repository vectors (`test/secret-shape.test.ts` shows why such a composition misses one). Until every reader of its feed it knows of has adopted DEC-0151, a producer publishes no `project` and withholds every channel whose day holds tickets of two projects that enter `/1`, counting every project whose tickets the channel holds: by its channel agent declaration where the declaration names the project, by its own project mapping otherwise (no declaration, no alias, or an alias read as a credential); a project whose kind there is left out of `/1`, such as `team_chat`, does not count. The switch day of a channel moving from one project to another is one of them, and a withheld day is dropped, never published later. A producer that merged projects into one event under DEC-0095 thus stops publishing that channel
+  from DEC-0151 until every reader adopts, so its readers see no days for that channel meanwhile, never reruns a merged day before adoption, and after adoption reruns one only unchanged; whether any `/1` producer does so
+  today is the producers' to confirm (CT-103 suggests multi-product producers are still on their v2 shape).
+  No member DEC-0151 adds reuses a v2 field name with another meaning or unit (`/1`'s older `channel`, DEC-0095, is the
+  known member that shares v2's name with another value space, so a reader maps v2 explicitly, never by name); a ticket
+  count is named for tickets: the ending cohort's answered tickets are
+  `autonomy.answeredTickets`, because the asker's v2 shape already has `autonomy.answered` counting turns (board thread
+  `b6820b97`, message `5a1334d1`), and the safe-reply counts are `stability.safeReplyTurns` and
+  `stability.safeReplyTickets`, because Fabric Inbox's v2 quality worker, at commit `99d71f3`, counts in `stability.fallbackTurns` the turns whose run had `modelCalls.recovered > 0` (a fallback model answered; same unit and window), while `/1`'s count is the channel agent standard's section 5.1 row, a safe reply after the checker refused twice in a row (board thread `b6820b97`, message `24cf4f25`). The other new members were checked by name against the
+  fields the channel agent standard's section 5.1 table treats as present (it marks every other member new): none is a
+  v2 name. `contractVersion` stays
+  `0.1.0`.
+- **Consequences / affects:** `schemas/support-quality-daily.schema.json` (also the `calibration` description DEC-0144
+  left to correct), `src/support-quality-rules.ts`, `test/support-quality.test.ts`; `src/secret-shape.ts`,
+  `src/session-handoff.ts`, `src/connections.ts` (a comment), `test/secret-shape.test.ts`,
+  `test/session-handoff-review.test.ts` (its SH-9 key now holds a digit and an upper-case letter),
+  `tools/vectors/folder-attribution.ts` and `fixtures/vectors/folder-attribution.json` (one AT-15 input, nine AT-15 cases),
+  `fixtures/semantic/package-secret-shaped-name.json`, `fixtures/semantic/estate-secret-value-as-slot.json`,
+  `test/package.test.ts`, `test/estate-record.test.ts`,
+  `fixtures/positive/service-events-page-support-quality-sk-slug.json`;
+  `fixtures/positive/support-quality-daily-tickets.json`, `-first-reply-unmeasured.json`, `-no-reply.json` and `-project.json`,
+  `fixtures/positive/service-events-page-support-quality-projects.json`, seven `fixtures/negative/support-quality-daily-*`
+  with their `fixtures/catalogue.json` rows, seven
+  `fixtures/semantic/support-quality-daily-*`; `docs/specification/support-quality.md`, `docs/specification/conformance.md`
+  (the producer and reader rows), `docs/specification/identifiers.md`, `docs/specification/profiles.md`,
+  `docs/specification/fabric-button.md`, `docs/specification/connections.md`, `docs/specification/folder-attribution.md`,
+  `docs/specification/session-handoff.md`, `docs/specification/source.md`, `docs/specification/channel-agent.md`,
+  `docs/specification/ops-digest.md`, `docs/specification/README.md`, `docs/evidence/sources.md`, `docs/ux/scenarios.md`
+  (SCN-002), `src/channel-agent.ts`, `test/channel-agent.test.ts`, `test/ops-digest.test.ts`, `docs/DOCMAP.md`,
+  `CONTEXT.md`; DEC-0095, DEC-0144, DEC-0044, DEC-0096, DEC-0150 and DEC-0153 annotated; `docs/backlog.md` (CT-210, CT-129, CT-103, CT-73, CT-213, CT-188's note);
+  `docs/handoffs/2026-11-04-support-quality-tickets.md`.
+- **Source:** CT-210, CT-129; the board request `74105ca1` (thread `b6820b97`); DEC-0151 reserved by git CAS (key
+  `support-quality-v2-dec`, counter commit `ee67e35`). Readings: Rounds 1 to 15 found breaks, each fixed: round 8 the per-day attribution of an absent `project`; round 9 one rule for it (no `project` before adoption, `project` on every event after, a day without it never attributed); round 10 rule 1's trigger the day's tickets and calibration per side; round 11 the observed check by period, only projects whose tickets enter `/1`, merged legacy days kept from reruns before adoption, one-way adoption; round 12 adoption marked by the first day that names `project`, rule 9 per project, the colour boundary's `:` and `\33`; round 13 DEC-0144's calibration carry-forward per project and a weak `sk-` alias still a credential in a DEC-0149 source tree; round 14 AT-15 vectors for the canonical case, the `sk-` strength and the word start, the no-alias exception in every copy of rule 2, rule 9's "unnamed", the interim message, and the registry's alias rule as the operator's open question; before round 15, on a producer's board messages, the `notMeasured` pattern admits a digit after the first letter of either part (X-4, `6a4e3757`), the ticket count `autonomy.answered` renamed `autonomy.answeredTickets`, since v2's `autonomy.answered` counts turns (`5a1334d1`), and `stability.fallbackTurns` and `fallbackTickets` renamed `stability.safeReplyTurns` and `safeReplyTickets`, since v2's `stability.fallbackTurns` counts turns a fallback model answered (`24cf4f25`); round 15, not clean: the no-reply fixture showed check rates, a rubric and a judge on a day where nothing was judged (now `null`, with `checks` named), and with it the reuse rule is scoped to the members DEC-0151 adds (`channel` named as the older member with another value space) and CT-210 (d) records what the standard's owner applied at `86c49ec`; rounds 16 to 18 not clean (16: the escape
+  boundary's cost bound and the vendored copy's comment; 17: the DEC-0096 annotation, the landing record, the reader
+  row's no-outage rule, SCN-002's coverage; 18: the no-outage rule in rule 5 and item 6, the restated annotations,
+  SCN-002's validate path, an upper-case `SK-` id without rename advice), each fixed; rounds 19 and 20 clean on all
+  three tiers.
+
 ### DEC-0152: a board message that waits for an answer is answered in the same turn
 
 - **Date:** 2026-11-04
@@ -10265,6 +10517,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (unit, seam, product). New schemas, rule codes `FAC-SEM-166`, `FAC-SEM-167` and `FAC-SEM-168`, a descriptor
   extension, a reference module and vectors, and a host obligation. Additive: nothing that validated before changes.
 - **Annotated (2026-11-07):** amended by DEC-0154 (OD-9: a collector in the same OS account reads the daily digests; CT-243).
+- **Annotated (2026-11-08):** DEC-0151 has landed, so `FAC-SEM-167` reads the shapes as DEC-0151's `SECRET_VALUE` does: a provider prefix in its canonical case at a word start (the name's start, after a character that is no ASCII letter or digit, or after an escape), `sk-` with a digit and an upper-case letter and 16 or more characters, or a digit and 32 or more, within 256 characters, `AKIA` with 16 upper-case letters or digits; the JWT read through `hasJwt`, `Bearer` and the long run unchanged. Item 3's "in either case and anywhere in the name" and its `sk-` shape inside a word ending in sk no longer hold: `ops.risk-assessment-completed`, `queue.task-assigned-to-worker`, `work.desk-booking-confirmed` and `ui.disk-usage-refreshed-hourly` pass, and a lower-case `akia` tail does too (the page's OD-2 and `FAC-SEM-167` row, and `test/ops-digest.test.ts`, say so). "Until DEC-0151 lands" in item 3 and in the round-7 Source sentence is history.
 - **Annotated (2026-11-07):** DEC-0149 has landed: its "Starting without the instance", which item 4 cites as in progress, is on `main` (a call refused for the product's own missing source slot is `unknown`, never `failed`), and `foldDir` in `src/ops-digest.ts` is DEC-0149's `foldPath`; item 3's `JWT_SHAPE` is read through `hasJwt` (`src/secret-shape.ts`, one pass, the same matches).
 - **Context:** the operator asked on 2026-11-04 that every product's log be read every hour and every day, and that
   every agent close its work with a retro whose lessons are kept centrally; Fabric recorded the split in its ADR-0188

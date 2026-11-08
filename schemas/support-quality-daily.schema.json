@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/support-quality-daily.schema.json",
   "title": "support-quality-daily/1 (DEC-0095): one support channel's quality for one closed UTC day, as an event's data.value",
-  "description": "Counts and rates only: no person's words, no ids, no judge notes. A metric not computed is null and is named in notMeasured, never 0 (FAC-SEM-126). Fits DEC-0070's data.value: two levels, at most 32 members each; a reader recognises it by data.value.kind.",
+  "description": "Counts and rates only: no person's words, no ids (the project's registry alias excepted), no judge notes. A metric not computed is null and is named in notMeasured, never 0 (FAC-SEM-126). Fits DEC-0070's data.value: two levels, at most 32 members each; a reader recognises it by data.value.kind. DEC-0151 adds the optional project and ticket counts (arrived, ended, notATicket, open, outcomes, autonomy.answeredTickets, stability.safeReplyTurns and safeReplyTickets); a member absent is one the producer does not carry, never 0.",
   "type": "object",
   "required": [
     "kind",
@@ -34,6 +34,10 @@
         "community"
       ]
     },
+    "project": {
+      "$ref": "#/$defs/projectAlias",
+      "description": "Optional (DEC-0151): the project whose tickets these are, as the project registry's alias project:<slug>, compared as written (docs/specification/identifiers.md), the same form as the channel agent declaration's project (DEC-0150). Until every reader of its feed it knows of has adopted DEC-0151, a producer publishes no project and withholds every channel whose day holds tickets of two projects that enter /1, counting every project whose tickets the channel holds: by its channel agent declaration where the declaration names the project, by its own project mapping otherwise (no declaration, no alias, or an alias read as a credential); a project whose kind there is left out of /1, such as team_chat, does not count. The switch day of a channel moving from one project to another is one of them, and a withheld day is dropped, never published later. Once every reader of its feed it knows of has adopted DEC-0151, project is named on every day a producer first publishes, except a project with no registry alias (rule 9). A day without project is never attributed to a project: a reader keeps it per service, channel and day, and per-project history starts at adoption. The rules: docs/specification/support-quality.md, The project."
+    },
     "rubricVersion": {
       "type": [
         "string",
@@ -57,9 +61,93 @@
       "uniqueItems": true,
       "items": {
         "type": "string",
-        "pattern": "^[a-z][A-Za-z]{0,63}(\\.[a-z][A-Za-z_]{0,63})?$"
+        "pattern": "^[a-z][A-Za-z0-9]{0,63}(\\.[a-z][A-Za-z0-9_]{0,63})?$"
       },
-      "description": "Each metric not computed, as family.metric, or checks when no check was judged."
+      "description": "Each metric not computed, as family.metric (a metric name may carry digits, as nobodyDropped.firstReplyP50Ms does), a top-level count by its own name (arrived, ended, notATicket), or checks when no check was judged. At most 32 names (DEC-0070): a producer that would name more leaves out the optional members it did not measure."
+    },
+    "arrived": {
+      "$ref": "#/$defs/count",
+      "description": "Optional (DEC-0151): the tickets that arrived on the day."
+    },
+    "ended": {
+      "$ref": "#/$defs/count",
+      "description": "Optional (DEC-0151): the tickets that ended on the day, whatever day they arrived: the ending cohort the outcome counts are of."
+    },
+    "notATicket": {
+      "$ref": "#/$defs/count",
+      "description": "Optional (DEC-0151): the automated notices of the day, which are not tickets."
+    },
+    "open": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "description": "Optional (DEC-0151): the open tickets at the day's cutoff, by open outcome. Never empty: with none carried the member is absent.",
+      "properties": {
+        "handedOpen": {
+          "$ref": "#/$defs/count",
+          "description": "handed to a person through a queue, not answered yet (handed_open)"
+        },
+        "questionOpen": {
+          "$ref": "#/$defs/count",
+          "description": "held while the agent climbs the question ladder (question_open)"
+        },
+        "awaitingCustomer": {
+          "$ref": "#/$defs/count",
+          "description": "the agent asked the customer one question and waits (awaiting_customer)"
+        },
+        "awaitingApproval": {
+          "$ref": "#/$defs/count",
+          "description": "a draft waits for a person's or a transport's approval before it is sent (awaiting_approval)"
+        }
+      }
+    },
+    "outcomes": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "description": "Optional (DEC-0151): the ending cohort's tickets by outcome and mark (answered is autonomy.answeredTickets). Never empty: with none carried the member is absent.",
+      "properties": {
+        "handoffsClosedByPerson": {
+          "$ref": "#/$defs/count",
+          "description": "hand-offs that ended closed_by_person"
+        },
+        "referred": {
+          "$ref": "#/$defs/count",
+          "description": "ended referred: told where to write, with no signal from there"
+        },
+        "answeredElsewhere": {
+          "$ref": "#/$defs/count",
+          "description": "ended answered_elsewhere: someone answered before the agent acted"
+        },
+        "noReplyOwed": {
+          "$ref": "#/$defs/count",
+          "description": "ended no_reply_owed: written by a person, needs nothing"
+        },
+        "customerSilent": {
+          "$ref": "#/$defs/count",
+          "description": "ended customer_silent: the customer did not answer the agent's one question within 7 days"
+        },
+        "expiredByDecision": {
+          "$ref": "#/$defs/count",
+          "description": "ended expired_by_decision: a channel held by a recorded decision passed its limit without a person's answer"
+        },
+        "expired": {
+          "$ref": "#/$defs/count",
+          "description": "ended expired: the customer got a holding reply but no final answer by the final limit"
+        },
+        "unanswered": {
+          "$ref": "#/$defs/count",
+          "description": "ended unanswered: the final limit passed with nothing the customer saw"
+        },
+        "firstReplyLate": {
+          "$ref": "#/$defs/count",
+          "description": "a mark, not an outcome: tickets whose first reply did not come within the channel's first-reply limit"
+        },
+        "promotions": {
+          "$ref": "#/$defs/count",
+          "description": "a mark, not an outcome: the promotions of the day, a referred or expired ticket of the last 30 days turned closed_by_person by a late signal from a hand-off queue"
+        }
+      }
     },
     "nobodyDropped": {
       "type": "object",
@@ -167,6 +255,14 @@
         },
         "knowledgeAgeHours": {
           "$ref": "#/$defs/count"
+        },
+        "safeReplyTurns": {
+          "$ref": "#/$defs/count",
+          "description": "Optional (DEC-0151): the day's turns answered with a safe reply after the checker (the model that gates an answer before it is sent) refused twice in a row. Not recoveredByFallback, which counts the model-call fallback, and not v2's stability.fallbackTurns (a fallback model answered): no member DEC-0151 adds reuses a v2 field name with another meaning or unit (/1's older channel, DEC-0095, shares v2's name with another value space)."
+        },
+        "safeReplyTickets": {
+          "$ref": "#/$defs/count",
+          "description": "Optional (DEC-0151): the ending cohort's tickets with at least one safe-reply turn."
         }
       }
     },
@@ -185,16 +281,22 @@
           "$ref": "#/$defs/count"
         },
         "toPersonPolicy": {
-          "$ref": "#/$defs/count"
+          "$ref": "#/$defs/count",
+          "description": "In turns, bounded by nobodyDropped.turns (not tickets, DEC-0151)."
         },
         "toPersonInability": {
-          "$ref": "#/$defs/count"
+          "$ref": "#/$defs/count",
+          "description": "In turns, bounded by nobodyDropped.turns (not tickets, DEC-0151)."
         },
         "queueOldestMinutes": {
           "$ref": "#/$defs/count"
         },
         "queueSlaMinutes": {
           "$ref": "#/$defs/count"
+        },
+        "answeredTickets": {
+          "$ref": "#/$defs/count",
+          "description": "Optional (DEC-0151): the ending cohort's tickets that ended answered or answered_after_question. Named for tickets: no member DEC-0151 adds reuses a v2 field name with another meaning or unit (/1's older channel, DEC-0095, shares v2's name with another value space), and v2's autonomy.answered counts turns."
         }
       }
     },
@@ -206,7 +308,7 @@
         "labelled",
         "helped"
       ],
-      "description": "Optional (DEC-0144): how well the judge agreed with people on the latest ISO week a person labelled answers, starting no later than day, carried on every day it still holds for (a reader never carries it forward). Absent means no calibration. week is that ISO week, labelled the answers a person labelled, helped the share of those whose helped verdict the judge matched (null when helped was not labelled, named calibration.helped in notMeasured). Each check's agreement is calibrationChecks, at the top level so data.value stays two levels deep (DEC-0070). It is of the day's judge and rubric, and a week no later than day. A producer carries it once every reader of its feed it knows of has adopted DEC-0144: the schema is closed, so a reader validating against an older copy refuses that day's value.",
+      "description": "Optional (DEC-0144): how well the judge agreed with people on the latest ISO week a person labelled answers, starting no later than day, carried on every day it still holds for (a reader never carries it forward). Absent means no calibration. week is that ISO week, labelled the answers a person labelled, helped the share of those whose helped verdict the judge matched (null when helped was not labelled, named calibration.helped in notMeasured). Each check's agreement is calibrationChecks, at the top level so data.value stays two levels deep (DEC-0070). It is of the day's judge and rubric, and of an ISO week that starts no later than day. A producer carries it once every reader of its feed it knows of has adopted DEC-0144: the schema is closed, so a reader validating against an older copy refuses that day's value. With project (DEC-0151), a project's event carries the latest calibration of the side whose judge and rubric judge its tickets, on every day it still holds for (DEC-0144's carry-forward), whether or not anything was judged that day; a project of a side with no calibration carries none, and a producer with no declaration carries its calibration likewise on each project's event.",
       "properties": {
         "week": {
           "type": "string",
@@ -254,6 +356,11 @@
       ],
       "minimum": 0,
       "maximum": 1
+    },
+    "projectAlias": {
+      "description": "The project registry's alias of a Fabric Project, project:<slug>.",
+      "type": "string",
+      "pattern": "^project:[a-z0-9][a-z0-9._-]{0,127}$"
     }
   }
 }

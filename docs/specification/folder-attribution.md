@@ -181,7 +181,9 @@ session (Observatory's `_*` folders are, below).
 The record's `origin` is the remote without what can carry a credential (`recordOrigin`): an `http` or `https` URL
 loses its user information, any URL its password, query and fragment, the scp form `user:secret@host:path` its
 `:secret` up to the host's last `@`; a local path (absolute, a drive path, or starting with `.`) is kept; `null` for any other remote with no repository identity (its authority
-cannot be read reliably) and when what is left still has the shape of a secret (`secretUrl`). A record whose path is
+cannot be read reliably) and when what is left still has the shape of a secret (`secretUrl`). Since DEC-0151 the
+shared detector takes a provider prefix only at a word start and an `sk-` key only with its strength, so a remote
+holding a weak `sk-` slug now records its origin (the AT-15 cases of `fixtures/vectors/folder-attribution.json`). A record whose path is
 broad (a declared container at the matched place) is `null`, as an explicit attach of a broad folder is. An explicit
 attach that moves a folder (or its place in the repository, in this checkout or another of the same common dir) from
 another Project lasts only when the product also removes that Project's folder at the place from its own store (D5);

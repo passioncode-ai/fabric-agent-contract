@@ -159,8 +159,8 @@ agent starts and works without it.
 The schema gives a store slot its `path` and refuses one on any other kind. `FAC-SEM-156` refuses a slot named twice,
 a name or purpose shaped like a credential (read both as `FAC-SEM-065` reads a package secret's, the shared detector's
 `secretValue`, whole-value `Bearer` included, so a slot's purpose packs cleanly, and as the tree check reads a line, so
-whatever `FAC-SEM-158` blocks in `fabric.source.json` this blocks too; once the shared detector's key shapes are bounded
-(DEC-0151, in progress), `FAC-SEM-156` is stricter than `FAC-SEM-065`, because it keeps the tree check's unbounded shapes and
+whatever `FAC-SEM-158` blocks in `fabric.source.json` this blocks too; since the shared detector's key shapes are bounded
+(DEC-0151), `FAC-SEM-156` is stricter than `FAC-SEM-065`, because it keeps the tree check's unbounded shapes and
 the adapter's check reads the manifest as part of the tree), a manifest `description` shaped like
 one (read as prose: a provider key as the tree check reads one in a line, its own shapes `KEY_SHAPE_SOURCES` starting a
 word and holding no synthetic word, a JWT (with no synthetic-word exception), a long run, or a bearer token inside the text, 12 or more token characters
@@ -216,9 +216,12 @@ The blocking kinds are `FAC-SEM-158`: a source export refuses on any of them. Th
 `accepted`: a note beside the result, never a failure. The contract chooses no licence for an exported agent: a source
 export carries the licence files the source has, and `no-license` says when it has none.
 
-An identifier the tree check reads as a key that is a registry alias is renamed only by the registry's owner (DEC-0151,
-in progress); until then the identifier stays out of the source (the entry left out, or kept in the instance) or the
-agent does not export its source. Listing the file under `unchecked` to pass the finding
+An identifier the tree check reads as a key that is a registry alias is renamed only by the registry's owner (DEC-0151
+item 7); until then the identifier stays out of the source (the entry left out, or kept in the instance) or the
+agent does not export its source. So a weak `sk-` slug alias in `fabric-agent.json` (`project:sk-learn-experiments`
+and the like), which the shared detector no longer reads as a key since DEC-0151, is still a `FAC-SEM-158` credential
+here, because the tree check keeps its own unbounded, case-insensitive key shapes: such an agent cannot export its
+source until the registry issues another alias (`project:helpdesk-customer-support` gives no finding). Listing the file under `unchecked` to pass the finding
 is not a remedy: it removes that file's check (for `fabric-agent.json`, every line of the agent's manifest).
 
 A finding never carries the text it found. `instancePath` names the file (`/files/<index>`, or `/files/<index>/path`

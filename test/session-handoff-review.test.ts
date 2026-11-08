@@ -113,7 +113,7 @@ const cases: Array<[string, () => string[], string]> = [
   ["SH-9 credential env in a no-secret folder", () => onFolder("folder-stdio-ok", (f) => { const servers = f.entries["mcp.json"].json.mcpServers; servers[Object.keys(servers)[0] as string].env = { API_TOKEN: "abc" }; }), "a handoff with no secret carries no credential in a server's environment"],
   ["SH-9 standing key in a server's environment", () => onFolder("folder-ok", (f) => { f.entries["mcp.json"].json.mcpServers.fabric.env = { API_TOKEN: "abc" }; }), "a credential in a server's environment is a delegation token"],
   ["SH-9 credential in a URL", () => onFolder("folder-ok", (f) => { f.entries["mcp.json"].json.mcpServers.fabric.url = "http://127.0.0.1:47070/mcp?t=eyJhbGciOiJFZERTQSJ9.eyJzdWIiOiJ4In0.c2ln"; }), "a server's url never carries a credential"],
-  ["SH-9 credential in a server's arguments", () => onFolder("folder-stdio-ok", (f) => { const servers = f.entries["mcp.json"].json.mcpServers; servers[Object.keys(servers)[0] as string].args = ["--key", "sk-abcdefghijklmnopqrstuvwx"]; }), "a server's arguments never carry a credential"],
+  ["SH-9 credential in a server's arguments", () => onFolder("folder-stdio-ok", (f) => { const servers = f.entries["mcp.json"].json.mcpServers; servers[Object.keys(servers)[0] as string].args = ["--key", ["sk-", "aB3cD4eF5gH6", "jK7mN8pQ9rS2"].join("")]; }), "a server's arguments never carry a credential"],
   ["SH-13 credential repeated", () => onFolder("folder-ok", (f) => { f.entries["context.md"].text += "\nToken: tok-0f9b6d1e3c2a4b8e\n"; }), "context.md repeats a credential from mcp.json"]
 ];
 
@@ -207,7 +207,7 @@ describe("the review's fixes", () => {
     for (const arg of args) expect(secretArgument(arg), arg).toBe(shape.secretArgument(arg));
   });
 
-  it("holds the shared detector's patterns character for character (Fabric vendors this file alone)", () => {
+  it("holds the shared detector's patterns character for character (its vendors take this file alone)", () => {
     const literal = (text: string, name: string) => new RegExp(`const ${name}(?:: [^=]+)? = (/.+/[a-z]*);`).exec(text)?.[1];
     const copy = readFileSync(path.join(root, "src/session-handoff.ts"), "utf8");
     const original = readFileSync(path.join(root, "src/secret-shape.ts"), "utf8");
