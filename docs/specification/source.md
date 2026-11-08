@@ -596,7 +596,7 @@ maps or unbuilt files publicly, or to anyone who cannot read the home, is a hand
 a source file served verbatim, or a bundle built without minification, is the source tree served. The act the word
 names there is the deploy of a commit that serves source to anyone who cannot read the home: one word per commit and
 audience. Serving the running agent to a team
-(`peer`, client keys, the one-time code) gives no one the tree and is no hand-over; the prompts or resources it serves
+(`peer`, client keys, the operator's one-time code for the page) gives no one the tree and is no hand-over; the prompts or resources it serves
 are its output, except a prompt or resource that is a source file served verbatim, or a bundle built without
 minification, which is the source tree served.
 

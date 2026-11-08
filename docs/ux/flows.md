@@ -928,6 +928,30 @@ flowchart TD
 
 - **Screens traversed:** SCR-34 the agent's secret request.
 
+### FLW-35: A member's call to a team's cloud agent, from the key to the answer
+
+- **Traces:** ST-041 (JTBD-16); SCN-058, DEC-0159
+- **Goal:** the member's coding agent gets the cloud instance's answer with a client key of the member's own, and no provider key, descriptor token or page of the operator's reaches the member
+- **Entry points:** the operator hands the member a client key through a channel that keeps it out of chat and logs and tells the member `peer.endpoint`; the member stores the key in their own vault
+- **Success exit:** the tool's answer in the member's coding agent; or a refusal that names the member's next step
+- **Task analysis:** the operator issues the key with the agent's CLI, the page or its gated twin and hands it over through a channel that keeps it out of chat and logs, with a note naming whom to ask → the member stores it in their own vault (for example through their app's own secret window, SCN-053) → the member configures the endpoint as an MCP server with the key in `Authorization: Bearer` (how the vault reaches the header is CT-275's open question) → the coding agent calls a tool → the cloud instance checks the key's hash and scopes → it runs the tool with the provider keys it holds, or refuses: `unauthenticated` for no, an unknown or a revoked key, `scope-not-granted` for a scope the key lacks or for a step on the operator's page, which it raises to the operator.
+- **Rejected shape:** handing the member the descriptor's token, or the page through the one-time code: rejected, because the token mints the operator's sign-in and the page is the operator's (DEC-0159 CF-2, CF-4).
+- **Flow:**
+
+```mermaid
+flowchart TD
+  K[The operator hands the member a client key out of chat and logs, the member stores it in their own vault] --> C[The member's coding agent calls a tool at peer.endpoint]
+  C --> H{Key held and not revoked?}
+  H -->|no| U[unauthenticated, 401: ask whom the operator's note names]
+  H -->|yes| S{Tool in the key's scopes?}
+  S -->|no| G[scope-not-granted, 403: ask the operator for the scope]
+  S -->|yes| O{A step on the operator's page?}
+  O -->|yes| R[The step goes to the operator; scope-not-granted with operator-step, repeat the call later]
+  O -->|no| A[The answer, run with the provider keys on the server]
+```
+
+- **Screens traversed:** SCR-35 the member's coding agent.
+
 ## Practice compliance
 
 | Practice | Verdict | How / why not |

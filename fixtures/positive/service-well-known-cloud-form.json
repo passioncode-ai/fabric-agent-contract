@@ -1,0 +1,57 @@
+{
+  "protocol": "fabric-service/0.1",
+  "service": {
+    "id": "example-marketing-agent",
+    "instance": "cloud",
+    "name": "Example Marketing Agent (cloud)",
+    "version": "1.0.0",
+    "build": {
+      "commit": "4f6150b",
+      "dirty": false,
+      "builtAt": "2026-11-08T08:55:00Z"
+    }
+  },
+  "process": {
+    "pid": 4,
+    "startedAt": "2026-11-08T09:00:12Z"
+  },
+  "status": "ready",
+  "degraded": [],
+  "summary": [
+    {
+      "label": "Client keys",
+      "value": 3
+    },
+    {
+      "label": "Audits today",
+      "value": 2
+    }
+  ],
+  "surfaces": {
+    "dashboard": {
+      "path": "/dashboard",
+      "login": true
+    },
+    "mcp": {
+      "path": "/mcp",
+      "transport": "streamable-http",
+      "capabilities": [
+        "marketing.audit.run",
+        "marketing.project.status"
+      ],
+      "auth": "own"
+    },
+    "events": {
+      "path": "/fabric/v1/events"
+    }
+  },
+  "auth": {
+    "delegation": {
+      "issuer": "urn:fabric:estate:example",
+      "jwks": "https://keys.example.com/estate/jwks.json"
+    }
+  },
+  "update": {
+    "available": null
+  }
+}

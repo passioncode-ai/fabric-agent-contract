@@ -37,7 +37,11 @@ A service with a manifest declares only in its manifest: a reader of such a serv
 ignores one in its well-known answer. A reader knows a service has a manifest from its descriptor's `fabricManifest` (or
 the registry's provider entry); with only a well-known answer in hand it reads that answer's declaration. The checker
 still checks a well-known declaration beside a manifest: its author sees any findings, and a reader ignores the copy
-whether or not it is valid. A well-known declaration shares the answer's size with its host's readers (Fabric Dashboards' probe caps a well-known answer at 2 MiB, [sources](../evidence/sources.md)), so a large declaration belongs in the manifest. Latin-script prose stays under the 2 MiB cap at the budget, escaped or not; prose in any other script can exceed it, as written or escaped as `\uXXXX`. Keep a large declaration in the manifest and measure the answer's bytes. A well-known answer lists `channel-agent-standard/1` in its `protocols` only once
+whether or not it is valid. A channel agent in the local and cloud form has a manifest and declares there, so a reader
+that does not hold the cloud instance's token reads the declaration there: the local (`default`) descriptor names the
+manifest in `fabricManifest` and the cloud descriptor names none, because a manifest names one descriptor
+(`FAC-SEM-020`), so a reader of the cloud instance reaches the manifest through the local descriptor or the registry's
+provider entry ([service](service.md#the-local-and-cloud-form-of-one-agent) CF-1, DEC-0159). A well-known declaration shares the answer's size with its host's readers (Fabric Dashboards' probe caps a well-known answer at 2 MiB, [sources](../evidence/sources.md)), so a large declaration belongs in the manifest. Latin-script prose stays under the 2 MiB cap at the budget, escaped or not; prose in any other script can exceed it, as written or escaped as `\uXXXX`. Keep a large declaration in the manifest and measure the answer's bytes. A well-known answer lists `channel-agent-standard/1` in its `protocols` only once
 its readers have re-pinned to this revision of the contract.
 
 The same rules run in both places: kind `manifest` reads the first, kind `service-well-known` the second. No other

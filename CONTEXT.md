@@ -561,6 +561,12 @@ extension — on the operator's own computer, supervised by the operating system
 (a **local placement**), or online at an `https` origin, supervised by its
 platform (a **remote placement**, DEC-0019).
 
+**Local and cloud form**: One agent run as two instances of one `id`: the local one on its owner's computer and a
+cloud one at an `https` origin, which a team reaches with client keys of their own (one per client, held as a hash,
+revoked one by one) while the provider keys stay on the server and only the operator opens its page, with the host's
+one-time login code. The standard way to give a team an agent that holds keys without handing the keys out (CF-1 to CF-7,
+DEC-0159).
+
 **Placement**: Where a service runs, as its descriptor declares it: `local`
 (`http://127.0.0.1:<port>`, the default) or `remote` (`https://<dns-name>`). It
 changes reachability, supervision and the trust anchor, never the objects a

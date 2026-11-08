@@ -1,0 +1,35 @@
+{
+  "protocol": "fabric-service/0.1",
+  "id": "example-marketing-agent",
+  "instance": "cloud",
+  "name": "Example Marketing Agent (cloud)",
+  "summary": "An organization's agent on its own cloud account, offered to its team; provider keys stay on the server.",
+  "placement": "remote",
+  "origin": "https://marketing-agent.example.com",
+  "peer": {
+    "endpoint": "https://marketing-agent.example.com/mcp",
+    "custody": "organization-managed",
+    "residency": [
+      "EU"
+    ],
+    "maxDataClass": "confidential"
+  },
+  "auth": {
+    "tokenFile": "~/Library/Application Support/ai.passioncode.fabric/tokens/example-marketing-agent.cloud.token"
+  },
+  "lifecycle": {
+    "manager": "none"
+  },
+  "runner": {
+    "credentialKind": "key"
+  },
+  "source": {
+    "repository": "https://github.com/example/example-marketing-agent"
+  },
+  "installedAt": "2026-11-08T09:05:00Z",
+  "installedBy": {
+    "by": "person",
+    "role": "administrator",
+    "tool": "example-marketing-agent register-cloud 1.0.0"
+  }
+}

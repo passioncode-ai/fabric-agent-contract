@@ -290,7 +290,10 @@ and its answer may carry a mandate that covers it in the `_meta.mandate` of the 
 request key as its action, as at the start (MJ-1, DEC-0141). A mandate that expired before the step waits
 there too, its message saying the operator's mandate expired. A URL-mode request on the service's own page MUST carry
 its open_link as `url`, never a raw local address (**FAC-SEM-143**, [service](service.md#page-links) PL-4,
-DEC-0123), and a tool answer that names a page for a person MUST carry it in `open_link`.
+DEC-0123), and a tool answer that names a page for a person MUST carry it in `open_link`. A client-key caller of a cloud
+instance in the local and cloud form is never handed a URL-mode request on the operator's page: the service raises it to
+its operator and the job reads `working` to that caller ([service](service.md#the-local-and-cloud-form-of-one-agent)
+CF-4, DEC-0159).
 
 `inputRequests` is the MCP map of request key to `elicitation/create` request;
 `inputResponses` maps the same keys to `{action: accept | decline | cancel, content?}`.
@@ -331,7 +334,7 @@ each in the `structuredContent` of an `isError` tool result:
 |---|---|---|---|
 | `operator-decision-required` | a `relayed` action from a T0 or T1 caller came without a decision, or the caller's mandate does not cover the call (`data.detail` `outside-mandate: <part>`, DEC-0125); a source hand-over answers as [source](source.md#handing-over) specifies (DEC-0149) | the service | hands on again within its own mandate when that covers the call; otherwise asks the operator for that part and calls again with their answer in `_meta.decision` or a mandate that covers it; for a source hand-over, as [source](source.md#handing-over) specifies |
 | `decision-invalid` | the decision is not valid against its schema, names another action or another object, its `at` is not read strictly, is more than 60 s after the service's clock or more than 24 h before it; or the mandate is not valid (`data.detail` `mandate-*`, DEC-0125); a source hand-over answers as [source](source.md#handing-over) specifies (DEC-0149) | the service | corrects the decision it relays; an agent not sure the operator decided asks them (AP-3); for a source hand-over, as [source](source.md#handing-over) specifies |
-| `human-step-required` | the action is a step only the person takes (`gate: human`): sign-in, consent, payment, secret, spend above a limit, a passkey signature, a comparison of codes between two people or the choice to share without one | the service, with `error.data.humanStep` and `error.data.url`, the direct link to the step | hands the person that link |
+| `human-step-required` | the action is a step only the person takes (`gate: human`): sign-in, consent, payment, secret, spend above a limit, a passkey signature, a comparison of codes between two people or the choice to share without one; to a client-key caller of a cloud instance in the local and cloud form, a step on the operator's page is answered `scope-not-granted` with `data.detail` `operator-step: <humanStep>` instead ([service](service.md#the-local-and-cloud-form-of-one-agent) CF-4, DEC-0159) | the service, with `error.data.humanStep` and `error.data.url`, the direct link to the step | hands the person that link; on `operator-step`, tells the person the operator will take the step, does not retry under a wider key and repeats the call later |
 
 A `relayed` action from a T2 caller keeps [delegation](delegation.md#refusal-codes)'s `approval-required` (DL-17); its
 `_meta.decision` changes nothing; a source hand-over answers as [source](source.md#handing-over) specifies (DEC-0149).

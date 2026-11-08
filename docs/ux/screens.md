@@ -420,6 +420,17 @@
 - **Resources:** local channel specification, Secret requests
 - **Status:** proposed
 
+### SCR-35: The member's coding agent and a team's cloud agent
+
+- **Used by:** FLW-35
+- **Purpose:** the member sees the cloud instance's answer in their coding agent, or the refusal and whom to ask.
+- **Elements:** the coding agent's MCP server entry (the endpoint, and the client key from the member's own vault, never shown; how it reaches the header is CT-275's open question); the agent's reply: the tool's answer, or the refusal's code and the member's next step (ask the operator for a key or a scope, or wait for the operator's step); never a link to the operator's page.
+- **States:** success; error, `unauthenticated` (no, an unknown or a revoked key), which the coding agent may show as its own connection failure rather than the code (unobserved until tried with a named coding agent), the operator's hand-over note naming whom to ask; error, `scope-not-granted` (a scope the key lacks, or `operator-step: <humanStep>` for a step on the operator's page, its message saying the operator was asked and to repeat the call later); waiting, a job reading `working` while the operator takes a step on their page.
+- **Coverage:** DEC-0159 CF-3, CF-4 (owed: the service's own test); `schemas/delegation-refusal.schema.json`
+- **Scenarios:** SCN-058
+- **Resources:** service specification, The local and cloud form of one agent
+- **Status:** proposed
+
 ### SCR-32: A Project's sessions and its main one
 
 - **Used by:** FLW-16

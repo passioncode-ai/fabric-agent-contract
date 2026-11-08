@@ -21,7 +21,9 @@ and `b2511678`): which agents a viewer can find, what happens when more calls ar
 busy an agent is. The contract writes the wire and the reference functions. S4 is Fabric's as a whole (the operator's
 decision of 2026-10-22, fabric-workspace roadmap RM21-S4, Fabric CO-376): who serves each directory, the queue's
 storage and the panels are Fabric's products' to build; the visibility the roadmap names is `listed` below, and
-S4's per-agent token administration is not in this decision (CT-84 stays open for it).
+S4's per-agent token administration is not in this decision (CT-84 stays open for it); for a cloud instance in the
+local and cloud form, the client keys of [service](service.md#the-local-and-cloud-form-of-one-agent) CF-3 are its
+callers' keys (DEC-0159).
 
 ## Directory
 

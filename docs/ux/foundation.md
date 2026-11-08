@@ -153,6 +153,14 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Forces:** push: keys pasted into chats and messengers, no idea who still holds them, agents asking for tokens in a chat; pull: a link and a six-digit code, a count of uses, one button to take it back; anxiety: a cloud or a stranger catching the link, a copy outliving the share, a window an agent drew to look like the real one; habit: sending the key itself.
 - **Success metric:** a shared value opens only on the recipient's machine for the share's key, after the two people compared one code; a share the sender chose to seal without comparing is shown as not confirmed, with the risk that whoever claimed first holds it; the sender sees uses per day and takes the share back in three steps, each shown with what confirmed it; a secret an agent asked for is stored without the value reaching the agent through the request, a chat or a log; a command the agent later runs with it can still print it.
 
+### JTBD-16: Use my team's agent without holding its keys
+
+- **Statement:** When my team runs an agent that holds keys to the organization's accounts, I want my coding agent to call it with a key of my own, so I get its work without any provider key, its owner's token or its owner's page reaching my machine, and my key stops when the operator revokes it.
+- **Personas:** P-03
+- **Type:** functional
+- **Forces:** push: provider keys copied onto every member's machine; pull: one key per member, revoked one by one; anxiety: a key pasted into a chat, a key that outlives my place on the team; habit: asking the operator to run it for me.
+- **Success metric:** the member's coding agent calls the cloud instance with its own client key; no provider key, descriptor token or page address reaches the member's machine; every refusal names what the member does next.
+
 ## 3. Customer journeys
 
 ### JRN-01: Author — prove provider compatibility (JTBD-01)
@@ -777,6 +785,19 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
   - Given an agent's request, when the node prompts, then one admitted client shows the agent the node's binding names, the project, the slot and the agent's reason quoted, and no value travels on the channel (`secret.prompt`).
   - Given the person stores the value, when the node confirmed the slot was written after the prompt, then the agent is told `stored`; otherwise `unconfirmed`, `declined` or `no-answer` (`secretOutcome`), or, before it prompts, `no-client` when no signed app is admitted (SP-3), `no-answer` for a request the agent withdrew, or `declined` for the operator's decline through an agent (SP-4, SP-5, DEC-0147).
 - **Priority:** must
+- **Status:** draft
+- **Product:** unobserved
+
+### ST-041: Member calls the team's cloud agent with a key of their own
+
+- **Story:** As P-03, I want to call my team's cloud agent from my coding agent with a client key the operator gave me, so that I use its work without holding its provider keys and know what to do when a call is refused.
+- **Traces:** JTBD-16
+- **Acceptance criteria:**
+  - Given the operator handed me my client key through a channel that keeps it out of chat and logs, I stored it in my own vault, and the operator told me `peer.endpoint`, when my coding agent calls a tool in my key's scopes, then the cloud instance answers with the provider keys it holds on the server (DEC-0159 CF-3, CF-5).
+  - Given no key, a key the service does not hold or a revoked key, then my call is refused `unauthenticated` (`401`); given a tool outside my key's scopes, `scope-not-granted` (`403`) (CF-3, DL-19).
+  - Given my key on the page's routes, then the page opens nothing for me and answers as to a request with no session (CF-4).
+  - Given a tool that reaches a step on the operator's page, then no page link reaches me, the step goes to the operator, and my call is refused `scope-not-granted` naming `operator-step`, its message telling me the operator was asked and to repeat the call later (CF-4).
+- **Priority:** should
 - **Status:** draft
 - **Product:** unobserved
 

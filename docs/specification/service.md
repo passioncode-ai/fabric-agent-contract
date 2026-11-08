@@ -5,7 +5,7 @@
 `covers: REQ-R01…REQ-R05` — [remote placement brief](../evidence/specs/2026-10-02-remote-service-brief.md) · DEC-0019;
 settings backup and the feed client's token header · DEC-0025; one copy under every supervisor, the lifecycle per
 system and the Windows token-file reader · DEC-0057; the descriptor for listings — a service offered to others, the
-kind of its runner's sign-in, who installed it, and Project Observatory's node as supervisor · DEC-0061
+kind of its runner's sign-in, who installed it, and Project Observatory's node as supervisor · DEC-0061; the local and cloud form of one agent · DEC-0159
 
 A **service** is a long-running agent process — on the operator's own computer (a **local**
 placement) or online at an `https` origin (a **remote** placement, [below](#remote-placement)): it keeps
@@ -519,7 +519,10 @@ login](#operator-login)); a raw address opens a browser that has no session and 
   the open_link ([Events feed](#events-feed)). `human-step-required`'s `data.url` is a path on the service origin for
   a step on its own page, which the agent hands over as the open_link, or the `https` address of another party's page
   (a payment provider, a sign-in) (DEC-0121 AP-4). An input request in URL mode on the service's own page MUST carry
-  the open_link as its `url` ([interop C3.3](interop.md#c33-awaiting-a-choice)). A message on the
+  the open_link as its `url` ([interop C3.3](interop.md#c33-awaiting-a-choice)). To a client-key caller of a cloud
+  instance in the local and cloud form no page of the operator's travels, neither an `open_link`, a
+  `human-step-required` path nor a URL-mode request on that page: the service raises the step to its operator
+  ([CF-4](#the-local-and-cloud-form-of-one-agent), DEC-0159). A message on the
   [operator channel](operator-channel.md) is read on a phone, where neither form opens: it names the page and says it
   opens in Fabric Dashboards on the computer, as OC-10 says of files.
 - **The check.** `FAC-SEM-143` refuses a link handed to a person that is a raw `http` or `https` address on a local
@@ -913,13 +916,151 @@ operator's subscription is refused. Read beside its usage report, a service offe
   `personal` (a scope, not a class), an index — is refused before any comparison, and so is a peer whose
   `maxDataClass` is not one of them. [`src/descriptor-rules.ts`](../../src/descriptor-rules.ts) `peerRefusal` is the
   rule, with vectors a port runs ([`fixtures/vectors/service-peer.json`](../../fixtures/vectors/service-peer.json)).
-- **An offer grants nothing.** `peer` grants nobody access: a share grant in the person's estate record or an
-  organization's listing does ([estate record](estate-record.md), DEC-0055), and the caller presents its own
-  credential at `endpoint` — a delegation token ([delegation](delegation.md), DEC-0039) or a guest's through the relay.
+- **An offer grants nothing.** `peer` grants nobody access: a share grant in the person's estate record, an
+  organization's listing ([estate record](estate-record.md), DEC-0055), or a client key the service's operator issued
+  ([the local and cloud form](#the-local-and-cloud-form-of-one-agent) CF-3) does, and the caller presents its own
+  credential at `endpoint`: a delegation token ([delegation](delegation.md), DEC-0039), a guest's through the relay, or
+  that client key.
   The descriptor's token stays the host's: others never receive it ([MCP credentials](#mcp-credentials), DEC-0024).
 - `custody` and `residency` are shown beside the service. Which data an organization lets reach a service whose `custody` is `personal`, and
   whether a caller's residency requirement admits a service's, are the organization's placement policy and the
   caller's, not this descriptor's rules (DEC-0061, *Not decided*).
+
+## The local and cloud form of one agent
+
+The **local and cloud form** is the standard way to give a team an agent that holds provider keys without handing the
+keys out (DEC-0159; the operator's words of 2026-11-04, relayed on the board by a project, thread `79a9f452`, request
+`b0c476ec`, and narrowed the same day, message `02bfa26f`: no password sign-in, keys only). One agent's code runs as two
+instances: the local one on its owner's computer, as every local service does, and a cloud one on a platform, which the
+team reaches with client keys of its own while the provider keys stay on the server. It adds no schema, field or rule code:
+every rule of [remote placement](#remote-placement), [offered to others](#offered-to-others) and
+[MCP credentials](#mcp-credentials) holds, and CF-1 to CF-7 say how they combine. A pair of descriptors is in
+`fixtures/positive/service-descriptor-cloud-form-local.json` and `service-descriptor-cloud-form-cloud.json`, and the
+cloud instance's well-known document, declaring `surfaces.mcp.auth: "own"` and `auth.delegation`, in
+`service-well-known-cloud-form.json`.
+
+- **CF-1, one agent, two instances.** Both instances carry the agent's one `id` and differ by `instance` (the local one
+  `default` by convention, the cloud one a name such as `cloud`), one descriptor each, never one descriptor with two
+  placements: `id.instance` stays unique (`FAC-SEM-010`) and each descriptor keeps its own placement's rules. A host
+  that groups services by `id` shows both as one product (Fabric Dashboards does, opening the `default` instance
+  first). Both run code from one source home ([source](source.md#handing-over)); the cloud instance runs a commit that
+  passed that home's own gate. An agent copied into another home under another `id` is a second agent, not this form.
+  The agent's manifest names one descriptor, `<id>.<instance>`, in its service extension, and a descriptor that names
+  the manifest must be that one (`FAC-SEM-020`, G-07, the opening of this document), so only the local (`default`)
+  instance's descriptor carries `fabricManifest`; the cloud descriptor carries none, and a reader of the cloud instance
+  reaches the manifest through the local descriptor's `fabricManifest` or the registry's provider entry. The fixture pair
+  above shows an agent without a manifest: neither descriptor carries `fabricManifest`.
+- **CF-2, the cloud instance is a remote placement.** Its descriptor carries `placement: "remote"`, an `https` origin
+  and `lifecycle.manager: "none"`, and every rule of [remote placement](#remote-placement) applies: the token is required
+  on the well-known document, the session cookie's name starts with `__Host-`, `commands` carries `doctor` at most. Its
+  descriptor and token file are installed on its operator's own computers only, and the same value lives on the
+  platform as a secret; the descriptor's token is never given to a member of the team
+  ([offered to others](#offered-to-others)).
+- **CF-3, callers use keys of their own.** People's coding agents, and callers outside the estate, reach the cloud
+  instance's MCP surface and its HTTP API with a client key in `Authorization: Bearer`. The HTTP API is the routes a
+  client key opens; the page's routes are the ones the session cookie opens, with the custom request header of the
+  [Surfaces](#surfaces) table; a route opens to one or the other, never both. The descriptor's token keeps its own
+  routes, named by surface: the well-known document, the paths that document declares for the events feed, the usage
+  report, the operator channel and the load extension, and the login code (`POST /fabric/v1/login-code`)
+  ([MCP credentials](#mcp-credentials), DEC-0024). A client key is one per client and carries the scopes it allows.
+  Issuing, rotating and revoking client keys are the operator's alone, through three doors: the agent's own CLI, which
+  the operator runs from their own computer (on it, or as a one-off process of the platform it starts), not a
+  descriptor `commands` entry, which a remote placement limits to `doctor`; an action on the operator's page; and that
+  action's agent twin ([AP-1](#actions)), declared `gate: "relayed"`, so that it acts only as the operator's decision
+  and is recorded as theirs with the caller the service authenticated: from a T0 or T1 caller carrying the operator's
+  decision in `_meta.decision` (AP-2), or from any caller with an accepted `approval/1` (DL-17, DL-18). A caller that
+  reaches the cloud origin directly is T2 unless the platform proves its origin's tier ([delegation](delegation.md)
+  DL-25, DL-28), and the delegation token an agent of the estate presents there is DL-8's, which DL-26 does not forbid
+  because that caller is not inside the boundary. The twin checks a client key's scopes first, as every tool does: a
+  key without the twin's key-management scope is refused `scope-not-granted`, as any key outside its scopes is, and a
+  key whose scopes cover the twin but that comes with no accepted approval is refused `approval-required` (DL-17),
+  since its caller is T2. The twin never issues a key whose scopes let it issue, rotate or revoke keys; a key with
+  such a scope comes from the CLI or the page only, and only to an agent that acts on the operator's recorded decisions,
+  never to a member of the team, whose keys carry no key-management scope. Where the instance declares
+  `auth.delegation`, agents of the estate hold no client key (below), so the operator issues no key-management client
+  key; the twin stays open to a delegation-token caller with the operator's decision (T0 or T1, AP-2) or an accepted
+  `approval/1` (DL-16). A twin that takes `approval/1` holds the estate's issuer and key set to check it (DL-18),
+  configured or read from `auth.delegation`; without them its callers are answered `approval-required` and keys are
+  managed through the CLI and the page. A key is shown once, in the issuing answer,
+  and never again; the service keeps it only as a hash; it is revoked one by one, a revoked key refused from the next
+  call. Apart from that one issuing answer, a client key never appears in a log, an answer, a page or a report. An
+  agent that calls an issuing door (the twin, or the CLI the operator runs through that agent) receives the key in its
+  answer and so in its transcript; the hand-over below keeps a key out of chat and logs only when the operator runs
+  the CLI in their own terminal or uses the page. Each
+  key carries a holder label the operator gives it (whose key it is), shown on the operator's CLI and page alone and
+  never in an answer to another caller, the events feed or the usage report. The usage report counts a client-key
+  call's spend in its days and rows and never in `byGrant`, which names only the grant a delegation token carried
+  ([usage report](#usage-report), DL-22). Client-key spend reaches no `grant.usage` event and no grant limit, so the
+  service's own budgets ([Limits](#limits), DEC-0027) are the ceiling the operator sets for the team.
+  The operator hands a member their key through a channel that keeps it out of chat and logs, with a note naming whom
+  the member asks when a call is refused; the member stores the key in their own vault (SCN-053's secret window, for
+  example), and the member's coding agent reaches `peer.endpoint` as the operator states it, until a listing contract
+  carries it (backlog CT-275, which also holds how the key reaches the coding agent's header); a listing of the cloud instance installs no descriptor on a member's
+  machine (CF-2). A member's departure revokes no client key: removing a member ends what the organization listed or
+  issued (its share grants, DEC-0055; the credentials its issuer sealed, by `credential-revocation/1`, DEC-0111), never
+  a key the service issued itself. Learning of a departure from the organization's own process and revoking that
+  member's keys, found by their holder label, is the operator's duty.
+  Each refusal of a client-key caller is in DL-19's one set, onto which a product maps its own codes
+  ([delegation](delegation.md#refusal-codes)), in [`delegation-refusal.schema.json`](../../schemas/delegation-refusal.schema.json)'s
+  shape: no key, a key the service does not hold and a revoked key are `unauthenticated`, HTTP `401`, with a bare
+  `WWW-Authenticate: Bearer` when no key came and `WWW-Authenticate: Bearer error="invalid_token"` for a key the service
+  does not hold or has revoked (RFC 6750 section 3.1), on the MCP surface and the HTTP API alike, before any tool runs (the
+  service MAY say in `error.message` that the key was revoked, never whose it was); a key whose scopes do not cover the
+  called tool or route is `scope-not-granted`, `403`, on the MCP surface as the `structuredContent` of a tool result
+  with `isError: true` and on the HTTP API as the JSON body; a client key on the page's routes opens nothing, and the
+  page answers as it answers a request with no session (`401` on a page, [operator login](#operator-login)).
+  The well-known document declares `surfaces.mcp.auth: "own"`, because the surface takes client keys; when agents of the
+  estate call it too, it also declares `auth.delegation`, those agents present delegation tokens, and the operator
+  issues them no client key ([delegation](delegation.md) DL-12, DL-16). `"delegation"` does not fit the form: it means
+  the surface takes delegation tokens only, so client keys would be refused ([MCP credentials](#mcp-credentials)). Where
+  the instance declares no `auth.delegation`, an agent of the estate holds a client key its operator issued to it, as
+  any other caller does, its own credential and not a borrowed one ([delegation](delegation.md) DL-29), or nothing. Either way the descriptor's token is never accepted on the MCP surface or the HTTP
+  API and never given to a client. For a cloud instance, these are the per-client keys the agent network leaves to a
+  later decision ([agent network](agent-network.md), CT-84).
+- **CF-4, the page is the operator's.** The operator opens the cloud instance's page from their own host with the
+  [operator login](#operator-login) code, exactly as for a local instance; the form has no password sign-in, and a
+  member of the team works through a client key, not the page. The session that code opens covers the page and its own
+  same-origin requests (the page's routes, CF-3), and never authorizes a call to the MCP surface or the HTTP API; a
+  client key never opens the page. A client key is a caller's credential and never the operator's presence: whoever
+  holds one (a member, or an agent of the estate the operator issued one to, CF-3) is not the operator at that call, and
+  the page is the operator's. So a tool answer to a client-key caller names no page of the operator's: it carries no
+  `open_link` and no page address ([PL-4](#page-links) hands a link to the person the page is for). Nor is a step that
+  lives on the operator's page handed to that caller: a `human` action whose `data.url` would be a path on the service
+  origin ([AP-4](#actions)), and an input request in URL mode on that page ([interop C3.3](interop.md#c33-awaiting-a-choice)).
+  The service raises the step to its operator, on its [operator channel](operator-channel.md) where it has one, else as
+  an event in its [events feed](#events-feed) with `notify: true` (a host raises no notification without it), whose
+  `link` is the page's path and whose `kind` or `level` the host reads as asking the operator (Fabric Dashboards reads a
+  `kind` its ask pattern matches, such as `human_step.opened`, as a question and `level` `warning` as attention), and
+  refuses the call `scope-not-granted` (DL-19, the code a product maps its own refusal
+  onto: no client key's scopes reach a step that is the operator's), with `error.data.detail`
+  `operator-step: <humanStep>` and an `error.message` saying the operator was asked to take the step and to repeat the
+  call later. `human-step-required` does not fit, because its `data.url` is
+  required ([`delegation-refusal.schema.json`](../../schemas/delegation-refusal.schema.json)) and is the page this
+  caller is not given. A job's input request of that kind is not put in the caller's `inputRequests`: the job reads
+  `working` to that caller, its `statusMessage` saying the operator was asked, until the operator has taken the step on the page, then goes on, or ends as a decline ends
+  it. A step on another party's page (an `https` URL) is handed over as AP-4 says. Only the operator sees the cloud
+  instance in Fabric Dashboards, since its descriptor sits on the operator's computers alone (CF-2); a member sees it as
+  an MCP server their coding agent is configured with. Where Fabric Dashboards cannot show the page on the operator's
+  computer (`not_installed` or `unsupported`, [PL-3](#page-links)), no host signs the operator in, and the operator
+  manages keys with the agent's CLI (CF-3); a step on the operator's page is then taken from another computer of the
+  operator's that shows the page, and until then the job keeps reading `working` and a repeated call is refused again.
+  A member's key carries no scope that reaches a `relayed` action ([AP-2](#actions)): a member is a T2 caller with no
+  hub of the operator's to ask for an `approval/1`, so such a call is refused `scope-not-granted`, and the operator
+  takes the action on the page or with the CLI. A page for members needs a credential per person that can be revoked one by
+  one and mints no operator session, which a later decision adds.
+- **CF-5, provider keys stay on the server.** The provider keys the cloud instance uses live only in the platform's
+  secrets: set from the owner's vault by reference, the move recorded where the vault records moves, never in the
+  repository, a descriptor, a client's configuration, an answer, a page, a log or a report. A client of the cloud
+  instance holds no provider key; the local instance keeps taking its own from its owner's vault.
+- **CF-6, a team is an offer.** When the cloud instance serves anyone beside its operator, its descriptor declares
+  `peer` with every member [offered to others](#offered-to-others) requires, and its runner is never a `subscription`
+  (`FAC-SEM-087`). `peer` grants nothing: a member of the team presents a client key (CF-3), and an agent of the estate a
+  delegation token where the instance declares `auth.delegation`.
+- **CF-7, no source hand-over by the form.** Deploying the agent to a placement its owner holds and serving the running
+  agent to a team (a `peer`, client keys) give no one the source tree and are no source hand-over, except a prompt or
+  resource that is a source file served verbatim, or a bundle built without minification, which is the source tree
+  served; a personal agent's source on an organization's or a team's placement, or on one that others can read, stays
+  one, as [handing over](source.md#handing-over) says (DEC-0149).
 
 ## Windows token files
 
@@ -1152,7 +1293,7 @@ supervisor, rather than as a stdio server each session starts (LC-19, [profiles]
 |---|---|
 | Another agent on the same computer (its listener's owner checked, [HA-2](#ha-2); a token-free door under [HA-3](#ha-3)) | MCP `2026-07-28`, `streamable-http`, at `surfaces.mcp.path` on the service origin, token in the declared header, unless `surfaces.mcp.auth` is `own` or `delegation` ([below](#mcp-credentials)); an agent of the estate presents a delegation token ([delegation](delegation.md), DEC-0039); or A2A `1.0` on the loopback origin, never with the descriptor's token ([A2A Agent Card](#a2a-agent-card)) |
 | The operator, a script | the service's CLI, delegating start, stop and restart to the supervisor |
-| A remote agent | A2A `1.0` over HTTPS, found through its [Agent Card](#a2a-agent-card), or MCP behind an authenticated gateway |
+| A remote agent | A2A `1.0` over HTTPS, found through its [Agent Card](#a2a-agent-card), or MCP behind an authenticated gateway or with a client key the service issued (CF-3) |
 | The dashboard page | same-origin requests with the session cookie and the custom request header; its layout and appearance inside a host follow [`fabric-dashboard/0.1`](embedded-dashboard.md) (DEC-0036) |
 
 <a id="mcp-credentials"></a>
@@ -1335,7 +1476,9 @@ Every button a person has, the person's agent has (except the operator's move of
   the service's origin; a URL-mode elicitation where the client supports it; for a step held in the product's own app
   window, the comparison, a typed secret and a peer share's export, the service's page that names that window), so the agent hands the person the exact
   button (DEC-0121). An https URL is another party's page; a step on the service's own page is a path, which the agent
-  hands over as the service's open_link ([PL-4](#page-links), DEC-0123).
+  hands over as the service's open_link ([PL-4](#page-links), DEC-0123). To a client-key caller of a cloud instance in
+  the local and cloud form, a step on the operator's page is not handed over: the service raises it to its operator and
+  refuses the call `scope-not-granted` ([CF-4](#the-local-and-cloud-form-of-one-agent), DEC-0159).
 - **AP-5, approval separation.** A relayed decision is the operator's, not the agent's: an agent still MUST NOT approve
   its own promotion, grant, checker rule or policy change on its own account, and MAY relay the operator's approval of
   it, which the service's audit records with the relaying caller ([governance](governance-and-roles.md#approval-separation),
@@ -1371,7 +1514,10 @@ reference's under `FAC-SEM-142`. A refusal is DL-19's ([delegation](delegation.m
 `structuredContent` (DEC-0121). A reader pinned before DEC-0121 ignores the extension key and `_meta.decision`; the
 behaviour rules (AP-1, AP-2 and AP-4) bind a service at its next pin, and from then an older caller that calls a
 `relayed` action without a decision is refused `operator-decision-required` until its kit relays decisions (CT-124)
-(DEC-0121). A source hand-over departs from this table as [source](source.md#handing-over) specifies (DEC-0149).
+(DEC-0121). A source hand-over departs from this table as [source](source.md#handing-over) specifies (DEC-0149). A
+client-key caller of a cloud instance in the local and cloud form departs from the `human` row on a step on the
+operator's page, which the service answers `scope-not-granted` as [CF-4](#the-local-and-cloud-form-of-one-agent)
+specifies (DEC-0159): the reference cannot tell such a caller, so kind `action-call` is not run on those calls.
 
 ## Semantic rules
 
@@ -1395,4 +1541,4 @@ behaviour rules (AP-1, AP-2 and AP-4) bind a service at its next pin, and from t
 | <a id="fac-sem-088"></a>`FAC-SEM-088` | `service-peer-request` | a host sends another's request only to a service that declares `peer`, and only at or below its `maxDataClass` (`peerRefusal`) |
 | <a id="fac-sem-101"></a>`FAC-SEM-101` | `service-events-page` | no string in an event's `data.value`, at either level, sits under a credential's name or has a credential's shape; a finding names the place, never the value (DEC-0070) |
 | <a id="fac-sem-143"></a>`FAC-SEM-143` | `page-link`, `interop-input-requests` | a link handed to a person is not a raw `http` or `https` address whose host is a local one as PL's [check](#links-to-a-services-pages) lists it (`127.0.0.0/8`, `[::1]`, the IPv4-mapped `[::ffff:127.x.y.z]`, `localhost` and names under it, and the unspecified `0.0.0.0` and `[::]` a wildcard bind reports), and a `fabric-dashboards:` link follows `fabric-dashboards://service/<id>.<instance>[?path=<path>]` with no other parameter, a path on the service origin and no credential (DEC-0123 PL-1) |
-| <a id="fac-sem-142"></a>`FAC-SEM-142` | `service-well-known`, `action-call` | an actions declaration is its schema's, names each `id` once, carries `humanStep` exactly when `gate` is `human` and names only tools a present `surfaces.mcp.capabilities` lists; a service answers an action call as `actionDecision` does (DEC-0121), except a source hand-over ([source](source.md#handing-over)), out of this rule until a service pins a contract revision carrying CT-181: `--kind action-call` cannot tell a hand-over and is not run on a hand-over's calls until then |
+| <a id="fac-sem-142"></a>`FAC-SEM-142` | `service-well-known`, `action-call` | an actions declaration is its schema's, names each `id` once, carries `humanStep` exactly when `gate` is `human` and names only tools a present `surfaces.mcp.capabilities` lists; a service answers an action call as `actionDecision` does (DEC-0121), except a source hand-over ([source](source.md#handing-over)), out of this rule until a service pins a contract revision carrying CT-181: `--kind action-call` cannot tell a hand-over and is not run on a hand-over's calls until then; and except, with no such bound, a client-key caller's call on a step on the operator's page in the local and cloud form, which CF-4 answers `scope-not-granted` and `--kind action-call` is not run on (DEC-0159) |
