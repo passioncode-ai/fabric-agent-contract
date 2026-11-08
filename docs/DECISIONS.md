@@ -11438,23 +11438,24 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      product only when it was given before that product first sends (an earlier no stays off), and since the shared
      file records neither who wrote an off nor under what words, a product treats any shared off present before its
      first send as that earlier no; for an install that sent before the product's version that meets UD-2, the first
-     run of that version stands in for the first send, so a shared off present then, on an install whose own switch
-     the person never set, is read as the earlier no; after that product's first send (or that first run) its own
-     switch alone governs it (plans.md item D, "one product's switch never turns another off"), so
+     run of that version at which the shared file is read, or found absent, stands in for the first send, so a shared
+     off present then, on an install whose own switch the person never set, is read as the earlier no; after that
+     product's first send (or that stand-in run) its own switch alone governs it (plans.md item D, "one product's switch never turns another off"), so
      Fabric's live "One switch for every PassionCode app on this computer" (`en.ts` line 864 at `eafcf2e4`) is a false
      promise for a product that has already sent, which the person reads until Fabric's switch for Fabric alone ships
      (CO-496); a product's own switch never writes the shared file's `analytics` field, and a product whose switch
      wrote it under words that governed every reader stops writing it from the version whose switch governs it alone,
      and leaves an off already written there, which stays the earlier no for products that have not yet sent; a
-     shared file that exists but cannot be read before a product's first send (or at that first run) is no answer,
-     and the product sends nothing in that run.
+     shared file that exists but cannot be read before a product's first send (or before that stand-in run) is no
+     answer, and the product sends nothing in that run, a run that sent nothing for that reason being no stand-in run.
   3. UD-3: anonymous means no person named, not unlinkable (a shared id ties the products that send it); it leaves out a
      person (name, email, phone, account, billing or store id, an IP kept with the data, a hardware or advertising id),
      a credential, a path or a file name from the person's machine or data, and any content or text a person wrote or
      received; a product that creates an installation id makes it a random UUID for analytics only and the installation id
      a product sends is such an id; a product may also send a session id, random (it may carry the session's start
      time), never derived from another id, kept only in memory and renewed no later than after an idle hour, which is
-     no installation id and ties only one session's events; neither id is a user identifier (unlike activity
+     no installation id, ties only one session's events and authorizes nothing (no session credential, so not the
+     `credential` class's "session"); neither id is a user identifier (unlike activity
      telemetry's `user.id`, which names a membership or a profile and makes its events personal data), data that meets
      UD-3 being `confidential`, the data classification table's "private metrics" (whether a stored id needs prior consent in a market is the product's privacy review,
      RM-13's open question); neither the product, a service it sends to nor one that reads it there joins either id with an account, purchase,
@@ -11463,8 +11464,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      and is cleared of content, paths and credentials before it leaves.
   4. UD-4: an agent never turns a switch on that a person turned off except on that person's own word for that switch,
      which it takes only when the person is its operator (AP-3): a decision the operator gave that names the
-     switch, the operator's answer to the product's own elicitation (AP-2), or an `approval/1` the operator gave for
-     that switch (DL-18), never a mandate (a `change-policy` effect, MD-3), another approver's `approval/1` or a standing rule;
+     switch, or an `approval/1` the operator gave for that switch (DL-18), an elicitation the product itself sends
+     deciding the action, once the operator accepts it, on the product's own record (AP-2) with no decision relayed by
+     the agent, never a mandate (a `change-policy` effect, MD-3), another approver's `approval/1` or a standing rule;
      anyone else is told the switch is in the product's settings; an agent does not decline a person who asks to turn
      their switch off (the operator's switch turned off on the word, relayed under AP-2 with the product's own checks,
      anyone else pointed to the setting); it never sends around a switch that is off; where the notice is not a question,
@@ -11485,7 +11487,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      and a refusal for one action would split AP-2's single table).
   5. UD-5: no machine declaration now; each product documents it (its privacy text and a usage data page): what, the
      installation id when it sends one and whether it is shared, where it goes (the receiving organization and its
-     host), the switch, how long it is kept, the
+     host, and every service that reads the data there, with its purpose, described without naming a person), the switch, how long it is kept, the
      version that turned it on, and whether and how sent data can be erased; where erasure needs an id, the product
      shows it beside the switch before off deletes it and keeps the route working, or says beside the switch that
      turning off ends erasure; a product whose uninstall deletes its id says whether erasure survives the uninstall, and
@@ -11556,16 +11558,17 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   earlier rule, `crates/switchboard-runtime/src/analytics.rs` lines 315 to 322 at `405b789`, so it sends for an install
   whose person said no under Fabric's shared switch before Switchboard first sent, its test
   `an_install_whose_shared_file_says_off_still_sends_when_never_answered_here`; it owes reading an earlier shared no
-  before its first send, and, at the first run of its conforming version, a shared off on an install whose own switch
+  before its first send, and, at the first run of its conforming version that reads the shared file or finds it absent (UD-2), a shared off on an install whose own switch
   was never set, though it already sent), and UD-4's forms of the word for its agent door (`switchboard_analytics`, `crates/switchboard-cli/src/mcp.rs` line 72,
   `switchboard analytics on|off`, SB-299, used "only when the operator asks" and carrying no `_meta.decision`); its `docs/ANALYTICS.md` also says it sends no error
   event, which its own table contradicts. Fabric Inbox (its B-200, `desktop/analytics.cjs`, which sends at launch and
   shows the notice when a window first comes forward) and Fabric Dashboards (its FD-136, sending from a hidden or
   background first start) owe the same "nothing before the notice", and the same reading of an earlier shared no
-  before their first send (and at their conforming version's first run, for an install that already sent): Fabric Inbox reads it only for an install that answered under its earlier rule
+  before their first send (and at their conforming version's first run that reads the shared file or finds it absent, for an install that already sent): Fabric Inbox reads it only for an install that answered under its earlier rule
   (`desktop/analytics.cjs` line 295 at `1395416`) and, when the shared file cannot be read, sends a baseline without
-  an id (lines 307 to 310), where UD-2 has it send nothing that run, and Fabric Dashboards never reads it (`src/core/analytics.ts` lines
-  9 to 11 at `d43c94e`). Their notices owe UD-1's contents:
+  an id (lines 307 to 310), and Fabric Dashboards never reads it (`src/core/analytics.ts` lines
+  9 to 11 at `d43c94e`) and, when the shared file cannot be read, sends its events without an id (lines 59 to 60 and
+  170 to 171), where UD-2 has each send nothing that run. Their notices owe UD-1's contents:
   Fabric Dashboards' (`src/core/i18n.ts` lines 86 to 88 at `d43c94e`) names no installation id though every event
   carries the shared `install_id` (`src/core/analytics.ts`), and states no purpose of counting once, so it owes the id,
   that it is shared and with which products, that it ties events together, its session id, that turning back on resumes it, and
@@ -11573,7 +11576,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   without naming them and owes naming them, the tying of events, its session id and the resume. Switchboard, Fabric
   Inbox, Fabric Dashboards, the launcher and Fabric send a session id whose form UD-3 admits (the Aptabase SDKs' form,
   Unix seconds times 10^8 plus 8 random digits, kept in memory). Switchboard's
-  (`crates/switchboard-runtime/src/analytics.rs` lines 415 to 424 at `405b789`) and Fabric Inbox's
+  (`crates/switchboard-runtime/src/analytics.rs` lines 417 to 426 at `405b789`) and Fabric Inbox's
   (`desktop/analytics.cjs` lines 184 to 191 at `1395416`) are renewed after an idle hour and meet UD-3's session-id
   rule; Fabric Dashboards' (`src/core/analytics.ts` line 128 at `d43c94e`) and Fabric's
   (`apps/desktop/src/main/analytics.ts` line 192 at `eafcf2e4`, made once, since `createAnalytics` runs once,
@@ -11600,12 +11603,17 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   names that receiving organization ("Fabric Inbox sends PassionCode.ai", `desktop/main.cjs` line 937), which meets
   UD-1's "where"; the other notices read (Switchboard's, which says its counts help PassionCode.ai without saying who
   receives them, Fabric Dashboards', Fabric's and the launcher's, cited here) neither say where the data is sent nor
-  link a usage data page, so each owes that (UD-1). The host's owner (PassionCode.ai Platform) keeps the data 730
-  days (PLAT-132), the retention each product's UD-5 page states, and owns any erasure route by installation id that
-  UD-5 asks a product about (not read here); it admits a reader of the raw events, the shared installation id
-  included (PLAT-133), which as a service that reads the data there owes UD-3's join rule; where the counts are read
+  link a usage data page, so each owes that (UD-1). The host's owner (PassionCode.ai Platform) deletes events after
+  730 days and removes installation ids from them after 400 days (PLAT-132; its `infra/analytics/README.md` line 49
+  and `deploy/config.env` lines 39 to 40 at `e4d1c0e`), its backups keeping them beyond that (nightly copies 14 days
+  on disk, carried off the host by a weekly droplet backup, line 48), the retention each product's UD-5 page states;
+  it offers no erasure by installation id today (only that nightly retention pass), so each product's UD-5 page says
+  that data already sent cannot be erased, unless the host's owner files such a route; it admits a reader of the raw
+  events, the shared installation id included (PLAT-133), which as a service that reads the data there owes UD-3's
+  join rule and is named, with its purpose, on each product's UD-5 page; where the counts are read
   there, each product's conforming version is marked (below). PassionCode.ai's public privacy page (the organization's
-  site repository `passioncode-ai.github.io`, `privacy/index.html` line 60 at `8c517867`) names only Switchboard and
+  site repository `passioncode-ai.github.io`, line 60 of `privacy/index.html` and of its nine locale copies, `de`,
+  `es`, `fr`, `ja`, `ko`, `pl`, `pt-br`, `ru` and `zh-hans`, at `e7a2ed25`) names only Switchboard and
   Fabric as sending and says the switch applies to every PassionCode.ai app on that computer: its owner owes UD-2's
   switch for each product alone and, for every product that sends, what UD-5 asks of its privacy text. Fabric owes UD-1's
   notice, not a question: it sends nothing until the
@@ -11655,7 +11663,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `apps/desktop/src/shared/opsDigestCollect.ts`) and sends only its own daily lines to the local Project Observatory's
   `ops.digest.record` (OBS-330) over local stdio, refusing every other service's (`apps/desktop/src/main/opsDigestSend.ts`
   lines 45 to 47 at `eafcf2e4`), so it sends none of them; CO-503's planned delegated path for other services'
-  lines (the same file, lines 10 to 12, through Observatory's HTTP door for `ops.digest.record`) owes UD-6's condition and a test before it sends them; Observatory
+  lines (the same file, lines 10 to 12, through Observatory's HTTP door for `ops.digest.record`) hands them to a store on
+  the same machine, which is no sending, and owes UD-6's condition and a test only if it ever sends them to a store or
+  party other than the person's; Observatory
   (OBS-330) is the store and sends no digest outward; Fabric Inbox writes its OD-9 declaration whatever its switch says (B-210,
   `desktop/fabric-descriptor.cjs`), which UD-6 allows, and its server's `get_ops_digest` tool (`GET /api/ops-digest`,
   `docs/agents/mcp.md` line 278 at `1395416`, B-205) answers the person's own agent from the server the person deploys,
@@ -11663,7 +11673,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   meets UD-1 and UD-2: they drop where the product sent before its notice or past an earlier no (Switchboard, Fabric
   Inbox, Fabric Dashboards), and rise where it waited for an answer (Fabric, whose never-answered installs send nothing
   today and come on after its notice at CO-496); an installation id a product owns, made anew at re-enable (UD-2),
-  counts that install again. That version should be marked where its counts are read. `contractVersion` stays `0.1.0`.
+  counts that install again. That version should be marked where its counts are read. Events the host already
+  received past an earlier no (from Switchboard, Fabric Inbox and Fabric Dashboards before their conforming versions)
+  cannot be told apart there, since Fabric, under whose shared switch those people declined, sent nothing for those
+  installs, and stay under the host's retention: the
+  operator chooses whether to accept that or to have those products' events from before their conforming versions
+  dropped. `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `docs/specification/usage-data.md` (new), `docs/OPEN_QUESTIONS.md` (OQ-0013, the second
   purpose, for the operator), `docs/specification/conformance.md` (a product
   row, an agent row, the OD-9 declarer's row and the collector's row), `docs/specification/ops-digest.md` (OD-6 and Not

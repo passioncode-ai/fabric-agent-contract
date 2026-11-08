@@ -38,7 +38,7 @@ decision of 2026-11-04.
   and 57 to 64) at `ad978a6`; Fabric's `apps/desktop/src/main/opsDigestSend.ts` lines 10 to 12 and 45 to 47 at
   `eafcf2e4`; Observatory's HTTP door for `ops.digest.record` and its compatibility record (OBS-330 the digest capability, OBS-331 the daily learning review);
   the knowledge base's RM-13 (Okolos's practice, the ePrivacy question) at `c84c7a40`. Read in round 9: the session
-  ids of Switchboard (`crates/switchboard-runtime/src/analytics.rs` lines 415 to 424, and its id creation at line 149,
+  ids of Switchboard (`crates/switchboard-runtime/src/analytics.rs` lines 417 to 426, and its id creation at line 149,
   at `405b789`), Fabric Inbox (`desktop/analytics.cjs` lines 81 and 184 to 191, `desktop/main.cjs` line 662, and
   `docs/agents/mcp.md` line 278 for `get_ops_digest` at `1395416`), Fabric Dashboards (`src/core/analytics.ts` lines 62
   and 128 at `d43c94e`) and the launcher (`lib/analytics.js` lines 56 and 244 at `ad978a6`); Fabric's id creation
@@ -62,24 +62,33 @@ decision of 2026-11-04.
 ## Open
 
 - The coordinator's blind readings until two consecutive clean rounds; the gate; the pull request, merge, tag and
-  release; at merge DEC-0157 Accepted and CT-216 done, and the products told on the board what each owes, as
-  DEC-0157's Compatibility lists it (Fabric, with the collector row's UD-6 condition as the digest collector, and
+  release; at merge DEC-0157 Accepted and CT-216 done, and the products told on the board what each owes, in one
+  message on the plans thread `e1cb9f7e` (where each product reports plans.md items A to D) addressed to every product
+  owner, with a general line first (any product that sends usage or error data checks itself against UD-1 to UD-6
+  before its next release) and then a line per product, as DEC-0157's Compatibility lists it (Fabric, with the collector row's UD-6 condition as the digest collector, and
   UD-2's rule on writing at CO-496, since its switch writes the shared `analytics` field both ways,
   and, now and independently of CO-496, a string-only correction of its three strings that say its switch governs
   every app, `i18n/en.ts` lines 864, 869 and 870, and an agent twin for its switch (UD-4) at CO-496;
   Switchboard, with an action for its switch and a manifest capability for that tool (UD-4); Fabric Inbox, its
   exported shared-field writer kept uncalled, an agent twin for its switch on its desktop copy (UD-4) and sending
   nothing in a run where the shared file cannot be read (UD-2, its baseline at `desktop/analytics.cjs` lines 307 to
-  310); Fabric Dashboards, FD-175 and a manifest capability for that tool included, its switch's action refusing
+  310); Fabric Dashboards, the same for its events sent without an id (`src/core/analytics.ts` lines 59 to 60 and 170
+  to 171 at `d43c94e`), FD-175 and a manifest capability for that tool included, its switch's action refusing
   `operator-decision-required` without a decision rather than run as the caller's own act (`src/mcp/server.ts` lines
   332 to 333 at `d43c94e`); the launcher (PC-123, before 0.2.76 is tagged):
   UD-1's notice contents and a notice where the person reads it, its doc's agent-only path at
   `docs/analytics-events.md` line 50; every product but Fabric Inbox (whose notice names PassionCode.ai as its recipient), that its notice names where
   the data is sent or links its usage data page (UD-1); the analytics host's owner, PassionCode.ai Platform
   (`analytics.passioncode.ai`, PLAT-019): UD-3's join rule for any reader of the raw events it admits (PLAT-133), the
-  retention (730 days, PLAT-132) and any erasure route by installation id the products state under UD-5, and the
-  conforming versions marked where the counts are read there; the owner of PassionCode.ai's privacy page (the
-  organization's site repository `passioncode-ai.github.io`, `privacy/index.html` line 60 at `8c517867`): UD-2's
+  retention the products state under UD-5 (events deleted after 730 days, installation ids removed after 400 days,
+  backups beyond, PLAT-132, its `infra/analytics/README.md` lines 48 to 49 at `e4d1c0e`), that it offers no erasure
+  by installation id today, so each product's UD-5 page says sent data cannot be erased unless it files such a route,
+  each product's UD-5 page naming that reader and its purpose, and the conforming versions marked where the counts are
+  read there; events already received past an earlier no (Switchboard, Fabric Inbox and Fabric Dashboards before
+  their conforming versions) cannot be told apart at the host and stay under its retention unless the operator has
+  them dropped, his choice; the owner of PassionCode.ai's privacy page (the
+  organization's site repository `passioncode-ai.github.io`, line 60 of `privacy/index.html` and of its nine locale
+  copies, `de`, `es`, `fr`, `ja`, `ko`, `pl`, `pt-br`, `ru` and `zh-hans`, at `e7a2ed25`): UD-2's
   switch for each product alone in place of "the switch applies to every PassionCode.ai app", and UD-5's statements
   for every product that sends; the
   estate's hosted workspace product, whose self-hosted image owes UD-3's session id; the estate's growth and experiments service; the adapter; Okolos and Observatory to
@@ -93,17 +102,19 @@ decision of 2026-11-04.
   product but Fabric owes naming its session id in its notice (UD-1), and Fabric Dashboards and Fabric renewing it after
   an idle hour (UD-3, both one per process today); that where the list of the products sharing the id lives is their
   owners' choice, the estate's privacy page on passioncode.ai (PC-137) being one home; and, for the DEC-0156 branch,
-  the sentence naming UD-4's switch beside OW-5's limits (a mandate from the operator's words never turns a declined
-  switch back on).
+  UD-4's switch named in OW-1's exception and in OW-5's list (a mandate from the operator's words never turns a
+  declined switch back on).
 - Landing step, the knowledge base (AGENTS.md "After work"), in the same landing: plans.md's Contract row restates
   CT-216 as "what usage data every product shares: UD-1 to UD-6, no machine declaration" (today "what a service
   declares about analytics on by default", line 124 at `c84c7a40`), and roadmap RM-13 links
   `docs/specification/usage-data.md`, and RM-13's sentence placing the analytics backend beyond the organization
   (line 573 at `c84c7a40`, written 2026-10-05, before PLAT-019 went live on 2026-10-17) is restated as PassionCode.ai's own
-  self-hosted analytics host, `analytics.passioncode.ai` (PLAT-019); then the workspace sync, checked with
+  self-hosted analytics host, `analytics.passioncode.ai` (PLAT-019), and RM-13's heading "Product analytics, private
+  by default" (line 563), which reads as off by default, becomes "Product analytics, on by default with a per-product
+  switch"; then the workspace sync, checked with
   `git -C fabric-workspace grep -n 'usage-data' origin/main -- knowledge/roadmap.md knowledge/plans.md` (non-empty)
-  and `git -C fabric-workspace grep -n 'backend is hosted outside' origin/main -- knowledge/roadmap.md`
-  (empty).
+  and `git -C fabric-workspace grep -n 'backend is hosted outside\|analytics, private by default' origin/main --
+  knowledge/roadmap.md` (empty).
 - A question for the operator, [OQ-0013](../OPEN_QUESTIONS.md): does "only for this" («Все, только для этого») admit
   the second purpose, counting one installation once across the products that share its id? DEC-0157 reads it so; the
   page marks that reading and the notice wording that follows from it as provisional until he answers. Its second
@@ -111,14 +122,32 @@ decision of 2026-11-04.
   pending in the page's scope and DEC item 1.
 - The operator's ePrivacy answer (the knowledge base's RM-13, okolos B-216): until it, UD-1 lets a product ask first
   where the platform's own consent or a market's privacy review needs it.
+- Named residual risks, carried to the closing verdict: senders under the page that no reading here checked against
+  it, each a dependant of UD-1 to UD-5 with no test: Project Observatory's own usage data (OBS-324; Observatory was
+  read only as the digest store), Okolos beyond its default and its destination, and the adapter's kits (FAA-202,
+  planned). The board message's general line asks each owner to check its product before its next release; no row is
+  filed here, since each check is its owner's backlog, not this repository's.
 - Parallel branches: DEC-0156, DEC-0158 and DEC-0159 are open on their own branches. Whichever of them and DEC-0157
-  lands second resolves `docs/DECISIONS.md`, `docs/handoffs/README.md` and `docs/backlog.md` keeping both sides, and,
-  for DEC-0156, adds the sentence naming UD-4's switch beside OW-5's limits (a mandate from the operator's words never
-  turns a declined switch back on) to OW-5 and to DEC-0156's restatement, checked after both merge with
-  `git grep -n 'UD-4' origin/main -- docs/specification/governance-and-roles.md` (non-empty). DEC-0158 and DEC-0159
-  edit `delegation.md` and `service.md`: whichever of them and DEC-0157 lands second re-reads UD-4 against AP-2,
-  AP-3, MD-3 (no mandate covers `change-policy`) and DL-26 as merged, not only the registers (on 2026-11-08 none of
-  the three moves them).
+  lands second resolves `docs/DECISIONS.md`, `docs/handoffs/README.md` and `docs/backlog.md` keeping both sides.
+  - DEC-0156 (`agent/ct220-operators-word-v2`): this note follows that branch's own, under its heading "Landing note,
+    DEC-0157" in `docs/handoffs/2026-11-07-operators-word.md`. Whichever of the two lands second names UD-4's switch
+    in OW-1's exception ("a change-policy effect, AP-5, such as UD-4's usage switch"), adds to OW-5's list a product's
+    usage switch a person turned off (UD-4: a mandate from the operator's words never turns a declined switch back
+    on), restates both in DEC-0156, and cites OW-1 from UD-4; checked after both merge with
+    `awk '/^- \*\*OW-1/,/^- \*\*OW-2/' docs/specification/governance-and-roles.md | grep -c UD-4` and the same over
+    `OW-5` to `OW-6`, each printing at least 1.
+  - DEC-0159 (`agent/ct218-local-cloud-v2`) moves rules UD-4 rests on: its DL-26 has a client key take the token's
+    and the grant's place at a callee without `auth.delegation`, and its CF-4 hands a client-key caller of a cloud
+    instance no person's step, refusing a call that reaches one `scope-not-granted` with `operator-step: <humanStep>`,
+    while such an instance refuses a member key's call on a `relayed` action `scope-not-granted` and, without the
+    estate's issuer and key set, takes no `approval/1`. Whichever of DEC-0157 and DEC-0159 lands second qualifies UD-4's
+    ask-first sentence, DEC-0157 item 4 and the conformance agent row ("or, as a client-key caller of a cloud
+    instance, reads `scope-not-granted` with `operator-step: consent` and tells the person the operator was asked,
+    CF-4") and restates UD-4's "the contract adds no product-side refusal" (page, item 4) to allow CF-4's member-key
+    refusal and an approval such an instance cannot check; checked after both merge with `grep -c 'CF-4' docs/specification/usage-data.md` (at least 1).
+  - DEC-0158 edits `delegation.md` and `service.md` too: whichever of it and DEC-0157 lands second re-reads UD-4
+    against AP-2, AP-3, MD-3 (no mandate covers `change-policy`) and DL-26 as merged, not only the registers (on
+    2026-11-08 its MD-2 hand-on edit moves none of them).
 
 ## Decisions taken here
 
@@ -280,7 +309,7 @@ not pushed for the same reason; the round entries' commits resolve only there.
 
 - Round 9 (on `1d3c5f2e`, all three tiers), not clean: product, UD-3 let a product send only a UUID while every
   shipped Aptabase product sends a per-session id of the SDKs' form (Unix seconds times 10^8 plus 8 random digits,
-  renewed after an idle hour; Switchboard's `analytics.rs` lines 415 to 424 at `405b789`, Fabric Inbox's
+  renewed after an idle hour; Switchboard's `analytics.rs` lines 417 to 426 at `405b789`, Fabric Inbox's
   `desktop/analytics.cjs` lines 184 to 191 at `1395416`; Fabric's notice names "a session id", `en.ts` line 864; now
   the installation id a product sends is a random UUID, and a session id, random, kept only in memory and renewed no
   later than after an idle hour, MAY be sent, being no installation id and tying one session's events; UD-1's notice
@@ -375,8 +404,8 @@ not pushed for the same reason; the round entries' commits resolve only there.
   Declined: pushing the earlier line's archive ref (product), because its commits carry private names into a public
   repository; the note above says once that the round entries' commits resolve only in the local archive. Recording
   the OW-5 sentence in DEC-0156's handoff too (product): that handoff is another session's branch, which already names
-  this branch in its landing notes (`docs/handoffs/2026-11-07-operators-word.md` line 57 on
-  `origin/agent/ct220-operators-word-v2`); this handoff's item binds whichever lands second and carries the check.
+  this branch in its landing notes (`docs/handoffs/2026-11-07-operators-word.md`, its heading "Landing note,
+  DEC-0157", on `origin/agent/ct220-operators-word-v2`); this handoff's item binds whichever lands second and carries the check.
   Applying UD-3 and UD-5 to hosted services now (product's other option): put to the operator as OQ-0013's second part
   instead, the safer reversible choice.
 - On the round 11 fold (this commit's tree): `pnpm run docs:check` exit 0 (272 Markdown files, 0 errors), `python3
@@ -418,6 +447,42 @@ not pushed for the same reason; the round entries' commits resolve only there.
   --write-tree HEAD origin/main` exit 0, no U+2014 in the lines the branch adds against `origin/main`, and no name of a
   private personal repository in the branch's diff. Not the full gate.
 
+- Round 13 (on `7d7c9b89`, all three tiers), not clean: unit passed with risks, product passed with risks, seam
+  failed. Seam, Fabric Dashboards sends its events without an id when the shared file cannot be read
+  (`src/core/analytics.ts` lines 59 to 60 and 170 to 171 at `d43c94e`), the UD-2 debt named for Fabric Inbox alone
+  (now beside it in the practice paragraph, DEC-0157's Compatibility, the spec README cell and the board message);
+  seam, this handoff said no sibling branch moves AP-2, AP-3, MD-3 or DL-26, false for DEC-0159, whose DL-26 has a
+  client key take the token's and the grant's place and whose CF-4 hands a client-key caller of a cloud instance no
+  person's step (now the parallel-branches item names it, and a landing note binds whichever of DEC-0157 and DEC-0159
+  lands second to qualify UD-4's ask-first sentence, item 4 and the agent row with CF-4's `scope-not-granted` and
+  `operator-step: consent`, and to restate "no product-side refusal" for CF-4's member-key refusal, with a check).
+  Risks folded: UD-2's stand-in for an install that already sent is the first run of the conforming version at which
+  the shared file is read or found absent, a run that sent nothing because it could not be read being none (page, DEC
+  item 2, the product row, CONTEXT, DOCMAP, the Compatibility, the README cell); UD-3's session id authorizes nothing
+  and is not the data classification table's `credential` session (page, DEC item 3); UD-4's elicitation: one the
+  product itself sends decides, once the operator accepts it, on the product's own record (AP-2), and the agent relays
+  no decision for it (page, DEC item 4, the agent row); the DEC-0156 note aligned with that branch's own (its heading
+  "Landing note, DEC-0157"): UD-4's switch named in OW-1's exception and OW-5's list, OW-1 cited from UD-4, both
+  checked; the host's retention stated as events 730 days, installation ids removed after 400 days, backups beyond
+  (passioncode-platform `infra/analytics/README.md` lines 48 to 49 and `deploy/config.env` lines 39 to 40 at
+  `e4d1c0e`); the host offers no erasure by installation id, so each product's UD-5 page says sent data cannot be
+  erased unless a route is filed; UD-5's page names every service that reads the data at the host, with its purpose,
+  described without naming a person (page, DEC item 5, the product row), chosen over a third part of OQ-0013 because
+  it tells the person without waiting and names no private service; events already received past an earlier no stay
+  under the host's retention unless the operator has them dropped (the Compatibility, the board message); the board
+  message goes on the plans thread `e1cb9f7e` to every product owner with a general line; RM-13's heading "Product
+  analytics, private by default" restated at landing, its check widened; the README cell's privacy-page debt adds
+  UD-5's statements; the privacy page's nine locale copies named (line 60 of each at `e7a2ed25`); Switchboard's
+  `fn session` cited at lines 417 to 426 at `405b789`; Fabric's planned delegated digest path owes UD-6's condition only
+  if it ever sends to a store or party other than the person's (it ends at Observatory on the same machine); the
+  sibling handoff's note cited by its heading, not line 57. Carried, not filed: the unread senders (Observatory's
+  OBS-324, Okolos, the adapter's kits) as named residual risks in Open, since each check is its owner's backlog.
+- On the round 13 fold (this commit's tree): `pnpm run docs:check` exit 0 (272 Markdown files, 0 errors), `python3
+  docs/ux/lint.py` exit 0 (40 stories, 34 flows, 34 screens, 56 scenarios), `pnpm run privacy:check` exit 0 (0
+  findings), `pnpm vitest run test/consistency.test.ts test/docs-check.test.ts` 45 tests passed, `git merge-tree
+  --write-tree HEAD origin/main` exit 0, no U+2014 in the lines the branch adds against `origin/main`, and no name of
+  a private personal repository in the branch's diff. Not the full gate.
+
 ## Next task
 
-Round 13 of the blind readings of branch `agent/ct216-usage-data-v2` (DEC-0157), all three tiers.
+Round 14 of the blind readings of branch `agent/ct216-usage-data-v2` (DEC-0157), all three tiers.
