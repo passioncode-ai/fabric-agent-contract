@@ -89,10 +89,12 @@ The key words MUST, MUST NOT, SHOULD and MAY are used as in RFC 2119.
   app ("One switch for every PassionCode app on this computer", its `en.ts` line 864 at `eafcf2e4`): for a product that
   has already sent, that is a false promise, which the person reads until Fabric's switch for Fabric alone ships (its
   CO-496). A device policy ([devices](devices.md#policy)) whose layer carries a key for a product's switch MAY lock it
-  off; it MUST NOT lock it on, since a person who declined stays off and the switch is the person's (UD-4). A product
-  ignores a lock that would hold its switch on: its switch resolves as if that layer's lock were absent, so a lower
-  layer's lock off still holds and, where none holds it off, the person's own setting (or an earlier no) governs, never the value of a layer whose lock
-  was dropped; the product does not show the switch as locked on. The reference resolution (`resolvePolicy`, [devices](devices.md#policy))
+  off; it MUST NOT lock it on, since a person who declined stays off and the switch is the person's (UD-4).
+  The device and the product ignore a lock that would hold the switch on, resolving the key without any lock that
+  would hold it on, so a lower layer's lock off still holds and, where none holds it off, the person's own setting (or an earlier
+  no) governs, never the value of a layer whose lock was dropped; the device lets the person change the key and shows
+  that value as the one the product applies, never as locked on, while its reported `effective` keeps the lock's
+  value (`FAC-SEM-042`). The reference resolution (`resolvePolicy`, [devices](devices.md#policy))
   does not apply this limit: the product applies it after resolution, resolving the key again without any lock that
   would hold it on; nor does the reference device decision (`expectedDecision`, `FAC-SEM-068`) apply it to a local
   change, which it refuses for any locked key (a reference helper and its vectors are CT-280).

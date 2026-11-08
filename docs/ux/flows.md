@@ -178,7 +178,7 @@ flowchart TD
 - **Goal:** the effective setting is the resolution of signed layers, and a locked key is never overridden locally, save a lock that would hold a product's usage data switch on, which the device and the product ignore (UD-2, DEC-0157)
 - **Entry points:** a policy in a check-in response; a local settings change; a 410 `organization-closed` answer (DEC-0103)
 - **Success exit:** effective settings shown with the layer each came from and its lock; for a closed organization, its sentence and date with its server locks lifted
-- **Task analysis:** verify signature and revision → resolve lock, then the user's value (never for `harness.baseline` or `repair.packages`, DEC-0102), then the highest default → resolve a product's usage data switch again without any lock that would hold it on, so a lower layer's lock off still holds and otherwise the person's own setting or an earlier no governs (UD-2, DEC-0157) → show each key's source → refuse a local change to a locked key, save one held on only by locks UD-2 ignores.
+- **Task analysis:** verify signature and revision → resolve lock, then the user's value (never for `harness.baseline` or `repair.packages`, DEC-0102), then the highest default → resolve a product's usage data switch again without any lock that would hold it on, so a lower layer's lock off still holds and otherwise the person's own setting or an earlier no governs (UD-2, DEC-0157) → show each key's source → refuse a local change to a locked key, save a usage data switch held on only by locks UD-2 ignores, whose person's value the device shows as the one the product applies while its reported `effective` keeps the lock's value.
 - **Rejected shape:** let the highest layer always win — rejected because an unlocked default would leave the person no choice at all.
 - **Flow:**
 
@@ -191,7 +191,7 @@ flowchart TD
   S --> C{Member changes a key}
   C -->|locked| X[Refused: locked by mdm or server]
   C -->|unlocked| U[User value becomes effective]
-  C -->|a usage data switch held on only by locks UD-2 ignores| U
+  C -->|a usage data switch held on only by locks UD-2 ignores| A[Person's value shown as the one the product applies; reported effective keeps the lock's value]
 ```
 
 - **Screens traversed:** SCR-10 success; SCR-10 error; SCR-10 closed.

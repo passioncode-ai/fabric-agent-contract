@@ -181,7 +181,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 | # | Stage | User action | Touchpoint | Emotion (1-5) | Pain | Opportunity |
 |---|---|---|---|---|---|---|
 | 1 | Enroll | signs in once on the device | enrollment | 3 | unclear what is collected | a notice that names purpose and retention (priority 9) |
-| 2 | Adjust | changes a setting | device settings | 2 | a change silently does nothing | locked keys shown as locked, the change refused with a reason; a usage data switch never shown as locked on, the person's off taking effect (UD-2) (priority 9) |
+| 2 | Adjust | changes a setting | device settings | 2 | a change silently does nothing | locked keys shown as locked, the change refused with a reason; a usage data switch never shown as locked on, the person's off shown as the value the product applies (UD-2) (priority 9) |
 | 3 | Check | reads who read their data | access log | 3 | reads are invisible | every read with reader role and purpose (priority 9) |
 
 ### JRN-04: Operator — connect and answer an agent's channel (JTBD-05)
@@ -369,7 +369,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
   - Given `logging.required` is locked by the server, when I try to switch logging off, then the device refuses and shows the key as locked by the server.
   - Given `x-example.banner` is an unlocked default, when I change it, then my value is the effective one.
   - Given a policy whose signature does not verify, when it arrives, then the device keeps the revision it holds.
-  - Given a server or mdm layer locks a product's usage data switch on and no other layer locks it off, when I switch it off, then my off takes effect and the switch is never shown as locked on; given a lock off on it, my change to on is refused and the switch is shown as locked (UD-2, DEC-0157).
+  - Given a server or mdm layer locks a product's usage data switch on and no other layer locks it off, when I switch it off, then the product applies my off, the device shows it as the value the product applies and never shows the switch as locked on; given a lock off on it, my change to on is refused and the switch is shown as locked (UD-2, DEC-0157).
 - **Priority:** must
 - **Status:** draft
 - **Product:** unobserved

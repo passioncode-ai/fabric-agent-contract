@@ -886,6 +886,33 @@ not pushed for the same reason; the round entries' commits resolve only there.
   `git merge-tree --write-tree HEAD origin/main` exit 0, no U+2014 in the lines added against `origin/main`.
   Not the full gate.
 
+- Round 21 (on `fc6236e5`, unit tier only), not clean: unit failed (two breaks, two risks). Seam and product were not
+  run on this head: both breaks are contradictions in the text itself, so the fold came first. Breaks: devices.md's
+  "A device MUST refuse a local change to a locked key and show the key as locked" carried no exception while the
+  conformance row "a device deciding under its policy" and the UX texts let the device allow the change; the MUST now
+  carries it (save a product's usage data switch key held on only by locks UD-2 ignores, which the device lets the
+  person change, does not show as locked on, and keeps reporting with the lock's value as `effective`), and the
+  exception has one subject, "the device and the product ignore", in DEC-0157 item 2, UD-2, devices.md and
+  CONTEXT.md's Policy layer, as FLW-07 and SCN-011 already had it (unit). The same key had two `effective` values
+  (SCN-011 and FLW-07's diagram gave the person's own setting, the row "a device applying policy" the lock's value);
+  the coordinator chose option (a): the device's reported `effective` keeps the lock's value (`FAC-SEM-042` compares
+  it with `resolvePolicy`, unchanged until CT-280), the device shows the person's own setting (or an earlier no) as
+  the value the product applies, and the product re-resolves without the ignored lock. SCN-011's Expected result,
+  alternative path and Coverage (which now says `FAC-SEM-042` and `FAC-SEM-068` hold the lock's value today, owed to
+  CT-280), FLW-07's diagram edge (a node of its own instead of "User value becomes effective") and task analysis,
+  SCR-10, ST-008, JRN-03 #2 and the two device conformance rows now give that one meaning (unit). Risks folded: DEC-0157
+  item 2 carries UD-2's result clause ("never the value of a layer whose lock was dropped"), and item 2 and UD-2 read
+  "resolving the key without any lock that would hold it on" instead of "as if that layer's lock were absent", as do
+  CT-280's row and the product conformance row, which used the old words (unit); SCR-10's Coverage adds "DEC-0157 UD-2
+  (owed: CT-280's helper and vectors)" (unit).
+- On the round 21 fold (the working tree before this entry): `pnpm run docs:check` exit 0 (272 Markdown files, 0
+  errors), `python3 docs/ux/lint.py` exit 0 (40 stories, 34 flows, 34 screens, 56 scenarios), `pnpm run
+  privacy:check` 0 findings, `pnpm vitest run test/device-rules.test.ts test/consistency.test.ts` 193 tests passed,
+  `git merge-tree --write-tree HEAD origin/main` exit 0; `sed -n '533,536p' docs/specification/devices.md` shows the
+  MUST carrying the UD-2 exception, and `grep -n -E '(product|device)[^.|]{0,30} ignore'` over CONTEXT.md,
+  DECISIONS.md, usage-data.md, devices.md, flows.md and scenarios.md prints "the device and the product" on each of
+  its six lines. The U+2014 count over the added lines is run on the commit. Not the full gate.
+
 ## Next task
 
-Round 21 of the blind readings of branch `agent/ct216-usage-data-v2` (DEC-0157), all three tiers.
+Round 22 of the blind readings of branch `agent/ct216-usage-data-v2` (DEC-0157): unit, seam and product.

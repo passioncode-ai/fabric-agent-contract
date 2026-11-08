@@ -11454,9 +11454,13 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      and leaves an off already written there, which stays the earlier no for products that have not yet sent; a
      shared file that exists but cannot be read before a product's first send (or before that stand-in run) is no
      answer, and the product sends nothing in that run, a run that sent nothing for that reason being no stand-in run;
-     a device policy whose layer carries a key for a product's switch may lock it off and never locks it on, and a
-     product ignores a lock that would hold its switch on, as if that layer's lock were absent (a lower layer's lock
-     off still holds), applying this after the reference resolution `resolvePolicy`, which does not (the pointer in
+     a device policy whose layer carries a key for a product's switch may lock it off and never locks it on, and
+     the device and the product ignore a lock that would hold the switch on, resolving the key without any lock that
+     would hold it on, so a lower layer's lock off still holds and, where none holds it off, the person's own setting (or an
+     earlier no) governs, never the value of a layer whose lock was dropped; the device lets the person change such a
+     key, does not show it as locked on and shows that value as the one the product applies, while its reported
+     `effective` keeps the lock's value (`FAC-SEM-042` compares it with `resolvePolicy`); the product applies this
+     after the reference resolution `resolvePolicy`, which does not (the pointer in
      devices.md's "Precedence and locks"; a reference helper and its vectors are CT-280); nor does the reference
      device decision `expectedDecision` (`FAC-SEM-068`) apply it to a local change, which it refuses for any locked
      key, so a device that lets the person change a switch held on only by such locks draws that rule's finding until
