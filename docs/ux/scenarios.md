@@ -34,6 +34,7 @@
 | SCN-025 | Follow a request on the Project board to its result, or to outcome_unknown | project-board | P-02 | ST-020, FLW-16 | draft | not audited |
 | SCN-026 | A second copy of a service starts, by hand or by its supervisor | service | P-02 | ST-021, FLW-17 | draft | not audited |
 | SCN-056 | Another OS account on this computer holds my service's port | service | P-02 | ST-021, FLW-17 | draft | not audited |
+| SCN-060 | On Windows, my service waits for an administrator to create the port claims folder | service | P-02 | ST-021, FLW-17 | draft | not audited |
 | SCN-027 | The operator unlists a Project: it leaves the directory, and a sender that knows its id still reaches it | project-board | P-02 | ST-022, FLW-18 | draft | not audited |
 | SCN-051 | The operator makes another session the Project's main one, and the host shows when it changes hands again | project-board | P-02 | ST-020, FLW-16 | draft | not audited |
 | SCN-028 | Add a second machine from afar: compare the code, sign with the passkey | network | P-02 | ST-023, FLW-19 | draft | not audited |
@@ -828,6 +829,26 @@ independent agent author and P-02 project operator.
 - **Errors & recovery:** another account's listener: reinstall my service onto a free port, which its installer records and claims (HA-1), or stop the other account's copy; the card then shows my service's own state. A listener owned by root or a system service account: find the system process or container that holds the port, or reinstall onto a free recorded port (HA-1). An owner that cannot be told: retry later, check the computer's own processes for what holds the port, or reinstall onto a free recorded port (HA-1). On macOS 27.2 and later the cause may be the reading program itself, a socket table restricted to its own sockets (DEC-0155): the host or doctor reports the reason `table-restricted` and, for a doctor, a warning rather than a fault; reinstalling does not help; run the reading program where the table reads (a signed app, or Apple's `/usr/bin/python3` for a kit in Python) or use a host that proves the accepted socket (RT-2), after which the card shows my service's own state.
 - **Status:** draft
 - **Coverage:** service specification, Several OS accounts on one computer (HA-1, HA-2); the state-order vectors owed by CT-229
+- **Product:** unobserved
+
+### SCN-060: On Windows, my service waits for an administrator to create the port claims folder
+
+- **Persona:** P-02
+- **Feature:** service
+- **Traces:** ST-021, FLW-17 (JTBD-03, JRN-02/#3); DEC-0154 HA-1; DEC-0160; DEC-0044
+- **Entry point:** the host's card for a local service on a Windows computer (a host that shows setup entries; none runs on Windows today)
+- **Preconditions:** my service runs under an ordinary account on a Windows computer where the Fabric setup step has not created `%ProgramData%\PassionCode\port-claims` with its access list: a computer with only the adapter's kits and no Fabric node, or a folder whose access list was changed
+- **Steps:**
+  1. My service starts -> it records its port in its own state and its descriptor, writes no claim, and its health report carries one `degraded` entry, `source` `port-claims-folder`, `setup: true`, with the line "An administrator of this computer runs the Fabric setup step, which creates %ProgramData%\PassionCode\port-claims with its access list. Until then this service records its port without a claim."
+  2. The host reads the health report -> the card shows the entry as a setup wait (DEC-0044), not an outage; it opens no alert and sends no message.
+  3. An administrator of this computer runs the Fabric setup step (a Fabric node's first installation) -> the folder exists with its access list; my service writes its claim and drops the entry, at the latest at its next start.
+- **Expected result:** I see my service working on its recorded port, and one line that says who acts on which computer; its status is `degraded`, never `ready`, until the step runs, and nothing is presented as a failure.
+- **Alt paths:** a service without a health report, or an installer -> the same text as one log line, once until the folder appears with its access list, not at every start. I am not an administrator of this computer -> the line still names who acts; a coding agent in my ordinary account cannot run the step for me.
+- **UI elements:** the service card's setup-wait line.
+- **States covered:** partial (a setup wait), success
+- **Errors & recovery:** the folder exists with another access list (accounts may write each other's files, or another account created it) -> the same entry; an administrator runs the setup step again, which sets the access list. My service never creates the folder or changes its access list itself; until the step runs, two accounts' installers may choose one port, and the listener's check (HA-2) still keeps every credential from another account.
+- **Status:** draft
+- **Coverage:** service specification, Several OS accounts on one computer (HA-1, the Windows claims folder); `test/port-claim.test.ts` pins the entry against the well-known document's degraded item
 - **Product:** unobserved
 
 ## Network

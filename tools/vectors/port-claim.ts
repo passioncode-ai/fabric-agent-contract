@@ -26,6 +26,12 @@ const GONE = "503";
 const SID = "S-1-5-21-3623811015-3361044348-30300820-1013";
 const SERVICE = "example-agent";
 const APP_PART = "ai.passioncode.desktop.hub";
+/** Two parts of one app in one account, one per data folder, named with 8 hex digits of the canonical folder path's hash (Switchboard). */
+const PART_A = "ai.passioncode.fabric-switchboard.proxy-1a2b3c4d";
+const PART_B = "ai.passioncode.fabric-switchboard.proxy-9e8f7a6b";
+/** The longest service (130 characters) and account (100 characters) a claim takes: the file name is 255 bytes. */
+const LONG_SERVICE = `ai.passioncode.${"x".repeat(115)}`;
+const LONG_ACCOUNT = `S-1-5-21-${Array.from({ length: 8 }, () => "4294967295").join("-")}-123`;
 
 const fileName = (service: string, account: string) => `.passioncode-ports.${service}.${account}.json`;
 
@@ -78,6 +84,9 @@ function readCases(): Json[] {
       { claims: [], notes: [{ code: "claim-name-mismatch", file: fileName(SERVICE, OTHER) }] }],
     ["another owner and an absent account: the owner is named first", read([file(SERVICE, GONE, [48210], { owner: ME })]),
       { claims: [], notes: [{ code: "claim-owner-mismatch", file: fileName(SERVICE, GONE) }] }],
+    ["the longest service and account: kept", read([file(LONG_SERVICE, LONG_ACCOUNT, [48210])], [LONG_ACCOUNT]), { claims: [claim(LONG_SERVICE, LONG_ACCOUNT, [48210])], notes: [] }],
+    ["a service of 131 characters: invalid (the file name would pass 255 bytes)", read([file(`${LONG_SERVICE}x`, ME, [48210])]), { claims: [], notes: [{ code: "claim-invalid", file: fileName(`${LONG_SERVICE}x`, ME) }] }],
+    ["an account of 101 characters: invalid (the file name would pass 255 bytes)", read([file(SERVICE, `${LONG_ACCOUNT}4`, [48210])], [`${LONG_ACCOUNT}4`]), { claims: [], notes: [{ code: "claim-invalid", file: fileName(SERVICE, `${LONG_ACCOUNT}4`) }] }],
     ["one ignored claim among usable ones", read([file(SERVICE, OTHER, [48230]), file(SERVICE, GONE, [48210]), file(APP_PART, ME, [48300])]),
       { claims: [claim(SERVICE, OTHER, [48230]), claim(APP_PART, ME, [48300])], notes: [{ code: "claim-account-absent", file: fileName(SERVICE, GONE) }] }]
   ];
@@ -110,7 +119,7 @@ function chooseCases(): Json[] {
     ["named by another account's claim while its own listener holds it: kept", choose({ ownListener: true, listeners: [{ port: 48210, account: ME }], files: [otherAccountClaim] }), kept(48210, "kept-own-listener")],
     ["held by another account's listener: a new port", choose({ listeners: [otherListener] }), fresh(48211, "new-held-by-listener")],
     ["held by a listener of this account that is not this instance's: a new port", choose({ listeners: [{ port: 48210, account: ME }] }), fresh(48211, "new-held-by-listener")],
-    ["a wildcard bind of another account on the recorded port, listed with the loopback ones: a new port", choose({ listeners: [{ port: 48210, account: OTHER }, { port: 48211, account: OTHER }] }), fresh(48212, "new-held-by-listener")],
+    ["listeners of another account on the recorded port and the next candidate: the candidate after them", choose({ listeners: [{ port: 48210, account: OTHER }, { port: 48211, account: OTHER }] }), fresh(48212, "new-held-by-listener")],
     ["a claim of an absent account: ignored, the port kept", choose({ files: [file(SERVICE, GONE, [48210])] }), kept(48210, "kept-free")],
     ["a claim whose owner is not its account: ignored, the port kept", choose({ files: [file(SERVICE, OTHER, [48210], { owner: ME })] }), kept(48210, "kept-free")],
     ["a claim path held by another owner: claims are not read, the port kept, the path reported", choose({ squatted: true, files: [otherAccountClaim, appClaim] }), kept(48210, "kept-free", ["claim-path-squatted"])],
@@ -128,6 +137,10 @@ function chooseCases(): Json[] {
     ["two instances of one service, the second without a port: it skips the first's",
       choose({ instance: "second", recorded: null, descriptors: [ownDescriptor], files: [file(SERVICE, ME, [48210])], listeners: [{ port: 48210, account: ME }] }),
       fresh(48211, "new-none-recorded")],
+    ["two parts of one app in one account (one per data folder): a part skips the port the other part claims",
+      choose({ service: PART_A, instance: "default", recorded: null, files: [file(PART_B, ME, [48210])] }), fresh(48211, "new-none-recorded")],
+    ["two parts of one app in one account: a part keeps its own port beside the other's claim",
+      choose({ service: PART_A, instance: "default", files: [file(PART_A, ME, [48210]), file(PART_B, ME, [48211])] }), kept(48210, "kept-free")],
     ["a candidate named only by this service's own claim: taken", choose({ recorded: null, files: [file(SERVICE, ME, [48210])] }), fresh(48210, "new-none-recorded")],
     ["holder order: a descriptor is named before a claim and a listener",
       choose({ descriptors: [otherDescriptor], files: [otherAccountClaim, appClaim], listeners: [otherListener] }), fresh(48211, "new-held-by-descriptor")],
@@ -159,7 +172,13 @@ function rebuildCases(): Json[] {
     ["uninstall of one of two instances: the remaining one's port, the removed one's state never read", rebuild({ descriptors: [{ service: SERVICE, instance: "second", port: 48211 }] }), claim(SERVICE, ME, [48211])],
     ["uninstall of the last instance: the claim is deleted", rebuild({}), { delete: true }],
     ["only another service's descriptor remains: the claim is deleted", rebuild({ descriptors: [{ service: "other-agent", instance: "default", port: 48220 }] }), { delete: true }],
-    ["on Windows, the account by SID", rebuild({ account: SID, descriptors: [{ service: SERVICE, instance: "default", port: 48210 }] }), claim(SERVICE, SID, [48210])]
+    ["on Windows, the account by SID", rebuild({ account: SID, descriptors: [{ service: SERVICE, instance: "default", port: 48210 }] }), claim(SERVICE, SID, [48210])],
+    ["one of two parts of one app in one account: only its own state, never the other part's claim", rebuild({ service: PART_A, ownState: [48210] }), claim(PART_A, ME, [48210])],
+    ["one of two parts of one app loses its last port: only its claim is deleted", rebuild({ service: PART_B, descriptors: [{ service: SERVICE, instance: "default", port: 48220 }] }), { delete: true }],
+    ["65 ports: a fault, no claim written", rebuild({ ownState: Array.from({ length: 65 }, (_, n) => 48000 + n) }), { fault: "claim-invalid" }],
+    ["port 0 in its own state: a fault, no claim written", rebuild({ ownState: [0, 48210] }), { fault: "claim-invalid" }],
+    ["an account named by its login name: a fault, no claim written", rebuild({ account: "alice", ownState: [48210] }), { fault: "claim-invalid" }],
+    ["now with an offset: a fault, no claim written", rebuild({ ownState: [48210], now: "2026-11-08T09:00:00+00:00" }), { fault: "claim-invalid" }]
   ];
   return list.map(([name, input, expected]) => ({ name, input, expected }));
 }
@@ -168,14 +187,17 @@ function fileNameCases(): Json[] {
   return [
     ["a service id and a uid", { service: SERVICE, account: ME }],
     ["an app's part and a uid", { service: APP_PART, account: ME }],
-    ["a service id and a SID", { service: SERVICE, account: SID }]
+    ["a service id and a SID", { service: SERVICE, account: SID }],
+    ["two parts of one app in one account: two files", { service: PART_A, account: ME }],
+    ["two parts of one app in one account: the other part's file", { service: PART_B, account: ME }],
+    ["the longest service and account: 255 bytes", { service: LONG_SERVICE, account: LONG_ACCOUNT }]
   ].map(([name, input]) => ({ name, input, expected: fileName((input as { service: string }).service, (input as { account: string }).account) }));
 }
 
 /** The vectors as an object. */
 export function portClaimVectors(): Json {
   return {
-    about: "Vectors for the port claim and the port choice (DEC-0154 HA-1, DEC-0160), written by tools/vectors/port-claim.ts, never by hand. fileName: claimFileName(service, account), .passioncode-ports.<service>.<account>.json. read: readClaims(files, presentAccounts), each file {name, owner, json} as a reader finds it in the shared folder (owner the file owner's uid, its SID on Windows); the answer is {claims, notes}: the usable claims in the order read, and one note {code, file} per ignored file, the first that applies in this order: claim-invalid (not a passioncode-port-claim/1 document, updatedAt a real UTC instant), claim-name-mismatch (the name is not claimFileName of the content's service and account), claim-owner-mismatch (the owner is not the account it names), claim-account-absent (the account is not in presentAccounts). choose: choosePort(input) with input.claims = readClaims(input.files, input.presentAccounts).claims; descriptors are this account's services directory, any service, as {service, instance, port}; listeners every listener accepting on 127.0.0.1:<port>, a wildcard bind (0.0.0.0, [::]) included, as {port, account}; ownListener whether this instance's own listener holds the recorded port; squatted whether this account's own claim path exists with another owner, and then no claim is read. The answer is {port, kept, reason, notes} or {fault: no-free-port, notes}; reason kept-own-listener, kept-free, new-none-recorded, or new-held-by- followed by the first holder of the recorded port in the order descriptor, claim-other-account, claim-other-service, listener; a new port is the first candidate no listener, no other id.instance's descriptor, and no claim of another account or of another service in this account names; notes holds claim-path-squatted when squatted. rebuild: rebuildClaim({account, service, descriptors, ownState, now}): the ports of this service's descriptors in the account and its own state, once each, ascending, in a claim with updatedAt now; {delete: true} when none remains; the old claim is never read.",
+    about: "Vectors for the port claim and the port choice (DEC-0154 HA-1, DEC-0160), written by tools/vectors/port-claim.ts, never by hand. fileName: claimFileName(service, account), .passioncode-ports.<service>.<account>.json. read: readClaims(files, presentAccounts), each file {name, owner, json} as a reader finds it in the shared folder (owner the file owner's uid, its SID on Windows); the answer is {claims, notes}: the usable claims in the order read, and one note {code, file} per ignored file, the first that applies in this order: claim-invalid (not a passioncode-port-claim/1 document, updatedAt a real UTC instant), claim-name-mismatch (the name is not claimFileName of the content's service and account), claim-owner-mismatch (the owner is not the account it names), claim-account-absent (the account is not in presentAccounts). choose: choosePort(input) with input.claims = readClaims(input.files, input.presentAccounts).claims; descriptors are this account's services directory, any service, as {service, instance, port}; listeners every listener accepting on 127.0.0.1:<port>, a wildcard bind (0.0.0.0, [::]) included, as {port, account}: the caller lists a wildcard bind among them, and no vector carries an address; ownListener whether this instance's own listener holds the recorded port; squatted whether this account's own claim path exists with another owner, and then no claim is read. The answer is {port, kept, reason, notes} or {fault: no-free-port, notes}; reason kept-own-listener, kept-free, new-none-recorded, or new-held-by- followed by the first holder of the recorded port in the order descriptor, claim-other-account, claim-other-service, listener; a new port is the first candidate no listener, no other id.instance's descriptor, and no claim of another account or of another service in this account names; notes holds claim-path-squatted when squatted. rebuild: rebuildClaim({account, service, descriptors, ownState, now}): the ports of this service's descriptors in the account and its own state, once each, ascending, in a claim with updatedAt now; {delete: true} when none remains; {fault: claim-invalid} when that claim would not be a valid passioncode-port-claim/1 document (more than 64 ports, a port outside 1 to 65535, an account that is not a uid or a SID, now not a UTC instant with Z); the old claim is never read. A service is at most 130 characters and an account at most 100, so a file name is at most 255 bytes.",
     fileName: fileNameCases(),
     read: readCases(),
     choose: chooseCases(),

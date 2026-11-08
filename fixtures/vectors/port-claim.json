@@ -1,5 +1,5 @@
 {
-  "about": "Vectors for the port claim and the port choice (DEC-0154 HA-1, DEC-0160), written by tools/vectors/port-claim.ts, never by hand. fileName: claimFileName(service, account), .passioncode-ports.<service>.<account>.json. read: readClaims(files, presentAccounts), each file {name, owner, json} as a reader finds it in the shared folder (owner the file owner's uid, its SID on Windows); the answer is {claims, notes}: the usable claims in the order read, and one note {code, file} per ignored file, the first that applies in this order: claim-invalid (not a passioncode-port-claim/1 document, updatedAt a real UTC instant), claim-name-mismatch (the name is not claimFileName of the content's service and account), claim-owner-mismatch (the owner is not the account it names), claim-account-absent (the account is not in presentAccounts). choose: choosePort(input) with input.claims = readClaims(input.files, input.presentAccounts).claims; descriptors are this account's services directory, any service, as {service, instance, port}; listeners every listener accepting on 127.0.0.1:<port>, a wildcard bind (0.0.0.0, [::]) included, as {port, account}; ownListener whether this instance's own listener holds the recorded port; squatted whether this account's own claim path exists with another owner, and then no claim is read. The answer is {port, kept, reason, notes} or {fault: no-free-port, notes}; reason kept-own-listener, kept-free, new-none-recorded, or new-held-by- followed by the first holder of the recorded port in the order descriptor, claim-other-account, claim-other-service, listener; a new port is the first candidate no listener, no other id.instance's descriptor, and no claim of another account or of another service in this account names; notes holds claim-path-squatted when squatted. rebuild: rebuildClaim({account, service, descriptors, ownState, now}): the ports of this service's descriptors in the account and its own state, once each, ascending, in a claim with updatedAt now; {delete: true} when none remains; the old claim is never read.",
+  "about": "Vectors for the port claim and the port choice (DEC-0154 HA-1, DEC-0160), written by tools/vectors/port-claim.ts, never by hand. fileName: claimFileName(service, account), .passioncode-ports.<service>.<account>.json. read: readClaims(files, presentAccounts), each file {name, owner, json} as a reader finds it in the shared folder (owner the file owner's uid, its SID on Windows); the answer is {claims, notes}: the usable claims in the order read, and one note {code, file} per ignored file, the first that applies in this order: claim-invalid (not a passioncode-port-claim/1 document, updatedAt a real UTC instant), claim-name-mismatch (the name is not claimFileName of the content's service and account), claim-owner-mismatch (the owner is not the account it names), claim-account-absent (the account is not in presentAccounts). choose: choosePort(input) with input.claims = readClaims(input.files, input.presentAccounts).claims; descriptors are this account's services directory, any service, as {service, instance, port}; listeners every listener accepting on 127.0.0.1:<port>, a wildcard bind (0.0.0.0, [::]) included, as {port, account}: the caller lists a wildcard bind among them, and no vector carries an address; ownListener whether this instance's own listener holds the recorded port; squatted whether this account's own claim path exists with another owner, and then no claim is read. The answer is {port, kept, reason, notes} or {fault: no-free-port, notes}; reason kept-own-listener, kept-free, new-none-recorded, or new-held-by- followed by the first holder of the recorded port in the order descriptor, claim-other-account, claim-other-service, listener; a new port is the first candidate no listener, no other id.instance's descriptor, and no claim of another account or of another service in this account names; notes holds claim-path-squatted when squatted. rebuild: rebuildClaim({account, service, descriptors, ownState, now}): the ports of this service's descriptors in the account and its own state, once each, ascending, in a claim with updatedAt now; {delete: true} when none remains; {fault: claim-invalid} when that claim would not be a valid passioncode-port-claim/1 document (more than 64 ports, a port outside 1 to 65535, an account that is not a uid or a SID, now not a UTC instant with Z); the old claim is never read. A service is at most 130 characters and an account at most 100, so a file name is at most 255 bytes.",
   "fileName": [
     {
       "name": "a service id and a uid",
@@ -24,6 +24,30 @@
         "account": "S-1-5-21-3623811015-3361044348-30300820-1013"
       },
       "expected": ".passioncode-ports.example-agent.S-1-5-21-3623811015-3361044348-30300820-1013.json"
+    },
+    {
+      "name": "two parts of one app in one account: two files",
+      "input": {
+        "service": "ai.passioncode.fabric-switchboard.proxy-1a2b3c4d",
+        "account": "501"
+      },
+      "expected": ".passioncode-ports.ai.passioncode.fabric-switchboard.proxy-1a2b3c4d.501.json"
+    },
+    {
+      "name": "two parts of one app in one account: the other part's file",
+      "input": {
+        "service": "ai.passioncode.fabric-switchboard.proxy-9e8f7a6b",
+        "account": "501"
+      },
+      "expected": ".passioncode-ports.ai.passioncode.fabric-switchboard.proxy-9e8f7a6b.501.json"
+    },
+    {
+      "name": "the longest service and account: 255 bytes",
+      "input": {
+        "service": "ai.passioncode.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "account": "S-1-5-21-4294967295-4294967295-4294967295-4294967295-4294967295-4294967295-4294967295-4294967295-123"
+      },
+      "expected": ".passioncode-ports.ai.passioncode.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.S-1-5-21-4294967295-4294967295-4294967295-4294967295-4294967295-4294967295-4294967295-4294967295-123.json"
     }
   ],
   "read": [
@@ -883,6 +907,108 @@
       }
     },
     {
+      "name": "the longest service and account: kept",
+      "input": {
+        "files": [
+          {
+            "name": ".passioncode-ports.ai.passioncode.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.S-1-5-21-4294967295-4294967295-4294967295-4294967295-4294967295-4294967295-4294967295-4294967295-123.json",
+            "owner": "S-1-5-21-4294967295-4294967295-4294967295-4294967295-4294967295-4294967295-4294967295-4294967295-123",
+            "json": {
+              "schema": "passioncode-port-claim/1",
+              "service": "ai.passioncode.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+              "account": "S-1-5-21-4294967295-4294967295-4294967295-4294967295-4294967295-4294967295-4294967295-4294967295-123",
+              "ports": [
+                48210
+              ],
+              "updatedAt": "2026-11-08T09:00:00Z"
+            }
+          }
+        ],
+        "presentAccounts": [
+          "S-1-5-21-4294967295-4294967295-4294967295-4294967295-4294967295-4294967295-4294967295-4294967295-123"
+        ]
+      },
+      "expected": {
+        "claims": [
+          {
+            "schema": "passioncode-port-claim/1",
+            "service": "ai.passioncode.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "account": "S-1-5-21-4294967295-4294967295-4294967295-4294967295-4294967295-4294967295-4294967295-4294967295-123",
+            "ports": [
+              48210
+            ],
+            "updatedAt": "2026-11-08T09:00:00Z"
+          }
+        ],
+        "notes": []
+      }
+    },
+    {
+      "name": "a service of 131 characters: invalid (the file name would pass 255 bytes)",
+      "input": {
+        "files": [
+          {
+            "name": ".passioncode-ports.ai.passioncode.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.501.json",
+            "owner": "501",
+            "json": {
+              "schema": "passioncode-port-claim/1",
+              "service": "ai.passioncode.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+              "account": "501",
+              "ports": [
+                48210
+              ],
+              "updatedAt": "2026-11-08T09:00:00Z"
+            }
+          }
+        ],
+        "presentAccounts": [
+          "501",
+          "502"
+        ]
+      },
+      "expected": {
+        "claims": [],
+        "notes": [
+          {
+            "code": "claim-invalid",
+            "file": ".passioncode-ports.ai.passioncode.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.501.json"
+          }
+        ]
+      }
+    },
+    {
+      "name": "an account of 101 characters: invalid (the file name would pass 255 bytes)",
+      "input": {
+        "files": [
+          {
+            "name": ".passioncode-ports.example-agent.S-1-5-21-4294967295-4294967295-4294967295-4294967295-4294967295-4294967295-4294967295-4294967295-1234.json",
+            "owner": "S-1-5-21-4294967295-4294967295-4294967295-4294967295-4294967295-4294967295-4294967295-4294967295-1234",
+            "json": {
+              "schema": "passioncode-port-claim/1",
+              "service": "example-agent",
+              "account": "S-1-5-21-4294967295-4294967295-4294967295-4294967295-4294967295-4294967295-4294967295-4294967295-1234",
+              "ports": [
+                48210
+              ],
+              "updatedAt": "2026-11-08T09:00:00Z"
+            }
+          }
+        ],
+        "presentAccounts": [
+          "S-1-5-21-4294967295-4294967295-4294967295-4294967295-4294967295-4294967295-4294967295-4294967295-1234"
+        ]
+      },
+      "expected": {
+        "claims": [],
+        "notes": [
+          {
+            "code": "claim-invalid",
+            "file": ".passioncode-ports.example-agent.S-1-5-21-4294967295-4294967295-4294967295-4294967295-4294967295-4294967295-4294967295-4294967295-1234.json"
+          }
+        ]
+      }
+    },
+    {
       "name": "one ignored claim among usable ones",
       "input": {
         "files": [
@@ -1359,7 +1485,7 @@
       }
     },
     {
-      "name": "a wildcard bind of another account on the recorded port, listed with the loopback ones: a new port",
+      "name": "listeners of another account on the recorded port and the next candidate: the candidate after them",
       "input": {
         "account": "501",
         "service": "example-agent",
@@ -1981,6 +2107,105 @@
         "port": 48211,
         "kept": false,
         "reason": "new-none-recorded",
+        "notes": []
+      }
+    },
+    {
+      "name": "two parts of one app in one account (one per data folder): a part skips the port the other part claims",
+      "input": {
+        "account": "501",
+        "service": "ai.passioncode.fabric-switchboard.proxy-1a2b3c4d",
+        "instance": "default",
+        "recorded": null,
+        "ownListener": false,
+        "descriptors": [],
+        "files": [
+          {
+            "name": ".passioncode-ports.ai.passioncode.fabric-switchboard.proxy-9e8f7a6b.501.json",
+            "owner": "501",
+            "json": {
+              "schema": "passioncode-port-claim/1",
+              "service": "ai.passioncode.fabric-switchboard.proxy-9e8f7a6b",
+              "account": "501",
+              "ports": [
+                48210
+              ],
+              "updatedAt": "2026-11-08T09:00:00Z"
+            }
+          }
+        ],
+        "presentAccounts": [
+          "501",
+          "502"
+        ],
+        "listeners": [],
+        "candidates": [
+          48210,
+          48211,
+          48212
+        ],
+        "squatted": false
+      },
+      "expected": {
+        "port": 48211,
+        "kept": false,
+        "reason": "new-none-recorded",
+        "notes": []
+      }
+    },
+    {
+      "name": "two parts of one app in one account: a part keeps its own port beside the other's claim",
+      "input": {
+        "account": "501",
+        "service": "ai.passioncode.fabric-switchboard.proxy-1a2b3c4d",
+        "instance": "default",
+        "recorded": 48210,
+        "ownListener": false,
+        "descriptors": [],
+        "files": [
+          {
+            "name": ".passioncode-ports.ai.passioncode.fabric-switchboard.proxy-1a2b3c4d.501.json",
+            "owner": "501",
+            "json": {
+              "schema": "passioncode-port-claim/1",
+              "service": "ai.passioncode.fabric-switchboard.proxy-1a2b3c4d",
+              "account": "501",
+              "ports": [
+                48210
+              ],
+              "updatedAt": "2026-11-08T09:00:00Z"
+            }
+          },
+          {
+            "name": ".passioncode-ports.ai.passioncode.fabric-switchboard.proxy-9e8f7a6b.501.json",
+            "owner": "501",
+            "json": {
+              "schema": "passioncode-port-claim/1",
+              "service": "ai.passioncode.fabric-switchboard.proxy-9e8f7a6b",
+              "account": "501",
+              "ports": [
+                48211
+              ],
+              "updatedAt": "2026-11-08T09:00:00Z"
+            }
+          }
+        ],
+        "presentAccounts": [
+          "501",
+          "502"
+        ],
+        "listeners": [],
+        "candidates": [
+          48210,
+          48211,
+          48212
+        ],
+        "squatted": false
+      },
+      "expected": {
+        "port": 48210,
+        "kept": true,
+        "reason": "kept-free",
         "notes": []
       }
     },
@@ -2648,6 +2873,171 @@
           48210
         ],
         "updatedAt": "2026-11-08T09:00:00Z"
+      }
+    },
+    {
+      "name": "one of two parts of one app in one account: only its own state, never the other part's claim",
+      "input": {
+        "account": "501",
+        "service": "ai.passioncode.fabric-switchboard.proxy-1a2b3c4d",
+        "descriptors": [],
+        "ownState": [
+          48210
+        ],
+        "now": "2026-11-08T09:00:00Z"
+      },
+      "expected": {
+        "schema": "passioncode-port-claim/1",
+        "service": "ai.passioncode.fabric-switchboard.proxy-1a2b3c4d",
+        "account": "501",
+        "ports": [
+          48210
+        ],
+        "updatedAt": "2026-11-08T09:00:00Z"
+      }
+    },
+    {
+      "name": "one of two parts of one app loses its last port: only its claim is deleted",
+      "input": {
+        "account": "501",
+        "service": "ai.passioncode.fabric-switchboard.proxy-9e8f7a6b",
+        "descriptors": [
+          {
+            "service": "example-agent",
+            "instance": "default",
+            "port": 48220
+          }
+        ],
+        "ownState": [],
+        "now": "2026-11-08T09:00:00Z"
+      },
+      "expected": {
+        "delete": true
+      }
+    },
+    {
+      "name": "65 ports: a fault, no claim written",
+      "input": {
+        "account": "501",
+        "service": "example-agent",
+        "descriptors": [],
+        "ownState": [
+          48000,
+          48001,
+          48002,
+          48003,
+          48004,
+          48005,
+          48006,
+          48007,
+          48008,
+          48009,
+          48010,
+          48011,
+          48012,
+          48013,
+          48014,
+          48015,
+          48016,
+          48017,
+          48018,
+          48019,
+          48020,
+          48021,
+          48022,
+          48023,
+          48024,
+          48025,
+          48026,
+          48027,
+          48028,
+          48029,
+          48030,
+          48031,
+          48032,
+          48033,
+          48034,
+          48035,
+          48036,
+          48037,
+          48038,
+          48039,
+          48040,
+          48041,
+          48042,
+          48043,
+          48044,
+          48045,
+          48046,
+          48047,
+          48048,
+          48049,
+          48050,
+          48051,
+          48052,
+          48053,
+          48054,
+          48055,
+          48056,
+          48057,
+          48058,
+          48059,
+          48060,
+          48061,
+          48062,
+          48063,
+          48064
+        ],
+        "now": "2026-11-08T09:00:00Z"
+      },
+      "expected": {
+        "fault": "claim-invalid"
+      }
+    },
+    {
+      "name": "port 0 in its own state: a fault, no claim written",
+      "input": {
+        "account": "501",
+        "service": "example-agent",
+        "descriptors": [],
+        "ownState": [
+          0,
+          48210
+        ],
+        "now": "2026-11-08T09:00:00Z"
+      },
+      "expected": {
+        "fault": "claim-invalid"
+      }
+    },
+    {
+      "name": "an account named by its login name: a fault, no claim written",
+      "input": {
+        "account": "alice",
+        "service": "example-agent",
+        "descriptors": [],
+        "ownState": [
+          48210
+        ],
+        "now": "2026-11-08T09:00:00Z"
+      },
+      "expected": {
+        "fault": "claim-invalid"
+      }
+    },
+    {
+      "name": "now with an offset: a fault, no claim written",
+      "input": {
+        "account": "501",
+        "service": "example-agent",
+        "descriptors": [],
+        "ownState": [
+          48210
+        ],
+        "now": "2026-11-08T09:00:00+00:00"
+      },
+      "expected": {
+        "fault": "claim-invalid"
       }
     }
   ]

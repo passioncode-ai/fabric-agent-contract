@@ -416,7 +416,7 @@ flowchart TD
 
 ### FLW-17: A second copy of a service starts, or another account's listener holds its port
 
-- **Traces:** ST-021 (JTBD-03, JRN-02/#3); SCN-056, DEC-0154
+- **Traces:** ST-021 (JTBD-03, JRN-02/#3); SCN-056, SCN-060, DEC-0154, DEC-0160
 - **Goal:** a second copy changes nothing, and what the operator sees says what happened, never an outage; another account's listener on the port is shown as `foreign-user`, nothing is sent to it, and it is never shown as the service
 - **Entry points:** the operator runs the service by hand; its supervisor starts it again; the host probes the service's port
 - **Success exit:** one copy runs and answers; the second has exited 75 or taken over after the first left. For another account's listener: the card shows `foreign-user` and its line; after a reinstall onto a free recorded port (HA-1) the card shows the service's own state

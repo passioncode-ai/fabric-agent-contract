@@ -609,10 +609,10 @@ the claim from what remains:
 
 | | |
 |---|---|
-| File | `.passioncode-ports.<service-id>.<account>.json`, `<service-id>` the descriptor's `id`; an app without a descriptor: its reverse-DNS bundle identifier under its own domain, stable across versions; an app with separately recorded parts: that identifier plus `.<part>`, one claim per part (Fabric's hub and its local stack: `ai.passioncode.desktop.hub`, `ai.passioncode.desktop.stack`); `<account>` the OS account's numeric uid on macOS and Linux, its SID on Windows (a login name can be renamed, and is not what the owner check compares) |
+| File | `.passioncode-ports.<service-id>.<account>.json`, `<service-id>` the descriptor's `id`; an app without a descriptor: its reverse-DNS bundle identifier under its own domain, stable across versions; an app with separately recorded parts: that identifier plus `.<part>`, one claim per part (Fabric's hub and its local stack: `ai.passioncode.desktop.hub`, `ai.passioncode.desktop.stack`); an app with several data folders in one account records one part per folder, named with a stable hash of the canonical folder path (Switchboard: `ai.passioncode.fabric-switchboard.proxy-<8 hex digits>`), so its parts avoid each other's ports and rebuilding one never touches another's claim; `<account>` the OS account's numeric uid on macOS and Linux, its SID on Windows (a login name can be renamed, and is not what the owner check compares); the name stays at or under 255 bytes, so `<service-id>` is at most 130 characters and `<account>` at most 100 |
 | Folder | the computer's shared sticky folder: `/Users/Shared` (macOS), `/var/tmp` (Linux), `%ProgramData%\PassionCode\port-claims` (Windows) |
 | Owner | the account the file names |
-| Content | only `{schema, service, account, ports, updatedAt}`: `schema` `passioncode-port-claim/1`, `service` the `id`, `account` the same uid (a string of digits) or SID, `ports` every port this account's instances of the service (or the app's part) record, in one claim, `updatedAt` an RFC 3339 UTC time ([`port-claim.schema.json`](../../schemas/port-claim.schema.json), DEC-0160) |
+| Content | only `{schema, service, account, ports, updatedAt}`: `schema` `passioncode-port-claim/1`, `service` the `id`, `account` the same uid (a string of digits) or SID, `ports` every port this account's instances of the service (or the app's part) record, in one claim, at most 64 (the reference answers `claim-invalid` rather than write more), `updatedAt` interop-common's `utcInstant`: an RFC 3339 UTC time written with `Z` and at most three fraction digits, never an offset such as `+00:00` ([`port-claim.schema.json`](../../schemas/port-claim.schema.json), DEC-0160) |
 
 <!-- example: port-claim.schema.json -->
 
@@ -625,8 +625,11 @@ the claim from what remains:
   [`port-claim.json`](../../fixtures/vectors/port-claim.json) (DEC-0160). When several hold the recorded port, a
   reported reason names the first in this order: another `id.instance`'s descriptor, a claim of another account, a claim
   of another service in this account, a listener.
-- A reader ignores a claim whose file owner (its owner uid; on Windows its owner SID) is not the `account` it names,
-  and a claim of an account no longer on the computer.
+- A reader ignores, and notes, four kinds of file, naming the first that applies: content that is not a valid claim
+  (`claim-invalid`), a file name that is not the claim file name of its content's service and account
+  (`claim-name-mismatch`), a file owner (its owner uid; on Windows its owner SID) that is not the `account` it names
+  (`claim-owner-mismatch`), and a claim of an account no longer on the computer (`claim-account-absent`); the first two
+  are DEC-0160's readings.
 - **A claim grants nothing.** It only keeps two installers from choosing one port; who may receive a credential is
   HA-2's check, never a claim.
 - **Who writes the claim.** At install the installer, or the node that installs the service, chooses the port, writes
@@ -649,15 +652,20 @@ the claim from what remains:
   the host label's secret ([devices](devices.md#the-host-label)), creates `%ProgramData%\PassionCode\port-claims`
   and sets its ACL: Users may create files in it, the creator owner has full control of its own files, and no account
   may write or delete another's, the sticky folder's meaning on macOS and Linux. That step is part of the first
-  installation of a Fabric node on Windows, whose installer asks once for elevation. An installer or a service running
-  as an ordinary account that finds the folder missing, or with another ACL, records its port anyway and reports it
-  once, until the folder appears or its ACL is right, not at every start, never as interface text (DEC-0160): a
-  service with a health report keeps one `degraded` entry while it lasts, `source` `port-claims-folder`, `setup: true`
-  (it waits for the administrator's step, not an outage) and the `reason` below; an installer, or a service without a
-  health report, writes one log line with the same text. It never creates the folder or changes its ACL itself.
+  installation of a Fabric node on Windows, whose installer asks once for elevation; an install of the adapter's kits
+  alone, with no Fabric node, runs no such step. An installer or a service running as an ordinary account that finds
+  the folder missing, or with another ACL, records its port anyway and never creates the folder or changes its ACL
+  itself. A service with a health report keeps one `degraded` entry while the state lasts, at every start: `source`
+  `port-claims-folder`, `setup: true` (it waits for an administrator's step, not an outage) and the `reason` below. The
+  entry is person-facing: a host shows it as a setup wait (DEC-0044), so its reason names who acts and on which
+  computer. An installer, or a service without a health report, writes the same text as one log line, once until the
+  folder appears with its ACL, not at every start; it remembers in its own state that it wrote the line (DEC-0160).
+  On a Windows computer where the step has not run, a kit-only install included, such a service stays `degraded`,
+  never `ready`, until an administrator runs it; on a kit-only computer that is a Fabric node's first installation,
+  the only install that runs the step today.
 
   ```json
-  {"source": "port-claims-folder", "setup": true, "reason": "The port claims folder %ProgramData%\\PassionCode\\port-claims is missing or its access list is not the setup's; this service records its port without a claim until the administrator's setup step runs."}
+  {"source": "port-claims-folder", "setup": true, "reason": "An administrator of this computer runs the Fabric setup step, which creates %ProgramData%\\PassionCode\\port-claims with its access list. Until then this service records its port without a claim."}
   ```
 
 - **The Linux folder's limits.** `/var/tmp` was agreed on the board and stays, with two known limits: `systemd-tmpfiles`

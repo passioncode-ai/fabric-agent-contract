@@ -29,8 +29,9 @@
     },
     "account": {
       "type": "string",
+      "maxLength": 100,
       "pattern": "^(?:[0-9]{1,10}|S-1-[0-9]+(?:-[0-9]+){1,14})$",
-      "description": "The OS account the claim is for: its numeric uid on macOS and Linux, its SID on Windows, never a login name (a login name can be renamed, and is not what the owner check compares)."
+      "description": "The OS account the claim is for: its numeric uid on macOS and Linux, its SID on Windows, never a login name (a login name can be renamed, and is not what the owner check compares). At most 100 characters, so the file name stays at or under 255 bytes."
     },
     "ports": {
       "type": "array",
@@ -42,19 +43,19 @@
         "minimum": 1,
         "maximum": 65535
       },
-      "description": "Every port this account's instances of the service (or the app's part) record, in one claim. The reference rebuilds them ascending, once each (src/port-claim.ts rebuildClaim); a reader takes them in any order."
+      "description": "Every port this account's instances of the service (or the app's part) record, in one claim, at most 64. The reference rebuilds them ascending, once each (src/port-claim.ts rebuildClaim), and answers claim-invalid rather than write more; a reader takes them in any order."
     },
     "updatedAt": {
       "$ref": "interop-common.schema.json#/$defs/utcInstant",
-      "description": "When the claim was last rebuilt, an RFC 3339 instant in UTC."
+      "description": "When the claim was last rebuilt: interop-common's utcInstant, an RFC 3339 instant in UTC written with Z and at most three fraction digits (an offset such as +00:00, or microseconds, is refused)."
     }
   },
   "$defs": {
     "bundleId": {
       "type": "string",
-      "maxLength": 255,
+      "maxLength": 130,
       "pattern": "^[A-Za-z][A-Za-z0-9-]*(?:\\.[A-Za-z0-9][A-Za-z0-9-]*)+$",
-      "description": "A reverse-DNS bundle identifier under the app's own domain, stable across versions, optionally followed by .<part>: letters, digits and hyphens in two or more dot-separated parts."
+      "description": "A reverse-DNS bundle identifier under the app's own domain, stable across versions, optionally followed by .<part>: letters, digits and hyphens in two or more dot-separated parts, at most 130 characters, so the file name (25 characters besides the service and the account) stays at or under 255 bytes."
     }
   }
 }

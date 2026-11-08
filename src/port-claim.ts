@@ -14,21 +14,27 @@ import { strictTime } from "./rfc3339.js";
  *   descriptor declares it, or when nothing holds it; otherwise it takes the first free candidate. A squatted claim path
  *   (this account's own claim file owned by another account) means no claim is read at all (DEC-0160's reading of HA-1).
  * - `rebuildClaim` writes the claim from this service's descriptors in the account and, for an app without a descriptor
- *   origin or an app's part, the ports in its own state; never from the old claim, which it takes no parameter for.
+ *   origin or an app's part, the ports in its own state; never from the old claim, which it takes no parameter for. When
+ *   the result would not be a valid claim (more than 64 ports, a port outside 1 to 65535, an account that is not a uid
+ *   or a SID, a `now` that is not a UTC instant) it answers `{fault: "claim-invalid"}`, never a claim every reader
+ *   would ignore.
  */
 
 /** The claim's schema revision, the value of its `schema` member. */
 export const PORT_CLAIM_SCHEMA = "passioncode-port-claim/1";
 /** A descriptor's id (service-common.schema.json `serviceId`). */
 export const SERVICE_ID = /^[a-z][a-z0-9-]{1,62}$/;
-/** A reverse-DNS bundle identifier, optionally followed by `.<part>` (the schema's `$defs/bundleId`). */
+/** A reverse-DNS bundle identifier, optionally followed by `.<part>` (the schema's `$defs/bundleId`), at most 130 characters. */
 export const BUNDLE_ID = /^[A-Za-z][A-Za-z0-9-]*(?:\.[A-Za-z0-9][A-Za-z0-9-]*)+$/;
-/** A numeric uid (macOS, Linux) or a SID (Windows); never a login name. */
+/** A numeric uid (macOS, Linux) or a SID (Windows), at most 100 characters; never a login name. */
 export const ACCOUNT = /^(?:[0-9]{1,10}|S-1-[0-9]+(?:-[0-9]+){1,14})$/;
-/** An RFC 3339 instant in UTC (interop-common.schema.json `utcInstant`). */
-const UTC_INSTANT = /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-5][0-9](\.[0-9]{1,3})?Z$/;
+/** An RFC 3339 instant in UTC (interop-common.schema.json `utcInstant`): `Z`, at most three fraction digits. */
+export const UTC_INSTANT = /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-5][0-9](\.[0-9]{1,3})?Z$/;
 const MEMBERS = ["schema", "service", "account", "ports", "updatedAt"];
 const MAX_PORTS = 64;
+/** The longest service and account, so the file name stays at or under 255 bytes: 25 + 130 + 100. */
+const MAX_SERVICE = 130;
+const MAX_ACCOUNT = 100;
 
 export interface PortClaim { schema: string; service: string; account: string; ports: number[]; updatedAt: string }
 /** A claim file as a reader finds it: its name in the shared folder, its owner's uid (SID on Windows), its parsed content. */
@@ -44,7 +50,10 @@ export interface ChooseInput {
   account: string;
   service: string;
   instance: string;
-  /** The port this `id.instance` records (descriptor, own state or claim), or null. */
+  /**
+   * The port this `id.instance` records (descriptor, own state or claim), or null. Under `squatted` the claim is not a
+   * source: the caller takes it from the descriptor or its own state only.
+   */
   recorded: number | null;
   /** Whether this instance's own listener holds the recorded port (HA-2's check). */
   ownListener: boolean;
@@ -79,8 +88,8 @@ export function isPortClaim(value: unknown): value is PortClaim {
   if (keys.length !== MEMBERS.length || !MEMBERS.every((member) => keys.includes(member))) return false;
   const { schema, service, account, ports, updatedAt } = value as Record<string, unknown>;
   if (schema !== PORT_CLAIM_SCHEMA) return false;
-  if (typeof service !== "string" || !(SERVICE_ID.test(service) || (service.length <= 255 && BUNDLE_ID.test(service)))) return false;
-  if (typeof account !== "string" || !ACCOUNT.test(account)) return false;
+  if (typeof service !== "string" || !(SERVICE_ID.test(service) || (service.length <= MAX_SERVICE && BUNDLE_ID.test(service)))) return false;
+  if (typeof account !== "string" || account.length > MAX_ACCOUNT || !ACCOUNT.test(account)) return false;
   if (!Array.isArray(ports) || ports.length < 1 || ports.length > MAX_PORTS || !ports.every(isPort) || new Set(ports).size !== ports.length) return false;
   return typeof updatedAt === "string" && UTC_INSTANT.test(updatedAt) && !Number.isNaN(strictTime(updatedAt));
 }
@@ -142,11 +151,13 @@ export function choosePort(input: ChooseInput): ChooseResult {
 
 /**
  * The claim this account writes for a service, rebuilt from this service's descriptors in the account (every instance)
- * and its own state; the ports once each, ascending; `{delete: true}` when none remains.
+ * and its own state; the ports once each, ascending; `{delete: true}` when none remains; `{fault: "claim-invalid"}`
+ * when the result would not be a valid claim, so nothing is written that every reader ignores.
  */
-export function rebuildClaim(input: { account: string; service: string; descriptors: readonly DescriptorPort[]; ownState: readonly number[]; now: string }): PortClaim | { delete: true } {
+export function rebuildClaim(input: { account: string; service: string; descriptors: readonly DescriptorPort[]; ownState: readonly number[]; now: string }): PortClaim | { delete: true } | { fault: "claim-invalid" } {
   const ports = [...new Set([...input.descriptors.filter((entry) => entry.service === input.service).map((entry) => entry.port), ...input.ownState])].sort((a, b) => a - b);
   if (ports.length === 0) return { delete: true };
-  return { schema: PORT_CLAIM_SCHEMA, service: input.service, account: input.account, ports, updatedAt: input.now };
+  const claim = { schema: PORT_CLAIM_SCHEMA, service: input.service, account: input.account, ports, updatedAt: input.now };
+  return isPortClaim(claim) ? claim : { fault: "claim-invalid" };
 }
 // #endregion port-claim
