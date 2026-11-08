@@ -38,11 +38,30 @@ package the run is handed, (b) its lifecycle and a dead run's request, (c) how i
 
 ## Checks run
 
-- `pnpm run docs:check`, `python3 docs/ux/lint.py`, an em-dash scan of the added lines (results in the commit).
+- On `7bd5253d`: `pnpm run docs:check` exit 0 ("Documentation checks passed", lint:md 270 files, 0 errors);
+  `python3 docs/ux/lint.py` exit 0 (40 stories, 34 flows, 34 screens, 56 scenarios); no U+2014 in the added lines
+  (reproduced by round 1's readers).
+
+## Rounds
+
+- Round 1 (on `7bd5253d`), not clean on any tier: unit, OS-4 gave every run claim, accept and complete, which an
+  `accepted` request (continued only by a transfer) and an `in_progress` one (made `outcome_unknown` by the run's own
+  enrollment, settled only by an observed reconcile) cannot take (now OS-4 goes by the state found); seam, OS-6 and
+  Alternative (d) contradicted C3.3, which reads a cancel of an ordinary input request as the person's no (now a run
+  declares no elicitation capability), nothing carried OS-5's effect key from run to run (now the checkpoint's body,
+  carried by the host's take-back, owed by Fabric and the adapter), and five Fabric debts were already built (now
+  restated from its CO-409 row); product, the operator's hold ended a request's runs before its lift (now held work is
+  no candidate and a run that never held the slot counts for nothing), the C3.3 contradiction, and the handoff's checks
+  "in the commit" (now written here). Risks folded: the exit contract is OS-4's; an `outcome_unknown` a run leaves is
+  shown at once; OS-3's mismatch covers one or both ids missing and is a `message` in the line's request's thread; the
+  claim names the request; the state note at a claim or transfer; settled means terminal; the human step's resubmission;
+  the mandate taken as callee and handed on by MD-2; the grace named as the host's; SCN-025's accept, release,
+  generation and `failed_known`; SCN-051's run as main session; OS-6 links AP-4, not the unmerged OW section; the
+  conformance rows' rule ranges and test files; a DOCMAP row; Consequences complete, the knowledge page at landing.
 
 ## Next task
 
-Round 1 of the blind readings of branch `agent/ct215-on-demand-20261108` (DEC-0158): verifier-unit, verifier-seam and
-verifier-product against `origin/main`; fold every tier's findings at once, then the next round. At landing: DEC-0158
-Accepted with its rounds, the amendment line and DEC-0022's annotation without "proposed", CT-215 done, the North Star
-plan's wave 0 row, and a board post of the consumer debts to Fabric, Switchboard, the adapter and Observatory.
+Round 2 of the blind readings of branch `agent/ct215-on-demand-20261108` (DEC-0158), all three tiers. At landing:
+DEC-0158 Accepted with its rounds, the amendment line and DEC-0022's annotation without "proposed", CT-215 done, the
+North Star plan's wave 0 row, fabric-workspace `knowledge/agents-first.md` items 3, 5 and 8, and a board post of the
+consumer debts to Fabric, Switchboard, the adapter and Observatory.
