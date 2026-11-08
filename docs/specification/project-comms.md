@@ -867,11 +867,14 @@ and account) is the host's own; Fabric's is its specification `docs/evidence/spe
 board client of its Project and moves a request only through the operations of the
 [request lifecycle](#request-lifecycle).
 
-**OS-1 to OS-7 (DEC-0158).**
+**OS-1 to OS-7 (DEC-0158).** *At once* in these rules is the host's next pass over its requests, never a moment the
+contract times.
 
 - **OS-1, who starts one.** Only the host that serves its operator's board starts a dispatched run, on the operator's
   own machine, only in a folder of the target Project on that machine, after a grace of its own choosing from the
-  request's submission, which it states among its settings so that a requester can wait longer than it, and only for a request of its own estate whose (Project, capability) slot has no live holder. A
+  request's submission, which it states among its settings; the grace is the earliest a run starts, never a promise that none starts later
+  (the host's checks, caps and limits may defer a start), so a requester never reads a still-`queued` request as one
+  no run will take; and only for a request of its own estate whose (Project, capability) slot has no live holder. A
   request is a candidate while it is `queued`, `claimed` with a lapsed attempt, or `accepted` or `in_progress` with no
   live holder, with time left before its deadline for a run to finish; never `answered`, `outcome_unknown`, `cancelled`
   or a terminal state, and never while its thread, its Project or its slot is [held](#holds) (it waits for the lift, as
@@ -881,7 +884,10 @@ board client of its Project and moves a request only through the operations of t
   slot stops it only before its effect begins, since a hold refuses `com.accept` and `com.effect_begin` and never
   `com.complete`, `com.reconcile`, `com.progress` or `com.renew` ([what a hold refuses](#what-a-hold-refuses)), so a run
   whose effect began finishes under the hold; moving its slot ([PR-2](#the-operator-moves-a-slot)) fences the run at its
-  next board call and turns its `in_progress` request into `outcome_unknown` (`lost_result`). Turned on again, the host starts at once for a request whose grace has passed. A standing dispatcher, on by default, is the operator's choice of 2026-11-04 and amends C5
+  next fenced board call (its renewal at the latest) and turns its `in_progress` request into `outcome_unknown`
+  (`lost_result`). A move needs another live session of the Project already authorized for the capability (PR-2); with
+  none, a run whose effect began cannot be stopped from the board and finishes, and a host that offers a stop of the
+  run's process leaves the request as a run that dies does (OS-5). Turned on again, the host starts at once for a request whose grace has passed. A standing dispatcher, on by default, is the operator's choice of 2026-11-04 and amends C5
   (DEC-0022, [OQ-0008](../OPEN_QUESTIONS.md)) for the host alone: a client still keeps no background helper of its own,
   and claims stay short tool bursts.
 - **OS-2, what a run is handed.** A run is handed the request by reference: the request's id, its thread, the
@@ -925,8 +931,9 @@ board client of its Project and moves a request only through the operations of t
   (`com.complete`, `com.reconcile`) with the same idempotency key when its refusal is `retryable` and not `held` (the
   key makes the retry safe, [idempotency](#idempotency)); a settling call refused again leaves the request as OS-5 says. One whose `com.enroll` is refused does
   what SA-6 says for that refusal ([answering in the same turn](#answering-in-the-same-turn)) except SA-6's retry once
-  the cause is gone, and ends, the host's next start after the cause is gone being the retry (OS-5); one refused `held`,
-  `fenced` or `lease_expired` on its work stops acting and ends, never retaking the slot.
+  the cause is gone, and ends, the host's next start after the cause is gone being the retry (OS-5); any other refusal of a board call on its work (`held`, `fenced` and `lease_expired` among
+  them, and a `com.reconcile` refused because the run no longer holds the slot) ends it, never retaking the slot, and
+  leaves the request as OS-5 says.
 - **OS-5, a run that dies.** A run that ends without settling the request leaves it in the state this extension gives
   it, and no host changes that state for it: `queued` stays queued; `claimed` is taken again by the next `com.claim`
   under a new attempt; `accepted` is held (C4) and continues only by a replacement with a checkpoint transfer
@@ -939,14 +946,15 @@ board client of its Project and moves a request only through the operations of t
   run left in `outcome_unknown`, since the estate owner settles them; an `accepted` or `in_progress` request with no
   live holder once its deadline leaves no time for a run (OS-1's candidate needs that time), at the latest when the
   deadline passes; and a request a run settled at a human step it could not put to its operator, by the run's record
-  (OS-6, OS-7). A run counts for nothing when it never held the slot (its enrollment refused `held`, `fenced` or
-  because a live holder appeared), when a hold refused its work, or when the operator's move of the slot fenced it;
-  after a hold's lift the host may start again. A run refused `not_authorized` ends the host's starts for that request
+  (OS-6, OS-7). A run counts for nothing only when it found the slot `active` with another live holder, when its
+  enrollment was refused `held` or `fenced`, when a hold refused its work, or when the operator's move of the slot
+  fenced it; after a hold's lift the host may start again. Every other run that ends without settling the request
+  counts toward the two, one that ended before its `com.enroll` included (a crash, OS-3's mismatch, a client that could
+  not reach the board), so no refusal and no failed start starts runs without end. A run refused `not_authorized` ends the host's starts for that request
   until the operator grants, and the host shows the request to its operator (a grant is the operator's). A run whose
-  enrollment is refused with any other code that is not `retryable` (not `fenced` and not `held`, which count for
-  nothing above) likewise ends the host's starts for that request and shows it to its operator. A run whose enrollment
-  is refused with a `retryable` code other than `held` or `fenced` counts as a run that ended without settling the
-  request, toward the two above, so no refusal starts runs without end. After the
+  enrollment is refused with any other code that is not `retryable` (`fenced` aside, which counts for nothing above)
+  likewise ends the host's starts for that request
+  and shows it to its operator. After the
   grant: at `absent` generation 0 the run's SA-6 decline made the request `answered`, so the requester submits it
   again; at a generation of 1 or more the run sent no reply, so the request kept its state (a `queued` one stays
   queued), and the host may start a run for it again. The requester sees no signal from the host in the thread:
@@ -972,10 +980,12 @@ board client of its Project and moves a request only through the operations of t
   human step ([service](service.md#actions) AP-4, the full list there),
   and a source hand-over without a decision naming its exact target ([source](source.md#handing-over), DEC-0149; without
   the elicitation capability the service answers `operator-decision-required` with the detail `handover-needs-operator`)
-  are each a stop. Only the first two have an exception: a job's question or an `operator-decision-required` refusal
+  are each a stop, and so is a step the estate's rules keep from a session with no person (in PassionCode, the
+  production stop of fabric-workspace `knowledge/agents-first.md`, *One approval binds all*, item 8). Only the first two have an exception: a job's question or an `operator-decision-required` refusal
   that the request's mandate (MD-3) or a relayed decision (OA-1 to OA-3) covers exactly is answered by it and is not a
   stop. A source hand-over goes ahead only on a decision naming its exact target ([source](source.md#handing-over)), and
-  a human step is never covered (MD-6, AP-4, OA-5). At a stop the run settles first: before an effect began,
+  a human step is never covered (MD-6, AP-4, OA-5); the estate's production stop is lifted only as its own rule says, and
+  otherwise is settled, noted and submitted again as a human step is. At a stop the run settles first: before an effect began,
   `failed_known` with `observed: false`; after one, it cancels a waiting job with that job's own cancel and settles
   `failed_known` once it has observed that the effect did not happen, or else leaves the request `in_progress`, so the
   next holder's `lost_result` makes it `outcome_unknown`, which the host shows at once (OS-5). Then it names the stop

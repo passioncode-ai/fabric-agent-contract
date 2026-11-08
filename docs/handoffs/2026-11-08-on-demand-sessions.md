@@ -83,6 +83,16 @@ package the run is handed, (b) its lifecycle and a dead run's request, (c) how i
   Fabric's new debts, the `hand_on` read as the service case, and the knowledge base's items 3 and 8 as drafted below;
   backlog CT-276 (the operator's limits on where a run starts) and CT-277 (how a requester learns a target Project's
   registry agent id).
+- Round 8: one counting rule for OS-5's two runs in OS-5, the host's conformance row, CONTEXT, DEC-0158 item 5 and
+  its Compatibility (a run counts for nothing only when it found a live holder, its enrollment was refused `held` or
+  `fenced`, a hold refused its work or the operator's move fenced it; every other unsettled run counts, one that ended
+  before `com.enroll` included), so Fabric's counting of every unsettled end is met; the drafted knowledge base item 3
+  cancels a still-`queued` request first and acts only on `cancelled`, reads `answered` as a decline, sends a request a
+  run holds to item 1 and held work to item 4; item 5's requester branch; item 8's production step. OS-1 defines *at
+  once* as the host's next pass, the grace as the earliest a run starts, a move's fence at the next fenced call and the
+  run no move can stop; OS-4 ends a run on any other refusal of its work; OS-6 names the estate's production stop;
+  the run's conformance row gains OS-3's quotation and OS-6's job cancel; SCR-32 and SCN-025 follow; Switchboard's
+  refused-enrollment debt and Fabric's state for *at once* in Compatibility.
 
 ## Decisions taken here
 
@@ -146,15 +156,31 @@ package the run is handed, (b) its lifecycle and a dead run's request, (c) how i
 The text to land in fabric-workspace `knowledge/agents-first.md` with this decision's merge (read at its main
 `c84c7a40`). Items not named keep their text.
 
-"When nobody answers", item 3, its first sentence restated (the rest of the item unchanged):
+"When nobody answers", item 3, its first sentence restated and one paragraph added after it (the rest of the item
+unchanged but its last paragraph's cancel, below):
 
 > 3\. **Nobody is live, the machine is the operator's, and the change is small: make it yourself, in the owner's
-> repository, unless the host dispatches.** Where the machine's host starts on-demand sessions (Fabric's dispatcher,
-> on by default; contract DEC-0158 OS-1), a request whose receipt carries `noResponder` is first left to it: wait
-> longer than the host's grace, which the host states among its settings, then read the request (`com.get`). Still
-> `queued`: no run took it (the switch is off, the slot, Project or thread is held, or a run's enrollment was
-> refused), so go on with this item. Claimed or further on: a run has it, so leave it and put the wait on a watcher
-> (item 2).
+> repository; where the host dispatches, cancel the request first.** Where the machine's host starts on-demand
+> sessions (Fabric's dispatcher, on by default; contract DEC-0158 OS-1), a run may take a request no responder holds
+> at any time: the host's grace is the earliest a run starts, never a promise that none starts later, and its caps
+> and limits may defer a start. So, whatever the receipt's `noResponder` says, read the request (`com.get`) before you
+> change anything:
+>
+> - `queued`: cancel it (`com.cancel`, the reason "done by the asker") and start the change only once the receipt
+>   reads `cancelled`; then no run can take it. A receipt that reads anything else, or a refusal, means a run took
+>   it meanwhile: read it again and go by the lines below.
+> - `answered`: the target declined it (a run's decline, OS-5), and no run will take it; go on with this item, or
+>   submit it again once what the decline names is done.
+> - `claimed`, `accepted` or `in_progress`: a run has it. Leave it and put the wait on a watcher (item 2); if the date
+>   its state note named passes with no result, follow item 1, whose cancel while the effect is `not_started` serves a
+>   `claimed` request too.
+> - `outcome_unknown`: the work began; follow item 1.
+>
+> The slot, the Project or the thread being held is never a reason to make the change: held work waits for the lift,
+> as item 4 says (`held: true` on the target's slot in `com.directory` or `com.status`).
+
+and in the item's last paragraph, "and cancel your own request (`com.cancel`, the reason "done by the asker")" reads
+"and cancel your own request (`com.cancel`, the reason "done by the asker") unless you already cancelled it as above".
 
 "When nobody answers", item 5, restated:
 
@@ -162,13 +188,15 @@ The text to land in fabric-workspace `knowledge/agents-first.md` with this decis
 > takes, after its grace, with that request as its only task; the session takes it by its state, settles it and
 > ends (contract DEC-0158 OS-1 to OS-7; Fabric's dispatcher since 0.3.16). A request the host starts no more runs
 > for is shown to the operator with its cause (OS-5), and the operator acts through a session of the requesting
-> Project they own; a question or an announcement waits for the Project's next session (OS-7, contract CT-272).
+> Project they own; otherwise the requester acts on its own reading of the request's state (item 1 and item 3's
+> lines). A question or an announcement waits for the Project's next session (OS-7, contract CT-272).
 > Fabric's home ("requests no agent answers now") and the thread remain how the owner's next session, or the
 > operator, finds a request no run holds; the asker does not wait on either.
 
 "One approval binds all", item 8, two additions (its production stop kept):
 
-> A session started for a request settles it before it stops at a step that needs a person: `failed_known` with
+> A session started for a request settles it before it stops at a step that needs a person, this item's production
+> step included: `failed_known` with
 > `observed: false` before an effect began; after one, `failed_known` only once it observed that no effect happened,
 > and otherwise it leaves the request `in_progress` for the next holder; then it names the stop once in the thread
 > (contract DEC-0158 OS-6).
@@ -228,6 +256,15 @@ Its check: the knowledge base's own gate on the change, then a reading of the me
   `pnpm vitest run test/mandate.test.ts test/comms-tools.test.ts test/comms-hold.test.ts test/consistency.test.ts`
   exit 0 (4 files, 355 tests); `git diff origin/main...HEAD | grep '^+' | grep -c` of U+2014 printed 0. The full
   `pnpm run check` was not run in this round.
+
+## Checks run on the round-8 commit
+
+- On the tree of the round-8 commit (parent `f0457843`): `pnpm run docs:check` exit 0 ("Documentation checks passed",
+  lint:md 271 files, 0 errors); `python3 docs/ux/lint.py` exit 0 (40 stories, 34 flows, 34 screens, 56 scenarios);
+  `pnpm run privacy:check` exit 0 (0 findings); `pnpm vectors:check` exit 0 (32 vector files match their generators);
+  `pnpm vitest run test/mandate.test.ts test/consistency.test.ts test/comms-tools.test.ts` exit 0 (3 files, 231
+  tests); `git diff origin/main...HEAD | grep '^+' | grep -c` of U+2014 printed 0; `git merge-tree --write-tree HEAD
+  origin/main` exit 0. The full `pnpm run check` was not run in this round.
 
 ## Rounds
 
@@ -329,9 +366,41 @@ Its check: the knowledge base's own gate on the change, then a reading of the me
   `DISPATCH_CONTRACT` and vector-count tests; CT-277 for a target Project's registry agent id, `hand_on` read as the
   service case.
 
+- Round 8 (on `f0457843`), not clean: unit and seam, which runs count toward OS-5's two was stated three ways: the
+  host's conformance row said "two runs that held the slot" and then counted a run whose enrollment was refused
+  `retryable`, which never held it, and the row, CONTEXT, DEC-0158 item 5 and the Compatibility's Fabric debt said,
+  unqualified, that a run that never held the slot counts for nothing, which would leave uncounted a run that died
+  before `com.enroll`, a run Fabric counts on purpose (now one rule everywhere: a run counts for nothing only when it
+  found the slot `active` with another live holder, its enrollment was refused `held` or `fenced`, a hold refused its
+  work or the operator's move fenced it, and every other run that ends without settling counts, one that ended before
+  `com.enroll` included; Fabric's counting at `eafcf2e4` is then met and its debt is only not counting those four);
+  product, the drafted knowledge base item 3 let a requester change the owner's repository while a later run took the
+  same still-`queued` request, since a host defers starts past its grace for its own caps, and read a hold as a reason
+  to make the change (now, where the host dispatches, the requester cancels a still-`queued` request first and starts
+  only once the receipt reads `cancelled`, whatever `noResponder` says; `answered` is the target's decline; a request
+  a run holds goes to item 1 once its state note's date passes; held work waits for the lift, item 4; OS-1 says the
+  grace is the earliest a run starts, never a promise that none starts later). Risks folded: a move fences a run at its
+  next fenced call, its renewal at the latest (OS-1, item 1, SCR-32, SCN-025); OS-4 ends a run on any other refusal of
+  a board call on its work, `com.reconcile`'s refusal once the run no longer holds the slot among them, leaving the
+  request as OS-5 says (item 4, the run's row); the run's row gains OS-3's quotation (with no
+  `FABRIC_DISPATCH_WORKFLOW` the line is quoted and nothing is written) and OS-6's cancel of a waiting job by its own
+  cancel; *at once* is the host's next pass (OS-1's preamble, item 1, the host's row, SCR-32, SCN-025), and the
+  Compatibility names Fabric's state for it (the switch read on each dispatcher pass, `index.ts:2996`; the abandoned
+  sweep every third cycle, `AGENTS.md:148`); Switchboard's `EXIT_CONTRACT` debt gains the refused-enrollment end (SA-6
+  for that code without its retry, then the end, the operator asked only for a refusal that is not `retryable`); a run
+  no move can stop (no other live authorized session) finishes, and a host's stop of its process leaves the request as
+  a run that dies does (OS-1, item 1, SCR-32, SCN-025); OS-6 and item 6 name the estate's production stop (agents-first
+  item 8), lifted only as that rule says and otherwise settled as a human step, and the draft's item 8 addition names
+  it; the draft's item 5 gains "otherwise the requester acts on its own reading". Declined in part: the product risk
+  that an asker cannot read the host's grace is folded by making the asker's safety independent of the grace (cancel
+  first), not by naming a route that exposes the grace to another Project's agent, which would add a tool or a field
+  this decision says it does not add; the product risk's suggested restatement of item 1 for `claimed` and `queued`
+  requests is folded by item 3's lines (a `claimed` request goes to item 1, whose cancel while `not_started` serves it;
+  a `queued` one is cancelled first), not by rewriting item 1, which keeps the merge condition's text small.
+
 ## Next task
 
-Round 8 of the blind readings of branch `agent/ct215-on-demand-20261108` (DEC-0158), all three tiers. At landing:
+Round 9 of the blind readings of branch `agent/ct215-on-demand-20261108` (DEC-0158), all three tiers. At landing:
 DEC-0158 Accepted with its rounds, the amendment line and DEC-0022's annotation without "proposed", CT-215 done, the
 North Star plan's wave 0 row, fabric-workspace `knowledge/agents-first.md` items 3, 5 and 8 landed with the merge as drafted above (a
 merge condition, not a step after it), and a board post of the consumer debts to Fabric, Switchboard, the adapter,
