@@ -8,7 +8,7 @@ contract already has.
 
 ## Done
 
-- DEC-0156 reserved by git CAS on 2026-11-07 and drafted (Proposed) in `docs/DECISIONS.md`; next free `DEC-0160` at this writing (the CAS counter on origin after `origin/main` was merged in on 2026-11-08).
+- DEC-0156 reserved by git CAS on 2026-11-07 and drafted (Proposed) in `docs/DECISIONS.md`; next free `DEC-0161` at this writing (the CAS counter on origin on 2026-11-08, `DEC-0160` reserved by a sibling branch, which the lander keeps in id order).
 - [Governance and roles](../specification/governance-and-roles.md#the-operators-word-carried-out-the-first-time): OW-1
   (the word is the task), OW-2 (no command handed over), OW-3 (a risk is a reason to adjust, not to stop), OW-4 (only
   what needs the person), OW-5 (what stays), OW-6 (whose word).
@@ -36,7 +36,8 @@ contract already has.
 - Backlog CT-220 in progress; CT-266, CT-269, CT-271, CT-273, CT-278 and CT-282 filed. The operator channel's Status table:
   its `off` row names an `accepted` answer waiting for the token (`credential.present: false` or no `credential`
   member), and the tile names that step (or, with no `credential` member, the step without a name, which the agent
-  states), and with the token present it names the next step, telling the agent it is stored, pinned by the positive fixture
+  states) and says to tell the agent, or the coding session it runs in, once it is stored; with the token present no
+  person step is left, the agent enabling the channel on its own status read (OC-11 step 3); pinned by the positive fixture
   `fixtures/positive/operator-channel-status-off-awaiting-token.json` and its catalogue row; OC-17 says a product's own
   `reason.detail` stays within 300 characters in every locale it ships.
 - Consumers read before drafting: the adapter ships the rule (FAA-207, `v0.63.0`, citing CT-220); fabric-workspace
@@ -58,8 +59,10 @@ contract already has.
 - Landing step for fabric-workspace (owner: its knowledge base; DEC-0156's Compatibility): in the same run as the
   merge, land the change to `knowledge/agents-first.md` (merged in fabric-workspace, not only opened) that links the OW
   rules, rewrites its stale CT-220 paragraph to
-  them (OW-3's waits, its message form, its FA-09 reading, OW-4's list with a refusal never routed around) and fixes
-  its refusals section's item 4.
+  them (OW-3's waits, its message form, its FA-09 reading, OW-4's list with a refusal never routed around), fixes
+  its refusals section's item 4, and makes its "One approval binds all" items 1 and 5 say that a host's gate (Fabric's
+  `floor.ask-first`) still asks once, quoting the relayed words as its reason, until Fabric question `add1df7c` is
+  answered (round 24, product; OA-4 carries the same pointer to OW-3 and OW-5 here).
 - Landing step for Fabric question `add1df7c` (round 14): add to it the case of a board request whose relay names a
   floored act; DEC-0156 reads it as the reason the one ask quotes, not the agreement, so the act still goes to a session
   the person is in (OW-3, the Compatibility); and add the operator's word of 2026-11-07 that they press nothing
@@ -108,6 +111,18 @@ contract already has.
     range with `grep -c 'side act'` prints at least 1 (judgement: OS-6's never-resubmit names only OW-3's FA-09 case, a
     production stop or a host's gate that a relay naming the step or a grant lifts is resubmitted, and both ranges name
     the same `completed` case).
+    The split governs DEC-0158's own text beyond OS-6 as well (round 24, seam): its dispatched-run conformance row,
+    its decision item 6 and the item its handoff has Fabric's `board.read-at-start` owe each keep never-resubmit for
+    a host's gate alone (OW-3's FA-09 case), and each has a request settled at the estate's production stop submitted
+    again once it carries the operator's relayed words naming the step; none of them says nobody submits the request
+    again at the production stop. Checks, on the merged tree:
+    `grep '^| a dispatched run' docs/specification/conformance.md | grep -c 'production stop or a host.s gate asks no question, names the step in its note and its report, and says that it waits'`
+    prints 0 and the same row with `grep -c 'at the production stop says the request is submitted again'` prints 1;
+    `awk '/^### DEC-0158/,/^### DEC-0159/' docs/DECISIONS.md | awk '/^  6\. /,/^  7\. /'` (item 6) with
+    `grep -c 'request is submitted again once it carries'` prints at least 1 and with `grep -c FA-09` prints at least
+    1; `grep -c 'at the production stop its note says the request is submitted again' docs/handoffs/2026-11-08-on-demand-sessions.md`
+    prints at least 1 (judgement, for each of the three: never-resubmit names only a host's gate, and the production
+    stop is lifted by the relayed words naming the step).
   - DEC-0159 (CT-218, members' client keys): this requirement is written here and binds whichever of DEC-0156 and
     DEC-0159 lands second, whether or not the other branch's handoff repeats it (the coordinator relays it to that
     branch's owner). SCN-059 states the key split. Issuing and rotating a member's key are
@@ -120,7 +135,10 @@ contract already has.
     member's key are the operator's, from their own terminal; revoking is the agent's, on the operator's word, through
     the agent's CLI on the operator's computer), so no SCN-044 line has the operator manage client keys. Checks:
     `awk '/^### SCN-044/,/^### SCN-058/' docs/ux/scenarios.md | grep -c 'operator manages client keys'` prints 0, and
-    the same range with `grep -c 'revok'` prints at least 1 (judgement: revoking named as the agent's). OW-4 names, as a human step's exact step, a command the person runs in their own
+    the same range with `grep -c 'revok'` prints at least 1 (judgement: revoking named as the agent's). The SCN-044
+    Coverage conflict hunk carries SCN-058 and the scenarios after it on DEC-0159's side, which the lander keeps whole,
+    never resolving that hunk by taking one side. Check, on the resolved tree:
+    `grep -c '^### SCN-05[89]' docs/ux/scenarios.md` prints 2 and `python3 docs/ux/lint.py` exits 0. OW-4 names, as a human step's exact step, a command the person runs in their own
     terminal where an agent's run would put a secret in its transcript (CF-3), and CONTEXT's "hands the operator no
     command" takes that exception. That clause goes into OW-4 and into CONTEXT's entry whichever branch lands second;
     CF-4's *Where the operator is* may carry it as well, but never instead, and the clause in CF-4 alone meets none of
@@ -146,14 +164,22 @@ contract already has.
   - Register conflicts with any sibling (`docs/DECISIONS.md`, `docs/backlog.md`, `docs/handoffs/README.md`) are
     adjacent appends: the lander keeps both sides, in id order. Check: no conflict marker is left (`git grep -n '^<<<<<<<'`
     prints nothing), no backlog id appears twice (`grep -o '^| CT-[0-9]*' docs/backlog.md | sort | uniq -d` prints
-    nothing; this branch adds CT-266, CT-269, CT-271, CT-273 and CT-278) and `pnpm run check` exits 0 on the merged
-    tree.
+    nothing on the merged tree; this branch adds CT-266, CT-269, CT-271, CT-273, CT-278 and CT-282) and
+    `pnpm run check` exits 0 on the merged tree. CT ids have no reservation counter on origin (only `DEC` and `SEM` do,
+    under `refs/agent-sync/ids/`), so two branches can file the same CT id; round 24's seam found CT-282 taken twice,
+    renumbered to CT-283 on DEC-0159's branch (commit `cbe9fe94`), this branch keeping CT-282. A duplicate found at landing is renumbered on the
+    branch that lands second, with every reference to it.
 - Owed at the operator-channel status schema's next change (round 20, product; backlog CT-282 since round 23): its
   `state` description still reads `off` as "the operator has not enabled the channel"; it takes the Status table's
-  `off` row (an `accepted` answer with `credential.present: false` or no `credential` member waits for the token, and
-  with the token present the tile names telling the agent it is stored). Not changed here, so the schema and its
+  `off` row (an `accepted` answer with `credential.present: false` or no `credential` member waits for the token, the
+  tile saying to tell the agent once it is stored, and with the token present the agent enables the channel on its own
+  status read, leaving no person step). Not changed here, so the schema and its
   vendored copies stay byte for byte. That change also decides whether `off` with an `accepted` answer requires
   `credential` (round 21, seam); until then the row says what the tile shows without it.
+- At Fabric's next pin of this contract (round 24, seam): Fabric vendors the fixture catalogue
+  (`apps/desktop/test/fixtures/fabric-agent-contract/current/catalogue.json` at `eafcf2e4`), which gains
+  `operator-channel-status-off-awaiting-token` and six changed details; nothing on the wire or in the schema moves, and
+  `pnpm pin:check <Fabric checkout>` runs on the landed contract commit then.
 - Named risk carried to the closing verdict (round 15, product): in the no-person FA-09 case only Fabric's refused card
   and its OS notification reach the person, and the card's "Allow once" leaves the act undone; the person learns what
   is open only from the board reply and the report until Fabric ships the card change DEC-0156's Compatibility owes. The
@@ -725,8 +751,8 @@ counter, and the board told what each consumer owes (DEC-0156's Compatibility).
   (headroom under the schema's 300, unit, seam, product), each negative failing for its original single reason;
   mirrored in DEC-0156's Consequences and Done. Risks folded: the Status table's `off` row reads "`proposal.answer:
   accepted` and either `credential.present: false` or no `credential` member" (unit), and says that with `accepted`
-  and `credential.present: true` the agent has not yet read the store and the tile names the next step, telling the
-  agent the token is stored, as OC-11 step 3 reads the store at its next start and when told (product); OC-11 step 2
+  and `credential.present: true` the tile names a person step, as OC-11 step 3 read the store only at the agent's next
+  start and when told (product; replaced in round 24, where the agent enables on its own status read); OC-11 step 2
   names its hand-over, AP-4's `secret` step with its link or the host's secret prompt (SCN-053), never a command
   (product); DEC-0034's Annotated line adds "and the token is stored" (unit); OW-3's no-person FA-09 case says a reader
   takes the thread record, not the request's `failed_known` state, as the act's outcome (product); the DEC-0158
@@ -746,6 +772,31 @@ counter, and the board told what each consumer owes (DEC-0156's Compatibility).
   test/fixtures.test.ts test/consistency.test.ts test/positive-sweep.test.ts`, 4 files, 1390 passed; no U+2014 in the
   added lines; `git merge-tree --write-tree HEAD origin/main` clean. The full gate (`pnpm run check`) was not run.
 
+- Round 24 (on `1c24ef7f`): unit clean of breaks; seam and product not clean. Breaks folded: the Status table's `off`
+  row with `accepted` and `credential.present: true` handed the person a step the agent's own status shows it can
+  take; now the agent reads the store whenever it builds its status and enables the channel on the read that finds
+  the token (OC-11 step 3), no person step is left but OC-11's one renewal question for an old `accepted`, and with
+  `credential.present: false` the tile names the token to store and says to tell the agent, or the coding session it
+  runs in, once it is stored; mirrored in CT-282, DEC-0156's Consequences, SCN-012's alt path and Done (product); the
+  DEC-0158 landing note now has the split govern DEC-0158's dispatched-run conformance row, its decision item 6 and
+  its owed `board.read-at-start` item, with merged-tree greps over each (seam); CT-282 was filed twice, renumbered to
+  CT-283 on DEC-0159's branch (`cbe9fe94`), and the register-conflict note lists CT-282 and says CT ids have no
+  reservation counter on origin (seam, unit). Risks folded: the conformance row reads "unpressed, stays refused" and
+  the row and OW-3's report clause say "the act stays refused" (unit); the next free id reads `DEC-0161`, `DEC-0160`
+  reserved by a sibling (unit); the DEC-0159 note keeps SCN-044's Coverage hunk whole, carrying SCN-058 onward (seam);
+  OA-4 points to OW-3 and OW-5, DEC-0126 carries an Annotated line, and the fabric-workspace landing step adds "One
+  approval binds all" items 1 and 5 (product); Fabric's vendored catalogue gets `pnpm pin:check` at its next pin, in
+  Open (seam). Declined: none.
+- On the round-24 fold (working tree over `1c24ef7f`): `pnpm run docs:check` exit 0 (271 Markdown files, 0
+  markdownlint errors); `python3 docs/ux/lint.py` exit 0 (57 scenarios); `pnpm run privacy:check` 0 findings;
+  `pnpm --silent validate fixtures/positive/operator-channel-status-off-awaiting-token.json` exit 0 (no fixture
+  changed); `pnpm vitest run test/operator-channel.test.ts test/consistency.test.ts`, 2 files, 58 passed;
+  a `git grep` over `docs` and `fixtures` for the two retired `off`-row phrases (the product reading's check) prints
+  nothing; no U+2014
+  in the added lines; `git merge-tree --write-tree HEAD origin/main` clean; on the merged tree with DEC-0158's branch
+  (`755023cf`) the new greps print 0, 1, 1, 1 and 1, and with DEC-0159's branch (`cbe9fe94`) the CT duplicate check
+  prints nothing and `grep -c '^### SCN-05[89]'` prints 2. The full gate (`pnpm run check`) was not run.
+
 ## Next task
 
-Round 24 blind readings of branch `agent/ct220-operators-word-v2` (DEC-0156), all three tiers.
+Round 25 blind readings of branch `agent/ct220-operators-word-v2` (DEC-0156), all three tiers.

@@ -176,7 +176,7 @@ words AP-2 and OA-1 already name; the rules hold for any owner.
   «Разрешить один раз», under «заблокировано» or «Отказано»), for example: "Fabric refused publishing this project's
   release in this session; its "Allow once" card does not allow it here. You said "release it"; shall I publish it
   myself?". The agent's report, and with no person in the session's chat its board reply too, says that the card does
-  not allow the act, that it stays refused and that its "Allow once" would leave such a grant.
+  not allow the act, that the act stays refused and that its "Allow once" would leave such a grant.
   Fabric keeps no receipt of an act taken after an FA-09 refusal (its effect report needs an effect id that an allow
   issued), so the agent records the act and the operator's words in its own report. OW-5's limits still hold, and
   acting on the yes takes the remedy the refusal names, which is not routing around it (OW-4). This is the contract's

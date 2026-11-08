@@ -3,8 +3,8 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0160` (the CAS counter's next value when this line was last written; read
-`refs/agent-sync/ids/DEC` on origin for the current one)
+**Next free ID:** `DEC-0161` (the CAS counter's next value when this line was last written, DEC-0160 being reserved
+by a sibling branch; read `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
 `DEC-0028` is not used: two runs reserved under one key (`usage-budgets-20261007`); the first wrote DEC-0027 and
@@ -7653,6 +7653,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (DEC-0125) for a relay. Adoption: CT-149.
 - **Annotated (2026-11-02):** DEC-0147 adds to OA-6 that the receiver's record of the operator's words replaces a
   peer share link's fragment with the share id (PS-4).
+- **Annotated (2026-11-08):** DEC-0156 (proposed) adds to OA-4 that a host's gate on a floored act (Fabric's
+  `floor.ask-first`) still asks once, quoting the relayed words as its reason, not as the agreement (OW-3, OW-5).
 - **Context:** the operator, 2026-10-26, relayed by one of the operator's agents (request `519d7b21`, thread `3e8f706c`):
   «хочу чтобы на уровне мои агентов работающи по моей команде не было двойного апрува, я сказал одному = сказал всем,
   передай это в фабрик контракт и в фабрик агентам тоже пусть там у себы поправят». On 2026-10-25 the operator approved
@@ -11631,8 +11633,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/specification/operator-channel.md` (OC-11's second step handed over as AP-4's `secret` step or the host's
   secret prompt, SCN-053, never as a command; its third step the agent's, OW-2, on AP-2's relayed decision, the code
   shown to the person only (an agent with a dashboard has its link command print to its output only that a code was issued), the store
-  read for the token at the agent's next start and when the person says it is stored, a new code issued on the
-  person's ask when one expires unused while the `accepted` holds and never because of a chat message, an old `accepted` renewed by one question), DEC-0034 (an Annotated line), DEC-0150 (an Annotated line:
+  read for the token whenever the agent builds its status, at its next start and when the person says it is stored, the channel enabled on the read that finds it, a new code issued on the
+  person's ask when one expires unused while the `accepted` holds and never because of a chat message, an old `accepted` renewed by one question), DEC-0034 (an Annotated line), DEC-0126 (an Annotated line and OA-4's pointer in `docs/specification/delegation.md`: a host's gate still asks once, quoting the relayed words), DEC-0150 (an Annotated line:
   OW-6 keeps CA-8's bound), the operator channel's status fixtures whose
   `detail`, one sentence each as the schema describes it and within about 280 characters, now says what happens for a
   stopped receiver (a supervisor restarts it; if it does not, the person asks the agent, in the unlinked example or the
@@ -11653,7 +11655,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   and OW-3; CT-273 names how the operator removes a channel binding they did not make; CT-278 puts the dashboard's
   link code on a screen; CT-282 brings the status schema's `off` description to the Status table), the operator
   channel's Status table (its `off` row: an `accepted` answer waiting for the token, with or without a `credential`
-  member, and with the token present the tile naming the next step, telling the agent it is stored) and OC-17 (a product's own `reason.detail` within 300 characters in every locale it ships); the handoff
+  member, the tile naming the token to store and saying to tell the agent once it is stored, and with the token present no person step, the agent enabling the channel on its own status read) and OC-17 (a product's own `reason.detail` within 300 characters in every locale it ships); the handoff
   `docs/handoffs/2026-11-07-operators-word.md` and its row in `docs/handoffs/README.md`.
 - **Source:** the operator's words of 2026-11-04 relayed on board threads `b91254c4` and `a7a9d05d` (message
   `b66a8fae`); their words of 2026-11-07 that they press nothing in any interface (relayed by one of their projects
