@@ -18,7 +18,7 @@ is missing or has another ACL. Fabric (CO-513, the hub port per account), Switch
   `isPortClaim`; branch coverage floor 100 in `vitest.config.ts`.
 - [`fixtures/vectors/port-claim.json`](../../fixtures/vectors/port-claim.json) written by
   `tools/vectors/port-claim.ts` (registered in `tools/vectors/run.ts`): at round 1, 3 file-name, 24 read, 34 choose and
-  11 rebuild cases, 72 in all (86 after its fold); `test/port-claim.test.ts` runs them and the generator's check.
+  11 rebuild cases, 72 in all; now 6 file-name, 28 read, 36 choose and 17 rebuild, 87 in all; `test/port-claim.test.ts` runs them and the generator's check.
 - [service](../specification/service.md#ha-1) HA-1: the schema in the Content row, an example the guide test validates,
   a bullet naming the reference and the holder order, the squatted path reading, and the Windows folder line (the
   `degraded` entry `port-claims-folder`, `setup: true`, or one log line).
@@ -101,9 +101,24 @@ The unit reading of `2a5827ad` failed on one stale line; seam and product were n
   `src/port-claim.ts`, HA-1's File row), the form the owner check compares; a read vector shows `0501` as
   `claim-invalid` (87 vectors now). Branch coverage of `src/port-claim.ts` stays 100% (73 of 73).
 
+## Round 4 of the blind readings (2026-11-08), unit only, folded
+
+The unit reading of `9979a1e5` failed on the handoff itself; seam and product were not run on that head.
+
+- Break: the round 3 fold had replaced the `## Open` heading with its own; the heading is back, above the open items.
+- Break: the round 2 entry sent one item to Open that never reached it; it is now in the Open list below.
+- Risk folded: DEC-0160 item 1 and item 6 say a uid is decimal with no leading zero (a reading of the form the owner
+  check compares); DEC-0160 Source names the readings of rounds 1 to 4.
+- Risk folded: Done states the current vector count; a checks section records the run on the round 4 fold.
+
+## Open
 
 - The coordinator's blind readings (unit, seam, product) at the branch's head, round by round as the Next task names
-  them, until two consecutive rounds are clean; then merge, a release tag, an Annotated line on DEC-0154, and the board threads told.
+  them, until two consecutive rounds are clean; then merge, a release tag, an Annotated line on DEC-0154, and the board
+  threads told.
+- What a caller does with the claim file already on disk when `rebuildClaim` answers `claim-invalid` (leave it,
+  delete it, or report it): HA-1 does not say (round 2 unit risk). The file-name vectors share `claimFileName`'s
+  template, so only the 255-byte length adds information there.
 - Board line for thread `1fe66e6e` (the hosts, Fabric Dashboards FD-159 and Fabric), to send with the acceptance: the
   `port-claims-folder` setup entry is person-facing and needs an administrator of that computer, not the coding-agent
   setup path ("Set up with coding agent" runs as an ordinary account and cannot create the folder or set its ACL); a
@@ -179,6 +194,15 @@ At the fold's working tree, each once unless said:
 - `pnpm run docs:check`, the em-dash count of the added lines and `git merge-tree --write-tree HEAD origin/main`: in
   the commit's record below the round 1 entry's commit.
 
+## Checks actually run on the round 4 fold
+
+- `pnpm typecheck`: exit 0 (round 3 fold; no source changed in round 4).
+- `pnpm vitest run --coverage --coverage.include=src/port-claim.ts test/port-claim.test.ts`: 94 passed, branches 73 of 73
+  (round 3 fold).
+- `pnpm vectors:check`: 33 vector files match their generators (round 3 fold).
+- `pnpm run docs:check`, `python3 docs/ux/lint.py` (57 scenarios), `pnpm run privacy:check` (0 findings), the em-dash
+  count (0) and `git merge-tree --write-tree HEAD origin/main` (exit 0): run on the round 4 fold.
+
 ## Next task
 
-Round 4 of the blind readings of DEC-0160 (unit, seam, product) at the branch's head, then fold what they find.
+Round 5 of the blind readings of DEC-0160 (unit, seam, product) at the branch's head, then fold what they find.

@@ -11388,7 +11388,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-11-08
 - **Status:** Proposed 2026-11-08, a draft for the coordinator's blind readings: round 1 (unit pass, seam fail, product
-  fail) folded 2026-11-08; round 2 (unit fail, two text contradictions) and round 3 (unit fail, one stale line) folded 2026-11-08, round 4 next. It completes DEC-0154's HA-1 with what CT-228 owed and adds no rule beyond
+  fail) folded 2026-11-08; round 2 (unit fail, two text contradictions), round 3 (unit fail, one stale line) and round 4 (unit fail, the handoff's Open heading) folded 2026-11-08, round 5 next. It completes DEC-0154's HA-1 with what CT-228 owed and adds no rule beyond
   three: (a) the wording and place of the line a service writes when the Windows claims folder is missing or has another
   ACL, (b) the order in which a reported reason names the holder when several hold one port, and (c) the length bound
   on a claim's service and account, so its file name stays at or under 255 bytes. Everything else here is a reading of
@@ -11401,7 +11401,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   1. **The schema.** `schemas/port-claim.schema.json`, title `passioncode-port-claim/1`: a closed object of exactly
      `{schema, service, account, ports, updatedAt}`, all required. `service` is the descriptor's id
      (service-common's `serviceId`) or a reverse-DNS bundle identifier of at most 130 characters, optionally followed by
-     `.<part>`; `account` a numeric uid of 1 to 10 digits or a SID (`S-1-` and 2 to 15 numeric parts) of at most 100
+     `.<part>`; `account` a numeric uid in decimal with no leading zero, 1 to 10 digits, or a SID (`S-1-` and 2 to 15 numeric parts) of at most 100
      characters, never a login name; `ports` 1 to 64 unique integers from 1 to 65535 (a claim with no port is deleted,
      HA-1's uninstall); `updatedAt` interop-common's `utcInstant`, written with `Z` and at most three fraction digits.
      The file name is 25 characters besides the service and the account, so (c) the two bounds keep it at or under the
@@ -11457,10 +11457,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
        canonical folder path (Switchboard's `ai.passioncode.fabric-switchboard.proxy-<8 hex digits>`, SB-278, board
        thread `50a7ece3`): HA-1's parts, given as an example; the form of the claim is unchanged.
      - A fault keeps the squatted note, so a caller reports the path even when no port is free.
+     - A uid is written in decimal with no leading zero (`0501` is not a uid): that is the form the owner check compares,
+       so a claim naming another form is invalid rather than ignored as another owner's.
 - **Why:** three products were about to write the claim and choose a port from HA-1's prose; one schema and one set
-  of vectors keep three ports of the same rule from drifting, as the host label's vectors did for HA-4. The two added
-  rules are the ones prose could not settle: a line whose text every product shows the same way, and a reason that a
-  test can compare.
+  of vectors keep three ports of the same rule from drifting, as the host label's vectors did for HA-4. The three added
+  rules are the ones prose could not settle: a line whose text every product shows the same way, a reason that a
+  test can compare, and a file name every file system on the three platforms accepts.
 - **Alternatives considered:** a semantic rule that the ports be sorted (HA-1 does not say so; the reference sorts for
   deterministic bytes and a reader takes any order); a `code` member on the degraded entry (the entry's schema has
   `source`, `reason` and `setup` only, so `source` carries the code); reading this account's own claim under a squatted
@@ -11490,5 +11492,5 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/guides/connecting-compatible-agents.md` (HA-1's paragraph), `docs/ux/scenarios.md` (SCN-060),
   `docs/ux/screens.md` (SCR-20), `docs/ux/flows.md` (FLW-17); backlog CT-228; the handoff
   `docs/handoffs/2026-11-08-port-claim.md`.
-- **Source:** DEC-0154 (HA-1); backlog CT-228; board threads `d5abc880`, `1fe66e6e` and `50a7ece3`; the round 1 blind
-  readings (unit, seam, product) recorded in the handoff.
+- **Source:** DEC-0154 (HA-1); backlog CT-228; board threads `d5abc880`, `1fe66e6e` and `50a7ece3`; the blind readings
+  of rounds 1 to 4 (unit, seam, product) recorded in the handoff.
