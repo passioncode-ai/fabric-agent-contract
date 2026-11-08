@@ -384,7 +384,7 @@ the person's passkey signs, never part of the plan that leaves. The part that le
 **Family**: The operator's agents: every agent placed on a machine of the operator's estate and the operator's own
 local sessions, which a callee recognises only by placing them in **T0** or **T1** (any process of the owner's OS account,
 one the owner did not install included); never a caller's own claim. Open to everything open to the operator in the
-context the call runs in, within the money limits, the human gates, the credential source, the contexts' routing, the machine profiles on calls over the relay and, for a relayed action, the operator's decision or a mandate. Not a context and not a tier of its own (DEC-0130, DEC-0137, [delegation](docs/specification/delegation.md#the-family-and-the-agent-network)).
+context the call runs in, within the money limits (with the one exception spend policy's L0 row names: client-key spend at a cloud instance in the **Local and cloud form**, DEC-0159 CF-3), the human gates, the credential source, the contexts' routing, the machine profiles on calls over the relay and, for a relayed action, the operator's decision or a mandate. Not a context and not a tier of its own (DEC-0130, DEC-0137, [delegation](docs/specification/delegation.md#the-family-and-the-agent-network)).
 Every other reachable agent is in the agent network beyond the family: **T2**, open to what its context was granted
 (or, at a cloud instance in the **Local and cloud form**, to its client key's scopes, CF-3, DL-29).
 The agent network is not **Network** (NET-1, a context's machines). Unrelated to the relay family (the relay's

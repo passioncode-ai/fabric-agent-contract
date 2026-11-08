@@ -11427,8 +11427,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      AP-2, or an accepted `approval/1`; a caller reaching the cloud origin directly is T2 unless the platform proves its
      tier, DL-25, so the delegation token an estate agent presents there is DL-8's). The twin checks a key's scopes
      first: a key without its key-management scope is refused `scope-not-granted`, as any key outside its scopes is,
-     and a key with that scope but no accepted approval `approval-required` (DL-17). The twin never issues a key that
-     can manage keys and no member's key carries such a scope; where the instance declares `auth.delegation`, agents of
+     and a key with that scope but no accepted approval `approval-required` (DL-17). The twin never issues or rotates a
+     key that can manage keys (refusing either `scope-not-granted`; the CLI or the page does it) and no member's key carries such a scope; where the instance declares `auth.delegation`, agents of
      the estate hold no client key, so the operator issues no key-management client key, and the twin stays open to a
      delegation-token caller with the operator's decision (T0 or T1, AP-2) or an accepted `approval/1` (DL-16). The twin
      takes `approval/1` only where the instance holds the estate's issuer and key set (DL-18); on an instance without
@@ -11508,7 +11508,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      such as `human_step.opened`) and `level` `notice` or higher (its default banner minimum), which its operator
      channel, where it has one, sends (OC-4); the page shows it with the holder label of every key listed on
      it and records the operator's answer as theirs: taking a step is the step itself (AP-4), and choosing and declining
-     are `relayed` page actions with agent twins (AP-1), reached as the key twin is, so an operator without the page
+     are `relayed` page actions with agent twins (AP-1), each a tool of its own addressing the step by its opaque id,
+     never `fabric.job.get` on the member's job (a queuing instance answers another caller's job `unknown-job`), reached
+     as the key twin is, so an operator without the page
      answers through their agent or the operator channel's buttons (OC-5). The caller reads the outcome: a job reads `working`, its `statusMessage` starting `operator-step <humanStep>`
      (`operator-step choice` for a choice) in the style of `FAC-SEM-119`'s pause grammar, then goes on
      or, on a decline, ends `failed` with `error.data.detail` `operator-declined: <humanStep>`
@@ -11531,12 +11533,14 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      (DL-13 row 1, DL-18), answered by the service itself or by `verifyApproval` given a jti store (with none it answers
      `unknown-state` first), with `data.detail` `no-trusted-issuer`, still HTTP `503` but final for the caller from any callee (DL-19's row), the
      operator then acting on the page or with the CLI; a
-     member's key carries no scope that reaches one's tool, so the operator takes such an action on the page or with
+     member's key carries no scope that reaches one's tool other than `fabric.job.get`, which it reaches to read its own
+     job, so the operator takes such an action on the page or with
      the CLI, and a member's `inputResponses` on `fabric.job.get`, which its key reaches, is refused
      `approval-required`.
      Where no host on the operator's computer signs the operator in to the page (Fabric Dashboards cannot show it,
-     PL-3, and no other host, Fabric for one, mints a login code for a browser there), the operator manages keys with
-     the CLI and takes a step from another computer of theirs that shows the page, or answers through the channel's
+     PL-3, and no other host, Fabric for one, mints a login code for a browser there), the operator issues and rotates
+     keys in their own terminal with the CLI, their own agent revokes one on the operator's word with that CLI on the
+     operator's computer, and the operator takes a step from another computer of theirs that shows the page, or answers through the channel's
      buttons. Only the operator sees the cloud
      instance in Fabric Dashboards; a member sees it as an MCP server. A page for members needs a per-person
      credential a later decision adds. AP-2's elicitation clause, AP-4, PL-4, the note under `actionDecision`'s table,
@@ -11570,10 +11574,13 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Compatibility:** additive, with one change on the wire that reaches every service, not the form alone: DL-19's
   header sentence now asks a bare `WWW-Authenticate: Bearer` on a `401` for a request that carried no credential,
   where its old text put `error="invalid_token"` on every `401` (RFC 6750 section 3.1); its dependants are named below.
+  One change in how callers read the wire also reaches every service: DL-19's row now makes `issuer-unavailable`
+  with `data.detail` `no-trusted-issuer` final from any callee, so callers of any service read it as final and do not
+  retry it, and FAA-204's kit work below covers that generally, not in the form alone.
   And one relaxation the operator must know: L0 is the hard stop on everything the estate spends in a month, and
   client-key spend at a cloud instance in the form reaches no grant check, so at the call it is bound only by each
-  provider key's own ceiling and the service's own budgets, not by L0's monthly total or a project's L1, which see it
-  only after the fact (CF-3; spend policy's Levels name the exception). Whether the operator accepts it is asked in
+  provider key's own ceiling and the service's own budgets, not by L0's monthly total or a project's L1; only L0's
+  monthly total sees it, after the fact, where a reader totals the usage report (CF-3; spend policy's Levels name the exception). Whether the operator accepts it is asked in
   the handoff's *Open*. Read on 2026-11-08 at each default branch. Fabric Dashboards
   groups services by `id` and opens the `default` instance first (`src/core/products.ts`), never calls a remote `/mcp`
   with the descriptor's token, and its descriptor check admits both fixtures; it owes `peer.custody`
@@ -11711,7 +11718,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   stop, and rule 2 points to it), `docs/evidence/sources.md` (RFC 6750's row: section 3's `invalid_token` for a credential that came, section
   3.1's bare challenge for none), `docs/specification/conformance.md` (the agent-relaying row: an agent never calls
   the member's key door; the family row names L0's one exception), `docs/ux/foundation.md` (ST-035's human-step
-  criterion answered at a cloud instance as CF-4 says);
+  criterion answered at a cloud instance as CF-4 says), `docs/specification/contexts.md` (*Usage per grant*: client-key
+  spend at a cloud instance in the form is not in that view, CF-3), `CONTEXT.md` (*Family* names L0's one exception);
   `docs/specification/delegation.md` (DL-19's `401` header sentence: `invalid_token` for a credential that came, a bare
   challenge for none, RFC 6750 section 3.1; the `operator-step: choice` caller instruction in its row; DL-26's grant
   and DL-29's outside-family sentence for a client key), `docs/specification/interop.md` (the caller-action row for

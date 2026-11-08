@@ -155,6 +155,8 @@ organization server ingests only activity batches (DEC-0030) over the device tra
 no activity event kind carried a grant reference: a usage report's `byGrant` and a grant check's receipt (DEC-0037,
 DEC-0045) stay on the device, with its meter. So the activity protocol gains the kind **`grant.usage`**: one grant's
 metered usage for one UTC day ([activity → kinds](activity.md#kinds), `telemetry-event.schema.json#/$defs/grantUsage`).
+Client-key spend at a cloud instance in the local and cloud form carries no grant, so it is not in this view: only
+that service's usage report and its operator's CLI and page show it ([service](service.md#the-local-and-cloud-form-of-one-agent) CF-3, DEC-0159).
 
 - **Its data**: `day`; `grantId`, the share grant's `meta.id`, `urn:fabric:share:` and 32 lower-case hex digits,
   compared as written (DEC-0086, `FAC-SEM-117`), so one grant revised during the day is one row and the organization

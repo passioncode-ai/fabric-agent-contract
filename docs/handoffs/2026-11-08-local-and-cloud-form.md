@@ -102,8 +102,8 @@ a client-key caller input for CF-4's `operator-step` (FAA-204).
 - The coordinator's blind readings until two consecutive clean rounds.
 - A question for the operator (not reserved as an `OQ` id): client-key spend at a cloud instance in the form reaches no
   grant check, so at the call it is bound only by each provider key's own ceiling and the service's own budgets, not by
-  L0's monthly total or a project's L1, which see it only after the fact (CF-3, spend policy's *Levels*, DEC-0159
-  *Compatibility*). That relaxes L0's hard stop for this one kind of spend. Does the operator accept it, or should the
+  L0's monthly total or a project's L1, and only L0's monthly total sees it, after the fact (CF-3, spend policy's
+  *Levels*, DEC-0159 *Compatibility*). That relaxes L0's hard stop for this one kind of spend. Does the operator accept it, or should the
   form wait until such a service reserves its spend with the estate's meter at the call? Until answered the text states
   the relaxation plainly; the landing message to the operator asks it.
 - A second question for the operator (not reserved as an `OQ` id): is a door that issues a member's key straight into
@@ -137,12 +137,15 @@ a client-key caller input for CF-4's `operator-step` (FAA-204).
   keys, the operator's one-time code for the page)", as source.md reads; `knowledge/authority.md` line 148's T2 row
   gains the clause "at a cloud instance in the local and cloud form, a caller presenting a client key that instance's
   operator issued it takes the token's place and the grant's (DL-26, CF-3)"; and `knowledge/north-star.md` lines 204
-  (every service agent's issue door for client keys), 233 (its administrator agent "issues client keys"), 261 (the
+  (every service agent's issue door for client keys), 138 (*Joining*: the administrator agent's onboarding checklist
+  issues client keys through each service's issue door), 142 (*Leaving*: one command reverses every grant on that
+  list), 224 (the PM agent's row: the issue doors and client keys for members and agents), 233 (its administrator agent "issues client keys"), 261 (the
   administrator agent's key doors and client-key issue doors at onboarding and offboarding) and 536 (members' agents
   get client keys through the PM agent on the owner's or an administrator's word), with `knowledge/system/base-set.md`
   line 31 (Administration's client-key doors at onboarding and offboarding), are restated so that an agent issues only its own key, as its operator's
   `relayed` twin, and a member's key is issued by the service's operator in their own terminal or on the page (CF-3),
-  pending the vault-delivery question above.
+  pending the vault-delivery question above. Until these land the knowledge base contradicts CF-3; they land in the
+  same landing run as the merge, and the knowledge commit is recorded in this handoff.
 - At landing, beside DEC-0156 (branch `agent/ct220-operators-word-v2`), DEC-0157 (branch `agent/ct216-usage-data-v2`)
   and DEC-0158 (branch `agent/ct215-on-demand-20261108`), the second lander resolves each conflict in
   `docs/DECISIONS.md`, `docs/backlog.md` and `docs/handoffs/README.md` as the adjacent appends they are: both sides
@@ -151,7 +154,10 @@ a client-key caller input for CF-4's `operator-step` (FAA-204).
   prints nothing.
 - The merged text with DEC-0156. SCN-044's *Alt paths* and *Coverage* keep both sides: DEC-0156's update alt path and
   its `DEC-0156 OW-1 to OW-4` coverage, and this branch's one sentence for the cloud instance's page and its
-  `DEC-0159 CF-1, CF-2, CF-4` coverage, with the whole of SCN-058 and SCN-059 after it. SCN-059 states the key split:
+  `DEC-0159 CF-1, CF-2, CF-4` coverage, that sentence taking SCN-059's key split (issuing and rotating a client key
+  are the operator's, in their own terminal or on the page; revoking is the agent's, on the operator's word, through
+  the agent's CLI on the operator's computer), so that
+  `awk '/^### SCN-044/,/^### SCN-058/' docs/ux/scenarios.md | grep -c 'operator manages client keys'` prints 0, with the whole of SCN-058 and SCN-059 after it. SCN-059 states the key split:
   issuing and rotating a member's key are OW-4's secret step, taken from the operator's own terminal or on the page
   (the page's action for a member's key is `gate: "human"`, `humanStep` `secret`, CF-3); revoking is the agent's step
   on the operator's word, through the `relayed` twin where the instance checks `approval/1`, else by running the
@@ -159,8 +165,17 @@ a client-key caller input for CF-4's `operator-step` (FAA-204).
   where the operator issues a member's key, or in its *Coverage*), since neither branch alone can name it. OW-4's
   merged text also names the hand-over of a secret step that has no AP-4 link (a member's key on a computer with no
   page): the exact command of the agent's CLI the operator runs in their own terminal, which the agent names and never
-  runs; whichever lands second writes that clause into OW-4, or into CF-4's *Where the operator is* if OW-4 is
-  already on `main`. SCR-30's *Scenarios* line does not list SCN-059, which is SCR-36's alone. On
+  runs. That clause goes into OW-4 and into CONTEXT's entry *Operator's word, carried out the first time*; CF-4's
+  *Where the operator is* may carry it as well, never instead. This requirement binds whichever of DEC-0156 and
+  DEC-0159 lands second. On the merged tree:
+  `awk '/\*\*OW-4/,/\*\*OW-5/' docs/specification/governance-and-roles.md | grep -c 'own terminal'` and the same range
+  piped through `grep -c 'CF-3'` each print at least 1, and
+  `awk "/^\*\*Operator's word, carried out the first time\*\*/,/^\$/" CONTEXT.md | grep -c 'own terminal'` prints at
+  least 1.
+  `docs/ux/foundation.md` conflicts too, at ST-035: keep this branch's human-step line (CF-4, no link) and then
+  DEC-0156's new ST-035 line, both, in that order, so that ST-035's exact-step list is read together with CF-4's
+  no-link case; on the merged tree `awk '/^### ST-035/,/^### ST-036/' docs/ux/foundation.md | grep -c 'DEC-0159 CF-4'`
+  prints 1, and the line it prints comes before every line of that range naming `OW-` (a judgement on order). SCR-30's *Scenarios* line does not list SCN-059, which is SCR-36's alone. On
   the merged tree: `python3 docs/ux/lint.py` passes; `grep -c '^### SCN-05[789]' docs/ux/scenarios.md` prints 3;
   `awk '/^### SCN-059/,/^### SCN-045/' docs/ux/scenarios.md | grep -c 'OW-4'` prints at least 1; each sentence that
   `awk '/^### SCN-059/,/^### SCN-045/' docs/ux/scenarios.md | grep -o "[^.;]*own terminal[^.;]*"` prints puts issuing
@@ -185,7 +200,9 @@ a client-key caller input for CF-4's `operator-step` (FAA-204).
   conformance row for a dispatched run says the same. On the merged tree:
   `awk '/^- \*\*OS-6/,/^- \*\*OS-7/' docs/specification/project-comms.md | grep -c 'operator-step'` prints at least 1,
   and `grep -n 'DEC-0158' docs/specification/conformance.md | grep 'dispatched run' | grep -c 'operator-step'` prints
-  at least 1.
+  at least 1. This requirement binds whichever of DEC-0158 and DEC-0159 lands second; the note is written on this
+  branch only, so the coordinator relays it to DEC-0158's branch (round 13), and a lander of DEC-0158 that lands
+  second makes the edit from this note.
 
 ## Rounds
 
@@ -629,6 +646,39 @@ a client-key caller input for CF-4's `operator-step` (FAA-204).
   lines against `origin/main`: 0; `git merge-tree --write-tree HEAD origin/main`: exit 0. The full `pnpm run check`
   was not run here.
 
+- Round 13 (on `4653ab82`), not clean: the unit tier passed with three risks, the seam tier passed with five, and the
+  product tier failed on one break with three risks. Break folded: the conformance row, SCN-058's alt path and
+  DEC-0159 item 4 said a member's key reaches no `relayed` action's tool with no exception, so a service built to the
+  row would refuse a member's `fabric.job.get`; each now reads "other than `fabric.job.get`, which it reaches to read
+  its own job", as CF-4 does. Risks folded: SCN-044's cloud-instance sentence, CF-4's *Where the operator is*, SCN-059's
+  no-page alt path and DEC-0159's restatement take SCN-059's key split (issuing and rotating in the operator's own
+  terminal or on the page, revoking by the operator's agent on the operator's word with the agent's CLI on the
+  operator's computer), and *Open*'s SCN-044 note says so with DEC-0156's check (`grep -c 'operator manages client
+  keys'` over SCN-044 prints 0); CF-4, DEC-0159 item 4 and the conformance row make the choose and decline twins tools
+  of their own addressing a step by its opaque id, never `fabric.job.get` on the member's job (a queuing instance
+  answers another caller's job `unknown-job`, agent network); CF-3, DEC-0159, SCN-059 and the conformance row have the
+  twin refuse to rotate, as to issue, a key that can manage keys, `scope-not-granted`, such a key issued and rotated
+  only through the CLI or the page; spend policy's L0 row and *Compatibility* say only L0's monthly total sees
+  client-key spend after the fact, as CF-3 and DL-26 do; *Compatibility* names that callers of any service now read
+  `issuer-unavailable` with `no-trusted-issuer` as final, which FAA-204's kit work covers generally; `CONTEXT.md`'s
+  *Family* carries *Trust tier*'s L0 parenthesis; contexts.md's *Usage per grant* says client-key spend at a cloud
+  instance in the form is not in that view (CF-3). In *Open*: the DEC-0156 note puts the operator's-own-terminal
+  clause into OW-4 and CONTEXT's *Operator's word, carried out the first time* (CF-4 may carry it too, never instead),
+  binding whichever of DEC-0156 and DEC-0159 lands second, with its merged-tree checks; `docs/ux/foundation.md` joins
+  that note (ST-035: this branch's human-step line, then DEC-0156's line, both, in that order); the knowledge landing
+  list adds `north-star.md` lines 138, 142 and 224, and the knowledge commit is to be recorded here at landing; the
+  DEC-0158 note binds whichever of the two lands second, and the coordinator relays it to DEC-0158's branch, which
+  carries no reciprocal note. Left in *Open*: the L0 relaxation question and the vault-delivery question. Not changed:
+  no rule code, schema or vector.
+
+- Checks run on the round-13 fold before its commit: `pnpm run docs:check` ("Documentation checks passed", markdownlint
+  0 errors over 271 files); `python3 docs/ux/lint.py` (passed: 42 stories, 36 flows, 36 screens, 58 scenarios);
+  `pnpm run privacy:check` (0 findings); `pnpm vectors:check` (32 vector files match their generators);
+  `pnpm typecheck` (exit 0); `pnpm --silent validate` on the three fixtures (exit 0 each); `pnpm vitest run
+  test/fixtures.test.ts test/consistency.test.ts test/actions.test.ts test/positive-sweep.test.ts
+  test/delegation.test.ts` (1499 passed); em dashes in the branch's added lines against `origin/main`: 0;
+  `git merge-tree --write-tree HEAD origin/main`: exit 0. The full `pnpm run check` was not run here.
+
 ## Next task
 
-Round 13 of the blind readings of branch `agent/ct218-local-cloud-v2` (DEC-0159), all three tiers.
+Round 14 of the blind readings of branch `agent/ct218-local-cloud-v2` (DEC-0159), all three tiers.

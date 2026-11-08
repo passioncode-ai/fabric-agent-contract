@@ -989,8 +989,9 @@ cloud instance's well-known document, declaring `surfaces.mcp.auth: "own"` and `
   because that caller is not inside the boundary. The twin checks a client key's scopes first, as every tool does: a
   key without the twin's key-management scope is refused `scope-not-granted`, as any key outside its scopes is, and a
   key whose scopes cover the twin but that comes with no accepted approval is refused `approval-required` (DL-17),
-  since its caller is T2. The twin never issues a key whose scopes let it issue, rotate or revoke keys; a key with
-  such a scope comes from the CLI or the page only, and only to an agent that acts on the operator's recorded decisions,
+  since its caller is T2. The twin never issues a key whose scopes let it issue, rotate or revoke keys, nor rotates
+  one (rotating issues a key with the same scopes): it refuses either `scope-not-granted` (`403`), and a key with such
+  a scope is issued and rotated through the CLI or the page only, and issued only to an agent that acts on the operator's recorded decisions,
   never to a member of the team, whose keys carry no key-management scope. Where the instance declares
   `auth.delegation`, agents of the estate hold no client key (below), so the operator issues no key-management client
   key; the twin stays open to a delegation-token caller with the operator's decision (T0 or T1, AP-2) or an accepted
@@ -1120,7 +1121,9 @@ cloud instance's well-known document, declaring `surfaces.mcp.auth: "own"` and `
     may relay its ask to a channel of its own, so each raise is at most one ask per host and per channel. The page lists each open step and choice with the holder label of every key listed on
     it and, for a choice, the request's message and options, and records the operator's answer as theirs
     (AP-1): taking a step is the step itself, the operator's `human` action (AP-4); choosing and declining are
-    `relayed` actions of the page, each with its agent twin (AP-1), which a caller reaches as CF-3's key twin is (the
+    `relayed` actions of the page, each with its agent twin (AP-1), a tool of its own that addresses the step by its
+    opaque id, not `fabric.job.get` on the member's job (which a queuing instance answers `unknown-job` to anyone but
+    the job's own caller, [agent network](agent-network.md#call-queue)), and which a caller reaches as CF-3's key twin is (the
     operator's decision from a T0 or T1 caller, or an accepted `approval/1`, with the gate below), so an operator whose
     computer shows no page can answer a choice or decline a step through their own agent where that gate lets the agent
     through, or with their operator channel's buttons, which perform the page's own operation (OC-5).
@@ -1175,7 +1178,9 @@ cloud instance's well-known document, declaring `surfaces.mcp.auth: "own"` and `
     on the operator's computers alone (CF-2); a member sees it as an MCP server their coding agent is configured with.
     Where no host on the operator's computer signs the operator in to the page (Fabric Dashboards cannot show it there,
     `not_installed` or `unsupported`, [PL-3](#page-links), and no other host, Fabric for one, mints a login code for a
-    browser there, [HA-2](#ha-2)), the operator manages keys with the agent's CLI (CF-3), takes a step from another
+    browser there, [HA-2](#ha-2)), the operator issues and rotates keys in their own terminal with the agent's CLI, their
+    own agent revokes one on the operator's word by running that CLI on the operator's computer (CF-3), the operator
+    takes a step from another
     computer of theirs that shows the page, and may answer a choice or decline a step through the page actions' agent
     twins or the operator channel's buttons (above); until then the job keeps reading `working` and a repeated call is refused
     again. A page for members needs a credential per person that can be revoked one by one and mints no operator
