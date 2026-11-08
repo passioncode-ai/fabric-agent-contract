@@ -11405,15 +11405,17 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   covers (DEC-0125) and which steps stay the person's (AP-4, OA-5); it did not say that the agent carries the word out
   itself. Backlog CT-220.
 - **Decision:**
-  1. OW-1: the operator's words about a task, in a form AP-3 admits (its own session, a subagent passing them on
-     verbatim, the operator channel, a mandate handed on as MD-2 says, a relay OA-2 and OA-3 accept), are carried out on
+  1. OW-1: the operator's words about a task, in a form AP-3 admits (its own session, a subagent receiving them
+     verbatim from the session that started it, the operator channel, a mandate handed on as MD-2 says, a relay OA-2 and OA-3 accept), are carried out on
      that word; every step inside the task is the agent's to take within the grants, mandates and money limits that
      already apply, without asking leave for each; a relayed act the words do not name is covered by the leading
      agent's mandate (MD-1) or raised under OW-3 while the rest goes on; a task that may outlive a decision's 24 hours
      is carried under a mandate stated from the words, so the operator is not asked again for a word they gave while it
      lasts, except for an act no mandate covers (MD-3, MD-6 and PR-2: among them a change-policy effect, a source
-     hand-over and the move of a board slot), whose word is renewed by one short question as AP-2 says (a source
-     hand-over's word is consumed once by the act it names, as source's Handing over says).
+     hand-over, the move of a board slot and MD-6's human steps): the word for a change-policy effect or a source
+     hand-over is renewed by one short question as AP-2 says (a source hand-over's word is consumed once by the act it
+     names, as source's Handing over says), and the move of a board slot and a human step go to the person as OW-4
+     says.
   2. OW-2: the agent runs commands itself and never asks the operator to run one, paste an output, press a button, open
      a page to confirm or choose on a card where an agent twin it may take itself (`gate` `none` or `relayed`, AP-1) or
      another route of its own reaches the step (the operator's word of 2026-11-07 that they press nothing); a refusal
@@ -11436,10 +11438,13 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      the rest, and on the operator's yes performs the act itself and records it with the words in its own report, and
      in a session with no person in its chat it does not perform the act and asks nothing from that session, leaving
      the act open and naming it, in its board reply and its report, as a step for a session the person is in (as
-     Fabric's `board.read-at-start` hands a production step to such a session) and settling the board request as SA-6
-     says (a `com.progress` note naming the open act and what blocks it, SA-5; a request whose asked act is the open one
-     left in progress, never completed, another completed with the open act named in its result, or left in progress,
-     as the rest of the work allows), every other step that waits in such a session named the same way, a relay or a mandate that names the
+     Fabric's `board.read-at-start` hands a production step to such a session) and settling the board request under
+     SA-6's `com.accept`, then `com.complete`, with OW-3's additions (a `com.progress` note naming the open act and what
+     blocks it, SA-5; no `com.effect_begin` for an act not begun, so the request stays `accepted` with its effect
+     `not_started` until it settles; a request whose asked act is the open one settled `failed_known` with
+     `observed: false` before any effect, a `com.reply` to it naming the open act and what it waits for, and submitted
+     again by the requester once the person has acted; one whose asked act was done, with only a side act left open,
+     settled `completed` with the open act named in its result), every other step that waits in such a session named the same way, a relay or a mandate that names the
      act changing neither mode, being the reason the one ask quotes, not the agreement the gate holds the act for; the
      agent adds no question of its own
      about an act a host's gate already asks about (a risk on it travels as that gate's one ask), while the asks other
@@ -11608,9 +11613,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/ux/scenarios.md` (SCN-057 and its index row; SCN-044's alt path, the host app's update asked once and done by
   the agent through the supervisor its descriptor's `lifecycle.manager` names, and its Coverage; SCN-012's step 1, its alt path and its recovery, and SCN-014's recovery: the link command the agent's, a stopped receiver
   restarted by OC-17's supervisor and, if the status stays, by the agent on the operator's word, given to it or the
-  session that runs it,
-  a waiting decision answered on the dashboard, not in the bot's chat, a paid action or a spend approval only as OC-6
-  and spend policy rule 3 say, the webhook's removal waiting on
+  coding session it runs in,
+  a waiting decision answered on the dashboard, not in the bot's chat, spend above a project's `autoApproveUsd` only
+  through spend policy rule 3's approval request, never a chat or session message (CT-269), a paid action within a
+  limit as AP-1's `relayed` class, on the dashboard or by telling the agent as AP-2 says, in the bot's chat only with
+  OC-6's presses once the receiver is back, the webhook's removal waiting on
   the operator's decision, OC-2, AP-2 and AP-3),
   `docs/specification/operator-channel.md` (OC-11's third step the agent's, OW-2, on AP-2's relayed decision, the code
   shown to the person only (an agent with a dashboard has its link command print to its output only that a code was issued), the store
@@ -11618,10 +11625,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   person's ask when one expires unused while the `accepted` holds and never because of a chat message, an old `accepted` renewed by one question), DEC-0034 (an Annotated line), DEC-0150 (an Annotated line:
   OW-6 keeps CA-8's bound), the operator channel's status fixtures whose
   `detail`, one sentence each as the schema describes it, now says what happens for a stopped receiver (a supervisor
-  restarts it; if the status stays, the person asks the agent, or the session that runs it, to restart it and answers decisions on
+  restarts it; if the status stays, the person asks the agent, or the coding session it runs in, to restart it and answers decisions on
   its dashboard, since an answer sent in the bot's chat may be lost after 24 hours, OC-5 and OC-17; while unlinked, the code,
   or a new one the person asks the agent for once it expires, OC-11) and, for a set
-  webhook, that removing it or switching to it is the operator's decision, told to the agent or the session that runs it,
+  webhook, that removing it or switching to it is the operator's decision, told to the agent or the coding session it runs in,
   never in the bot's chat, or taken by them in the channel settings (OC-2)
   (`fixtures/positive/operator-channel-status-degraded.json`, `-degraded-receiver-missing.json`,
   `-degraded-receiver-missing-unlinked.json`; `fixtures/negative/operator-channel-status-degraded-without-credential.json`,
@@ -11630,8 +11637,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/specification/README.md`, `docs/specification/channel-agent.md` (CA-8's pointer), `CONTEXT.md` (the operator's
   word), the separation of the operator's businesses (OW-5) as a pointer to the
   operator's own instructions outside this contract, `docs/ux/flows.md` (FLW-29), backlog CT-220, CT-266, CT-269,
-  CT-271 and CT-273 (filed; CT-271 rewrites the recoveries other scenarios still give the operator, under OW-2 and OW-3;
-  CT-273 names how the operator removes a channel binding they did not make); the handoff
+  CT-271, CT-273 and CT-278 (filed; CT-271 rewrites the recoveries other scenarios still give the operator, under OW-2
+  and OW-3; CT-273 names how the operator removes a channel binding they did not make; CT-278 puts the dashboard's
+  link code on a screen), the operator channel's Status table (its `off` row: an `accepted` answer waiting for the
+  token); the handoff
   `docs/handoffs/2026-11-07-operators-word.md` and its row in `docs/handoffs/README.md`.
 - **Source:** the operator's words of 2026-11-04 relayed on board threads `b91254c4` and `a7a9d05d` (message
   `b66a8fae`); their words of 2026-11-07 that they press nothing in any interface (relayed by one of their projects

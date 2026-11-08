@@ -17,19 +17,22 @@ contract already has.
 - SCN-057 in `docs/ux/scenarios.md` and its index row, mapped to SCR-30 in `docs/ux/screens.md`; SCN-044's update
   alt path and Coverage; SCN-012's step 1, alt path and recovery and SCN-014's recovery (the link command the
   agent's; a stopped receiver restarted by OC-17's supervisor and, if the status stays, by the agent on the operator's
-  word, given to it or the session that runs it, a waiting decision answered on the dashboard, not in the bot's chat, a paid action or a
-  spend approval only as OC-6 and spend policy rule 3 say; the
+  word, given to it or the coding session it runs in, a waiting decision answered on the dashboard, not in the bot's chat; spend
+  above a project's `autoApproveUsd` only through spend policy rule 3's approval request, never a chat or session
+  message (CT-269), and a paid action within a limit as AP-1's `relayed` class, on the dashboard or by telling the
+  agent as AP-2 says, in the bot's chat only with OC-6's presses once the receiver is back; the
   webhook's removal waiting on OC-2's decision).
 - [Operator channel](../specification/operator-channel.md) OC-11's step 3 (the agent enables and links on AP-2's
   relayed decision, the code shown to the person only (an agent with a dashboard has its link command print to its output only that a code was issued), the store read for the token at the agent's next start and when the person says it is stored, a new code issued on the person's ask when one expires unused and never because of a chat message; an old `accepted` renewed by one question, MD-1), DEC-0034's Annotated line and DEC-0150's (OW-6 keeps CA-8's bound); six status
   fixtures (`fixtures/positive/operator-channel-status-degraded*.json` three,
   `fixtures/negative/operator-channel-status-degraded-without-credential.json`,
   `-receiver-missing-lease-held.json`, `-receiver-missing-without-receiver.json`) whose `detail`, one sentence each as the schema describes it, says what happens for
-  a stopped receiver and the person's step if it stays (asked of the agent or the session that runs it) and, for a set webhook, that its removal is the operator's decision, told to the agent
-  or the session that runs it, never in the bot's chat, or taken in the channel settings.
+  a stopped receiver and the person's step if it stays (asked of the agent or the coding session it runs in) and, for a set webhook, that its removal is the operator's decision, told to the agent
+  or the coding session it runs in, never in the bot's chat, or taken in the channel settings.
 - `docs/ux/foundation.md` (JRN-04/#2's touchpoint, ST-035), `docs/ux/flows.md` (FLW-29), `CONTEXT.md` (the operator's
   word), `docs/DOCMAP.md`, `docs/specification/README.md`, `docs/specification/channel-agent.md` (CA-8's pointer).
-- Backlog CT-220 in progress; CT-266, CT-269, CT-271 and CT-273 filed.
+- Backlog CT-220 in progress; CT-266, CT-269, CT-271, CT-273 and CT-278 filed. The operator channel's Status table:
+  its `off` row names an `accepted` answer waiting for the token, and the tile names that step.
 - Consumers read before drafting: the adapter ships the rule (FAA-207, `v0.63.0`, citing CT-220); fabric-workspace
   `knowledge/agents-first.md` states it (`956afadf`); Fabric's session rules do not.
 
@@ -59,23 +62,27 @@ contract already has.
   every round. Whichever of the two branches lands second makes the merged text say it. The branches: DEC-0157 on
   `agent/ct216-usage-data-v2`, DEC-0158 on `agent/ct215-on-demand-20261108`, DEC-0159 on `agent/ct218-local-cloud-v2`
   (re-read with `git ls-remote origin 'refs/heads/agent/ct2*'` at landing).
-  - DEC-0157 (UD-4, a usage switch a person turned off): OW-1's exception covers UD-4's switch (its open list "an act
-    no mandate covers" does) and names UD-4 there as an example of a change-policy effect; OW-5's limits name UD-4's
-    switch (a mandate from the operator's words never turns a declined switch back on); UD-4 cites OW-1. Checks:
+  - DEC-0157 (UD-4, a usage switch a person turned off): binding on whichever of DEC-0156 and DEC-0157 lands second,
+    whatever either branch's handoff said before: OW-1's exception covers UD-4's switch (its open list "an act no
+    mandate covers" does) and names UD-4 there as an example of a change-policy effect, whose word is renewed by one
+    short question; OW-5's limits name UD-4's switch (a mandate from the operator's words never turns a declined switch
+    back on); UD-4 cites OW-1. Checks, on the merged tree, all three required:
     `awk '/^- \*\*OW-1/,/^- \*\*OW-2/' docs/specification/governance-and-roles.md | grep -c UD-4` prints at least 1,
     `awk '/^- \*\*OW-5/,/^- \*\*OW-6/' docs/specification/governance-and-roles.md | grep -c UD-4` prints at least 1,
     and `grep -c OW-1 docs/specification/usage-data.md` prints at least 1.
-  - DEC-0158 (OS-6, no person in a dispatched run): `docs/specification/conformance.md` keeps the board-client row in
-    DEC-0158's form (with "a dispatched run follows its own row below (OS-4, OS-7)"), then the OW row, then DEC-0158's
-    rows; OW-3's sentence for a session with no person in its chat and OS-6 cite each other, and the two name one
-    settlement for a dispatched run: in a dispatched run, OW-3's no-person case is one of OS-6's stops and settles as
-    OS-6 says. Checks:
+  - DEC-0158 (OS-6, no person in a dispatched run): this requirement is written here and binds whichever of DEC-0156
+    and DEC-0158 lands second, whether or not the other branch's handoff repeats it (the coordinator relays it to that
+    branch's owner). `docs/specification/conformance.md` keeps the board-client row in DEC-0158's form (with "a
+    dispatched run follows its own row below (OS-4, OS-7)"), then the OW row, then DEC-0158's rows; OW-3 and OS-6 cite
+    each other; and OW-3's no-person case and OS-6 name the same settlement, so one situation reads one way on the
+    board: before any effect, `failed_known` with `observed: false`, a `com.reply` naming the open act and what it
+    waits for, and the request submitted again once the person has acted. Checks, on the merged tree:
     `grep -c 'a dispatched run follows its own row below (OS-4, OS-7)' docs/specification/conformance.md` prints 1,
     `grep -c "^| an agent that takes its operator's words" docs/specification/conformance.md` prints 1,
     `awk '/^- \*\*OW-3/,/^- \*\*OW-4/' docs/specification/governance-and-roles.md | grep -c OS-6` prints at least 1,
-    `awk '/^- \*\*OW-3/,/^- \*\*OW-4/' docs/specification/governance-and-roles.md | grep -c 'settles as OS-6 says'`
-    prints at least 1, and OS-6's paragraph names OW-3 and reads OW-3's no-person case as one of its stops (judgement,
-    where OS-6 is defined).
+    `awk '/^- \*\*OW-3/,/^- \*\*OW-4/' docs/specification/governance-and-roles.md | grep -c 'observed: false'`
+    prints at least 1, the same range with `grep -c 'left in progress'` prints 0, and OS-6's paragraph names OW-3 and
+    settles a stop before an effect as `failed_known` with `observed: false` (judgement, where OS-6 is defined).
   - DEC-0159 (CT-218, members' client keys): SCN-059 states the key split. Issuing and rotating a member's key are
     OW-4's secret step, from the operator's terminal or the page, so the value never enters an agent's transcript (CF-3);
     revoking is the agent's step on the operator's decision (OW-2), through the `relayed` twin where the instance checks
@@ -90,10 +97,21 @@ contract already has.
     `awk '/^- \*\*OW-4/,/^- \*\*OW-5/' docs/specification/governance-and-roles.md | grep -c 'own terminal'` prints at
     least 1 and the same over the same range for `CF-3` prints at least 1;
     `awk '/^\*\*Operator.s word, carried out the first time\*\*/,/^$/' CONTEXT.md | grep -c 'own terminal'` prints at
-    least 1 (judgement: the entry's "no command" reads with that exception).
+    least 1 (judgement: the entry's "no command" reads with that exception). OW-4 also names CF-4's raised operator
+    step (the page's event and its ask) as the hand-over when the agent called with a client key, and names spend under
+    a client key as outside rule 3's approval request. Checks:
+    `awk '/^- \*\*OW-4/,/^- \*\*OW-5/' docs/specification/governance-and-roles.md | grep -c CF-4` prints at least 1
+    and the same range with `grep -c 'client key'` prints at least 1 (judgement: read with CF-4 for the operator's own
+    agent holding a client key).
   - Register conflicts with any sibling (`docs/DECISIONS.md`, `docs/backlog.md`, `docs/handoffs/README.md`) are
     adjacent appends: the lander keeps both sides, in id order. Check: no conflict marker is left (`git grep -n '^<<<<<<<'`
-    prints nothing) and `pnpm run check` exits 0 on the merged tree.
+    prints nothing), no backlog id appears twice (`grep -o '^| CT-[0-9]*' docs/backlog.md | sort | uniq -d` prints
+    nothing; this branch adds CT-266, CT-269, CT-271, CT-273 and CT-278) and `pnpm run check` exits 0 on the merged
+    tree.
+- Owed at the operator-channel status schema's next change (round 20, product): its `state` description still reads
+  `off` as "the operator has not enabled the channel"; it takes the Status table's `off` row (an `accepted` answer
+  with `credential.present: false` waits for the token, and the tile names that step). Not changed here, so the schema
+  and its vendored copies stay byte for byte.
 - Named risk carried to the closing verdict (round 15, product): in the no-person FA-09 case only Fabric's refused card
   and its OS notification reach the person, and the card's "Allow once" leaves the act undone; the person learns what
   is open only from the board reply and the report until Fabric ships the card change DEC-0156's Compatibility owes. The
@@ -123,9 +141,12 @@ contract already has.
   reached no live session.
 - Round 19 gave every step that waits in a session with no person in its chat one place, the FA-09 case's: no
   question from that session, the step left open and named in the board reply and the report for a session the person
-  is in, rather than `fabric_question_ask` (dropped in round 13 because a yes there reached no live session). A board
-  request whose asked act is that open step is left in progress, never completed (SA-6), so its state does not read as
-  done.
+  is in, rather than `fabric_question_ask` (dropped in round 13 because a yes there reached no live session). Round 20
+  replaced its settlement: OW-3 adds to SA-6's `com.accept`, then `com.complete`, that no `com.effect_begin` is called
+  for an act not begun, and that a request whose asked act is the open step settles `failed_known` with
+  `observed: false` before any effect, a `com.reply` naming the open act and what it waits for, the requester
+  submitting it again once the person has acted, as DEC-0158's OS-6 does for a dispatched run, so the board reads one
+  way; a request whose asked act was done, with only a side act left open, settles `completed` with that act named.
 - OW-5 names the separation the operator keeps between unrelated businesses as recorded in the operator's own
   instructions, outside this contract: the contract has no specification of it (contexts, DEC-0082, are personal and
   organization contexts, not businesses).
@@ -548,6 +569,45 @@ counter, and the board told what each consumer owes (DEC-0156's Compatibility).
   test/consistency.test.ts`, 3 files, 1195 passed; no U+2014 in the added lines; `git merge-tree --write-tree HEAD
   origin/main` clean. The full gate (`pnpm run check`) was not run.
 
+- Round 20 (on `ee1ff512`): unit clean of breaks; seam and product not clean. Breaks folded: SCN-014's recovery
+  (product) made every paid action answerable only through OC-6 and rule 3; it is now split, in SCN-014, DEC-0156's
+  Consequences and Done: spend above a project's `autoApproveUsd` only through rule 3's approval request, never a chat
+  or session message (the surface is CT-269's), and a paid action within a limit as AP-1's `relayed` class, on the
+  dashboard or by telling the agent as AP-2 says, in the bot's chat only with OC-6's presses once the receiver is back.
+  OW-3's no-person settlement (product; unit and seam as a risk) said "left in progress", which collides with the
+  board's `in_progress` (reached only through `com.effect_begin`), and credited the split to SA-6, which does not state
+  it: OW-3 now settles under SA-6's `com.accept`, then `com.complete`, and adds its own rule: no `com.effect_begin` for
+  an act not begun (the request stays `accepted`, effect `not_started`, until it settles); a request whose asked act is
+  the open one settles `failed_known` with `observed: false` before any effect, a `com.reply` naming the open act and
+  what it waits for, the requester submitting it again once the person has acted, as DEC-0158's OS-6 settles a stop
+  before an effect, so the board reads one way; one whose asked act was done, with only a side act left open, settles
+  `completed` with that act named; mirrored in DEC-0156 item 3, the conformance row, SCN-057's alt path, FLW-29's FA
+  node and Decisions taken here, and the DEC-0158 landing note now requires the same settlement with merged-tree greps.
+  The DEC-0157 landing notes on the two branches disagreed (seam): this note keeps OW-1 naming UD-4 as an example of a
+  change-policy effect, now stated as binding on whichever branch lands second, with the OW-1 grep among three required
+  checks. Risks folded: OW-1 limits "renewed by one short question as AP-2 says" to a change-policy effect and a source
+  hand-over, and sends the move of a board slot and MD-6's human steps to the person as OW-4 says (unit), mirrored in
+  DEC-0156 item 1; OW-1 and DEC-0156 item 1 take AP-3's direction, "a subagent receiving them verbatim from the session
+  that started it" (unit); the DEC-0159 landing note requires OW-4 to name CF-4's raised operator step as the hand-over
+  for an agent calling with a client key and client-key spend as outside rule 3's request, with merged-tree greps
+  (product); the DEC-0158 note says it binds whichever branch lands second, whether or not the other handoff repeats it
+  (seam); the operator channel's Status table's `off` row names an `accepted` answer with `credential.present: false`
+  as waiting for the token, the tile naming that step, and the schema's `state` description is owed at its next change
+  (Open) (product); SCN-012's dashboard link code has no screen: filed as CT-278 (product); CT-220's backlog row
+  restates its round count (product); the six fixture details and their mirrors (OC-11 step 3, SCN-012, SCN-014,
+  DEC-0156's Consequences, Done) say "the coding session it runs in" instead of "the session that runs it", each one
+  sentence of at most 291 characters (product). Left as owed, no edit: the adapter's owed list and its released
+  versions since (seam, product) and the spend approval while nobody receives (CT-269) stay as DEC-0156's
+  Compatibility and CT-269 already name them. Declined: none.
+- On the round-20 fold (working tree over `ee1ff512`): `pnpm run docs:check` exit 0 (271 Markdown files, 0
+  markdownlint errors); `python3 docs/ux/lint.py` exit 0 (57 scenarios); `pnpm run privacy:check` 0 findings;
+  `pnpm --silent validate` exits 0 on the three changed positive fixtures and 1 on the three negatives, each for its
+  original single reason (missing "credential"; `/receiver/lease` must be "none"; missing "receiver");
+  `pnpm vitest run test/operator-channel.test.ts test/fixtures.test.ts test/consistency.test.ts`, 3 files, 1195
+  passed; `awk` over OW-3, over SCN-057 and over the conformance row, each with `grep -c 'left in progress'`, prints 0;
+  no U+2014 in the added lines; `git merge-tree --write-tree HEAD origin/main` exit 0. The full gate
+  (`pnpm run check`) was not run.
+
 ## Next task
 
-Round 20 of the blind readings of branch `agent/ct220-operators-word-v2` (DEC-0156), all three tiers.
+Round 21 of the blind readings of branch `agent/ct220-operators-word-v2` (DEC-0156), all three tiers.

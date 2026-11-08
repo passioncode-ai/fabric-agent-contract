@@ -86,7 +86,7 @@ An agent carries out its operator's word the first time, by itself (DEC-0156). "
 words AP-2 and OA-1 already name; the rules hold for any owner.
 
 - **OW-1, the word is the task.** The operator's words about a task, in a form AP-3 admits (its own session, a
-  subagent its session started that passed them on verbatim, the operator channel (a press, or a reply to an open request,
+  subagent receiving them verbatim from the session that started it, the operator channel (a press, or a reply to an open request,
   [operator channel](operator-channel.md) OC-5 and OC-7), a mandate handed on as MD-2 says,
   or a relay that OA-2 and OA-3 accept), are carried out on that word: every step inside the task (the commands, edits,
   builds and checks, and the relayed actions the words name, [service](service.md#actions) AP-2 and AP-3: "release it"
@@ -98,9 +98,10 @@ words AP-2 and OA-1 already name; the rules hold for any owner.
   ([delegation](delegation.md#the-operators-mandate) MD-1, never wider than the words) or raised under OW-3 while the
   rest of the task goes on (AP-3). A task that may outlive a decision's 24 hours (AP-2) is carried under such a mandate
   (up to 7 days, MD-1), so the operator is not asked again for a word they gave while it lasts, except for an act no
-  mandate covers (MD-3, MD-6 and PR-2: among them a change-policy effect, a source hand-over and the move of a board
-  slot), whose word is renewed by one short question as AP-2 says (for a source hand-over, as
-  [source](source.md#handing-over) says: a word consumed once by the act it names). A task still open when the mandate expires asks once, in one line, as MD-1 says.
+  mandate covers (MD-3, MD-6 and PR-2: among them a change-policy effect, a source hand-over, the move of a board slot
+  and MD-6's human steps): the word for a change-policy effect or a source hand-over is renewed by one short question
+  as AP-2 says (for a source hand-over, as [source](source.md#handing-over) says: a word consumed once by the act it
+  names), and the move of a board slot and a human step go to the person as OW-4 says. A task still open when the mandate expires asks once, in one line, as MD-1 says.
 - **OW-2, no command handed over.** The agent runs the commands itself. It never asks the operator to run a command,
   paste an output, press a button, open a page to confirm or choose on a card where an agent twin the agent may take
   itself under the words, a decision or a mandate in force exists (`gate` `none` or `relayed`, AP-1), or another route
@@ -141,9 +142,12 @@ words AP-2 and OA-1 already name; the rules hold for any owner.
   names it, in its board reply and in its report, as a step for a session the person is in, as Fabric's
   `board.read-at-start` already hands a step that touches production to such a session; it gives the board request's
   state in a `com.progress` note naming the open act and what blocks it ([project
-  communication](project-comms.md#answering-in-the-same-turn) SA-5), and settles the request as SA-6 says: a request
-  whose asked act is the open one is left in progress, never completed; another is completed with the open act named in
-  its result, or left in progress, as the rest of the work allows. A relay or a mandate that
+  communication](project-comms.md#answering-in-the-same-turn) SA-5), and settles the request under SA-6's `com.accept`, then
+  `com.complete`, and adds: it calls no `com.effect_begin` for an act it has not begun, so until it settles the request
+  stays `accepted` with its effect `not_started`; a request whose asked act is the open one settles `failed_known` with
+  `observed: false` before any effect, a `com.reply` to it naming the open act and what it waits for, and the
+  requester submits it again once the person has acted; a request whose asked act was done, with only a side act left
+  open, settles `completed` with the open act named in its result. A relay or a mandate that
   names the act changes neither mode: like the operator's words in a session the person is in, it is the reason the
   one ask quotes, not the agreement the gate holds the act for (Fabric's ADR-0160 section 4); `board.read-at-start`'s production
   stop, which its own text lifts on such a relay, is another gate.

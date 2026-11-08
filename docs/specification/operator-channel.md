@@ -147,9 +147,9 @@ stop while the channel is off. The proposal lists its four steps, three of them 
    to its own output only that a code was issued, never the code; only an agent without a dashboard shows it in its
    reply in the operator's session, never in a tool argument, an outward message, a file or any other outward act
    ([governance and roles](governance-and-roles.md#the-operators-word-carried-out-the-first-time) OW-2 and OW-4,
-   DEC-0156). The agent reads the store for the token at its next start and when the person tells it, or the session
-   that runs it, that the token is stored, and its reply or its dashboard then says that the code is ready. When a code
-   expires unused while that `accepted` holds, the agent issues a new one when the person asks it, or the session that runs it,
+   DEC-0156). The agent reads the store for the token at its next start and when the person tells it, or the coding session
+   it runs in, that the token is stored, and its reply or its dashboard then says that the code is ready. When a code
+   expires unused while that `accepted` holds, the agent issues a new one when the person asks it, or the coding session it runs in,
    for one, and shows it the same way, on the dashboard first; it never issues one because of a message in the chat
    with the bot (a late code typed there is refused, OC-3). A code in that reply stays in the session's transcript, a residual like DEC-0147's share code, without
    its comparison code: the code is for one use and at most 10 minutes (OC-3), the operator's own send of a code already spent binds
@@ -250,7 +250,7 @@ Schema: [`operator-channel-status.schema.json`](../../schemas/operator-channel-s
 
 | State | Meaning | Requires |
 |---|---|---|
-| `off` | the operator has not enabled the channel (the default) | — |
+| `off` | the channel is not enabled (the default); with `proposal.answer: accepted` and `credential.present: false` it waits for the token (OC-11 step 3: the agent enables it once the token is stored), and the tile names that step, the token to store under `credential.name` | no field beyond the common ones |
 | `unlinked` | enabled; no chat is bound yet, the agent waits for a code | `credential`, `receiver` with `receiver.lease: held` or `elsewhere`; no `binding` |
 | `linked` | bound; this process holds the receiving lease | `credential` present, `receiver.lease: held`, `binding`; no `reason` |
 | `standby` | bound; another process of the same agent holds the lease | `reason`, `credential`, `receiver.lease: elsewhere`, `binding` |
