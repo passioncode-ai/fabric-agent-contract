@@ -87,7 +87,8 @@ repository.
    `v0.1.0+2026-11-07.4`. Added the same day: DEC-0155 (CT-261, a restricted macOS socket table) merged (PR #259),
    released `v0.1.0+2026-11-07.5`, and its consumers' changes posted on board thread `eefa7959` (message `2e99031d`).
 3. Done 2026-11-08: DEC-0151 (CT-210, the ticket counts in `support-quality-daily/1`) accepted after clean rounds 19
-   and 20 of the blind readings, merged after the gate; its round-20 risks filed as CT-268.
+   and 20 of the blind readings, merged after the gate (PR #261), released `v0.1.0+2026-11-08.1`; its round-20 risks
+   filed as CT-268.
 4. Draft CT-220 (due 2026-11-08).
 5. Done 2026-11-07: both stale branches archived under `refs/archive/2026-11-07/` and deleted (`template-parity` was
    squash-merged in #236); 34 merged branches deleted on `origin`, which keeps `main`,
