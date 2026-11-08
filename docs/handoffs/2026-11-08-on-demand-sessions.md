@@ -132,6 +132,20 @@ package the run is handed, (b) its lifecycle and a dead run's request, (c) how i
   object exactly; Fabric's missing owner "Settle" and its two texts named; Switchboard's exit text debt restated; the
   drafted item 3 says a hold stops board work and leaves the requester's own change to the operator's open question (then decided: held work waits for the lift, see Open);
   the drafted "The project board" item 3 and "When nobody answers" item 1.
+- Round 14: OS-6 names an act a host's gate holds until a person agrees (on Fabric `floor.ask-first`, its ADR-0160
+  section 4) as a stop; at it and at the estate's production stop the run settles and notes as at a human step but
+  asks no question and nobody submits the request to the board again (only a session with a person can take the
+  act), a request settled at a stop being submitted again only where what the person does lets a later run with no
+  person take the step; OS-5, the host's row, CONTEXT and item 5 show such a request to the operator; SCN-025's
+  release goes ahead only where the mandate or relayed words cover it and no host's gate holds it, a stop otherwise;
+  the run's row and items 6 follow; the drafted "When nobody answers" item 3 reads the target in `com.directory`
+  before any state line (`expired` included) and finds a thread hold by a `held` refusal of a one-line intent post
+  before the change, its *adapted by* line posted once a later thread hold lifts, with the Compatibility restated;
+  OS-4 exempts a refused stop note from its "ends it" clause; SCR-32 and SCN-051 say a moved-off run's `accepted`
+  request waits for the receiving session's transfer (CT-175), not shown meanwhile; CONTEXT's "(`fenced` aside)";
+  Fabric's "one run in flight" debt dropped (OS-1 leaves another machine's second run to the board's slot);
+  `comms-enroll.schema.json`'s description applies the run's end to every refusal branch (description only);
+  backlog CT-281 (a host test of the revision rule); CT-215 and the handoffs index current.
 
 ## Decisions taken here
 
@@ -160,8 +174,9 @@ package the run is handed, (b) its lifecycle and a dead run's request, (c) how i
   mandate taken only when its last entry is the target's registry agent id with that id as a packet reference, its
   grace help saying the grace is the earliest a run starts, and its `com.submit` description naming a run that may
   take a `noResponder` request; from round 11, the `noResponder` receipt's sentence for a person
-  (`boardService.ts:617-618`) saying the same, and one count of OS-5's two runs and one run in flight per request
-  across every machine it dispatches from, under CO-409; from round 12, the on-demand switch as one setting its
+  (`boardService.ts:617-618`) saying the same, and one count of OS-5's two runs per request
+  across every machine it dispatches from, under CO-409 (after round 14 one run in flight across machines is no debt:
+  OS-1 leaves it to the board's slot); from round 12, the on-demand switch as one setting its
   machines share, stopping new starts on every machine it dispatches from, where each machine reads its own today
   (`index.ts:2996`), its tests `board-dispatch-run.test.mjs:566` and `protocolObligations.test.ts:91` changing with
   the `:281` and `:222` wording they pin, and its packet having a run observe, never redo, a change the thread's
@@ -203,7 +218,11 @@ package the run is handed, (b) its lifecycle and a dead run's request, (c) how i
   label already tells the operator ("nothing new is taken until you resume"), it matches round 8's settlement that held
   work waits for the lift, and it is the reversible side: a change that waits can be made after the lift, a change made
   under a hold cannot be unmade by the lift. The cost, a small change waiting on a hold the operator set for another
-  reason, is the operator's to lift. The operator may reverse it before the merge; the drafted item 3 and DEC-0158's
+  reason, is the operator's to lift. After round 14 the check comes first, before any cancel and before the `expired`
+  line, as the adapter's `references/project-board.md:105-106` puts it in its step 1: the requester reads the target in
+  `com.directory` (`com.status` reads only its own Project), and finds a thread hold, which no page shows, by a `held`
+  refusal of a one-line post of its intent made before the change; an *adapted by* line a later thread hold refuses is
+  posted once the hold lifts. The operator may reverse it before the merge; the drafted item 3 and DEC-0158's
   Compatibility then change together.
 - CT-276 (the operator's limits on where a run starts) and CT-277 (how a requester learns a target Project's registry
   agent id) are open; neither blocks the merge.
@@ -233,14 +252,37 @@ package the run is handed, (b) its lifecycle and a dead run's request, (c) how i
   by its date) beside the consumer debts (DEC-0158 Compatibility).
 - The landing board post of the consumer debts names, for each consumer (Fabric, Fabric Switchboard, the adapter,
   Project Observatory, the third host), its debts (the adapter's among them: dropping "do not cancel it" from its
-  requester rule; Fabric's: its `com.submit` description, its `noResponder` sentence, one count and one run in
-  flight per request across its machines, one record of a request's runs across them (a begun effect's key, a
+  requester rule; Fabric's: its `com.submit` description, its `noResponder` sentence, one count per request across
+  its machines, one record of a request's runs across them (a begun effect's key, a
   settlement at a human step), the on-demand switch as one setting its machines share, the accept immediately after
   the claim, owner settlement's "Settle" on a shown `outcome_unknown` request (CT-41, DEC-0081) with its "nothing
   settles it" string and its "answer the requester" next step brought to owner settlement; Switchboard's: the end of
   every refused enrollment, the operator asked only where SA-6 asks) and a date: 2026-11-22 (two weeks after landing) unless the consumer's
   reply carries a `row` reaction with its own `due` (DEC-0098), which then replaces it. Until each date, a consumer
   still at the old reading is the mixed state the post names.
+
+- From round 14, Fabric's packet and `board.read-at-start` text owe OS-6's host-gate stop: at a `floor.ask-first`
+  refusal or the production stop a run settles as OS-6 says, asks no question, and its note says nobody submits the
+  request to the board again; its dispatcher shows such a request to the operator by the run's record (OS-5).
+- Sibling landing requirements on DEC-0158's own text, binding on whichever of the two branches lands second. They
+  are stated here as requirements on the merged text with merged-tree checks; what each sibling's own text says is
+  read on its branch at landing, never assumed here.
+  - DEC-0156 (the operator's word): OW-3 and OS-6 cite each other; OW-3's no-person case and OS-6 name one
+    settlement (before an effect, `failed_known` with `observed: false` and a reply naming the open act); no act that
+    only a session with a person can take (FA-09) is submitted to the board again; OS-6's notice question only at a
+    human step; the conformance rows keep their order (the board-client row with "a dispatched run follows its own
+    row below (OS-4, OS-7)" first). Checks on the merged tree: `awk '/^- \*\*OS-6/,/^- \*\*OS-7/'
+    docs/specification/project-comms.md | grep -c OW-3` prints at least 1; `awk '/^- \*\*OW-3/,/^- \*\*OW-4/'
+    docs/specification/governance-and-roles.md | grep -c OS-6` prints at least 1; `grep -c 'a dispatched run follows
+    its own row below (OS-4, OS-7)' docs/specification/conformance.md` prints 1; then a reading of OS-6 as merged.
+  - DEC-0159 (the local and cloud form): OS-6 and the dispatched-run row count a `scope-not-granted` refusal with an
+    `operator-step:` detail, and a job whose `statusMessage` starts `operator-step`, as a human-step stop. Checks on
+    the merged tree: `awk '/^- \*\*OS-6/,/^- \*\*OS-7/' docs/specification/project-comms.md | grep -c operator-step`
+    prints at least 1, and `grep '^| a dispatched run' docs/specification/conformance.md | grep -c operator-step`
+    prints 1.
+  - DEC-0157 (usage data): UD-4 re-read against the host's and the dispatched run's rows and OS-7 (a change-policy
+    act such as the usage switch stays outside any mandate). Check: a reading on the merged tree, recorded in the
+    lander's handoff.
 
 ## Draft of the knowledge base change (a merge condition)
 
@@ -276,8 +318,17 @@ unchanged but its last paragraph, below):
 > of the operator's it runs on for a request no responder holds (Fabric's dispatcher, on by default; contract DEC-0158
 > OS-1), and the board does not say whether one will. Such a run accepts the request immediately after its claim, before any
 > change in the target's folder (OS-4), and an accepted request never returns to `queued` and never expires. Your
-> reply as the asker does not answer your own request, and a request left `queued` may be taken by a run (item 5). So
-> read the request (`com.get` gives its `state` and `revision`) and go by its state:
+> reply as the asker does not answer your own request, and a request left `queued` may be taken by a run (item 5).
+> First read the target in `com.directory` (your source for another Project; `com.status` reads only your own): if
+> the target Project or the request's capability reads `held: true`, cancel nothing, make no change, and go to item 4.
+> This comes before every line below, `expired` included, so a request that expires under a hold waits for the lift
+> before any change: a hold stops board work on the held thread, Project or slot (no run starts under it, contract
+> OS-1) and your own change for that request too. A thread hold shows in neither, only as a `held` refusal of a post
+> into the thread: so before a change under the `queued`, `answered` or `expired` line, post on the request's thread
+> (`com.submit`, kind message, the thread's id) one line, that the asker means to make this change itself. A `held`
+> refusal of that line is the thread's hold: cancel nothing, make no change, and go to item 4. A thread held only
+> after your change leaves the change made: post the **adapted by** line (below) once the hold lifts. Then read the
+> request (`com.get` gives its `state` and `revision`) and go by its state:
 >
 > - `queued`, or `answered` (the target's decline; no run takes it): cancel it (`com.cancel`, `expectedRevision` set
 >   to that revision, the reason "the asker makes this change itself"), then make the change. Only a `cancelled`
@@ -292,10 +343,7 @@ unchanged but its last paragraph, below):
 >   thread names submits it again; after the owner's settlement (`settledBy: "owner"`), the operator when they own
 >   your Project, otherwise you; with no such note, you decide (OS-6).
 >
-> If your change does not land, submit the request again. A hold (`held: true` in `com.directory` or `com.status`)
-> stops board work on the held thread, Project or slot (no run starts under it, contract OS-1), and your own change for
-> that request too: a request whose target Project or slot reads `held: true` waits for the lift, and you make no change
-> for it (item 4).
+> If your change does not land, submit the request again.
 
 and the item's last paragraph, from "Then post on the request's thread", reads:
 
@@ -323,7 +371,9 @@ a run a host starts (item 5)".
 > step included: `failed_known` with
 > `observed: false` before an effect began; after one, `failed_known` only once it observed that no effect happened,
 > and otherwise it leaves the request `in_progress` for the next holder; then it names the stop once in the thread
-> (contract DEC-0158 OS-6).
+> (contract DEC-0158 OS-6). At this item's production step, or an act a host's gate holds until a person agrees
+> (Fabric's `floor.ask-first`), it asks no question, and its note says the act waits for a session the person is in and
+> that nobody submits the request to the board again.
 
 and its close rule's parenthesis, aligned with OS-5's terminal states:
 
@@ -436,6 +486,16 @@ Its check: the knowledge base's own gate on the change, then a reading of the me
   scenarios); `pnpm run privacy:check` exit 0 (0 findings); `pnpm vectors:check` exit 0 (32 vector files match their
   generators); `pnpm vitest run test/mandate.test.ts test/comms-hold.test.ts test/consistency.test.ts
   test/comms-tools.test.ts` exit 0 (4 files, 355 tests); `git diff origin/main...HEAD | grep '^+' | grep -c` of U+2014
+  printed 0; `git merge-tree --write-tree HEAD origin/main` exit 0. The full `pnpm run check` was not run in this
+  round.
+
+## Checks run on the round-14 commit
+
+- On the tree of the round-14 commit (parent `231b1a92`): `pnpm run docs:check` exit 0 (lint:md 271 files, 0
+  errors); `python3 docs/ux/lint.py` exit 0 (40 stories, 34 flows, 34 screens, 56 scenarios); `pnpm run
+  privacy:check` 0 findings; `pnpm vectors:check` 32 vector files match their generators; `pnpm typecheck` exit 0;
+  `pnpm vitest run test/mandate.test.ts test/comms-hold.test.ts test/consistency.test.ts test/comms-tools.test.ts
+  test/fixtures.test.ts` exit 0 (5 files, 1492 tests); `git diff origin/main...HEAD | grep '^+' | grep -c` of U+2014
   printed 0; `git merge-tree --write-tree HEAD origin/main` exit 0. The full `pnpm run check` was not run in this
   round.
 
@@ -732,10 +792,28 @@ Its check: the knowledge base's own gate on the change, then a reading of the me
   a hold of the target's Project or slot also stops the requester's own change (product); the draft says a hold stops
   board work and claims neither answer. Kept as is: the mixed-state window (product), already a merge condition with a
   dated post.
+- Round 14 (on `231b1a92`), not clean: unit passed with risks, seam failed with one break, product failed with three.
+  Breaks folded: OS-6 named no stop for an act a host's gate holds until a person agrees, so SCN-025's release under a
+  mandate completed where Fabric's `floor.ask-first` (ADR-0160 section 4) holds a release to users (product); now OS-6
+  names it, settles and notes it as a human step with no question and no resubmission (only a session with a person
+  can take it, as at the production stop), OS-5 shows it, and SCN-025 and the run's row follow. The drafted "When
+  nobody answers" item 3 put the hold check after the state list, so a requester cancelled a held `queued` request
+  before reading that it waits, and an `expired` one under a hold fell to "make the change" (seam); a thread hold never
+  shows as `held: true`, so the change landed under it (product); now the target is read in `com.directory` before
+  every state line, a thread hold is found by a `held` refusal of a one-line intent post before the change, and the
+  *adapted by* line a later thread hold refuses is posted once it lifts; the Compatibility restated. The CT-215 row and
+  the handoffs index said "round 13 next" (product); now current. Risks folded: the siblings' DEC-0158 requirements and
+  checks in Open, binding on the second lander (seam, product); a moved-off run's `accepted` request waits for the
+  receiving session's transfer and is not shown meanwhile, said in SCR-32's confirmation and SCN-051 (product);
+  CONTEXT's "(`fenced` aside)" (product); OS-4 exempts a refused stop note (unit); Fabric's "one run in flight" debt
+  dropped to match OS-1 (unit); `comms-enroll.schema.json`'s run ending on every refusal branch (unit). Filed: the
+  revision rule's host test, CT-281 (unit).
 
 ## Next task
 
-Round 14 of the blind readings of branch `agent/ct215-on-demand-20261108` (DEC-0158), all three tiers. At landing:
+Round 15 of the blind readings of branch `agent/ct215-on-demand-20261108` (DEC-0158), all three tiers, read hardest at
+OS-6's host-gate stop and the drafted "When nobody answers" item 3's hold check. At landing, also the sibling
+requirements in Open (DEC-0156, DEC-0159, DEC-0157), whichever branch lands second. At landing:
 DEC-0158 Accepted with its rounds, the amendment line and DEC-0022's annotation without "proposed", CT-215 done, the
 North Star plan's wave 0 row, fabric-workspace `knowledge/agents-first.md` ("The project board" items 3 and 4, "When
 nobody answers" items 1, 3, 4 and 5, "One approval binds all" item 8) landed with the merge as drafted above (a merge condition, not
