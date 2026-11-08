@@ -11401,8 +11401,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   credentials) and that a named form with examples was owed (message `f6fb6df0`); backlog CT-218 lists it. The first
   implementation's specification is the CMO project's own cloud-instance specification, read on its default branch.
 - **Decision:** the local and cloud form, in [service](specification/service.md#the-local-and-cloud-form-of-one-agent):
-  1. CF-1: one `id`, two instances, one descriptor each, never one descriptor with two placements (`FAC-SEM-010`); a host
-     that groups by `id` shows them as one product; both run code from one source home, the cloud one a commit that
+  1. CF-1: one `id`, two instances, one descriptor each, never one descriptor with two placements (`FAC-SEM-010`); each
+     instance verifies a delegation token's and an `approval/1`'s `aud` against `<id>.<instance>` (DL-2, DL-13 step 8,
+     DL-18; the `agentId` grammar admits it), so a token or an approval for one instance is not accepted by the other;
+     a host that groups by `id` shows them as one product; both run code from one source home, the cloud one a commit that
      passed that home's gate; a copy in another home under another `id` is a second agent, not the form. A manifest's
      service extension names one `<id>.<instance>` and a descriptor naming the manifest must be that one
      (`FAC-SEM-020`), so only the local (`default`) descriptor carries `fabricManifest`; the cloud descriptor carries
@@ -11426,13 +11428,17 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      the estate hold no client key, so the operator issues no key-management client key, and the twin stays open to a
      delegation-token caller with the operator's decision (T0 or T1, AP-2) or an accepted `approval/1` (DL-16). A twin
      that takes `approval/1` holds the estate's issuer and key set (DL-18), configured or read from `auth.delegation`;
-     without them its callers are answered `approval-required` and keys are managed through the CLI and the page. A key
+     a twin without them takes no `approval/1`: a T2 caller with no approval is refused `approval-required`
+     (`verifyApproval`'s first refusal, DL-18) and a caller carrying an approval `issuer-unavailable` (DL-13 row 1,
+     DL-18), and keys are then managed only through the CLI and the page. The well-known fixture leaves the actions
+     declaration out, so it shows neither the key action nor its twin. A key
      is shown once in the issuing answer and never again, held as a hash, labelled with its holder for the operator
      alone, revoked one by one; an agent that calls an issuing door (the twin, or the CLI run through that agent)
      receives the key in its answer and so in its transcript. Usage counts a client key's spend in its days and rows
      and never in `byGrant`, which names only the grant a delegation token carried (DL-22); client-key spend reaches no
      `grant.usage` event and no grant limit, so the service's own budgets (Limits, DEC-0027) are the ceiling the
-     operator sets for the team. The operator hands a key over, from the CLI run in their own terminal or from the page,
+     operator sets for the team; per-key spend and any per-key cap are the service's own and shown on the operator's
+     CLI and page only, as the holder label is. The operator hands a key over, from the CLI run in their own terminal or from the page,
      through a channel that keeps it out of chat and logs, with a note naming whom the member asks when a call is
      refused, and the member stores it in their own vault (SCN-053's secret window, for example); the member reaches
      `peer.endpoint` as the operator states it until a listing contract carries it (CT-275), and a member's departure
@@ -11443,20 +11449,28 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      (DL-19). The well-known document declares `surfaces.mcp.auth: "own"`, never `"delegation"`, which takes delegation
      tokens only and would refuse client keys; when agents of the estate call it, it also declares `auth.delegation` and
      they present delegation tokens with no client key issued to them (DL-12, DL-16); without `auth.delegation` an
-     agent of the estate holds a client key the operator issued to it, its own credential and not a borrowed one
-     (DL-29), or nothing. The descriptor's token is never accepted on the MCP surface or the HTTP API nor given to a
+     agent of the estate holds a client key the operator issued to it, its own credential and not a borrowed one, or
+     nothing (DL-8: never a borrowed credential; DL-26: a credential source is never another agent's key); DL-29's token
+     per call applies where the instance declares `auth.delegation`, and DL-26's token per call binds only a callee that
+     declares it, so here the client key takes its place. The descriptor's token is never accepted on the MCP surface or the HTTP API nor given to a
      client.
   4. CF-4: the page is the operator's, opened with the host's one-time login code; no password sign-in; the session
      covers the page's routes and never the MCP surface or the HTTP API; a client key never opens the page, and, since a
      client key is never the operator's presence, a tool answer to a client-key caller carries no `open_link` and no
      page address (PL-4 hands a link to the person the page is for). A step on the operator's page (AP-4's path, a
-     URL-mode request of C3.3) is not handed to that caller: the service raises it to its operator (operator channel or
-     events feed, with `notify: true` and a `kind` or `level` the host reads as an ask, as Fabric Dashboards reads
-     `human_step.opened` or `level` `warning`) and refuses the call `scope-not-granted` with `data.detail`
+     URL-mode request of C3.3) is not handed to that caller: the service raises it to its operator as an event in its
+     events feed with `notify: true`, a `kind` the host reads as an ask (Fabric Dashboards: its ask pattern, such as
+     `human_step.opened`) and `level` `notice` or higher (its default banner minimum), which its operator channel,
+     where it has one, sends (OC-4), and refuses the call `scope-not-granted` with `data.detail`
      `operator-step: <humanStep>` and a message saying the operator was asked and to repeat the call later, because
      `human-step-required` requires the `data.url` this caller is not given; a job's such request is not put in that
      caller's `inputRequests` and the job reads `working`, its `statusMessage` saying the operator was asked, until the
-     operator takes the step. Where Fabric Dashboards cannot show the page on one of the operator's computers, the
+     operator takes the step. Every other choice a client-key caller's job or call needs is handled the same way,
+     since answering it is a `relayed` action (AP-2, C3.3) and that caller is not the operator, and an elicitation it
+     accepted would be recorded as the operator's decision (AP-2): a form-mode input request is never put in its
+     `inputRequests`, the job reads `working`, no elicitation is sent to it, the choice is raised to the operator, and a
+     call that cannot go on without it is refused `scope-not-granted` with `operator-step: choice`; AP-2's elicitation
+     clause and C3.3 say so in one sentence each. Where Fabric Dashboards cannot show the page on one of the operator's computers, the
      operator takes the step from another computer of theirs that shows it, and until then the job keeps reading
      `working`. A member's key carries no scope that reaches a `relayed` action: a member is a T2 caller with no hub of
      the operator's to ask for an `approval/1`, so the operator takes such an action on the page or with the CLI. Only
@@ -11466,6 +11480,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   5. CF-5: provider keys live only in the platform's secrets, set from the owner's vault by reference with the move
      recorded; no client holds one.
   6. CF-6: serving a team is an offer: `peer` with every member, never a `subscription` runner; `peer` grants nothing.
+     On the client-key path no host applies `FAC-SEM-088`, so `peer.maxDataClass` is the operator's statement to the
+     team and the service's own refusal, if it makes one.
   7. CF-7: deploying to a placement the owner holds and serving the running agent to a team are no source hand-over,
      except a source file served verbatim or an unminified bundle; a personal agent's source on an organization's, a
      team's or a readable placement stays one (DEC-0149).
@@ -11490,9 +11506,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Compatibility:** additive; nothing on the wire changes. Read on 2026-11-08 at each default branch. Fabric Dashboards
   groups services by `id` and opens the `default` instance first (`src/core/products.ts`), never calls a remote `/mcp`
   with the descriptor's token, and its descriptor check admits both fixtures; it owes `peer.custody`
-  `processor-hosted` (DEC-0099), which it refuses today. It raises an event as an ask when its `kind` matches its ask
-  pattern (`human_step.opened` among them) and as an attention banner on `level` `warning` (`src/core/notify.ts`
-  lines 55 to 65), which is how CF-4's raised step reaches the operator. The adapter's probe reads a refusal under
+  `processor-hosted` (DEC-0099), which it refuses today. It raises an event with `notify: true` as an ask when its `kind`
+  matches its ask pattern (`human_step.opened` among them), and shows a banner only at `level` `notice` or higher by
+  default (`src/core/notify.ts` lines 41 and 55 to 65), which is how CF-4's raised step reaches the operator. The adapter's probe reads a refusal under
   `own` as conformance (`check_service.py`), and it and the readers of CA-1 owe resolving the manifest for a descriptor
   without `fabricManifest` through the same `id`'s `default` descriptor or the registry's provider entry: today the probe
   reads the manifest only from the descriptor's own `fabricManifest` (`check_service.py` lines 592 to 595 and 675 to
@@ -11528,16 +11544,17 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   it already never issues a key that carries that scope; its refusals are not in DL-19's shape: it answers an error
   sentence with no code, a bare `WWW-Authenticate: Bearer` with no `error=` for an unknown or a revoked key as for none,
   and a scope the key lacks on `/mcp` as an HTTP `403` before any tool runs, not a tool result, and a revoked key stays
-  accepted for up to 30 seconds from a cache, not refused from its next call (CF-3); and a later specification of its
-  own gives the first key with the key-issuing scope to a colleague who is not the operator, and its key-listing tool
-  returns every key's holder name to that key, where CF-3 lets a key-management scope go only to an agent that acts on
-  the operator's recorded decisions and shows holder labels on the operator's CLI and page alone. The copy in an
+  accepted for up to 30 seconds from a cache, not refused from its next call (CF-3); and a key with its key-issuing scope was
+  already issued, on 2026-11-07, to a colleague who is not the operator, and its key-listing tool returns every key's
+  holder name to that key, where CF-3 lets a key-management scope go only to an agent that acts on the operator's
+  recorded decisions and shows holder labels on the operator's CLI and page alone; the landing message asks the project
+  to revoke that key and to route key management through its operator's CLI or page, or through a `relayed` twin. The copy in an
   organization's repository is a source hand-over of a personal agent (CF-7, DEC-0149) unless its word is recorded; the
   contract has not seen that word. Its local instance takes the descriptor's token on `/mcp` by DEC-0024's default,
   which is no defect. The adapter owes the form's offer in `creating-fabric-agents` and `building-fabric-services`
   (message `8eb77518`); fabric-workspace owes a knowledge page (message `56ccc6d2`). `contractVersion` stays `0.1.0`.
-- **Consequences / affects:** `docs/specification/service.md` (the section *The local and cloud form of one agent* and
-  the header line), `fixtures/positive/service-descriptor-cloud-form-local.json`,
+- **Consequences / affects:** `docs/specification/service.md` (the section *The local and cloud form of one agent*, the
+  header line and AP-2's elicitation clause), `fixtures/positive/service-descriptor-cloud-form-local.json`,
   `fixtures/positive/service-descriptor-cloud-form-cloud.json`, `fixtures/positive/service-well-known-cloud-form.json`
   and their rows in `fixtures/catalogue.json`, `docs/specification/conformance.md` (one row, and a clause each in the
   actions row and the channel-agent row), `CONTEXT.md` (*Local and

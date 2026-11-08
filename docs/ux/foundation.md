@@ -797,6 +797,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
   - Given no key, a key the service does not hold or a revoked key, then my call is refused `unauthenticated` (`401`); given a tool outside my key's scopes, `scope-not-granted` (`403`) (CF-3, DL-19).
   - Given my key on the page's routes, then the page opens nothing for me and answers as to a request with no session (CF-4).
   - Given a tool that reaches a step on the operator's page, then no page link reaches me, the step goes to the operator, and my call is refused `scope-not-granted` naming `operator-step`, its message telling me the operator was asked and to repeat the call later (CF-4).
+  - Given my job or call needs a choice, then I am never asked it: the choice goes to the operator, my job reads `working` until the operator answers, and a call that cannot go on without it is refused `scope-not-granted` naming `operator-step: choice` (CF-4).
 - **Priority:** should
 - **Status:** draft
 - **Product:** unobserved

@@ -6,6 +6,14 @@ Name the layout the operator asked for on 2026-11-04 (board thread `79a9f452`, r
 `02bfa26f`): one agent as a local instance and a cloud instance, the team reaching the cloud one with client keys while
 the provider keys stay on the server, with no password sign-in; say how to declare it; give example descriptors.
 
+## Branch
+
+`agent/ct218-local-cloud-v2`: one squashed commit, `f7217820` (rounds 1 to 5), on `origin/main` at `0fcb5d97`, then one
+commit per later fold. It replaces the branch `agent/ct218-local-cloud-20261108`, whose earlier commits carried private
+repository names; those commits were public on `origin` (this repository is public) until 2026-11-08, when that branch
+was deleted from `origin` and replaced by this squash. Commit-addressed references in the rounds below (`a6fde192` to
+`cc78d063`) name commits of the deleted branch.
+
 ## Done
 
 - DEC-0159 (Proposed), reserved with `agent_sync.py reserve DEC`; `Next free ID` set to `DEC-0160`.
@@ -45,9 +53,9 @@ client keys) opens to any client key with its key-issuing scope, declares effect
 so it is not the operator's issuance until it is a `relayed` action carrying the operator's decision (CF-3, AP-2); and,
 found in round 4, its refusals are not in DL-19's shape (an error sentence with no code, a bare
 `WWW-Authenticate: Bearer` for every `401`, a scope miss on `/mcp` an HTTP `403` before any tool runs, and a revoked
-key accepted for up to 30 seconds from a cache), and a later specification of its own gives the first key with the
-key-issuing scope to a colleague who is not the operator, with its key-listing tool returning every key's holder name
-to that key (CF-3). The organization copy is a source hand-over of a personal agent unless its word is recorded (CF-7).
+key accepted for up to 30 seconds from a cache), and a key with its key-issuing scope was already issued, on
+2026-11-07, to a colleague who is not the operator, with its key-listing tool returning every key's holder name to that
+key (CF-3; restated in round 6, it was earlier read as a later specification's plan). The organization copy is a source hand-over of a personal agent unless its word is recorded (CF-7).
 The estate's cloud-deploy template registers its descriptor's instance as `default` unless its configuration names
 another; as the cloud half it must be set to `cloud` (CF-1), which the adapter's offer is to say (FAA-204, message
 `8eb77518`); its registration script writes no `peer` and no `runner`, which FAA-204 also owes when the cloud instance
@@ -69,8 +77,10 @@ a client-key caller input for CF-4's `operator-step` (FAA-204).
 
 - The coordinator's blind readings until two consecutive clean rounds.
 - At landing: answer thread `79a9f452` with the tag and the section's link, and send the CMO project the sixth to
-  eighth divergences (its ungated key door, its refusals' shape with the 30-second revocation, its key-management
-  holder and the list tool's holder names); send the adapter FAA-204's two round-4 items (`fabricManifest` off the
+  eighth divergences (its ungated key door, its refusals' shape with the 30-second revocation, the key with its
+  key-issuing scope already issued to a colleague who is not the operator, which the message asks it to revoke and to
+  route key management through its operator's CLI or page, or through a `relayed` twin, and the list tool's holder
+  names); send the adapter FAA-204's two round-4 items (`fabricManifest` off the
   cloud descriptor, the refusal mapping) and round 5's two (the manifest's resolution for a descriptor without
   `fabricManifest`, the kits' `operator-step` message and client-key caller input); the adapter's offer in its skills (FAA-204) and fabric-workspace's knowledge
   page follow.
@@ -201,6 +211,42 @@ a client-key caller input for CF-4's `operator-step` (FAA-204).
   `origin/main`: nothing; em dashes in the branch's added lines against `origin/main`: 0. The full `pnpm run check` was
   not run here.
 
+- Round 6 (on `f7217820`, the squash on `agent/ct218-local-cloud-v2`), not clean. Breaks folded: CF-3 had a twin
+  without the estate's issuer and key set answer every caller `approval-required`, which sends a caller for an approval
+  that twin can never accept, while DL-13 row 1 and DL-18 refuse a presented approval `issuer-unavailable`
+  (`src/delegation.ts` lines 461 to 465) (now such a twin takes no `approval/1`: a T2 caller with no approval is refused
+  `approval-required`, `verifyApproval`'s first refusal, a caller carrying one `issuer-unavailable`, and keys are then
+  managed only through the CLI and the page; in CF-3, the conformance row, DEC-0159 item 3 and SCN-044's alt path); a
+  member's job or call that needs a choice had no path, since a form-mode input request answered by the member is a
+  `relayed` action a member's key does not reach, and an elicitation the member accepted would be recorded as the
+  operator's decision under AP-2 (now every input request and elicitation of a client-key caller's job or call is
+  handled as CF-4's step on the operator's page: never put in that caller's `inputRequests`, never elicited to it,
+  raised to the operator, the job reading `working`, a call that cannot go on refused `scope-not-granted` with
+  `operator-step: choice`; one sentence each in AP-2's elicitation clause and interop C3.3, and in DL-19's row; an alt
+  path in SCN-058, the decision node and task analysis of FLW-35, an acceptance criterion of ST-041 and SCR-35's states;
+  DEC-0159 item 4 and the conformance row). Risks folded: CF-4's event is one path, an events-feed event with
+  `notify: true`, a `kind` the host reads as an ask and `level` `notice` or higher (Fabric Dashboards' default banner
+  minimum, its `notify.ts` line 41), which the operator channel, where there is one, sends (OC-4), with `level`
+  `warning` no longer an equivalent (CF-4, the conformance row, DEC-0159 item 4 and *Compatibility*, SCN-044, SCN-058);
+  CF-1 has each instance verify a token's and an approval's `aud` against `<id>.<instance>` (DL-2, DL-13 step 8, DL-18,
+  the `agentId` grammar); CF-3 cites DL-8 and DL-26 for a client key as an estate agent's own credential, DL-29's token
+  where `auth.delegation` is declared and the client key in place of DL-26's token per call otherwise; the eighth
+  divergence restated as a key with the key-issuing scope already issued on 2026-11-07 to a colleague who is not the
+  operator, the landing message asking the project to revoke it and route key management through its operator's CLI or
+  page, or a `relayed` twin; per-key spend and caps the service's own, on the operator's CLI and page only (CF-3, the
+  conformance row, DEC-0159 item 3, SCN-044); CF-6's `peer.maxDataClass` on the client-key path the operator's statement
+  and the service's own refusal, no host applying `FAC-SEM-088`; the well-known fixture leaving the actions declaration
+  out, said in CF-3, DEC-0159 item 3 and the README row (no fixture changed). The branch moved to
+  `agent/ct218-local-cloud-v2` (see *Branch*), named in this handoff, its README row and backlog CT-218, CT-270 and
+  CT-275.
+- Checks run on the round-6 fold before its commit: `pnpm run docs:check` ("Documentation checks passed", markdownlint
+  0 errors over 271 files); `python3 docs/ux/lint.py` (passed: 41 stories, 35 flows, 35 screens, 57 scenarios);
+  `pnpm run privacy:check` (0 findings); `pnpm vectors:check` (32 vector files match their generators);
+  `pnpm --silent validate` on the three fixtures (exit 0 each); `pnpm vitest run test/fixtures.test.ts
+  test/consistency.test.ts test/actions.test.ts` (1272 passed); the private-name grep over the branch's diff against
+  `origin/main`: nothing; em dashes in the branch's added lines against `origin/main`: 0. The full `pnpm run check` was
+  not run here.
+
 ## Next task
 
-Round 6 of the blind readings of branch `agent/ct218-local-cloud-20261108` (DEC-0159), all three tiers.
+Round 7 of the blind readings of branch `agent/ct218-local-cloud-v2` (DEC-0159), all three tiers.

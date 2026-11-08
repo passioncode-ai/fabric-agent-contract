@@ -291,9 +291,10 @@ request key as its action, as at the start (MJ-1, DEC-0141). A mandate that expi
 there too, its message saying the operator's mandate expired. A URL-mode request on the service's own page MUST carry
 its open_link as `url`, never a raw local address (**FAC-SEM-143**, [service](service.md#page-links) PL-4,
 DEC-0123), and a tool answer that names a page for a person MUST carry it in `open_link`. A client-key caller of a cloud
-instance in the local and cloud form is never handed a URL-mode request on the operator's page: the service raises it to
-its operator and the job reads `working` to that caller ([service](service.md#the-local-and-cloud-form-of-one-agent)
-CF-4, DEC-0159).
+instance in the local and cloud form is never handed an input request, in either mode, nor sent an elicitation: answering
+one is a `relayed` action and that caller is not the operator, so the service raises it to its operator, the job reads
+`working` to that caller, and a call that cannot go on without the choice is refused `scope-not-granted`
+([service](service.md#the-local-and-cloud-form-of-one-agent) CF-4, DEC-0159).
 
 `inputRequests` is the MCP map of request key to `elicitation/create` request;
 `inputResponses` maps the same keys to `{action: accept | decline | cancel, content?}`.
