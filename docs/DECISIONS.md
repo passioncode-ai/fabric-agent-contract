@@ -11517,19 +11517,22 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      settlement, nothing is submitted again and the open act is the person's. After the step (at the estate's
      production stop, once the request carries the relayed words naming the step) the one the note names
      submits a `failed_known` request again (a requester's wake is CT-150), and a request left `in_progress` is not
-     submitted again (a new request's run gets no earlier effect key) until the estate owner settles it (`settledBy:
-     "owner"`): settled `failed_known` (observed), where a run's stop note is in its thread, the one a run's
-     `failed_known` note would name (the operator through a session of the requesting Project they own, otherwise the
-     requester; at a host's gate, nobody) submits it again once the step is taken (at the estate's production stop,
-     once the request carries the relayed words naming the step), and with no such note (its note refused) its
-     requester decides, finding no note (below); settled `completed`, nothing is submitted again. A later run or opened session that settles `failed_known` a
+     submitted again (a new request's run gets no earlier effect key) until it is settled: by a later run's or an
+     operator-opened session's observed reconcile (which writes the `failed_known` note, below), or by the estate
+     owner (`settledBy: "owner"`), the other way to settle it. Settled `failed_known` (observed), where a run's stop
+     note is in its thread, the one a run's `failed_known` note would name (the operator through a session of the
+     requesting Project they own, otherwise the requester; at a host's gate, nobody) submits it again once the step is
+     taken (at the estate's production stop, once the request carries the relayed words naming the step), and with no
+     such note (its note refused, and a later run's too where a later run settled it) its requester decides, finding
+     no note (below); settled `completed`, nothing is submitted again. A later run or opened session that settles `failed_known` a
      request an earlier run left `in_progress` at a stop writes the same note (its own note refused, its question carries
      the earlier run's stop note's rule where that note is in the thread); a `failed_known` request with no such
      note, whoever settled it, the owner included (a responder's own reason, a run's time limit, a refused note), is that sole exception: its requester decides,
      finding no note, at a host's gate too. A run whose note was refused asks its notice question at every stop, naming
      the step and one actor with one directive, on a `failed_known` request with no stop note in its thread "the requester decides, finding no note", never a note's directive (at
      a host's gate, that nobody submits it again) beside it, on a request left `in_progress` that it is not
-     submitted again until the owner settles it, and on a side act's `completed` request that nothing is submitted
+     submitted again until it is settled (by a later run's or an operator-opened session's observed reconcile, or by
+     the owner), and on a side act's `completed` request that nothing is submitted
      again and the open act is the person's; a request submitted again from a host's gate meets the
      same refusal in a later run, which settles it and writes the note.
   7. **Slots and mandates (OS-7).** A run holds a slot only while it works, never takes one from a live holder, uses a

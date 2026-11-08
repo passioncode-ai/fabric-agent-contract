@@ -402,16 +402,18 @@ unchanged but its last paragraph, below):
 > - `expired`: no run accepted it; make the change.
 > - `claimed`, `accepted`, `in_progress` or `outcome_unknown`: a run or another holder has it; never make the change.
 >   Wait on a watcher (item 2) and act on it only as item 1 says. A request a run left `in_progress` at a stop is
->   not submitted again until the owner settles it, whatever a run's notice says (OS-6).
+>   not submitted again until it is settled (by a later run's or an operator-opened session's observed reconcile,
+>   or by the owner), whatever a run's notice says; then go by the state it reads (OS-6).
 > - `completed` or `cancelled`: settled; make no change for it, except one you cancelled under the first line. A
 >   cancel you did not send means another session of your Project acted on it: submit nothing for it. A `completed`
 >   request whose result names an act left open at a stop is not submitted again: that act is the person's (OS-6).
 > - `failed_known`: settled as not done; make no change for it. Where a run's stop note is in the thread, it is
 >   submitted again only once the step is taken (at the estate's production stop, once the request carries the
 >   operator's relayed words naming the step), by the one the note names, and at a host's gate by nobody, since a
->   later run meets the same refusal; after the owner's settlement (`settledBy: "owner"`), the operator when they own
->   your Project, otherwise you, and at a host's gate nobody. With no such note in the thread, whoever settled it,
->   you decide (OS-6).
+>   later run meets the same refusal; where that note is a run's note on a request it left `in_progress` (settled
+>   after it by the owner, `settledBy: "owner"`, or by a later run whose own note was refused), the operator when
+>   they own your Project, otherwise you, and at a host's gate nobody. With no such note in the thread, whoever
+>   settled it, you decide (OS-6).
 >
 > If your change does not land, submit the request again.
 
@@ -447,13 +449,15 @@ a run a host starts (item 5)".
 > `failed_known`, says the request is submitted again once it carries the operator's verbatim relayed words naming
 > that step (date, source, scope), which lift this stop as above, by the one the note names (the operator when they
 > own the requesting Project, otherwise the requester); after a request left `in_progress`, that it is not submitted
-> again until the owner settles it. At an act a host refuses to a session with no person whatever is
+> again until it is settled (by a later run's or an operator-opened session's observed reconcile, or by the owner).
+> At an act a host refuses to a session with no person whatever is
 > agreed (Fabric's FA-09 refusal of a `floor.ask-first` act, which no relay, mandate or grant passes) it asks no
 > question, and its note says the act waits for a session the person is in and that nobody submits the request to the
 > board again. Where its note is refused, it asks the operator through the host's question surface instead, naming
 > the requester, who decides, finding no note, on a `failed_known` request with no stop note in its thread; a request
 > left `in_progress` is still not
-> submitted again until the owner settles it; and on a side act's `completed` request, that nothing is submitted
+> submitted again until it is settled (by a later run's or an operator-opened session's observed reconcile, or by the
+> owner); and on a side act's `completed` request, that nothing is submitted
 > again and the open act is the person's.
 
 and its close rule's parenthesis, aligned with OS-5's terminal states:
@@ -998,9 +1002,10 @@ Its check: the knowledge base's own gate on the change, then a reading of the me
   owner settles it `failed_known` ..., the same actor submits it again") now reads by the table (with a run's stop
   note, the one a `failed_known` note would name; without one, the same actor decides).
 
-  The decision table (54 rows; "none" is a run that settled and ended before writing its note, so it asked no
-  question; a stop's `in_progress` request settled "by run" is settled by a later run or an opened session's observed
-  reconcile):
+  The decision table (54 rows over the three stops, and since round 19 two rows for no stop; "none" is a run that
+  ended at the stop (settled or left `in_progress`) before writing its note, so it asked no question; a stop's
+  `in_progress` request settled "by run" is settled by a later run or an opened session's observed reconcile; outside
+  the table OS-6's no-note rule governs):
 
   | Stop kind | Note state | Request state | Settled by | Who submits it again, and when |
   |---|---|---|---|---|
@@ -1058,12 +1063,48 @@ Its check: the knowledge base's own gate on the change, then a reading of the me
   | host's gate | none | `in_progress` | owner | nobody until settled; settled `failed_known`, the requester decides, finding no note, at a host's gate too; settled `completed`, nobody |
   | host's gate | none | side-act `completed` | run | nobody; the open act is the person's (named in the result) |
   | host's gate | none | side-act `completed` | owner | n/a: settled by the run at the stop, a terminal state; the owner settles only an `outcome_unknown` request (the `in_progress` rows) |
+  | no stop (a responder's own reason, a time limit, a run that died) | none | `failed_known` | the responder or the run (its own reason, its time limit) | the requester decides, finding no note (OS-6's no-note rule) |
+  | no stop (a responder's own reason, a time limit, a run that died) | none | `in_progress` (a run that died after its effect began) | a later run, an opened session or the owner | nobody until settled; settled `failed_known`, the requester decides, finding no note; settled `completed`, nobody |
+
+- Round 19 (on `c4c9ff06`), not clean: the unit reading failed with two breaks and four risks; the seam and product
+  readings were not run on this head, since both breaks are contradictions in the text they would read. Break 1
+  folded (unit): a request left `in_progress` at a stop was gated on the owner alone ("not submitted again until the
+  owner settles it"), while the table and OS-6's own later-run sentence let a later run or an operator-opened session
+  settle it by an observed reconcile and write the note (the slot holder's settlement, `project-comms.md` *What was in
+  flight after a move*, never carries `settledBy: "owner"`). Every such sentence now reads "not submitted again until
+  it is settled (by a later run's or an operator-opened session's observed reconcile, or by the owner)", the actor
+  after a `failed_known` settlement the one the table names for that row, and after `completed` nobody: OS-4's
+  refused-note sentence, OS-6's refused-note directive and its closing resubmission sentence (the owner's settlement
+  now "the other way to settle it", beside the later run's), DEC-0158 item 6 (both places), the run's row in
+  `docs/specification/conformance.md` (both places, the owner branch now carrying the timing), SCN-025 (the run-died
+  path, the stop path's `in_progress` directive and the refused-note directive), SCR-19 and drafted items 3 and 8
+  (three places). Break 2 folded (unit): SCR-19's run-died path and its closing human-step sentence said that after
+  the owner's settlement "the same actor submits it again"; both now split by the stop note as SCN-025 does: with a
+  run's stop note in the thread, the one a run's `failed_known` note would name (at a host's gate nobody), with none,
+  the requester decides, finding no note; settled `completed`, nothing is submitted again. Risks folded (unit):
+  SCN-025's two general `failed_known` sentences carry "(at the estate's production stop, once the request carries
+  the relayed words naming the step)"; SCN-025's run-died no-note case reads "`project-a` decides, finding no note";
+  the table's key defines "none" as a run that ended at the stop (settled or left `in_progress`) before writing its
+  note, and the table gains two "no stop" rows (a responder's own reason, a time limit, a run that died), its key
+  saying OS-6's no-note rule governs everything outside it; the run's row carries the timing in its owner branch.
+  Consistency pass against the table, row by row, over OS-4, OS-6, item 6, the run's row, CONTEXT, SCN-025, SCR-19,
+  SCR-32 and the drafted items: two more disagreements found and folded. OS-6's "So each request has one actor"
+  named "the one that note names, or, settled by the owner, the one a run's `failed_known` note would name", leaving
+  out a later run whose own note was refused (rows `in thread`, `in_progress`, run); it now reads "where that note is
+  a run's note on a request it left `in_progress` (settled after it by the owner, or by a later run whose own note was
+  refused)". SCR-19's `failed_known` state and drafted item 3's `failed_known` line had the same gap and the same fix,
+  and SCR-19's state now carries the timing. CONTEXT and SCR-32 carry no `in_progress` resubmission sentence and
+  agree. `grep -n 'until the owner settles it\|until the estate owner settles it\|only once the owner settles it'`
+  over the six files and CONTEXT prints two lines, neither a rule: the round 17 entry above (a record of that round)
+  and this entry's own command.
 
 ## Next task
 
-Round 19 blind readings (unit, seam, product) of branch `agent/ct215-on-demand-20261108` (DEC-0158), all three
-tiers (the seam and product tiers last ran in round 15), read hardest against round 18's decision table (the
-owner-settled `failed_known` request with no note, the later run whose own note is refused) and at OS-6's resubmission rule (the "only where" sentence binding a request whose stop note is in its
+Round 20 blind readings (unit, seam, product), read against the table: branch `agent/ct215-on-demand-20261108`
+(DEC-0158), all three tiers (the seam and product tiers last ran in round 15; rounds 16 to 19 ran the unit tier only),
+read hardest against the decision table under round 18 (with round 19's key and its two "no stop" rows: a request
+left `in_progress` settled by a later run, an operator-opened session or the owner, the owner-settled `failed_known`
+request with no note, the later run whose own note is refused) and at OS-6's resubmission rule (the "only where" sentence binding a request whose stop note is in its
 thread, the no-note path its sole exception), the refused-note notice question's one actor and one directive, the
 production stop (submitted again once the relayed words naming the step are carried) and a host's gate (FA-09, never
 submitted again by a reader of the note), the side-act `completed` settlement and its directive, the refused-note directive scoped to `failed_known`, and the
