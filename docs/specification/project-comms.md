@@ -948,7 +948,8 @@ contract times.
   leaves the request as OS-5 says; a refusal of OS-6's stop note itself, after OS-6's settlement or after it leaves
   the request `in_progress`, ends nothing but the note, and the run still asks its notice question as OS-6 says (at
   every stop, once its note was refused, naming the requester, who decides, finding no note, on a `failed_known`
-  request; a request left `in_progress` is still not submitted again until the owner settles it, OS-6).
+  request with no stop note in its thread; a request left `in_progress` is still not submitted again until the owner settles it, and a side act's
+  `completed` request is not submitted again, the open act being the person's, OS-6).
 - **OS-5, a run that dies.** A run that ends without settling the request leaves it in the state this extension gives
   it, and no host changes that state for it: `queued` stays queued; `claimed` is taken again by the next `com.claim`
   under a new attempt; `accepted` is held (C4) and continues only by a replacement with a checkpoint transfer
@@ -1027,9 +1028,9 @@ the refused run's cause was the operator's to lift. The requester sees no signal
   thread. A host that lets a run's session take the act once the operator grants has no host's gate here: its act is a
   stop the grant clears. A request whose stop note is in its thread is submitted again only where what the person does
   lets a later run with no person take the step (a human step cleared, a decision or a relay naming the exact choice or
-  the step, a grant), never by one who reads a host's gate note; the sole exception is a request with no such note,
-  whose requester decides (below). A request whose asked act the run did and observed, with only a
-  side act left at a stop, is settled `completed`, the open act named in its result and its note. At a stop the run settles first: before an effect began,
+  the step, a grant), never by one who reads a host's gate note; the sole exception is a `failed_known` request with no
+  such note, whose requester decides (below). A request whose asked act the run did and observed, with only a
+  side act left at a stop, is settled `completed`, the open act named in its result and its note. Otherwise, at a stop the run settles first: before an effect began,
   `failed_known` with `observed: false`; after one, it cancels a waiting job with that job's own cancel and settles
   `failed_known` once it has observed that the effect did not happen, or else leaves the request `in_progress`, so the
   next holder's `lost_result` makes it `outcome_unknown`, which the host shows at once (OS-5). Then it names the stop
@@ -1050,22 +1051,29 @@ the refused run's cause was the operator's to lift. The requester sees no signal
   request left `in_progress`: "do not submit it again; it reaches the owner as `outcome_unknown` once a session of the
   target Project takes the slot". After a side act's `completed` settlement: nothing is submitted again, and the
   open act is the person's. A run, or a session the operator opened (OS-5), that settles `failed_known` a request an earlier run left
-  `in_progress` at a stop writes the same `failed_known` note, by the earlier run's record. A `failed_known` request
-  with no such note in its thread (a responder's own reason, a run's time limit, OS-4, or a note a
+  `in_progress` at a stop writes the same `failed_known` note, by the earlier run's record; where its own note is
+  refused and the earlier run's stop note is in the thread, its notice question carries that rule (the one a
+  `failed_known` note would name), never the requester's. A `failed_known` request
+  with no such note in its thread, whoever settled it, the owner included (a responder's own reason, a run's time limit, OS-4, or a note a
   [hold](#what-a-hold-refuses) refused, since a thread hold refuses a participant's `com.reply` and never
-  `com.complete`) is the sole exception to the rule for a request whose stop note is in its thread (above): its requester decides whether to submit it again, finding
+  `com.complete` or the owner's `com.reconcile`) is the sole exception to the rule for a request whose stop note is in its thread (above): its requester decides whether to submit it again, finding
   no note, at a host's gate too. A run whose note was refused asks its notice question at every stop, a host's gate and
   the production stop included; the question names the step and why no route avoided it, and one actor with one
-  directive: on a `failed_known` request, "the requester decides, finding no note", never a note's directive (at a host's gate, that nobody submits
-  it again) beside it; on a request left `in_progress`, that it is not submitted again until the owner settles it. A request submitted again from a host's gate meets the same refusal in a later run, which
-  settles it and writes the note. So the requester submits it again only when that note, the operator, the owner's
-  settlement (below) or the absence of a note says so. Once
+  directive: on a `failed_known` request with no stop note in its thread, "the requester decides, finding no note", never a note's directive (at a host's gate, that nobody submits
+  it again) beside it; on a request left `in_progress`, that it is not submitted again until the owner settles it; on
+  a side act's `completed` request, that nothing is submitted again and the open act is the person's. A request submitted again from a host's gate meets the same refusal in a later run, which
+  settles it and writes the note. So each request has one actor for submitting it again: a `failed_known` request
+  with a stop note in its thread, the one that note names, or, settled by the owner, the one a run's `failed_known`
+  note would name (below), at a host's gate nobody; a `failed_known` request with no such note, whoever settled it,
+  its requester, who decides; a request left `in_progress`, nobody until it is settled; a `completed` request, nobody. Once
   the person has taken the step (at the estate's production stop, once the request carries the relayed words naming the step), the one the note names submits a `failed_known` request again (a requester's wake for
   it is CT-150); a request left `in_progress` is not submitted again, since a new request's run gets no earlier effect
   key (OS-2, OS-5), until the estate owner settles it ([owner settlement](#owner-settlement), `settledBy: "owner"`):
-  settled `failed_known` (observed: the effect did not happen), the one a run's `failed_known` note would name submits
-  it again once the step is taken (at the estate's production stop, once the request carries the relayed words naming the step; the operator through a session of the requesting Project they own, otherwise the
-  requester; at a host's gate, nobody); settled `completed`, nothing is submitted again.
+  settled `failed_known` (observed: the effect did not happen), where a run's stop note is in its thread, the one a
+  run's `failed_known` note would name submits it again once the step is taken (at the estate's production stop, once
+  the request carries the relayed words naming the step; the operator through a session of the requesting Project
+  they own, otherwise the requester; at a host's gate, nobody), and with no such note in its thread (its note
+  refused) its requester decides, finding no note, as above; settled `completed`, nothing is submitted again.
 - **OS-7, slots and mandates.** A dispatched run holds a slot only while it works: it never takes a slot from a live
   holder, uses `com.responder_replace` only to continue a held `accepted` request whose holder is gone (CT-175), and
   ends its session, and with it the slot, when it ends. The host withholds the move of a slot to a dispatched run in its

@@ -11498,11 +11498,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      records the act in the thread (a host that lets a run's session take the act once the operator grants has no
      host's gate here, its act being a stop the grant clears); a request whose stop note is in its thread is submitted
      again only where what the person does lets a later run with no person take the step, never by one who reads a
-     host's gate note, the sole exception being a request with no such note, whose requester decides (below); a request whose asked act the run did and observed, with only a side act left at a stop, is settled
+     host's gate note, the sole exception being a `failed_known` request with no such note, whose requester decides (below); a request whose asked act the run did and observed, with only a side act left at a stop, is settled
      `completed`, the open act named. Only the first two are answered by what covers that exact choice (the mandate or a relayed decision);
      a source hand-over goes ahead only on a decision, relayed or not, naming its exact target (source, DEC-0149), never
      on a mandate (MD-6), and a human step is never
-     covered (MD-6, AP-4, OA-5). At a stop the run settles first: `failed_known` (`observed: false` before an effect
+     covered (MD-6, AP-4, OA-5). Otherwise (more than a side act left, above), at a stop the run settles first: `failed_known` (`observed: false` before an effect
      began; after one, only once it observed no effect, after cancelling a begun job), or it leaves the request
      `in_progress` for the next holder's `lost_result`. Then it names the stop once in the thread as a participant's
      reply. At a human step the note carries the refusal's `humanStep` and `url` when it gave them, and the run asks the
@@ -11518,16 +11518,19 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      production stop, once the request carries the relayed words naming the step) the one the note names
      submits a `failed_known` request again (a requester's wake is CT-150), and a request left `in_progress` is not
      submitted again (a new request's run gets no earlier effect key) until the estate owner settles it (`settledBy:
-     "owner"`): settled `failed_known` (observed), the one a run's `failed_known` note would name (the operator through a
-     session of the requesting Project they own, otherwise the requester; at a host's gate, nobody) submits it again
-     once the step is taken (at the estate's production stop, once the request carries the relayed words naming the
-     step); settled `completed`, nothing is submitted again. A later run or opened session that settles `failed_known` a
-     request an earlier run left `in_progress` at a stop writes the same note; a `failed_known` request with no such
-     note (a responder's own reason, a run's time limit, a refused note) is that sole exception: its requester decides,
+     "owner"`): settled `failed_known` (observed), where a run's stop note is in its thread, the one a run's
+     `failed_known` note would name (the operator through a session of the requesting Project they own, otherwise the
+     requester; at a host's gate, nobody) submits it again once the step is taken (at the estate's production stop,
+     once the request carries the relayed words naming the step), and with no such note (its note refused) its
+     requester decides, finding no note (below); settled `completed`, nothing is submitted again. A later run or opened session that settles `failed_known` a
+     request an earlier run left `in_progress` at a stop writes the same note (its own note refused, its question carries
+     the earlier run's stop note's rule where that note is in the thread); a `failed_known` request with no such
+     note, whoever settled it, the owner included (a responder's own reason, a run's time limit, a refused note), is that sole exception: its requester decides,
      finding no note, at a host's gate too. A run whose note was refused asks its notice question at every stop, naming
-     the step and one actor with one directive, on a `failed_known` request "the requester decides, finding no note", never a note's directive (at
-     a host's gate, that nobody submits it again) beside it, and on a request left `in_progress` that it is not
-     submitted again until the owner settles it; a request submitted again from a host's gate meets the
+     the step and one actor with one directive, on a `failed_known` request with no stop note in its thread "the requester decides, finding no note", never a note's directive (at
+     a host's gate, that nobody submits it again) beside it, on a request left `in_progress` that it is not
+     submitted again until the owner settles it, and on a side act's `completed` request that nothing is submitted
+     again and the open act is the person's; a request submitted again from a host's gate meets the
      same refusal in a later run, which settles it and writes the note.
   7. **Slots and mandates (OS-7).** A run holds a slot only while it works, never takes one from a live holder, uses a
      replacement only to continue a held request whose holder is gone (CT-175), and is never offered as the receiving

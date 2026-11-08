@@ -410,7 +410,8 @@ unchanged but its last paragraph, below):
 >   submitted again only once the step is taken (at the estate's production stop, once the request carries the
 >   operator's relayed words naming the step), by the one the note names, and at a host's gate by nobody, since a
 >   later run meets the same refusal; after the owner's settlement (`settledBy: "owner"`), the operator when they own
->   your Project, otherwise you, and at a host's gate nobody. With no such note in the thread, you decide (OS-6).
+>   your Project, otherwise you, and at a host's gate nobody. With no such note in the thread, whoever settled it,
+>   you decide (OS-6).
 >
 > If your change does not land, submit the request again.
 
@@ -450,8 +451,10 @@ a run a host starts (item 5)".
 > agreed (Fabric's FA-09 refusal of a `floor.ask-first` act, which no relay, mandate or grant passes) it asks no
 > question, and its note says the act waits for a session the person is in and that nobody submits the request to the
 > board again. Where its note is refused, it asks the operator through the host's question surface instead, naming
-> the requester, who decides, finding no note, on a `failed_known` request; a request left `in_progress` is still not
-> submitted again until the owner settles it.
+> the requester, who decides, finding no note, on a `failed_known` request with no stop note in its thread; a request
+> left `in_progress` is still not
+> submitted again until the owner settles it; and on a side act's `completed` request, that nothing is submitted
+> again and the open act is the person's.
 
 and its close rule's parenthesis, aligned with OS-5's terminal states:
 
@@ -596,6 +599,15 @@ Its check: the knowledge base's own gate on the change, then a reading of the me
   108 tests); `git diff origin/main...HEAD | grep '^+' | grep -c` of U+2014 printed 0; `git merge-tree --write-tree
   HEAD origin/main` exit 0. `pnpm vectors:check` and the full `pnpm run check` were not run in this round (no vector or
   code changed).
+
+## Checks run on the round-18 commit
+
+- On the working tree of the round-18 commit before it was made (parent `849aa456`): `pnpm run docs:check` exit 0;
+  `python3 docs/ux/lint.py` exit 0 (40 stories, 34 flows, 34 screens, 56 scenarios); `pnpm run privacy:check` exit 0
+  (0 findings); `pnpm vitest run test/mandate.test.ts test/consistency.test.ts` exit 0 (2 files, 108 tests); `git
+  merge-tree --write-tree HEAD origin/main` exit 0 at the parent; `git diff origin/main...HEAD | grep '^+' | grep -c`
+  of U+2014 run on the commit. `pnpm vectors:check` and the full `pnpm run check` were not run in this round (no
+  vector or code changed); this section was added after `docs:check` ran.
 
 ## Rounds
 
@@ -962,11 +974,96 @@ Its check: the knowledge base's own gate on the change, then a reading of the me
   directive (nothing is submitted again; the open act is the person's) (unit); the Compatibility cites Fabric's
   every-permission launch beside FA-09, its on-demand spec `docs/evidence/specs/2026-11-04-on-demand-sessions.md:51`
   and `:67` at `eafcf2e4`, verified read only with `git show` (unit).
+- Round 18 (on `849aa456`), not clean: the unit reading failed with one break and four risks; the seam and product
+  readings were not run on this head, since the break is a contradiction in the text they would read. Break folded
+  (unit): a run at a host's gate after an effect began, under a thread hold, has its `in_progress` note refused; the
+  owner settles the request `failed_known` with no note in its thread, and OS-6 gave two actors (the owner-settlement
+  sentence: "at a host's gate, nobody"; the no-note exception: the requester decides, "at a host's gate too"), with
+  DEC-0158 item 6 the same. Now the owner-settlement directive binds a request whose stop note is in its thread, as
+  drafted item 3 already did, and an owner-settled `failed_known` request with no note falls to its requester under
+  the no-note exception ("whoever settled it, the owner included"), in OS-6, item 6, the run's row in
+  `docs/specification/conformance.md`, SCN-025, CONTEXT and SCR-19; OS-6's trigger list ("So the requester submits
+  it again only when that note, the operator, the owner's settlement or the absence of a note says so") is rewritten
+  as one actor per case. Risks folded (unit): SCN-025's `failed_known` directive and its "Once the person has taken
+  the step" sentence carry "(at any stop but a host's gate)"; the run's row and SCN-025 add "nothing is submitted
+  again; the open act is the person's" after a side act's `completed` settlement; OS-6 begins the general settlement
+  "Otherwise, at a stop the run settles first", and item 6 "Otherwise (more than a side act left, above), at a stop";
+  the refused-note question carries the side-act case in OS-4, OS-6, item 6, the run's row, SCN-025 and drafted item 8.
+  Consistency pass: the table below is the single reference the texts follow (OS-4, OS-6, item 6, the run's row,
+  CONTEXT, SCN-025, SCR-19 and the drafted items 3 and 8); read against it, the pass found one more disagreement and
+  folded it: a later run that settles `failed_known` a request an earlier run left `in_progress`, its own note
+  refused, would have named the requester ("finding no note") though the earlier run's stop note is in the thread;
+  now the refused-note directive "the requester decides, finding no note" binds a `failed_known` request with no stop
+  note in its thread, and such a run's question carries the earlier note's rule. SCN-025's run-died path ("once the
+  owner settles it `failed_known` ..., the same actor submits it again") now reads by the table (with a run's stop
+  note, the one a `failed_known` note would name; without one, the same actor decides).
+
+  The decision table (54 rows; "none" is a run that settled and ended before writing its note, so it asked no
+  question; a stop's `in_progress` request settled "by run" is settled by a later run or an opened session's observed
+  reconcile):
+
+  | Stop kind | Note state | Request state | Settled by | Who submits it again, and when |
+  |---|---|---|---|---|
+  | human step | in thread | `failed_known` | run | once the step is taken: the operator through a session of the requesting Project they own, otherwise the requester |
+  | human step | in thread | `failed_known` | owner | n/a: settled by the run at the stop, a terminal state; the owner settles only an `outcome_unknown` request (the `in_progress` rows) |
+  | human step | in thread | `in_progress` | run | nobody until settled; a later run or opened session that settles it `failed_known` writes the same note, then once the step is taken: the operator through a session of the requesting Project they own, otherwise the requester (its own note refused, its question carries that rule); settled `completed`, nobody |
+  | human step | in thread | `in_progress` | owner | nobody until settled; settled `failed_known`, the one a run's `failed_known` note would name, once the step is taken: the operator through a session of the requesting Project they own, otherwise the requester; settled `completed`, nobody |
+  | human step | in thread | side-act `completed` | run | nobody; the open act is the person's (named in the result and the note) |
+  | human step | in thread | side-act `completed` | owner | n/a: settled by the run at the stop, a terminal state; the owner settles only an `outcome_unknown` request (the `in_progress` rows) |
+  | human step | refused | `failed_known` | run | the requester decides, finding no note (the run's notice question says so) |
+  | human step | refused | `failed_known` | owner | n/a: settled by the run at the stop, a terminal state; the owner settles only an `outcome_unknown` request (the `in_progress` rows) |
+  | human step | refused | `in_progress` | run | nobody until settled; a later run or opened session that settles it `failed_known` writes the note, then once the step is taken: the operator through a session of the requesting Project they own, otherwise the requester; its own note refused or missing too, the requester decides, finding no note; settled `completed`, nobody |
+  | human step | refused | `in_progress` | owner | nobody until settled; settled `failed_known`, the requester decides, finding no note; settled `completed`, nobody |
+  | human step | refused | side-act `completed` | run | nobody; the open act is the person's (the run's notice question says so) |
+  | human step | refused | side-act `completed` | owner | n/a: settled by the run at the stop, a terminal state; the owner settles only an `outcome_unknown` request (the `in_progress` rows) |
+  | human step | none | `failed_known` | run | the requester decides, finding no note (no notice question) |
+  | human step | none | `failed_known` | owner | n/a: settled by the run at the stop, a terminal state; the owner settles only an `outcome_unknown` request (the `in_progress` rows) |
+  | human step | none | `in_progress` | run | nobody until settled; a later run or opened session that settles it `failed_known` writes the note, then once the step is taken: the operator through a session of the requesting Project they own, otherwise the requester; its own note refused or missing too, the requester decides, finding no note; settled `completed`, nobody |
+  | human step | none | `in_progress` | owner | nobody until settled; settled `failed_known`, the requester decides, finding no note; settled `completed`, nobody |
+  | human step | none | side-act `completed` | run | nobody; the open act is the person's (named in the result) |
+  | human step | none | side-act `completed` | owner | n/a: settled by the run at the stop, a terminal state; the owner settles only an `outcome_unknown` request (the `in_progress` rows) |
+  | production stop | in thread | `failed_known` | run | once the request carries the operator's relayed words naming the step: the operator through a session of the requesting Project they own, otherwise the requester |
+  | production stop | in thread | `failed_known` | owner | n/a: settled by the run at the stop, a terminal state; the owner settles only an `outcome_unknown` request (the `in_progress` rows) |
+  | production stop | in thread | `in_progress` | run | nobody until settled; a later run or opened session that settles it `failed_known` writes the same note, then once the request carries the operator's relayed words naming the step: the operator through a session of the requesting Project they own, otherwise the requester (its own note refused, its question carries that rule); settled `completed`, nobody |
+  | production stop | in thread | `in_progress` | owner | nobody until settled; settled `failed_known`, the one a run's `failed_known` note would name, once the request carries the operator's relayed words naming the step: the operator through a session of the requesting Project they own, otherwise the requester; settled `completed`, nobody |
+  | production stop | in thread | side-act `completed` | run | nobody; the open act is the person's (named in the result and the note) |
+  | production stop | in thread | side-act `completed` | owner | n/a: settled by the run at the stop, a terminal state; the owner settles only an `outcome_unknown` request (the `in_progress` rows) |
+  | production stop | refused | `failed_known` | run | the requester decides, finding no note (the run's notice question says so) |
+  | production stop | refused | `failed_known` | owner | n/a: settled by the run at the stop, a terminal state; the owner settles only an `outcome_unknown` request (the `in_progress` rows) |
+  | production stop | refused | `in_progress` | run | nobody until settled; a later run or opened session that settles it `failed_known` writes the note, then once the request carries the operator's relayed words naming the step: the operator through a session of the requesting Project they own, otherwise the requester; its own note refused or missing too, the requester decides, finding no note; settled `completed`, nobody |
+  | production stop | refused | `in_progress` | owner | nobody until settled; settled `failed_known`, the requester decides, finding no note; settled `completed`, nobody |
+  | production stop | refused | side-act `completed` | run | nobody; the open act is the person's (the run's notice question says so) |
+  | production stop | refused | side-act `completed` | owner | n/a: settled by the run at the stop, a terminal state; the owner settles only an `outcome_unknown` request (the `in_progress` rows) |
+  | production stop | none | `failed_known` | run | the requester decides, finding no note (no notice question) |
+  | production stop | none | `failed_known` | owner | n/a: settled by the run at the stop, a terminal state; the owner settles only an `outcome_unknown` request (the `in_progress` rows) |
+  | production stop | none | `in_progress` | run | nobody until settled; a later run or opened session that settles it `failed_known` writes the note, then once the request carries the operator's relayed words naming the step: the operator through a session of the requesting Project they own, otherwise the requester; its own note refused or missing too, the requester decides, finding no note; settled `completed`, nobody |
+  | production stop | none | `in_progress` | owner | nobody until settled; settled `failed_known`, the requester decides, finding no note; settled `completed`, nobody |
+  | production stop | none | side-act `completed` | run | nobody; the open act is the person's (named in the result) |
+  | production stop | none | side-act `completed` | owner | n/a: settled by the run at the stop, a terminal state; the owner settles only an `outcome_unknown` request (the `in_progress` rows) |
+  | host's gate | in thread | `failed_known` | run | nobody (the act waits for a session the person is in, which records it in the thread) |
+  | host's gate | in thread | `failed_known` | owner | n/a: settled by the run at the stop, a terminal state; the owner settles only an `outcome_unknown` request (the `in_progress` rows) |
+  | host's gate | in thread | `in_progress` | run | nobody until settled; a later run or opened session that settles it `failed_known` writes the same note, then nobody (the act waits for a session the person is in, which records it in the thread) (its own note refused, its question carries that rule); settled `completed`, nobody |
+  | host's gate | in thread | `in_progress` | owner | nobody until settled; settled `failed_known`, the one a run's `failed_known` note would name, nobody (the act waits for a session the person is in, which records it in the thread); settled `completed`, nobody |
+  | host's gate | in thread | side-act `completed` | run | nobody; the open act is the person's (named in the result and the note) |
+  | host's gate | in thread | side-act `completed` | owner | n/a: settled by the run at the stop, a terminal state; the owner settles only an `outcome_unknown` request (the `in_progress` rows) |
+  | host's gate | refused | `failed_known` | run | the requester decides, finding no note (the run's notice question says so); one submitted again meets the same refusal in a later run, which settles it and writes the note |
+  | host's gate | refused | `failed_known` | owner | n/a: settled by the run at the stop, a terminal state; the owner settles only an `outcome_unknown` request (the `in_progress` rows) |
+  | host's gate | refused | `in_progress` | run | nobody until settled; a later run or opened session that settles it `failed_known` writes the note, then nobody (the act waits for a session the person is in, which records it in the thread); its own note refused or missing too, the requester decides, finding no note; settled `completed`, nobody |
+  | host's gate | refused | `in_progress` | owner | nobody until settled; settled `failed_known`, the requester decides, finding no note, at a host's gate too; settled `completed`, nobody |
+  | host's gate | refused | side-act `completed` | run | nobody; the open act is the person's (the run's notice question says so) |
+  | host's gate | refused | side-act `completed` | owner | n/a: settled by the run at the stop, a terminal state; the owner settles only an `outcome_unknown` request (the `in_progress` rows) |
+  | host's gate | none | `failed_known` | run | the requester decides, finding no note (no notice question); one submitted again meets the same refusal in a later run, which settles it and writes the note |
+  | host's gate | none | `failed_known` | owner | n/a: settled by the run at the stop, a terminal state; the owner settles only an `outcome_unknown` request (the `in_progress` rows) |
+  | host's gate | none | `in_progress` | run | nobody until settled; a later run or opened session that settles it `failed_known` writes the note, then nobody (the act waits for a session the person is in, which records it in the thread); its own note refused or missing too, the requester decides, finding no note; settled `completed`, nobody |
+  | host's gate | none | `in_progress` | owner | nobody until settled; settled `failed_known`, the requester decides, finding no note, at a host's gate too; settled `completed`, nobody |
+  | host's gate | none | side-act `completed` | run | nobody; the open act is the person's (named in the result) |
+  | host's gate | none | side-act `completed` | owner | n/a: settled by the run at the stop, a terminal state; the owner settles only an `outcome_unknown` request (the `in_progress` rows) |
 
 ## Next task
 
-Round 18 blind readings (unit, seam, product) of branch `agent/ct215-on-demand-20261108` (DEC-0158), all three
-tiers, read hardest at OS-6's resubmission rule (the "only where" sentence binding a request whose stop note is in its
+Round 19 blind readings (unit, seam, product) of branch `agent/ct215-on-demand-20261108` (DEC-0158), all three
+tiers (the seam and product tiers last ran in round 15), read hardest against round 18's decision table (the
+owner-settled `failed_known` request with no note, the later run whose own note is refused) and at OS-6's resubmission rule (the "only where" sentence binding a request whose stop note is in its
 thread, the no-note path its sole exception), the refused-note notice question's one actor and one directive, the
 production stop (submitted again once the relayed words naming the step are carried) and a host's gate (FA-09, never
 submitted again by a reader of the note), the side-act `completed` settlement and its directive, the refused-note directive scoped to `failed_known`, and the
