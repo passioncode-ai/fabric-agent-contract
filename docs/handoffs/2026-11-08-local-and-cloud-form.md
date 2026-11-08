@@ -62,7 +62,7 @@ was deleted from `origin` and replaced by this squash. Commit-addressed referenc
   *Compatibility*, CT-279 filed (see *Rounds*).
 - Round 14: SCN-044's cloud page narrowed to a delegation-token caller, the twin of a page answer gated in SCN-059,
   FLW-36, CF-4 and SCR-36, DL-8's client-key path, CF-1's premise, `no-trusted-issuer` for a missing issuer only,
-  AP-1's wider twin, the call-record gap with CT-282, and the DEC-0157 merge note's two requirements (see *Rounds*).
+  AP-1's wider twin, the call-record gap with CT-283, and the DEC-0157 merge note's two requirements (see *Rounds*).
 - Round 7: CF-4 as one rule (a client-key caller is handed no person's step and no choice), SCN-059 for the operator's
   keys and the steps members' calls raise (ST-042), OM-5's sentence on client keys, `peer`'s schema description, and
   back-pointers to CF-3 in DL-26, DL-29 and source.md's T2 premise (see *Rounds*).
@@ -99,6 +99,10 @@ a client-key caller input for CF-4's `operator-step` (FAA-204).
   well-known document behind the token (DEC-0159 Alternatives).
 - The form is a combination of DEC-0019, DEC-0024, DEC-0061 and DEC-0149's landing note, so every rule stays in its
   section; CF-1 to CF-7 say how they combine and where builders go wrong.
+- The call-record backlog row is CT-283. Round 14 filed it as CT-282 a minute after DEC-0156's branch filed a
+  different CT-282; DEC-0156's came first, so this branch renumbered (2026-11-08). CT ids have no reservation
+  counter on origin: before landing, `grep -o '^| CT-[0-9]*' docs/backlog.md | sort | uniq -d` on the merged tree
+  prints nothing.
 
 ## Open
 
@@ -709,7 +713,7 @@ a client-key caller input for CF-4's `operator-step` (FAA-204).
   instance with no estate issuer configured, a missing key set staying DL-14's retryable `no-published-keys`; AP-1
   lets a twin's tool take an act no page action offers under the same gate, which CF-3's key twin does; contexts.md
   and *Compatibility* say client-key calls to a cloud instance in the form write no `call-record/1` the organization
-  reads, and CT-282 asks whether the form should write them; SCN-058 step 1 and CF-3 offer SCN-053's window where the
+  reads, and CT-283 asks whether the form should write them; SCN-058 step 1 and CF-3 offer SCN-053's window where the
   member runs that app, CT-275 carrying it otherwise; *Open*'s DEC-0157 note adds UD-1's scope for a cloud instance
   served to a team (no usage data about its members' calls until a page for members exists) and the conformance
   conflict (DEC-0157's device row, then this branch's form row, never both device rows), each with its merged-tree

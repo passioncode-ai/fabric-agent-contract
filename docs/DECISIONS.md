@@ -11639,7 +11639,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   organization's call list: the callee's node writes a call's `call-record/1` (`docs/specification/credentials.md`,
   *The call record*), a cloud instance on a platform has no node, and a client-key call carries no context, so
   client-key calls to a cloud instance in the form write no `call-record/1` that the organization reads (backlog
-  CT-282 asks whether the form should write them). The estate's cloud-deploy template declares `own` and
+  CT-283 asks whether the form should write them). The estate's cloud-deploy template declares `own` and
   registers the descriptor on the operator's computer only. It registers its descriptor's instance as `default` unless
   its configuration names another; as the cloud half of the form it must be set to `cloud`, so the cloud descriptor does
   not take the local one's `id.instance` (CF-1); the adapter's offer is to say so (FAA-204, message `8eb77518`). Its
