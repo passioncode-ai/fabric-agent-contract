@@ -11437,8 +11437,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      in a session with no person in its chat it does not perform the act and asks nothing from that session, leaving
      the act open and naming it, in its board reply and its report, as a step for a session the person is in (as
      Fabric's `board.read-at-start` hands a production step to such a session) and settling the board request as SA-6
-     says (a `com.progress` note naming the open act and what blocks it, SA-5; the request completed with the open act
-     named in its result, or left in progress, as the rest of the work allows), a relay or a mandate that names the
+     says (a `com.progress` note naming the open act and what blocks it, SA-5; a request whose asked act is the open one
+     left in progress, never completed, another completed with the open act named in its result, or left in progress,
+     as the rest of the work allows), every other step that waits in such a session named the same way, a relay or a mandate that names the
      act changing neither mode, being the reason the one ask quotes, not the agreement the gate holds the act for; the
      agent adds no question of its own
      about an act a host's gate already asks about (a risk on it travels as that gate's one ask), while the asks other
@@ -11612,13 +11613,13 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   and spend policy rule 3 say, the webhook's removal waiting on
   the operator's decision, OC-2, AP-2 and AP-3),
   `docs/specification/operator-channel.md` (OC-11's third step the agent's, OW-2, on AP-2's relayed decision, the code
-  shown to the person only (the link command printing to the agent's output only that a code was issued), the store
+  shown to the person only (an agent with a dashboard has its link command print to its output only that a code was issued), the store
   read for the token at the agent's next start and when the person says it is stored, a new code issued on the
   person's ask when one expires unused while the `accepted` holds and never because of a chat message, an old `accepted` renewed by one question), DEC-0034 (an Annotated line), DEC-0150 (an Annotated line:
   OW-6 keeps CA-8's bound), the operator channel's status fixtures whose
   `detail`, one sentence each as the schema describes it, now says what happens for a stopped receiver (a supervisor
   restarts it; if the status stays, the person asks the agent, or the session that runs it, to restart it and answers decisions on
-  its dashboard, not in the bot's chat, where they may be lost in 24 hours, OC-5 and OC-17; while unlinked, the code,
+  its dashboard, since an answer sent in the bot's chat may be lost after 24 hours, OC-5 and OC-17; while unlinked, the code,
   or a new one the person asks the agent for once it expires, OC-11) and, for a set
   webhook, that removing it or switching to it is the operator's decision, told to the agent or the session that runs it,
   never in the bot's chat, or taken by them in the channel settings (OC-2)
@@ -11628,8 +11629,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   reason), `docs/ux/foundation.md` (JRN-04/#2's touchpoint and ST-035), `docs/ux/screens.md` (SCR-30), `docs/DOCMAP.md`,
   `docs/specification/README.md`, `docs/specification/channel-agent.md` (CA-8's pointer), `CONTEXT.md` (the operator's
   word), the separation of the operator's businesses (OW-5) as a pointer to the
-  operator's own instructions outside this contract, `docs/ux/flows.md` (FLW-29), backlog CT-220, CT-266, CT-269 and
-  CT-271 (filed; CT-271 rewrites the recoveries other scenarios still give the operator, under OW-2 and OW-3); the handoff
+  operator's own instructions outside this contract, `docs/ux/flows.md` (FLW-29), backlog CT-220, CT-266, CT-269,
+  CT-271 and CT-273 (filed; CT-271 rewrites the recoveries other scenarios still give the operator, under OW-2 and OW-3;
+  CT-273 names how the operator removes a channel binding they did not make); the handoff
   `docs/handoffs/2026-11-07-operators-word.md` and its row in `docs/handoffs/README.md`.
 - **Source:** the operator's words of 2026-11-04 relayed on board threads `b91254c4` and `a7a9d05d` (message
   `b66a8fae`); their words of 2026-11-07 that they press nothing in any interface (relayed by one of their projects

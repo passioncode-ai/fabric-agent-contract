@@ -143,18 +143,18 @@ stop while the channel is off. The proposal lists its four steps, three of them 
 3. once the operator has answered `accepted` and the token is in the store under that name, the agent enables the
    channel on that answer (the operator's decision relayed as [service](service.md#actions) AP-2 says, its words in
    AP-3's form, OC-1), runs its own link command and shows the code to the person on the dashboard OC-3 names, handed
-   over as the page's [`open_link`](service.md#page-links) (DEC-0123), its link command printing to the agent's own output only
-   that a code was issued, never the code; only an agent without a dashboard shows it in its
+   over as the page's [`open_link`](service.md#page-links) (DEC-0123), an agent with a dashboard having its link command print
+   to its own output only that a code was issued, never the code; only an agent without a dashboard shows it in its
    reply in the operator's session, never in a tool argument, an outward message, a file or any other outward act
    ([governance and roles](governance-and-roles.md#the-operators-word-carried-out-the-first-time) OW-2 and OW-4,
    DEC-0156). The agent reads the store for the token at its next start and when the person tells it, or the session
    that runs it, that the token is stored, and its reply or its dashboard then says that the code is ready. When a code
    expires unused while that `accepted` holds, the agent issues a new one when the person asks it, or the session that runs it,
    for one, and shows it the same way, on the dashboard first; it never issues one because of a message in the chat
-   with the bot (a late code typed there is refused, OC-3). A code in that reply stays in the session's transcript, a residual bounded as DEC-0147 bounds a share
-   code's: the code is for one use and at most 10 minutes (OC-3), the operator's own send of a code already spent binds
+   with the bot (a late code typed there is refused, OC-3). A code in that reply stays in the session's transcript, a residual like DEC-0147's share code, without
+   its comparison code: the code is for one use and at most 10 minutes (OC-3), the operator's own send of a code already spent binds
    nothing, and the status shows when the chat was bound and for how many users (`binding.linkedAt`,
-   `binding.allowedUsers`), so a binding the operator did not make is seen. Until the token is stored the agent names that
+   `binding.allowedUsers`), so a binding the operator did not make is seen (no rule here yet names how they remove it, CT-273). Until the token is stored the agent names that
    step; an `accepted` answer given as a decision and older than AP-2's 24-hour window, or given under a mandate and past
    that mandate's `expiresAt`, is renewed by one short question ([delegation](delegation.md#the-operators-mandate) MD-1), which is not a repeat of
    the proposal;

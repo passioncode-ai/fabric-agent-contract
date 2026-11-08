@@ -115,7 +115,7 @@ words AP-2 and OA-1 already name; the rules hold for any owner.
   not name and the mandate in force does not cover; it is a step a limit of OW-5 gates other than a human step or a
   host's gate (a source hand-over, an effect outside a grant); or no corrected way both undoes cleanly and still meets
   the word, the one stop this rule adds itself, as AP-3 has an agent that is not sure the operator decided ask them.
-  For a step that waits the message is a question; for any other it states the corrected way as under way and how to
+  For a step that waits the message is a question (with no person in the chat, the step is named as the end of this rule says); for any other it states the corrected way as under way and how to
   stop it. When the step the message concerns is one a host's gate holds (below), the message is no question of its
   own: it travels as that gate's one ask, whose reason names the risk, the corrected way and the operator's words, and
   the step waits as that gate says. Otherwise the agent takes the corrected way, the safest one that undoes cleanly and
@@ -141,8 +141,9 @@ words AP-2 and OA-1 already name; the rules hold for any owner.
   names it, in its board reply and in its report, as a step for a session the person is in, as Fabric's
   `board.read-at-start` already hands a step that touches production to such a session; it gives the board request's
   state in a `com.progress` note naming the open act and what blocks it ([project
-  communication](project-comms.md#answering-in-the-same-turn) SA-5), and settles the request as SA-6 says, completing
-  it with the open act named in its result or leaving it in progress, as the rest of the work allows. A relay or a mandate that
+  communication](project-comms.md#answering-in-the-same-turn) SA-5), and settles the request as SA-6 says: a request
+  whose asked act is the open one is left in progress, never completed; another is completed with the open act named in
+  its result, or left in progress, as the rest of the work allows. A relay or a mandate that
   names the act changes neither mode: like the operator's words in a session the person is in, it is the reason the
   one ask quotes, not the agreement the gate holds the act for (Fabric's ADR-0160 section 4); `board.read-at-start`'s production
   stop, which its own text lifts on such a relay, is another gate.
@@ -173,6 +174,10 @@ words AP-2 and OA-1 already name; the rules hold for any owner.
   open, named in the report with its reason; a step taken by the corrected way stays done and reported; the agent does
   not repeat the message. An answer that names another way is a new word under OW-1; a bare refusal undoes the
   corrected way where it undoes cleanly and leaves the step open, and the agent asks further only as AP-3 does.
+  In a session with no person in its chat, every step that waits under this rule (one of the three waits above, an act
+  a host's gate holds, or the FA-09 case) has the one place the FA-09 case names: the agent asks no question from that
+  session, leaves the step open and names it, in its board reply and its report, as a step for a session the person is
+  in (a host's gate still asks as it does), and settles the board request as that case does.
 - **OW-4, only what needs the person.** Of the task's steps, the agent hands the person only those that technically
   need a person: a binding that only the person's own act proves (a bot created in their own messenger account, the
   code typed in their own chat, OC-3 and OC-11); a human step of AP-4 and OA-5 (a sign-in with its one-time code, a consent, a payment or top-up, a
