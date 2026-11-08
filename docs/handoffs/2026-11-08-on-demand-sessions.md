@@ -15,8 +15,9 @@ package the run is handed, (b) its lifecycle and a dead run's request, (c) how i
 - DEC-0022 annotated: C5 amended for the host alone.
 - `docs/specification/conformance.md`: rows for the host that starts runs and for the dispatched run.
 - `CONTEXT.md`: *On-demand session*.
-- `docs/ux/scenarios.md`: SCN-025's alt paths (a started run that completes, a run that dies, a human step) and its
-  Coverage.
+- `docs/ux/scenarios.md`: SCN-025's alt paths (a started run that completes, a hold, a run that dies, a human step),
+  States and Coverage; SCN-051's alt path (a run as the main session). `docs/ux/screens.md`: SCR-19's `failed_known`.
+- `docs/DOCMAP.md`: a row.
 - Backlog CT-215 in progress.
 
 ## Decisions taken here
@@ -25,8 +26,9 @@ package the run is handed, (b) its lifecycle and a dead run's request, (c) how i
   or the owner settles it through existing operations (DEC-0158 Alternatives (a)).
 - A run settles `failed_known` at a human step, another job's `input_required`, or a source hand-over without an exact
   decision, rather than waiting: there is no person in the run, and the thread names the step.
-- A begun effect's idempotency key is carried in the workflow's checkpoint and reused by the next run, so a relaunch
-  never begins the same effect twice (CT-215's open point under (b)).
+- A begun effect's idempotency key is kept in the host's record of the run and carried to the next run, which observes
+  the effect before an observed reconcile, or reuses the key after its own `com.effect_begin` on a transferred request
+  (CT-215's open point under (b)); exactly-once is not claimed.
 - How the host decides (grace, caps, time limit, agent and account) stays the host's; the contract binds what the run is
   handed, what done means and what a dead run leaves.
 
@@ -59,9 +61,21 @@ package the run is handed, (b) its lifecycle and a dead run's request, (c) how i
   generation and `failed_known`; SCN-051's run as main session; OS-6 links AP-4, not the unmerged OW section; the
   conformance rows' rule ranges and test files; a DOCMAP row; Consequences complete, the knowledge page at landing.
 
+- Round 2 (on `57588aaf`), not clean: unit, SCN-051 counted a moved-off run for nothing while OS-5 counted it (now OS-5
+  exempts a run the operator's move fenced, or whose work a hold refused) and OS-6 settled `failed_known` after an
+  effect began without an observation (now `observed: false` only before an effect, after one only once no effect is
+  observed, else the request stays `in_progress` for the next holder); seam, the SCN-051 point, and Fabric's packet and
+  Switchboard's exit text did not carry OS-4 (now owed); product, the SCN-051 point and SA-6's closing sentence (now
+  points to OS-4). Risks folded: a `not_authorized` refusal ends the starts; OS-2 hands OS-3's line and environment and
+  the earlier run's record; a run strips the variables from what it launches; the transfer's checkpoint is the run's
+  own, the host's record is not the board's; reuse only after the run's own effect begin; settled counts runs only;
+  the elicitation lever is the launcher's or host's; an `operator-decision-required` outside the mandate is named and
+  settled; the chain ends in the target Project and the run appends itself once; the requester sees only the state;
+  a third implementing host named; the knowledge page's sections named; CONTEXT tells the stdio scope apart; SCR-19's `failed_known`.
+
 ## Next task
 
-Round 2 of the blind readings of branch `agent/ct215-on-demand-20261108` (DEC-0158), all three tiers. At landing:
+Round 3 of the blind readings of branch `agent/ct215-on-demand-20261108` (DEC-0158), all three tiers. At landing:
 DEC-0158 Accepted with its rounds, the amendment line and DEC-0022's annotation without "proposed", CT-215 done, the
 North Star plan's wave 0 row, fabric-workspace `knowledge/agents-first.md` items 3, 5 and 8, and a board post of the
 consumer debts to Fabric, Switchboard, the adapter and Observatory.

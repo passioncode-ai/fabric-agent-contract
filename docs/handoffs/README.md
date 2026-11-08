@@ -4,7 +4,7 @@ Each run leaves a handoff naming its objective, what it did, what is open and th
 
 | Handoff | Decisions | Merge |
 |---|---|---|
-| [2026-11-08 on-demand sessions](2026-11-08-on-demand-sessions.md) | DEC-0158 (CT-215), proposed; round 1 not clean | branch `agent/ct215-on-demand-20261108` |
+| [2026-11-08 on-demand sessions](2026-11-08-on-demand-sessions.md) | DEC-0158 (CT-215), proposed; rounds 1 and 2 not clean | branch `agent/ct215-on-demand-20261108` |
 | [2026-11-07 a restricted socket table](2026-11-07-restricted-table.md) | DEC-0155 (CT-261; CT-265 filed); rounds 1 and 2 not clean, 3 and 4 clean | accepted 2026-11-07; merged with this change |
 | [2026-11-04 a board message is answered in the same turn](2026-11-04-board-same-turn.md) | DEC-0152 (CT-217; CT-263 filed); rounds 1 to 6 not clean, 7 and 8 clean | accepted 2026-11-07; merged with this change |
 | [2026-11-03 an agent's source and its instance](2026-11-03-source-manifest.md) | DEC-0149 (CT-194; CT-207, CT-208, CT-211, CT-212, CT-214, CT-244, CT-255 to CT-258 filed); rounds 81 and 82 clean at `d03ae791`; paused and resumed | accepted 2026-11-07, #251; merged 2026-11-07; released `v0.1.0+2026-11-07.2`; the knowledge base's #628 merged straight after |

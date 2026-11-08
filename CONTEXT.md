@@ -246,7 +246,7 @@ sequence number (DEC-0073).
 a replacement with a transfer, or an observed reconcile), replies, settles it and ends, releasing the slot. It knows it
 is the run by its first prompt line and its environment together, never by the environment alone. A run that dies
 leaves the request in the state the extension gives it; after two runs that held the slot the host shows the request to
-its operator unchanged (OS-1 to OS-7, DEC-0158).
+its operator unchanged (OS-1 to OS-7, DEC-0158). Not the stdio server scope `on-demand` (LC-19).
 
 **Board hold**: The operator's hold, set in the host or relayed by their agent to the host's action (DEC-0121), on a thread, a Project or a (Project, capability) responder slot.
 While it lasts the board refuses new work in its scope `held` (retryable), the operator's move of a slot included (DEC-0140), never refuses a cancel or a read, and

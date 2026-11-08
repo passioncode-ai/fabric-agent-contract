@@ -11166,35 +11166,35 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      name.
   3. **Knowing it is the run (OS-3).** The first prompt line `fabric-dispatch/1 workflow=… handoff=… request=…` and the
      same three ids in `FABRIC_DISPATCH_WORKFLOW`, `FABRIC_DISPATCH_HANDOFF` and `FABRIC_DISPATCH_REQUEST`, both; the
-     environment alone never makes a session the run (a child inherits it); a line without the environment is a
-     quotation; an environment missing or disagreeing with the line is said once as a `message` in the request's thread,
-     never a reply to the request, and the session stops.
+     environment alone never makes a session the run, and a run removes the variables from what it launches; with no
+     `FABRIC_DISPATCH_WORKFLOW` the line is a quotation; with it set and another id missing or disagreeing, the session
+     says so once as a `message` in the request's thread, never a reply to the request, and stops.
   4. **Done (OS-4).** Enroll; take the handed request by its state and no other (claim it by name and accept it when
      `queued` or a lapsed `claimed`, continue it by a replacement with a transfer when `accepted`, reconcile it observed
      when its own enrollment made it `outcome_unknown`, else leave it to the owner); give the state at the claim or
      transfer (SA-2, SA-6); begin an effect before acting outward, renew inside the lease, reply in the thread, settle
-     (`com.complete` `completed` or `failed_known`, or the observed reconcile), then end, which releases the slot; end at
-     `run-ends-at` too, settling `failed_known` rather than leaving `accepted` when no later run could start before the
-     deadline. A refused `com.enroll` follows SA-6 (DEC-0152) without waiting.
-  5. **A run that dies (OS-5).** The request keeps the state the extension gives it (`queued`, a lapsed `claimed`, a
-     held `accepted` continued only by a transfer, `in_progress` to `outcome_unknown` by `lost_result` when the next
-     holder takes the slot); settled means terminal; the host may start one more run, and after two that held the slot
-     and ended without settling starts none and shows the request to its operator unchanged; one left `outcome_unknown`
-     it shows at once; a run that never held the slot counts for nothing. A begun effect's idempotency key is recorded
-     in the checkpoint's body, carried by the host's take-back, and used by the next run to observe the effect or reuse
-     the key, never to begin it again without an observation.
-  6. **No person in the run (OS-6).** The run never waits for a person and declares no elicitation capability, so no
-     service asks it one (C3.3 would read a cancel as the person's no; it is never the operator's decision, AP-2);
-     leaves another job's `input_required` unanswered and settles `failed_known` naming it unless the mandate or a
-     relayed decision covers that exact choice; names a human step once and settles `failed_known`, the requester or the
-     operator submitting again after the step; and takes a source hand-over only as a decision with the exact target
-     (DEC-0149), never under the request's mandate.
+     (`com.complete` `completed`, or `failed_known` with `observed: false` before an effect began and only after
+     observing no effect once one began, or the observed reconcile), then end; never wait on a refusal: a refused
+     enrollment follows SA-6 and ends, and `held`, `fenced` or `lease_expired` on its work ends the run.
+  5. **A run that dies (OS-5).** The request keeps the state the extension gives it; settled means terminal and counts
+     runs only; after two runs that ended without settling, the host starts none and shows the request to its operator
+     unchanged, and one left `outcome_unknown` at once; a run that never held the slot, whose work a hold refused, or
+     that the operator's move fenced counts for nothing; a run refused `not_authorized` ends the starts and shows the
+     request; the requester sees only the request's state. A begun effect's key is kept in the host's record of the run,
+     carried to the next run, and used to observe the effect before an observed reconcile, or reused after the run's own
+     `com.effect_begin` on a transferred `accepted` request.
+  6. **No person in the run (OS-6).** The run never waits for a person and declares no elicitation capability (the
+     launcher or host owning that lever where the client cannot drop it); a job's `input_required`, an
+     `operator-decision-required` outside the mandate, a human step and a source hand-over without its exact decision
+     are named once in the thread unless the mandate or a relayed decision covers that exact choice, and settled
+     `failed_known` (observed, after cancelling a begun job and seeing no effect) or left `in_progress` for the next
+     holder's `lost_result`; the requester or the operator submits again after the step.
   7. **Slots and mandates (OS-7).** A run holds a slot only while it works, never takes one from a live holder, uses a
      replacement only to continue a held request whose holder is gone (CT-175); holding `project.work` it is the main
-     session meanwhile and settles no request but its own; it takes the mandate as the target's callee (MD-3), appends
-     each onward callee (MD-2), never only itself, never extends it, and settles `failed_known` when it expires before
-     the work is done (CT-205). Its outcome is the host's record, never a request state, with no request text and no
-     secret.
+     session meanwhile and settles no request but its own; a board request's mandate chain ends in the target Project,
+     and the run appends its own id once as that Project's callee and each onward callee after (MD-2, MD-3), never
+     extends it, and settles as OS-6 does when it expires (CT-205). Its outcome is the host's record, never a request
+     state, with no request text and no secret.
 - **Why:** the operator's word asked for exactly this, and the products have built it; without the contract's text the
   run's lifecycle lives in four repositories' prose and each reads a dead run differently. Keeping the request's states
   as the extension already defines them means a run that dies needs no new state, no new refusal and no host write:
@@ -11215,24 +11215,29 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   states, its one run in flight and OS-5's two empty runs, and writes no request state; its CO-409 row marks the
   board-event wake, the `crash` reason, the mandate's carriage, `com.get` reading and the time-out stop done on main.
   It owes, at its next pin: a held slot, Project or thread is no candidate (its `responderLive` reads a held holder as
-  not live and starts a run into the hold); a run that never held the slot is not counted; a request a run left in
+  not live and starts a run into the hold); a run that never held the slot, whose work a hold refused or that the
+  operator's move fenced is not counted, and a `not_authorized` refusal ends the starts; a request a run left in
   `outcome_unknown` shown to the operator at once; the take-back carrying the earlier run's record of a begun effect's
-  key into the body it writes (today a fresh body); the packet's mandate text ("append yourself to its chain") read as
-  MD-2's callee rule, and its 5-minute skew for a mandate's `at` brought to MD-4's 60 seconds; and the items its
-  CO-409 row still lists open (the journal events, the permissions screen, the live session's wake, the default agent
+  key into the body it writes (today a fresh body); the packet's constraints carrying OS-4 by state (the claim naming
+  the request, a replacement for `accepted`, an observed reconcile for `outcome_unknown`) and OS-6's settlement in place
+  of "stop before any step that touches production"; its 5-minute skew for a mandate's `at` brought to MD-4's 60
+  seconds (its "append yourself to its chain" is OS-7's rule); and the items its CO-409 row still lists open (the journal events, the permissions screen, the live session's wake, the default agent
   when none is set, Windows). Fabric Switchboard's `switchboard dispatch` writes the first line and the environment of
-  OS-3 exactly and scrubs the environment from sessions a run launches. The adapter's `working-with-fabric` (FAA-201,
+  OS-3 exactly and scrubs the environment from sessions a run launches; it owes its `EXIT_CONTRACT` text (OS-4's claim
+  by name and settlement) and, as the launcher, the elicitation lever of OS-6 where the coding agent's client declares
+  the capability. A third host of the estate implements the dispatched run itself (its own board-spawn design of
+  2026-11-04) and owes the same reading of OS-4 to OS-7. The adapter's `working-with-fabric` (FAA-201,
   `references/on-demand-session.md`) meets OS-3, names the request in `com.claim` and posts a mismatch as a
   `message`; it owes, at its next pin: declaring no elicitation capability, `failed_known` at a job's `input_required`
-  and at a human step, recording a begun effect's key in its checkpoint (its FAA-215), and OS-5's meaning of settled
-  (it closes a run at `answered` or `outcome_unknown` too). Project Observatory's workflow (OBS-323) carries the
+  and at a human step, recording a begun effect's key in its checkpoint (its FAA-215), and nothing for closing its own run at `answered` or `outcome_unknown`, which OS-5 leaves to the host. Project Observatory's workflow (OBS-323) carries the
   packet's references and keeps a checkpoint's body as written, which is where OS-5's record lives. fabric-workspace's
-  `knowledge/agents-first.md` owes its items 3, 5 and 8 restated (a session the host starts is built; a requester
-  waits out the grace before changing the owner's repository; settled as OS-5 says). `contractVersion` stays `0.1.0`.
+  `knowledge/agents-first.md` owes, in "When nobody answers", its items 3 and 5 restated (a session the host starts is
+  built; a requester leaves a request to a host that dispatches rather than change the owner's repository) and, in "One
+  approval binds all", item 8's production stop read as OS-6's settlement. `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `docs/specification/project-comms.md` (the amendment line and the section *On-demand
   sessions*), DEC-0022 (an Annotated line), `docs/specification/conformance.md` (a row for the host that starts a run
   and one for the run), `CONTEXT.md` (*On-demand session*), `docs/ux/scenarios.md` (SCN-025's alt paths, States and Coverage; SCN-051's
-  alt path), `docs/DOCMAP.md` (a row); backlog CT-215 (in progress); the handoff
+  alt path), `docs/DOCMAP.md` (a row), `docs/ux/screens.md` (SCR-19's states); backlog CT-215 (in progress); the handoff
   `docs/handoffs/2026-11-08-on-demand-sessions.md` and its row in `docs/handoffs/README.md`; at landing, fabric-workspace
   `knowledge/agents-first.md`.
 - **Source:** the operator's word of 2026-11-04, relayed by the Fabric project (thread `b2e5df1f`, announcement
