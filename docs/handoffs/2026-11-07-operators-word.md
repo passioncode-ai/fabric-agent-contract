@@ -22,18 +22,21 @@ contract already has.
   message (CT-269), and a paid action within a limit as AP-1's `relayed` class, on the dashboard or by telling the
   agent as AP-2 says, in the bot's chat only with OC-6's presses once the receiver is back; the
   webhook's removal waiting on OC-2's decision).
-- [Operator channel](../specification/operator-channel.md) OC-11's step 3 (the agent enables and links on AP-2's
+- [Operator channel](../specification/operator-channel.md) OC-11's step 2 (the typed token handed over as AP-4's `secret` step or the host's secret prompt, SCN-053, never a command) and step 3 (the agent enables and links on AP-2's
   relayed decision, the code shown to the person only (an agent with a dashboard has its link command print to its output only that a code was issued), the store read for the token at the agent's next start and when the person says it is stored, a new code issued on the person's ask when one expires unused and never because of a chat message; an old `accepted` renewed by one question, MD-1), DEC-0034's Annotated line and DEC-0150's (OW-6 keeps CA-8's bound); six status
   fixtures (`fixtures/positive/operator-channel-status-degraded*.json` three,
   `fixtures/negative/operator-channel-status-degraded-without-credential.json`,
-  `-receiver-missing-lease-held.json`, `-receiver-missing-without-receiver.json`) whose `detail`, one sentence each as the schema describes it, says what happens for
-  a stopped receiver and the person's step if it stays (asked of the agent or the coding session it runs in) and, for a set webhook, that its removal is the operator's decision, told to the agent
+  `-receiver-missing-lease-held.json`, `-receiver-missing-without-receiver.json`) whose `detail`, one sentence each as the schema describes it and within about 280 characters, says what happens for
+  a stopped receiver and the person's step if it stays (asked of the agent; in the unlinked example, or the coding session it runs in), where decisions
+  other than a spend approval are answered (on the dashboard or by telling the agent, never in the bot's chat; a spend approval offered no chat or
+  session route, spend policy rule 3) and, for a set webhook, that its removal is the operator's decision, told to the agent
   or the coding session it runs in, never in the bot's chat, or taken in the channel settings.
 - `docs/ux/foundation.md` (JRN-04/#2's touchpoint, ST-035), `docs/ux/flows.md` (FLW-29), `CONTEXT.md` (the operator's
   word), `docs/DOCMAP.md`, `docs/specification/README.md`, `docs/specification/channel-agent.md` (CA-8's pointer).
-- Backlog CT-220 in progress; CT-266, CT-269, CT-271, CT-273 and CT-278 filed. The operator channel's Status table:
-  its `off` row names an `accepted` answer waiting for the token, and the tile names that step (or, with no
-  `credential` member, the step without a name, which the agent states), pinned by the positive fixture
+- Backlog CT-220 in progress; CT-266, CT-269, CT-271, CT-273, CT-278 and CT-282 filed. The operator channel's Status table:
+  its `off` row names an `accepted` answer waiting for the token (`credential.present: false` or no `credential`
+  member), and the tile names that step (or, with no `credential` member, the step without a name, which the agent
+  states), and with the token present it names the next step, telling the agent it is stored, pinned by the positive fixture
   `fixtures/positive/operator-channel-status-off-awaiting-token.json` and its catalogue row; OC-17 says a product's own
   `reason.detail` stays within 300 characters in every locale it ships.
 - Consumers read before drafting: the adapter ships the rule (FAA-207, `v0.63.0`, citing CT-220); fabric-workspace
@@ -81,11 +84,13 @@ contract already has.
     dispatched run follows its own row below (OS-4, OS-7)"), then the OW row, then DEC-0158's rows; OW-3 and OS-6 cite
     each other; and OW-3's no-person case and OS-6 name the same settlement, so one situation reads one way on the
     board: before any effect, `failed_known` with `observed: false` and a `com.reply` naming the open act. Who submits
-    it again follows OS-6's split, the operator when they own the requesting Project and the requester otherwise, and
-    only where what the person does lets a session with no person take the step (a human step cleared, a decision or
-    a relay naming the step); an act that only a session the person is in can take (OW-3's FA-09 case) is never
-    submitted again, its reply says so, and the person's session that performs it records that in the request's
-    thread. OS-6 asks its notice question (`fabric_question_ask` or the host's equal) only at a human step; at the
+    it again (round 23, seam): OS-6's never-resubmit covers only the act that only a session with a person can take
+    (OW-3's FA-09 case), which is never submitted again, its reply says so, and the person's session that performs it
+    records that in the request's thread; a request stopped at the estate's production stop or at a host's gate that a
+    relay naming the step or a grant can lift is submitted again as OW-3 says, as is one whose human step was cleared or
+    whose step a decision names. The resubmitter follows OS-6's split: the operator when they own the requesting
+    Project, otherwise the requester. A request whose asked act was done, with only a side act left open, settles
+    `completed` with the open act named in its result, in OW-3 and OS-6 alike. OS-6 asks its notice question (`fabric_question_ask` or the host's equal) only at a human step; at the
     estate's production stop or a step a host's gate holds, a dispatched run asks no question and names the step in
     its thread note and its report, as OW-3 has a session with no person do. Checks, on the merged tree:
     `grep -c 'a dispatched run follows its own row below (OS-4, OS-7)' docs/specification/conformance.md` prints 1,
@@ -97,7 +102,12 @@ contract already has.
     prints at least 1 and with `grep -c 'when they own the requesting Project'` prints at least 1, and OS-6's paragraph
     names OW-3, settles a stop before an effect as `failed_known` with `observed: false`, names the same resubmitter
     split, has no FA-09 act submitted again and scopes its notice question to a human step (judgement, where OS-6 is
-    defined).
+    defined). On the resubmission wording, on the merged tree: the OS-6 range
+    (`awk '/^- \*\*OS-6/,/^- \*\*OS-7/' docs/specification/project-comms.md`) with `grep -c 'FA-09'` prints at
+    least 1, with `grep -c 'a grant'` prints at least 1 and with `grep -c 'side act'` prints at least 1, and the OW-3
+    range with `grep -c 'side act'` prints at least 1 (judgement: OS-6's never-resubmit names only OW-3's FA-09 case, a
+    production stop or a host's gate that a relay naming the step or a grant lifts is resubmitted, and both ranges name
+    the same `completed` case).
   - DEC-0159 (CT-218, members' client keys): this requirement is written here and binds whichever of DEC-0156 and
     DEC-0159 lands second, whether or not the other branch's handoff repeats it (the coordinator relays it to that
     branch's owner). SCN-059 states the key split. Issuing and rotating a member's key are
@@ -138,10 +148,11 @@ contract already has.
     prints nothing), no backlog id appears twice (`grep -o '^| CT-[0-9]*' docs/backlog.md | sort | uniq -d` prints
     nothing; this branch adds CT-266, CT-269, CT-271, CT-273 and CT-278) and `pnpm run check` exits 0 on the merged
     tree.
-- Owed at the operator-channel status schema's next change (round 20, product): its `state` description still reads
-  `off` as "the operator has not enabled the channel"; it takes the Status table's `off` row (an `accepted` answer
-  with `credential.present: false` waits for the token, and the tile names that step). Not changed here, so the schema
-  and its vendored copies stay byte for byte. That change also decides whether `off` with an `accepted` answer requires
+- Owed at the operator-channel status schema's next change (round 20, product; backlog CT-282 since round 23): its
+  `state` description still reads `off` as "the operator has not enabled the channel"; it takes the Status table's
+  `off` row (an `accepted` answer with `credential.present: false` or no `credential` member waits for the token, and
+  with the token present the tile names telling the agent it is stored). Not changed here, so the schema and its
+  vendored copies stay byte for byte. That change also decides whether `off` with an `accepted` answer requires
   `credential` (round 21, seam); until then the row says what the tile shows without it.
 - Named risk carried to the closing verdict (round 15, product): in the no-person FA-09 case only Fabric's refused card
   and its OS notification reach the person, and the card's "Allow once" leaves the act undone; the person learns what
@@ -707,7 +718,34 @@ counter, and the board told what each consumer owes (DEC-0156's Compatibility).
   test/operator-channel.test.ts test/fixtures.test.ts test/consistency.test.ts test/positive-sweep.test.ts`, 4 files,
   1390 passed; no U+2014 in the added lines; `git merge-tree --write-tree HEAD origin/main` clean. The full gate
   (`pnpm run check`) was not run.
+- Round 23 (on `7f1b8e92`): unit and seam clean of breaks; product not clean. Break folded: the three receiver-missing
+  details (one positive, two negatives) told the person to answer decisions by telling the agent, a route spend
+  policy rule 3 never accepts for spend above `autoApproveUsd` (product). Each now reads "answer decisions, a spend
+  approval excepted, on its dashboard or by telling the agent, not in the bot's chat", one sentence of 274 characters
+  (headroom under the schema's 300, unit, seam, product), each negative failing for its original single reason;
+  mirrored in DEC-0156's Consequences and Done. Risks folded: the Status table's `off` row reads "`proposal.answer:
+  accepted` and either `credential.present: false` or no `credential` member" (unit), and says that with `accepted`
+  and `credential.present: true` the agent has not yet read the store and the tile names the next step, telling the
+  agent the token is stored, as OC-11 step 3 reads the store at its next start and when told (product); OC-11 step 2
+  names its hand-over, AP-4's `secret` step with its link or the host's secret prompt (SCN-053), never a command
+  (product); DEC-0034's Annotated line adds "and the token is stored" (unit); OW-3's no-person FA-09 case says a reader
+  takes the thread record, not the request's `failed_known` state, as the act's outcome (product); the DEC-0158
+  landing note states who resubmits on the merged text (OS-6's never-resubmit only for OW-3's FA-09 case; a production
+  stop or a host's gate that a relay naming the step or a grant can lift resubmitted as OW-3 says; the resubmitter by
+  OS-6's split; an asked act done with only a side act open settling `completed` in both) with merged-tree greps over
+  OS-6 and OW-3, binding whichever lands second (seam); the schema's `off` description and whether `off` with
+  `accepted` requires `credential` are backlog CT-282 (unit, seam, product), mirrored in DEC-0156's Consequences and
+  Open. Left as owed, no edit: the adapter's, Fabric's and fabric-workspace's mixed state until landing (DEC-0156's
+  Compatibility, the landing step) (seam, product); the sibling reconciliation, carried by the landing notes (product).
+  Declined: none.
+- On the round-23 fold (working tree over `7f1b8e92`): `pnpm run docs:check` exit 0 (271 Markdown files, 0
+  markdownlint errors); `python3 docs/ux/lint.py` exit 0 (57 scenarios); `pnpm run privacy:check` 0 findings;
+  `pnpm --silent validate` exits 0 on `fixtures/positive/operator-channel-status-degraded-receiver-missing.json` and 1
+  on the two changed negatives, each for its original single reason (`/receiver/lease` must be "none"; missing
+  "receiver"); the three changed details are 274 characters each; `pnpm vitest run test/operator-channel.test.ts
+  test/fixtures.test.ts test/consistency.test.ts test/positive-sweep.test.ts`, 4 files, 1390 passed; no U+2014 in the
+  added lines; `git merge-tree --write-tree HEAD origin/main` clean. The full gate (`pnpm run check`) was not run.
 
 ## Next task
 
-Round 23 of the blind readings of branch `agent/ct220-operators-word-v2` (DEC-0156), all three tiers.
+Round 24 blind readings of branch `agent/ct220-operators-word-v2` (DEC-0156), all three tiers.

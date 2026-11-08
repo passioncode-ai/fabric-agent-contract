@@ -150,7 +150,8 @@ words AP-2 and OA-1 already name; the rules hold for any owner.
   `observed: false` before any effect, and a `com.reply` to it names the open act and says that it waits for a session
   the person is in and that nobody submits the request to the board again (a session with no person would meet the
   same refusal); when a session the person is in performs the act, it records that in the request's thread, and the
-  requester submits nothing; a request whose asked act was done, with only a side act left open, settles `completed`
+  requester submits nothing; a reader takes that thread record, not the request's `failed_known` state, as the act's
+  outcome (the state says only that this request's session did not perform it); a request whose asked act was done, with only a side act left open, settles `completed`
   with the open act named in its result. A relay or a mandate that
   names the act changes neither mode: like the operator's words in a session the person is in, it is the reason the
   one ask quotes, not the agreement the gate holds the act for (Fabric's ADR-0160 section 4); `board.read-at-start`'s production

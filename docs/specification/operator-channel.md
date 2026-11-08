@@ -139,7 +139,9 @@ channel to its operator **once**: when it is created or adapted to Fabric, or at
 stop while the channel is off. The proposal lists its four steps, three of them the operator's:
 
 1. the operator creates a bot with @BotFather (an act in their own messenger account);
-2. the operator puts its token into the secret store under the name the agent states (a typed secret);
+2. the operator puts its token into the secret store under the name the agent states (a typed secret, which the agent
+   hands over as [service](service.md#actions) AP-4's `secret` step with its link, or as the host's secret prompt, SCN-053,
+   never as a command, OW-2);
 3. once the operator has answered `accepted` and the token is in the store under that name, the agent enables the
    channel on that answer (the operator's decision relayed as [service](service.md#actions) AP-2 says, its words in
    AP-3's form, OC-1), runs its own link command and shows the code to the person on the dashboard OC-3 names, handed
@@ -252,7 +254,7 @@ Schema: [`operator-channel-status.schema.json`](../../schemas/operator-channel-s
 
 | State | Meaning | Requires |
 |---|---|---|
-| `off` | the channel is not enabled (the default); with `proposal.answer: accepted` and `credential.present: false` it waits for the token (OC-11 step 3: the agent enables it once the token is stored), and the tile names that step, the token to store under `credential.name`, or, with no `credential` member, the step without a name, which the agent states in its reply or on its dashboard | no field beyond the common ones |
+| `off` | the channel is not enabled (the default); with `proposal.answer: accepted` and either `credential.present: false` or no `credential` member it waits for the token (OC-11 step 3: the agent enables it once the token is stored), and the tile names that step, the token to store under `credential.name`, or, with no `credential` member, the step without a name, which the agent states in its reply or on its dashboard; with `accepted` and `credential.present: true` the agent has not yet read the store (it reads it at its next start and when told, OC-11 step 3), and the tile names the next step, to tell the agent that the token is stored | no field beyond the common ones |
 | `unlinked` | enabled; no chat is bound yet, the agent waits for a code | `credential`, `receiver` with `receiver.lease: held` or `elsewhere`; no `binding` |
 | `linked` | bound; this process holds the receiving lease | `credential` present, `receiver.lease: held`, `binding`; no `reason` |
 | `standby` | bound; another process of the same agent holds the lease | `reason`, `credential`, `receiver.lease: elsewhere`, `binding` |

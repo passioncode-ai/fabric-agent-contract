@@ -1131,8 +1131,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Annotated (2026-10-11):** extended by DEC-0035 (a shared group: OC-14…OC-17).
 - **Annotated (2026-10-12):** the status table's `unlinked` row amended by DEC-0058 (`receiver.lease` `held` or `elsewhere`; a channel nobody receives on is only `degraded` with `receiver-missing`).
 - **Annotated (2026-11-08):** OC-11 amended by DEC-0156 (proposed): of the proposal's four steps, enabling the
-  channel and running the link command are the agent's once the operator answers `accepted` (AP-2, OW-2); creating the
-  bot, storing its token and typing the code stay the operator's.
+  channel and running the link command are the agent's once the operator answers `accepted` and the token is stored
+  (AP-2, OW-2); creating the bot, storing its token and typing the code stay the operator's.
 - **Amends:** nothing — a new profile beside `fabric-service/0.1` and `fabric-project-comms/0.1`,
   added under the DEC-0016 extension policy; one optional well-known surface.
 - **Decision:** An agent MAY have an **operator channel** — its own messenger channel to its
@@ -11628,14 +11628,17 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   limit as AP-1's `relayed` class, on the dashboard or by telling the agent as AP-2 says, in the bot's chat only with
   OC-6's presses once the receiver is back, the webhook's removal waiting on
   the operator's decision, OC-2, AP-2 and AP-3),
-  `docs/specification/operator-channel.md` (OC-11's third step the agent's, OW-2, on AP-2's relayed decision, the code
+  `docs/specification/operator-channel.md` (OC-11's second step handed over as AP-4's `secret` step or the host's
+  secret prompt, SCN-053, never as a command; its third step the agent's, OW-2, on AP-2's relayed decision, the code
   shown to the person only (an agent with a dashboard has its link command print to its output only that a code was issued), the store
   read for the token at the agent's next start and when the person says it is stored, a new code issued on the
   person's ask when one expires unused while the `accepted` holds and never because of a chat message, an old `accepted` renewed by one question), DEC-0034 (an Annotated line), DEC-0150 (an Annotated line:
   OW-6 keeps CA-8's bound), the operator channel's status fixtures whose
-  `detail`, one sentence each as the schema describes it, now says what happens for a stopped receiver (a supervisor
-  restarts it; if the status stays, the person asks the agent, or the coding session it runs in, to restart it and answers decisions by
-  telling the agent or on its dashboard, since an answer sent in the bot's chat may be lost after 24 hours, OC-5 and OC-17; while unlinked, the code,
+  `detail`, one sentence each as the schema describes it and within about 280 characters, now says what happens for a
+  stopped receiver (a supervisor restarts it; if it does not, the person asks the agent, in the unlinked example or the
+  coding session it runs in, to restart it, and answers decisions other than a spend approval on its dashboard or by
+  telling the agent, never in the bot's chat, which may lose them after 24 hours, OC-5 and OC-17, the detail offering
+  a spend approval no chat or session route, spend policy rule 3; while unlinked, the code,
   or a new one the person asks the agent for once it expires, OC-11) and, for a set
   webhook, that removing it or switching to it is the operator's decision, told to the agent or the coding session it runs in,
   never in the bot's chat, or taken by them in the channel settings (OC-2)
@@ -11646,10 +11649,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/specification/README.md`, `docs/specification/channel-agent.md` (CA-8's pointer), `CONTEXT.md` (the operator's
   word), the separation of the operator's businesses (OW-5) as a pointer to the
   operator's own instructions outside this contract, `docs/ux/flows.md` (FLW-29), backlog CT-220, CT-266, CT-269,
-  CT-271, CT-273 and CT-278 (filed; CT-271 rewrites the recoveries other scenarios still give the operator, under OW-2
+  CT-271, CT-273, CT-278 and CT-282 (filed; CT-271 rewrites the recoveries other scenarios still give the operator, under OW-2
   and OW-3; CT-273 names how the operator removes a channel binding they did not make; CT-278 puts the dashboard's
-  link code on a screen), the operator channel's Status table (its `off` row: an `accepted` answer waiting for the
-  token) and OC-17 (a product's own `reason.detail` within 300 characters in every locale it ships); the handoff
+  link code on a screen; CT-282 brings the status schema's `off` description to the Status table), the operator
+  channel's Status table (its `off` row: an `accepted` answer waiting for the token, with or without a `credential`
+  member, and with the token present the tile naming the next step, telling the agent it is stored) and OC-17 (a product's own `reason.detail` within 300 characters in every locale it ships); the handoff
   `docs/handoffs/2026-11-07-operators-word.md` and its row in `docs/handoffs/README.md`.
 - **Source:** the operator's words of 2026-11-04 relayed on board threads `b91254c4` and `a7a9d05d` (message
   `b66a8fae`); their words of 2026-11-07 that they press nothing in any interface (relayed by one of their projects
