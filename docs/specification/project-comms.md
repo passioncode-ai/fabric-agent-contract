@@ -947,7 +947,8 @@ contract times.
   them, and a `com.reconcile` refused because the run no longer holds the slot) ends it, never retaking the slot, and
   leaves the request as OS-5 says; a refusal of OS-6's stop note itself, after OS-6's settlement or after it leaves
   the request `in_progress`, ends nothing but the note, and the run still asks its notice question as OS-6 says (at
-  every stop, once its note was refused, naming the requester, who decides, finding no note).
+  every stop, once its note was refused, naming the requester, who decides, finding no note, on a `failed_known`
+  request; a request left `in_progress` is still not submitted again until the owner settles it, OS-6).
 - **OS-5, a run that dies.** A run that ends without settling the request leaves it in the state this extension gives
   it, and no host changes that state for it: `queued` stays queued; `claimed` is taken again by the next `com.claim`
   under a new attempt; `accepted` is held (C4) and continues only by a replacement with a checkpoint transfer
@@ -1047,22 +1048,23 @@ the refused run's cause was the operator's to lift. The requester sees no signal
   requesting Project they own (OS-5); otherwise "the requester submits it again once the step is taken" (at the estate's production stop, "once it carries
   the operator's relayed words naming the step" in place of "once the step is taken"). After a
   request left `in_progress`: "do not submit it again; it reaches the owner as `outcome_unknown` once a session of the
-  target Project takes the slot". A run, or a session the operator opened (OS-5), that settles `failed_known` a request an earlier run left
+  target Project takes the slot". After a side act's `completed` settlement: nothing is submitted again, and the
+  open act is the person's. A run, or a session the operator opened (OS-5), that settles `failed_known` a request an earlier run left
   `in_progress` at a stop writes the same `failed_known` note, by the earlier run's record. A `failed_known` request
   with no such note in its thread (a responder's own reason, a run's time limit, OS-4, or a note a
   [hold](#what-a-hold-refuses) refused, since a thread hold refuses a participant's `com.reply` and never
   `com.complete`) is the sole exception to the rule for a request whose stop note is in its thread (above): its requester decides whether to submit it again, finding
   no note, at a host's gate too. A run whose note was refused asks its notice question at every stop, a host's gate and
   the production stop included; the question names the step and why no route avoided it, and one actor with one
-  directive, "the requester decides, finding no note", never a note's directive (at a host's gate, that nobody submits
-  it again) beside it. A request submitted again from a host's gate meets the same refusal in a later run, which
+  directive: on a `failed_known` request, "the requester decides, finding no note", never a note's directive (at a host's gate, that nobody submits
+  it again) beside it; on a request left `in_progress`, that it is not submitted again until the owner settles it. A request submitted again from a host's gate meets the same refusal in a later run, which
   settles it and writes the note. So the requester submits it again only when that note, the operator, the owner's
   settlement (below) or the absence of a note says so. Once
-  the person has taken the step, the one the note names submits a `failed_known` request again (a requester's wake for
+  the person has taken the step (at the estate's production stop, once the request carries the relayed words naming the step), the one the note names submits a `failed_known` request again (a requester's wake for
   it is CT-150); a request left `in_progress` is not submitted again, since a new request's run gets no earlier effect
   key (OS-2, OS-5), until the estate owner settles it ([owner settlement](#owner-settlement), `settledBy: "owner"`):
   settled `failed_known` (observed: the effect did not happen), the one a run's `failed_known` note would name submits
-  it again once the step is taken (the operator through a session of the requesting Project they own, otherwise the
+  it again once the step is taken (at the estate's production stop, once the request carries the relayed words naming the step; the operator through a session of the requesting Project they own, otherwise the
   requester; at a host's gate, nobody); settled `completed`, nothing is submitted again.
 - **OS-7, slots and mandates.** A dispatched run holds a slot only while it works: it never takes a slot from a live
   holder, uses `com.responder_replace` only to continue a held `accepted` request whose holder is gone (CT-175), and

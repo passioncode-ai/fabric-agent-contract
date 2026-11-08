@@ -11513,17 +11513,21 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      step) only when the operator owns the requesting Project (a Project the run's own `com.directory` lists), since the
      operator acts only through a session of the requesting Project they own, and otherwise "the requester submits it
      again once the step is taken"; after a request left `in_progress`, "do not submit it again; it reaches the owner
-     as `outcome_unknown` once a session of the target Project takes the slot". After the step the one the note names
+     as `outcome_unknown` once a session of the target Project takes the slot"; after a side act's `completed`
+     settlement, nothing is submitted again and the open act is the person's. After the step (at the estate's
+     production stop, once the request carries the relayed words naming the step) the one the note names
      submits a `failed_known` request again (a requester's wake is CT-150), and a request left `in_progress` is not
      submitted again (a new request's run gets no earlier effect key) until the estate owner settles it (`settledBy:
      "owner"`): settled `failed_known` (observed), the one a run's `failed_known` note would name (the operator through a
      session of the requesting Project they own, otherwise the requester; at a host's gate, nobody) submits it again
-     once the step is taken; settled `completed`, nothing is submitted again. A later run or opened session that settles `failed_known` a
+     once the step is taken (at the estate's production stop, once the request carries the relayed words naming the
+     step); settled `completed`, nothing is submitted again. A later run or opened session that settles `failed_known` a
      request an earlier run left `in_progress` at a stop writes the same note; a `failed_known` request with no such
      note (a responder's own reason, a run's time limit, a refused note) is that sole exception: its requester decides,
      finding no note, at a host's gate too. A run whose note was refused asks its notice question at every stop, naming
-     the step and one actor with one directive, "the requester decides, finding no note", never a note's directive (at
-     a host's gate, that nobody submits it again) beside it; a request submitted again from a host's gate meets the
+     the step and one actor with one directive, on a `failed_known` request "the requester decides, finding no note", never a note's directive (at
+     a host's gate, that nobody submits it again) beside it, and on a request left `in_progress` that it is not
+     submitted again until the owner settles it; a request submitted again from a host's gate meets the
      same refusal in a later run, which settles it and writes the note.
   7. **Slots and mandates (OS-7).** A run holds a slot only while it works, never takes one from a live holder, uses a
      replacement only to continue a held request whose holder is gone (CT-175), and is never offered as the receiving
@@ -11582,7 +11586,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   among it, as an act that stops and asks (`docs/adr/0160-on-the-operators-machine-an-act-happens-at-once-is-recorded-and-can-be-undone.md:36-38`),
   and its floor asks whether an agent asker can be held to the act before it reads any grant, refusing one it cannot
   contain (`apps/desktop/src/main/policy.ts:324-347`, `apps/desktop/src/shared/containment.ts:1-22`; the finding's row
-  `docs/audit/2026-09-09-final/core-tasks.json:321`).
+  `docs/audit/2026-09-09-final/core-tasks.json:321`). A dispatched run is one it cannot contain because its on-demand
+  spec launches the run with every permission, `--permissions all`
+  (`docs/evidence/specs/2026-11-04-on-demand-sessions.md:51`, `:67`), and containment is a property of the runner and
+  permission-mode pair (`containment.ts`).
   It owes, at its next pin: a held slot, Project or thread is no candidate (its `responderLive` reads a held holder as
   not live and starts a run into the hold); a run that found the slot `active` with another live holder, whose
   enrollment was refused `held` or `fenced`, whose work a hold refused or that the operator's move fenced is not

@@ -167,6 +167,16 @@ package the run is handed, (b) its lifecycle and a dead run's request, (c) how i
   settles it and writes the note; OS-6, item 6 and the run's conformance row changed together, OS-4's refused-note
   sentence aligned, SCR-19 and the run's row say "a refused note" / "one whose note was refused"; SCN-025's
   `in_progress` hold says "do not submit it again"; FA-09 pinned in the Compatibility at Fabric's main `eafcf2e4`.
+- Round 17: the drafted knowledge-base items carry OS-6's rule. Item 3's `failed_known` line says the request is
+  submitted again only once the step is taken (at the production stop, once it carries the relayed words naming the
+  step), by the one the run's note names, at a host's gate by nobody, and after the owner's settlement by the operator
+  when they own the requesting Project, otherwise the requester, and at a host's gate nobody; its `in_progress` and
+  `completed` lines say a request left `in_progress` waits for the owner's settlement and a side act left open is the
+  person's. Item 8 settles a request whose asked act was done and observed, with only a side act left at the stop,
+  `completed`, and scopes its production-stop note to `failed_known`. OS-4, OS-6, item 6, the run's row and SCN-025
+  scope the refused-note directive ("the requester decides, finding no note") to a `failed_known` request; OS-6 and
+  item 6 name the side-act `completed` directive and the production stop's "once the request carries the relayed
+  words naming the step" in their later sentences; the Compatibility cites Fabric's every-permission launch.
 
 ## Decisions taken here
 
@@ -391,12 +401,16 @@ unchanged but its last paragraph, below):
 >   request's lifecycle advances its revision, so the board refuses `revision_conflict` when the request moved). On `revision_conflict`, read it again.
 > - `expired`: no run accepted it; make the change.
 > - `claimed`, `accepted`, `in_progress` or `outcome_unknown`: a run or another holder has it; never make the change.
->   Wait on a watcher (item 2) and act on it only as item 1 says.
+>   Wait on a watcher (item 2) and act on it only as item 1 says. A request a run left `in_progress` at a stop is
+>   not submitted again until the owner settles it, whatever a run's notice says (OS-6).
 > - `completed` or `cancelled`: settled; make no change for it, except one you cancelled under the first line. A
->   cancel you did not send means another session of your Project acted on it: submit nothing for it.
-> - `failed_known`: settled as not done; make no change for it. Once the step is taken, the one the run's note in the
->   thread names submits it again; after the owner's settlement (`settledBy: "owner"`), the operator when they own
->   your Project, otherwise you; with no such note, you decide (OS-6).
+>   cancel you did not send means another session of your Project acted on it: submit nothing for it. A `completed`
+>   request whose result names an act left open at a stop is not submitted again: that act is the person's (OS-6).
+> - `failed_known`: settled as not done; make no change for it. Where a run's stop note is in the thread, it is
+>   submitted again only once the step is taken (at the estate's production stop, once the request carries the
+>   operator's relayed words naming the step), by the one the note names, and at a host's gate by nobody, since a
+>   later run meets the same refusal; after the owner's settlement (`settledBy: "owner"`), the operator when they own
+>   your Project, otherwise you, and at a host's gate nobody. With no such note in the thread, you decide (OS-6).
 >
 > If your change does not land, submit the request again.
 
@@ -423,15 +437,21 @@ a run a host starts (item 5)".
 "One approval binds all", item 8, two additions (its production stop kept):
 
 > A session started for a request settles it before it stops at a step that needs a person, this item's production
-> step included: `failed_known` with
+> step included. A request whose asked act the session did and observed, with only a side act left at the stop, it
+> settles `completed`, the open act named in its result and its note; nothing is submitted again, and the open act is
+> the person's. Otherwise it settles `failed_known` with
 > `observed: false` before an effect began; after one, `failed_known` only once it observed that no effect happened,
 > and otherwise it leaves the request `in_progress` for the next holder; then it names the stop once in the thread
-> (contract DEC-0158 OS-6). At this item's production step it asks no question, and its note names the step and says
-> the request is submitted again once it carries the operator's verbatim relayed words naming that step (date,
-> source, scope), which lift this stop as above. At an act a host refuses to a session with no person whatever is
+> (contract DEC-0158 OS-6). At this item's production step it asks no question, and its note names the step and, after
+> `failed_known`, says the request is submitted again once it carries the operator's verbatim relayed words naming
+> that step (date, source, scope), which lift this stop as above, by the one the note names (the operator when they
+> own the requesting Project, otherwise the requester); after a request left `in_progress`, that it is not submitted
+> again until the owner settles it. At an act a host refuses to a session with no person whatever is
 > agreed (Fabric's FA-09 refusal of a `floor.ask-first` act, which no relay, mandate or grant passes) it asks no
 > question, and its note says the act waits for a session the person is in and that nobody submits the request to the
-> board again. Where its note is refused, it asks the operator through the host's question surface instead.
+> board again. Where its note is refused, it asks the operator through the host's question surface instead, naming
+> the requester, who decides, finding no note, on a `failed_known` request; a request left `in_progress` is still not
+> submitted again until the owner settles it.
 
 and its close rule's parenthesis, aligned with OS-5's terminal states:
 
@@ -567,6 +587,15 @@ Its check: the knowledge base's own gate on the change, then a reading of the me
   '/^- \*\*OS-6/,/^- \*\*OS-7/' docs/specification/project-comms.md | grep -c "every stop but the estate's production
   stop and a host's gate"` printed 0; `awk '/^### DEC-0158/,0' docs/DECISIONS.md | grep -c 'W4-7\|comms-directory-held'`
   printed 1. The full `pnpm run check` was not run in this round.
+
+## Checks run on the round-17 commit
+
+- On the tree of the round-17 commit (parent `818de9eb`): `pnpm run docs:check` exit 0 (lint:md 271 files, 0
+  errors); `python3 docs/ux/lint.py` exit 0 (40 stories, 34 flows, 34 screens, 56 scenarios); `pnpm run
+  privacy:check` exit 0 (0 findings); `pnpm vitest run test/mandate.test.ts test/consistency.test.ts` exit 0 (2 files,
+  108 tests); `git diff origin/main...HEAD | grep '^+' | grep -c` of U+2014 printed 0; `git merge-tree --write-tree
+  HEAD origin/main` exit 0. `pnpm vectors:check` and the full `pnpm run check` were not run in this round (no vector or
+  code changed).
 
 ## Rounds
 
@@ -913,14 +942,35 @@ Its check: the knowledge base's own gate on the change, then a reading of the me
   `:36-38`, the finding's row `docs/audit/2026-09-09-final/core-tasks.json:321`) (unit); SCN-025's `in_progress`
   hold uses OS-6's "do not submit it again" (unit); the run's row and SCR-19 say "one whose note was refused" and
   "a refused note", not a thread hold alone (unit).
+- Round 17 (on `818de9eb`), not clean: the unit reading failed with two breaks and four risks; the seam and product
+  readings were not run on this head, since both breaks are in the drafted knowledge-base text they would read, which
+  lands as drafted with the merge. Breaks folded, both in the draft above (unit): drafted item 3's `failed_known` line
+  told the requester that after the owner's settlement the operator or the requester submits it again, with no host's
+  gate exception, and no production-stop condition; it now reads as OS-6 does ("after the owner's settlement
+  (`settledBy: "owner"`), the operator when they own your Project, otherwise you, and at a host's gate nobody", and
+  "once the request carries the relayed words naming the step" at the production stop). Drafted item 8 had no side-act
+  case, so a run whose only open act was the production deploy would leave the request `in_progress`; it now carries
+  OS-6's sentence ("A request whose asked act the session did and observed, with only a side act left at the stop, it
+  settles `completed`, the open act named in its result and its note"). Re-read of drafted items 1, 3, 4, 5 and 8
+  against OS-4 and OS-6: item 3's `in_progress` and `completed` lines and item 8's production-stop note (scoped to
+  `failed_known`, with the `in_progress` directive and the refused-note question) restated; items 1, 4 and 5 and "The
+  project board" items 3 and 4 already agreed. Risks folded: OS-6's later sentences and item 6 add "at the estate's
+  production stop, once the request carries the relayed words naming the step" beside "once the step is taken" (unit);
+  the refused-note directive is scoped to a `failed_known` request, and a request left `in_progress` is still not
+  submitted again until the owner settles it, in OS-4, OS-6, item 6, the run's row in
+  `docs/specification/conformance.md` and SCN-025 (unit); OS-6 and item 6 name the side-act `completed` settlement's
+  directive (nothing is submitted again; the open act is the person's) (unit); the Compatibility cites Fabric's
+  every-permission launch beside FA-09, its on-demand spec `docs/evidence/specs/2026-11-04-on-demand-sessions.md:51`
+  and `:67` at `eafcf2e4`, verified read only with `git show` (unit).
 
 ## Next task
 
-Round 17 blind readings (unit, seam, product) of branch `agent/ct215-on-demand-20261108` (DEC-0158), all three
+Round 18 blind readings (unit, seam, product) of branch `agent/ct215-on-demand-20261108` (DEC-0158), all three
 tiers, read hardest at OS-6's resubmission rule (the "only where" sentence binding a request whose stop note is in its
 thread, the no-note path its sole exception), the refused-note notice question's one actor and one directive, the
 production stop (submitted again once the relayed words naming the step are carried) and a host's gate (FA-09, never
-submitted again by a reader of the note), and the drafted items 1, 3 and 8 against agents-first.md and, on the merged
+submitted again by a reader of the note), the side-act `completed` settlement and its directive, the refused-note directive scoped to `failed_known`, and the
+drafted items 1, 3, 5 and 8 against OS-4, OS-6 and agents-first.md and, on the merged
 tree, DEC-0156's OW-3 (see Open on its notice-question and no-note judgements). At landing, also the sibling
 requirements in Open (DEC-0156, DEC-0159, DEC-0157), whichever branch lands second. At landing:
 DEC-0158 Accepted with its rounds, the amendment line and DEC-0022's annotation without "proposed", CT-215 done, the
