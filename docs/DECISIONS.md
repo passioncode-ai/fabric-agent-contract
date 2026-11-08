@@ -11635,7 +11635,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   receives them, Fabric Dashboards', Fabric's and the launcher's, cited here) neither say where the data is sent nor
   link a usage data page, so each owes that (UD-1). The host's owner (PassionCode.ai Platform) deletes events after
   730 days and removes installation ids from them after 400 days (PLAT-132; its `infra/analytics/README.md` line 49
-  and `deploy/config.env` lines 39 to 40 at `e4d1c0e`), its backups keeping them beyond that (nightly copies 14 days
+  and `infra/analytics/deploy/config.env` lines 39 to 40 at `e4d1c0e`), its backups keeping them beyond that (nightly copies 14 days
   on disk, carried off the host by a weekly droplet backup, line 48), the retention each product's UD-5 page states;
   it offers no erasure by installation id today (only that nightly retention pass), so each product's UD-5 page says
   that data already sent cannot be erased, unless the host's owner files such a route; it admits a reader of the raw
@@ -11759,13 +11759,16 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   dropped. `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `docs/specification/usage-data.md` (new), `docs/OPEN_QUESTIONS.md` (OQ-0013, the second
   purpose and the hosted services' scope, for the operator), `docs/specification/conformance.md` (a product
-  row, an agent row, the OD-9 declarer's row and the collector's row), `docs/specification/ops-digest.md` (OD-6 and Not
+  row, an agent row, the OD-9 declarer's row, the collector's row, and the rows for a device applying policy and a
+  device deciding under its policy), `docs/specification/ops-digest.md` (OD-6 and Not
   decided here point to UD-6), `docs/specification/activity.md` (its purpose points to UD-6's channel separation),
   `docs/specification/openrouter-attribution.md` (its default points to UD-6), `docs/specification/devices.md`
   ("Precedence and locks" points to UD-2's limit on a lock),
-  `docs/specification/README.md`, `docs/DOCMAP.md`, `CONTEXT.md` (usage data), `docs/ux/scenarios.md` (SCN-043's alt
-  path for UD-4 and its Coverage), backlog CT-216 and CT-280 (a reference for UD-2's limit on a lock); the handoff `docs/handoffs/2026-11-07-usage-data.md` and its row in
-  `docs/handoffs/README.md`. The notice and the switch are each product's screens (Fabric's SCR-52 and SCN-134, which
-  owe UD-1 and UD-2 under its CO-496 rewrite), not this contract's UX.
+  `docs/specification/README.md`, `docs/DOCMAP.md`, `CONTEXT.md` (usage data; Policy layer), `docs/ux/scenarios.md` (SCN-043's alt
+  path for UD-4 and its Coverage; SCN-011's alt path, Expected result and Coverage for UD-2's lock limit),
+  `docs/ux/flows.md` (FLW-07), `docs/ux/screens.md` (SCR-10), `docs/ux/foundation.md` (ST-008, JTBD-04, JRN-03 #2), backlog CT-216 and CT-280 (a reference for UD-2's limit on a lock); the handoff `docs/handoffs/2026-11-07-usage-data.md` and its row in
+  `docs/handoffs/README.md`. The notice and each product's own switch screens are the product's (Fabric's SCR-52 and SCN-134,
+  which owe UD-1 and UD-2 under its CO-496 rewrite), not this contract's UX; the contract's device-settings surface
+  (SCR-10, FLW-07) carries UD-2's lock limit.
 - **Source:** the operator's decision of 2026-11-04 (CT-216; the knowledge base's roadmap track RM-13, product analytics private by default, and plans.md item D); the reading of the operator's decision in board reply `cbea0b76`; the consent rules of the estate's growth and experiments service (board `42a41db8`); Fabric
   ADR-0127 and `docs/ANALYTICS.md`; Fabric Switchboard `docs/ANALYTICS.md`. DEC-0157 reserved by git CAS on 2026-11-07.

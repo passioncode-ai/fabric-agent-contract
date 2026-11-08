@@ -91,8 +91,8 @@ The key words MUST, MUST NOT, SHOULD and MAY are used as in RFC 2119.
   CO-496). A device policy ([devices](devices.md#policy)) whose layer carries a key for a product's switch MAY lock it
   off; it MUST NOT lock it on, since a person who declined stays off and the switch is the person's (UD-4). A product
   ignores a lock that would hold its switch on: its switch resolves as if that layer's lock were absent, so a lower
-  layer's lock off still holds and, where none holds it off, the person's own setting (or an earlier no) governs; the
-  product does not show the switch as locked on. The reference resolution (`resolvePolicy`, [devices](devices.md#policy))
+  layer's lock off still holds and, where none holds it off, the person's own setting (or an earlier no) governs, never the value of a layer whose lock
+  was dropped; the product does not show the switch as locked on. The reference resolution (`resolvePolicy`, [devices](devices.md#policy))
   does not apply this limit: the product applies it after resolution, resolving the key again without any lock that
   would hold it on; nor does the reference device decision (`expectedDecision`, `FAC-SEM-068`) apply it to a local
   change, which it refuses for any locked key (a reference helper and its vectors are CT-280).
@@ -252,7 +252,7 @@ meets UD-1's "where"; the other notices read (Switchboard's, which says its coun
 who receives them, Fabric Dashboards', Fabric's and the launcher's, each cited in DEC-0157's Compatibility) neither say
 where the data is sent nor link a usage data page, so each owes that (UD-1). The host's owner (PassionCode.ai
 Platform) deletes events after 730 days and removes installation ids from them after 400 days (PLAT-132; its
-`infra/analytics/README.md` line 49 and `deploy/config.env` lines 39 to 40 at `e4d1c0e`), and its backups keep them
+`infra/analytics/README.md` line 49 and `infra/analytics/deploy/config.env` lines 39 to 40 at `e4d1c0e`), and its backups keep them
 beyond that (nightly copies 14 days on disk, carried off the host by a weekly droplet backup, line 48): the retention
 each product's usage data page states (UD-5). The host offers no erasure by installation id today (only that nightly
 retention pass), so each product's page says that data already sent cannot be erased, unless the host's owner files

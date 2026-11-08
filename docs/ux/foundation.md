@@ -363,13 +363,13 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 
 ### ST-008: Member sees which settings are locked
 
-- **Story:** As P-03, I want a setting the organization locked to show as locked and refuse my change, so that I know where my choice applies.
+- **Story:** As P-03, I want a setting the organization locked to show as locked and refuse my change (save a lock UD-2 ignores), so that I know where my choice applies.
 - **Traces:** JTBD-04, JRN-03/#2
 - **Acceptance criteria:**
   - Given `logging.required` is locked by the server, when I try to switch logging off, then the device refuses and shows the key as locked by the server.
   - Given `x-example.banner` is an unlocked default, when I change it, then my value is the effective one.
   - Given a policy whose signature does not verify, when it arrives, then the device keeps the revision it holds.
-  - Given a server or mdm layer locks a product's usage data switch on and no lower layer locks it off, when I switch it off, then my off takes effect and the switch is never shown as locked on; given a lock off on it, my change to on is refused and the switch is shown as locked (UD-2, DEC-0157).
+  - Given a server or mdm layer locks a product's usage data switch on and no other layer locks it off, when I switch it off, then my off takes effect and the switch is never shown as locked on; given a lock off on it, my change to on is refused and the switch is shown as locked (UD-2, DEC-0157).
 - **Priority:** must
 - **Status:** draft
 - **Product:** unobserved

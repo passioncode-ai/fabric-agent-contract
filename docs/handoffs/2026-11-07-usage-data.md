@@ -70,12 +70,16 @@ decision of 2026-11-04.
   and, now and independently of CO-496, a string-only correction of its three strings that say its switch governs
   every app, `i18n/en.ts` lines 864, 869 and 870, with their Russian copies `i18n/ru.ts` lines 2488, 2493 and 2494 and
   its `README.md` lines 336 to 338 and its `docs/ANALYTICS.md` lines 92 to 94, the page that README sends readers to
-  ("`analytics: false` turns analytics off for every PassionCode app on the machine") (all at `eafcf2e4`), the README's "one person using several apps counts once" (line
-  336) saying one installation instead, and an agent twin for its switch (UD-4) at CO-496;
+  ("`analytics: false` turns analytics off for every PassionCode app on the machine") and its interface string registry `docs/brand/strings.md` lines 706 and 716, which repeat `en.ts` lines 869 and 870 (all at `eafcf2e4`), the README's "one person using several apps counts once" (line
+  336) saying one installation instead, the corrected strings saying, until CO-496 removes the write, that Fabric's off also tells
+  PassionCode apps on this computer that have not yet sent to stay off and that its on clears that (not "for Fabric
+  only", which the write makes false for those apps), and an agent twin for its switch (UD-4) at CO-496;
   Switchboard, with an action for its switch and a manifest capability for that tool (UD-4), and UD-1's purpose in its
-  notice (its "to help PassionCode.ai improve its apps", `src/main.ts` line 109 at `f6f1dc1`, names every app), and the
+  notice (its "to help PassionCode.ai improve its apps", `src/main.ts` line 109 at `f6f1dc1`, names every app; its Russian copy is `src/locales/ru.ts` line 68 at its
+  `origin/main` `6461505`), and the
   same line's "lets one person using several of them count once" saying "one installation" (or "this computer")
-  rather than "one person", a new notice under UD-1's re-show rule (OQ-0013); its `docs/ANALYTICS.md` line 48 at
+  rather than "one person", a new notice under UD-1's re-show rule (OQ-0013), with its `docs/ANALYTICS.md` lines 6 to 8 at `d192cfa`, which repeat both ("so
+  PassionCode can see how its apps are used", one person using several tools counting once); its `docs/ANALYTICS.md` line 48 at
   `d192cfa` already says its switch turns Switchboard only, which the site's Switchboard page contradicts (the site
   owner's line); Fabric Inbox, its
   exported shared-field writer kept uncalled, an agent twin for its switch on its desktop copy (UD-4; its B-236 at
@@ -91,7 +95,8 @@ decision of 2026-11-04.
   Fabric Inbox alone and its stale menu label "Share Anonymous Usage Counts" to the menu's "Share Usage Details"
   (`desktop/menu.cjs` line 26 at `c9d9cc7`), a UD-2 debt since they contradict its own notice; and its notice's "counts one person once"
   (`desktop/main.cjs` line 937) saying "one installation" (or "this computer") rather than "one person", a new notice
-  under UD-1's re-show rule (OQ-0013); Fabric Dashboards, the same for its events sent without an id (`src/core/analytics.ts` lines 59 to 60 and 170
+  under UD-1's re-show rule (OQ-0013), with its `docs/ANALYTICS.md` lines 10 to 11 at `1395416`, which carry the same
+  "one person ... counts once"; Fabric Dashboards, the same for its events sent without an id (`src/core/analytics.ts` lines 59 to 60 and 170
   to 171 at `d43c94e`), FD-175 and a manifest capability for that tool included, its switch's action refusing
   `operator-decision-required` without a decision rather than run as the caller's own act (`src/mcp/server.ts` lines
   332 to 333 at `d43c94e`); the launcher (PC-123, before 0.2.76 is tagged):
@@ -124,7 +129,11 @@ decision of 2026-11-04.
   for every product that sends; and the same correction on its two product pages, `switchboard/index.html` line 89
   ("the switch applies to every PassionCode.ai tool", already false of Switchboard by its own `docs/ANALYTICS.md` line
   48 at `d192cfa`, and "lets one person count once" to say one installation) and `fabric/index.html` line 61 ("which
-  applies to every PassionCode.ai app on your Mac"), each with its nine locale copies at `e7a2ed25`; the
+  applies to every PassionCode.ai app on your Mac"), each with its nine locale copies at `e7a2ed25`; its home page's FAQ
+  "Where does my data go?" (`index.html` line 245 and its JSON-LD answer at line 54, in all ten locales at
+  `e7a2ed25`), which names only Switchboard and Fabric as sending, the privacy page's omission; and the Switchboard
+  page's stale label "About → Share anonymous usage counts" (line 89) corrected to the app's "Share anonymous usage
+  and error counts" (Switchboard `src/main.ts` line 2479 at its `origin/main` `6461505`); the
   estate's hosted workspace product, whose self-hosted image owes UD-3's session id and UD-4's product side (a
   `relayed` action for its switch, which is today only on its Organization page and an admin route recorded as a
   person's act, its MCP server declaring no actions extension), and whose planned well-known declaration of its
@@ -843,6 +852,40 @@ not pushed for the same reason; the round entries' commits resolve only there.
   and the row "a device applying policy" 1 each, and `grep -c '^| a device deciding under its policy .*CT-280'` 1.
   Not the full gate.
 
+- Round 20 (on `d205114a`, all three tiers), not clean: unit failed (two breaks), seam passed with three risks,
+  product failed (one break, the same SCN-011 break the unit tier found). Breaks: SCN-011's Expected result said "no
+  locked key changes locally" against its own UD-2 alt path; it now adds "save a product's usage data switch held on
+  only by locks UD-2 ignores, whose effective value is the person's own setting or an earlier no (UD-2, DEC-0157)",
+  the alt path says the member's change to on under a lock off is refused like any locked key, and its Coverage marks
+  UD-2 as owed to CT-280 (FAC-SEM-068's reference refuses this change today) (unit and product). DEC-0157's
+  Consequences listed neither the two device conformance rows nor the device-settings UX the branch changed; it now
+  names the rows "a device applying policy" and "a device deciding under its policy", `docs/ux/flows.md` (FLW-07),
+  `screens.md` (SCR-10), `foundation.md` (ST-008, JTBD-04, JRN-03 #2) and SCN-011, reads `CONTEXT.md` "(usage data;
+  Policy layer)", and says the notice and each product's own switch screens are the product's while the contract's
+  device-settings surface (SCR-10, FLW-07) carries UD-2's lock limit (unit). Risks folded: ST-008's Story reads "(save
+  a lock UD-2 ignores)" and its criterion "no other layer locks it off" (unit); FLW-07's goal and SCN-011's alt path
+  say the device and the product ignore the lock, and FLW-07's task analysis reads "or an earlier no" (unit); UD-2
+  carries devices.md's "never the value of a layer whose lock was dropped", and CT-280 takes a vector for an `mdm`
+  lock on over an unlocked `server` default off with the user layer silent (seam); the row "a device applying policy"
+  says the device's `effective` keeps the lock's value as `FAC-SEM-042` compares it, the product re-resolving after
+  it, a helper being CT-280 (seam); the platform retention citation reads `infra/analytics/deploy/config.env` lines 39
+  to 40 at `e4d1c0e` in the page and in DEC-0157's Compatibility, read there (`RETAIN_EVENT_DAYS=730`,
+  `RETAIN_IDENTIFIER_DAYS=400`) (seam); the board message's Fabric line gives the interim wording until CO-496 removes
+  the shared write (Fabric's off also tells PassionCode apps on this computer that have not yet sent to stay off, its
+  on clears that) (product); the board message names Fabric's `docs/brand/strings.md` lines 706 and 716 at
+  `eafcf2e4`, Switchboard's `src/locales/ru.ts` line 68 at its `origin/main` `6461505` and its `docs/ANALYTICS.md`
+  lines 6 to 8 at `d192cfa`, Fabric Inbox's `docs/ANALYTICS.md` lines 10 to 11 at `1395416`, the site home page's FAQ
+  (`index.html` line 245 and its JSON-LD at line 54, all ten locales at `e7a2ed25`) and the site Switchboard page's
+  stale label against the app's "Share anonymous usage and error counts" (Switchboard `src/main.ts` line 2479), each
+  read at its commit (product); CT-280 takes the neighbouring path, the organization server's policy authoring
+  refusing or warning on a lock on for a usage switch key and the device's status naming a lock UD-2 dropped
+  (product).
+- On the round 20 fold (the working tree before this entry's check line): `pnpm run docs:check` exit 0 (272 Markdown
+  files, 0 errors), `python3 docs/ux/lint.py` exit 0 (40 stories, 34 flows, 34 screens, 56 scenarios), `pnpm run
+  privacy:check` 0 findings, `pnpm vitest run test/device-rules.test.ts test/consistency.test.ts` 193 tests passed,
+  `git merge-tree --write-tree HEAD origin/main` exit 0, no U+2014 in the lines added against `origin/main`.
+  Not the full gate.
+
 ## Next task
 
-Round 20 of the blind readings of branch `agent/ct216-usage-data-v2` (DEC-0157), all three tiers.
+Round 21 of the blind readings of branch `agent/ct216-usage-data-v2` (DEC-0157), all three tiers.
