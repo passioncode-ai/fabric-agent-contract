@@ -71,8 +71,10 @@ decision of 2026-11-04.
   every app, `i18n/en.ts` lines 864, 869 and 870, and an agent twin for its switch (UD-4) at CO-496;
   Switchboard, with an action for its switch and a manifest capability for that tool (UD-4); Fabric Inbox, its
   exported shared-field writer kept uncalled, an agent twin for its switch on its desktop copy (UD-4) and sending
-  nothing in a run where the shared file cannot be read (UD-2, its baseline at `desktop/analytics.cjs` lines 307 to
-  310); Fabric Dashboards, the same for its events sent without an id (`src/core/analytics.ts` lines 59 to 60 and 170
+  nothing in a run before its first send (or before its conforming version's stand-in run) in which the shared file
+  cannot be read (UD-2, its baseline at `desktop/analytics.cjs` lines 307 to 310), and that its server is counted by
+  each member's app under that member's switch, so an organization deploying it holds no switch over those counts (UD-1's
+  scope); Fabric Dashboards, the same for its events sent without an id (`src/core/analytics.ts` lines 59 to 60 and 170
   to 171 at `d43c94e`), FD-175 and a manifest capability for that tool included, its switch's action refusing
   `operator-decision-required` without a decision rather than run as the caller's own act (`src/mcp/server.ts` lines
   332 to 333 at `d43c94e`); the launcher (PC-123, before 0.2.76 is tagged):
@@ -94,15 +96,25 @@ decision of 2026-11-04.
   (their history copied from it on 2026-10-17; installs older than Fabric 0.3.7, Switchboard 0.6.42 and Fabric Inbox
   0.19.0 sent there until they updated), which keeps events 2 years, removes installation ids after 400 days, has its
   own erasure of the ids the estate's growth and experiments service deleted and an off-host copy of 28 days, and
-  which that service still reads, so each of the three products' UD-5 page states that store until its apps there are
-  retired (PLAT-019's remainder); the owner of PassionCode.ai's privacy page (the
+  which that service and the operator's own estate monitor (reading counts) read, so each of the three products' UD-5
+  page states that store, its two readers included, until its apps there are retired (PLAT-019's remainder), and
+  PLAT-019's retirement of those apps does not end the store, since Project Observatory sends every install's usage
+  data there by default; the owner of PassionCode.ai's privacy page (the
   organization's site repository `passioncode-ai.github.io`, line 60 of `privacy/index.html` and of its nine locale
   copies, `de`, `es`, `fr`, `ja`, `ko`, `pl`, `pt-br`, `ru` and `zh-hans`, at `e7a2ed25`): UD-2's
   switch for each product alone in place of "the switch applies to every PassionCode.ai app", and UD-5's statements
   for every product that sends; the
-  estate's hosted workspace product, whose self-hosted image owes UD-3's session id; the estate's growth and experiments service; the adapter; Okolos and Observatory to
-  check themselves, Observatory knowing that it already sends usage data on by default since its 0.33.0 (OBS-324) and
-  confirming that its encrypted snapshot's key is the person's; the hosted products of
+  estate's hosted workspace product, whose self-hosted image owes UD-3's session id and UD-4's product side (a
+  `relayed` action for its switch, which is today only on its Organization page and an admin route recorded as a
+  person's act, its MCP server declaring no actions extension), and whose planned well-known declaration of its
+  counting (its design doc, line 301) has nothing to declare, since CT-216 lands with no machine declaration (UD-5); the
+  estate's growth and experiments service; the adapter; Okolos (which sends to `analytics.passioncode.ai`, so the
+  host's reader reads it) to check itself; Project Observatory, which turned usage data on by default in its 0.33.0
+  and first sent it from 0.33.1, the first release build carrying its key (OBS-324, OBS-329), and sends it to the
+  operator's earlier analytics instance, not PassionCode.ai's host: its notice names no destination (UD-1's "where"),
+  its UD-5 page states that store (retention, erasure, off-host copy, both readers) and that its OpenRouter attribution
+  goes out whatever its usage data switch says (UD-6), and it confirms that its encrypted snapshot's key is the
+  person's; the hosted products of
   plans.md item D only where they ship an installed product, pending OQ-0013; the operator asked OQ-0013); the board message says each
   product's install and active counts move at the version that meets UD-1 and UD-2 (they drop where the product sent
   before its notice or past an earlier no, Switchboard, Fabric Inbox and Fabric Dashboards; they rise where it waited
@@ -118,13 +130,19 @@ decision of 2026-11-04.
   CT-216 as "what usage data every product shares: UD-1 to UD-6, no machine declaration" (today "what a service
   declares about analytics on by default", line 124 at `c84c7a40`), and roadmap RM-13 links
   `docs/specification/usage-data.md`, and RM-13's sentence placing the analytics backend beyond the organization
-  (line 573 at `c84c7a40`, written 2026-10-05, before PLAT-019 went live on 2026-10-17) is restated as PassionCode.ai's own
-  self-hosted analytics host, `analytics.passioncode.ai` (PLAT-019), and RM-13's heading "Product analytics, private
-  by default" (line 563), which reads as off by default, becomes "Product analytics, on by default with a per-product
-  switch"; then the workspace sync, checked with
-  `git -C fabric-workspace grep -n 'usage-data' origin/main -- knowledge/roadmap.md knowledge/plans.md` (non-empty)
-  and `git -C fabric-workspace grep -n 'backend is hosted outside\|analytics, private by default' origin/main --
-  knowledge/roadmap.md` (empty).
+  (line 573 at `c84c7a40`, written 2026-10-05, before PLAT-019 went live on 2026-10-17) is restated to name both
+  hosts: PassionCode.ai's own self-hosted analytics host, `analytics.passioncode.ai` (PLAT-019), for every product read
+  but Project Observatory, and the operator's earlier analytics instance in his own account, outside the
+  organization, for Project Observatory (which sends there by default from its 0.33.1) and for the older installs and
+  history PLAT-019's remainder retires; RM-13's heading "Product analytics, private by default" (line 563), which
+  reads as off by default, becomes "Product analytics, on by default with a per-product switch"; and plans.md's
+  quality-table Contract row (line 146 at `bdd35d57`, "CT-216 by 2026-11-09") is restated as CT-216 done, linking
+  `docs/specification/usage-data.md`; then the workspace sync, checked with
+  `git -C fabric-workspace grep -n 'usage-data' origin/main -- knowledge/roadmap.md knowledge/plans.md` (non-empty),
+  `git -C fabric-workspace grep -n 'backend is hosted outside the organization\|analytics, private by default'
+  origin/main -- knowledge/roadmap.md` (empty), `git -C fabric-workspace grep -n 'CT-216 by 2026-11-09' origin/main --
+  knowledge/plans.md` (empty), and the restated RM-13 section read for both `analytics.passioncode.ai` and Project
+  Observatory's own destination.
 - A question for the operator, [OQ-0013](../OPEN_QUESTIONS.md): does "only for this" («Все, только для этого») admit
   the second purpose, counting one installation once across the products that share its id? DEC-0157 reads it so; the
   page marks that reading and the notice wording that follows from it as provisional until he answers. Its second
@@ -133,15 +151,25 @@ decision of 2026-11-04.
 - The operator's ePrivacy answer (the knowledge base's RM-13, okolos B-216): until it, UD-1 lets a product ask first
   where the platform's own consent or a market's privacy review needs it.
 - Named residual risks, carried to the closing verdict: senders under the page that no reading here checked against
-  it, each a dependant of UD-1 to UD-5 with no test: Project Observatory's own usage data, which it already sends on
-  by default since its 0.33.0 (OBS-324; Observatory was read as the digest store, its sender not against these
-  rules), Okolos beyond its default and its destination, and the adapter's kits (FAA-202,
-  planned). The board message's general line asks each owner to check its product before its next release; no row is
+  it, each a dependant of UD-1 to UD-5 with no test: Project Observatory's own usage data, on by default since its
+  0.33.0 and first sent by 0.33.1 (OBS-324, OBS-329), read in round 15 only for its destination (the operator's
+  earlier analytics instance), its notice and its OpenRouter attribution (not whether it sends before its notice is
+  shown at a terminal or on its dashboard, or whether its MCP surface offers its switch), Okolos beyond its default
+  and its destination (`analytics.passioncode.ai`, read in round 15), and the adapter's kits (FAA-202, planned). The board message's general line asks each owner to check its product before its next release; no row is
   filed here, since each check is its owner's backlog, not this repository's.
+- Whether a person needs a switch of their own for OpenRouter attribution that a product sends whatever its usage data
+  switch says (Project Observatory, on every request it makes to OpenRouter, `observatory/engine/agent/providers.py`
+  lines 76 to 94 at `2a11b3fd`): UD-6 leaves it undecided and asks such a product to say so on its usage data page; a
+  question for the operator through Observatory's owner, carried in the board message's Observatory line, not filed
+  here as a contract question since DEC-0065 leaves the setting to the product's operator.
 - Parallel branches: DEC-0156, DEC-0158 and DEC-0159 are open on their own branches. What this decision requires of
   the merged text, checked on the merged tree at the landing of whichever lands second:
-  - Register conflicts with any sibling (`docs/DECISIONS.md`, `docs/handoffs/README.md`, `docs/backlog.md`) are
-    adjacent appends: keep both sides in id order.
+  - Register conflicts in `docs/DECISIONS.md` and `docs/handoffs/README.md` are adjacent appends: keep both sides in
+    id order. A conflict in `docs/backlog.md` is not: each branch may rewrite its own existing row in place, and two
+    such rows can fall in one hunk, so the merged file takes each row from the branch that owns it (CT-216 from this
+    branch, every other row from its own branch), one of each. Check on the merged tree: `grep -c '^| CT-215 '
+    docs/backlog.md` and `grep -c '^| CT-216 ' docs/backlog.md` each print 1, and no other row id appears twice
+    (`grep -o '^| [A-Z]*-[0-9]* ' docs/backlog.md | sort | uniq -d` prints nothing).
   - After DEC-0156 and DEC-0157 are both on main: OW-5's limits name UD-4's switch (a mandate from the operator's words
     never turns a declined switch back on), UD-4 cites OW-1, and OW-1's exception covers the switch. OW-1's open list
     ("an act no mandate covers", MD-3, among them a `change-policy` effect) does; add UD-4 to OW-1 only if the merged
@@ -154,8 +182,13 @@ decision of 2026-11-04.
     allows CF-4's refusal of a member key's call on a `relayed` action and an approval such an instance cannot check;
     and UD-4's elicitation clause notes AP-2's rule that a cloud instance sends no elicitation to a client-key caller.
     Check: `grep -c 'CF-4' docs/specification/usage-data.md` at least 1, and the merged AP-2 and CF-4 read against UD-4.
-  - After DEC-0158 and DEC-0157 are both on main: DEC-0158 edits `project-comms.md` and MD-2 in `delegation.md` only;
-    UD-4 is re-read against AP-2, AP-3, MD-3 (no mandate covers `change-policy`) and DL-26 as merged.
+  - After DEC-0158 and DEC-0157 are both on main: UD-4 is re-read against AP-2, AP-3, MD-3 (no mandate covers
+    `change-policy`) and DL-26 as merged, and every conformance row for a dispatched run and for a host that starts
+    one is re-read against UD-4's agent row (a dispatched run is an agent session, and a mandate it carries never
+    covers the switch). Check on the merged tree: `git diff --name-only <merge-base> HEAD -- docs/specification`
+    names every specification file the two landings changed, and each conformance row the merge brought in for a
+    session started on a request, or for its host, is read beside the agent row that cites UD-4, whatever words it
+    uses; `grep -n 'UD-4' docs/specification/conformance.md` finds that agent row.
 
 ## Decisions taken here
 
@@ -167,6 +200,10 @@ decision of 2026-11-04.
 - A shared installation id is not rotated at off (UD-2): rotating it would split one person's installs across every
   product that reads the file; the product only stops sending it.
 - No machine declaration (UD-5): no host reads one; the safer reversible choice is to add it when a host asks.
+- A device policy may lock a product's switch off and never locks it on (UD-2, round 15): locking off only protects
+  the person, while a lock on would override a person's decline, which UD-2 keeps, and the switch is the person's
+  (UD-4). The other choice, leaving device policy unaddressed, let an organization's server or MDM layer, which can
+  lock extension keys ([devices](../specification/devices.md#policy)), hold a declined switch on.
 - UD-6 against OD-9 (round 6): a digest kept on its machine is counts a product keeps about itself, not usage data, so
   the declaration a local collector reads stands whatever the switch says; the condition sits where data is sent to
   anyone but the person. The other reading (a declaration kept only while the switch is on) would stop a product that collects no
@@ -522,6 +559,43 @@ not pushed for the same reason; the round entries' commits resolve only there.
   --write-tree HEAD origin/main` exit 0, no U+2014 in the lines the branch adds against `origin/main`, and no name of
   a private personal repository in the branch's diff. Not the full gate.
 
+- Round 15 (on `0c28b42e`, all three tiers), not clean: unit passed with risks, seam failed, product failed. Seam,
+  Project Observatory was said to send usage data on by default since its 0.33.0, while its `CHANGELOG.md` (at
+  `2a11b3fd`) says 0.33.0 had no key and sent nothing and 0.33.1 is the first release build that sends (now "on by
+  default in its 0.33.0, first sent from 0.33.1, the first release build carrying its key, OBS-324, OBS-329" in the
+  page, the Compatibility, the README cell and this handoff's Open); seam, the parallel-branches item called every
+  register conflict an adjacent append, false for `docs/backlog.md`, where each branch may rewrite its own row inside
+  one hunk (now: adjacent appends for `docs/DECISIONS.md` and `docs/handoffs/README.md` only, and for the backlog one
+  row of each from its owning branch, checked by `grep -c '^| CT-215 '` and `grep -c '^| CT-216 '` each printing 1
+  and no row id twice); seam, the item said what DEC-0158 edits and that it edits nothing else, a claim about a
+  sibling (now dropped: a requirement that every conformance row for a session started on a request, or for its host,
+  is re-read against UD-4's agent row, with a check on the merged tree). Product, Observatory sends its usage data to
+  the second store, the operator's earlier analytics instance, not to PassionCode.ai's host
+  (`observatory/engine/usage_analytics.py` line 61 at `2a11b3fd`), so that store is not closing while Observatory
+  sends there (now in the practice paragraph, the Compatibility, the README cell and the board message: Observatory's
+  notice owes UD-1's "where", its UD-5 page states that store, PassionCode.ai Platform is told PLAT-019's retirement
+  does not end the store; the knowledge-base landing step restates RM-13 naming both hosts, with its check). Risks
+  folded: the second store's second reader, the operator's own estate monitor reading counts (page, Compatibility,
+  README cell, board message); Okolos's destination, `analytics.passioncode.ai` (the host's `infra/analytics/README.md`
+  line 18 at `e4d1c0e`), so the host's reader reads it (page, Compatibility, README cell, residual risks, board
+  message); UD-6's OpenRouter sentence from the person's side: off until the product's operator sets it, a product that
+  sets it sends it whatever the usage data switch and should say so on its usage data page, Observatory doing so
+  (page, DEC item 6, the Compatibility, Open); a device policy may lock a product's switch off, never on (page UD-2,
+  DEC item 2, Decisions taken here); the hosted workspace product's self-hosted image owes UD-4's product side and
+  its planned well-known declaration has no UD-5 member (page, Compatibility, README cell, board message); Fabric
+  Inbox's server under UD-1's organization clause: it sends none of its own counts, each member's app sends them under
+  its own switch, so the organization holds no switch over them (page scope, DEC item 1, Compatibility, README cell,
+  board message); plans.md line 146 ("CT-216 by 2026-11-09") joins the landing step (seam); UD-2's "sending nothing"
+  debt of Fabric Inbox and Fabric Dashboards limited to a run before the first send or the stand-in run (unit; page,
+  Compatibility, README cell, board message); Fabric Dashboards' gate placed on its `change-settings` action, whose
+  tool is `settings` (unit; page, README cell). Carried to Open: whether a person needs a switch of their own for
+  OpenRouter attribution (for the operator through Observatory's owner).
+- On the round 15 fold (this commit's tree): `pnpm run docs:check` exit 0 (272 Markdown files, 0 errors), `python3
+  docs/ux/lint.py` exit 0 (40 stories, 34 flows, 34 screens, 56 scenarios), `pnpm run privacy:check` exit 0 (0
+  findings), `git merge-tree --write-tree HEAD origin/main` exit 0, no U+2014 in the lines the branch adds against
+  `origin/main`, no name of a private personal repository in the branch's diff, and the unit tier's gate-wording grep
+  printing nothing. Not the full gate.
+
 ## Next task
 
-Round 15 of the blind readings of branch `agent/ct216-usage-data-v2` (DEC-0157), all three tiers.
+Round 16 of the blind readings of branch `agent/ct216-usage-data-v2` (DEC-0157), all three tiers.

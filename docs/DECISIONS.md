@@ -11427,8 +11427,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      service that installs nothing on the person's machine or in an account or server of theirs is outside the page
      (DEC-0157's reading of the operator's "every product", pending his answer, OQ-0013),
      one that ships an installed product is under it for that product, and a component the estate ships to run on the
-     person's own server is under it for that component, the switch being the deploying organization's where an
-     organization deploys it on its own server for its members, who are told by the component's notice.
+     person's own server is under it for that component, the switch over its counts being that of whatever sends
+     them: the deploying organization's where the component sends its own and an organization deploys it on its own
+     server for its members, who are told by the component's notice, and an app's own switch where the person's app
+     reads the component's counts and sends them (Fabric Inbox's server, whose counts each member's app sends, so the
+     organization holds no switch over them).
   2. UD-2: the switch is in the product's own settings and governs that product alone; off stops both kinds and drops
      what waits, and removes nothing already sent; an installation id the product owns is deleted at off and made anew
      at on, while a shared one is never deleted or rotated by one product, only no longer sent, a reset being the sharing
@@ -11447,7 +11450,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      wrote it under words that governed every reader stops writing it from the version whose switch governs it alone,
      and leaves an off already written there, which stays the earlier no for products that have not yet sent; a
      shared file that exists but cannot be read before a product's first send (or before that stand-in run) is no
-     answer, and the product sends nothing in that run, a run that sent nothing for that reason being no stand-in run.
+     answer, and the product sends nothing in that run, a run that sent nothing for that reason being no stand-in run;
+     a device policy whose layer carries a key for a product's switch may lock it off and never locks it on.
   3. UD-3: anonymous means no person named, not unlinkable (a shared id ties the products that send it); it leaves out a
      person (name, email, phone, account, billing or store id, an IP kept with the data, a hardware or advertising id),
      a credential, a path or a file name from the person's machine or data, and any content or text a person wrote or
@@ -11511,8 +11515,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      sending, an encrypted backup a store makes to the person's own storage, readable only with a key the person holds,
      being such a case; the condition binds the products under the page, and a hosted service's digests on its own
      server are its own; OpenRouter attribution (DEC-0065), which labels a product's model requests, is not usage data
-     under the page: it stays off by default under its own setting, and the usage data switch neither turns it on nor
-     off.
+     under the page: it is off until the product's operator sets it, and the usage data switch neither turns it on nor
+     off; a product whose operator set it sends it whatever its usage data switch says (Project Observatory does) and
+     should say so on its usage data page, and whether a person needs a switch of their own for it is not decided here.
 - **Why:** the operator's decision fixes the default and the per-product switch; what keeps it trustworthy across
   products is that "anonymous" and "off" mean the same everywhere, so those two are the contract's. The operator's words
   (quoted in Fabric Switchboard's `docs/ANALYTICS.md`, lines 19 to 23 at `405b789`) begin «Включает первый раз продукт,
@@ -11572,7 +11577,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (`desktop/analytics.cjs` line 295 at `1395416`) and, when the shared file cannot be read, sends a baseline without
   an id (lines 307 to 310), and Fabric Dashboards never reads it (`src/core/analytics.ts` lines
   9 to 11 at `d43c94e`) and, when the shared file cannot be read, sends its events without an id (lines 59 to 60 and
-  170 to 171), where UD-2 has each send nothing that run. Their notices owe UD-1's contents:
+  170 to 171), where UD-2 has each send nothing in a run before its first send (or before its conforming version's
+  stand-in run) in which the shared file cannot be read. Their notices owe UD-1's contents:
   Fabric Dashboards' (`src/core/i18n.ts` lines 86 to 88 at `d43c94e`) names no installation id though every event
   carries the shared `install_id` (`src/core/analytics.ts`), and states no purpose of counting once, so it owes the id,
   that it is shared and with which products, that it ties events together, its session id, that turning back on resumes it, and
@@ -11601,9 +11607,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   switch in its menu (Share Usage Details, its notice at `desktop/main.cjs` line 937) with no agent twin, and Fabric
   offers its switch only to its own window (`analyticsSetEnabled`, `apps/desktop/src/main/index.ts` line 4201 at
   `eafcf2e4`) and declares no action for it; both owe UD-4's product side, an action for the switch whose tool's
-  effect is `change-policy`, with `gate: relayed` (Fabric at CO-496). The products read send to PassionCode.ai's own
-  self-hosted analytics host, `analytics.passioncode.ai` (passioncode-platform PLAT-019, live since 2026-10-17, and
-  PLAT-132; Switchboard's `crates/switchboard-runtime/src/analytics.rs` line 30 at `b99a17b`). Fabric Inbox's notice
+  effect is `change-policy`, with `gate: relayed` (Fabric at CO-496). The products read, all but Project Observatory
+  (below), send to PassionCode.ai's own self-hosted analytics host, `analytics.passioncode.ai` (passioncode-platform
+  PLAT-019, live since 2026-10-17, and PLAT-132; Switchboard's `crates/switchboard-runtime/src/analytics.rs` line 30 at
+  `b99a17b`; Okolos's too, the host's `infra/analytics/README.md` line 18 at `e4d1c0e`, so the host's reader of raw
+  events reads it). Fabric Inbox's notice
   names that receiving organization ("Fabric Inbox sends PassionCode.ai", `desktop/main.cjs` line 937), which meets
   UD-1's "where"; the other notices read (Switchboard's, which says its counts help PassionCode.ai without saying who
   receives them, Fabric Dashboards', Fabric's and the launcher's, cited here) neither say where the data is sent nor
@@ -11622,9 +11630,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   updated (passioncode-platform `infra/analytics/README.md`, "The move", lines 101 to 119 at `e4d1c0e`; PLAT-019); as
   its owner records it, that instance keeps events 2 years and removes installation ids after 400 days, has its own
   erasure of the installation ids the estate's growth and experiments service deleted, and keeps an off-host copy for
-  28 days, and that service still reads it; until those products' apps there are retired (PLAT-019's remainder), each
-  of the three products' UD-5 page states that store too (that it received the product's events, its retention, its
-  erasure and its reader). PassionCode.ai's public privacy page (the organization's
+  28 days, and that service still reads it, as does the operator's own estate monitor, which reads counts there;
+  Project Observatory sends its usage and error data to that store (below), so the store stays live while Observatory
+  sends there, whatever PLAT-019's remainder retires; until those three products' apps there are retired (PLAT-019's
+  remainder), each of their UD-5 pages states that store too, and Observatory's states it for as long as it sends
+  there (that it received the product's events, its retention, its erasure, its off-host copy and its readers). PassionCode.ai's public privacy page (the organization's
   site repository `passioncode-ai.github.io`, line 60 of `privacy/index.html` and of its nine locale copies, `de`,
   `es`, `fr`, `ja`, `ko`, `pl`, `pt-br`, `ru` and `zh-hans`, at `e7a2ed25`) names only Switchboard and
   Fabric as sending and says the switch applies to every PassionCode.ai app on that computer: its owner owes UD-2's
@@ -11669,10 +11679,24 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   as a hosted service; its self-hosted image, a component an organization deploys on its own server for its members,
   is under it with that organization's switch (its owner and administrators turn the counting off or on, its ADR-0014
   item 3) and owes UD-3's session id, random per server process per UTC day today rather than renewed after an idle
-  hour (its ADR-0014 line 24 at `43f04f15`); no self-hosted instance of it runs yet (line 37). Project Observatory was read as the digest store
-  (OBS-330); it also sends anonymous usage and error data on by default since its 0.33.0 (OBS-324; its `CHANGELOG.md`
-  and `docs/COMPATIBILITY.md`, "Workspace state: anonymous usage data", at `2a11b3fd`), which was not read against
-  these rules. The owners of both check them against UD-1 to UD-6. Observatory's
+  hour (its ADR-0014 line 24 at `43f04f15`); no self-hosted instance of it runs yet (line 37). The self-hosted image
+  also owes UD-4's product side: its switch is on its Organization page and an HTTP admin route recorded as a person's
+  act (`src/modules/analytics/routes.ts` line 36), and its MCP server declares no actions extension, so it owes a
+  `relayed` action for the switch whose tool's effect is `change-policy`; and its design's planned well-known
+  declaration of its counting, waiting on CT-216 (`docs/design/2026-11-04-analytics-default.md` line 301), has no
+  member to declare, since UD-5 defines none until a later decision adds one. Fabric Inbox's server is no component
+  with an organization's switch: it sends none of its own counts, and each person's Fabric Inbox app sends that
+  server's counts under the app's own switch (`desktop/analytics.cjs` lines 352 to 353 and 422 to 429 at `1395416`),
+  so a server an organization deploys for several members is counted by each member's app under that member's switch
+  (UD-1's scope). Project Observatory was read as the digest store
+  (OBS-330); it also turned anonymous usage and error data on by default in its 0.33.0 and first sent it from 0.33.1,
+  the first release build carrying its key (OBS-324, OBS-329; its `CHANGELOG.md` and `docs/COMPATIBILITY.md`,
+  "Workspace state: anonymous usage data", at `2a11b3fd`), to the second store above rather than PassionCode.ai's host
+  (`observatory/engine/usage_analytics.py` line 61 at `2a11b3fd`); its notice (lines 98 to 101) names no destination,
+  so it owes UD-1's "where", and its UD-5 page states that store; the rest of its sender was not read against these
+  rules. It also sends OpenRouter attribution on every request it makes to OpenRouter whatever its usage data switch
+  says (`observatory/engine/agent/providers.py` lines 76 to 94), which UD-6 leaves outside the page and asks it to
+  say on its usage data page. The owners of both check them against UD-1 to UD-6. Observatory's
   encrypted workspace snapshot copies its home, the digest store included, into the person's own storage (which iCloud
   may carry off the machine), which UD-6 counts as no sending only when its key is the person's: Observatory's to confirm. The estate's
   hosted products in the knowledge base's plans.md item D are outside the page unless they ship an installed product

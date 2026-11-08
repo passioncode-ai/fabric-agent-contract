@@ -11,10 +11,15 @@ is, where it goes and how it is read stay each product's; the rules below are wh
 the estate hosts, which people reach over the network and which installs nothing on their machine or in an account or
 server of theirs, is outside this page (DEC-0157's reading of the operator's "every product", pending his answer,
 OQ-0013); a hosted service that ships an installed product (an app, an agent, a command
-line tool) is under it for that product, and a component the estate ships to run on the person's own server (such as
-Fabric Inbox's server, whose counts its notice names, `desktop/main.cjs` line 937 at `1395416`) is under it for that
-component; where an organization deploys such a component on its own server for its members, the switch is the
-deploying organization's, and its members are told by the component's notice (UD-1).
+line tool) is under it for that product, and a component the estate ships to run on the person's own server is under
+it for that component. The switch over a component's counts is the switch of whatever sends them. Where the component
+sends its own and an organization deploys it on its own server for its members, the switch is the deploying
+organization's, and its members are told by the component's notice (UD-1). Where an app of the person reads the
+component's counts and sends them, that app's own switch governs them: Fabric Inbox's server sends none of its own,
+and each person's Fabric Inbox app sends that server's counts under the app's switch, its notice naming them
+(`desktop/main.cjs` line 937, `desktop/analytics.cjs` lines 352 to 353 and 422 to 429 at `1395416`), so a server an
+organization deploys for several members is counted by each member's app under that member's switch, and the
+organization holds no switch over those counts.
 The key words MUST, MUST NOT, SHOULD and MAY are used as in RFC 2119.
 
 - **UD-1, on by default, told once.** A product that collects usage or error data collects it from its first start, for
@@ -76,7 +81,8 @@ The key words MUST, MUST NOT, SHOULD and MAY are used as in RFC 2119.
   for products that have not yet sent. Fabric's live setting says its switch governs every
   app ("One switch for every PassionCode app on this computer", its `en.ts` line 864 at `eafcf2e4`): for a product that
   has already sent, that is a false promise, which the person reads until Fabric's switch for Fabric alone ships (its
-  CO-496).
+  CO-496). A device policy ([devices](devices.md#policy)) whose layer carries a key for a product's switch MAY lock it
+  off; it MUST NOT lock it on, since a person who declined stays off and the switch is the person's (UD-4).
 - **UD-3, anonymous.** "Anonymous" here means the data names no person; it is not unlinkable: an installation id ties
   one install's events together, and a shared one ties together the events of every product on that machine that sends
   it, which the notice (UD-1) and the privacy text (UD-5) say. The data MUST NOT carry a person (a name, an email
@@ -169,8 +175,11 @@ The key words MUST, MUST NOT, SHOULD and MAY are used as in RFC 2119.
   sending; an encrypted backup a store makes to the person's own storage, readable only with a key the person holds, is
   such a case. The condition binds the products under this page (its scope above); a hosted service's digests on its
   own server are its own. [OpenRouter attribution](openrouter-attribution.md) (DEC-0065), which
-  labels a product's model requests to OpenRouter, is not usage data under this page: it stays off by default under its
-  own setting, and the usage data switch neither turns it on nor off.
+  labels a product's model requests to OpenRouter, is not usage data under this page: it is off until the product's
+  operator sets it (a kit that offers it keeps it off), and the usage data switch neither turns it on nor off. A
+  product whose operator set it sends it whatever its usage data switch says (Project Observatory does, on every request
+  it makes to OpenRouter, its `observatory/engine/agent/providers.py` lines 76 to 94 at `2a11b3fd`), and SHOULD say so
+  on its usage data page (UD-5); whether a person needs a switch of their own for it is not decided here.
 
 Practice in the estate, read on 2026-11-07 and 2026-11-08 (DEC-0157's Compatibility is the full account, product by
 product): Fabric Switchboard, Fabric Inbox and Fabric Dashboards collect and send from their first start, a background
@@ -183,7 +192,8 @@ line 295 at `1395416`), and Fabric Dashboards never reads it (`src/core/analytic
 each sends for an install whose person said no under Fabric's shared switch before it first sent. Fabric Inbox
 sends a baseline without an id when the shared file cannot be read (`desktop/analytics.cjs` lines 307 to 310 at
 `1395416`), and Fabric Dashboards sends its events without an id then (`src/core/analytics.ts` lines 59 to 60 and 170
-to 171 at `d43c94e`); both owe UD-2's sending nothing in that run. Their notices owe
+to 171 at `d43c94e`); both owe UD-2's sending nothing in a run before their first send (or before their conforming
+version's stand-in run) in which the shared file cannot be read. Their notices owe
 UD-1's contents: Fabric Dashboards' (`src/core/i18n.ts` lines 86 to 88 at `d43c94e`) names no installation id though
 every event carries the shared `install_id`, and no purpose of counting once, so it owes the id, that it is shared and
 with which products, that it ties events together, that turning back on resumes it, and that purpose; Fabric Inbox's
@@ -198,8 +208,9 @@ UD-3's session-id rule; Fabric Dashboards' (`src/core/analytics.ts` line 128 at 
 UD-3's renewal; the launcher's (`lib/analytics.js` line 244 at `ad978a6`) is made at each run's one send, which
 carries that run's events in one request at its end (`after`, line 192), so no idle hour passes within it and it
 meets UD-3's session-id rule. Fabric's notice names "a
-session id" (`i18n/en.ts` line 864 at `eafcf2e4`), and the other four owe naming it (UD-1). Fabric Dashboards' MCP
-`settings` tool, declared with gate `none` (FD-175), lets any agent turn its switch on with no operator decision (it owes
+session id" (`i18n/en.ts` line 864 at `eafcf2e4`), and the other four owe naming it (UD-1). Fabric Dashboards'
+`change-settings` action, declared with gate `none` (FD-175, `src/mcp/actions.ts` line 38 at `d43c94e`) for its
+MCP `settings` tool, lets any agent turn its switch on with no operator decision (it owes
 its switch an action of its own that refuses `operator-decision-required` without a decision, AP-2, rather than take
 the path its dispatcher keeps for other relayed calls, which runs one without a decision as the caller's own act,
 `src/mcp/server.ts` lines 332 to 333 at `d43c94e`), and
@@ -211,9 +222,10 @@ Switchboard owes an action for its switch and both owe a manifest capability for
 (Share Usage Details, its notice at `desktop/main.cjs` line 937) with no agent twin, and Fabric offers its switch only to its own window
 (`analyticsSetEnabled`, `apps/desktop/src/main/index.ts` line 4201 at `eafcf2e4`) and declares no action for it; both
 owe UD-4's product side, an action for the switch whose tool's effect is `change-policy`, with `gate: relayed`
-(Fabric at CO-496). The products read send it to PassionCode.ai's own self-hosted analytics host, `analytics.passioncode.ai`
-(passioncode-platform PLAT-019, live since 2026-10-17, and PLAT-132; Switchboard's
-`crates/switchboard-runtime/src/analytics.rs` line 30 at `b99a17b`). Fabric Inbox's notice names that receiving
+(Fabric at CO-496). The products read, all but Project Observatory (below), send it to PassionCode.ai's own
+self-hosted analytics host, `analytics.passioncode.ai` (passioncode-platform PLAT-019, live since 2026-10-17, and
+PLAT-132; Switchboard's `crates/switchboard-runtime/src/analytics.rs` line 30 at `b99a17b`; Okolos's too, the host's
+`infra/analytics/README.md` line 18 at `e4d1c0e`, so the host's reader below reads it). Fabric Inbox's notice names that receiving
 organization ("Fabric Inbox sends PassionCode.ai anonymous usage and error data", `desktop/main.cjs` line 937), which
 meets UD-1's "where"; the other notices read (Switchboard's, which says its counts help PassionCode.ai without saying
 who receives them, Fabric Dashboards', Fabric's and the launcher's, each cited in DEC-0157's Compatibility) neither say
@@ -232,9 +244,12 @@ installs older than each product's switch version (Fabric 0.3.7, Switchboard 0.6
 sending there until they updated (passioncode-platform `infra/analytics/README.md`, "The move", lines 101 to 119 at
 `e4d1c0e`; PLAT-019). As its owner records it, that instance keeps events 2 years and removes installation ids after
 400 days, has its own erasure of the installation ids the estate's growth and experiments service deleted, and keeps
-an off-host copy for 28 days; that service still reads it. Until those products' apps there are retired
-(PLAT-019's remainder), each of the three products' UD-5 page states that store too: that it received the product's
-events, its retention, its erasure and its reader. PassionCode.ai's public privacy page (the
+an off-host copy for 28 days; that service still reads it, and so does the operator's own estate monitor, which reads
+counts there. Project Observatory sends its usage and error data to that store, not to PassionCode.ai's host (below),
+so the store stays live while Observatory sends there, whatever PLAT-019's remainder retires. Until those three
+products' apps there are retired (PLAT-019's remainder), each of their UD-5 pages states that store too, and
+Observatory's states it for as long as it sends there: that it received the product's events, its retention, its
+erasure, its off-host copy and its readers. PassionCode.ai's public privacy page (the
 organization's site repository `passioncode-ai.github.io`, line 60 of `privacy/index.html` and of its nine locale
 copies, `de`, `es`, `fr`, `ja`, `ko`, `pl`, `pt-br`, `ru` and `zh-hans`, at `e7a2ed25`) names only Switchboard and Fabric as sending and says
 the switch applies to every PassionCode.ai app on that computer: its owner owes UD-2's switch for each product alone
@@ -265,13 +280,22 @@ that command (`plugin/passioncode/skills/setting-up-passioncode/SKILL.md` lines 
 agent side (an agent turns a switch the person turned off back on only as UD-4 admits). Okolos turned it on by default
 on 2026-11-05 in Chrome and Edge, and its Firefox build follows Firefox's built-in data consent, which UD-1 admits
 pending the operator's ePrivacy answer (the knowledge base's roadmap RM-13, okolos ADR-0021 and B-216); the rest of its
-practice was not read against these rules. Project Observatory sends anonymous usage and error data on by default
-since its 0.33.0 (OBS-324; its `CHANGELOG.md` and `docs/COMPATIBILITY.md`, "Workspace state: anonymous usage data",
-at `2a11b3fd`), a sender under this page not read against these rules. The estate's hosted workspace product is outside the page as a hosted
+practice was not read against these rules. Project Observatory turned anonymous usage and error data on by default in
+its 0.33.0 and first sent it from 0.33.1, the first release build carrying its key (OBS-324, OBS-329; its
+`CHANGELOG.md` and `docs/COMPATIBILITY.md`, "Workspace state: anonymous usage data", at `2a11b3fd`), so its counts
+start at 0.33.1. It sends to the second store above, the operator's earlier analytics instance, not to PassionCode.ai's
+host (its `observatory/engine/usage_analytics.py` line 61 at `2a11b3fd`), and its notice (the same file, lines 98 to
+101) names no destination, so it owes UD-1's "where", and its UD-5 page states that store; the rest of its sender was
+not read against these rules. The estate's hosted workspace product is outside the page as a hosted
 service; its self-hosted image, a component an organization deploys on its own server for its members, is under it
 with that organization's switch (its owner and administrators turn the counting off or on, its ADR-0014 item 3), and
 owes UD-3's session id, random per server process per UTC day today rather than renewed after an idle hour (its
-ADR-0014 line 24 at `43f04f15`); no self-hosted instance of it runs yet (line 37). A product's install and active counts move at the version that meets UD-1
+ADR-0014 line 24 at `43f04f15`); no self-hosted instance of it runs yet (line 37). Its switch is on its Organization
+page and an HTTP admin route, recorded as a person's act (its `src/modules/analytics/routes.ts` line 36), and its MCP
+server declares no actions extension, so the image owes UD-4's product side too: a `relayed` action for the switch
+whose tool's effect is `change-policy`. Its design plans to declare its counting in its well-known document once
+CT-216 lands (its `docs/design/2026-11-04-analytics-default.md` line 301); UD-5 defines no such member, so it has
+nothing to declare until a later decision adds one. A product's install and active counts move at the version that meets UD-1
 and UD-2: they drop where the product sent before its notice or past an earlier no (Switchboard, Fabric Inbox, Fabric
 Dashboards), and rise where it waited for an answer (Fabric, whose never-answered installs send nothing today and come
 on after its notice at CO-496); an installation id a product owns, made anew at re-enable (UD-2), counts that install
