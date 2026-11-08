@@ -11457,7 +11457,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      a device policy whose layer carries a key for a product's switch may lock it off and never locks it on, and a
      product ignores a lock that would hold its switch on, as if that layer's lock were absent (a lower layer's lock
      off still holds), applying this after the reference resolution `resolvePolicy`, which does not (the pointer in
-     devices.md's "Precedence and locks"; a reference helper and its vector are CT-279).
+     devices.md's "Precedence and locks"; a reference helper and its vector are CT-280).
   3. UD-3: anonymous means no person named, not unlinkable (a shared id ties the products that send it); it leaves out a
      person (name, email, phone, account, billing or store id, an IP kept with the data, a hardware or advertising id),
      a credential, a path or a file name from the person's machine or data, and any content or text a person wrote or
@@ -11748,7 +11748,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/specification/openrouter-attribution.md` (its default points to UD-6), `docs/specification/devices.md`
   ("Precedence and locks" points to UD-2's limit on a lock),
   `docs/specification/README.md`, `docs/DOCMAP.md`, `CONTEXT.md` (usage data), `docs/ux/scenarios.md` (SCN-043's alt
-  path for UD-4 and its Coverage), backlog CT-216 and CT-279 (a reference for UD-2's limit on a lock); the handoff `docs/handoffs/2026-11-07-usage-data.md` and its row in
+  path for UD-4 and its Coverage), backlog CT-216 and CT-280 (a reference for UD-2's limit on a lock); the handoff `docs/handoffs/2026-11-07-usage-data.md` and its row in
   `docs/handoffs/README.md`. The notice and the switch are each product's screens (Fabric's SCR-52 and SCN-134, which
   owe UD-1 and UD-2 under its CO-496 rewrite), not this contract's UX.
 - **Source:** the operator's decision of 2026-11-04 (CT-216; the knowledge base's roadmap track RM-13, product analytics private by default, and plans.md item D); the reading of the operator's decision in board reply `cbea0b76`; the consent rules of the estate's growth and experiments service (board `42a41db8`); Fabric

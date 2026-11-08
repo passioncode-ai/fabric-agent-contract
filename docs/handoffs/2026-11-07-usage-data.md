@@ -265,7 +265,7 @@ decision of 2026-11-04.
   refusing the whole policy, since devices keep and ignore keys they do not take, or showing the switch as locked on.
   Round 17 narrowed it to "as if that layer's lock were absent": treating the whole key as unlocked would also drop a
   lower layer's lock off, which UD-2 lets a layer set. `resolvePolicy` does not apply the limit; the product applies it
-  after resolution, and a reference helper with its vector is CT-279 rather than a change to the reference here, since
+  after resolution, and a reference helper with its vector is CT-280 rather than a change to the reference here, since
   no usage switch key is defined and no product reads one from a device policy today.
 - An organization-run cloud instance sends no usage data about its members' calls until a page for members exists
   (round 17, a merged-text requirement in the DEC-0159 landing item): a member who works only through a client key
@@ -716,7 +716,7 @@ not pushed for the same reason; the round entries' commits resolve only there.
   being each product's usage data, on by default with a per-product switch, with a grep printing nothing after the
   landing). Risks folded: UD-2's lock limit reads "as if that layer's lock were absent", a lower layer's lock off still
   holding (page, DEC item 2, the product row, devices.md; unit), and devices.md says `resolvePolicy` does not apply it
-  and the product applies it after resolution, a reference helper and vector filed as CT-279 (seam); UD-1's privacy
+  and the product applies it after resolution, a reference helper and vector filed as CT-280 (seam); UD-1's privacy
   page parenthetical says the list of sharing products on that page (PC-137) is unpublished, not the page (page, DEC
   item 1; unit); "is to be marked" for the conforming version in both places in the page and the DEC (unit); the
   Switchboard door pinned (`mcp.rs` line 72 at `c762821`) and Fabric Dashboards' `AGENT_SETTINGS` pinned (`settings.ts`
@@ -734,7 +734,7 @@ not pushed for the same reason; the round entries' commits resolve only there.
   'never[^|]*change-policy'` because the bare grep matches the existing callee row that never lets a mandate cover it
   (`conformance.md` line 253 on this head, and on the tree merged with DEC-0158's branch), so it printed one line where
   the check asks for none; the filtered grep prints nothing on both and catches a row that lets one cover it; the
-  Registers item keeps OQ ids unique at the second landing, with a `uniq -d` check (seam). Filed: CT-279.
+  Registers item keeps OQ ids unique at the second landing, with a `uniq -d` check (seam). Filed: CT-280. Renumbered from CT-279 after the fold, since DEC-0159's branch filed CT-279 first.
 - On the round 17 fold (this commit's tree): `pnpm run docs:check` passed (272 Markdown files, 0 errors), `python3
   docs/ux/lint.py` exit 0 (40 stories, 34 flows, 34 screens, 56 scenarios), `pnpm run privacy:check` 0 findings, `pnpm
   vitest run test/consistency.test.ts test/docs-check.test.ts test/device-rules.test.ts` 215 tests passed, `git
