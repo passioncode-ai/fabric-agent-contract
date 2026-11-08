@@ -744,7 +744,8 @@ DEC-0154).
 
 **`foreign-user`**: The state of a local service whose port is held by a listener of another OS account, or by one
 whose owner cannot be told; ordered after `down` and before `foreign`, it wins over any well-known answer, and nothing
-is sent to it (HA-2, DEC-0154).
+is sent to it (HA-2, DEC-0154). One reader is exempt, the root installer of a launchd system-domain job, for its own
+job's token-free well-known document only (RT-3a, DEC-0161); for every other client, root included, the state stands.
 
 **`table-restricted`**: The reason, or its prefix, for an owner that cannot be told because a macOS socket table shows
 its reader only the reader's own sockets (macOS 27.2, an ad hoc signed process); for a listener that accepted the

@@ -11393,11 +11393,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 ### DEC-0161: a root installer vouches for its launchd system-domain job's listener (RT-3a)
 
 - **Date:** 2026-11-08
-- **Status:** Proposed 2026-11-08, a draft for the coordinator's blind readings (round 1 next). It amends HA-2
-  (DEC-0154) and RT-3 (DEC-0155): no schema, field or rule code changes.
+- **Status:** Proposed 2026-11-08, a draft for the coordinator's blind readings (round 1 folded, round 2 next). It
+  amends HA-2 (DEC-0154) and RT-3 (DEC-0155): no schema, field or rule code changes.
 - **Context:** the adapter (fabric-agent-adapter) asked on board request `7eabdcee` (thread `b986b9f7`, capability
   `contract.change`, due 2026-11-15; answered in principle in message `ff108cd4`) for its FAA-288. Its kit 0.78.0
-  (FAA-278; branch `rel-0.78.0` at `33b8e5ad`, read-only; its `main` at `2c0b1b18` carries only the FAA-278 row) installs
+  (FAA-278; branch `rel-0.78.0` at `33b8e5ad` when it asked, read-only; its `main` at `2c0b1b18` carries only the FAA-278 row) installs
   a service as a LaunchDaemon in launchd's system domain (a plist in `/Library/LaunchDaemons` that names `UserName`) so
   it runs on a computer with no GUI login after FileVault, where a `gui/<uid>` job never starts. Its installer runs as
   root and polls the install as the Lifecycle Install row says (until the listener is this account's and the well-known
@@ -11407,7 +11407,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `plugins/fabric-agent-adapter/skills/building-fabric-services/references/lifecycle.md` (*The system domain*) at
   `33b8e5ad` record this as a departure from HA-2 and RT-3 and ask for an exception. At `main` `0fcb5d97`, HA-2 reads
   that listener as `foreign-user` for root (its uid is the job's `UserName`, not root), and RT-3 vouches only for a
-  process whose uid equals the caller's, and only under a restricted table, which root's table is not.
+  process whose uid equals the caller's, and only under a restricted table, which root's table usually is not. A
+  second root bootstrapper of system-domain jobs with `UserName` exists: Project Observatory's space-daemons installer
+  (OBS-361), which reads no listener today. This decision binds any root installer that polls; a root loader that
+  leaves the poll to a process of the plist's `UserName` (HA-2 or RT-2 as that account) meets the Install row without
+  it.
 - **Decision:** [service](specification/service.md#a-restricted-socket-table) RT-3a, on macOS.
   1. **Who.** A caller running as root that itself bootstrapped the launchd system-domain job `system/<label>` from a
      plist that names `UserName` U. Every other client keeps HA-2: for a client of another account the listener stays
@@ -11416,7 +11420,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      running job: the pid of the server end of this connection (the socket table root reads, or that pid's descriptors
      as RT-2 finds a server end), or, under a restricted table, the pid RT-3's
      `lsof -nP -a -p <pid> -i4TCP -sTCP:LISTEN` shows listening on the port. The accepted connection is preferred to
-     the listen, as RT-2 is to RT-3.
+     the listen, as RT-2 is to RT-3. Under a restricted table, RT-3a accepts RT-3's weaker proof: it shows the job's
+     pid listens on exactly `127.0.0.1:<port>`, not that the pid accepted this connection. The weakness is accepted
+     for the same reason as RT-3's (DEC-0155, CT-261): the read sends no credential, and only root could bind that
+     exact address over a wildcard the kit refuses. So the installer does not refuse on that path (the adapter's board
+     question `b72a09f5`, answered in `567cc241`).
   3. **The account.** That pid's uid in the process table equals U's uid, and U is the service's own account: the
      counted account whose services directory holds the service's descriptor (the account its HA-1 claim names; the
      claim itself grants nothing).
@@ -11431,7 +11439,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      `UserName` runs as that account; [conformance](specification/conformance.md#clients-and-readers) gains the root
      installer's row.
   8. **Open.** No system-domain equivalent is decided for systemd (a `--system` unit with `User=` is the analogue) or
-     for Windows; it is owed when an adapter ships one.
+     for Windows; it is owed when an adapter ships one. CT-234 owns the host verbs, the descriptor's domain field and
+     host reporting for a system job (the Supervisor, Off and Code rows); a host without root reports the job read-only.
 - **Why:** an install on a computer with no GUI login has no other way to learn that its job came up: the installer
   must be root to bootstrap into the system domain, and HA-2 makes everything the job answers unreadable to root.
   launchd's own record of the job's pid is a stronger tie between the installer and the listener than anything the
@@ -11446,16 +11455,21 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   proves the listener this account's with no exception (an installer MAY still do so; it is not required because it
   adds a second process under another uid to the install for a read whose only output is whether the job came up, and
   launchd's pid ties the job to the installer at least as strongly).
-- **Compatibility:** nothing on the wire changes; `contractVersion` stays `0.1.0`. The adapter's kit at `33b8e5ad`
-  already takes launchd's pid (item 2), an exact `127.0.0.1` bind under a restricted table (item 4) and a token-free
-  read with no credential (item 5); it owes item 3, the pid's uid checked against the plist's `UserName` (its
-  `lifecycle.md` today says the vouch rests on launchd's pid "and nothing else"), and its departure note's removal at
-  its next repin (FAA-258). Hosts that read launchd only in `gui/<uid>` are the adapter's FAA-287, not this decision.
+- **Compatibility:** nothing on the wire changes; `contractVersion` stays `0.1.0`. The adapter's kit at `rel-0.78.0`
+  `056e6bf4` (read-only) takes launchd's pid (item 2), the exact `127.0.0.1` bind on both the accepted-connection and
+  the restricted paths (item 4, `5da30013`), a token-free read with no credential (item 5) and the uid half of item 3,
+  the pid's uid checked against the plist's `UserName` (`7cabd731`); item 2 covers its restricted-table vouch, which
+  its `lifecycle.md` asks about. It still owes the services-directory half of item 3 (U is a counted account whose
+  services directory holds the descriptor; it checks only that `UserName` is a short name, an account of the Mac and
+  not root), the set-uid exclusion of item 6 (its Node kit tests only `euid === 0`, its Python kit only
+  `os.geteuid() == 0`), and its departure note's removal at its next repin (FAA-258). Hosts that read launchd only in `gui/<uid>` are the adapter's FAA-287, not this decision.
   No contract vector set covers listener ownership (the state-order vectors are CT-229), so this decision is text and a
   conformance row; the installer's own test carries the cases (a matching job, a pid that is not the job's, a uid that
   is not U's, a wildcard bind, a non-root caller).
-- **Consequences / affects:** `docs/specification/service.md` (HA-2's list, RT-3a, the set-uid and scope paragraph,
-  the Lifecycle Install row), `docs/specification/conformance.md` (the root installer's row), DEC-0154 and DEC-0155 (an
-  Annotated line each); backlog CT-284; the handoff `docs/handoffs/2026-11-08-system-domain.md`.
+- **Consequences / affects:** `docs/specification/service.md` (HA-2's MUST and its list, RT-3a, the set-uid and scope
+  paragraph, the Lifecycle Install row), `docs/specification/conformance.md` (the root installer's row, the client row), DEC-0154 and DEC-0155 (an
+  Annotated line each), `CONTEXT.md` (the `foreign-user` entry), `docs/ux/scenarios.md` (SCN-056's launch daemon
+  wording), `docs/guides/connecting-compatible-agents.md` (one sentence); backlog CT-284, CT-234 and CT-265 (annotated);
+  the handoff `docs/handoffs/2026-11-08-system-domain.md`.
 - **Source:** board request `7eabdcee` (thread `b986b9f7`, message `ff108cd4`); the adapter's FAA-288 and FAA-278 at
-  `33b8e5ad` (`rel-0.78.0`).
+  `33b8e5ad` (`rel-0.78.0`, when it asked), restated against its head `056e6bf4`.
