@@ -19,7 +19,9 @@ component's counts and sends them, that app's own switch governs them: Fabric In
 and each person's Fabric Inbox app sends that server's counts under the app's switch, its notice naming them
 (`desktop/main.cjs` line 937, `desktop/analytics.cjs` lines 352 to 353 and 422 to 429 at `1395416`), so a server an
 organization deploys for several members is counted by each member's app under that member's switch, and the
-organization holds no switch over those counts.
+organization holds no switch over those counts. Such counts are per member's app, not per server (the events carry no
+server id), so they are not summed across installs; an organization that wants them off locks its members' switch off
+by device policy on their enrolled devices (UD-2).
 The key words MUST, MUST NOT, SHOULD and MAY are used as in RFC 2119.
 
 - **UD-1, on by default, told once.** A product that collects usage or error data collects it from its first start, for
@@ -91,8 +93,9 @@ The key words MUST, MUST NOT, SHOULD and MAY are used as in RFC 2119.
   ignores a lock that would hold its switch on: its switch resolves as if that layer's lock were absent, so a lower
   layer's lock off still holds and, where none holds it off, the person's own setting (or an earlier no) governs; the
   product does not show the switch as locked on. The reference resolution (`resolvePolicy`, [devices](devices.md#policy))
-  does not apply this limit: the product applies it after resolution, resolving the key again without the lock that
-  held it on.
+  does not apply this limit: the product applies it after resolution, resolving the key again without any lock that
+  would hold it on; nor does the reference device decision (`expectedDecision`, `FAC-SEM-068`) apply it to a local
+  change, which it refuses for any locked key (a reference helper and its vectors are CT-280).
 - **UD-3, anonymous.** "Anonymous" here means the data names no person; it is not unlinkable: an installation id ties
   one install's events together, and a shared one ties together the events of every product on that machine that sends
   it, which the notice (UD-1) and the privacy text (UD-5) say. The data MUST NOT carry a person (a name, an email
@@ -269,20 +272,29 @@ erasure, its off-host copy and its readers. PassionCode.ai's public privacy page
 organization's site repository `passioncode-ai.github.io`, line 60 of `privacy/index.html` and of its nine locale
 copies, `de`, `es`, `fr`, `ja`, `ko`, `pl`, `pt-br`, `ru` and `zh-hans`, at `e7a2ed25`) names only Switchboard and Fabric as sending and says
 the switch applies to every PassionCode.ai app on that computer: its owner owes UD-2's switch for each product alone
-and, for every product that sends, what UD-5 asks of its privacy text. Fabric sends nothing before the person has answered its question (its ADR-0127, its SCN-134,
+and, for every product that sends, what UD-5 asks of its privacy text. Two product pages of that site say the same, each
+in all ten locales at `e7a2ed25`: `switchboard/index.html` line 89 ("the switch applies to every PassionCode.ai tool",
+already false of Switchboard, whose own `docs/ANALYTICS.md` line 48 at `d192cfa` says its switch turns Switchboard off
+or on only) and `fabric/index.html` line 61 ("which applies to every PassionCode.ai app on your Mac"), each with its
+nine locale copies; the owner owes UD-2's switch for each product alone there too. Fabric sends nothing before the person has answered its question (its ADR-0127, its SCN-134,
 "Usage counts: share them?" and "Nothing more is sent until you answer", `i18n/en.ts` lines 868 to 870 at
 `eafcf2e4`), which is a UD-1 debt: the notice is not a question and no answer means on. Its notice and settings also
 say its switch governs every PassionCode app on the computer and give no purpose, so it owes UD-1's purpose, naming
 the sharing products, that the id ties events together and the resume (lines 864, 869 and 870), and UD-2's own
 switch; line 864's "One switch for every PassionCode app on this computer" is a false promise for every product that
 has already sent, which the person reads until its own record of the operator's decision (its on-demand sessions
-specification §8, rewriting CO-496) ships a switch for Fabric alone. Fabric's switch also writes the shared `analytics`
+specification §8, rewriting CO-496) ships a switch for Fabric alone. The same claim stands in their Russian copies
+(`i18n/ru.ts` lines 2488, 2493 and 2494) and in its `README.md` (lines 336 to 338, "turns this off for every
+PassionCode app on the Mac"), both at `eafcf2e4`, which the same string-only correction reaches. Fabric's switch also writes the shared `analytics`
 field both ways (`writeAnalyticsSwitch`, `apps/desktop/src/main/analytics.ts` lines 88 to 96, called by `setEnabled`
 at lines 305 to 308, at `eafcf2e4`), so under UD-2's earlier-no reading its off decides for every product that has
 not yet sent and its on erases a person's earlier no; CO-496 owes UD-2's rule on writing: Fabric stops writing the
 field from the version whose switch governs Fabric alone and leaves an off already written there. Fabric Inbox exports
 a writer for the shared field that nothing calls (`writeSwitch`, `desktop/analytics.cjs` lines 96 to 103 at
-`1395416`), so it writes nothing there today, and under UD-2 it stays uncalled. The consent rules of the estate's growth and
+`1395416`), so it writes nothing there today, and under UD-2 it stays uncalled. Its `README.md` (lines 202 to 204 at
+`1395416`) says its switch turns the counts off "for every PassionCode.ai app on the Mac at once", which contradicts
+its own notice ("that turns it off for Fabric Inbox only", `desktop/main.cjs` line 937) and UD-2: a UD-2 debt, a
+string-only correction. The consent rules of the estate's growth and
 experiments service have a baseline tier (no id) and an identity tier (the random id), both stopped by the switch, and
 owe UD-1's notice contents, UD-3's paths and received content, UD-2's shared id kept at off (they delete it) and at
 re-enable and their no-switch exception, and UD-3's join rule for the service's revenue attribution. The adapter (FAA-202, open, its target 0.64.0 passed)

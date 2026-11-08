@@ -208,7 +208,11 @@ ruling; DEC-0017 states what holds now.
   once", `desktop/main.cjs` line 937 at `1395416`), so a narrower answer changes shipped strings, not only future
   wording. Switchboard's same line also gives its first purpose as "to help PassionCode.ai improve its apps" (unchanged
   at `f6f1dc1`), every app of the organization rather than Switchboard, which DEC-0157 counts as a UD-1 debt; a narrow
-  answer changes that string too. Does "only for this" admit the second purpose, or is a shared id's only use each product's own improvement?
+  answer changes that string too. Both notices also say the shared id counts "one person" once, while UD-1 and UD-3
+  count one installation and name no person (one OS account used by two people, or one person on two machines, makes
+  "one person" untrue); whatever the answer, those notices are asked to say "one installation" (or "this computer")
+  rather than "one person", a new notice under UD-1's re-show rule (the board message's Switchboard and Fabric Inbox
+  lines). Does "only for this" admit the second purpose, or is a shared id's only use each product's own improvement?
   (2) Plans.md item D addresses "every product owner". DEC-0157 reads it as the products the estate ships to people
   (an app, an agent, a command line tool, a component run on the person's own server) and leaves out a service the
   estate hosts that installs nothing on the person's machine or in an account or server of theirs, since nothing of it

@@ -536,8 +536,10 @@ key as locked. A key for a product's anonymous usage data switch is limited by [
 (DEC-0157): a layer MAY lock it off and MUST NOT lock it on, and a product ignores a lock that would hold its switch on,
 resolving it as if that layer's lock were absent (so a lower layer's lock off still holds) and not showing it as locked
 on. `resolvePolicy` does not apply this limit: it returns the locking layer's value, and the product applies UD-2's limit
-after resolution, resolving the key again without the lock that held it on (a reference helper and its vector are
-CT-280). The `user` layer cannot lock (schema, `FAC-SEM-042`). A `user` layer's `harness.baseline` and
+after resolution, resolving the key again without any lock that would hold it on (a reference helper and its vectors are
+CT-280). Nor does `expectedDecision`, the reference decision `FAC-SEM-068` checks, apply it to a local change: it refuses
+any local change to a locked key, so a device that lets the person change a usage switch key held on only by locks UD-2
+ignores meets UD-2 and still draws that rule's finding until CT-280 changes the reference. The `user` layer cannot lock (schema, `FAC-SEM-042`). A `user` layer's `harness.baseline` and
 `repair.packages` count for nothing (DEC-0102): the resolution skips them, so a local change to either changes nothing
 (which answer a device gives such a change, and a schema that refuses them in a user layer, is CT-99). A `server`
 layer's locks also end with its enrollment when the organization closed ([a closed organization](#organization-closed), DEC-0103)

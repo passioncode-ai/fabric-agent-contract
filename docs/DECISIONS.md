@@ -11457,7 +11457,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      a device policy whose layer carries a key for a product's switch may lock it off and never locks it on, and a
      product ignores a lock that would hold its switch on, as if that layer's lock were absent (a lower layer's lock
      off still holds), applying this after the reference resolution `resolvePolicy`, which does not (the pointer in
-     devices.md's "Precedence and locks"; a reference helper and its vector are CT-280).
+     devices.md's "Precedence and locks"; a reference helper and its vectors are CT-280); nor does the reference
+     device decision `expectedDecision` (`FAC-SEM-068`) apply it to a local change, which it refuses for any locked
+     key, so a device that lets the person change a switch held on only by such locks draws that rule's finding until
+     CT-280 changes the reference, and the conformance row for a device deciding under its policy says so.
   3. UD-3: anonymous means no person named, not unlinkable (a shared id ties the products that send it); it leaves out a
      person (name, email, phone, account, billing or store id, an IP kept with the data, a hardware or advertising id),
      a credential, a path or a file name from the person's machine or data, and any content or text a person wrote or
@@ -11649,12 +11652,18 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   site repository `passioncode-ai.github.io`, line 60 of `privacy/index.html` and of its nine locale copies, `de`,
   `es`, `fr`, `ja`, `ko`, `pl`, `pt-br`, `ru` and `zh-hans`, at `e7a2ed25`) names only Switchboard and
   Fabric as sending and says the switch applies to every PassionCode.ai app on that computer: its owner owes UD-2's
-  switch for each product alone and, for every product that sends, what UD-5 asks of its privacy text. Fabric owes UD-1's
+  switch for each product alone and, for every product that sends, what UD-5 asks of its privacy text. Two product
+  pages of that site say the same, each in all ten locales at `e7a2ed25`: `switchboard/index.html` line 89 ("the
+  switch applies to every PassionCode.ai tool", already false of Switchboard, whose `docs/ANALYTICS.md` line 48 at
+  `d192cfa` says its switch turns Switchboard off or on only) and `fabric/index.html` line 61 ("which applies to every
+  PassionCode.ai app on your Mac"), each with its nine locale copies; the owner owes UD-2's switch for each product
+  alone there too. Fabric owes UD-1's
   notice, not a question: it sends nothing until the
   person answers "Usage counts: share them?" ("Nothing more is sent until you answer", `i18n/en.ts` lines 868 to 870 at
   `eafcf2e4`; its ADR-0127, SCN-134), where UD-1 has no answer mean on. It owes UD-2's per-product switch and UD-1's
   purpose, naming of the sharing products, the tying of events and the resume: its live notice and settings say its
-  switch governs every PassionCode app on the computer (`i18n/en.ts` lines 864, 869 and 870), a false promise for every
+  switch governs every PassionCode app on the computer (`i18n/en.ts` lines 864, 869 and 870, their Russian copies
+  `i18n/ru.ts` lines 2488, 2493 and 2494, and its `README.md` lines 336 to 338, all at `eafcf2e4`), a false promise for every
   product that has already sent (UD-2), which the person reads until CO-496 ships, and name no purpose; its own record (its on-demand sessions specification §8, read at `7dce3758`, rewriting CO-496) replaces
   the shared switch with one for Fabric alone. Its switch also writes the shared `analytics` field both ways
   (`writeAnalyticsSwitch`, `apps/desktop/src/main/analytics.ts` lines 88 to 96, called by `setEnabled` at lines 305 to
@@ -11662,7 +11671,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   its on erases a person's earlier no; CO-496 owes UD-2's rule on writing (Fabric stops writing the field from the
   version whose switch governs Fabric alone and leaves an off already written there). Fabric Inbox exports a writer for
   the shared field that nothing calls (`writeSwitch`, `desktop/analytics.cjs` lines 96 to 103 at `1395416`), so it
-  writes nothing there today, and under UD-2 it stays uncalled. The consent rules of the estate's growth and experiments
+  writes nothing there today, and under UD-2 it stays uncalled. Its `README.md` (lines 202 to 204 at `1395416`) says
+  its switch turns the counts off "for every PassionCode.ai app on the Mac at once", which contradicts its own notice
+  ("that turns it off for Fabric Inbox only", `desktop/main.cjs` line 937) and UD-2: a UD-2 debt, a string-only
+  correction. The consent rules of the estate's growth and experiments
   service owe the installation id and the switch's place in the notice (UD-1), paths and received content in the
   never-send list (UD-3), keeping a shared id at off and at re-enable rather than deleting it or making a new one (UD-2;
   its consent rules delete the installation id at off, which breaks UD-2 for a shared id), their no-switch exception

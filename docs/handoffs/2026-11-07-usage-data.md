@@ -68,14 +68,25 @@ decision of 2026-11-04.
   before its next release) and then a line per product, as DEC-0157's Compatibility lists it (Fabric, with the collector row's UD-6 condition as the digest collector, and
   UD-2's rule on writing at CO-496, since its switch writes the shared `analytics` field both ways,
   and, now and independently of CO-496, a string-only correction of its three strings that say its switch governs
-  every app, `i18n/en.ts` lines 864, 869 and 870, and an agent twin for its switch (UD-4) at CO-496;
+  every app, `i18n/en.ts` lines 864, 869 and 870, with their Russian copies `i18n/ru.ts` lines 2488, 2493 and 2494 and
+  its `README.md` lines 336 to 338 (all at `eafcf2e4`), the README's "one person using several apps counts once" (line
+  336) saying one installation instead, and an agent twin for its switch (UD-4) at CO-496;
   Switchboard, with an action for its switch and a manifest capability for that tool (UD-4), and UD-1's purpose in its
-  notice (its "to help PassionCode.ai improve its apps", `src/main.ts` line 109 at `f6f1dc1`, names every app); Fabric Inbox, its
+  notice (its "to help PassionCode.ai improve its apps", `src/main.ts` line 109 at `f6f1dc1`, names every app), and the
+  same line's "lets one person using several of them count once" saying "one installation" (or "this computer")
+  rather than "one person", a new notice under UD-1's re-show rule (OQ-0013); its `docs/ANALYTICS.md` line 48 at
+  `d192cfa` already says its switch turns Switchboard only, which the site's Switchboard page contradicts (the site
+  owner's line); Fabric Inbox, its
   exported shared-field writer kept uncalled, an agent twin for its switch on its desktop copy (UD-4) and sending
   nothing in a run before its first send (or before its conforming version's stand-in run) in which the shared file
   cannot be read (UD-2, its baseline at `desktop/analytics.cjs` lines 307 to 310), and that its server is counted by
   each member's app under that member's switch, so an organization deploying it holds no switch over those counts (UD-1's
-  scope); Fabric Dashboards, the same for its events sent without an id (`src/core/analytics.ts` lines 59 to 60 and 170
+  scope), such counts being per member's app, not per server, so not summed across installs, an organization that
+  wants them off locking its members' switch off by device policy (UD-2); its `README.md` lines 202 to 204 at
+  `1395416`, which say its switch turns the counts off "for every PassionCode.ai app on the Mac at once", corrected to
+  Fabric Inbox alone, a UD-2 debt since they contradict its own notice; and its notice's "counts one person once"
+  (`desktop/main.cjs` line 937) saying "one installation" (or "this computer") rather than "one person", a new notice
+  under UD-1's re-show rule (OQ-0013); Fabric Dashboards, the same for its events sent without an id (`src/core/analytics.ts` lines 59 to 60 and 170
   to 171 at `d43c94e`), FD-175 and a manifest capability for that tool included, its switch's action refusing
   `operator-decision-required` without a decision rather than run as the caller's own act (`src/mcp/server.ts` lines
   332 to 333 at `d43c94e`); the launcher (PC-123, before 0.2.76 is tagged):
@@ -105,7 +116,10 @@ decision of 2026-11-04.
   organization's site repository `passioncode-ai.github.io`, line 60 of `privacy/index.html` and of its nine locale
   copies, `de`, `es`, `fr`, `ja`, `ko`, `pl`, `pt-br`, `ru` and `zh-hans`, at `e7a2ed25`): UD-2's
   switch for each product alone in place of "the switch applies to every PassionCode.ai app", and UD-5's statements
-  for every product that sends; the
+  for every product that sends; and the same correction on its two product pages, `switchboard/index.html` line 89
+  ("the switch applies to every PassionCode.ai tool", already false of Switchboard by its own `docs/ANALYTICS.md` line
+  48 at `d192cfa`, and "lets one person count once" to say one installation) and `fabric/index.html` line 61 ("which
+  applies to every PassionCode.ai app on your Mac"), each with its nine locale copies at `e7a2ed25`; the
   estate's hosted workspace product, whose self-hosted image owes UD-3's session id and UD-4's product side (a
   `relayed` action for its switch, which is today only on its Organization page and an admin route recorded as a
   person's act, its MCP server declaring no actions extension), and whose planned well-known declaration of its
@@ -266,7 +280,10 @@ decision of 2026-11-04.
   Round 17 narrowed it to "as if that layer's lock were absent": treating the whole key as unlocked would also drop a
   lower layer's lock off, which UD-2 lets a layer set. `resolvePolicy` does not apply the limit; the product applies it
   after resolution, and a reference helper with its vector is CT-280 rather than a change to the reference here, since
-  no usage switch key is defined and no product reads one from a device policy today.
+  no usage switch key is defined and no product reads one from a device policy today. Round 18 found the same gap in
+  `expectedDecision`, the reference decision `FAC-SEM-068` checks, which refuses any local change to a locked key: it
+  is named in devices.md, UD-2, DEC item 2 and the conformance row and joins CT-280, rather than changed here, for the
+  same reason (DEC-0157 changes no code).
 - An organization-run cloud instance sends no usage data about its members' calls until a page for members exists
   (round 17, a merged-text requirement in the DEC-0159 landing item): a member who works only through a client key
   reads no product output where UD-1's notice could be shown first, and a hand-over of the key by the operator is no
@@ -742,6 +759,40 @@ not pushed for the same reason; the round entries' commits resolve only there.
   name of a private personal repository in the branch's diff, and the filtered DEC-0158 grep printing nothing on this
   head and on the tree merged with DEC-0158's branch. Not the full gate.
 
+- Round 18 (on `20587da0`, all three tiers), not clean: unit passed with risks, seam failed, product failed. Seam,
+  FAC-SEM-068's reference decision (`expectedDecision`, `src/device-rules.ts` lines 511 to 513, its local-change
+  branch) refuses any local change to a locked key, so a device that follows UD-2 by letting the person turn off a
+  switch held on only by a lone lock draws that rule's finding, and no text said so (now: devices.md "Precedence and
+  locks", UD-2, DEC item 2 and CT-280 say `expectedDecision` does not apply UD-2's limit to a local change; CT-280's
+  helper and vectors take a local-change case, a lone lock on deciding allow; the conformance row "a device deciding
+  under its policy" excepts a lock that would hold a usage switch on; no code changes here, since DEC-0157 changes
+  none). Product, the live "one switch for every app" claims were routed only in part (now, each read at its commit:
+  the site's `switchboard/index.html` line 89 and `fabric/index.html` line 61 with their nine locale copies at
+  `e7a2ed25`; Fabric's `README.md` lines 336 to 338 and `i18n/ru.ts` lines 2488, 2493 and 2494 at `eafcf2e4`, beside
+  `en.ts`; Fabric Inbox's `README.md` lines 202 to 204 at `1395416`, a UD-2 debt that contradicts its own notice; and
+  Switchboard's own `docs/ANALYTICS.md` line 48 at `d192cfa`, which says its switch turns Switchboard only, cited
+  against the site's Switchboard page; in the Compatibility, the page's practice paragraph, the README cell and the
+  board message). Risks folded: CT-280 defines the re-resolution's result (every lock that would hold the switch on
+  dropped; where no lock off then holds and the user layer is silent, the person's own switch state or an earlier no,
+  never a dropped layer's unlocked value) and adds a vector with an `mdm` lock on and a `server` lock on resolving to
+  the person's own setting, and the page and devices.md read "without any lock that would hold it on" (unit); the
+  conformance agent row and the DOCMAP summary carry the organization-switch clause, "whoever holds that switch for
+  the organization" (unit); OQ-0013 and the board message's Switchboard and Fabric Inbox lines (and Fabric's README
+  line 336, and the site's Switchboard page) ask the notices to say "one installation" (or "this computer") rather
+  than "one person", under UD-1's re-show rule (product); the scope paragraph says Fabric Inbox's server counts are
+  per member's app, not per server, so not summed across installs, an organization that wants them off locking its
+  members' switch off by device policy (UD-2), also in the board message's Fabric Inbox line (product); the CT-216
+  row quotes the Parallel branches checks on the merged tree together (seam). Carried as named: the sibling edits and
+  the RM-08 restatement stay owed work of the second landing and the knowledge-base landing, already in the list
+  above (seam).
+- On the round 18 fold (this commit's tree): `pnpm run docs:check` exit 0 (272 Markdown files, 0 errors), `python3
+  docs/ux/lint.py` exit 0 (40 stories, 34 flows, 34 screens, 56 scenarios), `pnpm run privacy:check` 0 findings, `pnpm
+  vitest run test/consistency.test.ts test/docs-check.test.ts test/device-rules.test.ts` 215 tests passed, `git
+  merge-tree --write-tree HEAD origin/main` exit 0, no U+2014 in the lines the branch adds against `origin/main`, no
+  name of a private personal repository in the branch's diff, and the seam tier's two checks (the devices.md
+  "Precedence and locks" range and the CT-280 row each naming `expectedDecision` or `FAC-SEM-068`) printing 1 each.
+  Not the full gate.
+
 ## Next task
 
-Round 18 of the blind readings of branch `agent/ct216-usage-data-v2` (DEC-0157), all three tiers.
+Round 19 of the blind readings of branch `agent/ct216-usage-data-v2` (DEC-0157), all three tiers.
