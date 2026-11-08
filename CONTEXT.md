@@ -771,7 +771,8 @@ purpose `agent-host`, file names such as `docs/handoffs/2026-11-06-shared-host-p
 words they were written in.
 
 **Policy layer**: One `device-policy` document from `mdm`, `server` or `user`; precedence is in that
-order, and a locked key is never overridden by a lower layer.
+order, and a locked key is never overridden by a lower layer, save a lock that would hold a product's usage data switch
+on, which the product ignores ([usage data](docs/specification/usage-data.md) UD-2, DEC-0157).
 
 **Interop**: The `fabric-interop/0.1` extension (and `/0.2`, whose readers accept `null` usage, DEC-0087): how agents are called over MCP:
 capabilities as tools, jobs, awaiting a choice, trace context and the hub.

@@ -69,7 +69,8 @@ decision of 2026-11-04.
   UD-2's rule on writing at CO-496, since its switch writes the shared `analytics` field both ways,
   and, now and independently of CO-496, a string-only correction of its three strings that say its switch governs
   every app, `i18n/en.ts` lines 864, 869 and 870, with their Russian copies `i18n/ru.ts` lines 2488, 2493 and 2494 and
-  its `README.md` lines 336 to 338 (all at `eafcf2e4`), the README's "one person using several apps counts once" (line
+  its `README.md` lines 336 to 338 and its `docs/ANALYTICS.md` lines 92 to 94, the page that README sends readers to
+  ("`analytics: false` turns analytics off for every PassionCode app on the machine") (all at `eafcf2e4`), the README's "one person using several apps counts once" (line
   336) saying one installation instead, and an agent twin for its switch (UD-4) at CO-496;
   Switchboard, with an action for its switch and a manifest capability for that tool (UD-4), and UD-1's purpose in its
   notice (its "to help PassionCode.ai improve its apps", `src/main.ts` line 109 at `f6f1dc1`, names every app), and the
@@ -77,14 +78,18 @@ decision of 2026-11-04.
   rather than "one person", a new notice under UD-1's re-show rule (OQ-0013); its `docs/ANALYTICS.md` line 48 at
   `d192cfa` already says its switch turns Switchboard only, which the site's Switchboard page contradicts (the site
   owner's line); Fabric Inbox, its
-  exported shared-field writer kept uncalled, an agent twin for its switch on its desktop copy (UD-4) and sending
+  exported shared-field writer kept uncalled, an agent twin for its switch on its desktop copy (UD-4; its B-236 at
+  `c9d9cc7` keeps the switch "without a door unless the operator asks", since a door would change it for the person,
+  and UD-4's relayed action changes the switch only on the operator's own decision, so the door does not change it for
+  the person; whether to build it now is for the operator) and sending
   nothing in a run before its first send (or before its conforming version's stand-in run) in which the shared file
   cannot be read (UD-2, its baseline at `desktop/analytics.cjs` lines 307 to 310), and that its server is counted by
   each member's app under that member's switch, so an organization deploying it holds no switch over those counts (UD-1's
   scope), such counts being per member's app, not per server, so not summed across installs, an organization that
   wants them off locking its members' switch off by device policy (UD-2); its `README.md` lines 202 to 204 at
   `1395416`, which say its switch turns the counts off "for every PassionCode.ai app on the Mac at once", corrected to
-  Fabric Inbox alone, a UD-2 debt since they contradict its own notice; and its notice's "counts one person once"
+  Fabric Inbox alone and its stale menu label "Share Anonymous Usage Counts" to the menu's "Share Usage Details"
+  (`desktop/menu.cjs` line 26 at `c9d9cc7`), a UD-2 debt since they contradict its own notice; and its notice's "counts one person once"
   (`desktop/main.cjs` line 937) saying "one installation" (or "this computer") rather than "one person", a new notice
   under UD-1's re-show rule (OQ-0013); Fabric Dashboards, the same for its events sent without an id (`src/core/analytics.ts` lines 59 to 60 and 170
   to 171 at `d43c94e`), FD-175 and a manifest capability for that tool included, its switch's action refusing
@@ -215,7 +220,12 @@ decision of 2026-11-04.
     counter (only `DEC` and `SEM` do), so the second lander also keeps them unique: an `OQ` id taken on both branches
     stays with the branch that landed first, and the other branch's question is renumbered to the next free id, with
     every reference to it and the file's next free id line. Check: `grep -o '^### OQ-[0-9]*' docs/OPEN_QUESTIONS.md |
-    sort | uniq -d` prints nothing.
+    sort | uniq -d` prints nothing. `docs/specification/conformance.md` conflicts with DEC-0159 in one hunk: this
+    branch rewrites the row "a device deciding under its policy" (UD-2's lock exception and the CT-280 note) and
+    DEC-0159 adds the row "a service in the local and cloud form" right after it; the second lander keeps this
+    branch's device row, then DEC-0159's new row, one each. Checks, each printing 1:
+    `grep -c '^| a device deciding under its policy .*CT-280' docs/specification/conformance.md`;
+    `grep -c '^| a service in the local and cloud form' docs/specification/conformance.md`.
   - With DEC-0156. The second lander writes into the merged OW-1 UD-4's switch as an example of a `change-policy`
     effect its exception covers, whatever form OW-1's list takes; writes into OW-5's limits UD-4's switch (a mandate
     from the operator's words never turns a declined switch back on); and makes UD-4 cite OW-1. Checks, each printing
@@ -247,6 +257,8 @@ decision of 2026-11-04.
     elicitation line names CF-4);
     `awk '/^### DEC-0157/{f=1;print;next} /^### DEC-/{f=0} f' docs/DECISIONS.md | grep -c 'operator-step: consent'`
     (in the DEC-0157 section);
+    and `grep -n 'DEC-0157' docs/specification/conformance.md | grep -c 'operator-step: consent'` (DEC-0159's own
+    check);
     and printing 0: `grep -c 'receives the client key' docs/specification/usage-data.md`; then the merged AP-2 and
     CF-2 to CF-4 read against UD-4 and the scope paragraph.
   - With DEC-0158. The second lander re-reads UD-4 against AP-2, AP-3, MD-3 (no mandate covers `change-policy`) and
@@ -264,12 +276,19 @@ decision of 2026-11-04.
 ## Decisions taken here
 
 - No UX scenario in this contract: the notice and the switch are each product's screens (Fabric's SCR-52 and SCN-134,
-  which owe UD-1 and UD-2 under its CO-496 rewrite); the
-  contract's UX documents describe contract surfaces, and none carries this. UD-4 is an agent's refusal with no surface
+  which owe UD-1 and UD-2 under its CO-496 rewrite). The contract's own device-settings surface does carry UD-2's lock
+  exception (round 19 corrected "none carries this"): SCN-011's alt path, FLW-07's goal, task analysis and diagram,
+  SCR-10's states, an ST-008 criterion, JTBD-04's metric and JRN-03 #2 now say that a lock that would hold a product's
+  usage data switch on is ignored, the switch never shown as locked on, and a lock off still refused. UD-4 is an agent's refusal with no surface
   of its own: it is an alt path of SCN-043 (the agent answers in its chat that the switch is the person's), with no new
   screen or flow.
-- A shared installation id is not rotated at off (UD-2): rotating it would split one person's installs across every
+- A shared installation id is not rotated at off (UD-2): rotating it would split one installation's events across every
   product that reads the file; the product only stops sending it.
+- The device-policy schema's description ("a locked key cannot be overridden by a lower layer",
+  `schemas/device-policy.schema.json` line 5) stays as it is (round 19): DEC-0157 changes no schema, and the
+  description is true of the resolution the schema serves (`resolvePolicy` returns the locking layer's value); UD-2's
+  limit is applied by the product after resolution, as devices.md says. Pointing the description at UD-2 joins CT-280,
+  which changes the reference and its vectors.
 - No machine declaration (UD-5): no host reads one; the safer reversible choice is to add it when a host asks.
 - A device policy may lock a product's switch off and never locks it on (UD-2, round 15): locking off only protects
   the person, while a lock on would override a person's decline, which UD-2 keeps, and the switch is the person's
@@ -793,6 +812,37 @@ not pushed for the same reason; the round entries' commits resolve only there.
   "Precedence and locks" range and the CT-280 row each naming `expectedDecision` or `FAC-SEM-068`) printing 1 each.
   Not the full gate.
 
+- Round 19 (on `5795313e`, all three tiers), not clean: unit failed, seam passed with risks, product failed. Unit, the
+  conformance row "a device deciding under its policy" allowed the person's local change to a usage switch key under
+  any ignored lock and hung the exception on policy expiry, while devices.md and UD-2 allow it only for a key held on
+  only by such locks (an `mdm` lock on over a `server` lock off stays refused); now the row says so, apart from
+  expiry. Product, UD-2's lock exception was missing from the contract's own device-settings path (now: SCN-011's alt
+  path, FLW-07's goal, task analysis and diagram, SCR-10's states, an ST-008 criterion, JTBD-04's metric, JRN-03 #2,
+  CONTEXT.md's Policy layer and the conformance row "a device applying policy" each carry a UD-2 pointer; the
+  device-policy schema's description stays, recorded in Decisions taken here and joined to CT-280; the "none carries
+  this" line corrected). Risks folded: devices.md says that where no lock off holds the person's own setting or an
+  earlier no governs, never a dropped layer's value (unit); the "one person" wording is a UD-1 purpose debt of the
+  Switchboard and Fabric Inbox notices in the practice account, the Compatibility and the README cell, and the
+  Alternatives and Decisions read "split one installation's events" (unit); the Registers item names the
+  conformance.md hunk with DEC-0159 (this branch's device row, then DEC-0159's new row, one each) and the DEC-0159
+  item carries that branch's own conformance check, both quoted in the CT-216 row (product and seam); CT-280 asks
+  ports of the reference to re-sync at their next pin, an adoption row per port, and takes the schema description and
+  a refuse vector for an `mdm` lock on over a `server` lock off (seam); the board message's Fabric Inbox line and the
+  Compatibility cite its B-236 at `c9d9cc7` ("kept without a door unless the operator asks"), say UD-4's relayed
+  action changes the switch only on the operator's own decision and leave when to build the door to the operator,
+  and the README correction takes its stale menu label (`desktop/menu.cjs` line 26 at `c9d9cc7`, read at Fabric
+  Inbox's `origin/main`) (product); Fabric's `docs/ANALYTICS.md` lines 92 to 94 at `eafcf2e4` (read there, unchanged
+  at its `origin/main`) join the board line's string-only correction and the page's "the same claim stands in"
+  sentence (product). The seam report's own file was not at hand for this fold: its risks were folded as the
+  coordinator relayed them.
+- On the round 19 fold (this commit's tree): `pnpm run docs:check` passed (272 Markdown files, 0 errors), `python3
+  docs/ux/lint.py` exit 0 (40 stories, 34 flows, 34 screens, 56 scenarios), `pnpm run privacy:check` 0 findings, `pnpm
+  vitest run test/consistency.test.ts test/docs-check.test.ts test/device-rules.test.ts` 215 tests passed, `git
+  merge-tree --write-tree HEAD origin/main` exit 0, no U+2014 in the lines the branch adds against `origin/main`;
+  `grep -c 'UD-2'` inside SCN-011, FLW-07, SCR-10 and ST-008 printing 1, 3, 1 and 1, in CONTEXT.md's Policy layer
+  and the row "a device applying policy" 1 each, and `grep -c '^| a device deciding under its policy .*CT-280'` 1.
+  Not the full gate.
+
 ## Next task
 
-Round 19 of the blind readings of branch `agent/ct216-usage-data-v2` (DEC-0157), all three tiers.
+Round 20 of the blind readings of branch `agent/ct216-usage-data-v2` (DEC-0157), all three tiers.

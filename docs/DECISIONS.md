@@ -11567,7 +11567,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   data's shape, its destination and the notice's words differ by product and stay theirs. A declaration nobody reads
   would be a field to keep true with no reader to catch it drifting.
 - **Alternatives considered:** a well-known member now (no host reads it; added when one asks, UD-5); one switch for
-  several products (the operator said per product); rotating a shared id at off (it would split one person's installs
+  several products (the operator said per product); rotating a shared id at off (it would split one installation's events
   across every product reading the file); leaving all of it to each product (the meaning of "anonymous" and "off" would
   drift between them, which is what the operator's decision guards).
 - **Compatibility:** nothing on the wire changes. Read on 2026-11-07 and 2026-11-08, each product's documents and code
@@ -11576,7 +11576,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `on_by_default_a_background_start_sends_from_the_first_start`, "Nothing waits for the notice"), UD-1's naming of the
   products that share its id, the tying of events, its session id and that turning back on resumes it (its notice,
   `src/main.ts` line 109 at `c762821`), UD-1's purpose (that line gives it as "to help PassionCode.ai improve its apps",
-  unchanged at `f6f1dc1`, every app of the organization rather than Switchboard, OQ-0013 naming the string),
+  unchanged at `f6f1dc1`, every app of the organization rather than Switchboard, OQ-0013 naming the string, and its
+  "one person" counted once where UD-1 and UD-3 count one installation, a UD-1 purpose debt Fabric Inbox's notice owes too),
   UD-2's kept decline (it reads the shared `analytics: false` only for an install that answered in Switchboard under its
   earlier rule, `crates/switchboard-runtime/src/analytics.rs` lines 315 to 322 at `405b789`, so it sends for an install
   whose person said no under Fabric's shared switch before Switchboard first sent, its test
@@ -11621,7 +11622,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   switch in its menu (Share Usage Details, its notice at `desktop/main.cjs` line 937) with no agent twin, and Fabric
   offers its switch only to its own window (`analyticsSetEnabled`, `apps/desktop/src/main/index.ts` line 4201 at
   `eafcf2e4`) and declares no action for it; both owe UD-4's product side, an action for the switch whose tool's
-  effect is `change-policy`, with `gate: relayed` (Fabric at CO-496). The products read, all but Project Observatory
+  effect is `change-policy`, with `gate: relayed` (Fabric at CO-496). Fabric Inbox recorded on 2026-11-08 that its
+  switch is kept without a door unless the operator asks (its B-236, `docs/agents/desktop-actions.md` line 28 at
+  `c9d9cc7`), since a door would change it for the person; UD-4's relayed action changes the switch only on the
+  operator's own decision, so the door does not change it for the person, and when to build it is the operator's. The products read, all but Project Observatory
   (below), send to PassionCode.ai's own self-hosted analytics host, `analytics.passioncode.ai` (passioncode-platform
   PLAT-019, live since 2026-10-17, and PLAT-132; Switchboard's `crates/switchboard-runtime/src/analytics.rs` line 30 at
   `b99a17b`; Okolos's too, the host's `infra/analytics/README.md` line 18 at `e4d1c0e`, so the host's reader of raw

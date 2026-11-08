@@ -63,7 +63,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Personas:** P-03
 - **Type:** functional, emotional
 - **Forces:** push: telemetry nobody can see feels like surveillance; pull: a log of every read and visible locks; anxiety: data used beyond its stated purpose; habit: switch the collector off.
-- **Success metric:** every read of the member's raw data or device state appears in their access log with a purpose, and a locked setting is shown as locked rather than silently ignored.
+- **Success metric:** every read of the member's raw data or device state appears in their access log with a purpose, and a locked setting is shown as locked rather than silently ignored (a lock that would hold a product's usage data switch on is the exception: it is ignored and the switch shows the person's own setting, UD-2, DEC-0157).
 
 ### JTBD-05: Answer my agents' stops from my phone
 
@@ -181,7 +181,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 | # | Stage | User action | Touchpoint | Emotion (1-5) | Pain | Opportunity |
 |---|---|---|---|---|---|---|
 | 1 | Enroll | signs in once on the device | enrollment | 3 | unclear what is collected | a notice that names purpose and retention (priority 9) |
-| 2 | Adjust | changes a setting | device settings | 2 | a change silently does nothing | locked keys shown as locked, the change refused with a reason (priority 9) |
+| 2 | Adjust | changes a setting | device settings | 2 | a change silently does nothing | locked keys shown as locked, the change refused with a reason; a usage data switch never shown as locked on, the person's off taking effect (UD-2) (priority 9) |
 | 3 | Check | reads who read their data | access log | 3 | reads are invisible | every read with reader role and purpose (priority 9) |
 
 ### JRN-04: Operator — connect and answer an agent's channel (JTBD-05)
@@ -369,6 +369,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
   - Given `logging.required` is locked by the server, when I try to switch logging off, then the device refuses and shows the key as locked by the server.
   - Given `x-example.banner` is an unlocked default, when I change it, then my value is the effective one.
   - Given a policy whose signature does not verify, when it arrives, then the device keeps the revision it holds.
+  - Given a server or mdm layer locks a product's usage data switch on and no lower layer locks it off, when I switch it off, then my off takes effect and the switch is never shown as locked on; given a lock off on it, my change to on is refused and the switch is shown as locked (UD-2, DEC-0157).
 - **Priority:** must
 - **Status:** draft
 - **Product:** unobserved

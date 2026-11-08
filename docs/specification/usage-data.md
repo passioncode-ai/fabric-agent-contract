@@ -217,7 +217,9 @@ with which products, that it ties events together, that turning back on resumes 
 (`desktop/main.cjs` line 937 at `1395416`, "an id shared by the PassionCode apps") owes naming those products, the tying of events and the resume; Switchboard's (`src/main.ts` line 109 at `c762821`)
 owes naming them, the tying of events and the resume, and UD-1's purpose: that line gives it as "to help PassionCode.ai
 improve its apps" (unchanged at `f6f1dc1`), every app of the organization, where UD-1's purpose is to improve that
-product (OQ-0013 names the string). Switchboard, Fabric Inbox, Fabric Dashboards, the launcher
+product (OQ-0013 names the string). Both Switchboard's and Fabric Inbox's notices also say their shared id
+counts "one person" once, where UD-1 and UD-3 count one installation and name no person, so both owe "one installation"
+(or "this computer") in its place, a UD-1 purpose debt (OQ-0013). Switchboard, Fabric Inbox, Fabric Dashboards, the launcher
 and Fabric send a session id whose form UD-3 admits (the Aptabase SDKs' form, Unix seconds times 10^8 plus 8 random
 digits, kept in memory). Switchboard's (`crates/switchboard-runtime/src/analytics.rs` lines 417 to 426 at `405b789`)
 and Fabric Inbox's (`desktop/analytics.cjs` lines 184 to 191 at `1395416`) are renewed after an idle hour and meet
@@ -285,7 +287,9 @@ switch; line 864's "One switch for every PassionCode app on this computer" is a 
 has already sent, which the person reads until its own record of the operator's decision (its on-demand sessions
 specification §8, rewriting CO-496) ships a switch for Fabric alone. The same claim stands in their Russian copies
 (`i18n/ru.ts` lines 2488, 2493 and 2494) and in its `README.md` (lines 336 to 338, "turns this off for every
-PassionCode app on the Mac"), both at `eafcf2e4`, which the same string-only correction reaches. Fabric's switch also writes the shared `analytics`
+PassionCode app on the Mac") and its `docs/ANALYTICS.md` (lines 92 to 94, "turns analytics off for every PassionCode
+app on the machine", the page its README sends readers to), all at `eafcf2e4`, which the same string-only correction
+reaches. Fabric's switch also writes the shared `analytics`
 field both ways (`writeAnalyticsSwitch`, `apps/desktop/src/main/analytics.ts` lines 88 to 96, called by `setEnabled`
 at lines 305 to 308, at `eafcf2e4`), so under UD-2's earlier-no reading its off decides for every product that has
 not yet sent and its on erases a person's earlier no; CO-496 owes UD-2's rule on writing: Fabric stops writing the

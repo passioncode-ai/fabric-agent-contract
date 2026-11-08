@@ -534,8 +534,9 @@ An unlocked value above the user layer is therefore a default the person may cha
 never overridden by a lower layer. A device MUST refuse a local change to a locked key and show the
 key as locked. A key for a product's anonymous usage data switch is limited by [usage data](usage-data.md) UD-2
 (DEC-0157): a layer MAY lock it off and MUST NOT lock it on, and a product ignores a lock that would hold its switch on,
-resolving it as if that layer's lock were absent (so a lower layer's lock off still holds) and not showing it as locked
-on. `resolvePolicy` does not apply this limit: it returns the locking layer's value, and the product applies UD-2's limit
+resolving it as if that layer's lock were absent (so a lower layer's lock off still holds and, where no lock off holds,
+the person's own setting, or an earlier no, governs, never the value of a layer whose lock was dropped) and not
+showing it as locked on. `resolvePolicy` does not apply this limit: it returns the locking layer's value, and the product applies UD-2's limit
 after resolution, resolving the key again without any lock that would hold it on (a reference helper and its vectors are
 CT-280). Nor does `expectedDecision`, the reference decision `FAC-SEM-068` checks, apply it to a local change: it refuses
 any local change to a locked key, so a device that lets the person change a usage switch key held on only by locks UD-2
