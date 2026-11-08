@@ -980,7 +980,8 @@ cloud instance's well-known document, declaring `surfaces.mcp.auth: "own"` and `
   the operator runs from their own computer (on it, or as a one-off process of the platform it starts), not a
   descriptor `commands` entry, which a remote placement limits to `doctor`; an action on the operator's page; and that
   action's agent twin ([AP-1](#actions)), declared `gate: "relayed"`, so that it acts only as the operator's decision
-  and is recorded as theirs with the caller the service authenticated: from a T0 or T1 caller carrying the operator's
+  and is recorded as theirs with the caller the service authenticated (a member's key is issued and rotated by the
+  page's own separate action, below, which has no `relayed` twin): from a T0 or T1 caller carrying the operator's
   decision in `_meta.decision` (AP-2), or from any caller with an accepted `approval/1` (DL-17, DL-18). A caller that
   reaches the cloud origin directly is T2 unless the platform proves its origin's tier ([delegation](delegation.md)
   DL-25, DL-28), and the delegation token an agent of the estate presents there is DL-8's, which DL-26 does not forbid
@@ -994,7 +995,8 @@ cloud instance's well-known document, declaring `surfaces.mcp.auth: "own"` and `
   key; the twin stays open to a delegation-token caller with the operator's decision (T0 or T1, AP-2) or an accepted
   `approval/1` (DL-16). A twin takes `approval/1` only where the instance holds the estate's issuer and key set to
   check it (DL-18); on an instance without them it answers as every `relayed` action of that instance does (CF-4, *A
-  `relayed` action keeps its gate*), and keys are then managed only through the CLI and the page. The well-known fixture above leaves the actions declaration (`extensions/actions/0.1`,
+  `relayed` action keeps its gate*), and keys are then managed only through the CLI and the page, unless the platform
+  proves a caller's tier T0 or T1 (DL-25), whose call carrying the operator's decision needs no `approval/1` (AP-2). The well-known fixture above leaves the actions declaration (`extensions/actions/0.1`,
   [AP-1](#actions)) out, so it shows neither the page's key action nor its twin; a service that has them declares them
   there (AP-1). A key is shown once, in the issuing answer,
   and never again; the service keeps it only as a hash; it is revoked one by one, a revoked key refused from the next
@@ -1002,35 +1004,44 @@ cloud instance's well-known document, declaring `surfaces.mcp.auth: "own"` and `
   service treats the key as revoked. Revoking a key, or its expiry, also cancels that key's running jobs and its jobs
   waiting on an operator step, which end `cancelled` ([interop C3.2](interop.md#c32-jobs)); the page drops a revoked
   key from every step's waiting list, and a step no remaining call or job waits on closes, raising no further repeat
-  (CF-4). Apart from that one issuing answer, a client key never appears in a log, an answer, a page or a report. An
+  (CF-4). Rotating a key revokes it, with all that revoking does, its jobs included, and issues a new key under the
+  same holder label, scopes and per-key cap, shown once in the rotating answer. Apart from that one issuing answer, a
+  client key never appears in a log, an answer, a page or a report. An
   agent that calls an issuing door (the twin, or the CLI the operator runs through that agent) receives the key in its
   answer and so in its transcript; the hand-over below keeps a key out of chat and logs only when the operator runs
   the CLI in their own terminal or uses the page. So issuing or rotating a member's key, which hands out a secret, is
-  the operator's own step in their terminal or on the page, never an agent's. Revoking a key hands out no value, so
+  the operator's own step in their terminal or on the page, never an agent's: the page's action that issues or rotates
+  a member's key is its own action, declared `gate: "human"` with `humanStep` `secret` (AP-1, [AP-4](#actions): a
+  secret handed out), so its tool answers an agent as every `human` action does and it has no `relayed` twin; the
+  `relayed` twin issues and rotates only an agent's own key, and revokes any key. Revoking a key hands out no value, so
   the operator's agent revokes one on the operator's word: through the twin where its gate lets the agent through
   (above; CF-4, *A `relayed` action keeps its gate*), else by running the agent's CLI on the operator's
-  computer, as it must on an instance without the estate's issuer, where the twin answers a caller carrying an approval
-  `issuer-unavailable` (CF-4). Each
+  computer, as it must on an instance without the estate's issuer (unless the platform proves its tier, above), where
+  the twin answers a caller carrying an approval `issuer-unavailable` (CF-4). Each
   key carries a holder label the operator gives it (whose key it is), shown on the operator's CLI and page alone and
   never in an answer to another caller, the events feed or the usage report. The usage report counts a client-key
   call's spend in its days and rows and never in `byGrant`, which names only the grant a delegation token carried
   ([usage report](#usage-report), DL-22). Client-key spend reaches no `grant.usage` event and no grant limit, so the
   service's own budgets ([Limits](#limits), DEC-0027) are the ceiling the operator sets for the team. It reaches no
-  grant check either, so the estate's meter reserves none of it: at the call L0 binds it only through each provider
-  key's own ceiling, and the estate's monthly total sees it only after the fact, where a reader totals the usage
-  report's days and rows ([spend policy](spend-policy.md#levels)). Per-key spend,
+  grant check either, so the estate's meter reserves none of it: at the call it is bound only by each provider key's
+  own ceiling and the service's own budgets, not by L0's monthly total or a project's L1, and the estate's monthly
+  total sees it only after the fact, where a reader totals the usage report's days and rows (the one exception
+  [spend policy](spend-policy.md#levels) names to L0's hard stop). Per-key spend,
   and any cap on one key's spend, are the service's own and shown on the operator's CLI and page only, as the holder
   label is; a per-key cap is no entry of `budgets`, whose scopes name no key. A client-key call that a budget or a
   per-key cap stops is refused `limit-reached` with `error.data.window` (DL-19), the service the refuser, and carries no
   approval request. The window is the budget's `period` where it has one (`day` or `month`), `task` for a `per_job`
-  budget, for a rolling `windowSeconds` the smallest of `day` (86400 seconds), `week` and `month` that covers it
-  (`total` beyond a month), and `total` for a `since` budget or another with no window; a per-key cap names its own window the same way. Raising the
+  budget, for a rolling `windowSeconds` the smallest of `day` (up to 86400 seconds), `week` (up to 604800 seconds)
+  and `month` (up to 2678400 seconds, 31 days, so every monthly window of [Limits](#limits) maps to it) that covers it
+  (`total` beyond), and `total` for a `since` budget or another with no window; a per-key cap names its own window the same way. Raising the
   ceiling is the operator's, on the CLI or the page, so the caller tells its person to ask
   the operator (the hand-over note names whom) and does not resend until the operator says so (interop's resend after an approval through
   SCN-017 reaches the caller's own operator, not this service's). An `approval` threshold an order crosses is a step,
   spend above a limit, and goes to the operator as CF-4 says.
-  The operator hands a member their key through a channel that keeps it out of chat and logs, with a note naming whom
-  the member asks when a call is refused; the member stores the key in their own vault (SCN-053's secret window, for
+  The operator hands a member their key through a channel that keeps it out of chat and logs (a password manager's
+  item share, a one-time secret link, or reading it out to the member, who types it into their own secret window),
+  with a note naming whom the member asks when a call is refused and the key's expiry, where one is set; the member
+  stores the key in their own vault (SCN-053's secret window, for
   example), and the member's coding agent reaches `peer.endpoint` as the operator states it, until a listing contract
   carries it (backlog CT-275, which also holds how the key reaches the coding agent's header); a listing of the cloud instance installs no descriptor on a member's
   machine (CF-2). A member's departure revokes no client key: removing a member ends what the organization listed or
@@ -1053,10 +1064,12 @@ cloud instance's well-known document, declaring `surfaces.mcp.auth: "own"` and `
   the instance declares no `auth.delegation`, an agent of the estate holds a client key its operator issued to it, as
   any other caller does, its own credential and not a borrowed one, or nothing: a T2 caller never falls back to a
   borrowed credential ([delegation](delegation.md) DL-8), and a credential source is never another agent's key (DL-26).
-  DL-29's token per call applies where the instance declares `auth.delegation`; DL-26's token per call and grant for a T2
-  caller bind only a callee that declares `auth.delegation` (DL-16), so here the client key takes the token's place and
-  the grant's: the service's own budgets are its limits, the key's revocation or expiry its end, and the service's
-  operator its payer. Either way the descriptor's token is never accepted on the MCP surface or the HTTP
+  Which credential an agent of the estate holds is all that `auth.delegation` decides: with it, a delegation token per
+  call (DL-29); without it, a client key or nothing. A caller presenting a client key that instance's operator issued
+  it, a member, a caller outside the estate or an agent of the estate holding one, takes the token's place and the
+  grant's with that key at any instance in the form, whether or not it declares `auth.delegation` (DL-26; DL-12 keeps
+  a service's own credentials for people and for callers outside the estate): the service's own budgets are its
+  limits, the key's revocation or expiry its end, and the service's operator its payer. Either way the descriptor's token is never accepted on the MCP surface or the HTTP
   API and never given to a client. For a cloud instance, these are the per-client keys the agent network leaves to a
   later decision ([agent network](agent-network.md), CT-84).
 - **CF-4, the page and every step are the operator's.** The operator opens the cloud instance's page from their own host
@@ -1097,8 +1110,10 @@ cloud instance's well-known document, declaring `surfaces.mcp.auth: "own"` and `
     computer shows no page can answer a choice or decline a step through their own agent where that gate lets the agent
     through, or with their operator channel's buttons, which perform the page's own operation (OC-5).
   - **What the caller reads.** A job reads `working` to that caller, its `statusMessage` saying the operator was asked,
-    and its request is never put in the caller's `inputRequests`; when the operator answers, the job goes on, or ends
-    as the operator's no ends it (C3.3), which the caller reads with `fabric.job.get`. An `inputResponses` that caller
+    and its request is never put in the caller's `inputRequests`; when the operator takes the step or answers the
+    choice, the job goes on; when the operator declines it, the job ends `failed`, its `error.code` the service's own
+    and its `error.data.detail` `operator-declined: <humanStep>` (`operator-declined: choice` for a choice), which the
+    caller reads with `fabric.job.get` ([interop C3.2](interop.md#c32-jobs)). An `inputResponses` that caller
     sends anyway is the job step's `relayed` action ([AP-2](#actions): its id the request key, its tool
     `fabric.job.get`), answered by its gate below like every `relayed` action: refused `approval-required` with the
     step's digest without an accepted `approval/1`, and taken as the approver's decision with one where the instance
@@ -1108,12 +1123,16 @@ cloud instance's well-known document, declaring `surfaces.mcp.auth: "own"` and `
     `scope-not-granted` (DL-19, the code a product maps its own refusal onto: no client key's scopes reach a step that
     is the operator's) with `error.data.detail` `operator-step: <humanStep>` and an `error.message` saying the operator
     was asked and to repeat the call later. A decline answers the jobs waiting on the step when the operator declines
-    it, each ending as the operator's no ends it, and closes the step; it lasts for nothing else. A later call that
+    it, each ending `failed` with `operator-declined` as above, and closes the step; it lasts for nothing else. A
+    caller of a tool that is not job-backed gets no word of a decline: its repeated call reaches the need again, opens
+    a new step and asks the operator again, so an operator whose no is meant to last removes that tool from the key's
+    scopes, or tells the member. A later call that
     reaches the same need opens a new step and raises it as above, so a need the operator met outside the page (a
     top-up or a consent at the provider) is found met by the next call, which goes on with no step. A call to a tool that is not job-backed and cannot go on without a choice is refused the same way
     with `operator-step: choice` and raises no event, since no later call carries the operator's answer: its message
     says the call needs a choice that is the operator's and the tool cannot wait for it, and the caller does not repeat
-    the call, which would be refused again.
+    the call, which would be refused again. A member's key should therefore not carry such a tool: the operator runs it
+    themselves, or removes it from members' scopes.
     `human-step-required` does not fit, because its `data.url` is required
     ([`delegation-refusal.schema.json`](../../schemas/delegation-refusal.schema.json)) and is a page this caller is not
     given.

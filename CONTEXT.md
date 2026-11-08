@@ -154,8 +154,8 @@ only by its members, needs none).
 held it, each call appending its callee and never widening the scope. A callee that is the chain's last agent, called
 from T0 or T1 (by the agent before it, where it authenticated its caller's agent id), takes a call it covers as the operator's decision and refuses only the part it does
 not cover, so the operator is asked again for that alone; a T2 caller's mandate changes nothing, beyond the estate a
-delegation token carries the authority (or, at a cloud instance in the **Local and cloud form** without
-`auth.delegation`, the caller's client key, CF-3). A job's step is read under the job's capability (MJ-1, DEC-0141; `actionDecision`'s
+delegation token carries the authority (or, at a cloud instance in the **Local and cloud form**, the client key
+its operator issued the caller, CF-3). A job's step is read under the job's capability (MJ-1, DEC-0141; `actionDecision`'s
 `mandateCapability`) (`mandateCovers`, [delegation](docs/specification/delegation.md#the-operators-mandate), DEC-0125).
 A mandate never covers a **Source hand-over** ([source](docs/specification/source.md#handing-over), DEC-0149).
 

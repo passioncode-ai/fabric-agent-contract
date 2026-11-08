@@ -11433,30 +11433,37 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      delegation-token caller with the operator's decision (T0 or T1, AP-2) or an accepted `approval/1` (DL-16). The twin
      takes `approval/1` only where the instance holds the estate's issuer and key set (DL-18); on an instance without
      them it answers as every `relayed` action there does (item 4), and keys are then managed only through the CLI and
-     the page. The well-known fixture leaves the actions
+     the page, unless the platform proves a caller's tier T0 or T1 (DL-25), whose call carrying the operator's decision
+     needs no `approval/1` (AP-2). The well-known fixture leaves the actions
      declaration out, so it shows neither the key action nor its twin. A key
      is shown once in the issuing answer and never again, held as a hash, labelled with its holder for the operator
      alone, revoked one by one, and MAY carry an expiry the operator sets, past which it is treated as revoked;
      revoking a key, or its expiry, cancels that key's running jobs and its jobs waiting on an operator step (they end
      `cancelled`), drops it from every step's waiting list on the page and closes a step no remaining call or job waits
-     on. An agent that calls an issuing door (the twin, or the CLI run through that agent) receives the key in its
-     answer and so in its transcript, so issuing or rotating a member's key, a secret handed out, is the operator's own
-     step in their terminal or on the page; revoking hands out no value, so the operator's agent revokes on the
+     on. Rotating a key revokes it, its jobs included, and issues a new key under the same holder label, scopes and
+     per-key cap, shown once. An agent that calls an issuing door (the twin, or the CLI run through that agent)
+     receives the key in its answer and so in its transcript, so issuing or rotating a member's key, a secret handed
+     out, is the operator's own step in their terminal or on the page: the page's action for a member's key is its own
+     action, declared `gate: "human"` with `humanStep` `secret` (AP-4), with no `relayed` twin, the twin issuing and
+     rotating only an agent's own key (the agent conformance row says an agent never calls the member's door); revoking hands out no value, so the operator's agent revokes on the
      operator's word, through the twin where its gate lets it through, else by running the agent's CLI on the operator's
      computer, as it must on an issuer-less instance, whose twin answers a caller carrying an approval
      `issuer-unavailable` (item 4). Usage counts a client key's spend in its days and rows
      and never in `byGrant`, which names only the grant a delegation token carried (DL-22); client-key spend reaches no
      `grant.usage` event and no grant limit, so the service's own budgets (Limits, DEC-0027) are the ceiling the
      operator sets for the team; it reaches no grant check either, so the estate's meter reserves none of it: at the
-     call L0 binds it only through each provider key's own ceiling, and the estate's month sees it after the fact,
-     where a reader totals the usage report; per-key spend and any per-key cap are the service's own and shown on the operator's
+     call it is bound only by each provider key's own ceiling and the service's own budgets, not by L0's monthly total
+     or a project's L1 (spend policy's Levels name this one exception to L0's hard stop), and the estate's month sees
+     it after the fact, where a reader totals the usage report; per-key spend and any per-key cap are the service's own and shown on the operator's
      CLI and page only, as the holder label is, a per-key cap being no `budgets` entry; a call a budget or a per-key cap
      stops is refused `limit-reached` with its window (the budget's `period`, `task` for a `per_job` budget, the
-     smallest of `day`, `week` and `month` covering a rolling window, else `total`), the service the refuser, with no
+     smallest of `day` (up to 86400 seconds), `week` (up to 604800) and `month` (up to 2678400, 31 days) covering a
+     rolling window, else `total`), the service the refuser, with no
      approval request, raising the ceiling being the operator's; client-key spend has no per-member total outside the
      service's own CLI and page (the usage report's clause for a service offered to others). The operator hands a key over, from the CLI run in their own terminal or from the page,
-     through a channel that keeps it out of chat and logs, with a note naming whom the member asks when a call is
-     refused, and the member stores it in their own vault (SCN-053's secret window, for example); the member reaches
+     through a channel that keeps it out of chat and logs (a password manager's item share, a one-time secret link, or
+     reading it out), with a note naming whom the member asks when a call is refused and the key's expiry, where one is
+     set, and the member stores it in their own vault (SCN-053's secret window, for example); the member reaches
      `peer.endpoint` as the operator states it until a listing contract carries it (CT-275), and a member's departure
      revokes no client key: learning of it from the organization's own process and revoking that member's keys is the
      operator's duty. No, an unknown or a revoked key is refused `unauthenticated` (`401`, with a bare
@@ -11467,11 +11474,14 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      tokens only and would refuse client keys; when agents of the estate call it, it also declares `auth.delegation` and
      they present delegation tokens with no client key issued to them (DL-12, DL-16); without `auth.delegation` an
      agent of the estate holds a client key the operator issued to it, its own credential and not a borrowed one, or
-     nothing (DL-8: never a borrowed credential; DL-26: a credential source is never another agent's key); DL-29's token
-     per call applies where the instance declares `auth.delegation`, and DL-26's token per call and grant bind only a
-     callee that declares it, so here the client key takes the token's place and the grant's: the service's own budgets
-     are its limits, the key's revocation or expiry its end, and the service's operator its payer (DL-26 and DL-29 say
-     so, DL-29 for a caller outside the family too, its issuer condition on the token route only). The descriptor's token is never accepted on the MCP surface or the HTTP API nor given to a
+     nothing (DL-8: never a borrowed credential; DL-26: a credential source is never another agent's key);
+     `auth.delegation` decides only which credential an agent of the estate holds (with it a token per call, DL-29). A
+     caller presenting a client key that instance's operator issued it, a member, a caller outside the estate or an
+     agent of the estate holding one, takes the token's place and the grant's with that key at any instance in the
+     form, whether or not it declares `auth.delegation` (DL-12 keeps a service's own credentials for people and callers
+     outside the estate): the service's own budgets are its limits, the key's revocation or expiry its end, and the
+     service's operator its payer (DL-26 and DL-29 say so, DL-29 for a caller outside the family too, its issuer
+     condition on the token route only). The descriptor's token is never accepted on the MCP surface or the HTTP API nor given to a
      client.
   4. CF-4: the page and every step are the operator's. The page opens with the host's one-time login code; no password
      sign-in; the session covers the page's routes and never the MCP surface or the HTTP API; a client key never opens
@@ -11493,15 +11503,19 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      it and records the operator's answer as theirs: taking a step is the step itself (AP-4), and choosing and declining
      are `relayed` page actions with agent twins (AP-1), reached as the key twin is, so an operator without the page
      answers through their agent or the operator channel's buttons (OC-5). The caller reads the outcome: a job reads `working`, its `statusMessage` saying the operator was asked, then goes on
-     or ends as the operator's no ends it, an `inputResponses` that caller sends being the step's `relayed` action
+     or, on a decline, ends `failed` with `error.data.detail` `operator-declined: <humanStep>`
+     (`operator-declined: choice` for a choice), its `error.code` the service's own, an `inputResponses` that caller sends being the step's `relayed` action
      under its gate (`approval-required` without an accepted `approval/1`, the approver's decision with one where the
      instance takes one); a call to a
      job-backed tool answers with its job; a call to another tool is refused `scope-not-granted` with `data.detail`
      `operator-step: <humanStep>` and a message saying the operator was asked (a decline answering only the jobs
      waiting on the step and closing it, so a later call raises a new step, and a need met outside the page, a top-up
-     or a consent at the provider, is found met by the next call), and a call to such a tool
+     or a consent at the provider, is found met by the next call; such a caller gets no word of a decline and its
+     repeat asks the operator again, so an operator whose no is meant to last removes the tool from that key's scopes
+     or tells the member), and a call to such a tool
      that cannot go on without a choice `operator-step: choice`, raising nothing, since no later call carries the
-     answer, its message saying the tool cannot wait for the operator's choice and the caller not repeating it; `human-step-required` does not
+     answer, its message saying the tool cannot wait for the operator's choice and the caller not repeating it, so a
+     member's key should not carry such a tool (the operator runs it, or removes it from members' scopes); `human-step-required` does not
      fit, because it requires the `data.url` this caller is not given. A `relayed` action keeps its own gate after the
      key's scopes (`approval-required`, DL-17; a source hand-over's T2 answer, `handover-needs-estate-route`); an
      instance without the estate's issuer and key set takes no `approval/1` for any of them: a T2 caller with none is
@@ -11547,7 +11561,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Compatibility:** additive, with one change on the wire that reaches every service, not the form alone: DL-19's
   header sentence now asks a bare `WWW-Authenticate: Bearer` on a `401` for a request that carried no credential,
   where its old text put `error="invalid_token"` on every `401` (RFC 6750 section 3.1); its dependants are named below.
-  Read on 2026-11-08 at each default branch. Fabric Dashboards
+  And one relaxation the operator must know: L0 is the hard stop on everything the estate spends in a month, and
+  client-key spend at a cloud instance in the form reaches no grant check, so at the call it is bound only by each
+  provider key's own ceiling and the service's own budgets, not by L0's monthly total or a project's L1, which see it
+  only after the fact (CF-3; spend policy's Levels name the exception). Whether the operator accepts it is asked in
+  the handoff's *Open*. Read on 2026-11-08 at each default branch. Fabric Dashboards
   groups services by `id` and opens the `default` instance first (`src/core/products.ts`), never calls a remote `/mcp`
   with the descriptor's token, and its descriptor check admits both fixtures; it owes `peer.custody`
   `processor-hosted` (DEC-0099), which it refuses today. It raises an event with `notify: true` as an ask when its `kind`
@@ -11574,15 +11592,17 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   681), so for the cloud descriptor it finds none (CF-1). An older caller kit reads CF-4's operator step as a missing scope until it reads `data.detail`:
   the adapter's kits answer `scope-not-granted` with the token's message ("The called capability is not in the token's
   scope.", `fabric_delegation.py` line 81 and `fabric-delegation.mjs` line 45) and `refusal_from_action`
-  (`fabric_delegation.py` line 866) has no client-key caller. DL-19's header change has five dependants, all still
-  sending or teaching `WWW-Authenticate: Bearer error="invalid_token"` on every `401`, a no-token one included: the
+  (`fabric_delegation.py` line 866) has no client-key caller. DL-19's header change reaches the adapter's kits, their
+  tests and reference, and every service that vendors the kits (Fabric Dashboards' sample among them), each following
+  when it re-copies the kit; all still send or teach `WWW-Authenticate: Bearer error="invalid_token"` on every `401`,
+  a no-token one included. In the adapter: the
   Python kit's `refusal_http` (`fabric_delegation.py` line 915), the JS kit's `refusalHttp` (`fabric-delegation.mjs`
   line 548), the two kit tests that assert it on the no-token case (`test/fabric-delegation.test.mjs` line 140 and
   `test/test_fabric_delegation.py` line 386), the adapter's reference for builders (`references/delegation.md` line
   106), and Fabric Dashboards' sample service, a copy of the Python kit (`test/fixtures/sample-service/fabric_delegation.py`
-  line 915), which follows the kit once it is re-copied. FAA-204 carries the header change for the adapter although it
-  is not specific to the form, since it reaches every service built on the kits; Fabric Dashboards is told at landing
-  that its sample copies the kit. Under FAA-204 the kits also owe a message for `operator-step`,
+  line 915). FAA-204 is to carry the header change for the adapter although it is not specific to the form, since it
+  reaches every service built on the kits, and the landing message to the adapter names it; Fabric Dashboards is told
+  at landing that its sample copies the kit. Under FAA-204 the kits also owe a message for `operator-step`,
   and a kit input marking a client-key caller so that the kit answers every `human` action and input request as
   CF-4 says (the job, or `scope-not-granted` with `operator-step: <humanStep>`) and raises the event once per open
   step; and, in the form, each instance's delegation gate configured with the audience `<id>.<instance>`, not the bare
@@ -11631,10 +11651,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   operator's CLI or page, and client-key spend has no per-member total in the organization record, which the page says
   too), and the same
   wording as source.md at `knowledge/agents-first.md` line 291, whose "(`peer`, client keys, the one-time code)" becomes
-  "the operator's one-time code for the page" in the landing. The same landing restates `knowledge/authority.md` line
-  148, whose T2 row needs a share grant, a token per call and an approval per effect, with a clause for a cloud
-  instance in the form without `auth.delegation`, where the client key takes the token's place and the grant's (DL-26,
-  CF-3), and the owed page says that issuing a member's key through the north star's administrator agent puts the key
+  "(`peer`, client keys, the operator's one-time code for the page)" in the landing. The same landing restates
+  `knowledge/authority.md` line 148, whose T2 row needs a share grant, a token per call and an approval per effect,
+  with a clause: at a cloud instance in the form, a caller presenting a client key that instance's operator issued it
+  takes the token's place and the grant's (DL-26, CF-3), and the owed page says that issuing a member's key through the north star's administrator agent puts the key
   in that agent's transcript (CF-3), so that agent revokes keys and the operator issues them. `contractVersion` stays
   `0.1.0`.
 - **Consequences / affects:** `docs/specification/service.md` (the section *The local and cloud form of one agent*, the
@@ -11662,6 +11682,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   index row; SCN-044 keeps one sentence for the cloud instance's page), `docs/ux/foundation.md` (ST-042, JTBD-16's
   personas), `docs/ux/screens.md` (SCR-36, the operator's page, CLI and key twin, for SCN-059, which
   SCR-30 no longer maps since round 8), `docs/ux/flows.md` (FLW-36, SCN-059's flow);
+  `docs/specification/spend-policy.md` (L0's row names client-key spend in the form as the one exception to its hard
+  stop), `docs/evidence/sources.md` (RFC 6750's row: section 3's `invalid_token` for a credential that came, section
+  3.1's bare challenge for none), `docs/specification/conformance.md` (the agent-relaying row: an agent never calls
+  the member's key door);
   `docs/specification/delegation.md` (DL-19's `401` header sentence: `invalid_token` for a credential that came, a bare
   challenge for none, RFC 6750 section 3.1; the `operator-step: choice` caller instruction in its row; DL-26's grant
   and DL-29's outside-family sentence for a client key), `docs/specification/interop.md` (the caller-action row for

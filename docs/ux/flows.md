@@ -934,7 +934,7 @@ flowchart TD
 - **Goal:** the member's coding agent gets the cloud instance's answer with a client key of the member's own, and no provider key, descriptor token or page of the operator's reaches the member
 - **Entry points:** the operator hands the member a client key through a channel that keeps it out of chat and logs and tells the member `peer.endpoint`; the member stores the key in their own vault
 - **Success exit:** the tool's answer in the member's coding agent; or a refusal that names the member's next step
-- **Task analysis:** the operator issues the key with the agent's CLI, the page or its gated twin and hands it over through a channel that keeps it out of chat and logs, with a note naming whom to ask → the member stores it in their own vault (for example through their app's own secret window, SCN-053) → the member configures the endpoint as an MCP server with the key in `Authorization: Bearer` (how the vault reaches the header is CT-275's open question) → the coding agent calls a tool → the cloud instance checks the key's hash and scopes → it runs the tool with the provider keys it holds, or refuses: `unauthenticated` for no, an unknown or a revoked key, `scope-not-granted` for a scope the key lacks, `limit-reached` for the team's budget or the key's cap; a person's step (on the operator's page or at the service's provider) or a choice is the operator's: the service raises it once, a job-backed tool answers with its job, which reads `working` until the operator acts and then goes on or ends as the operator's no ends it, and another tool's call is refused `scope-not-granted` with `operator-step`.
+- **Task analysis:** the operator issues the key with the agent's CLI, the page or its gated twin and hands it over through a channel that keeps it out of chat and logs, with a note naming whom to ask → the member stores it in their own vault (for example through their app's own secret window, SCN-053) → the member configures the endpoint as an MCP server with the key in `Authorization: Bearer` (how the vault reaches the header is CT-275's open question) → the coding agent calls a tool → the cloud instance checks the key's hash and scopes → it runs the tool with the provider keys it holds, or refuses: `unauthenticated` for no, an unknown or a revoked key, `scope-not-granted` for a scope the key lacks, `limit-reached` for the team's budget or the key's cap; a person's step (on the operator's page or at the service's provider) or a choice is the operator's: the service raises it once, a job-backed tool answers with its job, which reads `working` until the operator acts and then goes on or, on a decline, ends `failed` with `operator-declined`, and another tool's call is refused `scope-not-granted` with `operator-step`.
 - **Rejected shape:** handing the member the descriptor's token, or the page through the one-time code: rejected, because the token mints the operator's sign-in and the page is the operator's (DEC-0159 CF-2, CF-4).
 - **Flow:**
 
@@ -976,7 +976,7 @@ flowchart TD
   N --> P
   P --> D{Take, choose or decline}
   D -->|take or choose| G[The members' jobs go on]
-  D -->|decline| X[The waiting jobs end as the operator's no ends them; the step closes]
+  D -->|decline| X[The waiting jobs end failed, operator-declined; the step closes]
   X -->|a later call reaches the same need| C
   G --> R[Per-key spend, caps, rotation; revocation by the operator's agent on their word, cancelling the key's jobs]
   X --> R
