@@ -55,6 +55,11 @@ was deleted from `origin` and replaced by this squash. Commit-addressed referenc
   and rotates only the calling agent's own key, a waiting job's `statusMessage` reads `operator-step <humanStep>`, a
   final `issuer-unavailable` carries `no-trusted-issuer`, one step covers every `humanStep`, and the merge notes state
   the second lander's edits (see *Rounds*).
+- Round 12: a member's key never through the twin in FLW-35, L0's one exception named in the glossary's trust tier and
+  the family's limits, what reaches a member restated (no link to the page, nothing the page opens for a key), an
+  open step's repeat bounded to 25 to 48 hours, `no-trusted-issuer` final from any callee and still HTTP `503`, the
+  page's `relayed` key action stated (it revokes), the re-keying window and the organization's usage view in
+  *Compatibility*, CT-279 filed (see *Rounds*).
 - Round 7: CF-4 as one rule (a client-key caller is handed no person's step and no choice), SCN-059 for the operator's
   keys and the steps members' calls raise (ST-042), OM-5's sentence on client keys, `peer`'s schema description, and
   back-pointers to CF-3 in DL-26, DL-29 and source.md's T2 premise (see *Rounds*).
@@ -108,6 +113,9 @@ a client-key caller input for CF-4's `operator-step` (FAA-204).
   members' keys into the vault through the doors. Until answered, CF-3's ban covers that route too, and the member's
   key is issued by the operator in their own terminal or on the page; a yes is new mechanics (a door, its record of
   the move, its scope), filed as a backlog row then.
+- CT-279 (filed in round 12): a reference input marking a client-key caller, so that `FAC-SEM-142`'s client-key
+  exception has a machine check; until then the conformance row's evidence for CF-4's human path is the service's
+  own test alone.
 - At landing, to the CMO project: the sixth to eighth divergences (its ungated key door, its refusals' shape with the
   30-second revocation, the key with its key-issuing scope already issued to a colleague who is not the operator, which
   the message asks it to revoke and to route key management through its operator's CLI or page, or through a `relayed`
@@ -128,9 +136,11 @@ a client-key caller input for CF-4's `operator-step` (FAA-204).
   (CF-3); `knowledge/agents-first.md` line 291's "(`peer`, client keys, the one-time code)" becomes "(`peer`, client
   keys, the operator's one-time code for the page)", as source.md reads; `knowledge/authority.md` line 148's T2 row
   gains the clause "at a cloud instance in the local and cloud form, a caller presenting a client key that instance's
-  operator issued it takes the token's place and the grant's (DL-26, CF-3)"; and `knowledge/north-star.md` lines 233
-  (its administrator agent "issues client keys") and 536 (members' agents get client keys through the PM agent on the
-  owner's or an administrator's word) are restated so that an agent issues only its own key, as its operator's
+  operator issued it takes the token's place and the grant's (DL-26, CF-3)"; and `knowledge/north-star.md` lines 204
+  (every service agent's issue door for client keys), 233 (its administrator agent "issues client keys"), 261 (the
+  administrator agent's key doors and client-key issue doors at onboarding and offboarding) and 536 (members' agents
+  get client keys through the PM agent on the owner's or an administrator's word), with `knowledge/system/base-set.md`
+  line 31 (Administration's client-key doors at onboarding and offboarding), are restated so that an agent issues only its own key, as its operator's
   `relayed` twin, and a member's key is issued by the service's operator in their own terminal or on the page (CF-3),
   pending the vault-delivery question above.
 - At landing, beside DEC-0156 (branch `agent/ct220-operators-word-v2`), DEC-0157 (branch `agent/ct216-usage-data-v2`)
@@ -165,13 +175,17 @@ a client-key caller input for CF-4's `operator-step` (FAA-204).
   of a cloud instance in the local and cloud form, CF-4)". Then, on the merged tree: `awk '/\*\*UD-4/,/\*\*UD-5/'
   docs/specification/usage-data.md | grep -c 'operator-step: consent'` prints at least 1, the same range piped through
   `grep -n 'elicitation' | grep -c 'CF-4'` prints at least 1, and `awk '/^### DEC-0157/,/^### DEC-0158/'
-  docs/DECISIONS.md | grep -c 'operator-step: consent'` prints at least 1.
+  docs/DECISIONS.md | grep -c 'operator-step: consent'` prints at least 1, and the conformance row DEC-0157 adds for
+  the agent carries it too: `grep -n 'DEC-0157' docs/specification/conformance.md | grep -c 'operator-step: consent'`
+  prints at least 1.
 - The merged text with DEC-0158: the register appends above, and one edit by whichever lands second. A run DEC-0158
   dispatches is an estate session that may hold a client key at a cloud instance declaring no `auth.delegation`
   (CF-3), so OS-6's list of a dispatched run's stops counts, as a human-step stop, a `scope-not-granted` whose
   `data.detail` starts `operator-step:` and a job whose `statusMessage` starts `operator-step` (CF-4); OS-6's
   conformance row for a dispatched run says the same. On the merged tree:
-  `awk '/^- \*\*OS-6/,/^- \*\*OS-7/' docs/specification/project-comms.md | grep -c 'operator-step'` prints at least 1.
+  `awk '/^- \*\*OS-6/,/^- \*\*OS-7/' docs/specification/project-comms.md | grep -c 'operator-step'` prints at least 1,
+  and `grep -n 'DEC-0158' docs/specification/conformance.md | grep 'dispatched run' | grep -c 'operator-step'` prints
+  at least 1.
 
 ## Rounds
 
@@ -579,6 +593,42 @@ a client-key caller input for CF-4's `operator-step` (FAA-204).
   test/delegation.test.ts` (1499 passed); em dashes in the branch's added lines against `origin/main`: 0;
   `git merge-tree --write-tree HEAD origin/main`: exit 0. The full `pnpm run check` was not run here.
 
+- Round 12 (on `5f99cf7e`), not clean: the unit tier passed with five risks, the seam tier failed on one break and the
+  product tier on three. Breaks folded: FLW-35 let the operator issue a member's key through the gated twin (now with
+  the agent's CLI in their own terminal or on the page, never through the twin, CF-3; `grep 'gated twin' docs/ux`
+  prints nothing); `CONTEXT.md`'s *Trust tier* said money limits bind at every tier with no exception (now with the
+  one exception spend policy's L0 row names, CF-3, and human gates at every tier); JTBD-16's success metric and
+  SCN-058's *Expected result* promised that no page address reaches the member, whose `peer.endpoint` shares the
+  page's origin (now: no provider key or descriptor token reaches the member, no link to the operator's page is
+  handed to them, and the page opens nothing for their key, CF-4; FLW-35's goal and SCN-059's *Expected result* the
+  same). Risks folded: DL-27's family sentence and the family's conformance row name L0's one exception (chosen over
+  a CF-3 sentence that a T0 or T1 caller uses no client key, which would contradict CF-3's estate agent holding one
+  where no `auth.delegation` is declared); ST-035's human-step criterion gives CF-4's answer for a client-key caller
+  at a cloud instance; the DEC-0157 and DEC-0158 merge notes gain a merged-tree check on each one's conformance row;
+  *Compatibility* names the adapter's vendored actions vector, which takes `action-call-human.json`'s description at
+  its next re-pin under FAA-204, the re-keying window (an estate caller refused `wrong-audience` until its grant is
+  re-issued, with an alt path in SCN-059), and the organization server's usage view, which does not see client-key
+  spend (also in CF-3); DL-19's `issuer-unavailable` row makes `no-trusted-issuer` final from any callee, a
+  configuration fault, still HTTP `503` but not retried as DL-14's is, and CF-4 and DEC-0159 item 4 say "still HTTP
+  `503`, but final"; CF-4's sentence on a member's key now carries `fabric.job.get`'s exception itself; an open step's
+  repeat is bounded to no sooner than 25 hours and no later than 48 hours after the previous raise (CF-4, DEC-0159
+  item 4 and *Compatibility*, the conformance row, SCN-059, FLW-36, SCR-36); the knowledge landing list adds
+  `north-star.md` lines 204 and 261 and `system/base-set.md` line 31, pending the vault-delivery question; CT-279 is
+  filed for a reference input marking a client-key caller, so that `FAC-SEM-142`'s exception gets a machine check.
+  CF-3 now says what the page's own `relayed` key action does (it revokes a key; issuing or rotating any key on the
+  page is the `human` action), so the twin revokes with the same effect (AP-1) and its issuing of its caller's own key
+  is an agent-surface act no page action offers, narrowing none. Already in *Open* and left:
+  the L0 relaxation question. Not changed: no rule code, schema or vector.
+
+- Checks run on the round-12 fold before its commit: `pnpm run docs:check` ("Documentation checks passed", markdownlint
+  0 errors over 271 files); `python3 docs/ux/lint.py` (passed: 42 stories, 36 flows, 36 screens, 58 scenarios);
+  `pnpm run privacy:check` (0 findings); `pnpm vectors:check` (32 vector files match their generators);
+  `pnpm typecheck` (exit 0); `pnpm --silent validate` on the three fixtures (exit 0 each); `pnpm vitest run
+  test/fixtures.test.ts test/consistency.test.ts test/actions.test.ts test/positive-sweep.test.ts
+  test/delegation.test.ts` (1499 passed); `grep -rn 'gated twin' docs/ux` (nothing); em dashes in the branch's added
+  lines against `origin/main`: 0; `git merge-tree --write-tree HEAD origin/main`: exit 0. The full `pnpm run check`
+  was not run here.
+
 ## Next task
 
-Round 12 of the blind readings of branch `agent/ct218-local-cloud-v2` (DEC-0159), all three tiers.
+Round 13 of the blind readings of branch `agent/ct218-local-cloud-v2` (DEC-0159), all three tiers.

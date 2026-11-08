@@ -159,7 +159,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Personas:** P-03; P-02, the operator who issues the keys and takes the steps the members' calls raise (ST-042)
 - **Type:** functional
 - **Forces:** push: provider keys copied onto every member's machine; pull: one key per member, revoked one by one; anxiety: a key pasted into a chat, a key that outlives my place on the team; habit: asking the operator to run it for me.
-- **Success metric:** the member's coding agent calls the cloud instance with its own client key; no provider key, descriptor token or page address reaches the member's machine; every refusal names what the member does next.
+- **Success metric:** the member's coding agent calls the cloud instance with its own client key; no provider key or descriptor token reaches the member, no link to the operator's page is handed to them, and the page opens nothing for their key (CF-4); every refusal names what the member does next.
 
 ## 3. Customer journeys
 
@@ -715,7 +715,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Acceptance criteria:**
   - Given a service that declares an action `relayed`, when my agent calls its tool from my machine with my decision naming the action and quoting me, then the service takes it as my decision and its audit names the agent it authenticated (`actionDecision`, DEC-0121).
   - Given my agent calls without my decision, when the service answers `operator-decision-required`, then the agent asks me and calls again with my answer quoted.
-  - Given a step only I can take (a sign-in, a consent, a payment, a secret, a passkey signature, spend above a limit, a comparison of codes with another person or the choice to share without one), when my agent calls it, then the service answers `human-step-required` with the link to that step.
+  - Given a step only I can take (a sign-in, a consent, a payment, a secret, a passkey signature, spend above a limit, a comparison of codes with another person or the choice to share without one), when my agent calls it, then the service answers `human-step-required` with the link to that step; at a cloud instance in the local and cloud form, where my agent holds a client key, the service instead raises the step to me and answers with the job, or refuses `scope-not-granted` with `operator-step: <humanStep>`, and hands my agent no link (DEC-0159 CF-4).
 - **Priority:** must
 - **Status:** draft
 - **Product:** unobserved

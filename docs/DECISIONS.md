@@ -11444,7 +11444,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      expiry (the old key's, unless the operator sets another), shown once. An agent that calls an issuing door (the twin, or the CLI run through that agent)
      receives the key in its answer and so in its transcript, so issuing or rotating a member's key, a secret handed
      out, is the operator's own step in their terminal or on the page: the page's action for a member's key is its own
-     action, declared `gate: "human"` with `humanStep` `secret` (AP-4), with no `relayed` twin, the twin issuing and
+     action, declared `gate: "human"` with `humanStep` `secret` (AP-4), with no `relayed` twin (on the page every key
+     is issued and rotated through that action and the `relayed` action revokes, so the twin revokes with the page's
+     effect and its issuing of its caller's own key narrows no page action, AP-1), the twin issuing and
      rotating a key only for the agent that calls it, returned to that agent alone and so no secret handed to another
      party, and none where the instance declares `auth.delegation`, whose estate agents hold no client key (the agent
      conformance row says an agent never calls the member's door; any other agent's key is the operator's to issue in
@@ -11499,7 +11501,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      no provider account's), one action with its arguments; every call reaching it while open is listed on it with its
      key, only a job waits on it, and it stays open until the operator takes or declines it or no listed key remains. The service raises it
      to its operator when it opens, however many calls reach it, and again while it stays open, each time no sooner than
-     25 hours after the previous raise (a host's 24-hour ask hold and its poll interval), as a new event with a new
+     25 hours and no later than 48 hours after the previous raise (a host's 24-hour ask hold and its poll interval), as a new event with a new
      `id` and the same `subject`, `kind` and `link`, so that each host and each channel asks at most once per raise and
      a host that was not running when it opened, which reads its first poll as history, still asks: an events-feed event with `notify: true`, a `subject` naming the step by an opaque id (never
      the holder label), `link` the page's path, a `kind` the host reads as an ask (Fabric Dashboards: its ask pattern,
@@ -11527,7 +11529,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      instance without the estate's issuer and key set takes no `approval/1` for any of them: a T2 caller with none is
      refused `approval-required` (`verifyApproval`'s first refusal) and a caller carrying one `issuer-unavailable`
      (DL-13 row 1, DL-18), answered by the service itself or by `verifyApproval` given a jti store (with none it answers
-     `unknown-state` first), with `data.detail` `no-trusted-issuer` and final for the caller (DL-19's row), the
+     `unknown-state` first), with `data.detail` `no-trusted-issuer`, still HTTP `503` but final for the caller from any callee (DL-19's row), the
      operator then acting on the page or with the CLI; a
      member's key carries no scope that reaches one's tool, so the operator takes such an action on the page or with
      the CLI, and a member's `inputResponses` on `fabric.job.get`, which its key reaches, is refused
@@ -11583,7 +11585,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   reads every event it finds at its first poll after it starts as history and asks nothing for them (`src/core/monitor.ts`
   line 582), so a step raised while the operator's Fabric Dashboards was not running would never become an ask; CF-4
   therefore raises an open step's event again under the same `subject`, as a new event (an event id increases), no
-  sooner than 25 hours after the previous raise: the host's 24-hour ask cooldown is measured from the poll that read
+  sooner than 25 hours (and no later than 48 hours, so a host started late asks within two days) after the previous raise: the host's 24-hour ask cooldown is measured from the poll that read
   the event (`notify.ts` lines 69 to 72 and 99 to 101), it polls a remote instance every 60 seconds
   (`src/core/monitor.ts` line 95), and its relay to the operator channel queues one ask per episode in 24 hours of
   event time (`src/core/outage-alerts.ts` lines 66 and 182), so a repeat at exactly 24 hours would be muted on about
@@ -11616,7 +11618,17 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `data.detail` `no-trusted-issuer` (the detail the JS kit's `verifyApproval` already gives, `fabric-delegation.mjs`
   line 326), read by their callers as final and not retried (CF-4, DL-19's row); and, in the form, each instance's delegation gate configured with the audience `<id>.<instance>`, not the bare
   `id` its delegation reference shows today (`references/delegation.md` lines 34 and 42), so that a token for one
-  instance is not accepted by the other (CF-1). The estate's cloud-deploy template declares `own` and
+  instance is not accepted by the other (CF-1). The adapter's generator copies each action-call fixture's description
+  into its vendored actions vector (`test/fixtures/contract/make_actions_vectors.mjs` line 63), so the new description
+  of `fixtures/semantic/action-call-human.json` changes the adapter's committed `actions-vectors.json` at its next
+  re-pin, under FAA-204, though this repository's vectors are unchanged. An agent that adopts the form re-keys its
+  local instance's gate from the bare `id` to `<id>.default` (CF-1), so an estate caller whose grant still names the
+  bare `id` is refused `wrong-audience` until that grant is re-issued naming `<id>.<instance>`; the operator has every
+  such grant re-issued with the move (SCN-059's alt path). An organization server's usage view does not see a cloud
+  instance's client-key spend: it reaches no `grant.usage` event, and the organization's collector reports only what
+  the meter holds (`docs/specification/contexts.md`, *grant.usage* collection), so when an organization's cloud agent moves its team
+  from share grants to client keys, that agent's usage in the organization's view falls while the real spend goes on,
+  which only the service's usage report and its operator's CLI and page show (CF-3). The estate's cloud-deploy template declares `own` and
   registers the descriptor on the operator's computer only. It registers its descriptor's instance as `default` unless
   its configuration names another; as the cloud half of the form it must be set to `cloud`, so the cloud descriptor does
   not take the local one's `id.instance` (CF-1); the adapter's offer is to say so (FAA-204, message `8eb77518`). Its
@@ -11672,7 +11684,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `fixtures/positive/service-descriptor-cloud-form-cloud.json`, `fixtures/positive/service-well-known-cloud-form.json`
   and their rows in `fixtures/catalogue.json`, `docs/specification/conformance.md` (one row, and a clause each in the
   actions row and the channel-agent row), `CONTEXT.md` (*Local and
-  cloud form*, and a pointer to CF-3 or CF-4 in the entries on the operator's decision, the mandate and the family), `docs/ux/scenarios.md` (SCN-044's and SCN-041's alt paths and Coverage, the operator's key management
+  cloud form*, and a pointer to CF-3 or CF-4 in the entries on the operator's decision, the mandate and the family;
+  *Trust tier* names L0's one exception from round 12), `docs/ux/scenarios.md` (SCN-044's and SCN-041's alt paths and Coverage, the operator's key management
   moved from SCN-044 to SCN-059 in round 7; SCN-058, a member's
   scenario, and its index row), `docs/ux/foundation.md` (JTBD-16, ST-041), `docs/ux/flows.md` (FLW-35),
   `docs/ux/screens.md` (SCR-35), `docs/DOCMAP.md` (a row), `README.md` (a row of *Build an agent*), the service.md lines
@@ -11687,7 +11700,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   CT-275 (filed in round 5: the key's path from the member's vault into the coding agent's header, and the endpoint's
   delivery until a listing contract carries it);
   `docs/specification/membership.md` (OM-5: a client key a service issued itself is not carried by the membership),
-  `docs/specification/delegation.md` (a clause each in DL-26 and DL-29 pointing to CF-3), `docs/specification/source.md`
+  `docs/specification/delegation.md` (a clause each in DL-26 and DL-29 pointing to CF-3, and in DL-27 naming L0's one exception; DL-19's
+  `issuer-unavailable` row makes `no-trusted-issuer` final from any callee, still HTTP `503`), `docs/specification/source.md`
   (a client-key caller in the T2 premise of a hand-over), `schemas/service-descriptor.schema.json` (`peer`'s
   description only, its em dashes replaced), `docs/ux/scenarios.md` (SCN-059, the operator's keys and steps, and its
   index row; SCN-044 keeps one sentence for the cloud instance's page), `docs/ux/foundation.md` (ST-042, JTBD-16's
@@ -11696,7 +11710,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/specification/spend-policy.md` (L0's row names client-key spend in the form as the one exception to its hard
   stop, and rule 2 points to it), `docs/evidence/sources.md` (RFC 6750's row: section 3's `invalid_token` for a credential that came, section
   3.1's bare challenge for none), `docs/specification/conformance.md` (the agent-relaying row: an agent never calls
-  the member's key door);
+  the member's key door; the family row names L0's one exception), `docs/ux/foundation.md` (ST-035's human-step
+  criterion answered at a cloud instance as CF-4 says);
   `docs/specification/delegation.md` (DL-19's `401` header sentence: `invalid_token` for a credential that came, a bare
   challenge for none, RFC 6750 section 3.1; the `operator-step: choice` caller instruction in its row; DL-26's grant
   and DL-29's outside-family sentence for a client key), `docs/specification/interop.md` (the caller-action row for

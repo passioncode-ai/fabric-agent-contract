@@ -980,8 +980,9 @@ cloud instance's well-known document, declaring `surfaces.mcp.auth: "own"` and `
   the operator runs from their own computer (on it, or as a one-off process of the platform it starts), not a
   descriptor `commands` entry, which a remote placement limits to `doctor`; an action on the operator's page; and that
   action's agent twin ([AP-1](#actions)), declared `gate: "relayed"`, so that it acts only as the operator's decision
-  and is recorded as theirs with the caller the service authenticated (a member's key is issued and rotated by the
-  page's own separate action, below, which has no `relayed` twin): from a T0 or T1 caller carrying the operator's
+  and is recorded as theirs with the caller the service authenticated (on the page, issuing and rotating any key, a
+  member's included, is the page's own separate action, below, which has no `relayed` twin, and the `relayed` action
+  revokes): from a T0 or T1 caller carrying the operator's
   decision in `_meta.decision` (AP-2), or from any caller with an accepted `approval/1` (DL-17, DL-18). A caller that
   reaches the cloud origin directly is T2 unless the platform proves its origin's tier ([delegation](delegation.md)
   DL-25, DL-28), and the delegation token an agent of the estate presents there is DL-8's, which DL-26 does not forbid
@@ -1015,7 +1016,9 @@ cloud instance's well-known document, declaring `surfaces.mcp.auth: "own"` and `
   a member's key is its own action, declared `gate: "human"` with `humanStep` `secret` (AP-1, [AP-4](#actions): a
   secret handed out), so its tool answers an agent as every `human` action does and it has no `relayed` twin; the
   `relayed` twin issues and rotates a key only for the agent that calls it, returned in that agent's own answer, and
-  revokes any key. A key minted for its holder and returned to it alone is handed to no other party, so it is not
+  revokes any key. On the page, the `relayed` key action revokes a key, and issuing or rotating any key is the `human`
+  action: the twin revokes with the same effect (AP-1), and its issuing of its caller's own key is an act of the agent
+  surface that no page action offers, so it narrows no page action. A key minted for its holder and returned to it alone is handed to no other party, so it is not
   AP-4's secret handed out; a key for any other agent is issued or rotated by the operator in their own terminal or on
   the page, as a member's is. Where the instance declares `auth.delegation` an agent of the estate holds no client key
   (below), so there the twin issues none to its caller and only revokes. Revoking a key hands out no value, so
@@ -1031,7 +1034,9 @@ cloud instance's well-known document, declaring `surfaces.mcp.auth: "own"` and `
   grant check either, so the estate's meter reserves none of it: at the call it is bound only by each provider key's
   own ceiling and the service's own budgets, not by L0's monthly total or a project's L1, and the estate's monthly
   total sees it only after the fact, where a reader totals the usage report's days and rows (the one exception
-  [spend policy](spend-policy.md#levels) names to L0's hard stop). Per-key spend,
+  [spend policy](spend-policy.md#levels) names to L0's hard stop). An organization server's usage view sees none of
+  it either, since the organization's collector reports only what the meter holds ([contexts](contexts.md#usage-per-grant));
+  only the service's usage report and its operator's CLI and page show it. Per-key spend,
   and any cap on one key's spend, are the service's own and shown on the operator's CLI and page only, as the holder
   label is; a per-key cap is no entry of `budgets`, whose scopes name no key. A client-key call that a budget or a
   per-key cap stops is refused `limit-reached` with `error.data.window` (DL-19), the service the refuser, and carries no
@@ -1106,7 +1111,7 @@ cloud instance's well-known document, declaring `surfaces.mcp.auth: "own"` and `
     its subject); a `link` that is the page's path; a `kind` the host reads as an ask (Fabric Dashboards: its ask
     pattern, such as `human_step.opened`); and a `level` of `notice` or higher (Fabric Dashboards' default minimum for a
     banner). A call that reaches a step still open raises no new event; while the step stays open, the service raises
-    it again, each time no sooner than 25 hours after the previous raise (a host's 24-hour ask hold and its poll
+    it again, each time no sooner than 25 hours and no later than 48 hours after the previous raise (a host's 24-hour ask hold and its poll
     interval), as a new event with a new `id` (an event id increases) and the same `subject`, `kind` and `link`, until
     the operator takes or declines it or it closes (CF-3). A host holds an ask for one subject for 24 hours from when it
     reads the event, so a repeat is a new ask, and a host that was not running when the step opened, which reads the
@@ -1158,13 +1163,14 @@ cloud instance's well-known document, declaring `surfaces.mcp.auth: "own"` and `
     approval is refused `approval-required` (`verifyApproval`'s first refusal, DL-18), and a caller carrying an approval
     `issuer-unavailable` (DL-13 row 1, which DL-18 applies to an approval), which the service answers itself or by
     passing `verifyApproval` a jti store, since with none DL-18's order answers `unknown-state` first. From such an
-    instance `issuer-unavailable` carries `error.data.detail` `no-trusted-issuer` and is final, not the `503` DL-14
-    tells a caller to retry: the caller does not retry it or fetch another approval, and the operator takes the action
+    instance `issuer-unavailable` carries `error.data.detail` `no-trusted-issuer` and is still HTTP `503`, but final,
+    not retried as DL-14's `503` is: the caller does not retry it or fetch another approval, and the operator takes the action
     on the page or with the CLI (DL-19's row). A member's key carries no
-    scope that reaches a `relayed` action's tool: a member is a T2 caller with no hub of the operator's to ask for an
-    `approval/1`, so such a call is refused `scope-not-granted`, and the operator takes the action on the page or with
-    the CLI. A job step is the one `relayed` action whose tool, `fabric.job.get`, the member's key reaches to read its
-    job, so an `inputResponses` the member sends is refused `approval-required` (above).
+    scope that reaches a `relayed` action's tool other than `fabric.job.get`, which it reaches to read its own job: a
+    member is a T2 caller with no hub of the operator's to ask for an `approval/1`, so a call to any other `relayed`
+    action's tool is refused `scope-not-granted`, and the operator takes the action on the page or with the CLI. A job
+    step is that one `relayed` action whose tool the member's key reaches, so an `inputResponses` the member sends is
+    refused `approval-required` (above).
   - **Where the operator is.** Only the operator sees the cloud instance in Fabric Dashboards, since its descriptor sits
     on the operator's computers alone (CF-2); a member sees it as an MCP server their coding agent is configured with.
     Where no host on the operator's computer signs the operator in to the page (Fabric Dashboards cannot show it there,
