@@ -11411,7 +11411,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      installation id, that id, whether it is shared and with which products (named as of the product's version, with a
      link to one maintained list of them, whose home is the sharing products' owners' choice: the estate's privacy page
      on passioncode.ai, the launcher's PC-137 in plans.md, would be one home for every product, and until one exists
-     each product keeps its own copy on its UD-5 page and updates it in the version that re-shows the notice), that the id ties events together though no person is named
+     each product keeps its own copy on its UD-5 page; the list and every copy name a new sharing product before it
+     first sends the shared id, the notice's link naming it until the next version re-shows the notice), that the id ties events together though no person is named
      and that turning back on resumes a shared id, and, when it sends a session id, that it does and that the session
      id ties one session's events together, where the data is sent (naming the organization that receives it meets
      this, its usage data page naming the host) or a link to that page (UD-5), which says, and where the switch is, and says when data collected before it may
@@ -11439,8 +11440,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      governed this product included (RM-13, "an explicit earlier «no» stays off"; `cbea0b76`, a reading of the
      operator's decision); an off in a shared file, written under words that governed every reader, is a decline for a
      product only when it was given before that product first sends (an earlier no stays off), and since the shared
-     file records neither who wrote an off nor under what words, a product treats any shared off present before its
-     first send as that earlier no; for an install that sent before the product's version that meets UD-2, the first
+     file records neither who wrote an off nor under what words, a product that can read the shared file where it runs
+     treats any shared off present before its first send as that earlier no (one that cannot read it there, such as a
+     browser build or a component on a server, owes no read of it); for an install that sent before the product's version that meets UD-2, the first
      run of that version at which the shared file is read, or found absent, stands in for the first send, so a shared
      off present then, on an install whose own switch the person never set, is read as the earlier no; after that
      product's first send (or that stand-in run) its own switch alone governs it (plans.md item D, "one product's switch never turns another off"), so
@@ -11451,7 +11453,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      and leaves an off already written there, which stays the earlier no for products that have not yet sent; a
      shared file that exists but cannot be read before a product's first send (or before that stand-in run) is no
      answer, and the product sends nothing in that run, a run that sent nothing for that reason being no stand-in run;
-     a device policy whose layer carries a key for a product's switch may lock it off and never locks it on.
+     a device policy whose layer carries a key for a product's switch may lock it off and never locks it on, and a
+     product ignores a lock that would hold its switch on, as if the key were unlocked (the pointer in devices.md's
+     "Precedence and locks").
   3. UD-3: anonymous means no person named, not unlinkable (a shared id ties the products that send it); it leaves out a
      person (name, email, phone, account, billing or store id, an IP kept with the data, a hardware or advertising id),
      a credential, a path or a file name from the person's machine or data, and any content or text a person wrote or
@@ -11471,7 +11475,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      switch, or an `approval/1` the operator gave for that switch (DL-18), an elicitation the product itself sends
      deciding the action, once the operator accepts it, on the product's own record (AP-2) with no decision relayed by
      the agent, never a mandate (a `change-policy` effect, MD-3), another approver's `approval/1` or a standing rule;
-     anyone else is told the switch is in the product's settings; an agent does not decline a person who asks to turn
+     anyone else is told the switch is in the product's settings; for a component an organization deploys on its own
+     server for its members that sends its own counts, the switch is the deploying organization's, and the word is that
+     of whoever holds it for the organization; an agent does not decline a person who asks to turn
      their switch off (the operator's switch turned off on the word, relayed under AP-2 with the product's own checks,
      anyone else pointed to the setting); it never sends around a switch that is off; where the notice is not a question,
      the switch is a `relayed` action, not AP-4's consent (a human gate); where UD-1's ask-first branch applies (the
@@ -11517,7 +11523,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      server are its own; OpenRouter attribution (DEC-0065), which labels a product's model requests, is not usage data
      under the page: it is off until the product's operator sets it, and the usage data switch neither turns it on nor
      off; a product whose operator set it sends it whatever its usage data switch says (Project Observatory does) and
-     should say so on its usage data page, and whether a person needs a switch of their own for it is not decided here.
+     should say so on its usage data page, and whether a person needs a switch of their own for it is not decided here;
+     a service's usage report (DEC-0021, `GET /fabric/v1/usage`), read by its host with the service token, is not usage
+     data under the page either.
 - **Why:** the operator's decision fixes the default and the per-product switch; what keeps it trustworthy across
   products is that "anonymous" and "off" mean the same everywhere, so those two are the contract's. The operator's words
   (quoted in Fabric Switchboard's `docs/ANALYTICS.md`, lines 19 to 23 at `405b789`) begin «Включает первый раз продукт,
@@ -11539,8 +11547,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   and only an id the product owns is deleted. An operations digest kept on its machine is counts a product keeps about
   itself, so the condition sits where data is sent to anyone but the person, not on the declaration a local
   collector reads. A
-  session id kept in memory and renewed no later than after an idle hour ties no more than the installation id already does, so UD-3
-  admits it beside that id and UD-1 has the notice name it. Data that meets UD-3 names no person, yet its counts are the
+  session id kept in memory and renewed no later than after an idle hour, beside an installation id, ties no more than
+  that id; without one it ties one session's events, which the notice names (UD-1), so UD-3 admits it. Data that meets UD-3 names no person, yet its counts are the
   estate's private metrics, which the data classification table puts in `confidential`, so it is that class rather
   than `project-internal`; data joined with an account names a person, so it is `personal`, or `regulated` where a
   market's law controls it. A hosted service the estate runs, which installs nothing on
@@ -11681,9 +11689,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   item 3) and owes UD-3's session id, random per server process per UTC day today rather than renewed after an idle
   hour (its ADR-0014 line 24 at `43f04f15`); no self-hosted instance of it runs yet (line 37). The self-hosted image
   also owes UD-4's product side: its switch is on its Organization page and an HTTP admin route recorded as a person's
-  act (`src/modules/analytics/routes.ts` line 36), and its MCP server declares no actions extension, so it owes a
+  act (`src/modules/analytics/routes.ts` line 36 at `855f7a37`), and its MCP server declares no actions extension, so it owes a
   `relayed` action for the switch whose tool's effect is `change-policy`; and its design's planned well-known
-  declaration of its counting, waiting on CT-216 (`docs/design/2026-11-04-analytics-default.md` line 301), has no
+  declaration of its counting, waiting on CT-216 (`docs/design/2026-11-04-analytics-default.md` line 301 at `855f7a37`), has no
   member to declare, since UD-5 defines none until a later decision adds one. Fabric Inbox's server is no component
   with an organization's switch: it sends none of its own counts, and each person's Fabric Inbox app sends that
   server's counts under the app's own switch (`desktop/analytics.cjs` lines 352 to 353 and 422 to 429 at `1395416`),
@@ -11692,11 +11700,15 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (OBS-330); it also turned anonymous usage and error data on by default in its 0.33.0 and first sent it from 0.33.1,
   the first release build carrying its key (OBS-324, OBS-329; its `CHANGELOG.md` and `docs/COMPATIBILITY.md`,
   "Workspace state: anonymous usage data", at `2a11b3fd`), to the second store above rather than PassionCode.ai's host
-  (`observatory/engine/usage_analytics.py` line 61 at `2a11b3fd`); its notice (lines 98 to 101) names no destination,
-  so it owes UD-1's "where", and its UD-5 page states that store; the rest of its sender was not read against these
-  rules. It also sends OpenRouter attribution on every request it makes to OpenRouter whatever its usage data switch
-  says (`observatory/engine/agent/providers.py` lines 76 to 94), which UD-6 leaves outside the page and asks it to
-  say on its usage data page. The owners of both check them against UD-1 to UD-6. Observatory's
+  (`observatory/engine/usage_analytics.py` line 61 at `2a11b3fd`); its notice (lines 99 to 102) names no destination,
+  so it owes UD-1's "where", and its UD-5 page states that store; that notice also names neither its own, unshared
+  installation id (line 12, `install_id` at lines 288 to 300) nor its session id, so it owes naming both (UD-1), and
+  its session id is one per process (lines 401 to 409), so where a process lives past an idle hour it owes UD-3's
+  renewal; the rest of its sender was not read against these rules. It also sends OpenRouter attribution on every
+  request it makes to OpenRouter whatever its usage data switch says (`observatory/engine/agent/providers.py` lines 76
+  to 94), which UD-6 leaves outside the page and asks it to say on its usage data page, and that attribution carries
+  the legacy `X-Title` header too (line 93), where DEC-0065 has a product add exactly its headers and send the
+  current name. The owners of both check them against UD-1 to UD-6. Observatory's
   encrypted workspace snapshot copies its home, the digest store included, into the person's own storage (which iCloud
   may carry off the machine), which UD-6 counts as no sending only when its key is the person's: Observatory's to confirm. The estate's
   hosted products in the knowledge base's plans.md item D are outside the page unless they ship an installed product
@@ -11726,6 +11738,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   purpose and the hosted services' scope, for the operator), `docs/specification/conformance.md` (a product
   row, an agent row, the OD-9 declarer's row and the collector's row), `docs/specification/ops-digest.md` (OD-6 and Not
   decided here point to UD-6), `docs/specification/activity.md` (its purpose points to UD-6's channel separation),
+  `docs/specification/openrouter-attribution.md` (its default points to UD-6), `docs/specification/devices.md`
+  ("Precedence and locks" points to UD-2's limit on a lock),
   `docs/specification/README.md`, `docs/DOCMAP.md`, `CONTEXT.md` (usage data), `docs/ux/scenarios.md` (SCN-043's alt
   path for UD-4 and its Coverage), backlog CT-216; the handoff `docs/handoffs/2026-11-07-usage-data.md` and its row in
   `docs/handoffs/README.md`. The notice and the switch are each product's screens (Fabric's SCR-52 and SCN-134, which

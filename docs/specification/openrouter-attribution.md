@@ -25,7 +25,9 @@ A product that attributes its traffic keeps one setting ([schema](../../schemas/
 
 `FAC-SEM-098` (kind `openrouter-attribution`) checks the setting; the schema carries the same list and limit, and a test
 keeps the two equal. **Without a setting, a product sends no attribution:** attribution is off by default, and a kit
-that offers it (the adapter's) keeps it off until the product's operator sets it.
+that offers it (the adapter's) keeps it off until the product's operator sets it. Attribution is not anonymous usage
+data: a product's usage data switch neither turns it on nor off, and a product that sends it should say so on its
+usage data page ([usage data](usage-data.md) UD-6, DEC-0157).
 
 ## The headers
 

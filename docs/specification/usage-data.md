@@ -43,7 +43,10 @@ The key words MUST, MUST NOT, SHOULD and MAY are used as in RFC 2119.
   with a link to one maintained list of them. Where that list lives is the sharing products' owners' choice: the
   estate's privacy page on passioncode.ai (the launcher's PC-137 in the knowledge base's plans.md, its launcher row at
   `c84c7a40`, asked and not yet published) would be one home for every product; until one home exists, each product
-  keeps its own copy on its usage data page (UD-5) and updates it in the version that re-shows the notice. When what the notice states changes
+  keeps its own copy on its usage data page (UD-5). The list, and every such copy, MUST name a new sharing product
+  before that product first sends the shared id; a notice already shown names the sharing products as of its version,
+  so from that first send until the product's next version re-shows its notice, the notice's link (the maintained list,
+  or the product's own copy) is what names the new product. When what the notice states changes
   (a new purpose, or a new product sharing the id, which the notice states from the product's next version that ships
   the updated list), the product MUST show it again, once, where the person reads it, before it sends data under the
   change, as a device policy's `noticeVersion` marks a new notice ([devices](devices.md#policy)). The notice is a
@@ -67,8 +70,9 @@ The key words MUST, MUST NOT, SHOULD and MAY are used as in RFC 2119.
   a setting that said it governed this product: the product's own switch, whenever it was set; or a shared switch's off
   (an `analytics: false` written in a shared file under a prompt or a setting that said it governed every app reading
   that file) given before this product first sends, which is an earlier no and stays off for it. Since the shared file records
-  neither who wrote an off nor under what words, a product treats any shared `analytics: false` present before its
-  first send as that earlier no. For an install that sent before the product's version that meets this rule, the first
+  neither who wrote an off nor under what words, a product that can read the shared file where it runs treats any shared
+  `analytics: false` present before its first send as that earlier no; a product that cannot read it there (a browser
+  build, a component on a server) owes no read of it, and only its own switch's off is its decline. For an install that sent before the product's version that meets this rule, the first
   run of that version at which the shared file is read, or found absent, stands in for the first send: a shared
   `analytics: false` present then, on an install whose own switch the person never set, is read as the earlier no.
   After a product's first send (for such an install, after that stand-in run), its own switch alone governs it, and an
@@ -82,7 +86,9 @@ The key words MUST, MUST NOT, SHOULD and MAY are used as in RFC 2119.
   app ("One switch for every PassionCode app on this computer", its `en.ts` line 864 at `eafcf2e4`): for a product that
   has already sent, that is a false promise, which the person reads until Fabric's switch for Fabric alone ships (its
   CO-496). A device policy ([devices](devices.md#policy)) whose layer carries a key for a product's switch MAY lock it
-  off; it MUST NOT lock it on, since a person who declined stays off and the switch is the person's (UD-4).
+  off; it MUST NOT lock it on, since a person who declined stays off and the switch is the person's (UD-4). A product
+  ignores a lock that would hold its switch on: its switch resolves as if that key were unlocked, the person's own
+  setting (or an earlier no) governs, and the product does not show the switch as locked.
 - **UD-3, anonymous.** "Anonymous" here means the data names no person; it is not unlinkable: an installation id ties
   one install's events together, and a shared one ties together the events of every product on that machine that sends
   it, which the notice (UD-1) and the privacy text (UD-5) say. The data MUST NOT carry a person (a name, an email
@@ -117,7 +123,9 @@ The key words MUST, MUST NOT, SHOULD and MAY are used as in RFC 2119.
   never a mandate (the switch is a
   `change-policy` effect, which no mandate covers, [delegation](delegation.md#the-operators-mandate) MD-3), never an
   `approval/1` of another approver and never a standing rule. Any other person turns their switch on in the product's
-  settings, and the agent says so. An agent does not decline a person who asks it to turn their switch off: the
+  settings, and the agent says so. Where a component an organization deploys on its own server for its members sends
+  its own counts, its switch is the deploying organization's (the scope above), and the person whose word this rule
+  asks for is whoever holds that switch for the organization. An agent does not decline a person who asks it to turn their switch off: the
   operator's own switch it turns off on the operator's word, relayed under AP-2 (the product's own checks still apply,
   so a T2 caller (any caller the callee cannot place in T0 or T1) brings an `approval/1`, [delegation](delegation.md#trust-tiers) DL-17, DL-18
   and DL-25), and anyone else it points to the setting, since off only protects them. Where the notice is not a
@@ -179,7 +187,9 @@ The key words MUST, MUST NOT, SHOULD and MAY are used as in RFC 2119.
   operator sets it (a kit that offers it keeps it off), and the usage data switch neither turns it on nor off. A
   product whose operator set it sends it whatever its usage data switch says (Project Observatory does, on every request
   it makes to OpenRouter, its `observatory/engine/agent/providers.py` lines 76 to 94 at `2a11b3fd`), and SHOULD say so
-  on its usage data page (UD-5); whether a person needs a switch of their own for it is not decided here.
+  on its usage data page (UD-5); whether a person needs a switch of their own for it is not decided here. A service's
+  [usage report](service.md#usage-report) (DEC-0021, `GET /fabric/v1/usage`), read by its host with the service token,
+  is not usage data under this page either.
 
 Practice in the estate, read on 2026-11-07 and 2026-11-08 (DEC-0157's Compatibility is the full account, product by
 product): Fabric Switchboard, Fabric Inbox and Fabric Dashboards collect and send from their first start, a background
@@ -284,17 +294,20 @@ practice was not read against these rules. Project Observatory turned anonymous 
 its 0.33.0 and first sent it from 0.33.1, the first release build carrying its key (OBS-324, OBS-329; its
 `CHANGELOG.md` and `docs/COMPATIBILITY.md`, "Workspace state: anonymous usage data", at `2a11b3fd`), so its counts
 start at 0.33.1. It sends to the second store above, the operator's earlier analytics instance, not to PassionCode.ai's
-host (its `observatory/engine/usage_analytics.py` line 61 at `2a11b3fd`), and its notice (the same file, lines 98 to
-101) names no destination, so it owes UD-1's "where", and its UD-5 page states that store; the rest of its sender was
+host (its `observatory/engine/usage_analytics.py` line 61 at `2a11b3fd`), and its notice (the same file, lines 99 to
+102) names no destination, so it owes UD-1's "where", and its UD-5 page states that store. That notice also names
+neither the installation id every event carries (its own, unshared: line 12, `install_id` at lines 288 to 300) nor its
+session id, so it owes naming both (UD-1); its session id is one per process (lines 401 to 409), so where a process
+lives past an idle hour it owes UD-3's renewal. The rest of its sender was
 not read against these rules. The estate's hosted workspace product is outside the page as a hosted
 service; its self-hosted image, a component an organization deploys on its own server for its members, is under it
 with that organization's switch (its owner and administrators turn the counting off or on, its ADR-0014 item 3), and
 owes UD-3's session id, random per server process per UTC day today rather than renewed after an idle hour (its
 ADR-0014 line 24 at `43f04f15`); no self-hosted instance of it runs yet (line 37). Its switch is on its Organization
-page and an HTTP admin route, recorded as a person's act (its `src/modules/analytics/routes.ts` line 36), and its MCP
+page and an HTTP admin route, recorded as a person's act (its `src/modules/analytics/routes.ts` line 36 at `855f7a37`), and its MCP
 server declares no actions extension, so the image owes UD-4's product side too: a `relayed` action for the switch
 whose tool's effect is `change-policy`. Its design plans to declare its counting in its well-known document once
-CT-216 lands (its `docs/design/2026-11-04-analytics-default.md` line 301); UD-5 defines no such member, so it has
+CT-216 lands (its `docs/design/2026-11-04-analytics-default.md` line 301 at `855f7a37`); UD-5 defines no such member, so it has
 nothing to declare until a later decision adds one. A product's install and active counts move at the version that meets UD-1
 and UD-2: they drop where the product sent before its notice or past an earlier no (Switchboard, Fabric Inbox, Fabric
 Dashboards), and rise where it waited for an answer (Fabric, whose never-answered installs send nothing today and come

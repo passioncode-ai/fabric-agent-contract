@@ -532,7 +532,9 @@ even after it passes: it stays on the device (`FAC-SEM-068`).
 
 An unlocked value above the user layer is therefore a default the person may change; a locked one is
 never overridden by a lower layer. A device MUST refuse a local change to a locked key and show the
-key as locked. The `user` layer cannot lock (schema, `FAC-SEM-042`). A `user` layer's `harness.baseline` and
+key as locked. A key for a product's anonymous usage data switch is limited by [usage data](usage-data.md) UD-2
+(DEC-0157): a layer MAY lock it off and MUST NOT lock it on, and a product ignores a lock that would hold its switch on,
+resolving it as if the key were unlocked and not showing it as locked. The `user` layer cannot lock (schema, `FAC-SEM-042`). A `user` layer's `harness.baseline` and
 `repair.packages` count for nothing (DEC-0102): the resolution skips them, so a local change to either changes nothing
 (which answer a device gives such a change, and a schema that refuses them in a user layer, is CT-99). A `server`
 layer's locks also end with its enrollment when the organization closed ([a closed organization](#organization-closed), DEC-0103)
