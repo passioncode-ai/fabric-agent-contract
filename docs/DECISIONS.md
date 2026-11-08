@@ -11429,7 +11429,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      the rest, and on the operator's yes performs the act itself and records it with the words in its own report, and
      in a session with no person in its chat it does not perform the act and asks nothing from that session, leaving
      the act open and naming it, in its board reply and its report, as a step for a session the person is in (as
-     Fabric's `board.read-at-start` hands a production step to such a session); the agent adds no question of its own
+     Fabric's `board.read-at-start` hands a production step to such a session), a relay or a mandate that names the
+     act changing neither mode, being the reason the one ask quotes, not the agreement the gate holds the act for; the
+     agent adds no question of its own
      about an act a host's gate already asks about (a risk on it travels as that gate's one ask), while the asks other
      rules require for the same act stay and are named: spend policy rule 3's approval request for spend above a
      project's `autoApproveUsd` (OW-4, CT-269), DEC-0149's stated word for a source hand-over the words do not give
@@ -11439,9 +11441,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      single-use one-hour grant scoped to the project, floor class and target with no action class, which does not lift
      the refusal and which a session of the project that keeps its runner gate and asks for the same floor class and
      target would spend without asking, after which the card reads "Allowed once, until {time}" and leaves the queue
-     while the act stays undone, and unpressed the card stays refused after the act, so the chat question, which says
+     while the act stays undone, and unpressed the card stays refused, the act done or not, so the chat question, which says
      the card does not allow the act and names it by its label in the operator's interface language, is the one the
-     operator answers, and the agent's report says the card stays refused and what its press would leave; until Fabric
+     operator answers, and the agent's report (with no person in the chat, its board reply too) says the card does not
+     allow the act, stays refused and what its press would leave; until Fabric
      answers its open question `add1df7c` this FA-09 reading is the contract's; a waiting step with no answer stays
      open and named, a step taken stays done and reported, and the message is not repeated; an answer naming another
      way is a new word, a bare refusal undoes the corrected way where it can and leaves the step open.
@@ -11510,7 +11513,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   this one's (Fabric question `add1df7c`); until then Fabric owes nothing for it. Noted beside that question: Fabric's
   relay test for the production stop (a relay whose scope names the step) is narrower than a mandate handed on as MD-2
   says, whose scope names capabilities (`mandate.schema.json`) and whose `source` may be absent (OA-7); until Fabric
-  says otherwise, a relayed mandate that does not name the step meets that stop, which OW-5 keeps. For a session whose runner gate is
+  says otherwise, a relayed mandate that does not name the step meets that stop, which OW-5 keeps. A relay that does name
+  the step lifts that production stop and not the floor: under FA-09, as in a session the person is in, the operator's
+  words are the reason the one ask quotes, so the step still goes to a session the person is in, and the session that
+  lands this decision adds that case to question `add1df7c`. For a session whose runner gate is
   removed (FA-09, the machine's default mode under Fabric ADR-0168, and every session Fabric did not launch), Fabric
   refuses every floored act whatever is agreed and returns a remedy with two options ("Run it in a mode where the runner
   asks before each tool, or perform the effect yourself", `containment.ts`). Fabric's own record reads that remedy as
@@ -11551,13 +11557,14 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   undone; and nothing resolves the card after the agent acts on the chat yes). Until Fabric ships it, OW-3 has the
   operator see that card beside the agent's chat question, the chat question saying that the card's "Allow once" does
   not allow the act, naming the card by its label in the operator's interface language, and being the one the operator
-  answers, and the agent's report saying that the card stays refused and that a press would leave such a grant. `intake.spec-first` (build nothing
+  answers, and the agent's report (with no person in the chat, its board reply too) saying that the card does not allow
+  the act, that it stays refused and that a press would leave such a grant. `intake.spec-first` (build nothing
   while the specification is incomplete) rests on the operator's own recorded decision (Fabric ADR-0176, 2026-10-23):
   its question (the missing parts of a specification) is one the words do not answer, so under OW-3 it stands and
   Fabric owes nothing for it (Fabric question `46167c9f` asked whether it, and OW-3's added wait, stand). The adapter's line that `fabric_effect_request` is for acts on the agent's own initiative
   (working-with-fabric `SKILL.md`, since `344ed96c`) owes the same for an act the agent performs itself or through
   Fabric: an act the operator ordered still asks Fabric's floor once with the words as its reason; its carve-out for a
-  service's relayed action (AP-2) stays. One owed list for the adapter, here and in the conformance row: the DEC-0156
+  service's relayed action (AP-2) stays. The adapter's owed list, which the conformance row points to: the DEC-0156
   citation; OW-3's waits, its message form (a statement as under way with how to stop it, a question only for a step
   that waits; a risk on a step a host's gate holds carried as that gate's one ask), its bare refusal and its one
   question in the chat under an FA-09 refusal and, with no person in the chat, the act left open and named for a
@@ -11569,7 +11576,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   creating-fabric-agents and adapting-projects-to-fabric, step 3 "run the agent's link command"), creating-fabric-agents'
   Step 6 and adapting-projects-to-fabric's section 8 (both "Propose the operator channel": "the operator's four steps",
   read on the adapter's main at `2c0b1b18`) and their evals, which OC-11 now gives the agent the link command in
-  (OW-2); and both skills' `references/source-and-instance.md` line 7 ("handing over, a new remote, a push or a change
+  (OW-2), the code shown to the person only (on the agent's dashboard, else only in its reply in the operator's
+  session, never in a tool argument, a message, a file or an outward act); and both skills' `references/source-and-instance.md` line 7 ("handing over, a new remote, a push or a change
   of visibility stays the owner's act, each time"), which under OW-4 reads as the owner's word for each such act
   (DEC-0149's word where the act is a source hand-over), the agent performing it. Fabric owes the same for `floor.ask-first`'s own text ("Ask again once they have agreed"), which tells a session
   with no runner gate to wait for agreement that changes nothing under FA-09; in that default mode OW-3's FA-09 reading
@@ -11590,9 +11598,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   the agent, and its Coverage; SCN-012's step 1, its alt path and its recovery, and SCN-014's recovery: the link command the agent's, the receiver
   restarted by OC-17's supervisor and then by the agent through its lifecycle owner, the webhook's removal waiting on
   the operator's decision, OC-2, AP-2 and AP-3),
-  `docs/specification/operator-channel.md` (OC-11's third step the agent's, OW-2, on AP-2's relayed decision, an old
-  `accepted` renewed by one question), DEC-0034 (an Annotated line), the operator channel's status fixtures whose
-  `detail` now tells the reader what the agent does and where its one question waits (in the session the operator gave it the task in, not the bot's chat, which cannot receive while a webhook is set), not what the person does
+  `docs/specification/operator-channel.md` (OC-11's third step the agent's, OW-2, on AP-2's relayed decision, the code
+  shown to the person only, an old `accepted` renewed by one question), DEC-0034 (an Annotated line), the operator channel's status fixtures whose
+  `detail` now says what the agent does for a stopped receiver (restarts it; until it is back a waiting decision is
+  answered on the agent's dashboard, since an answer sent to the bot may be lost after 24 hours, OC-17) and, for a set
+  webhook, that removing it or switching to it is the operator's decision, taken by them in the channel settings or told
+  to the agent in any session with it, never in the bot's chat (OC-2)
   (`fixtures/positive/operator-channel-status-degraded.json`, `-degraded-receiver-missing.json`,
   `-degraded-receiver-missing-unlinked.json`; `fixtures/negative/operator-channel-status-degraded-without-credential.json`,
   `-receiver-missing-lease-held.json`, `-receiver-missing-without-receiver.json`, each negative for its original

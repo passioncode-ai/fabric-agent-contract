@@ -134,7 +134,10 @@ words AP-2 and OA-1 already name; the rules hold for any owner.
   stays open in the report. In a session with no person in its chat (a session carrying out a board request in the
   default mode), the agent does not perform the act and asks nothing from that session: it leaves the act open and
   names it, in its board reply and in its report, as a step for a session the person is in, as Fabric's
-  `board.read-at-start` already hands a step that touches production to such a session.
+  `board.read-at-start` already hands a step that touches production to such a session. A relay or a mandate that
+  names the act changes neither mode: like the operator's words in a session the person is in, it is the reason the
+  one ask quotes, not the agreement the gate holds the act for (Fabric's ADR-0160 section 4); `board.read-at-start`'s production
+  stop, which its own text lifts on such a relay, is another gate.
   The agent adds no question of its own about an act a host's gate already asks about (a risk on that step travels as
   that gate's one ask, and the chat question above is that ask under an FA-09 refusal); the asks other rules require
   for the same act stay and are named: [spend policy](spend-policy.md) rule 3's approval request for spend above a
@@ -148,12 +151,13 @@ words AP-2 and OA-1 already name; the rules hold for any owner.
   action class, that does not lift the FA-09 refusal (FA-09 is checked before any grant) and that Fabric hands to any
   session of the project that keeps its runner gate and asks for the same floor class and target, which would spend it
   without asking; the card then reads "Allowed once, until {time}" and leaves the queue while the act stays undone.
-  Unpressed, the card stays in the queue as refused after the act (it leaves only when newer policy decisions push it
-  out). The card is no question the agent asks: the agent's chat question is the one the operator answers, and it says
+  Unpressed, the card stays in the queue as refused, the act done or not (it leaves only when newer policy decisions
+  push it out). The card is no question the agent asks: the agent's chat question is the one the operator answers, and it says
   that the card does not allow the act, naming the card by its label in the operator's interface language (in Russian
   «Разрешить один раз», under «заблокировано» or «Отказано»), for example: "Fabric refused publishing this project's
   release in this session; its "Allow once" card does not allow it here. You said "release it"; shall I publish it
-  myself?". The agent's report says that the card stays refused and that its "Allow once" would leave such a grant.
+  myself?". The agent's report, and with no person in the session's chat its board reply too, says that the card does
+  not allow the act, that it stays refused and that its "Allow once" would leave such a grant.
   Fabric keeps no receipt of an act taken after an FA-09 refusal (its effect report needs an effect id that an allow
   issued), so the agent records the act and the operator's words in its own report. OW-5's limits still hold, and
   acting on the yes takes the remedy the refusal names, which is not routing around it (OW-4). This is the contract's

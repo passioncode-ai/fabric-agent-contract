@@ -9,7 +9,7 @@
   "state": "degraded",
   "reason": {
     "code": "receiver-missing",
-    "detail": "Nobody has received this bot's updates since 08:52 and 14 updates are waiting; the agent's supervisor restarts its receiver, and the agent restarts it if it does not come back; you hear from the agent only if it cannot bring it back."
+    "detail": "Nobody has received this bot's updates since 08:52 and 14 updates are waiting; the agent restarts its receiver through its supervisor or lifecycle owner; until it is back, answer the waiting decision on the agent's dashboard, since an answer sent here may be lost after 24 hours."
   },
   "credential": {
     "name": "EXAMPLE_AGENT_TELEGRAM_BOT_TOKEN",
