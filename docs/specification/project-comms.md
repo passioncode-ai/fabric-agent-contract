@@ -885,7 +885,7 @@ contract times.
   in flight is refused by the host, idempotent by the request's id, and where the host dispatches from more than one
   machine of the estate, the board's slot keeps a second run from working (its `com.enroll` finds the slot `active`
   with a live holder and is refused `fenced`, which counts for nothing, OS-5). The host offers the operator one switch that stops
-  new starts at once; a run already working is not stopped by it: it finishes, or the operator stops it. Holding its
+  new starts at once on every machine it dispatches from (one setting its machines share, as OS-5's count is one); a run already working is not stopped by it: it finishes, or the operator stops it. Holding its
   slot stops it only before its effect begins, since a hold refuses `com.accept` and `com.effect_begin` and never
   `com.complete`, `com.reconcile`, `com.progress` or `com.renew` ([what a hold refuses](#what-a-hold-refuses)), so a run
   whose effect began finishes under the hold; moving its slot ([PR-2](#the-operator-moves-a-slot)) fences the run at its
@@ -926,8 +926,10 @@ contract times.
   enrollment moved from `in_progress` to `outcome_unknown` (`lost_result`) it settles only by an observed
   `com.reconcile` after it has observed the effect the earlier run began (OS-5), and otherwise leaves to the estate
   owner ([owner settlement](#owner-settlement)) with a note in the thread. On a claim or a transfer it gives the state
-  in the same turn, as any holder does (SA-2, SA-6). It begins an effect before it acts outward, renews its lease while
-  it works (about every 20 seconds, inside the 60-second lease), answers in the request's thread (`com.reply`) and
+  in the same turn, as any holder does (SA-2, SA-6). A run whose request's thread already says the change was made (in
+  PassionCode, the asker's **adapted by** line, fabric-workspace `knowledge/agents-first.md`, *When nobody answers*,
+  item 3) observes that change in the target's folder, never makes it again and settles from what it observed. It begins an effect before it acts outward, renews its lease while
+  it works (about every 20 seconds, inside the 60-second lease), answers in the request's thread by a fenced `com.reply` (never refused `held`) and
   settles the request: `com.complete` with `completed`, or with `failed_known` and the reason when it cannot finish
   (with `observed: false` before an effect began; after one, only once it has observed that the effect did not happen,
   and otherwise it leaves the request `in_progress`, OS-6), or the observed `com.reconcile`. Done is that settlement; a
@@ -935,7 +937,7 @@ contract times.
   ([slots end with the session](#slots-end-with-the-session)). It ends also at `run-ends-at`; a run that cannot settle the request before
   then, and whose deadline falls before the host could start another, settles it `failed_known` as above rather than
   leaving it `accepted` (who submits it again: OS-6). A run never waits on a refusal and never retries one, except one immediate retry of a settling call
-  (`com.complete`, `com.reconcile`) with the same idempotency key when its refusal is `retryable` and not `held` (the
+  (`com.complete`, `com.reconcile`) with the same idempotency key when its refusal is `retryable` and neither `held` nor `lease_expired` (a lapsed lease is never retried; the
   key makes the retry safe, [idempotency](#idempotency)); a settling call refused again leaves the request as OS-5 says. One whose `com.enroll` is refused does
   what SA-6 says for that refusal ([answering in the same turn](#answering-in-the-same-turn)) except SA-6's retry once
   the cause is gone, and ends, the host's next start after the cause is gone being the retry (OS-5); any other refusal of a board call on its work (`held`, `fenced` and `lease_expired` among
@@ -965,9 +967,10 @@ contract times.
   enrollment is refused with any other code that is not `retryable` (`fenced` aside, which counts for nothing above)
   likewise ends the host's starts for that request
   and shows it to its operator. After the
-  grant: at `absent` generation 0 the run's SA-6 decline made the request `answered`, so the requester submits it
-  again, only while it still reads `answered` (one the requester cancelled to make the change itself reads `cancelled`
-  and is not submitted again); at a generation of 1 or more the run sent no reply, so the request kept its state (a `queued` one stays
+  grant: at `absent` generation 0 the run's SA-6 decline made the request `answered`, so whoever submits it again
+  (the operator through a session of the requesting Project they own, otherwise the requester) first cancels it with
+  `expectedRevision` set to the revision it read, and submits it again only on its own `cancelled` receipt; on
+  `revision_conflict` or another state, it reads again and submits nothing; at a generation of 1 or more the run sent no reply, so the request kept its state (a `queued` one stays
   queued), and the host may start a run for it again: the grant starts the count of two again for that request, since
 the refused run's cause was the operator's to lift. The requester sees no signal from the host in the thread:
   it reads the request's state and may cancel, while the operator is the one shown the request; the operator acts on
@@ -996,10 +999,10 @@ the refused run's cause was the operator's to lift. The requester sees no signal
   and a source hand-over without a decision naming its exact target ([source](source.md#handing-over), DEC-0149; without
   the elicitation capability the service answers `operator-decision-required` with the detail `handover-needs-operator`)
   are each a stop, and so is a step the estate's rules keep from a session with no person (in PassionCode, the
-  production stop of fabric-workspace `knowledge/agents-first.md`, *One approval binds all*, item 8). Only the first two are answered under a mandate or a relayed decision: a job's question or an
+  production stop of fabric-workspace `knowledge/agents-first.md`, *One approval binds all*, item 8). Only the first two are answered by what covers that exact choice: a job's question or an
   `operator-decision-required` refusal that the request's mandate (MD-3) or a relayed decision (OA-1 to OA-3) covers
-  exactly is answered by it and is not a stop. A source hand-over goes ahead only on a decision naming its exact target ([source](source.md#handing-over)), and
-  a human step is never covered (MD-6, AP-4, OA-5); the estate's production stop is lifted only as its own rule says, and
+  exactly is answered by it and is not a stop. A source hand-over goes ahead only on a decision, relayed or not, naming its exact target
+  ([source](source.md#handing-over)), never on a mandate (MD-6), and a human step is never covered (MD-6, AP-4, OA-5); the estate's production stop is lifted only as its own rule says, and
   otherwise is settled, noted and submitted again as a human step is. At a stop the run settles first: before an effect began,
   `failed_known` with `observed: false`; after one, it cancels a waiting job with that job's own cancel and settles
   `failed_known` once it has observed that the effect did not happen, or else leaves the request `in_progress`, so the
