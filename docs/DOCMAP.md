@@ -118,6 +118,7 @@ and recorded as DEC-0001.
 | The design of authority levels and approve by level, the decision CT-250 owes (2026-11-12) | `docs/evidence/plans/2026-11-12-ct250-authority-levels.md` |
 | The design of an autonomy profile per place, the decision CT-285 owes (2026-11-12) | `docs/evidence/plans/2026-11-12-ct285-autonomy-profile.md` |
 | The design of an estate-scoped manager on the wire, the decision CT-252 owes (2026-11-12) | `docs/evidence/plans/2026-11-12-ct252-estate-manager.md` |
+| The design of the activity event of a unit of work, the decision CT-259 owes with Observatory's OBS-378 (2026-11-12) | `docs/evidence/plans/2026-11-12-ct259-activity-unit.md` |
 | A node's harness summary, the baseline and its drift, repairs; `FAC-SEM-128`, `FAC-SEM-129` | `docs/specification/node-summary.md`, `src/node-summary.ts`, `fixtures/vectors/repair-decision.json` written by `tools/vectors/repair-decision.ts` (DEC-0101) |
 | Licence and repository-standard handoff | `docs/handoffs/2026-09-30-repository-standard.md` |
 | Settings backup and feed-client handoff (DEC-0025) | `docs/handoffs/2026-10-05-settings-backup.md` |
