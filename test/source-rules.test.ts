@@ -899,7 +899,9 @@ describe("FAC-SEM-156 and FAC-SEM-157: the manifest", () => {
     const header = ["-----BEGIN RSA", "PRIVATE KEY-----"].join("\n");
     const folded = check({ ...manifest, slots: [{ name: header, kind: "config", purpose: "a" }, { name: header, kind: "config", purpose: "b" }] });
     expect(folded.map((finding) => finding.message)).toContain("slot slots[1] is declared twice");
-  });
+    // Reads of a million characters, timed: an explicit timeout, since a loaded runner passed 5000 ms with every
+    // assertion holding (the nightly runs of 2026-11-08 and 2026-11-09 on ubuntu, 5303 ms and 5324 ms).
+  }, 30000);
 
   it("leaves an exclude entry outside the path grammar to the schema: FAC-SEM-157 says nothing more of it", () => {
     const findings = check({ ...manifest, include: ["src/", "LICENSE"], exclude: ["src\\vendor/"], binaries: [] });
