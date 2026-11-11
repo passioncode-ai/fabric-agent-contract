@@ -115,6 +115,10 @@ and recorded as DEC-0001.
 | The iteration of 2026-10-22's order and dates (CT-81 to CT-89, all merged) | `docs/evidence/plans/2026-10-22-next-iteration.md` |
 | The audit of 2026-10-25, the inventory of every open row by class and the proposed order to the first organization; its questions | `docs/evidence/plans/2026-10-25-first-organization.md`, `docs/evidence/specs/2026-10-25-first-organization-questions.md` |
 | What is left until the North Star, the contract's open rows against its gaps, in waves to 2026-11-21 (2026-11-07) | `docs/evidence/plans/2026-11-07-north-star.md` |
+| The design of authority levels and approve by level, the decision CT-250 owes (2026-11-12) | `docs/evidence/plans/2026-11-12-ct250-authority-levels.md` |
+| The design of an autonomy profile per place, the decision CT-285 owes (2026-11-12) | `docs/evidence/plans/2026-11-12-ct285-autonomy-profile.md` |
+| The design of an estate-scoped manager on the wire, the decision CT-252 owes (2026-11-12) | `docs/evidence/plans/2026-11-12-ct252-estate-manager.md` |
+| The design of the activity event of a unit of work, the decision CT-259 owes with Observatory's OBS-378 (2026-11-12) | `docs/evidence/plans/2026-11-12-ct259-activity-unit.md` |
 | A node's harness summary, the baseline and its drift, repairs; `FAC-SEM-128`, `FAC-SEM-129` | `docs/specification/node-summary.md`, `src/node-summary.ts`, `fixtures/vectors/repair-decision.json` written by `tools/vectors/repair-decision.ts` (DEC-0101) |
 | Licence and repository-standard handoff | `docs/handoffs/2026-09-30-repository-standard.md` |
 | Settings backup and feed-client handoff (DEC-0025) | `docs/handoffs/2026-10-05-settings-backup.md` |
