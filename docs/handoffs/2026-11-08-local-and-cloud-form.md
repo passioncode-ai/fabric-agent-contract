@@ -93,6 +93,10 @@ then main's CT-285 row), `21f8097e` as `8563ee71` and `53835d18` as `e4710ba2` t
   instruction (AP-3), named in the conformance row, DEC-0159 item 4, SCN-059, FLW-36 and SCR-36; raising a budget or a
   cap is a relayed change to the service's own limits (AP-5); no door widens a key's scopes beyond what its issuing
   could carry; Fabric Dashboards citations pinned at `e23551e8`.
+- Round 19: jobs keyed by the client key that started them; a step's need checked again; the CLI's record marked as
+  stated; a page action's twin for cap, scope or ceiling where the page offers one; an `approval/1` asks the operator.
+- Round 20: a step closes also when a call or the repeat check finds its need met; the adapter kits owe job keying;
+  main's CT-285, CT-292 and CT-293 rows name DEC-0159 (#283); the last "operator removes the tool" now the agent's.
 
 ## Compared with the first implementation
 
@@ -138,8 +142,8 @@ a client-key caller input for CF-4's `operator-step` (FAA-204).
   lands second. A client key at a cloud instance in the form carries no grant and no context (CF-3; `contexts.md`), so
   TC-2's grant claim is absent for it: CT-292's DEC states which context a client-key call is in (the cloud
   instance's operator's context, read as the place) and that TC-6 covers a client key as a credential. Checks: main's
-  CT-292 row names DEC-0159 (`grep '^| CT-292 ' docs/backlog.md | grep -c 'DEC-0159'` prints 1, since main's row edit
-  of 2026-11-12); after that DEC, on the merged tree, `awk 'BEGIN{RS="\n### DEC-"} /CT-292/ && !/^0159/ {n += (/DEC-0159/
+  CT-292 row names DEC-0159 (`grep '^| CT-292 ' docs/backlog.md | grep -c 'DEC-0159'` prints 1, since main's #283,
+  round 20); after that DEC, on the merged tree, `awk 'BEGIN{RS="\n### DEC-"} /CT-292/ && !/^0159/ {n += (/DEC-0159/
   && /client key/)} END{print n+0}' docs/DECISIONS.md` prints at least 1 (round 19, seam).
 - Landing note for CT-293's decision (round 18, seam): binding on whichever of DEC-0159 and CT-293's DEC lands second.
   CT-293 has the decision for an act cover issuing the narrow grant, scope or key that act needs; its DEC lists DEC-0159
@@ -147,8 +151,8 @@ a client-key caller input for CF-4's `operator-step` (FAA-204).
   the page; the key twin issues only its caller's key; no door widens a key's scopes to one its issuing could not carry)
   and CF-4 (a key's scopes changed by the operator's agent on the operator's word) among the rules it restates, and says
   whether an act's decision covers the caller's own client key or a scope change. Checks: `grep '^| CT-293'
-  docs/backlog.md | grep -c 'DEC-0159'` prints 1 (main's row edit of 2026-11-12); after that DEC, on the merged tree,
-  `awk 'BEGIN{RS="\n### DEC-"} /CT-293/ && !/^0159/ {n += (/DEC-0159/ && /CF-3/)} END{print n+0}' docs/DECISIONS.md`
+  docs/backlog.md | grep -c 'DEC-0159'` prints 1 (main's #283, round 20); after that DEC, on the merged tree,
+  `awk 'BEGIN{RS="\n### DEC-"} /CT-293/ && !/^0159/ {n += (/DEC-0159/ && /CF-3/ && /CF-4/)} END{print n+0}' docs/DECISIONS.md`
   prints at least 1 (round 19, seam).
 - A question for the operator (not reserved as an `OQ` id): client-key spend at a cloud instance in the form reaches no
   grant check, so at the call it is bound only by each provider key's own ceiling and the service's own budgets, not by
@@ -172,7 +176,9 @@ a client-key caller input for CF-4's `operator-step` (FAA-204).
   30-second revocation, the key with its key-issuing scope already issued to a colleague who is not the operator, which
   the message asks it to revoke and to route key management through its operator's CLI or page, or through a `relayed`
   twin, and the list tool's holder names).
-- At landing, to the adapter, under FAA-204: round 4's two items (`fabricManifest` off the cloud descriptor, the
+- At landing, to the adapter, under FAA-204: round 20's (the kits key every job by `jobCallerKey`, a client key the
+  credential when no token came, and answer another caller's job `unknown-job`, not `job-of-another-caller`, at an
+  instance in the form, with a kit test); round 4's two items (`fabricManifest` off the cloud descriptor, the
   refusal mapping), round 5's two (the manifest's resolution for a descriptor without `fabricManifest`, the kits'
   `operator-step` message and client-key caller input), round 7's (the kits answering every `human` action and input
   request of a client-key caller as CF-4 says, one event per open step, and each instance's delegation gate configured
@@ -206,7 +212,9 @@ a client-key caller input for CF-4's `operator-step` (FAA-204).
   each changed on one side only; the lander keeps this branch's "a callee that serves the family" row and DEC-0156's
   "an agent receiving a relay" row (checks: `grep '^| a callee that serves the family' docs/specification/conformance.md
   | grep -c 'save the one exception'` and `grep "^| an agent receiving a relay" docs/specification/conformance.md | grep
-  -c "a host's gate on a floored act still asking once"` each print 1); and DEC-0156's OW-5 says that a relayed decision
+  -c "a host's gate on a floored act still asking once"` each print 1, and `grep -c '^| a callee that serves the
+  family' docs/specification/conformance.md` and `grep -c '^| an agent receiving a relay'
+  docs/specification/conformance.md` each print 1 (round 20, seam); and DEC-0156's OW-5 says that a relayed decision
   naming a change to a service's own budget or a per-key cap (CF-3, CF-4) is that change, not a widening by OW-1, and
   never moves L0 or L1 (check: `awk '/^- \*\*OW-5/,/^- \*\*OW-6/' docs/specification/governance-and-roles.md | grep -c
   'CF-4'` prints at least 1). DEC-0156's handoff carries both.
@@ -881,6 +889,19 @@ a client-key caller input for CF-4's `operator-step` (FAA-204).
   CT-293 notes' checks scoped to each DEC, main's rows naming DEC-0159; the DEC-0156 conformance hunk and OW-5 note;
   Branch names all four main merges; CT-218 carries rounds 18 and 19 (unit, product, seam). Declined: none.
 
+- Checks run on the round-19 fold (`f781d19b`): `pnpm run check` exit 0 (11185 tests), before round 20 was read.
+- Round 20 (on `f781d19b`; main `e9bb7ac7` merged as `0018bacb` before this fold): unit clean; seam and product not
+  clean. Breaks folded: two statements of when a step stays open omitted its need found met (seam); the CT-292 and
+  CT-293 notes said main's rows named DEC-0159, which they did not; main's #283 added it to CT-285, CT-292 and
+  CT-293 and the notes cite it (seam, product); the adapter's Python kit records no owner for a client-key job and
+  answers another caller's job `job-of-another-caller`, owed now under FAA-204 (seam). Risks folded: a call that finds
+  the need met closes the step too; "an operator whose no is meant to last" has their agent rescope; CF-3's ceiling,
+  DEC-0159 item 4 and SCN-059 name a page action's twin where the page offers one; item 4 and SCR-36 carry "stated,
+  not authenticated" and job keying; "in the same audit record a twin call writes"; the CT-293 check requires CF-4;
+  the DEC-0156 note counts each conformance row once; Done carries rounds 19 and 20. Kept as is: the once-a-day ask
+  is per step, and a need declined and raised again by a new call is a new step (the text says so; product, risk).
+  Declined: none.
+
 ## Next task
 
-Round 20 of the blind readings (unit, seam, product) of branch `agent/ct218-local-cloud-v2` (DEC-0159).
+Round 21 of the blind readings (unit, seam, product) of branch `agent/ct218-local-cloud-v2` (DEC-0159).

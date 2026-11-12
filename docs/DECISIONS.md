@@ -11499,7 +11499,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      elicitation is sent to it. One step is one account step for one provider account, one order's spend
      above a limit, one job's input request, or, for any other `humanStep` (`passkey`, `comparison`, a `secret` that is
      no provider account's), one action with its arguments; every call reaching it while open is listed on it with its
-     key, only a job waits on it, and it stays open until the operator takes or declines it or no listed key remains. The service raises it
+     key, only a job waits on it, and it stays open until the operator takes or declines it, no listed key remains, or
+     its need is found met (a call that reaches it, or the check before each repeat, finding a need met outside the
+     page closes the step with no event and its waiting jobs go on). The service raises it
      to its operator when it opens, however many calls reach it, and again while it stays open, each time no sooner than
      25 hours and no later than 48 hours after the previous raise (a host's 24-hour ask hold and its poll interval), as a new event with a new
      `id` and the same `subject`, `kind` and `link`, so that each host and each channel asks at most once per raise and
@@ -11509,7 +11511,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      channel, where it has one, sends (OC-4); the page shows it with the holder label of every key listed on
      it and records the operator's answer as theirs: taking a step is the step itself (AP-4), and choosing and declining
      are `relayed` page actions with agent twins (AP-1), each a tool of its own addressing the step by its opaque id,
-     never `fabric.job.get` on the member's job (a queuing instance answers another caller's job `unknown-job`), reached
+     never `fabric.job.get` on the member's job (the instance keys every job by the client key that started it and
+     answers another key's job `unknown-job`, whether or not it queues), reached
      as the key twin is, so an operator without the page
      answers through their agent or the operator channel's buttons (OC-5). The caller reads the outcome: a job reads `working`, its `statusMessage` starting `operator-step <humanStep>`
      (`operator-step choice` for a choice) in the style of `FAC-SEM-119`'s pause grammar, then goes on
@@ -11521,8 +11524,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      `operator-step: <humanStep>` and a message saying the operator was asked (a decline answering only the jobs
      waiting on the step and closing it, so a later call raises a new step, and a need met outside the page, a top-up
      or a consent at the provider, is found met by the next call; such a caller gets no word of a decline and its
-     repeat asks the operator again, so an operator whose no is meant to last removes the tool from that key's scopes
-     or tells the member), and a call to such a tool
+     repeat asks the operator again, so an operator whose no is meant to last has their agent remove the tool from that
+     key's scopes on their word, or tells the member), and a call to such a tool
      that cannot go on without a choice `operator-step: choice`, raising nothing, since no later call carries the
      answer, its message saying the tool cannot wait for the operator's choice and the caller not repeating it, so a
      member's key should not carry such a tool (the operator's agent runs it on the operator's word with the agent's CLI on the operator's computer, or removes it from members' keys' scopes); `human-step-required` does not
@@ -11542,10 +11545,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      PL-3, and no other host, Fabric for one, mints a login code for a browser there), the operator issues and rotates
      a member's or another agent's key in their own terminal with the CLI, and takes a body step from another computer
      of theirs that shows the page; their own agent, on the operator's word, revokes a key, caps one, changes its
-     scopes, raises a ceiling, and answers a choice or declines a step, through the twins where their gate lets it
-     through, else with the agent's CLI on the operator's computer, which offers choosing and declining an open step
-     by its opaque id beside revoking, capping, rescoping and raising a ceiling, and records the operator's instruction,
-     its `at` and the agent as relayer (AP-3); the channel's buttons also answer a choice or decline a step. Raising a
+     scopes, raises a ceiling, and answers a choice or declines a step: it answers, declines and revokes through the
+     twins, and caps, rescopes or raises through a page action's twin where the page offers one, where their gate
+     lets it through, else with the agent's CLI on the operator's computer, which offers choosing and declining an
+     open step by its opaque id beside revoking, capping, rescoping and raising a ceiling, and records the operator's
+     instruction, its `at` and the agent as relayer as its invoker states it, marked as stated and not authenticated
+     (AP-3); the channel's buttons also answer a choice or decline a step. Raising a
      service budget or a per-key cap changes the service's own limits, the operator's decision relayed (AP-2, AP-5),
      not AP-4's spend above a limit, and no door widens a key's scopes to one its issuing could not carry. Only the operator sees the cloud
      instance in Fabric Dashboards; a member sees it as an MCP server. A page for members needs a per-person
@@ -11628,7 +11633,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   106), and Fabric Dashboards' sample service, a copy of the Python kit (`test/fixtures/sample-service/fabric_delegation.py`
   line 915). FAA-204 is to carry the header change for the adapter although it is not specific to the form, since it
   reaches every service built on the kits, and the landing message to the adapter names it; Fabric Dashboards is told
-  at landing that its sample copies the kit. Under FAA-204 the kits also owe a message for `operator-step`,
+  at landing that its sample copies the kit. Under FAA-204 the kits also owe recording a job's caller as `jobCallerKey(accepted, credential)`, the client key as the credential when no token came (the Python kit records an owner only for a delegation token, `fabric_interop.py` line 316 at `97ca5b5e`), and answering another caller's job id `unknown-job`, not `scope-not-granted` `job-of-another-caller` (lines 918 to 920), at an instance in the form whether or not it queues, with a kit test of one key reading or cancelling another key's job; a message for `operator-step`,
   and a kit input marking a client-key caller so that the kit answers every `human` action and input request as
   CF-4 says (the job, or `scope-not-granted` with `operator-step: <humanStep>`) and raises the event once per open
   step; the kits' answer to an approval at an instance without the estate's issuer, `issuer-unavailable` with

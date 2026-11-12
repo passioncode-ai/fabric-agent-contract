@@ -1051,8 +1051,8 @@ cloud instance's well-known document, declaring `surfaces.mcp.auth: "own"` and `
   (`total` beyond), and `total` for a `since` budget or another with no window; a per-key cap names its own window the same way.
   For a rolling budget the window names its length class, not the calendar reset at UTC midnight that spend policy's
   windows have. Raising the
-  ceiling is the operator's decision, carried out by their own agent with the agent's CLI on their computer or by the
-  operator on the page; raising a service budget or a per-key cap changes the service's own limits, a policy change
+  ceiling is the operator's decision, carried out by their own agent with the agent's CLI on their computer, or
+  through the twin of a page action that raises it where the page offers one (CF-4), or by the operator on the page; raising a service budget or a per-key cap changes the service's own limits, a policy change
   the agent relays on the operator's word (AP-2, AP-5), not AP-4's spend above a limit, which an `approval` threshold
   an order crosses remains; so the caller tells its person to ask
   the operator (the hand-over note names whom) and does not resend until the operator says so (interop's resend after an approval through
@@ -1112,7 +1112,8 @@ cloud instance's well-known document, declaring `surfaces.mcp.auth: "own"` and `
     other `humanStep` (`passkey`, `comparison`, or a `secret` that is no provider account's, such as the member-key
     action's), one action with its arguments; every call that reaches a step while it is open is listed on that one
     step, with its key. Only a job waits on a step (a call to a tool that is not job-backed is refused, below), and a
-    step stays open until the operator takes or declines it or no key listed on it remains (CF-3). A client-key call
+    step stays open until the operator takes or declines it, no key listed on it remains (CF-3), or its need is found
+    met (below). A client-key call
     that reaches the member-key action raises the step, and its job, if any, ends without the key, which the operator
     alone sees, on the page or with the CLI (CF-3). The service raises each such step to its operator as an
     event in its [events feed](#events-feed) when it opens, however many calls reach it: `notify: true` (a host raises
@@ -1120,12 +1121,12 @@ cloud instance's well-known document, declaring `surfaces.mcp.auth: "own"` and `
     `operator-step`), never a holder label (CF-3), so that a host tells two steps apart (Fabric Dashboards keys an ask by
     its subject); a `link` that is the page's path; a `kind` the host reads as an ask (Fabric Dashboards: its ask
     pattern, such as `human_step.opened`); and a `level` of `notice` or higher (Fabric Dashboards' default minimum for a
-    banner). A call that reaches a step still open raises no new event. Before each repeat the service checks the
-    step's need again: a need met outside the page (a top-up or a consent at the provider) closes the step with no
-    event, and its waiting jobs go on. While the step stays open, the service raises
+    banner). A call that reaches a step still open raises no new event. A call that reaches the step's need, or the
+    check the service makes before each repeat, that finds the need met outside the page (a top-up or a consent at the
+    provider) closes the step with no event, and its waiting jobs go on. While the step stays open, the service raises
     it again, each time no sooner than 25 hours and no later than 48 hours after the previous raise (a host's 24-hour ask hold and its poll
     interval), as a new event with a new `id` (an event id increases) and the same `subject`, `kind` and `link`, until
-    the operator takes or declines it or it closes (CF-3). A host holds an ask for one subject for 24 hours from when it
+    the operator takes or declines it or it closes (CF-3; or its need is found met, above). A host holds an ask for one subject for 24 hours from when it
     reads the event, so a repeat is a new ask, and a host that was not running when the step opened, which reads the
     events it finds at its first poll as history and asks nothing for them (Fabric Dashboards), asks at the next
     repeat. Its [operator channel](operator-channel.md), where it has one, sends each of these events (OC-4), and a host
@@ -1159,8 +1160,8 @@ cloud instance's well-known document, declaring `surfaces.mcp.auth: "own"` and `
     was asked and to repeat the call later. A decline answers the jobs waiting on the step when the operator declines
     it, each ending `failed` with `operator-declined` as above, and closes the step; it lasts for nothing else. A
     caller of a tool that is not job-backed gets no word of a decline: its repeated call reaches the need again, opens
-    a new step and asks the operator again, so an operator whose no is meant to last removes that tool from the key's
-    scopes, or tells the member. A later call that
+    a new step and asks the operator again, so an operator whose no is meant to last has their agent remove that tool
+    from the key's scopes on their word (the agent's CLI on the operator's computer), or tells the member. A later call that
     reaches the same need opens a new step and raises it as above, so a need the operator met outside the page (a
     top-up or a consent at the provider) is found met by the next call, which goes on with no step. A call to a tool that is not job-backed and cannot go on without a choice is refused the same way
     with `operator-step: choice` and raises no event, since no later call carries the operator's answer: its message
@@ -1205,7 +1206,7 @@ cloud instance's well-known document, declaring `surfaces.mcp.auth: "own"` and `
     raising a ceiling; the operator channel's buttons (above) also answer a choice or decline a step. On that CLI path
     the CLI records the operator's instruction, its `at` and the agent as the relaying caller as its invoker states
     it, marked as stated and not authenticated (the CLI runs under the operator's own access on their computer, so the
-    caller AP-2 authenticates is the operator's CLI), beside the twin call's record ([AP-3](#actions), AP-5), and the
+    caller AP-2 authenticates is the operator's CLI), in the same audit record a twin call writes ([AP-3](#actions), AP-5), and the
     page shows the act as the operator's. Only issuing or
     rotating a key for anyone but the calling agent (a member's or another agent's key, a secret handed out, CF-3) and
     a body step stay the operator's own; the key twin's issuing and rotating of its own caller's key, on the operator's
