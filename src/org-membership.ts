@@ -50,7 +50,7 @@ const positive = (value: unknown) => Number.isSafeInteger(value) && (value as nu
 /** `activity-common#/$defs/opaqueId`. */
 const OPAQUE = /^[A-Za-z0-9][A-Za-z0-9._:~-]{0,127}$/;
 /** An organization's context id (`common#/$defs/contextId` without `personal`, DEC-0082). */
-const ORG = /^org:[A-Za-z0-9][A-Za-z0-9_-]{0,127}$/;
+export const ORG = /^org:[A-Za-z0-9][A-Za-z0-9_-]{0,127}$/;
 /** `entitlement#/$defs/issuer`: an https origin in lower case, two labels or more, no port, path or trailing slash. */
 const ISSUER = /^https:\/\/(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/;
 /** An extension's name: a domain the issuer controls, a slash, a name. */
@@ -322,7 +322,7 @@ export interface OrgMembershipTrust {
   levels?: boolean;
 }
 
-const heldMembershipOk = (held: unknown) => held === undefined || (isObject(held) && opaque(held.subject) && positive(held.revision) && matches(SHA256, held.digest));
+export const heldMembershipOk = (held: unknown) => held === undefined || (isObject(held) && opaque(held.subject) && positive(held.revision) && matches(SHA256, held.digest));
 
 /** Whether `trust` is a usable context, the clock aside. */
 function usableTrust(trust: OrgMembershipTrust): boolean {

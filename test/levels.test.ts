@@ -69,7 +69,7 @@ describe("levelStanding and FAC-SEM-170 at their edges (DEC-0162)", async () => 
   const base = { membership: admin, org: "org:org-a", level: "admin", at: "2026-10-25T11:20:00Z", contexts, tokenMem: vectors.digests.admin, now };
   it("stands, with a held record in the context", () => {
     const held = { subject: admin.subject, revision: admin.revision, digest: vectors.digests.admin };
-    expect(levelStanding({ ...base, contexts: { "org:org-a": { ...contexts["org:org-a"], held } } })).toMatchObject({ ok: true, level: "admin" });
+    expect(levelStanding({ ...base, contexts: { "org:org-a": { ...contexts["org:org-a"], held: { [admin.subject as string]: held } } } })).toMatchObject({ ok: true, level: "admin" });
   });
   it("refuses a /1 attestation, a decision made after the attestation expires, and a level that decides nothing", () => {
     expect(levelStanding({ ...base, membership: vectors.memberships.v1Member, tokenMem: vectors.digests.v1Member })).toEqual({ ok: false, invalid: "level-membership: malformed" });
@@ -90,6 +90,11 @@ describe("levelStanding and FAC-SEM-170 at their edges (DEC-0162)", async () => 
     expect(decide({ ...call, levels: { [org]: { ...entry, keySet: "none" } } })).toEqual({ fault: "levels-invalid" });
     expect(decide({ ...call, levels: { [org]: { ...entry, audience: "" } } })).toEqual({ fault: "levels-invalid" });
     expect(decide({ ...call, levels: { [org]: null } })).toEqual({ fault: "levels-invalid" });
+    expect(decide({ ...call, levels: { "org-a": entry } })).toEqual({ fault: "levels-invalid" });
+    expect(decide({ ...call, levels: { [org]: { ...entry, keySet: { ...entry.keySet, org: "org:other" } } } })).toEqual({ fault: "levels-invalid" });
+    expect(decide({ ...call, levels: { [org]: { ...entry, keySet: { org } } } })).toEqual({ fault: "levels-invalid" });
+    expect(decide({ ...call, levels: { [org]: { ...entry, held: { subject: "m-1", revision: 1, digest: "x" } } } })).toEqual({ fault: "levels-invalid" });
+    expect(decide({ ...call, levels: { [org]: { ...entry, held: { "m-1": { subject: "m-2", revision: 1, digest: `sha256:${"a".repeat(64)}` } } } } })).toEqual({ fault: "levels-invalid" });
     const mandateCall = vectors.mandates[1].input as Json;
     expect(decide({ ...mandateCall, levels: { [org]: { ...entry, audience: 7 } } })).toEqual({ fault: "levels-invalid" });
   });

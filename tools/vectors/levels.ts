@@ -149,7 +149,7 @@ function actionCases(): Json[] {
     ["a level above the attestation's role", call("T2", decided("admin", ARCHITECT), { tokenMem: digest(ARCHITECT) }), invalid("level-role")],
     ["a member's request carries no level", call("T2", decided("architect", MEMBER, { project: "alpha" }), { tokenMem: digest(MEMBER), project: "alpha" }), invalid("level-role")],
     ["a forged signature", call("T2", decided("admin", { ...ADMIN, role: "owner" }), { tokenMem: digest({ ...ADMIN, role: "owner" }) }), invalid("level-membership: bad-signature")],
-    ["an organization the service reads no levels in", call("T2", decided("admin", ADMIN), { tokenMem: digest(ADMIN), levels: { "org:org-b": { audience: SERVICE, keySet: KEY_SET } } }), invalid("level-membership: context-invalid")],
+    ["an organization the service reads no levels in", call("T2", decided("admin", ADMIN), { tokenMem: digest(ADMIN), levels: { "org:org-b": { audience: SERVICE, keySet: { ...KEY_SET, org: "org:org-b" } } } }), invalid("level-membership: context-invalid")],
     // LV-1: a /1 attestation is not a level decision's.
     ["a /1 attestation in a level decision", call("T2", decided("admin", V1_MEMBER), { tokenMem: digest(V1_MEMBER) }), invalid("level-membership: malformed")],
     // AP-2's checks on the decision itself.
