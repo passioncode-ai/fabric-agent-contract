@@ -1070,7 +1070,7 @@ independent agent author and P-02 project operator.
   3. The deployer deploys -> its audit records `via: profile` with the place, revision 3, the digest, the assignment and the chain.
 - **Expected result:** the deploy finishes with no question to anyone, recorded as the profile's.
 - **Alt paths:** the assignment calls `autonomy.profile.set` -> `outside-mandate: capability`; no assignment raises its own autonomy. A payment -> `human-step-required` with its link. A token without `prof` from T2 -> the profile changes nothing (`approval-required`). A token bound to an older revision -> `profile-unbound`. The watcher stops answering -> the next assignment runs as on a person's computer. The operator narrows the profile -> new assignments get the new revision; inside the boundary a running one keeps its stated mandate until its `expiresAt`, at most 24 hours, and from T2 a token of the new revision refuses the older mandate `profile-unbound`, so the agent asks its hub, which restates the current one. A service that does not declare `standing` -> answered as if no mandate came.
-- **UI elements:** none on the page; the hub's profile setting and the service's audit row (via profile, place, revision).
+- **UI elements:** none on the page; the hub's autonomy profile setting and the service's audit row (via profile, place, revision).
 - **States covered:** success, error
 - **Errors & recovery:** a fractional per-call ceiling is digested (RFC 8785) and bound like any other; a stale revision or an unwatched place never reaches a callee as a refusal, since the hub states no new mandate in them; a mandate stated before them stands until its `expiresAt` (AU-3).
 - **Status:** draft
@@ -1082,7 +1082,7 @@ independent agent author and P-02 project operator.
 - **Persona:** P-02
 - **Feature:** delegation
 - **Traces:** ST-043, FLW-31 (JTBD-07, JRN-06/#3)
-- **Entry point:** the hub's profile setting for a place, or the operator's words to an agent that relays them
+- **Entry point:** the hub's autonomy profile setting for a place, or the operator's words to an agent that relays them
 - **Preconditions:** the place's hub offers `autonomy.profile.set` as a relayed action (effect `change-policy`); in an organization's context the hub reads levels and the setter holds an `org-membership/2` attestation
 - **Steps:**
   1. In the personal context the operator chooses a preset (none, drafts only, finish everything) or sets the scope in full -> the hub takes it as the operator's decision (AP-2) and records revision 4.
@@ -1090,7 +1090,7 @@ independent agent author and P-02 project operator.
   3. An assignment under that profile reaches a billing act a service declares `owner` -> the service refuses `level-insufficient: owner`; the agent files one request to the owner (DEC-0162 LV-10).
 - **Expected result:** each place carries the profile its setter's level allows; no profile covers more than that level.
 - **Alt paths:** an architect sets a profile naming projects outside its attestation -> refused `level-insufficient: admin`. An architect's profile naming no projects -> `FAC-SEM-173`, and a call in a project under it `outside-mandate: project`. An organization's headless place with no recorded profile -> the hub states nothing, and assignments there ask as on a person's computer until the owner, an admin or (for its projects) an architect records one (question 4). A person's own computer -> nothing beyond the person's decisions until the person or, in the organization's context there, its administrator picks a preset. An assignment calls `autonomy.profile.set` -> `outside-mandate: capability` (AU-5).
-- **UI elements:** the hub's profile setting (presets, scope, the setter's level), the hub's record (revision, setter, approver), the service's audit row ("under a profile set at level X").
+- **UI elements:** the hub's autonomy profile setting (presets, scope, the setter's level), the hub's record (revision, setter, approver), the service's audit row ("under an autonomy profile set at level X").
 - **States covered:** empty (no profile recorded), success, error
 - **Errors & recovery:** a setter below the level the place needs is refused with the level it needs, and the agent asks a holder of it once.
 - **Status:** draft

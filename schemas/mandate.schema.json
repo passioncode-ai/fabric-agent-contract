@@ -74,6 +74,10 @@
           "maximum": 2147483647,
           "description": "The profile's revision the hub stated it at; a profile the hub replaced takes effect at the next mandate and token it states."
         },
+        "estateCapabilities": {
+          "const": true,
+          "description": "DEC-0166 AU-4: a headless place's default names every capability of the services registered in the place's estate instead of listing them in scope.capabilities, which the scope then leaves out; it names a call only from T0 or T1, inside the boundary. Inside the digest, as the rest of standing."
+        },
         "setLevel": {
           "enum": [
             "owner",
@@ -308,6 +312,10 @@
     {
       "if": { "required": ["standing"], "properties": { "standing": true } },
       "then": { "properties": { "by": { "const": "operator" } } }
+    },
+    {
+      "if": { "required": ["standing"], "properties": { "standing": { "type": "object", "required": ["estateCapabilities"], "properties": { "estateCapabilities": true } } } },
+      "then": { "properties": { "scope": { "type": "object", "not": { "required": ["capabilities"], "properties": { "capabilities": true } } } } }
     }
   ]
 }

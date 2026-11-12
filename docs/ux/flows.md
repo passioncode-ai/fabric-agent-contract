@@ -810,7 +810,7 @@ flowchart TD
 - **Goal:** the operator gives a task once; every agent the task reaches acts on their words within what the words cover
 - **Entry points:** the operator's chat with their agent; a board request from one of the operator's projects; an assignment a place's hub starts with the place's profile (DEC-0166); a callee's `operator-decision-required` naming `outside-mandate`; a relay of the operator's approval from another of their agents (DEC-0126 OA-2)
 - **Success exit:** the callee took the call as the operator's decision, recorded `via: mandate` with the task and the chain (`via: profile` with the place, revision and digest for a place's standing mandate, DEC-0166), or, for an approval relayed for one action, `via: relayed-instruction`; a relayed approval also records `source`, where the operator said it (DEC-0126)
-- **Task analysis:** the operator tells the leading agent → it states the mandate from their words → it calls the next agent with the mandate, narrowed to what it hands on → the callee runs `mandateCovers` and acts, or refuses the part not covered → the leading agent asks the operator for that part alone. An approval the operator gave another of their agents reaches the agent that acts by a relay from one of their own Projects or sessions → that agent states the decision or its own mandate from the relayed words with `source` and acts (DEC-0126 OA-2).
+- **Task analysis:** the operator tells the leading agent → it states the mandate from their words → it calls the next agent with the mandate, narrowed to what it hands on → the callee runs `mandateCovers` and acts, or refuses the part not covered → the leading agent asks the operator for that part alone; under a place's autonomy profile a `level-insufficient` refusal goes to one holder of that level (the operator for an act declared `operator`), and `profile-unbound` or an expired profile goes to the agent's hub, which restates the current revision, never to the operator (DEC-0166 AU-1 to AU-3). An approval the operator gave another of their agents reaches the agent that acts by a relay from one of their own Projects or sessions → that agent states the decision or its own mandate from the relayed words with `source` and acts (DEC-0126 OA-2).
 - **Rejected shape:** the callee asking the operator for a step their words already cover, or an agent passing another agent's paraphrase as the operator's decision: rejected, because the first asks twice and the second removes the prompt-injection boundary (DEC-0125).
 - **Exception:** a source hand-over is never covered by the task's mandate; it asks the operator per act (`handover-needs-operator`), as [source](../specification/source.md#handing-over) specifies (DEC-0149).
 - **Flow:**
@@ -818,6 +818,7 @@ flowchart TD
 ```mermaid
 flowchart TD
   O[Operator gives the task] --> L[Leading agent states the mandate]
+  H[Hub starts an assignment and states the place's autonomy profile] --> C
   R[Approval relayed from another of the operator's agents, from their own Project or session] --> L
   R --> D[For one action: the receiver states a decision with source]
   D --> S[Service takes it; recorded via relayed-instruction, with source where it lists operator-source/1, else in the receiver's own record]
@@ -832,6 +833,9 @@ flowchart TD
   K -->|no| Q[operator-decision-required: the part not covered]
   Q --> P[Leading agent asks the operator for that part]
   P --> C
+  K -->|no: level-insufficient| LH[One request to a holder of that level, or the operator for an act declared operator]
+  I -->|profile-unbound or expired| HR[The agent asks its hub, which restates the current revision]
+  HR --> C
 ```
 
 - **Screens traversed:** SCR-30 the operator's agent and the service's audit row.

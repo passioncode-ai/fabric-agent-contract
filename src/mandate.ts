@@ -52,7 +52,7 @@ export interface OperatorSource {
  * A place's standing mandate (DEC-0166 AU-1): the place, its kind and the profile's revision; in an organization's
  * context the level of the holder who set it (AU-2), which bounds what it covers at a service that declares levels.
  */
-export interface Standing { place: string; placeKind: "headless" | "person"; revision: number; setLevel?: "owner" | "admin" | "architect" }
+export interface Standing { place: string; placeKind: "headless" | "person"; revision: number; setLevel?: "owner" | "admin" | "architect"; estateCapabilities?: true }
 export interface Mandate {
   kind: "mandate/1";
   standing?: Standing;
@@ -96,8 +96,10 @@ export type MandateAnswer =
   | { ok: true; recordAs: LevelRecord & { via: "mandate" | "profile"; task: string; chain: string[]; profile?: ProfileRecord } }
   | { ok: false; code: typeof OUTSIDE_MANDATE; data: { detail: OutsideDetail | InsufficientDetail; estimateUsd?: number; perCallMaxUsd?: number } }
   | { ok: false; code: typeof MANDATE_INVALID; data: { detail: InvalidDetail } }
-  /** A T2 caller's operator mandate changes nothing: the callee applies the whole profile as if it were absent (MD-5).
-   * A level mandate at a callee that reads no levels is ignored the same way, at every tier (LV-10). */
+  /** A T2 caller's operator mandate changes nothing: the callee applies the whole compatibility profile as if it were
+   * absent (MD-5), and so does a standing mandate from T2 without `prof` (DEC-0166 AU-3). A level mandate at a callee
+   * that reads no levels, and a standing mandate at one that does not declare `standing`, are ignored the same way, at
+   * every tier (LV-10, AU-3). */
   | { ignored: "mandate-at-t2" | "levels-not-read" | "standing-not-read" }
   /** The callee's own fault, never sent: its clock does not read. */
   | { fault: "now-unreadable" | "levels-invalid" };
@@ -143,12 +145,13 @@ export function scopeWithin(child: MandateScope, parent: MandateScope): boolean 
 
 /**
  * The digest a delegation token's `prof` claim carries for a standing mandate (DEC-0166 AU-3): sha256 of the RFC 8785
- * canonical JSON of the mandate without its `chain`, which grows at every hand-over while the profile does not. RFC 8785
+ * canonical JSON of the mandate without its `chain`, which grows at every hand-over while the profile does not, and
+ * without its `source`, which OA-7 strips toward a target that does not list `operator-source/1`. RFC 8785
  * has a form for a fractional ceiling (`perCallMaxUsd` 0.5); it throws on a lone surrogate, which `mandateProblem` refuses
  * as a malformed mandate first.
  */
 export function profileDigest(mandate: Mandate): string {
-  const { chain: _chain, ...stated } = mandate;
+  const { chain: _chain, source: _source, ...stated } = mandate;
   return `sha256:${createHash("sha256").update(rfc8785(stated), "utf8").digest("hex")}`;
 }
 
@@ -185,7 +188,8 @@ export function mandateProblem(mandate: unknown): "mandate-malformed" | "mandate
  * chain ends in it. `callerAgent` is the caller's agent id when the callee authenticated one (a per-agent credential,
  * a delegation token's outermost actor, the hub's attested origin); it must then be the agent before `self`. Without
  * one (the shared descriptor token on loopback) the chain's end alone binds the mandate (MD-3). A T2 caller's operator
- * mandate is ignored; a level mandate is read at every tier by a callee given `levels` (DEC-0162 LV-6). An invalid, widened, expired, not yet given or misaddressed mandate is `decision-invalid`; a valid one that
+ * mandate is ignored; a level mandate is read at every tier by a callee given `levels` (DEC-0162 LV-6), and a place's
+ * standing mandate by a callee that declares `standing`, from T2 only under a matching `prof` (DEC-0166 AU-3). An invalid, widened, expired, not yet given or misaddressed mandate is `decision-invalid`; a valid one that
  * does not cover the call is `operator-decision-required`, its detail naming the first part not covered (MD-4).
  */
 export function mandateCovers(input: {
@@ -235,12 +239,16 @@ export function mandateCovers(input: {
   // AU-5: no mandate sets a place's profile, so no assignment raises its own autonomy.
   if (call.capability === PROFILE_SET_CAPABILITY || call.action === PROFILE_SET_CAPABILITY) return outside("outside-mandate: capability");
   if (call.action !== undefined && scope.actions !== undefined && !scope.actions.includes(call.action)) return outside("outside-mandate: action");
-  if (call.action !== undefined && scope.actions === undefined && scope.capabilities === undefined) return outside("outside-mandate: action");
+  // AU-4: a headless default may name every capability of the estate's registered services by `estateCapabilities`
+  // instead of listing them; it names a call only inside the boundary (T0, T1), where the callee is the estate's own.
+  const estateWide = standing && (read.standing as Standing).estateCapabilities === true && scope.capabilities === undefined;
+  if (estateWide && !inside) return outside("outside-mandate: capability");
+  if (!estateWide && call.action !== undefined && scope.actions === undefined && scope.capabilities === undefined) return outside("outside-mandate: action");
   if (scope.capabilities !== undefined && !scope.capabilities.includes(call.capability)) return outside("outside-mandate: capability");
   if (call.effect === NEVER_BY_MANDATE || !effectClosure(scope.effects).has(call.effect)) return outside("outside-mandate: effect");
   // An external effect needs the call named: a relayed action by `actions` or `capabilities`, any other call by
   // `capabilities`, since `actions` covers relayed actions only.
-  if (!READS_AND_DRAFTS.has(call.effect) && scope.capabilities === undefined && (call.action === undefined || scope.actions === undefined)) return outside("outside-mandate: capability");
+  if (!estateWide && !READS_AND_DRAFTS.has(call.effect) && scope.capabilities === undefined && (call.action === undefined || scope.actions === undefined)) return outside("outside-mandate: capability");
   if (scope.perCallMaxUsd !== undefined && (call.spendUsd === undefined || call.spendUsd > scope.perCallMaxUsd)) {
     return { ok: false, code: OUTSIDE_MANDATE, data: { detail: "outside-mandate: spend", ...(call.spendUsd === undefined ? {} : { estimateUsd: call.spendUsd }), perCallMaxUsd: scope.perCallMaxUsd } };
   }

@@ -42,9 +42,9 @@ function profile(extra: Json = {}, scope: Json = { capabilities: ["site.deploy"]
     ...extra
   };
 }
-/** AU-3: sha256 of the RFC 8785 canonical JSON of the mandate without its chain. */
+/** AU-3: sha256 of the RFC 8785 canonical JSON of the mandate without its chain and its source. */
 const prof = (mandate: Json) => {
-  const { chain: _chain, ...stated } = mandate;
+  const { chain: _chain, source: _source, ...stated } = mandate;
   return `sha256:${createHash("sha256").update(rfc8785(stated), "utf8").digest("hex")}`;
 };
 const call = (tier: string, mandate: Json, extra: Json = {}): Json => ({
@@ -64,6 +64,7 @@ function actionCases(): Json[] {
   const headlessDefault = profile({}, { capabilities: ["site.deploy"], effects: ["draft", "publish", "send", "reply", "charge", "delete", "merge", "deploy"] });
   const narrowed = profile({ chain: [{ agent: RUNNER, at: "2026-11-12T09:00:05Z" }, { agent: SELF, at: "2026-11-12T09:30:00Z", scope: { capabilities: ["site.deploy"], effects: ["draft"] } }] });
   const otherProf = `sha256:${"cd".repeat(32)}`;
+  const estateDefault = profile({ standing: { ...STANDING, estateCapabilities: true } }, { effects: ["draft", "publish", "send", "reply", "charge", "delete", "merge", "deploy"] });
   const byAdmin = profile({ standing: { ...STANDING, setLevel: "admin" } });
   const byOwner = profile({ standing: { ...STANDING, setLevel: "owner" } });
   const byArchitect = profile({ standing: { ...STANDING, setLevel: "architect" } }, { capabilities: ["site.deploy"], effects: ["deploy"], projects: ["alpha"] });
@@ -107,6 +108,11 @@ function actionCases(): Json[] {
     ["the operator's own profile at an action declared operator, from T1", call("T1", p, { actionLevel: "operator" }), taken(p)],
     // A non-object standing is no standing mandate: refused as malformed even where standing is not read.
     ["a mandate whose standing is null, at a callee that reads no standing mandate, from T1", call("T1", { ...task({ capabilities: ["site.deploy"], effects: ["deploy"] }), standing: null }, { standing: undefined }), { ok: false, code: "decision-invalid", data: { detail: "mandate-malformed" } }],
+    // AU-3: OA-7 strips source toward a target not listing operator-source/1; the digest leaves it out, so the token binds.
+    ["a profile stated with source, delivered without it, from T2 under the stated prof", call("T2", p, { tokenProf: prof({ ...p, source: { project: "fabric-workspace", session: "a616cbcb" } }) }), taken(p)],
+    // AU-4: a headless default naming the estate's capabilities by estateCapabilities, inside the boundary only.
+    ["a headless default naming the estate's capabilities, from T1", call("T1", estateDefault), taken(estateDefault)],
+    ["the same from T2 under its prof", call("T2", estateDefault, { tokenProf: prof(estateDefault) }), { ok: false, code: "operator-decision-required", data: { detail: "outside-mandate: capability", actionDigest: DIGEST } }],
     // DL-25: a caller placed in no tier is read as T2, so its token's prof binds the standing mandate too.
     ["a bound profile from a caller placed in no tier", call("T2", p, { tier: undefined, tokenProf: prof(p) }), taken(p)],
     // DL-17: from T2 an operator decision counts for nothing, so a bound profile beside one is still read.
@@ -140,6 +146,7 @@ function documentCases(): Json[] {
     // AU-1: the hub states a profile by the operator of the place's estate; the setter's level is checked at the set.
     ["an architect's profile without its projects", profile({ standing: { ...STANDING, setLevel: "architect" } }), ["FAC-SEM-173 /scope"]],
     ["an administrator's profile", profile({ standing: { ...STANDING, setLevel: "admin" } }), []],
+    ["a profile naming the estate's capabilities and listing some as well", profile({ standing: { ...STANDING, estateCapabilities: true } }), ["FAC-SEM-144 "]],
     ["a place recorded by an estate machine id holding a tilde", profile({ standing: { ...STANDING, place: "mac~studio-1" } }), []],
     ["a profile stated by a level", profile({ by: "level", level: "admin", org: "org:org-a", membership: { kind: "an attestation" } }), ["FAC-SEM-144 "]],
     // FAC-SEM-173 also reads a widened mandate's chain.

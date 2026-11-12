@@ -522,7 +522,7 @@ known-good earlier payload; it does not reactivate or edit history
 - [ ] A service that takes a place's standing mandate declares `standing` in `extensions/authority/0.1` and, when it
   offers a billing act or an act LV-7 keeps for the operator, that act's level in `actionLevels`, so a profile set
   below that act's level never covers it (no level holder's profile covers an act declared `operator`; only an owner's
-  covers a billing act); the organization's credential issuer declares no `standing`; it runs `fixtures/vectors/profile.json` (DEC-0166 AU-2, AU-3).
+  covers a billing act), and `admin` for any proposal type's approval other than a rule's; the organization's credential issuer and the service offering a rule proposal's approval declare no `standing`; it runs `fixtures/vectors/profile.json` (DEC-0166 AU-2, AU-3).
 
 ## Operator checklist
 

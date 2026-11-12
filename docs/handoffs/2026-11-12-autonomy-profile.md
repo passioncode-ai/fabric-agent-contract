@@ -43,7 +43,7 @@ organization slice of 2026-11-21: a place's profile as a standing `mandate/1` it
 - Restatement owed with DEC-0165 (`agent/ct292-task-context-20261112`), by whichever lands second: a place can hold a personal and an organization's profile (DEC-0082), and the stated mandate names only the place, so the hub states a standing mandate per (place, context) and it is a TC-2 place claim for the assignment's context; check on the merged tree: `grep -c 'DEC-0166' docs/specification/contexts.md` prints at least 1.
 - The rule register lists `FAC-SEM-173` while 171 and 172 belong to DEC-0164 and DEC-0165 on their branches; the
   last lander writes the next free code from the CAS counter.
-- Tell Fabric (CO-547) and the adapter (FAA-249) when DEC-0166 lands. Fabric's row gains the board-block refusal of `standing` in `boardMandate.ts`, separate from the forward schema it shares with `hubAuthority.ts`, and the forward to a callee declaring `standing` (both owed at any repin past this decision); question 4's organization default (nothing until a profile is recorded), the exclusion of `change-policy` and MD-6's list, and `standing.setLevel` with the setter's level, since CO-547 on Fabric's main still promises an organization's space or VM "all permissions". The adapter's FAA-249 row on its main names neither DEC-0166 nor `profile.json`: amend it at landing (`standing` in the authority extension, `standing` ['1'] in both `PROTOCOL_REVISIONS` twins, `profile.json` in the vendored vectors, `levelShortOf`'s bound, `actionGate` handing on the mandate for `via: "profile"` as for `"mandate"` and passing `standing` and `tokenProf` to `actionDecision`, AU-5's refusal of `autonomy.profile.set` under every mandate, a task's included, which its `mandateCovers` and the ten vendored kit copies lack, and the two semantic fixtures, renamed `standing-action-call*.json` so the `action-call-*` sweep and its count of 18 stay as they are until the port reads standing). Check: `git -C fabric-agent-adapter grep -c 'DEC-0166' origin/main -- docs/backlog.md` prints at least 1.
+- Tell Fabric (CO-547) and the adapter (FAA-249) when DEC-0166 lands. Fabric's row gains the board-block refusal of `standing` in `boardMandate.ts`, separate from the forward schema it shares with `hubAuthority.ts`, and the forward to a callee declaring `standing` (both owed at any repin past this decision); question 4's organization default (nothing until a profile is recorded), the exclusion of `change-policy` and MD-6's list, and `standing.setLevel` with the setter's level, since CO-547 on Fabric's main still promises an organization's space or VM "all permissions". The adapter's FAA-249 row on its main names neither DEC-0166 nor `profile.json`: amend it at landing (`standing` in the authority extension, `standing` ['1'] in both `PROTOCOL_REVISIONS` twins, `profile.json` in the vendored vectors, `levelShortOf`'s bound, `actionGate` handing on the mandate for `via: "profile"` as for `"mandate"` and passing `standing` and `tokenProf` to `actionDecision`, AU-5's refusal of `autonomy.profile.set` under every mandate, a task's included, which its `mandateCovers` and the ten vendored kit copies lack, the `standing` member, its 24-hour lifetime and `estateCapabilities` in the kits' own mandate schema and `mandateProblem`, `handOn` on a standing mandate (it throws `mandate-malformed` today), `profileDigest` leaving out `source` as OA-7 strips it, and the two semantic fixtures, renamed `standing-action-call*.json` so the `action-call-*` sweep and its count of 18 stay as they are until the port reads standing). Check: `git -C fabric-agent-adapter grep -c 'DEC-0166' origin/main -- docs/backlog.md` prints at least 1.
 
 ## Checks run
 
@@ -128,7 +128,24 @@ organization slice of 2026-11-21: a place's profile as a standing `mandate/1` it
   FAA-249 amendment names it); keeping the 2026-11-05 gates out of the headless default (the operator's newer record
   of 2026-11-09 says a headless place finishes everything; question 1 asks).
 
+- Landing check for membership.md's Not decided line: after landing, `grep -c 'ct285-autonomy-profile-20261112' docs/specification/membership.md` prints 0 (the lander turns the branch name into DEC-0166's delegation.md anchor).
+- Round 6 (on `02eeed99`): unit passed with three risks, seam failed, product failed. Seam, breaks folded:
+  `profileDigest` leaves out `source`, which OA-7 strips on the wire (a vector delivers a profile without it under the
+  stated `prof`); the headless default names the estate's capabilities by `standing.estateCapabilities` instead of a
+  list the scope's 64 cannot hold, naming a call only from T0 or T1 (schema, `mandateCovers`, three vectors). Product,
+  breaks folded: a rule proposal's approval is reached by no profile, the board's gate declaring no `standing`
+  (AU-4, Context, conformance, guide); `admin` for any other proposal type's approval in AU-2, conformance and the
+  guide; FLW-31 has the hub's entry, the `level-insufficient` route to a holder and the `profile-unbound` route to the
+  hub. Risks folded: an architect's profile names at most 16 projects (AU-2); a standing mandate stands only within
+  the stating estate's own context (AU-1); project-comms refuses a standing or level mandate in a board block;
+  credentials.md and spend-policy's L2 row name the profile; the screens say "autonomy profile"; a service declaring
+  `standing` passes `effect`, `self` and `mandateCapability` at every tier (conformance); this repo's action-call
+  sweep reads the renamed fixtures; the doc comments of `actionDecision`, `mandateCovers` and the ignored answers;
+  the FAA-249 amendment names the kits' schema, lifetime, `handOn` and the digest; a landing check for membership's
+  branch line. Declined: question 1's clause still waits for the board (its MCP is disconnected); acceptance waits on
+  that post.
+
 ## Next task
 
-Post question 1's round-4 clause on thread `8da128cf`, then round 6 of the blind readings (unit, seam, product) of
+Post question 1's round-4 clause on thread `8da128cf`, then round 7 of the blind readings (unit, seam, product) of
 branch `agent/ct285-autonomy-profile-20261112` (DEC-0166).

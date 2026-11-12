@@ -134,7 +134,9 @@ function acceptedApproval(approval: unknown): approval is { ok: true; approver: 
  * - `relayed`, in this order: an accepted approval (any tier) is the approver's decision; a T2 caller without one is
  *   refused `approval-required` with the action's digest, whatever operator form its call carries; the service's own
  *   record of an accepted elicitation is the operator's decision at T0 or T1; at a service given `levels`, a level
- *   decision or level mandate is read at every tier (DEC-0162 LV-6), a T2 refusal on it carrying the digest too; without a decision `operator-decision-required`; a decision not
+ *   decision or level mandate is read at every tier (DEC-0162 LV-6), a T2 refusal on it carrying the digest too; at a
+ *   service that declares `standing`, a place's standing mandate is read at every tier, from T2 only under a matching
+ *   `prof` (`profile-unbound` otherwise, DEC-0166 AU-3); without a decision `operator-decision-required`; a decision not
  *   valid against `decision.schema.json`, for another action, naming a `target` the call does not act on, or whose
  *   `at` does not read strictly, lies more than
  *   CLOCK_SKEW_SECONDS after `now` or more than DECISION_LIFETIME_SECONDS before it, `decision-invalid`; otherwise the

@@ -11496,7 +11496,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   gates" in two ways: every profile keeps `change-policy` and MD-6's list (a source hand-over, AP-5's approvals) with a
   person, and in an organization's context a profile set below an act's declared level never covers it (no level's
   profile covers an act declared `operator`; only an owner's covers a billing act). In the personal context the
-  operator's own default is the operator's word and covers the acts a service declares `operator` like any other;
+  operator's own default is the operator's word and covers the acts a service declares `operator` like any other, save
+  a rule proposal's approval, which no profile reaches (the board's gate declares no `standing`, `FAC-SEM-104`);
   question 1 asks about the 2026-11-05 gates.
 - **Decision:**
   1. **The profile is a standing mandate (AU-1).** `mandate.schema.json` gains the optional member `standing`
@@ -11515,11 +11516,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      sends one, and the hub forwards one, only to such a callee, and the protocol name `standing/1` gates the form
      toward a hub. From T0 or T1 it is taken as MD-3 says; from T2 only when the call's delegation token carries the new
      claim `prof`, the mandate's `profileDigest` (sha256 of the RFC 8785 canonical JSON of the mandate without its
-     `chain`), which the hub writes for the assignment's token; a `prof` that is not the mandate's is `decision-invalid`
+     `chain` and `source`), which the hub writes for the assignment's token; a `prof` that is not the mandate's is `decision-invalid`
      `profile-unbound` at any tier; an onward token keeps the parent's `prof` or none (`FAC-SEM-050`).
   4. **Defaults, bounds, watching, refusals (AU-4 to AU-7).** A headless place with no recorded profile covers every
      effect class but `change-policy` for every capability of the services registered in the place's estate, which
-     the hub lists by name; a person's computer nothing beyond its person's own decisions until a profile is
+     the hub states as `standing.estateCapabilities` (inside the boundary only); a person's computer nothing beyond its person's own decisions until a profile is
      recorded from the hub's presets; in an organization's context a headless place with no recorded profile states
      nothing until its owner or an administrator records one, an architect's ending the wait for its own projects (question 4). A profile decides no credential request
      (question 5). No mandate of any kind covers `autonomy.profile.set`, and no profile covers MD-6's list or `autonomy.profile.set` (`FAC-SEM-173` on the

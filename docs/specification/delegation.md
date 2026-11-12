@@ -675,7 +675,9 @@ decision of 2026-11-09, fabric-workspace `knowledge/authority.md`, *Autonomy by 
   estate its instance runs in, DEC-0162 LV-7), `instruction` the setter's recorded words (AU-2; AU-4's for a default),
   the profile's `scope`, and a chain starting at the assigned agent. A standing mandate is never stated `by: "level"`
   (the schema): the setter's level is checked once, at the set, and recorded there, so the stated mandate carries no
-  attestation, its digest does not change with one, and it stands at every service its token reaches; in an
+  attestation, its digest does not change with one, and it stands at every service its token reaches within the stating estate's own
+  context (a personal profile at the operator's own services, an organization's at that organization's, reached by that
+  context's routing, DL-27, and its issuer's token), never in another context, as LV-7 says of a level; in an
   organization's context `standing.setLevel` names that level (AU-2). A project-board
   request carries no standing mandate: only the place's hub states one, for an assignment it starts (as LV-6 keeps a
   level mandate off the board). It
@@ -688,23 +690,23 @@ decision of 2026-11-09, fabric-workspace `knowledge/authority.md`, *Autonomy by 
   `change-policy`: in the personal context by the operator's decision (AP-2); in an organization's context by a level
   decision (DEC-0162 LV-3), `owner` or `admin` for any place of the organization and an `architect` only for a profile
   whose `scope.projects` lie within its attestation's projects. A profile never covers more than its setter's level
-  does, and the hub records the setter's level and approver (LV-9). The hub states that level as `standing.setLevel`
+  does, and the hub records the setter's level and approver (LV-9). An architect's profile names at most 16 of its projects (the scope's bound; its attestation may list 64), so an architect of more states one profile per group of 16. The hub states that level as `standing.setLevel`
   (inside the digest, so `prof` binds it; an architect's profile names its projects, `FAC-SEM-173`), and a callee that
   declares `actionLevels` refuses an action declared above it as LV-7 and LV-10 say: `operator-decision-required`
   with `level-insufficient: operator` for an act no level decides, `owner` for a billing act below the owner,
-  `admin` for an act declared `admin` below an admin. Every callee that reads standing mandates, whether or not it
+  `admin` for an act declared `admin` (any proposal type's approval other than a rule's, LV-7) below an admin. Every callee that reads standing mandates, whether or not it
   declares `actionLevels`, refuses a call in no project under a profile set below `admin` (`level-insufficient:
   admin`), and a call in a project under an architect's profile that names no projects (`outside-mandate: project`);
   `actionLevels` adds the per-action bound. So a service that declares `standing` and offers an act LV-7 keeps for the
   owner (a billing act) or for the operator (client keys, a board hold, a slot move, a listing, a rule proposal's
-  approval) declares that act's level in `actionLevels`, as LV-7 asks of a service reading levels: without it an
+  approval) and any other proposal type's approval (`admin`) declares that act's level in `actionLevels`, as LV-7 asks of a service reading levels: without it an
   owner's or an admin's profile would cover it. The operator's own profile carries no `setLevel` and is the
   operator's word.
 - **AU-3, how it binds.** A callee reads standing mandates only when its authority extension declares `standing`
   (`extensions/authority/0.1`, `service-authority-extension.schema.json`); an agent sends one, and the hub forwards one, only to such a callee, and
   one that does not declare it answers as if the call carried no mandate. Inside the boundary (T0, T1) a standing
   mandate is taken as MD-3 says. From T2 it is taken only when the call's delegation token carries the claim `prof`,
-  the mandate's `profileDigest` (sha256 of the RFC 8785 canonical JSON of the mandate without its `chain`), which the
+  the mandate's `profileDigest` (sha256 of the RFC 8785 canonical JSON of the mandate without its `chain` and its `source`, which grows at each hand-over and which OA-7 strips toward a target that does not list `operator-source/1`), which the
   hub writes when it mints the assignment's token; a T2 call without `prof` changes nothing (MD-5), and a `prof` that
   is not the mandate's, at any tier, is `decision-invalid` `profile-unbound`. An onward token keeps the parent's
   `prof` or none (`FAC-SEM-050`). A revision the hub replaced binds no token minted after it, so a narrower revision is
@@ -720,15 +722,16 @@ decision of 2026-11-09, fabric-workspace `knowledge/authority.md`, *Autonomy by 
   the origin's token (interop C3.5).
 - **AU-4, the defaults.** A place with no profile recorded behaves by its kind. `headless`: the hub states a profile
   covering every effect class but `change-policy` (deploy, merge, publish, send, delete, charge within the limits)
-  for every capability of the services registered in the place's estate, which the hub lists by name in the scope's
-  `capabilities` when it states the profile (its own service list, whatever grants the assignment holds, so MD-3's
-  named call holds inside the estate, where a callee requires no token, DL-26), in the personal context, its
+  for every capability of the services registered in the place's estate, which the hub states as
+  `standing.estateCapabilities: true` with no `capabilities` in the scope (an estate's services declare more than the
+  scope's 64 names; the flag names a call only from T0 or T1, inside the estate, where a callee requires no token,
+  DL-26, and from T2 a call under it is `outside-mandate: capability`), in the personal context, its
   `instruction` the operator's recorded words of 2026-11-09 and its `source` the session where they were said
   (`{project: "fabric-workspace", session: "a616cbcb"}`, kept in the hub's record unless the target lists
   `operator-source/1`, OA-7); in an organization's context it states nothing
   until the organization's `owner` or an `admin` records a profile (an `architect`'s, for its own projects only, ends
   the wait for those) (question 4's default in DEC-0166, until the
-  operator answers otherwise). The organization's credential issuer (credentials, DEC-0111) declares no `standing`, so a profile reaches no credential request's decision. In the personal context the operator's own default, carrying no `setLevel`, is the operator's word and covers an act a service declares `operator` (a client key, a board hold, a rule proposal's approval) like any other act its scope names, save `change-policy` and MD-6's list. A profile decides no credential request: that stays as
+  operator answers otherwise). The organization's credential issuer (credentials, DEC-0111) declares no `standing`, so a profile reaches no credential request's decision. In the personal context the operator's own default, carrying no `setLevel`, is the operator's word and covers an act a service declares `operator` (a client key, a board hold) like any other act its scope names, save `change-policy` and MD-6's list. A rule proposal's approval is the operator's alone and never a policy's ([proposals](proposals.md), `FAC-SEM-104`), so the service that offers it (the board's gate) declares no `standing`, as the credential issuer does, and no profile reaches it. A profile decides no credential request: that stays as
   [credentials](credentials.md) has it (the administrator or the auto-approval policy, DEC-0111; question 5); a key
   the place's own estate issues through its own doors (Observatory's) is that estate's relayed act, which the profile
   covers as any other. `person`: nothing beyond what the session's own person decides,
