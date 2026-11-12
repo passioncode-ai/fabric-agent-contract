@@ -44,7 +44,9 @@ describe("the coding-agent catalogue (DEC-0093)", () => {
     const root = projectRoot();
     const out = execFileSync("python3", ["-I", path.join(root, "tools/catalogue/seed.py"), path.join(root, "tools/catalogue/permissions.json")], { encoding: "utf8" });
     expect(out).toBe(readFileSync(path.join(root, "catalogue/coding-agents.json"), "utf8"));
-  });
+    // A Python process: an explicit timeout, since a Windows runner took 11972 ms to start and run it (nightly run of
+    // 2026-11-10, CT-289).
+  }, 60000);
   it("raises revision whenever the file changes from its merge base with main", () => {
     let committed: string;
     try {

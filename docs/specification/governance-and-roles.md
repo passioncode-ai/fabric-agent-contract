@@ -159,7 +159,7 @@ words AP-2 and OA-1 already name; the rules hold for any owner.
   The agent adds no question of its own about an act a host's gate already asks about (a risk on that step travels as
   that gate's one ask, and the chat question above is that ask under an FA-09 refusal); the asks other rules require
   for the same act stay and are named: [spend policy](spend-policy.md) rule 3's approval request for spend above a
-  project's `autoApproveUsd` (OW-4; whether Fabric's floor reads that approval is CT-269's), DEC-0149's stated word for
+  project's `autoApproveUsd` (OW-4; whether Fabric's floor reads that approval is CT-291's), DEC-0149's stated word for
   a source hand-over the words do not give (OW-4), and the host's own gate. The other host gates OW-5 keeps
   (`board.read-at-start`'s production stop, `ladder.no-self-close`) are met as their own text says (DEC-0156's
   Compatibility).

@@ -3,8 +3,8 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0161` (the CAS counter's next value when this line was last written, DEC-0160 being reserved
-by a sibling branch; read `refs/agent-sync/ids/DEC` on origin for the current one)
+**Next free ID:** `DEC-0162` (the CAS counter's next value when this line was last written, DEC-0157 to DEC-0161 being reserved
+by sibling branches; read `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
 `DEC-0028` is not used: two runs reserved under one key (`usage-budgets-20261007`); the first wrote DEC-0027 and
@@ -11458,7 +11458,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      agent adds no question of its own
      about an act a host's gate already asks about (a risk on it travels as that gate's one ask), while the asks other
      rules require for the same act stay and are named: spend policy rule 3's approval request for spend above a
-     project's `autoApproveUsd` (OW-4, CT-269), DEC-0149's stated word for a source hand-over the words do not give
+     project's `autoApproveUsd` (OW-4, CT-291), DEC-0149's stated word for a source hand-over the words do not give
      (OW-4), and the host's own gate; the other host gates OW-5 keeps are met as their own text says; Fabric's refused
      card for an FA-09 refusal in its attention queue, announced once by its OS notification when Fabric is not in
      front, until Fabric ships the third change owed below, is no question the agent asks: its "Allow once" issues a
@@ -11626,7 +11626,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   restarted by OC-17's supervisor and, if the status stays, by the agent on the operator's word, given to it or the
   coding session it runs in,
   a waiting decision answered on the dashboard, not in the bot's chat, spend above a project's `autoApproveUsd` only
-  through spend policy rule 3's approval request, never a chat or session message (CT-269), a paid action within a
+  through spend policy rule 3's approval request, never a chat or session message (CT-291), a paid action within a
   limit as AP-1's `relayed` class, on the dashboard or by telling the agent as AP-2 says, in the bot's chat only with
   OC-6's presses once the receiver is back, the webhook's removal waiting on
   the operator's decision, OC-2, AP-2 and AP-3),
@@ -11650,7 +11650,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   reason), `docs/ux/foundation.md` (JRN-04/#2's touchpoint and ST-035), `docs/ux/screens.md` (SCR-30), `docs/DOCMAP.md`,
   `docs/specification/README.md`, `docs/specification/channel-agent.md` (CA-8's pointer), `CONTEXT.md` (the operator's
   word), the separation of the operator's businesses (OW-5) as a pointer to the
-  operator's own instructions outside this contract, `docs/ux/flows.md` (FLW-29), backlog CT-220, CT-266, CT-269,
+  operator's own instructions outside this contract, `docs/ux/flows.md` (FLW-29), backlog CT-220, CT-266, CT-291,
   CT-271, CT-273, CT-278 and CT-282 (filed; CT-271 rewrites the recoveries other scenarios still give the operator, under OW-2
   and OW-3; CT-273 names how the operator removes a channel binding they did not make; CT-278 puts the dashboard's
   link code on a screen; CT-282 brings the status schema's `off` description to the Status table), the operator

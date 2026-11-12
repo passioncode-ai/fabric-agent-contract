@@ -19,7 +19,7 @@ contract already has.
   agent's; a stopped receiver restarted by OC-17's supervisor and, if the status stays, by the agent on the operator's
   word, given to it or the coding session it runs in, a waiting decision answered by telling the agent or on the dashboard, not in the bot's chat; spend
   above a project's `autoApproveUsd` only through spend policy rule 3's approval request, never a chat or session
-  message (CT-269), and a paid action within a limit as AP-1's `relayed` class, on the dashboard or by telling the
+  message (CT-291), and a paid action within a limit as AP-1's `relayed` class, on the dashboard or by telling the
   agent as AP-2 says, in the bot's chat only with OC-6's presses once the receiver is back; the
   webhook's removal waiting on OC-2's decision).
 - [Operator channel](../specification/operator-channel.md) OC-11's step 2 (the typed token handed over as AP-4's `secret` step or the host's secret prompt, SCN-053, never a command) and step 3 (the agent enables and links on AP-2's
@@ -33,7 +33,7 @@ contract already has.
   or the coding session it runs in, never in the bot's chat, or taken in the channel settings.
 - `docs/ux/foundation.md` (JRN-04/#2's touchpoint, ST-035), `docs/ux/flows.md` (FLW-29), `CONTEXT.md` (the operator's
   word), `docs/DOCMAP.md`, `docs/specification/README.md`, `docs/specification/channel-agent.md` (CA-8's pointer).
-- Backlog CT-220 in progress; CT-266, CT-269, CT-271, CT-273, CT-278 and CT-282 filed. The operator channel's Status table:
+- Backlog CT-220 in progress; CT-266, CT-291, CT-271, CT-273, CT-278 and CT-282 filed. The operator channel's Status table:
   its `off` row names an `accepted` answer waiting for the token (`credential.present: false` or no `credential`
   member), and the tile names that step (or, with no `credential` member, the step without a name, which the agent
   states) and says to tell the agent, or the coding session it runs in, once it is stored; with the token present no
@@ -164,11 +164,13 @@ contract already has.
   - Register conflicts with any sibling (`docs/DECISIONS.md`, `docs/backlog.md`, `docs/handoffs/README.md`) are
     adjacent appends: the lander keeps both sides, in id order. Check: no conflict marker is left (`git grep -n '^<<<<<<<'`
     prints nothing), no backlog id appears twice (`grep -o '^| CT-[0-9]*' docs/backlog.md | sort | uniq -d` prints
-    nothing on the merged tree; this branch adds CT-266, CT-269, CT-271, CT-273, CT-278 and CT-282) and
+    nothing on the merged tree; this branch adds CT-266, CT-291, CT-271, CT-273, CT-278 and CT-282) and
     `pnpm run check` exits 0 on the merged tree. CT ids have no reservation counter on origin (only `DEC` and `SEM` do,
     under `refs/agent-sync/ids/`), so two branches can file the same CT id; round 24's seam found CT-282 taken twice,
     renumbered to CT-283 on DEC-0159's branch (commit `cbe9fe94`), this branch keeping CT-282. A duplicate found at landing is renumbered on the
     branch that lands second, with every reference to it.
+    Main merged into this branch on 2026-11-12: main had filed CT-269 (a remote placement's update path) meanwhile, so
+    this branch's CT-269 (the spend hand-over's two forms) is renumbered CT-291 with every reference.
 - Owed at the operator-channel status schema's next change (round 20, product; backlog CT-282 since round 23): its
   `state` description still reads `off` as "the operator has not enabled the channel"; it takes the Status table's
   `off` row (an `accepted` answer with `credential.present: false` or no `credential` member waits for the token, the
@@ -299,13 +301,13 @@ contract already has.
   `autoApproveUsd`; a host gate's one ask is the step's question; the conformance row's parenthetical sits by the
   harness refusal; FLW-29's relayed act and human gate return to the task; SCN-044's update question is for
   `incompatible` only; fabric-workspace owes OW-3's message form too; ADR-0160 section 4 cited for what it says; the
-  spend hand-over's two forms filed as CT-269.
+  spend hand-over's two forms filed as CT-291.
 - On `3e5154b2` (round 7's readers): `pnpm run docs:check` exit 0, `python3 docs/ux/lint.py` exit 0 (57 scenarios), no
   U+2014 in the added lines.
 
 - Round 8 (on `c6003c0f`): unit clean; seam not clean (DEC-0156's Source named a personal agent in this public
   repository, which `pnpm privacy:check` refuses: now the relay alone is cited); product not clean (SCN-012's alt path
-  and SCN-014's recovery still gave the operator the link code and the receiver: now the agent's; CT-269 missing from
+  and SCN-014's recovery still gave the operator the link code and the receiver: now the agent's; CT-291 missing from
   Consequences: now named). Risks folded: OC-11's step 3 waits for the stored token and enables on the `accepted`
   answer as OC-1 allows; steps 1 and 4 are a binding only the person's own act proves, now in OW-4's list; OW-2's twin
   is one the agent may take under the words, a decision or a mandate in force, so OC-5's buttons for a question stay;
@@ -376,7 +378,7 @@ contract already has.
   the operator channel's stop with buttons (OC-5) where linked, else leaves the step open and named (OW-3, Decision item
   3, the Compatibility, SCN-057's new alt path, SCR-30, FLW-29, the conformance row); "exactly one question" is scoped to
   acts other than spend above a limit, floored spend above `autoApproveUsd` having rule 3's approval request as its one
-  ask, and CT-269's row adds that the floor reads that approval; the conformance row's OW-2 clause names a twin the
+  ask, and CT-291's row adds that the floor reads that approval; the conformance row's OW-2 clause names a twin the
   agent may take itself under the words, a decision or a mandate in force; the handoffs README row reads rounds 1 to 11
   not clean, matching CT-220's row (round 11 folded, round 12 next); the Compatibility notes that `board.read-at-start`
   is advice the session keeps (mode `ADVICE`, `protocolObligations.ts` from line 197), not a refusal Fabric enforces.
@@ -554,7 +556,7 @@ counter, and the board told what each consumer owes (DEC-0156's Compatibility).
   270 characters (268) for headroom against the schema's 300; the unlinked detail (257) says "or ask it for a new one
   once this one expires", true with or without a dashboard and after the `accepted` lapses; SCN-014's recovery says
   the same and that a paid action or a spend approval is answered only as OC-6 and rule 3 say, never by a chat or
-  session message (the surface is CT-269's); SCN-012's recovery and DEC-0156's Consequences and Done match. The CT-218
+  session message (the surface is CT-291's); SCN-012's recovery and DEC-0156's Consequences and Done match. The CT-218
   landing note (seam) was stale: re-read at `05dc64ec`, `screens.md` auto-merges with SCR-30's Scenarios line "SCN-043,
   SCN-044, SCN-045, SCN-046, SCN-057" (SCN-059 is SCR-36's), and the note now says so and that the second lander maps
   SCN-059 to no other screen. The key split (seam) is now CT-218's, which CF-3 reads and the DEC-0159 fold states:
@@ -603,7 +605,7 @@ counter, and the board told what each consumer owes (DEC-0156's Compatibility).
   issued, never the code, so "shown to the person only" holds on the dashboard path (unit), that the agent reads the
   store at its next start and when told the token is stored (product), and that a new code is issued on the person's
   ask (unit, product), mirrored in DEC-0156's Consequences and Done; SCN-057's Preconditions and Expected result name
-  the host-gate case (product); CT-269 now asks whether the agent's dashboard takes a rule-3 approval, with the
+  the host-gate case (product); CT-291 now asks whether the agent's dashboard takes a rule-3 approval, with the
   `receiver-missing` tile following the answer (product); OW-3's no-person sentence, DEC-0156 item 3, the conformance
   row, FLW-29's F1 and SCN-057's alt path say how such a session settles the board request (a `com.progress` note naming
   the open act and its blocker, SA-5; completed with the act named in its result, or left in progress, as the rest of
@@ -630,7 +632,7 @@ counter, and the board told what each consumer owes (DEC-0156's Compatibility).
   details read "14 updates wait" and "an answer sent in the bot's chat may be lost after 24 hours" (286 characters,
   one sentence each), mirrored in DEC-0156's Consequences (unit, product); CT-271's row adds the trace gap (ST-035
   traces to JTBD-07 and JRN-06/#4; no stage or job covers giving a task and reading its report) (product). Left as
-  owed, no edit: the spend approval while the receiver is missing stays with CT-269 (the tile says "answer decisions on
+  owed, no edit: the spend approval while the receiver is missing stays with CT-291 (the tile says "answer decisions on
   its dashboard" and promises no spend approval there); fabric-workspace's `knowledge/agents-first.md` and the
   consumers' mixed state are the landing steps and the Compatibility already owe (product). Declined: none.
 - On the round-19 fold (working tree over `0f0a3f5f`): `pnpm run docs:check` exit 0 (271 Markdown files, 0
@@ -643,7 +645,7 @@ counter, and the board told what each consumer owes (DEC-0156's Compatibility).
 - Round 20 (on `ee1ff512`): unit clean of breaks; seam and product not clean. Breaks folded: SCN-014's recovery
   (product) made every paid action answerable only through OC-6 and rule 3; it is now split, in SCN-014, DEC-0156's
   Consequences and Done: spend above a project's `autoApproveUsd` only through rule 3's approval request, never a chat
-  or session message (the surface is CT-269's), and a paid action within a limit as AP-1's `relayed` class, on the
+  or session message (the surface is CT-291's), and a paid action within a limit as AP-1's `relayed` class, on the
   dashboard or by telling the agent as AP-2 says, in the bot's chat only with OC-6's presses once the receiver is back.
   OW-3's no-person settlement (product; unit and seam as a risk) said "left in progress", which collides with the
   board's `in_progress` (reached only through `com.effect_begin`), and credited the split to SA-6, which does not state
@@ -668,8 +670,8 @@ counter, and the board told what each consumer owes (DEC-0156's Compatibility).
   restates its round count (product); the six fixture details and their mirrors (OC-11 step 3, SCN-012, SCN-014,
   DEC-0156's Consequences, Done) say "the coding session it runs in" instead of "the session that runs it", each one
   sentence of at most 291 characters (product). Left as owed, no edit: the adapter's owed list and its released
-  versions since (seam, product) and the spend approval while nobody receives (CT-269) stay as DEC-0156's
-  Compatibility and CT-269 already name them. Declined: none.
+  versions since (seam, product) and the spend approval while nobody receives (CT-291) stay as DEC-0156's
+  Compatibility and CT-291 already name them. Declined: none.
 - On the round-20 fold (working tree over `ee1ff512`): `pnpm run docs:check` exit 0 (271 Markdown files, 0
   markdownlint errors); `python3 docs/ux/lint.py` exit 0 (57 scenarios); `pnpm run privacy:check` 0 findings;
   `pnpm --silent validate` exits 0 on the three changed positive fixtures and 1 on the three negatives, each for its
@@ -707,7 +709,7 @@ counter, and the board told what each consumer owes (DEC-0156's Compatibility).
   product); OC-17 says a product's own `reason.detail` stays within 300 characters in every locale it ships
   (product). Left as owed, no edit: the schema's `off` description and whether it requires `credential` (Open); the
   adapter's and fabric-workspace's mixed state until landing (DEC-0156's Compatibility, the landing step); the spend
-  approval while nobody receives (CT-269). Declined: shortening the 291-character example `detail` (optional; the
+  approval while nobody receives (CT-291). Declined: shortening the 291-character example `detail` (optional; the
   OC-17 sentence carries the locale bound).
 - On the round-21 fold (working tree over `b1676b13`): `pnpm run docs:check` exit 0 (271 Markdown files, 0
   markdownlint errors); `python3 docs/ux/lint.py` exit 0 (57 scenarios); `pnpm run privacy:check` 0 findings;
