@@ -2,7 +2,7 @@ import type { ValidateFunction } from "ajv/dist/2020.js";
 import { SCHEMA_PREFIX } from "./contract.js";
 import { effectClosure } from "./delegation.js";
 import { type Finding, type JsonObject, isObject } from "./findings.js";
-import { type InsufficientDetail, type LevelContexts, type LevelDetail, type LevelRecord, levelRules, levelStanding } from "./levels.js";
+import { type InsufficientDetail, type LevelContexts, type LevelDetail, type LevelRecord, levelContextsWellFormed, levelRules, levelStanding } from "./levels.js";
 import { CLOCK_SKEW_SECONDS, strictTime } from "./rfc3339.js";
 import { createValidatorSync } from "./validator.js";
 
@@ -170,8 +170,8 @@ export function mandateCovers(input: {
   const clock = strictTime(now);
   if (Number.isNaN(clock)) return { fault: "now-unreadable" };
   const byLevel = typeof mandate === "object" && mandate !== null && (mandate as { by?: unknown }).by === "level";
-  // Level contexts given but not a map are the callee's own fault, never "reads no levels" (actionDecision's levels-invalid).
-  if (input.levels !== undefined && !isObject(input.levels)) return { fault: "levels-invalid" };
+  // Level contexts given but malformed are the callee's own fault, never "reads no levels" (actionDecision's levels-invalid).
+  if (input.levels !== undefined && !levelContextsWellFormed(input.levels)) return { fault: "levels-invalid" };
   if (byLevel && !isObject(input.levels)) return { ignored: "levels-not-read" };
   if (!byLevel && tier !== "T0" && tier !== "T1") return { ignored: "mandate-at-t2" };
   const problem = mandateProblem(mandate);

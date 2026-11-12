@@ -517,7 +517,7 @@ known-good earlier payload; it does not reactivate or edit history
   the operator's relayed decision (DEC-0121).
 - [ ] A service that reads authority levels declares them in `extensions/authority/0.1`, and there in `actionLevels`
   `owner` for every billing act and `operator` for client keys, a board hold's set and lift, a slot move, a Project's
-  listing and unlisting and a checker rule's approval, and `admin` for any other proposal's approval (DEC-0162 LV-7; an owner's settlement is no relayed action): an action left out is decided by an architect in the call's project, or by `admin` for a
+  listing and unlisting and a rule proposal's approval (type `rule`), and `admin` for any other proposal type's approval and a credential request's decision (DEC-0162 LV-7; an owner's settlement is no relayed action): an action left out is decided by an architect in the call's project, or by `admin` for a
   call in no project.
 
 ## Operator checklist

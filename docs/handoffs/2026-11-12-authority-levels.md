@@ -42,8 +42,7 @@ into one decision with its schemas, reference code, vectors and pages, by the or
   organization, a level holder's within LV-2"), OW-1, OW-2, OW-5 and OA-4, and drops OW-3's "until CT-250's decision".  Checks on the merged tree (DEC-0156's own): `awk '/^- \*\*OW-6/,/^## Semantic rules/'
   docs/specification/governance-and-roles.md | grep -c DEC-0162`, `awk '/^- \*\*OA-4/,/^- \*\*OA-5/'
   docs/specification/delegation.md | grep -c DEC-0162`, and the same OW-1, OW-2 and OW-5 ranges (`awk '/^- \*\*OW-1/,/^- \*\*OW-2/'` and so on), each print at least 1 (0 on the merged tree before the edit, round 2 seam);
-  `awk '/^- \*\*OW-3/,/^- \*\*OW-4/' docs/specification/governance-and-roles.md | grep -c "until CT-250's decision and
-  Fabric"` prints 0 (round 1, seam and product).
+  `awk '/^- \*\*OW-3/,/^- \*\*OW-4/' docs/specification/governance-and-roles.md | grep -c "until CT-250's decision"` prints 0 (round 1, seam and product; one line since round 9).
   The second lander also rewrites OW-3's people.ask clause ("the operator's only where CT-266 or CT-250's decision
   says so") against DEC-0162 (a level holder's answer through `people.ask` carries no `mem`, so it is not a level
   decision; a level holder's task travels as LV-6 *The board* says), updates conformance.md's operator's-word row
@@ -74,12 +73,12 @@ into one decision with its schemas, reference code, vectors and pages, by the or
   is the sum of both branches' new schemas (round 5, seam). MG-5 drops "or mandate" (assigning a slot is `change-policy`, which no mandate covers, MD-3): `awk '/^- \*\*MG-5/,/^- \*\*MG-6/' docs/specification/governance-and-roles.md | grep -c 'or mandate'` prints 0 (round 6, seam). The merge also conflicts in three conformance.md hunks (this branch's `src/levels.ts` module row and the `src/org-membership.ts` row with FAC-SEM-169 stay: `grep -c '^| \[`src/levels.ts`\]' docs/specification/conformance.md` prints 1 and `grep '^| \[`src/org-membership.ts`\]' docs/specification/conformance.md | grep -c FAC-SEM-169` prints 1) and in `test/positive-sweep.test.ts` (both the levels and the role-slot sources) and `test/schema-compilation.test.ts` (the schema count 154) (round 8, seam).
 - Landing note with DEC-0166 (`agent/ct285-autonomy-profile-20261112`): its lander turns DEC-0162 Alternatives' "on branch
   `agent/ct285-autonomy-profile-20261112` until it lands" into a link (`awk '/^### DEC-0162/,/^### DEC-0163/'
-  docs/DECISIONS.md | grep -c 'ct285-autonomy-profile'` prints nothing after; round 6, seam). At the merge into DEC-0166's branch, `schemas/mandate.schema.json`'s description keeps both clauses: `grep -c 'never travels over the board' schemas/mandate.schema.json` prints 1 and `grep -c 'standing' schemas/mandate.schema.json` at least 1 (round 8, seam).
+  docs/DECISIONS.md | grep -c 'ct285-autonomy-profile'` prints 0 after; round 6, seam). At the merge into DEC-0166's branch, `schemas/mandate.schema.json`'s description keeps both clauses: `grep -c 'never travels over the board' schemas/mandate.schema.json` prints 1 and `grep -c 'standing' schemas/mandate.schema.json` at least 1 (round 8, seam).
 - Landing step, the knowledge base: fabric-workspace `knowledge/authority.md`'s "Not built yet" cites DEC-0162,
   names what remains (the hub route CO-523, the adopters), and bounds the interim reading as membership.md does (inside one product only; on the wire `by: operator` only for the operator's own words, AP-3); `knowledge/agents-first.md` replaces "decided by the contract's CT-250" with DEC-0162 and source.md's level rule; `north-star.md` G26 and `system/engineer.md` E4 name DEC-0162 where they wait on "the roles DEC (CT-250)"; `system/prompt-onboarding.md` ("after the contract's DEC on CT-250", "DECs on CT-250 (first)", "The contract's DEC on CT-250 holds" the organization product's row) names DEC-0162 as landed and the adopters as what still holds those rows; `north-star.md:147` ("has no project architect") and `:544` (levels "wait for the contract's DEC") and `authority.md:117,124` ("the levels CT-250 defines") state that the contract has the architect level (DEC-0162) and that adopters are open; and `knowledge/north-star.md` G2's status cell reads
   "contract DEC-0162 landed; adopters open"; then the workspace sync. Check: `git -C fabric-workspace grep -c
   'DEC-0162' origin/main -- knowledge/authority.md knowledge/north-star.md knowledge/agents-first.md knowledge/system/engineer.md` prints at least 1 for each, and `git -C fabric-workspace grep -c "decided by the contract's CT-250" origin/main -- knowledge/agents-first.md` prints 0, and `git -C fabric-workspace grep -c "has no project architect\|wait for the contract's DEC" origin/main -- knowledge/north-star.md` prints nothing (rounds 1 to 3). A messaging gateway's owner is asked on the board for its row (the adopter line names none yet). Phrase checks, not line numbers (round 4): `git -C fabric-workspace grep -c "levels CT-250 defines\|contract's levels (CT-250)\|the roles DEC (CT-250)\|has no project architect\|wait for the contract's DEC" origin/main -- knowledge/authority.md knowledge/north-star.md` prints nothing after the sync, and `git -C fabric-workspace grep -c 'DECs\? on CT-250' origin/main -- knowledge/system/prompt-onboarding.md` prints nothing (round 5). The step also covers `knowledge/system/modules.md` SU-3 ("after the DEC on CT-250"), and the final check reads the whole folder: `git -C fabric-workspace grep -c "DECs\? on CT-250\|contract roles (CT-250)\|contract CT-250 (open PR #246)" origin/main -- knowledge` prints nothing after the sync (round 6, seam).
-- The operator's questions: posted as board message `b719b08e` on thread `8da128cf` (round 1, product); question 4's widened text and question 8 went in `9faffa1d` after round 2's fold; question 9 and question 8's clarification went in `25f3ca27` after round 3's. Question 10 (round 5) and question 9's listing clause (round 6) wait for the board, which answered HTTP 503 through 2026-11-12: post them on thread `8da128cf` replying to `b719b08e` before acceptance, and add the message id here and in DEC-0162's Status.
+- The operator's questions: posted as board message `b719b08e` on thread `8da128cf` (round 1, product); question 4's widened text and question 8 went in `9faffa1d` after round 2's fold; question 9 and question 8's clarification went in `25f3ca27` after round 3's. Question 10 (round 5), question 9's listing and settlement clauses (round 6) and question 8 widened to the architect (round 8) wait for the board, which answered HTTP 503 through 2026-11-12.
 - With DEC-0157 (`agent/ct216-usage-data-v2`, its round 30 seam): UD-4 admits only the operator's own decision for a
   declined usage switch; LV-7 says a level decision is not that word unless the holder is that person's operator.
   Whichever lands second makes UD-4 say so and cite DEC-0162, and LV-7 cite UD-4 by its landed link. Checks on the
@@ -91,6 +90,11 @@ into one decision with its schemas, reference code, vectors and pages, by the or
   service AUTH-01, the platform PLAT-141 and PLAT-146. A port pinned past DEC-0162 adds `levels` ['1'] and
   `org-membership` ['1', '2'] to both of the adapter kits' hand-kept `PROTOCOL_REVISIONS`, whether or not it adopts the
   level form (round 6, seam).
+
+- Landing note with DEC-0164 (`agent/ct259-activity-unit-20261112`): the merge conflicts in `src/protocol-revisions.ts`
+  (`NAMED_ONLY`), versioning.md's named-only list and conformance.md (the rule rows and the next free code). Keep both
+  sides: on the merged tree `grep -c '"levels/1"' src/protocol-revisions.ts` and `grep -c '"activity-unit/1"' src/protocol-revisions.ts` each print 1, `grep -c 'levels/1' docs/specification/versioning.md` and `grep -c 'activity-unit/1' docs/specification/versioning.md` each at least 1, and `grep -c '^| \`FAC-SEM-1\(69\|70\|71\)\` |' docs/specification/conformance.md` prints 3; the next free code from the CAS counter (round 9, seam).
+- At the merge into DEC-0166's branch, conformance.md's two implementor rows: keep this branch's adopter row (the rule proposal's approval and `admin` for any other type) and DEC-0166's standing clause: `grep -c "rule proposal's approval (type \`rule\`" docs/specification/conformance.md` prints at least 1 and `grep -c 'standing mandate its token binds by' docs/specification/conformance.md` prints at least 1. At the DEC-0165 merge the three level rows stay: `grep -c '^| a hub that binds a level\|^| an agent relaying a level holder\|^| a service that reads authority levels' docs/specification/conformance.md` prints 3 (round 9, seam).
 
 ## Checks run
 
@@ -106,7 +110,7 @@ into one decision with its schemas, reference code, vectors and pages, by the or
   named; T2 refusals carry the digest; UD-4 for an organization's deployed component; the agent-side conformance
   row; OL-6 and source wording; the record's approver resolved by the issuer (question 7); the interim reading;
   the knowledge-base landing step. Declined: none.
-- `pnpm run check` exit 0 on the round-1 head (11250 tests passed, 3 skipped), on the round-1 fold (11259 passed, 3 skipped) on the round-2 fold (11269 passed, 3 skipped) on the round-3 fold (11276 passed, 3 skipped) on the round-4 fold (11279 passed, 3 skipped), on the round-5 fold (11280 passed, 3 skipped), on the round-6 fold (11280 passed, 3 skipped), on the round-7 fold (11281 passed, 3 skipped) and on the round-8 fold (11281 passed, 3 skipped; coverage floors met; UX lint, docs
+- `pnpm run check` exit 0 on the round-1 head (11250 tests passed, 3 skipped), on the round-1 fold (11259 passed, 3 skipped) on the round-2 fold (11269 passed, 3 skipped) on the round-3 fold (11276 passed, 3 skipped) on the round-4 fold (11279 passed, 3 skipped), on the round-5 fold (11280 passed, 3 skipped), on the round-6 fold (11280 passed, 3 skipped), on the round-7 fold (11281 passed, 3 skipped), on the round-8 fold (11281 passed, 3 skipped) and on the round-9 fold (11282 passed, 3 skipped; coverage floors met; UX lint, docs
   check with 0 markdownlint errors, privacy check).
 
 - Round 2 (on `001d55f7`): none clean. Unit: T2 refusals on the level branch without `data.actionDigest`, a T2 call
@@ -207,9 +211,21 @@ into one decision with its schemas, reference code, vectors and pages, by the or
   sources list and schema count; the DEC-0165 note's module rows; the DEC-0166 note's mandate description; the DEC-0158
   note's level mandate in a board body. Declined: none.
 
+- Round 9 (on `1956431e`): unit clean, seam clean. Product, break folded: the operator-only proposal is a rule proposal
+  (type `rule`, any agent binding's rule, `FAC-SEM-104`), not a checker's, in LV-7, governance, the checklist, the
+  schema (its parenthesis closed), the conformance row and item 6. Product risks folded: a credential request's
+  decision offered as a relayed action is declared `admin`; the Open bullet names all three pending posts; Who adopts
+  it says DEC-0162 bounds the interim reading on the wire; the proposal record's role is coarser than the level
+  record. Seam risks folded: a DEC-0164 landing note; the DEC-0166 and DEC-0165 conformance rows; checks on one line,
+  OW-3's pattern and "prints 0"; conformance reads the authority key in the service's well-known document (CT-296's
+  path). Unit risks folded: a malformed entry of the service's own level contexts is its fault `levels-invalid`
+  (`levelContextsWellFormed`), tested; a vector for a level decision beside an operator's mandate where no levels are
+  read. Declined: a level mandate's listed projects binding a call in no project (MD-3's rule for every mandate,
+  unchanged by this decision; a level decision names its project because AP-2's form does).
+
 ## Next task
 
-Round 9 of the blind readings (unit, seam, product) of branch `agent/ct250-levels-20261112` (DEC-0162), post question 10,
+Round 10 of the blind readings (unit, seam, product) of branch `agent/ct250-levels-20261112` (DEC-0162), post question 10,
 question 9's listing and settlement clauses and question 8 widened to the architect on thread `8da128cf`, then merge the
 new head into DEC-0166's branch (`agent/ct285-autonomy-profile-20261112`, which already carries `standing` in the
 authority extension).

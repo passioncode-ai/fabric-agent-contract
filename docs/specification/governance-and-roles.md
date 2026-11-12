@@ -82,7 +82,7 @@ audit records the relaying caller ([service](service.md#actions) AP-5, DEC-0121)
 
 A level holder's decision in an organization (DEC-0162) does not weaken this. A holder's agent never approves its own
 promotion, grant, checker rule or policy change on its own account; a proposal's approval takes the forms
-[proposals](proposals.md) lists in `approvedBy`: a checker rule's is the operator's alone (`FAC-SEM-104`), another
+[proposals](proposals.md) lists in `approvedBy`: a rule proposal's (type `rule`, a rule for an agent binding) is the operator's alone (`FAC-SEM-104`), any other type's
 proposal's is declared `admin`, so an `owner` or an `admin` decides it, recorded as `approvedBy: {role:
 "administrator"}`, and an `architect` never approves one. A level grants no governance role: assigning the `product-manager` or `ceo` role is an act like any
 other, decided at the level the service declares for it in `actionLevels` ([membership](membership.md#levels) LV-7). `change-policy` is decided by
