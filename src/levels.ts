@@ -1,5 +1,5 @@
 import { type Finding, type JsonObject, isObject, show } from "./findings.js";
-import { type HeldMembership, ORG, ORG_MEMBERSHIP_2_TYPE, heldMembershipOk, orgKeySetWellFormed, verifyOrgMembership } from "./org-membership.js";
+import { type HeldMembership, ORG_MEMBERSHIP_2_TYPE, levelContextOk, verifyOrgMembership } from "./org-membership.js";
 import { strictTime } from "./rfc3339.js";
 
 /** The levels a service may declare an action needs (DEC-0162 LV-7), in its authority extension's `actionLevels`. */
@@ -31,16 +31,13 @@ export type LevelContexts = Record<string, LevelContext>;
 
 /**
  * Whether a service's level contexts are its own well-formed configuration: a map keyed by `org:<orgId>` whose every
- * entry names an audience, carries a well-formed key set of that organization, and holds attestations (if any) by
- * subject, each `{subject, revision, digest}` under its own subject. A malformed one is the service's fault
+ * entry passes `levelContextOk` (an opaque audience, a well-formed EdDSA key set of that organization, attestations
+ * held by subject). A malformed one is the service's fault
  * (`levels-invalid`), never a caller's `level-membership: context-invalid`, which stays the answer for an organization
  * absent from the map (LV-10).
  */
 export function levelContextsWellFormed(levels: unknown): boolean {
-  return isObject(levels) && Object.entries(levels).every(([org, entry]) =>
-    ORG.test(org) && isObject(entry) && typeof entry.audience === "string" && entry.audience.length > 0 &&
-    isObject(entry.keySet) && orgKeySetWellFormed(entry.keySet) && entry.keySet.org === org &&
-    (entry.held === undefined || (isObject(entry.held) && Object.entries(entry.held).every(([subject, held]) => heldMembershipOk(held) && isObject(held) && held.subject === subject))));
+  return isObject(levels) && Object.entries(levels).every(([org, entry]) => levelContextOk(org, entry));
 }
 
 /** Why a level does not stand, as `data.detail` names it (LV-10). */

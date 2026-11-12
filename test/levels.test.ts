@@ -91,6 +91,10 @@ describe("levelStanding and FAC-SEM-170 at their edges (DEC-0162)", async () => 
     expect(decide({ ...call, levels: { [org]: { ...entry, audience: "" } } })).toEqual({ fault: "levels-invalid" });
     expect(decide({ ...call, levels: { [org]: null } })).toEqual({ fault: "levels-invalid" });
     expect(decide({ ...call, levels: { "org-a": entry } })).toEqual({ fault: "levels-invalid" });
+    expect(decide({ ...call, levels: { [org]: { ...entry, audience: "reviews service" } } })).toEqual({ fault: "levels-invalid" });
+    expect(decide({ ...call, levels: { [org]: { ...entry, held: null } } })).toEqual({ fault: "levels-invalid" });
+    expect(decide({ ...call, levels: { [org]: { ...entry, audience: "a".repeat(129) } } })).toEqual({ fault: "levels-invalid" });
+    expect(decide({ ...call, levels: { [org]: { ...entry, keySet: { ...entry.keySet, alg: "ES256" } } } })).toEqual({ fault: "levels-invalid" });
     expect(decide({ ...call, levels: { [org]: { ...entry, keySet: { ...entry.keySet, org: "org:other" } } } })).toEqual({ fault: "levels-invalid" });
     expect(decide({ ...call, levels: { [org]: { ...entry, keySet: { org } } } })).toEqual({ fault: "levels-invalid" });
     expect(decide({ ...call, levels: { [org]: { ...entry, held: { subject: "m-1", revision: 1, digest: "x" } } } })).toEqual({ fault: "levels-invalid" });

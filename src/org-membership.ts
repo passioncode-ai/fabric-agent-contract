@@ -472,3 +472,16 @@ export function orgMembershipRules(kind: string, value: JsonObject): Finding[] |
   return undefined;
 }
 // #endregion org-membership
+
+/**
+ * One entry of a service's level contexts (DEC-0162 LV-10), keyed by its organization: the clauses `verifyOrgMembership`
+ * applies to its trust (an opaque audience, a well-formed EdDSA key set of that organization), and the attestations it
+ * holds keyed by subject, each `{subject, revision, digest}` under its own subject. `levelContextsWellFormed` reads
+ * every entry with it, so a context `verifyOrgMembership` would refuse is the service's own fault, never the caller's.
+ */
+export function levelContextOk(org: string, entry: unknown): boolean {
+  if (!ORG.test(org) || !isObject(entry) || !opaque(entry.audience) || !isObject(entry.keySet)) return false;
+  const keySet = entry.keySet;
+  if (!orgKeySetWellFormed(keySet) || !ORG_MEMBERSHIP_ALGORITHMS.includes(keySet.alg as string) || keySet.org !== org) return false;
+  return entry.held === undefined || (isObject(entry.held) && Object.entries(entry.held).every(([subject, held]) => heldMembershipOk(held) && isObject(held) && held.subject === subject));
+}
