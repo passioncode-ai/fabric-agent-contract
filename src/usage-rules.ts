@@ -34,8 +34,8 @@ export const ROW_ROUNDING_USD = 0.0000005;
  * never fail the sum; a `null` row carries no rounding and widens nothing.
  */
 export const allowance = (a: number, b: number, rows: number) => ROW_ROUNDING_USD * rows + 0.000001 + 1e-9 * Math.max(Math.abs(a), Math.abs(b));
-/** Whether `a` exceeds `b` by more than `allowance`. */
-export const exceeds = (a: number, b: number, rows: number) => a - b > allowance(a, b, rows);
+/** Whether `a` exceeds `b` by more than `allowance`; a sum that overflows to an infinity exceeds a finite one. */
+export const exceeds = (a: number, b: number, rows: number) => (!Number.isFinite(a) && Number.isFinite(b)) || a - b > allowance(a, b, rows);
 /** A known cost: a finite, non-negative number, the rows the rounding allowance counts (DEC-0163). */
 const knownCost = (value: unknown): boolean => cost(value) === value;
 const usd = (value: number) => show(Math.round(value * 1e6) / 1e6);

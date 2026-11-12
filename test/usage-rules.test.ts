@@ -3,7 +3,7 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { projectRoot } from "../src/contract.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
-import { usageRules, usageSpend, utcDate } from "../src/usage-rules.js";
+import { allowance, exceeds, ROW_ROUNDING_USD, usageRules, usageSpend, utcDate } from "../src/usage-rules.js";
 
 // DEC-0065: FAC-SEM-025 reads the usage report's 31-day window (F-A-024) and its project attribution (CON-OE-13).
 type Json = Record<string, any>;
@@ -236,6 +236,20 @@ describe("FAC-SEM-025: sums of rows rounded to 6 places one by one (DEC-0163, CT
     expect(at({ ...report, byProject: undefined, days: [day(1, [1.0000024, -0.0000001])] }, "/days/0/costUsd")).toBe(true);
     expect(usageRules({ ...report, byProject: undefined, days: [day(Number.POSITIVE_INFINITY, [1])] }).map((f) => f.instancePath)).toContain("/days/0/costUsd");
     expect(usageRules({ ...report, byProject: undefined, days: [day(1, [Number.POSITIVE_INFINITY])] }).map((f) => f.instancePath)).toContain("/days/0/costUsd");
+  });
+  it("allows 0.000001, half a millionth per row and 1e-9 of the larger side, and an overflowing sum exceeds a finite one", () => {
+    expect(ROW_ROUNDING_USD).toBe(0.0000005);
+    expect(allowance(0, 0, 0)).toBe(0.000001);
+    expect(allowance(1, 0, 1)).toBeCloseTo(0.000001 + 0.0000005 + 1e-9, 15);
+    expect(allowance(0, 2, 10)).toBeCloseTo(0.000006 + 2e-9, 15);
+    expect(exceeds(1.0000016, 1, 1)).toBe(true);
+    expect(exceeds(1.0000014, 1, 1)).toBe(false);
+    expect(exceeds(Number.POSITIVE_INFINITY, 1, 0)).toBe(true);
+    expect(exceeds(Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY, 0)).toBe(false);
+    expect(exceeds(1, Number.POSITIVE_INFINITY, 0)).toBe(false);
+    // Two projects of 1e308 overflow their sum; the days are finite, so the projects exceed them.
+    const projects = [0, 1].map((i) => ({ projectId: `urn:project:big${i}`, calls: 0, unpricedCalls: 0, costUsd: 1e308, taskRuns: [] }));
+    expect(paths({ ...report, byProject: projects })).toContain("FAC-SEM-025 /byProject");
   });
   it("passes the rounded-rows fixture, which the fixed tolerance refused", () => {
     expect(paths(JSON.parse(readFileSync(path.join(projectRoot(), "fixtures/positive/service-usage-rounded-rows.json"), "utf8")))).toEqual([]);

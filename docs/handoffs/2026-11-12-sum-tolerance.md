@@ -5,8 +5,8 @@ Branch `agent/ct295-sum-tolerance-20261112`, from main `d69dc363`. Entry point: 
 ## Done
 
 - `src/usage-rules.ts`: `allowance(a, b, rows)` with `ROW_ROUNDING_USD` (0.0000005 per known-cost row summed on
-  either side); the day check's `close` (a distance within it), and `exceeds` (one-sided) for the project against its
-  task runs and the projects against the days.
+  either side); the day check's `close` (a distance within it), and `exceeds` (one-sided; a sum that overflows exceeds a finite one) for the
+  project against its task runs and the projects against the days.
 - `docs/specification/service.md`: the usage report's rounding sentence and `FAC-SEM-025`'s row.
 - `test/usage-rules.test.ts`: ten rows rounded up pass; an excess beyond rounding still fails; each count pinned at its
   boundary (mutation-checked); `fixtures/positive/service-usage-rounded-rows.json` (catalogued).
@@ -25,7 +25,7 @@ Branch `agent/ct295-sum-tolerance-20261112`, from main `d69dc363`. Entry point: 
 
 ## Checks run
 
-- `pnpm run check` exit 0 (11177 tests passed, 3 skipped), on the round-1 fold (11178 passed, 3 skipped) on the round-2 fold (11184 passed, 3 skipped; coverage floors, UX lint, docs check, privacy check) and on the round-3 fold (11184 passed, 3 skipped).
+- `pnpm run check` exit 0 (11177 tests passed, 3 skipped), on the round-1 fold (11178 passed, 3 skipped) on the round-2 fold (11184 passed, 3 skipped; coverage floors, UX lint, docs check, privacy check) on the round-3 fold (11184 passed, 3 skipped) and on the round-4 fold (11185 passed, 3 skipped).
 - Round 1 (on `65c5b76b`): unit clean (risks folded: null-cost rows no longer widen the allowance; the day's
   comparison is a distance again, so NaN is never close; the test comment matches its cases; the page states the
   relative 1e-9). Product, breaks folded: Compatibility names the copies of the rule that keep the old tolerance and
@@ -44,6 +44,13 @@ Branch `agent/ct295-sum-tolerance-20261112`, from main `d69dc363`. Entry point: 
   DEC-0021 and DEC-0065 annotations hold once readers apply DEC-0163; the page names unrounded first; this handoff's
   Done; the kit already rounds, so the window is the kit's change plus each copy. Declined: none.
 
+- Round 4 (on `8a50b86c`): unit clean, seam clean (no break; the adapter's 216 stored FAC-SEM-025 answers unchanged
+  under the new rule). Risks folded: `exceeds` refuses a sum that overflows against a finite one, as `close` already
+  did, and Compatibility says so; `allowance` and `exceeds` tested directly; the Decision says "not a finite number".
+  Product, breaks folded: the handoffs index and the backlog row named round 3 next. Product risks folded: the search
+  names its root and leaves out worktrees and both repositories in the command; Fabric Dashboards' copy is a
+  current-name kit; the Why states the whole allowance. Declined: none.
+
 ## Next task
 
-Round 4 of the blind readings (unit, seam, product) of branch `agent/ct295-sum-tolerance-20261112` (DEC-0163).
+Round 5 of the blind readings (unit, seam, product) of branch `agent/ct295-sum-tolerance-20261112` (DEC-0163).

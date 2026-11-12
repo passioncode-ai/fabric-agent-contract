@@ -11402,26 +11402,28 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   side of the comparison, plus a relative 1e-9 ([service](specification/service.md#usage-report)): a day against its
   models counts the day's row and each model's row with a known cost; a project against its task runs counts each run
   with a known cost and the project; the projects against the days count each project and each day with a known cost
-  (a `null` row carries no rounding and widens nothing). Only the day against its models is a distance, so a cost that
-  is not a number is never close; a project against its task runs and the projects against the days stay one-sided: an
-  excess beyond the allowance is refused and any shortfall passes, as before. A service may write each row's
+  (a `null` row carries no rounding and widens nothing). Only the day against its models is a distance, so a sum that is
+  not a finite number (a cost that is not a number, or a sum that overflows) is never close; a project against its task
+  runs and the projects against the days stay one-sided: an excess beyond the allowance is refused, as is a sum that
+  overflows against a finite one, and any shortfall passes, as before. A service may write each row's
   `costUsd` rounded to 6 decimal places or unrounded. Calls and tokens, which are integers, are compared exactly as
   before.
 - **Why:** the rounding of each written row is independent, so the error bound of a sum grows with the rows in it; a
-  fixed bound fails honest reports on rounding alone, while 0.0000005 per row still catches any real excess above
-  half a millionth per row.
+  fixed bound fails honest reports on rounding alone, while the allowance still catches any excess beyond it: 0.000001,
+  plus half a millionth for each row counted, plus 1e-9 of the larger sum.
 - **Alternatives considered:** requiring unrounded costs (refused: a service writing JSON from decimal money cannot
   always keep binary floats unrounded, and the adapter already rounds); a fixed but larger bound (refused: it fails for
   enough rows and hides an excess for few).
-- **Compatibility:** looser only for this repository's checker: every report that passed still passes. Read on
+- **Compatibility:** looser only for this repository's checker: every report whose costs sum to finite numbers that passed still passes; a report whose cost sum overflows to an infinity is now refused. Read on
   2026-11-12, the copies of the rule that do not read it from here and keep the fixed tolerance: the adapter's kit in
   Python and Node (`fabric_usage.py`, `fabric-usage.mjs`) and the probe that runs it, which owe the per-row allowance
   and a test of ten rows rounded up (FAA-310 part 2); and every copy outside it, which its owner changes. On the
   operator's machine on 2026-11-12 the message `is not the sum of its models` appeared in 45 files outside this
-  repository and the adapter (test files, dependency folders, worktrees and coverage left out: `rg -l` with the globs
+  repository and the adapter (run from the workspace folder that holds the checkouts: `rg -l 'is not the sum of its
+  models' .` with the globs `!_worktrees/**`, `!fabric-agent-contract/**`, `!fabric-agent-adapter/**`,
   `!**/node_modules/**`, `!**/.git/**`, `!**/coverage/**`, `!**/dist/**`, `!*.test.*` and `!test_*.py`): 39 vendored kit
-  copies (34 under the current names `fabric_usage.py` and `fabric-usage.mjs`, 5 under the older single-file names
-  `fabric_service.py` and `kit.mjs`, Fabric Dashboards' sample-service fixture among them), 3 vendored probes
+  copies (34 under the current names `fabric_usage.py` and `fabric-usage.mjs`, Fabric Dashboards' sample-service fixture
+  among them, and 5 under the older single-file names `fabric_service.py` and `kit.mjs`), 3 vendored probes
   (`check_service.py`), 2 ports of the probe (`usage-probe.ts`) and 1 vendored copy of `src/usage-rules.ts`. The
   current-name kits follow at their next kit refresh; the old-name kits, the probes and the ports owe the per-row
   allowance from their owners. Until each changes, a service that rounds its
