@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0156` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0168` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -334,6 +334,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Annotated (2026-10-12):** the usage report amended by DEC-0065 (its 31-day window checked; `byProject` attribution by project and task run, never by caller).
 - **Annotated (2026-10-11):** `budget` amended by DEC-0027 (a usage report lists every spending limit the service applies).
 - **Annotated (2026-10-23):** a host sums money over the rows not on a subscription; a `subscription` row's `costUsd` is an estimate, never money (DEC-0110).
+- **Annotated (2026-11-12):** the day's cost against its models holds within each known row's rounding, and rows may be written rounded to 6 places once its readers apply DEC-0163.
 - **Amends:** the `fabric-service/0.1` extension (additive, DEC-0016 extension policy)
 - **Decision:** A service MAY declare `surfaces.usage.path` in its well-known document and
   answer there, behind the service token, a `service-usage.schema.json` report. The report gives
@@ -3658,6 +3659,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   task runs when its own cost is known, and all projects together no more than the days, a `null` cost counting as
   none, within the rounding the day's cost check allows (so rows are written unrounded); and a project holds at least its
   task runs' priced calls (`src/usage-rules.ts`, test/usage-rules.test.ts).
+- **Annotated (2026-11-12):** the rounding clause above is replaced: cost sums hold within each known row's rounding, and rows may be written rounded to 6 places once its readers apply DEC-0163.
 - **Annotated (2026-10-13):** amended by DEC-0076: `byProject` names each project once by the normal form of `projectId`, and the finding names the second spelling (`docs/specification/identifiers.md`).
 - **Annotated (2026-10-12):** `attributionHeaders` answers a missing request as `not-openrouter` instead of throwing; vectors pin the default port, a trailing dot, the WHATWG-only forms, the other user-set headers, empty categories and the 64-character slug; adoption.md names how Project Observatory's private node is read (the owed reading of #68; packet P6-08).
 - **Amends:** DEC-0021 (the usage report: the window rule and `byProject`). Annotates DEC-0020…DEC-0029 with measured
@@ -11384,3 +11386,56 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `peer_owner` 1.3.0 proposal (`914c0383`), sshlg-fabric-server's (`ed799cae`, `93886034`) and the adapter's (`b8053022`)
   inputs; backlog CT-261.
 
+
+### DEC-0163: a usage report's cost sums hold within each row's rounding
+
+- **Date:** 2026-11-12
+- **Status:** Accepted 2026-11-12, merged with this change: rounds 5 and 6 of the coordinator's blind readings (at `4275ffff` and `43d123f2`) clean on all three tiers; rounds 1 to 4 folded.
+  It loosens `FAC-SEM-025`'s cost comparisons only; no schema or field changes.
+- **Amends:** DEC-0065 (the CT-40 annotation's rounding clause, "so rows are written unrounded") and DEC-0021 (the day's cost against its models).
+- **Context:** `FAC-SEM-025` compared a usage report's cost sums (a day against its models, a project against its task
+  runs, the projects against the days) within a fixed 0.000001 and a relative 1e-9, and the service page asked a
+  service to write each row's `costUsd` unrounded. A service that rounds each row to 6 decimal places, as the adapter's
+  kit does, can honestly put N rows up to N x 0.0000005 over their sum: the adapter measured 2.926432 against 2.926429
+  on a run localized into 15 languages (board request `785fd306`, thread `14937b75`, FAA-310).
+- **Decision:** every cost sum `FAC-SEM-025` checks holds within 0.000001, plus 0.0000005 for each row with a known cost summed on either
+  side of the comparison, plus a relative 1e-9 ([service](specification/service.md#usage-report)): a day against its
+  models counts the day's row and each model's row with a known cost; a project against its task runs counts each run
+  with a known cost and the project; the projects against the days count each project and each day with a known cost
+  (a `null` row carries no rounding and widens nothing). Only the day against its models is a distance, so a sum that is
+  not a finite number (a cost that is not a number, or a sum that overflows) is never close; a project against its task
+  runs and the projects against the days stay one-sided: an excess beyond the allowance is refused, as is a sum that
+  overflows against a finite one, and any shortfall passes, as before. A service may write each row's
+  `costUsd` rounded to 6 decimal places or unrounded. Calls and tokens, which are integers, are compared exactly as
+  before.
+- **Why:** the rounding of each written row is independent, so the error bound of a sum grows with the rows in it; a
+  fixed bound fails honest reports on rounding alone, while the allowance still catches any excess beyond it: 0.000001,
+  plus half a millionth for each row counted, plus 1e-9 of the larger sum.
+- **Alternatives considered:** requiring unrounded costs (refused: a service writing JSON from decimal money cannot
+  always keep binary floats unrounded, and the adapter already rounds); a fixed but larger bound (refused: it fails for
+  enough rows and hides an excess for few).
+- **Compatibility:** looser only for this repository's checker: every report whose costs sum to finite numbers that passed still passes; a report whose bounded side's sum overflows to an infinity while the side bounding it stays finite (runs against their project, projects against the days), or whose models' sum overflows against a finite day, is now refused; two sums that both overflow, or an overflowing bound against a finite sum, pass. Read on
+  2026-11-12, the copies of the rule that do not read it from here and keep the fixed tolerance: the adapter's kit in
+  Python and Node (`fabric_usage.py`, `fabric-usage.mjs`) and the probe that runs it, which owe the per-row allowance
+  and a test of ten rows rounded up (FAA-310 part 2); and every copy outside it, which its owner changes. On the
+  operator's machine on 2026-11-12 the message `is not the sum of its models` appeared in 45 files outside this
+  repository and the adapter (run from the workspace folder that holds the checkouts: `rg -l 'is not the sum of its
+  models' .` with the globs `!_worktrees/**`, `!fabric-agent-contract/**`, `!fabric-agent-adapter/**`,
+  `!**/node_modules/**`, `!**/.git/**`, `!**/coverage/**`, `!**/dist/**`, `!*.test.*` and `!test_*.py`): 39 vendored kit
+  copies (34 under the current names `fabric_usage.py` and `fabric-usage.mjs`, Fabric Dashboards' sample-service fixture
+  among them, and 5 under the older single-file names `fabric_service.py` and `kit.mjs`), 3 vendored probes
+  (`check_service.py`), 2 ports of the probe (`usage-probe.ts`) and 1 vendored copy of `src/usage-rules.ts`. The
+  current-name kits follow at their next kit refresh; the old-name kits, the probes and the ports owe the per-row
+  allowance from their owners. Until each changes, a service that rounds its
+  rows is refused by that reader, so a service writes rounded rows only once its readers apply this decision. The kit
+  already writes rounded rows, so the window closes only when the kit's own copies carry the allowance and each vendored
+  copy is refreshed; the handoff tracks it. A pin alone
+  is not enough for a copy, so the positive fixture `service-usage-rounded-rows.json` (ten rows rounded to 6 places),
+  which a copy's parity test reads with the other positive usage fixtures, fails that test at repin until the copy
+  changes. No vector
+  file covers FAC-SEM-025's sums: `test/usage-rules.test.ts` and the rounded-rows fixture hold the cases, and the adapter generates its usage vectors
+  from `usageRules` at its pin.
+- **Consequences / affects:** `src/usage-rules.ts` (`allowance`, `exceeds` and `ROW_ROUNDING_USD`, exported; the day check's
+  `close`), `docs/specification/service.md` (the usage report's sentence on rounding and `FAC-SEM-025`'s row),
+  `test/usage-rules.test.ts` (ten rows rounded up, an excess beyond rounding, each count at its boundary), `fixtures/positive/service-usage-rounded-rows.json` and `fixtures/catalogue.json`, `docs/specification/conformance.md` (the usage host row), DOCMAP, the DEC-0021 and DEC-0065 annotations.
+- **Source:** fabric-agent-adapter's board request `785fd306` (FAA-310); backlog CT-295. Course check (AGENTS.md 1a): it serves this repository's goal, interoperability, so that a kit's honest usage report passes every reader of `FAC-SEM-025`.
