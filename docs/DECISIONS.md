@@ -11453,7 +11453,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      product's own switch on, the product meanwhile showing its own switch as off and its notice saying where to turn it
      on, so
      Fabric's live "One switch for every PassionCode app on this computer" (`en.ts` line 864 at `eafcf2e4`) is a false
-     promise for a product that has already sent, or whose own switch the person set on, which the person reads until Fabric's switch for Fabric alone ships
+     promise for a product that has sent and had its stand-in run, or whose own switch the person set, and, for its on,
+     for a product that already read an off as an earlier no, which the person reads until Fabric's switch for Fabric alone ships
      (CO-496); a product's own switch never writes the shared file's `analytics` field, and a product whose switch
      wrote it under words that governed every reader stops writing it from the version whose switch governs it alone,
      and leaves an off already written there, which stays the earlier no for products that have not yet sent, or not
@@ -11463,7 +11464,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      shared file that exists but cannot be read before a product's first send (or before that stand-in run), on an install whose own switch the person has not set on, is no
      answer, and the product sends nothing in that run, a run that sent nothing for that reason being no stand-in run, and the product, on an install whose own switch the person never set, showing its switch as on but not sending and saying beside it (for a product without a window, where its switch is read) that nothing
      is sent until the shared file can be read at its next start and offering there to set its switch on, which is the
-     person setting the product's own switch on;
+     person setting the product's own switch on, a product that sends only with the shared installation id offering it
+     only where, once set on, it sends without that id, else keeping that display until the file can be read;
      a device policy whose layer carries a key for a product's switch may lock it off and never locks it on, and
      the device and the product ignore a lock that would hold the switch on, resolving the key without any lock that
      would hold it on, so a lower layer's lock off still holds and, where none holds it off, the person's own setting (or an
@@ -11486,7 +11488,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      `credential` class's "session"); neither id is a user identifier (unlike activity
      telemetry's `user.id`, which names a membership or a profile and makes its events personal data), data that meets
      UD-3 being `confidential`, the data classification table's "private metrics" (whether a stored id needs prior consent in a market is the product's privacy review,
-     RM-13's open question); neither the product, a service it sends to nor one that reads it there joins either id with an account, purchase,
+     RM-13's open question); neither the product, a service it sends to nor any service or agent that reads it there (a holder of a grant to read the raw events included) joins either id with an account, purchase,
      billing or advertising record, and data so joined, or bound to an account, leaves UD-3, is `personal`, or
      `regulated` where the product's privacy review finds it legally controlled, needs its own consent and is never called anonymous; error data names a place in the product's own code
      and is cleared of content, paths and credentials before it leaves.
@@ -11521,7 +11523,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      on the operator's word naming the switch, and pointing anyone else to that switch.
   5. UD-5: no machine declaration now; each product documents it (its privacy text and a usage data page): what, the
      installation id when it sends one and whether it is shared, where it goes (the receiving organization and its
-     host, and every service that reads the data there, with its purpose, described without naming a person), the switch, how long it is kept, the
+     host, and every service or agent that reads the data there (a holder of a grant to read the raw events included), with its purpose, described without naming a person), the switch, how long it is kept, the
      version that turned it on, and whether and how sent data can be erased; where erasure needs an id, the product
      shows it beside the switch before off deletes it and keeps the route working, or says beside the switch that
      turning off ends erasure; a product whose uninstall deletes its id says whether erasure survives the uninstall, and
@@ -11610,7 +11612,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   an id (lines 307 to 310), and Fabric Dashboards never reads it (`src/core/analytics.ts` lines
   9 to 11 at `d43c94e`) and, when the shared file cannot be read, sends its events without an id (lines 59 to 60 and
   170 to 171), where UD-2 has each send nothing in a run before its first send (or before its conforming version's
-  stand-in run) in which the shared file cannot be read, on an install whose own switch the person has not set on. Their notices owe UD-1's contents:
+  stand-in run) in which the shared file cannot be read, on an install whose own switch the person has not set on, and
+  UD-2's hold display (its switch on but not sending, the next-start line, and the control where UD-2 allows it); Switchboard, which holds its send then (`analytics.rs` lines 488 to 490 at `405b789`) with a
+  status carrying only `enabled`, owes the same display. Their notices owe UD-1's contents:
   Fabric Dashboards' (`src/core/i18n.ts` lines 86 to 88 at `d43c94e`) names no installation id though every event
   carries the shared `install_id` (`src/core/analytics.ts`), and states no purpose of counting once, so it owes the id,
   that it is shared and with which products, that it ties events together, its session id, that turning back on resumes it, and
@@ -11684,11 +11688,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `eafcf2e4`; its ADR-0127, SCN-134), where UD-1 has no answer mean on. It owes UD-2's per-product switch and UD-1's
   purpose, naming of the sharing products, the tying of events and the resume: its live notice and settings say its
   switch governs every PassionCode app on the computer (`i18n/en.ts` lines 864, 869 and 870, their Russian copies
-  `i18n/ru.ts` lines 2488, 2493 and 2494, and its `README.md` lines 336 to 338, all at `eafcf2e4`), a false promise for every
-  product that has already sent (UD-2), which the person reads until CO-496 ships, and name no purpose; its own record (its on-demand sessions specification §8, read at `7dce3758`, rewriting CO-496) replaces
+  `i18n/ru.ts` lines 2488, 2493 and 2494, and its `README.md` lines 336 to 338, all at `eafcf2e4`), a false promise for a product that has sent and had its stand-in run, or whose own switch the person set, and, for its on, for a product that already read an off as an earlier no (UD-2), which the person reads until CO-496 ships, and name no purpose; its own record (its on-demand sessions specification §8, read at `7dce3758`, rewriting CO-496) replaces
   the shared switch with one for Fabric alone. Its switch also writes the shared `analytics` field both ways
   (`writeAnalyticsSwitch`, `apps/desktop/src/main/analytics.ts` lines 88 to 96, called by `setEnabled` at lines 305 to
-  308, at `eafcf2e4`), so under UD-2's earlier-no reading its off decides for every product that has not yet sent and
+  308, at `eafcf2e4`), so under UD-2's earlier-no reading its off decides for every product that has not yet sent, or not
+  yet had its stand-in run, and
   its on erases a person's earlier no for every product that has not yet read it; CO-496 owes UD-2's rule on writing (Fabric stops writing the field from the
   version whose switch governs Fabric alone and leaves an off already written there). Fabric Inbox exports a writer for
   the shared field that nothing calls (`writeSwitch`, `desktop/analytics.cjs` lines 96 to 103 at `1395416`), so it
@@ -11707,7 +11711,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   at `ad978a6`, PC-123), which meets UD-1's timing and UD-2's kept decline (a shared off given before its first send);
   it owes UD-1's notice contents (its notice, `lib/analytics.js` line 31, names neither the installation id nor its
   sharing, its session id nor the resume) and a notice where the person reads it (its doc, `docs/analytics-events.md` line 50, lets
-  another tool show it to its agent only). Its switch, `analytics on|off`, is a command a person or their coding agent
+  another tool show it to its agent only), and UD-2's hold display (its switch on but not sending, the next-start line, and the control where UD-2 allows it) (it prints "off for now" during a hold, `bin/passioncode.js` line 233; its 0.2.76, tagged 2026-11-09, ships it unchanged). Its switch, `analytics on|off`, is a command a person or their coding agent
   runs (its `AGENTS.md` line 138 at `0f4b27f`), a command line and no agent surface under UD-4, so the launcher owes
   UD-4's product side nothing; its setup skill, which points agents at that command
   (`plugin/passioncode/skills/setting-up-passioncode/SKILL.md` lines 145 to 149 at `0f4b27f`), owes UD-4's agent side.

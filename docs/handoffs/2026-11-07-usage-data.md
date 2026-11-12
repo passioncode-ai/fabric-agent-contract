@@ -94,7 +94,8 @@ decision of 2026-11-04.
   a no, unless that app's own switch was set (an app turned on in its own settings keeps sending), and that its on lets
   those that have not yet read that off send, while an app that already read it stays off until it is turned on in its
   own settings; and its hold line `analytics.noFile` (`en.ts` line 866, `ru.ts` lines 2490 to 2491) replaced by UD-2's
-  hold display at CO-496 (not "for Fabric only", which the write makes false for those apps), and an agent twin for its switch (UD-4) at CO-496;
+  hold display at CO-496 (and, once the person sets Fabric on, either sending without the shared id or keeping that
+  display, since Fabric sends only with the shared id) (not "for Fabric only", which the write makes false for those apps), and an agent twin for its switch (UD-4) at CO-496;
   Switchboard, with an action for its switch and a manifest capability for that tool (UD-4), and UD-1's purpose in its
   notice (its "to help PassionCode.ai improve its apps", `src/main.ts` line 109 at `f6f1dc1`, names every app; its Russian copy is `src/locales/ru.ts` line 68 at its
   `origin/main` `6461505`), and the
@@ -122,7 +123,8 @@ decision of 2026-11-04.
   UD-2 says beside its switch (`src/core/analytics.ts` lines 59 to 60 and 170
   to 171 at `d43c94e`), FD-175 and a manifest capability for that tool included, its switch's action refusing
   `operator-decision-required` without a decision rather than run as the caller's own act (`src/mcp/server.ts` lines
-  332 to 333 at `d43c94e`); the launcher (PC-123, before 0.2.76 is tagged):
+  332 to 333 at `d43c94e`); the launcher (PC-123; its 0.2.76, tagged 2026-11-09, ships these unchanged from `ad978a6`,
+  so in its next release), UD-2's hold display (it prints "off for now" during a hold, `bin/passioncode.js` line 233):
   UD-1's notice contents and a notice where the person reads it, its doc's agent-only path at
   `docs/analytics-events.md` line 50, and its setup skill UD-4's agent side (its `analytics on|off` is a command line,
   no agent surface, so it owes no action); every product but Fabric Inbox (whose notice names PassionCode.ai as its recipient), that its notice names where
@@ -992,6 +994,19 @@ not pushed for the same reason; the round entries' commits resolve only there.
 - Checks run on the round-24 fold (`1e0d70c2`): `pnpm run check` exit 0 (11173 tests).
 - Checks run on the round-25 fold (`fb6ee0a9`): `pnpm run check` exit 0 (11173 tests), before round 26 was read.
 - Checks run on the round-26 fold (`71f40e77`): `pnpm run check` exit 0 (11173 tests), before round 27 was read.
+- Checks run on the round-27 fold (`1451e5bb`, then main `e9bb7ac7` merged as `446ccfd1`): `pnpm run check` exit 0
+  (11173 tests), before round 28 was read.
+- Round 28 (on `446ccfd1`): seam clean; unit and product not clean. Breaks folded: CONTEXT put the product behind
+  CT-280 and row 219 stated the device's exception without it; both now say the device once CT-280 names the key and
+  the product now (unit); the hold's control promised sending to products that send only with the shared id (Fabric,
+  Switchboard, the launcher); such a product offers it only where it can send without that id, else keeps the display
+  (product); the debt lists left out the hold display for Fabric Inbox, Fabric Dashboards, Switchboard and the launcher
+  ("off for now"); the page and the Compatibility now name it (product). Risks folded: the agent row's set-on clause;
+  one false-promise clause for Fabric's switch in five places; "or not yet had its stand-in run" in the Compatibility;
+  UD-3's join rule and UD-5's readers name an agent with a read grant in DEC items 3 and 5 and row 219; Observatory in
+  the counts-move list; the site's `main` at `d7da2a42` (SITE-054) described and its remaining debts named; the
+  launcher's 0.2.76 shipped unchanged (unit, product, seam). The DEC-0156 note's line-based OW-2 check is replaced on
+  that branch by this note's scoped one (seam, relayed). Declined: none.
 - Round 26 (on `fb6ee0a9`): seam clean; unit and product not clean. Breaks folded: round 25's agent rule sat in an
   unnumbered bullet that took UD-5's list marker, and the record said UD-4 held it; it is now UD-4's last sentence, in
   DEC-0157 item 4 and the agent row, the operator's own word naming the switch setting it on through the product's
@@ -1021,4 +1036,4 @@ not pushed for the same reason; the round entries' commits resolve only there.
 
 ## Next task
 
-Round 28 of the blind readings of branch `agent/ct216-usage-data-v2` (DEC-0157): unit, seam and product.
+Round 29 of the blind readings of branch `agent/ct216-usage-data-v2` (DEC-0157): unit, seam and product.
