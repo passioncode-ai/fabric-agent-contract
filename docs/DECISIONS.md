@@ -11452,9 +11452,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      "one product's switch never turns another off"), an earlier no read at that run holding until the person sets the
      product's own switch on, the product meanwhile showing its own switch as off and its notice saying where to turn it
      on, so
-     Fabric's live "One switch for every PassionCode app on this computer" (`en.ts` line 864 at `eafcf2e4`) is a false
-     promise for a product that has sent and had its stand-in run, or whose own switch the person set, and, for its on,
-     for a product that already read an off as an earlier no, which the person reads until Fabric's switch for Fabric alone ships
+     Fabric's live "One switch for every PassionCode app on this computer" (`en.ts` line 864 at `eafcf2e4`) is a false promise for a product past its first send (or, for an install that sent before its conforming version, past a stand-in run that read no earlier no), one that cannot read the shared file, or one whose own switch the person set, and, for its on, for a product that already read an off as an earlier no, which the person reads until Fabric's switch for Fabric alone ships
      (CO-496); a product's own switch never writes the shared file's `analytics` field, and a product whose switch
      wrote it under words that governed every reader stops writing it from the version whose switch governs it alone,
      and leaves an off already written there, which stays the earlier no for products that have not yet sent, or not
@@ -11464,8 +11462,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      shared file that exists but cannot be read before a product's first send (or before that stand-in run), on an install whose own switch the person has not set on, is no
      answer, and the product sends nothing in that run, a run that sent nothing for that reason being no stand-in run, and the product, on an install whose own switch the person never set, showing its switch as on but not sending and saying beside it (for a product without a window, where its switch is read) that nothing
      is sent until the shared file can be read at its next start and offering there to set its switch on, which is the
-     person setting the product's own switch on, a product that sends only with the shared installation id offering it
-     only where, once set on, it sends without that id, else keeping that display until the file can be read;
+     person setting the product's own switch on, a product whose only installation id is the shared one offering it
+     only where, once set on, it sends without an installation id, else keeping that display until the file can be read;
      a device policy whose layer carries a key for a product's switch may lock it off and never locks it on, and
      the device and the product ignore a lock that would hold the switch on, resolving the key without any lock that
      would hold it on, so a lower layer's lock off still holds and, where none holds it off, the person's own setting (or an
@@ -11520,7 +11518,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      and no product-side refusal is added (an approval is a signed approver's decision on the action's digest, DL-17,
      and a refusal for one action would split AP-2's single table); an agent never deletes or rewrites a shared file
      it cannot read to end a hold, reporting the hold, setting the product's own switch on through its relayed action
-     on the operator's word naming the switch, and pointing anyone else to that switch.
+     on the operator's word naming the switch, and pointing anyone else to that switch, save that for a product whose
+     only installation id is the shared one setting the switch on does not end the hold, so the agent tells the operator
+     the product sends nothing until the file can be read and points anyone else to its hold line.
   5. UD-5: no machine declaration now; each product documents it (its privacy text and a usage data page): what, the
      installation id when it sends one and whether it is shared, where it goes (the receiving organization and its
      host, and every service or agent that reads the data there (a holder of a grant to read the raw events included), with its purpose, described without naming a person), the switch, how long it is kept, the
@@ -11688,13 +11688,15 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `eafcf2e4`; its ADR-0127, SCN-134), where UD-1 has no answer mean on. It owes UD-2's per-product switch and UD-1's
   purpose, naming of the sharing products, the tying of events and the resume: its live notice and settings say its
   switch governs every PassionCode app on the computer (`i18n/en.ts` lines 864, 869 and 870, their Russian copies
-  `i18n/ru.ts` lines 2488, 2493 and 2494, and its `README.md` lines 336 to 338, all at `eafcf2e4`), a false promise for a product that has sent and had its stand-in run, or whose own switch the person set, and, for its on, for a product that already read an off as an earlier no (UD-2), which the person reads until CO-496 ships, and name no purpose; its own record (its on-demand sessions specification §8, read at `7dce3758`, rewriting CO-496) replaces
+  `i18n/ru.ts` lines 2488, 2493 and 2494, and its `README.md` lines 336 to 338, all at `eafcf2e4`), a false promise for a product past its first send (or, for an install that sent before its conforming version, past a stand-in run that read no earlier no), one that cannot read the shared file, or one whose own switch the person set, and, for its on, for a product that already read an off as an earlier no (UD-2), which the person reads until CO-496 ships, and name no purpose; its own record (its on-demand sessions specification §8, read at `7dce3758`, rewriting CO-496) replaces
   the shared switch with one for Fabric alone. Its switch also writes the shared `analytics` field both ways
   (`writeAnalyticsSwitch`, `apps/desktop/src/main/analytics.ts` lines 88 to 96, called by `setEnabled` at lines 305 to
   308, at `eafcf2e4`), so under UD-2's earlier-no reading its off decides for every product that has not yet sent, or not
   yet had its stand-in run, and
   its on erases a person's earlier no for every product that has not yet read it; CO-496 owes UD-2's rule on writing (Fabric stops writing the field from the
-  version whose switch governs Fabric alone and leaves an off already written there). Fabric Inbox exports a writer for
+  version whose switch governs Fabric alone and leaves an off already written there) and UD-2's hold display in place of
+  its hold line `analytics.noFile` (`en.ts` line 866, `ru.ts` line 2490), its set-on control only if, once set on, it
+  sends without an installation id, since it sends only with the shared id (`analytics.ts` line 223). Fabric Inbox exports a writer for
   the shared field that nothing calls (`writeSwitch`, `desktop/analytics.cjs` lines 96 to 103 at `1395416`), so it
   writes nothing there today, and under UD-2 it stays uncalled. Its `README.md` (lines 202 to 204 at `1395416`) says
   its switch turns the counts off "for every PassionCode.ai app on the Mac at once", which contradicts its own notice
@@ -11770,7 +11772,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/agents/mcp.md` line 278 at `1395416`, B-205) answers the person's own agent from the server the person deploys,
   a read UD-6 allows since no product owner receives the data. A product's install and active counts move at the version that
   meets UD-1 and UD-2: they drop where the product sent before its notice or past an earlier no (Switchboard, Fabric
-  Inbox, Fabric Dashboards) or when the shared file could not be read (Fabric Inbox's baseline and Fabric Dashboards'
+  Inbox, Fabric Dashboards, and Project Observatory, whose queued events are sent before its notice and past an earlier
+  no, counted in the operator's earlier analytics instance) or when the shared file could not be read (Fabric Inbox's baseline and Fabric Dashboards'
   events without an id), and rise where it waited for an answer (Fabric, whose never-answered installs send nothing
   today and come on after its notice at CO-496); an installation id a product owns, made anew at re-enable (UD-2),
   counts that install again. That version is to be marked where its counts are read. Events the host already

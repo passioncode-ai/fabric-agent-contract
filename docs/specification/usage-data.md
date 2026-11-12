@@ -98,13 +98,13 @@ The key words MUST, MUST NOT, SHOULD and MAY are used as in RFC 2119.
   own switch the person never set), the product shows its switch as on but not sending, says beside it
   (for a product without a window, where its switch is read, such as a command line tool's status output) that
   nothing is sent until the shared file can be read at its next start, and offers there a control that sets its own
-  switch on for this product, which is the person setting the product's own switch on. A product that sends only with the shared installation id offers that control only where, once its switch is set on, it sends without that id (UD-3 requires none); otherwise it offers none and keeps showing its switch as on but not sending, with the line, whether or not the person set it, until the shared file can be read. The shared file is `<root>/installation.json`, `<root>` as DEC-0025 defines it (the `PassionCode` folder), holding
+  switch on for this product, which is the person setting the product's own switch on. A product whose only installation id is the shared one offers that control only where, once its switch is set on, it sends without an installation id (UD-3 requires none); otherwise it offers none and keeps showing its switch as on but not sending, with the line, whether or not the person set it, until the shared file can be read. The shared file is `<root>/installation.json`, `<root>` as DEC-0025 defines it (the `PassionCode` folder), holding
   `version` 1, `id` (a random UUID), `analytics` (a boolean) and `created_at`, as the products that create it write it
   (the launcher's `lib/analytics.js` lines 41 to 46 for the path and line 56 for the shape, at `ad978a6`). A product's own switch MUST NOT write the shared
   file's `analytics` field; a product whose switch wrote it under words that governed every reader stops writing it
   from the version whose switch governs it alone, and leaves an off already written there, which stays the earlier no
   for products that have not yet sent, or not yet had their stand-in run. Fabric's live setting says its switch governs every
-  app ("One switch for every PassionCode app on this computer", its `en.ts` line 864 at `eafcf2e4`): that is a false promise for a product that has sent and had its stand-in run, or whose own switch the person set, and, for its on, for a product that already read an off as an earlier no, which the person reads until Fabric's switch for Fabric alone ships (its
+  app ("One switch for every PassionCode app on this computer", its `en.ts` line 864 at `eafcf2e4`): that is a false promise for a product past its first send (or, for an install that sent before its conforming version, past a stand-in run that read no earlier no), one that cannot read the shared file, or one whose own switch the person set, and, for its on, for a product that already read an off as an earlier no, which the person reads until Fabric's switch for Fabric alone ships (its
   CO-496). A device policy ([devices](devices.md#policy)) whose layer carries a key for a product's switch MAY lock it
   off; it MUST NOT lock it on, since a person who declined stays off and the switch is the person's (UD-4).
   The device and the product ignore a lock that would hold the switch on, resolving the key without any lock that
@@ -181,7 +181,7 @@ The key words MUST, MUST NOT, SHOULD and MAY are used as in RFC 2119.
   a signed decision of an approver the product trusts for that action's digest (DL-17, DL-18), and refusing it for one
   action would split AP-2's single table. An agent MUST NOT delete or rewrite a shared file it cannot read to end a
   hold (UD-2): it reports the hold and, on the operator's word naming the switch, sets the product's own switch on through
-  the product's relayed action as above; anyone else it points to the product's own switch.
+  the product's relayed action as above; anyone else it points to the product's own switch. For a product whose only installation id is the shared one, setting its switch on does not end the hold: the agent tells the operator the product sends nothing until the shared file can be read, and points anyone else to the product's hold line rather than to its switch.
 - **UD-5, no machine declaration yet.** A product MUST state in its own documentation (its privacy text and a page on
   its usage data) what it collects, the installation id it sends (when it sends one) and whether it is shared, where it
   sends the data (the organization that receives it and its host, and every service or agent that reads the data there (a holder of a grant to read the raw events included), with
@@ -300,12 +300,12 @@ and, for every product that sends, what UD-5 asks of its privacy text. Two produ
 in all ten locales at `e7a2ed25`: `switchboard/index.html` line 89 ("the switch applies to every PassionCode.ai tool",
 already false of Switchboard, whose own `docs/ANALYTICS.md` line 48 at `d192cfa` says its switch turns Switchboard off
 or on only) and `fabric/index.html` line 61 ("which applies to every PassionCode.ai app on your Mac"), each with its
-nine locale copies; the owner owes UD-2's switch for each product alone there too. On the site's `main` (`d7da2a42`, SITE-054, merged 2026-11-11, not yet deployed) line 60 already gives each of Switchboard, Fabric and Fabric Dashboards its own switch and line 61 covers the launcher; there the owner still owes Fabric Inbox (and Observatory and Okolos) named as senders with UD-5's statements, and line 60's "Turning one off does not turn off the others" qualified as Fabric's corrected strings are until CO-496, since Fabric's off writes the shared field that UD-2 reads as an earlier no; `switchboard/index.html` line 89, `fabric/index.html` line 61 and the home FAQ (`index.html` line 245) are unchanged there. Fabric sends nothing before the person has answered its question (its ADR-0127, its SCN-134,
+nine locale copies; the owner owes UD-2's switch for each product alone there too. On the site's `main` (`d7da2a42`, SITE-054, merged 2026-11-11, not yet deployed) line 60 already gives each of Switchboard, Fabric and Fabric Dashboards its own switch and line 61 covers the launcher; line 61's "If you already said no in a PassionCode.ai app, the launcher keeps that answer", in all ten locales, owes UD-2 (a no given in Fabric's switch, which writes the shared file, before the launcher first counts is kept; a no in another app's own switch does not reach the launcher), and every sender lines 60 and 61 name owes UD-5's backups, erasure and raw-event reader there; there the owner still owes Fabric Inbox (and Observatory and Okolos) named as senders with UD-5's statements, and line 60's "Turning one off does not turn off the others" qualified as Fabric's corrected strings are until CO-496, since Fabric's off writes the shared field that UD-2 reads as an earlier no; `switchboard/index.html` line 89, `fabric/index.html` line 61 and the home FAQ (`index.html` line 245) are unchanged there. Fabric sends nothing before the person has answered its question (its ADR-0127, its SCN-134,
 "Usage counts: share them?" and "Nothing more is sent until you answer", `i18n/en.ts` lines 868 to 870 at
 `eafcf2e4`), which is a UD-1 debt: the notice is not a question and no answer means on. Its notice and settings also
 say its switch governs every PassionCode app on the computer and give no purpose, so it owes UD-1's purpose, naming
 the sharing products, that the id ties events together and the resume (lines 864, 869 and 870), and UD-2's own
-switch; line 864's "One switch for every PassionCode app on this computer" is a false promise for a product that has sent and had its stand-in run, or whose own switch the person set, and, for its on, for a product that already read an off as an earlier no, which the person reads until its own record of the operator's decision (its on-demand sessions
+switch; line 864's "One switch for every PassionCode app on this computer" is a false promise for a product past its first send (or, for an install that sent before its conforming version, past a stand-in run that read no earlier no), one that cannot read the shared file, or one whose own switch the person set, and, for its on, for a product that already read an off as an earlier no, which the person reads until its own record of the operator's decision (its on-demand sessions
 specification §8, rewriting CO-496) ships a switch for Fabric alone. The same claim stands in their Russian copies
 (`i18n/ru.ts` lines 2488, 2493 and 2494) and in its `README.md` (lines 336 to 338, "turns this off for every
 PassionCode app on the Mac") and its `docs/ANALYTICS.md` (lines 92 to 94, "turns analytics off for every PassionCode
@@ -316,8 +316,10 @@ at lines 305 to 308, at `eafcf2e4`), so under UD-2's earlier-no reading its off 
 not yet sent, or not yet had its stand-in run, and its on erases a person's earlier no for every product that has not yet read it; CO-496 owes UD-2's rule on writing: Fabric stops writing the
 field from the version whose switch governs Fabric alone and leaves an off already written there, and replaces its hold
 line `analytics.noFile` ("Usage counts are off: the shared PassionCode file could not be read, so nothing is sent.",
-`en.ts` line 866 and `ru.ts` lines 2490 to 2491 at `eafcf2e4`) with UD-2's hold display (on but not sending, the
-next-start line, the set-on control), an install whose own switch the person set on sending despite an unreadable file.
+`en.ts` line 866 and `ru.ts` line 2490 at `eafcf2e4`) with UD-2's hold display (on but not sending and the
+next-start line), and, once the person sets Fabric on, either sending without an installation id with the set-on
+control, or keeping that display without one, since Fabric sends only with the shared id
+(`apps/desktop/src/main/analytics.ts` line 223 at `eafcf2e4`).
 Fabric Inbox exports
 a writer for the shared field that nothing calls (`writeSwitch`, `desktop/analytics.cjs` lines 96 to 103 at
 `1395416`), so it writes nothing there today, and under UD-2 it stays uncalled. Its `README.md` (lines 202 to 204 at
