@@ -128,7 +128,8 @@ words AP-2 and OA-1 already name; the rules hold for any owner.
   operator's word of 2026-10-23 in its ADR-0176: the missing parts of a specification).
   A host's gate that holds an act until a person agrees to it (Fabric's `floor.ask-first`, the operator's instruction
   of 2026-10-15 in its ADR-0160; the operator's later decisions of 2026-10-26, no second approval, and of 2026-11-06,
-  a level holder's command runs without a host's prompt, bear on it until CT-250's decision and Fabric's answer to
+  a level holder's command runs without a host's prompt, and of 2026-11-07, agents run without permission prompts, questions
+  and bounds settled when the task is set (fabric-workspace `knowledge/authority.md`), bear on it until CT-250's decision and Fabric's answer to
   question `add1df7c` land), for an act the agent performs itself or through that host, stays as OW-5 keeps it (a
   relayed action of a service the words name meets that service's gate instead, AP-2 and OW-1): the agent asks through
   it once, quoting the operator's words as its reason, goes on with the rest meanwhile, and calls it again once the

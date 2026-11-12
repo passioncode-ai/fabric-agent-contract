@@ -11635,7 +11635,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   second makes OW-3 cite it. The same OA-4 change reaches three statements of the relayed approval here (SCN-046,
   CONTEXT's *Relayed approval*, the relay receiver's conformance row), which say that a host's gate on a floored act
   still asks once, quoting the relayed words as its reason; and two consumer copies, owed: fabric-workspace's "One
-  approval binds all" items 1 and 5 say the same, and Fabric's session obligation `operator.told-one-is-told-all`
+  approval binds all" items 1 and 5 say the same, as Fabric's current behaviour pending CT-250's decision and Fabric's answer to question `add1df7c` (the operator's decisions of 2026-10-26 and 2026-11-06), and Fabric's session obligation `operator.told-one-is-told-all`
   ("do not ask the operator again (DEC-0126)") names the floor's one ask (OW-3). `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `docs/specification/governance-and-roles.md` (the section *The operator's word, carried
   out the first time*), `docs/specification/conformance.md` (one row for every agent that takes the operator's words),
