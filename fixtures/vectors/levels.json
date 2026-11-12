@@ -2209,7 +2209,7 @@
             "keySet": {
               "type": "org-key-set/1",
               "issuer": "https://orgs.example",
-              "org": "org:org-a",
+              "org": "org:org-b",
               "revision": 1,
               "issuedAt": "2026-10-15T00:00:00Z",
               "keys": [
