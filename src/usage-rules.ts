@@ -38,7 +38,8 @@ export const allowance = (a: number, b: number, rows: number) => ROW_ROUNDING_US
 export const exceeds = (a: number, b: number, rows: number) => (!Number.isFinite(a) && Number.isFinite(b)) || a - b > allowance(a, b, rows);
 /** A known cost: a finite, non-negative number, the rows the rounding allowance counts (DEC-0163). */
 const knownCost = (value: unknown): boolean => cost(value) === value;
-const usd = (value: number) => show(Math.round(value * 1e6) / 1e6);
+// A value too large to scale by 1e6 is shown as it is, so a finite cost never reads as Infinity.
+const usd = (value: number) => show(Math.abs(value) >= 1e15 ? value : Math.round(value * 1e6) / 1e6);
 
 /** Midnight UTC of a `YYYY-MM-DD` date that exists, or NaN. */
 export function utcDate(value: unknown): number {

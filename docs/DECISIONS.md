@@ -11414,7 +11414,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Alternatives considered:** requiring unrounded costs (refused: a service writing JSON from decimal money cannot
   always keep binary floats unrounded, and the adapter already rounds); a fixed but larger bound (refused: it fails for
   enough rows and hides an excess for few).
-- **Compatibility:** looser only for this repository's checker: every report whose costs sum to finite numbers that passed still passes; a report whose cost sum overflows to an infinity is now refused. Read on
+- **Compatibility:** looser only for this repository's checker: every report whose costs sum to finite numbers that passed still passes; a report whose cost sum overflows to an infinity against a finite one is now refused, and two sums that both overflow cannot be compared and pass. Read on
   2026-11-12, the copies of the rule that do not read it from here and keep the fixed tolerance: the adapter's kit in
   Python and Node (`fabric_usage.py`, `fabric-usage.mjs`) and the probe that runs it, which owe the per-row allowance
   and a test of ten rows rounded up (FAA-310 part 2); and every copy outside it, which its owner changes. On the
@@ -11437,5 +11437,5 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   from `usageRules` at its pin.
 - **Consequences / affects:** `src/usage-rules.ts` (`allowance`, `exceeds` and `ROW_ROUNDING_USD`, exported; the day check's
   `close`), `docs/specification/service.md` (the usage report's sentence on rounding and `FAC-SEM-025`'s row),
-  `test/usage-rules.test.ts` (ten rows rounded up, an excess beyond rounding, each count at its boundary), `fixtures/positive/service-usage-rounded-rows.json` and `fixtures/catalogue.json`, DOCMAP, the DEC-0021 and DEC-0065 annotations.
-- **Source:** fabric-agent-adapter's board request `785fd306` (FAA-310); backlog CT-295.
+  `test/usage-rules.test.ts` (ten rows rounded up, an excess beyond rounding, each count at its boundary), `fixtures/positive/service-usage-rounded-rows.json` and `fixtures/catalogue.json`, `docs/specification/conformance.md` (the usage host row), DOCMAP, the DEC-0021 and DEC-0065 annotations.
+- **Source:** fabric-agent-adapter's board request `785fd306` (FAA-310); backlog CT-295. Course check (AGENTS.md 1a): it serves this repository's goal, interoperability, so that a kit's honest usage report passes every reader of `FAC-SEM-025`.

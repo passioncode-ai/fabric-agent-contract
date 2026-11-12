@@ -250,6 +250,9 @@ describe("FAC-SEM-025: sums of rows rounded to 6 places one by one (DEC-0163, CT
     // Two projects of 1e308 overflow their sum; the days are finite, so the projects exceed them.
     const projects = [0, 1].map((i) => ({ projectId: `urn:project:big${i}`, calls: 0, unpricedCalls: 0, costUsd: 1e308, taskRuns: [] }));
     expect(paths({ ...report, byProject: projects })).toContain("FAC-SEM-025 /byProject");
+    // A finite cost too large to scale reads as itself, never as Infinity.
+    const big = { ...report, byProject: [{ projectId: "urn:project:big", calls: 2, unpricedCalls: 0, costUsd: 1e308, taskRuns: [run(0, 1e308), run(1, 1e308)] }] };
+    expect(usageRules(big).find((f) => f.instancePath === "/byProject/0/taskRuns")?.message).toMatch(/> 1e\+308\)$/);
   });
   it("passes the rounded-rows fixture, which the fixed tolerance refused", () => {
     expect(paths(JSON.parse(readFileSync(path.join(projectRoot(), "fixtures/positive/service-usage-rounded-rows.json"), "utf8")))).toEqual([]);
