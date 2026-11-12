@@ -994,8 +994,8 @@ cloud instance's well-known document, declaring `surfaces.mcp.auth: "own"` and `
   since its caller is T2. The twin never issues a key whose scopes let it issue, rotate or revoke keys, nor rotates
   one (rotating issues a key with the same scopes): it refuses either `scope-not-granted` (`403`). No door, the
   agent's CLI included, widens an existing key's scopes to one its issuing could not carry (a key-management scope,
-  or for a member's key a `relayed` action's tool other than `fabric.job.get`), and a key with such
-  a scope is issued and rotated through the CLI or the page only, and issued only to an agent that acts on the operator's recorded decisions,
+  or for a member's key a `relayed` action's tool other than `fabric.job.get`). A key with a key-management
+  scope is issued and rotated through the CLI or the page only, and issued only to an agent that acts on the operator's recorded decisions,
   never to a member of the team, whose keys carry no key-management scope. Where the instance declares
   `auth.delegation`, agents of the estate hold no client key (below), so the operator issues no key-management client
   key; the twin stays open to a delegation-token caller with the operator's decision (T0 or T1, AP-2) or an accepted
@@ -1120,7 +1120,9 @@ cloud instance's well-known document, declaring `surfaces.mcp.auth: "own"` and `
     `operator-step`), never a holder label (CF-3), so that a host tells two steps apart (Fabric Dashboards keys an ask by
     its subject); a `link` that is the page's path; a `kind` the host reads as an ask (Fabric Dashboards: its ask
     pattern, such as `human_step.opened`); and a `level` of `notice` or higher (Fabric Dashboards' default minimum for a
-    banner). A call that reaches a step still open raises no new event; while the step stays open, the service raises
+    banner). A call that reaches a step still open raises no new event. Before each repeat the service checks the
+    step's need again: a need met outside the page (a top-up or a consent at the provider) closes the step with no
+    event, and its waiting jobs go on. While the step stays open, the service raises
     it again, each time no sooner than 25 hours and no later than 48 hours after the previous raise (a host's 24-hour ask hold and its poll
     interval), as a new event with a new `id` (an event id increases) and the same `subject`, `kind` and `link`, until
     the operator takes or declines it or it closes (CF-3). A host holds an ask for one subject for 24 hours from when it
@@ -1135,8 +1137,11 @@ cloud instance's well-known document, declaring `surfaces.mcp.auth: "own"` and `
     the job's own caller, [agent network](agent-network.md#call-queue)), and which a caller reaches as CF-3's key twin is (the
     operator's decision from a T0 or T1 caller, or an accepted `approval/1`, with the gate below), so an operator whose
     computer shows no page can answer a choice or decline a step through their own agent where that gate lets the agent
-    through, or with their operator channel's buttons, which perform the page's own operation (OC-5).
-  - **What the caller reads.** A job reads `working` to that caller, its `statusMessage` starting
+    through, else by their agent running the agent's CLI on the operator's computer on their word (*Where the operator
+    is*, below), or with their operator channel's buttons, which perform the page's own operation (OC-5).
+  - **What the caller reads.** The instance keys every job by the client key that started it and answers
+    `fabric.job.get` and `fabric.job.cancel` for another key's job `unknown-job`, whether or not it queues, so a member
+    never reads or cancels another member's job. A job reads `working` to that caller, its `statusMessage` starting
     `operator-step <humanStep>` (`operator-step choice` for a choice), optionally followed by a colon, a space and a
     text saying the operator was asked, at most 500 characters in all, in the style of interop's pause grammar
     (`FAC-SEM-119`), so that a caller reads which step it waits on; no rule code checks this grammar yet. Its request is never put in the caller's `inputRequests`; when the operator takes the step or answers the
@@ -1193,11 +1198,15 @@ cloud instance's well-known document, declaring `surfaces.mcp.auth: "own"` and `
     (answering a choice, declining a step, revoking, capping a key, raising a ceiling, changing a scope) is carried out
     by the operator's own agent on their word: answering a choice and declining a step through their agent twins where
     the gate above lets the agent through, revoking through the key twin likewise (CF-3), and any of them, capping a key,
-    changing its scopes and raising a ceiling included, by running the agent's CLI on the operator's computer, which
+    changing its scopes and raising a ceiling included, by running the agent's CLI on the operator's computer (or
+    through the agent twin of a page action that caps, rescopes or raises, where the page offers one, AP-1, declared
+    `gate: "relayed"` and widening no key's scopes, CF-3), which
     offers choosing and declining an open step by its opaque id, revoking, capping a key, changing its scopes and
     raising a ceiling; the operator channel's buttons (above) also answer a choice or decline a step. On that CLI path
-    the CLI records the operator's instruction, its `at` and the agent as the relaying caller, as a twin call's
-    decision is recorded ([AP-3](#actions), AP-5), and the page shows the act as the operator's. Only issuing or
+    the CLI records the operator's instruction, its `at` and the agent as the relaying caller as its invoker states
+    it, marked as stated and not authenticated (the CLI runs under the operator's own access on their computer, so the
+    caller AP-2 authenticates is the operator's CLI), beside the twin call's record ([AP-3](#actions), AP-5), and the
+    page shows the act as the operator's. Only issuing or
     rotating a key for anyone but the calling agent (a member's or another agent's key, a secret handed out, CF-3) and
     a body step stay the operator's own; the key twin's issuing and rotating of its own caller's key, on the operator's
     decision, is the agent's (CF-3). Until then the job keeps reading `working` and a repeated call is refused

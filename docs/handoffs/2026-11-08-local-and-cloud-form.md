@@ -16,7 +16,7 @@ was deleted from `origin` and replaced by this squash. Commit-addressed referenc
 
 origin/main `d40ae936` was merged in as `6b5fa9ee` on 2026-11-12 (gate exit 0, 11185 tests), and `2b0bcd55` as
 `00c317c9` the same day (the backlog conflict at CT-285 resolved before the commit: this branch's CT-270 to CT-283 rows,
-then main's CT-285 row).
+then main's CT-285 row), `21f8097e` as `8563ee71` and `53835d18` as `e4710ba2` the same day (no conflict).
 
 ## Done
 
@@ -136,17 +136,20 @@ a client-key caller input for CF-4's `operator-step` (FAA-204).
 - The coordinator's blind readings until two consecutive clean rounds.
 - Landing note for CT-292's decision (round 18, seam and product): binding on whichever of DEC-0159 and CT-292's DEC
   lands second. A client key at a cloud instance in the form carries no grant and no context (CF-3; `contexts.md`), so
-  TC-2's grant claim is absent for it: CT-292's DEC states that a client-key call's claim is the callee instance's
-  context (DL-29), read as the place, and that TC-6 covers a client key as a credential. Check, on the merged tree after
-  that DEC: `awk '/^### DEC-0159/,0' docs/DECISIONS.md | grep -c 'CT-292'` prints at least 1, or main's CT-292 row names
-  DEC-0159.
+  TC-2's grant claim is absent for it: CT-292's DEC states which context a client-key call is in (the cloud
+  instance's operator's context, read as the place) and that TC-6 covers a client key as a credential. Checks: main's
+  CT-292 row names DEC-0159 (`grep '^| CT-292 ' docs/backlog.md | grep -c 'DEC-0159'` prints 1, since main's row edit
+  of 2026-11-12); after that DEC, on the merged tree, `awk 'BEGIN{RS="\n### DEC-"} /CT-292/ && !/^0159/ {n += (/DEC-0159/
+  && /client key/)} END{print n+0}' docs/DECISIONS.md` prints at least 1 (round 19, seam).
 - Landing note for CT-293's decision (round 18, seam): binding on whichever of DEC-0159 and CT-293's DEC lands second.
   CT-293 has the decision for an act cover issuing the narrow grant, scope or key that act needs; its DEC lists DEC-0159
   CF-3 (a member's or another agent's client key is issued and rotated only by the operator in their own terminal or on
   the page; the key twin issues only its caller's key; no door widens a key's scopes to one its issuing could not carry)
   and CF-4 (a key's scopes changed by the operator's agent on the operator's word) among the rules it restates, and says
-  whether an act's decision covers the caller's own client key or a scope change. Check, on the merged tree:
-  `grep '^| CT-293' docs/backlog.md | grep -c 'DEC-0159'` prints 1 once that row is edited.
+  whether an act's decision covers the caller's own client key or a scope change. Checks: `grep '^| CT-293'
+  docs/backlog.md | grep -c 'DEC-0159'` prints 1 (main's row edit of 2026-11-12); after that DEC, on the merged tree,
+  `awk 'BEGIN{RS="\n### DEC-"} /CT-293/ && !/^0159/ {n += (/DEC-0159/ && /CF-3/)} END{print n+0}' docs/DECISIONS.md`
+  prints at least 1 (round 19, seam).
 - A question for the operator (not reserved as an `OQ` id): client-key spend at a cloud instance in the form reaches no
   grant check, so at the call it is bound only by each provider key's own ceiling and the service's own budgets, not by
   L0's monthly total or a project's L1, and only L0's monthly total sees it, after the fact (CF-3, spend policy's
@@ -199,6 +202,14 @@ a client-key caller input for CF-4's `operator-step` (FAA-204).
   `relayed` twin, and a member's key is issued by the service's operator in their own terminal or on the page (CF-3),
   pending the vault-delivery question above. Until these land the knowledge base contradicts CF-3; they land in the
   same landing run as the merge, and the knowledge commit is recorded in this handoff.
+- With DEC-0156 (round 19, seam), binding whichever lands second: `conformance.md` conflicts over two adjacent rows,
+  each changed on one side only; the lander keeps this branch's "a callee that serves the family" row and DEC-0156's
+  "an agent receiving a relay" row (checks: `grep '^| a callee that serves the family' docs/specification/conformance.md
+  | grep -c 'save the one exception'` and `grep "^| an agent receiving a relay" docs/specification/conformance.md | grep
+  -c "a host's gate on a floored act still asking once"` each print 1); and DEC-0156's OW-5 says that a relayed decision
+  naming a change to a service's own budget or a per-key cap (CF-3, CF-4) is that change, not a widening by OW-1, and
+  never moves L0 or L1 (check: `awk '/^- \*\*OW-5/,/^- \*\*OW-6/' docs/specification/governance-and-roles.md | grep -c
+  'CF-4'` prints at least 1). DEC-0156's handoff carries both.
 - At landing, beside DEC-0156 (branch `agent/ct220-operators-word-v2`), DEC-0157 (branch `agent/ct216-usage-data-v2`)
   and DEC-0158 (branch `agent/ct215-on-demand-20261108`), the second lander resolves each conflict in
   `docs/DECISIONS.md`, `docs/backlog.md` and `docs/handoffs/README.md` as the adjacent appends they are: both sides
@@ -856,6 +867,20 @@ a client-key caller input for CF-4's `operator-step` (FAA-204).
   scopes to one its issuing could not carry (CF-3, conformance); CT-292 and CT-293 landing notes; a checks line for the
   round-17 fold. Declined: none.
 
+- Checks run on the round-18 fold (`e3ecb6f7`): `pnpm run check` exit 0 (11185 tests), before round 19 was read.
+- Round 19 (on `e3ecb6f7`): seam clean; unit and product not clean. Breaks folded: FLW-36 gave the key twin per-key
+  spend, cap, scope and ceiling, which only the CLI (or a page action's twin where the page offers one) does (unit);
+  SCN-059 had the hub mint an `approval/1` from a recorded word, which DL-18 does not, while SCR-36 had the agent ask
+  the operator for one; both now send the agent to the CLI, an `approval/1` asking the operator (product); SCN-058 and
+  SCR-35 said a member's job waits until the operator answers on the page; the operator or their agent answers (product,
+  unit). Risks folded: a key-management key's door rule a sentence of its own (unit); CF-4's raised-step bullet names
+  the CLI; every job keyed by its client key, another key's job `unknown-job`; a step's need checked again before each
+  repeat, with a SCN-059 alt path; the CLI's record marked as stated by its invoker, not AP-2's authenticated caller;
+  a page action's twin for cap, scope or ceiling where the page offers one (AP-1); SCN-044's no-page sentence narrowed;
+  SCN-058 keeps the key out of the coding agent's chat; FLW-36's diagram gains the agent's route; the CT-292 and
+  CT-293 notes' checks scoped to each DEC, main's rows naming DEC-0159; the DEC-0156 conformance hunk and OW-5 note;
+  Branch names all four main merges; CT-218 carries rounds 18 and 19 (unit, product, seam). Declined: none.
+
 ## Next task
 
-Round 19 of the blind readings (unit, seam, product) of branch `agent/ct218-local-cloud-v2` (DEC-0159).
+Round 20 of the blind readings (unit, seam, product) of branch `agent/ct218-local-cloud-v2` (DEC-0159).
