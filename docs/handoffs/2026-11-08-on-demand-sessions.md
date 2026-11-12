@@ -195,6 +195,16 @@ package the run is handed, (b) its lifecycle and a dead run's request, (c) how i
 
 ## Open
 
+- For the re-cut (relayed from DEC-0156's rounds 29 to 32, 2026-11-12): Fabric `9420da79` ships the operator's word of
+  2026-11-12 as `QUESTIONS_RULE` in both packets of a board-started run (decide first by recorded decisions, the goal
+  and the safest reversible option, then one question per task to the project offering `people.ask`, else
+  `fabric_question_ask`). The PM agent's reply starts the next run; an answer through `fabric_question_ask` wakes nobody
+  (`answer_question`), so it is a decision on which the request is submitted again only on the operator's word relayed
+  to the requester, or by the operator's own session when they own the requesting Project. OS-6 at `cb7009d7` asks
+  nothing at the stop for a decision outside the mandate and at the source hand-over stop, which are DEC-0156 OW-3's
+  first two waits; the re-cut table asks there once per task by that route, its notice question at a human step and
+  after a refused note unchanged, and says that the question's answer is read as above. DEC-0156's handoff carries
+  the merged-tree checks (`people.ask` and `starts no run` in `project-comms.md`).
 - The coordinator's blind readings (unit, seam, product) until two consecutive clean rounds.
 - Consumer debts, named in DEC-0158's Compatibility: Fabric's CO-409 items (held work no candidate, the counting, the
   packet's OS-4 and OS-6 text beside the production stop, its mandate text appending each callee and never the run, the
