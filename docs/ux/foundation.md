@@ -63,7 +63,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Personas:** P-03
 - **Type:** functional, emotional
 - **Forces:** push: telemetry nobody can see feels like surveillance; pull: a log of every read and visible locks; anxiety: data used beyond its stated purpose; habit: switch the collector off.
-- **Success metric:** every read of the member's raw data or device state appears in their access log with a purpose, and a locked setting is shown as locked rather than silently ignored (a lock that would hold a product's usage data switch on is the exception: it is ignored and the switch shows the person's own setting, UD-2, DEC-0157).
+- **Success metric:** every read of the member's raw data or device state appears in their access log with a purpose, and a locked setting is shown as locked rather than silently ignored (a lock that would hold a product's usage data switch on where no layer locks it off is the exception: it is ignored and the switch shows the person's own setting, UD-2, DEC-0157).
 
 ### JTBD-05: Answer my agents' stops from my phone
 

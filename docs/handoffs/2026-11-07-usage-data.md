@@ -69,7 +69,7 @@ decision of 2026-11-04.
 
 - The coordinator's blind readings until two consecutive clean rounds; the gate; the pull request, merge, tag and
   release; at merge DEC-0157 Accepted and CT-216 done, CT-287's DEC-0157 clause marked landed (the pull request and the merge
-  commit), the `Next free ID` line written from the counter read then, CT-250's, CT-252's and CT-259's "(proposed on a branch, CT-287)" after DEC-0157 restated as "(accepted <date>)",
+  commit), the `Next free ID` line written from the counter read then, CT-250's, CT-252's, CT-259's and CT-293's "(proposed on a branch, CT-287)" after DEC-0157 restated as "(accepted <date>)",
   `docs/handoffs/2026-11-12-north-star-designs.md`'s Next task no longer naming DEC-0157's readings, the handoffs index row's Decisions cell reading
   "DEC-0157 (CT-216; CT-280 filed), accepted <date>; rounds 1 to N not clean, N+1 and N+2 clean" and its Merge cell
   "merged <date>, #<PR> `<merge commit>`", and the products told on the board what each owes, in one
@@ -958,6 +958,17 @@ not pushed for the same reason; the round entries' commits resolve only there.
   CT-250, CT-252 and CT-259's "(proposed on a branch)" (product, seam); the index takes one row per handoff from its
   owner (seam); CT-280 first names how a key is known as a usage switch (seam). Declined: none.
 
+- Round 25 (on `1e0d70c2`): seam and product clean; unit not clean. Break folded: four summaries of the device lock
+  (conformance row 160, SCR-10, SCN-011's alt path, JTBD-04) dropped "where no lower layer's lock holds it off", so
+  with an `mdm` lock on over a `server` lock off they showed the person's on as applied; each now carries it (unit).
+  Risks folded: the product's conformance row and DEC-0157 item 2 carry the hold's display (the line and the offer);
+  a product records that its first send or stand-in run has happened, and drops what it collected before it read an
+  earlier no; the switch reads "on but not sending" during a hold, the line names the next start and, for a product
+  without a window, its status output; UD-4 forbids an agent to rewrite an unreadable shared file to end a hold;
+  devices.md, SCN-011 and SCR-10 say no key name marks a usage switch yet (CT-280); CT-280's row fixed; the landing
+  list names CT-293 (main's CT-293 row names UD-3 to UD-5 since #281) (unit, product, seam). Declined: none.
+- Checks run on the round-24 fold (`1e0d70c2`): `pnpm run check` exit 0 (11173 tests).
+
 ## Next task
 
-Round 25 of the blind readings of branch `agent/ct216-usage-data-v2` (DEC-0157): unit, seam and product.
+Round 26 of the blind readings of branch `agent/ct216-usage-data-v2` (DEC-0157): unit, seam and product.

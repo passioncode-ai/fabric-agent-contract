@@ -11459,7 +11459,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      and leaves an off already written there, which stays the earlier no for products that have not yet sent; a
      shared file that exists but cannot be read before a product's first send (or before that stand-in run), on an install whose own switch the person has not set on, is no
      answer, and the product sends nothing in that run, a run that sent nothing for that reason being no stand-in run, and the product saying beside its switch that nothing
-     is sent until the shared file can be read;
+     is sent until the shared file can be read at its next start and offering there to set its switch on, which is the
+     person setting the product's own switch on;
      a device policy whose layer carries a key for a product's switch may lock it off and never locks it on, and
      the device and the product ignore a lock that would hold the switch on, resolving the key without any lock that
      would hold it on, so a lower layer's lock off still holds and, where none holds it off, the person's own setting (or an

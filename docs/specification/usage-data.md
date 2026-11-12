@@ -89,11 +89,15 @@ The key words MUST, MUST NOT, SHOULD and MAY are used as in RFC 2119.
   it says why, as an earlier choice made for the apps on this computer), and its notice, if shown, says that it is off
   and where to turn it on; turning it on there is the person setting the product's own switch on. An earlier no is the
   shared off present at a run before the first send (or at the stand-in run); a product keeps an earlier no it read until the person sets its
-  own switch on, and need not keep a reading that found none. On an install whose own switch the person has not set on, a shared file that exists but cannot be read when the
+  own switch on, and need not keep a reading that found none, only that its first send, or its stand-in run, has happened. What a
+  product collected before it read an earlier no, a run held by an unreadable shared file included, it drops when it
+  reads that no, as off drops what waits to be sent. On an install whose own switch the person has not set on, a shared file that exists but cannot be read when the
   product reads it before its first send (or before that
   stand-in run) is no answer: the product MUST send nothing in that run and reads it again at its next run, and a run
-  that sent nothing for that reason is no stand-in run. While an unreadable shared file holds its send, the product says beside its switch that nothing is sent until the
-  shared file can be read, and offers there to set its switch on, which is the person setting the product's own switch on. A product's own switch MUST NOT write the shared
+  that sent nothing for that reason is no stand-in run. While an unreadable shared file holds its send, the product shows its switch as on but not sending, says beside it
+  (for a product without a window, where its switch is read, such as a command line tool's status output) that
+  nothing is sent until the shared file can be read at its next start, and offers there a control that sets its own
+  switch on for this product, which is the person setting the product's own switch on. A product's own switch MUST NOT write the shared
   file's `analytics` field; a product whose switch wrote it under words that governed every reader stops writing it
   from the version whose switch governs it alone, and leaves an off already written there, which stays the earlier no
   for products that have not yet sent. Fabric's live setting says its switch governs every
@@ -173,7 +177,10 @@ The key words MUST, MUST NOT, SHOULD and MAY are used as in RFC 2119.
   agent-side limit above is the only bar on that form: the contract adds no product-side refusal, since an approval is
   a signed decision of an approver the product trusts for that action's digest (DL-17, DL-18), and refusing it for one
   action would split AP-2's single table.
-- **UD-5, no machine declaration yet.** A product MUST state in its own documentation (its privacy text and a page on
+- An agent does not delete or rewrite a shared file it cannot read to end a hold: it reports the hold
+  and points the person to the product's own switch.
+
+**UD-5, no machine declaration yet.** A product MUST state in its own documentation (its privacy text and a page on
   its usage data) what it collects, the installation id it sends (when it sends one) and whether it is shared, where it
   sends the data (the organization that receives it and its host, and every service that reads the data there, with
   its purpose, described without naming a person), where the switch is, how long the data is kept, the version that turned collection on by default, and
