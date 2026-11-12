@@ -628,7 +628,9 @@ it reaches acts on them without asking, within what they cover.
   above, when the call's token binds the attestation by `mem` and the holder's level covers the call (an architect's,
   the call's project among its projects), and records `{by: "level", level, org, project?, approver, membershipDigest, revision, via: "mandate", task, chain, caller}` ([membership](membership.md#levels) LV-6, LV-9, LV-10); it stands only at the service its
   attestation's audience names, so handed on to another it is refused `level-audience` and the hub states a new one
-  for that service; a callee that reads no levels answers as if the call carried no mandate.
+  for that service; a callee that reads no levels answers as if the call carried no mandate. A place's standing mandate
+  (DEC-0166 AU-1) is taken from T0 or T1 as above and from T2 when the call's token binds it by `prof` (AU-3), at a
+  callee that declares `standing`; it is recorded `via: "profile"` with the place, the revision and the digest (AU-6).
 - **MD-4, asking only for the rest.** A call the mandate does not cover is refused `operator-decision-required` with
   `data.detail` `outside-mandate: <action|capability|effect|spend|project>`, naming the first part not covered, and for
   spend `estimateUsd` and `perCallMaxUsd`; a job's step it does not cover waits `input_required`, naming the part. The
@@ -638,7 +640,7 @@ it reaches acts on them without asking, within what they cover.
   a mandate that covers it. A mandate that is not valid (malformed, widened, expired, given more than 60 seconds after
   the callee's clock, or not addressed to this call) is refused `decision-invalid` with its `detail`; at a job's step,
   which has no refusal to send, the job waits `input_required` instead ([interop C3.3](interop.md#c33-awaiting-a-choice)).
-- **MD-5, beyond the estate.** A T2 caller's operator mandate changes nothing: the callee applies the whole profile as if it were
+- **MD-5, beyond the estate.** A T2 caller's operator mandate changes nothing: the callee applies the whole compatibility profile as if it were
   absent (DL-8, DL-13, DL-17), so a relayed action still answers `approval-required`; a level mandate its token binds is
   taken as MD-3 says (DEC-0162 LV-6), and so is a place's standing mandate its token binds by `prof` (DEC-0166 AU-3); a source hand-over answers as
   [source](source.md#handing-over) specifies (DEC-0149). Toward another person's
@@ -673,18 +675,25 @@ decision of 2026-11-09, fabric-workspace `knowledge/authority.md`, *Autonomy by 
   estate its instance runs in, DEC-0162 LV-7), `instruction` the setter's recorded words (AU-2; AU-4's for a default),
   the profile's `scope`, and a chain starting at the assigned agent. A standing mandate is never stated `by: "level"`
   (the schema): the setter's level is checked once, at the set, and recorded there, so the stated mandate carries no
-  attestation, its digest does not change with one, and it stands at every service its token reaches. A project-board
+  attestation, its digest does not change with one, and it stands at every service its token reaches; in an
+  organization's context `standing.setLevel` names that level (AU-2). A project-board
   request carries no standing mandate: only the place's hub states one, for an assignment it starts (as LV-6 keeps a
   level mandate off the board). It
   stands at most 24 hours after `at` (`FAC-SEM-144`); the hub states it again from the profile for a longer
   assignment. Every rule of a task's mandate applies unchanged: MD-2 and MD-2a narrow it at each hand-over, MD-3 says
-  what it covers, MD-4 what it refuses, MD-6 what never travels. AP-3's "a standing rule in a file is not a decision"
+  what it covers, MD-4 what it refuses, MD-6 what never travels; save MD-1's ask at expiry: at a standing mandate's
+  `expiresAt` the agent asks its hub, which restates the current revision, never the operator. AP-3's "a standing rule in a file is not a decision"
   stays true: the profile is the setter's recorded decision, which only the place's hub states.
 - **AU-2, who sets it.** Setting or changing a profile is the hub's relayed action `autonomy.profile.set`, effect
   `change-policy`: in the personal context by the operator's decision (AP-2); in an organization's context by a level
   decision (DEC-0162 LV-3), `owner` or `admin` for any place of the organization and an `architect` only for a profile
   whose `scope.projects` lie within its attestation's projects. A profile never covers more than its setter's level
-  does, and the hub records the setter's level and approver (LV-9).
+  does, and the hub records the setter's level and approver (LV-9). The hub states that level as `standing.setLevel`
+  (inside the digest, so `prof` binds it; an architect's profile names its projects, `FAC-SEM-173`), and a callee that
+  declares `actionLevels` refuses an action declared above it as LV-7 and LV-10 say: `operator-decision-required`
+  with `level-insufficient: operator` for an act no level decides, `owner` for a billing act below the owner,
+  `admin` for an act declared `admin` or a call in no project below an admin. The operator's own profile carries no
+  `setLevel` and is the operator's word.
 - **AU-3, how it binds.** A callee reads standing mandates only when its authority extension declares `standing`
   (`extensions/authority/0.1`, `service-authority-extension.schema.json`); an agent sends one, and the hub forwards one, only to such a callee, and
   one that does not declare it answers as if the call carried no mandate. Inside the boundary (T0, T1) a standing
@@ -697,16 +706,20 @@ decision of 2026-11-09, fabric-workspace `knowledge/authority.md`, *Autonomy by 
   Inside the boundary no token binds it, so a narrowed revision, or a place whose watcher stops answering (AU-6),
   reaches an assignment already running only at its stated mandate's `expiresAt`, at most 24 hours later; from T2 a
   token minted at the new revision refuses the older mandate `profile-unbound`, and the agent asks its hub, which
-  restates the current revision. From T2 the token binds the profile, not the chain: a hand-over's narrowing binds a T2
+  restates the current revision. This decision names no faster stop of an assignment already running: the hub's own
+  stop of its assignments, where it has one, is the operator's lever until one is decided. From T2 the token binds the profile, not the chain: a hand-over's narrowing binds a T2
   presenter only as far as the onward token's own scope, effect and spend (DL-5), so a hand-over to a T2 agent narrows
   the token as well as the chain. An origin
   sends a standing mandate only to a hub whose `protocols` list `standing/1`, which forwards it from any origin with
   the origin's token (interop C3.5).
 - **AU-4, the defaults.** A place with no profile recorded behaves by its kind. `headless`: the hub states a profile
   covering every effect class but `change-policy` (deploy, merge, publish, send, delete, charge within the limits)
-  for the capabilities the assignment's own grant names (its `capabilities`, so MD-3's named call holds),
-  in the personal context, its `instruction` the operator's recorded words of 2026-11-09 and its `source` that record
-  (fabric-workspace `knowledge/authority.md`, *Autonomy by place*); in an organization's context it states nothing
+  for every capability of the services registered in the place's estate, which the hub lists by name in the scope's
+  `capabilities` when it states the profile (its own service list, whatever grants the assignment holds, so MD-3's
+  named call holds inside the estate, where a callee requires no token, DL-26), in the personal context, its
+  `instruction` the operator's recorded words of 2026-11-09 and its `source` the session where they were said
+  (`{project: "fabric-workspace", session: "a616cbcb"}`, kept in the hub's record unless the target lists
+  `operator-source/1`, OA-7); in an organization's context it states nothing
   until the organization's `owner` or an `admin` records a profile (an `architect`'s, for its own projects only, ends
   the wait for those) (question 4's default in DEC-0166, until the
   operator answers otherwise). A profile decides no credential request: that stays as
@@ -724,7 +737,9 @@ decision of 2026-11-09, fabric-workspace `knowledge/authority.md`, *Autonomy by 
   digest, the assignment (`task`), the chain and the caller the service authenticated.
 - **AU-7, refusals.** As MD-4: `operator-decision-required` with `outside-mandate: <part>` for an act the profile does
   not cover; `decision-invalid` with `profile-unbound`, or the mandate's own detail (`mandate-malformed`,
-  `mandate-expired` and the others); from T2 every refusal carries `data.actionDigest` (DL-18). The hub's own states (a
+  `mandate-expired` and the others); from T2 every refusal carries `data.actionDigest` (DL-18). A mandate stated
+  `by: "level"` with `standing` is malformed (`FAC-SEM-144`), yet a service that reads no levels answers it as if
+  absent before it reads its schema, as LV-10 says of every level form. The hub's own states (a
   stale revision, an unwatched place) never reach a callee: the hub states no mandate in them.
 
 ### One approval binds all the operator's agents

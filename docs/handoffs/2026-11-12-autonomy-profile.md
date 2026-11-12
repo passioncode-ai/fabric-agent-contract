@@ -31,12 +31,9 @@ organization slice of 2026-11-21: a place's profile as a standing `mandate/1` it
 
 ## Open
 
-- Merge DEC-0162's head after each of its folds (round 9 merged at `a220c1ed`; round 10 next on its branch), never a
-  rebase; land after DEC-0162. At that merge `schemas/mandate.schema.json`'s description keeps both clauses: `grep -c
-  'never travels over the board' schemas/mandate.schema.json` prints 1 and `grep -c 'standing mandate its token binds
-  by prof' schemas/mandate.schema.json` prints 1.
-- The operator's five questions: post them with their defaults and 2026-11-21 on thread `8da128cf` (beside DEC-0162's);
-  the board answered HTTP 503 through 2026-11-12.
+- Merge DEC-0162's head after each of its folds (round 9 merged at `a220c1ed`; round 10's `ac23deaf` next), never a rebase; land after DEC-0162. At that merge `schemas/mandate.schema.json`'s description keeps both clauses: `grep -c 'neither a level mandate nor a standing mandate travels over the board' schemas/mandate.schema.json` prints 1 and `grep -c 'standing mandate its token binds by prof' schemas/mandate.schema.json` prints 1; `src/levels.ts` keeps both DEC-0162's `levelContextsWellFormed` (round 10's) and this branch's `levelShortOf`.
+- The operator's five questions: posted with their defaults and 2026-11-21 as board message `bd18b1fa` on thread `8da128cf` (beside DEC-0162's), 2026-11-12 21:00 UTC. Acceptance waits for no answer; an answer before 2026-11-21 changes DEC-0166, one after it is a new decision.
+- The knowledge base, at landing: fabric-workspace `knowledge/authority.md` *Autonomy by place* and `north-star.md` G19 give an organization's space, VM or cloud the finish-everything default; restate them with question 4 (an organization's headless place states nothing until its owner, an admin or, for its projects, an architect records a profile), question 5 (no credential request) and AU-2's level bound, then the workspace sync. Check: `git -C fabric-workspace grep -c 'DEC-0166' origin/main -- knowledge/authority.md knowledge/north-star.md` prints at least 1 for each.
 - Restatements owed by whichever lands second (the CT-285 row names them): DEC-0156 OW-3 (a profile is a standing
   mandate the hub states, not a session's own rule), DEC-0158 OS-2, OS-6 and OS-7 (a dispatched run on a headless place
   carries the place's standing mandate), DEC-0159 CF-3 and CF-4 (a client key carries no profile), and DEC-0157 UD-4
@@ -44,7 +41,7 @@ organization slice of 2026-11-21: a place's profile as a standing `mandate/1` it
   bar once UD-4 lands).
 - The rule register lists `FAC-SEM-173` while 171 and 172 belong to DEC-0164 and DEC-0165 on their branches; the
   last lander writes the next free code from the CAS counter.
-- Tell Fabric (CO-547) and the adapter (FAA-249) when DEC-0166 lands.
+- Tell Fabric (CO-547) and the adapter (FAA-249) when DEC-0166 lands. Fabric's row gains the board-block refusal of `standing` and the forward to a callee declaring `standing` (both owed at any repin past this decision). The adapter's FAA-249 row on its main names neither DEC-0166 nor `profile.json`: amend it at landing (`standing` in the authority extension, `standing` ['1'] in both `PROTOCOL_REVISIONS` twins, `profile.json` in the vendored vectors, `levelShortOf`'s bound). Check: `git -C fabric-agent-adapter grep -c 'DEC-0166' origin/main -- docs/backlog.md` prints at least 1.
 
 ## Checks run
 
@@ -83,6 +80,23 @@ organization slice of 2026-11-21: a place's profile as a standing `mandate/1` it
   generator's independence stated as the hashing step; the consumers' parity rows in Compatibility; a DOCMAP row.
   Declined: the register's order (cosmetic; no test reads it). `pnpm run check` exit 0 (11323 passed, 3 skipped).
 
+- Round 3 (on `a16a9863`): unit clean with two risks, seam failed, product failed. Product, breaks folded: AU-4's
+  headless default lists every capability of the services registered in the place's estate, which the hub names
+  (no grant needed inside the estate, DL-26); an organization's profile carries its setter's level
+  (`standing.setLevel`, inside the digest) and a callee declaring `actionLevels` refuses an action above it
+  `level-insufficient` (`levelShortOf`, six vectors; an architect's profile names its projects, `FAC-SEM-173`, a
+  document vector); AU-4's source is the expressible session record; MD-3 names the standing mandate and `via:
+  profile`. Product risks folded: the architect case in item 4, question 4 and the hub row; the actionDecision table's
+  row for a standing mandate at a service not declaring `standing`; the knowledge base restatement in Open; at a
+  standing mandate's expiry the agent asks its hub (AU-1); "the compatibility profile" in MD-5 and FLW-31; no faster
+  stop named (AU-3); a level standing mandate where no levels are read relabelled and its precedence in AU-7. Seam,
+  break folded: interop's T2 paragraph and `decision-invalid` row name the standing mandate and `profile-unbound`.
+  Seam risks folded: Fabric's board reader and forward path owed in Compatibility; the adapter row in Open; a vector
+  for a caller placed in no tier; the standing row reads an operator decision from T2 as none. Unit risks folded: a
+  non-object `standing` is gated by `isObject`, so it is `mandate-malformed` everywhere (a vector); the T2 chain
+  stripping stays AU-3's stated reading (the token's own scope binds, DL-5). Declined: none.
+
 ## Next task
 
-Round 3 of the blind readings (unit, seam, product) of branch `agent/ct285-autonomy-profile-20261112` (DEC-0166).
+Merge DEC-0162's round-10 head `ac23deaf` into this branch, then round 4 of the blind readings (unit, seam, product)
+of branch `agent/ct285-autonomy-profile-20261112` (DEC-0166).

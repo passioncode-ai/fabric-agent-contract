@@ -166,7 +166,7 @@ export function actionDecision(input: ActionDecisionInput): ActionDecisionAnswer
   // `standing`; from T2 it stands only when the call's token binds it by `prof`.
   // As a level mandate: from T2 an operator decision, or a level decision where no levels are read, counts for nothing.
   const levelRead = levelDecision && isObject(input.levels);
-  const standingMandate = (decision === undefined || (!inside && !levelRead)) && input.standing === true && isObject(input.mandate) && input.mandate.standing !== undefined;
+  const standingMandate = (decision === undefined || (!inside && !levelRead)) && input.standing === true && isObject(input.mandate) && isObject(input.mandate.standing);
   if ((isObject(input.levels) && (levelDecision || levelMandate)) || standingMandate) {
     const clock = strictTime(now);
     if (Number.isNaN(clock)) return { fault: "now-unreadable" };

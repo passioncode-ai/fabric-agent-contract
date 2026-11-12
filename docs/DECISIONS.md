@@ -11502,7 +11502,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      (`FAC-SEM-144` amended) and the hub restates it. MD-2, MD-2a, MD-3, MD-4 and MD-6 apply unchanged.
   2. **Who sets it (AU-2).** The hub's relayed action `autonomy.profile.set`, effect `change-policy`: by AP-2's decision
      in the personal context, by a level decision (DEC-0162 LV-3) in an organization's (`owner` or `admin` for any
-     place, an `architect` for a profile within its projects).
+     place, an `architect` for a profile within its projects). The hub states the setter's level as
+     `standing.setLevel` (inside the digest; an architect's names its projects, `FAC-SEM-173`), and a callee that
+     declares `actionLevels` refuses an action declared above it `level-insufficient` (LV-7, LV-10; `levelShortOf`
+     in `src/levels.ts`), so a profile never covers more than its setter's level does.
   3. **Binding (AU-3).** A callee reads standing mandates only when its authority extension declares `standing`; an agent
      sends one, and the hub forwards one, only to such a callee, and the protocol name `standing/1` gates the form
      toward a hub. From T0 or T1 it is taken as MD-3 says; from T2 only when the call's delegation token carries the new
@@ -11510,9 +11513,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      `chain`), which the hub writes for the assignment's token; a `prof` that is not the mandate's is `decision-invalid`
      `profile-unbound` at any tier; an onward token keeps the parent's `prof` or none (`FAC-SEM-050`).
   4. **Defaults, bounds, watching, refusals (AU-4 to AU-7).** A headless place with no recorded profile covers every
-     effect class but `change-policy`; a person's computer nothing beyond its person's own decisions until a profile is
+     effect class but `change-policy` for every capability of the services registered in the place's estate, which
+     the hub lists by name; a person's computer nothing beyond its person's own decisions until a profile is
      recorded from the hub's presets; in an organization's context a headless place with no recorded profile states
-     nothing until its owner or an administrator records one (question 4). A profile decides no credential request
+     nothing until its owner or an administrator records one, an architect's ending the wait for its own projects (question 4). A profile decides no credential request
      (question 5). No mandate of any kind covers `autonomy.profile.set`, and no profile covers MD-6's list or `autonomy.profile.set` (`FAC-SEM-173` on the
      document, `outside-mandate: capability` on the call). The hub states a headless profile only while the place's
      watcher answers. A call taken under it is recorded `via: profile` with the place, revision, digest, assignment,
@@ -11543,19 +11547,19 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   so no agent sends it there; a port pinned past this decision adds `standing` ['1'] to the adapter kits' hand-kept
   `PROTOCOL_REVISIONS` whether or not it reads standing (their feed-protocols test checks it). Read on 2026-11-12: no hub states a profile and no service declares `standing` yet. Owed:
   Fabric (CO-547, whose hub mirror `hubAuthority.ts` and its parity cases gain a standing case at its repin: the dispatcher and headless assignments read the profile, its hub writes `prof`, its floor treats a
-  covered effect as decided; ADR-0168's machine permission choice stays the runner's prompt mode), the organization
+  covered effect as decided; its board-mandate reader `boardMandate.ts` refuses `standing` in a board block (AU-1) and its hub forward path `hubCall.ts`/`hubTools.ts` forwards a standing mandate only to a callee declaring `standing` (AU-3), both owed at any repin past this decision, CO-523's levels repin included; ADR-0168's machine permission choice stays the runner's prompt mode), the organization
   product (who may change a profile, shown per place), the PM agent, the host's admin agent (records a place's kind and
   watcher), every service with `relayed` actions an assignment calls (the adapter's kits FAA-249, whose `mandateCovers` ports run `profile.json` before a kit service may declare `standing`). The operator's
   questions take the design's defaults: (1) the headless default covers a production deploy of a surface with outside
   users, and a project that wants the gate narrows its own profile; (2) an organization administrator sets a profile
   on a member's computer only inside the organization's context there; (3) watched means a monitoring agent declared in
   the place's record and answering its probe; (4, added) a headless place of an organization with no recorded profile
-  takes the default only once its owner or an administrator records it, and states nothing until then (written into
+  takes the default only once its owner or an administrator records it (an architect for its own projects), and states nothing until then (written into
   AU-4); (5, added in round 1) a profile decides no credential request, which stays the administrator's or the
   auto-approval policy's (credentials, DEC-0111), although the operator's record lists key issuance through
   Observatory's doors among a headless place's acts: a key a place's own estate issues through its own doors is that
-  estate's relayed act, which the profile covers as any other. The questions are posted on thread `8da128cf` before
-  acceptance (the board answered HTTP 503 through 2026-11-12). The operator may answer otherwise until 2026-11-21.
+  estate's relayed act, which the profile covers as any other. The questions were posted on thread `8da128cf` as
+  message `bd18b1fa` on 2026-11-12 once the board answered again. The operator may answer otherwise until 2026-11-21.
 - **Consequences / affects:** `schemas/mandate.schema.json` (`standing`), `schemas/delegation-token.schema.json`
   (`prof`), `schemas/service-authority-extension.schema.json` (`standing`); `src/mandate.ts`, `src/actions.ts`,
   `src/delegation.ts`, `src/delegation-rules.ts`, `src/protocol-revisions.ts` (`standing/1`);

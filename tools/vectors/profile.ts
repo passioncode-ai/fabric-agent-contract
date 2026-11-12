@@ -29,12 +29,13 @@ const setProfile = { id: "set-profile", title: "Set the place's profile", tool: 
 const settingsAction = { id: "autonomy.profile.set", title: "Set the place's profile", tool: "hub.settings", gate: "relayed" };
 const payment = { id: "top-up", title: "Top up", tool: "billing.topup", gate: "human", humanStep: "payment" };
 const URL = "https://example-deployer.example/billing/top-up";
+const STANDING = { place: "studio-space-1", placeKind: "headless", revision: 3 };
 
 /** A place's standing mandate as its hub states it for one assignment (AU-1, AU-3), handed to the runner, then to us;
  * its instruction is the operator's recorded sentence of 2026-11-09 (AU-4's default for a headless place). */
 function profile(extra: Json = {}, scope: Json = { capabilities: ["site.deploy"], effects: ["deploy"] }): Json {
   return {
-    kind: "mandate/1", by: "operator", standing: { place: "studio-space-1", placeKind: "headless", revision: 3 },
+    kind: "mandate/1", by: "operator", standing: STANDING,
     task: "assignment:alpha-0412", instruction: "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
     at: "2026-11-12T09:00:00Z", expiresAt: "2026-11-13T08:00:00Z", scope,
     chain: [{ agent: RUNNER, at: "2026-11-12T09:00:05Z" }, { agent: SELF, at: "2026-11-12T09:30:00Z" }],
@@ -63,6 +64,9 @@ function actionCases(): Json[] {
   const headlessDefault = profile({}, { capabilities: ["site.deploy"], effects: ["draft", "publish", "send", "reply", "charge", "delete", "merge", "deploy"] });
   const narrowed = profile({ chain: [{ agent: RUNNER, at: "2026-11-12T09:00:05Z" }, { agent: SELF, at: "2026-11-12T09:30:00Z", scope: { capabilities: ["site.deploy"], effects: ["draft"] } }] });
   const otherProf = `sha256:${"cd".repeat(32)}`;
+  const byAdmin = profile({ standing: { ...STANDING, setLevel: "admin" } });
+  const byOwner = profile({ standing: { ...STANDING, setLevel: "owner" } });
+  const byArchitect = profile({ standing: { ...STANDING, setLevel: "architect" } }, { capabilities: ["site.deploy"], effects: ["deploy"], projects: ["alpha"] });
   return [
     // AU-1, AU-3: inside the boundary the standing mandate is read like a task's (MD-3); recorded via profile (AU-6).
     ["a headless profile covers a deploy, from T1", call("T1", p), taken(p)],
@@ -85,10 +89,22 @@ function actionCases(): Json[] {
     ["a profile living longer than a day", call("T1", profile({ expiresAt: "2026-11-13T10:00:00Z" })), { ok: false, code: "decision-invalid", data: { detail: "mandate-malformed" } }],
     ["an expired profile", call("T1", p, { now: "2026-11-13T08:00:00Z" }), { ok: false, code: "decision-invalid", data: { detail: "mandate-expired" } }],
     // AU-2: a level holder's profile at a service that reads standing mandates but no levels: as if absent (LV-10).
-    ["a level holder's profile where no levels are read, from T1", call("T1", profile({ by: "level", level: "admin", org: "org:org-a", membership: { kind: "an attestation the service never reads" } })), { ok: false, code: "operator-decision-required" }],
+    ["a malformed level standing mandate where no levels are read, as LV-10, from T1", call("T1", profile({ by: "level", level: "admin", org: "org:org-a", membership: { kind: "an attestation the service never reads" } })), { ok: false, code: "operator-decision-required" }],
     // AU-3: a ceiling with cents has a canonical form (RFC 8785), so its profile is digested and bound like any other.
     ["a profile with a fractional per-call ceiling, from T1", call("T1", fractional, { spendUsd: 0.1 } as Json), taken(fractional)],
     ["the same from T2 with its prof", call("T2", fractional, { tokenProf: prof(fractional), spendUsd: 0.1 } as Json), taken(fractional)],
+    // AU-2: a profile an organization's level holder set covers no action declared above that level (LV-7, LV-10).
+    ["an administrator's profile at an action declared operator, from T1", call("T1", byAdmin, { actionLevel: "operator" }), { ok: false, code: "operator-decision-required", data: { detail: "level-insufficient: operator" } }],
+    ["an administrator's profile at an action declared owner, from T2", call("T2", byAdmin, { actionLevel: "owner", tokenProf: prof(byAdmin) }), { ok: false, code: "operator-decision-required", data: { detail: "level-insufficient: owner", actionDigest: DIGEST } }],
+    ["an owner's profile at an action declared owner, from T1", call("T1", byOwner, { actionLevel: "owner" }), taken(byOwner)],
+    ["an architect's profile at a call in one of its projects, from T1", call("T1", byArchitect, { actionLevel: "admin", project: "alpha" }), { ok: false, code: "operator-decision-required", data: { detail: "level-insufficient: admin" } }],
+    ["an architect's profile at a call in no project, from T1", call("T1", byArchitect), { ok: false, code: "operator-decision-required", data: { detail: "level-insufficient: admin" } }],
+    ["an architect's profile at a call in one of its projects, no level declared, from T1", call("T1", byArchitect, { project: "alpha" }), taken(byArchitect)],
+    ["the operator's own profile at an action declared operator, from T1", call("T1", p, { actionLevel: "operator" }), taken(p)],
+    // A non-object standing is no standing mandate: refused as malformed even where standing is not read.
+    ["a mandate whose standing is null, at a callee that reads no standing mandate, from T1", call("T1", { ...task({ capabilities: ["site.deploy"], effects: ["deploy"] }), standing: null }, { standing: undefined }), { ok: false, code: "decision-invalid", data: { detail: "mandate-malformed" } }],
+    // DL-25: a caller placed in no tier is read as T2, so its token's prof binds the standing mandate too.
+    ["a bound profile from a caller placed in no tier", call("T2", p, { tier: undefined, tokenProf: prof(p) }), taken(p)],
     // DL-17: from T2 an operator decision counts for nothing, so a bound profile beside one is still read.
     ["a bound profile beside an operator decision, from T2", call("T2", p, { tokenProf: prof(p), decision: { by: "operator", via: "relayed-instruction", action: "deploy-site", instruction: "deploy it", at: "2026-11-12T09:59:00Z" } }), taken(p)],
     // AU-5: no mandate of any kind sets a place's profile, a task's mandate included.
@@ -117,6 +133,8 @@ function documentCases(): Json[] {
     ["a profile living longer than a day", profile({ expiresAt: "2026-11-13T10:00:00Z" }), ["FAC-SEM-144 "]],
     ["a profile whose instruction holds a lone surrogate", profile({ instruction: "x\ud800y" }), ["FAC-SEM-144 "]],
     // AU-1: the hub states a profile by the operator of the place's estate; the setter's level is checked at the set.
+    ["an architect's profile without its projects", profile({ standing: { ...STANDING, setLevel: "architect" } }), ["FAC-SEM-173 /scope"]],
+    ["an administrator's profile", profile({ standing: { ...STANDING, setLevel: "admin" } }), []],
     ["a profile stated by a level", profile({ by: "level", level: "admin", org: "org:org-a", membership: { kind: "an attestation" } }), ["FAC-SEM-144 "]],
     // FAC-SEM-173 also reads a widened mandate's chain.
     ["a widened profile whose chain step names autonomy.profile.set", profile({ chain: [{ agent: RUNNER, at: "2026-11-12T09:00:05Z" }, { agent: SELF, at: "2026-11-12T09:30:00Z", scope: { capabilities: ["site.deploy", "autonomy.profile.set"], effects: ["deploy"] } }] }), ["FAC-SEM-144 ", "FAC-SEM-173 /chain/1/scope"]]

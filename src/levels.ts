@@ -38,6 +38,19 @@ export function levelContextsWellFormed(levels: unknown): boolean {
   return isObject(levels) && Object.values(levels).every((entry) => isObject(entry) && typeof entry.audience === "string" && entry.audience.length > 0 && isObject(entry.keySet));
 }
 
+/**
+ * The detail a level gets for an action its service declares `minLevel` (LV-7, LV-10), or undefined when the level
+ * covers it: `operator` is no level's, `owner` the owner's, and `admin` (or a call in no project) an admin's or more.
+ * DEC-0166 AU-2 reads it for a profile an organization's level holder set.
+ */
+export function levelShortOf(level: string, minLevel: string | undefined, inProject: boolean): InsufficientDetail | undefined {
+  if (minLevel === "operator") return "level-insufficient: operator";
+  const rank = RANK.get(level) ?? 0;
+  if (minLevel === "owner" && rank < (RANK.get("owner") as number)) return "level-insufficient: owner";
+  if ((minLevel === "admin" || !inProject) && rank < (RANK.get("admin") as number)) return "level-insufficient: admin";
+  return undefined;
+}
+
 /** Why a level does not stand, as `data.detail` names it (LV-10). */
 export type LevelDetail =
   | `level-membership: ${string}`

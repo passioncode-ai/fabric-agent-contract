@@ -823,7 +823,7 @@ flowchart TD
   D --> S[Service takes it; recorded via relayed-instruction, with source where it lists operator-source/1, else in the receiver's own record]
   L --> C[Calls the next agent with it, narrowed]
   C --> T{caller's tier}
-  T -->|T2| X[mandate ignored: the whole profile applies]
+  T -->|T2| X[mandate ignored: DL-17's refusals apply]
   T -->|T2, a place's standing mandate its token binds by prof| V
   T -->|T0 or T1| V{mandate valid}
   V -->|no| I[decision-invalid with the reason]

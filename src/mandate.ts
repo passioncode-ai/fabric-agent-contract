@@ -4,7 +4,7 @@ import { rfc8785 } from "./canonical.js";
 import { SCHEMA_PREFIX } from "./contract.js";
 import { effectClosure } from "./delegation.js";
 import { type Finding, type JsonObject, isObject } from "./findings.js";
-import { type InsufficientDetail, type LevelContexts, type LevelDetail, type LevelRecord, levelContextsWellFormed, levelRules, levelStanding } from "./levels.js";
+import { type InsufficientDetail, type LevelContexts, type LevelDetail, type LevelRecord, levelContextsWellFormed, levelRules, levelShortOf, levelStanding } from "./levels.js";
 import { CLOCK_SKEW_SECONDS, strictTime } from "./rfc3339.js";
 import { createValidatorSync } from "./validator.js";
 
@@ -48,8 +48,11 @@ export interface OperatorSource {
   session?: string;
   thread?: string;
 }
-/** A place's standing mandate (DEC-0166 AU-1): the place, its kind and the profile's revision. */
-export interface Standing { place: string; placeKind: "headless" | "person"; revision: number }
+/**
+ * A place's standing mandate (DEC-0166 AU-1): the place, its kind and the profile's revision; in an organization's
+ * context the level of the holder who set it (AU-2), which bounds what it covers at a service that declares levels.
+ */
+export interface Standing { place: string; placeKind: "headless" | "person"; revision: number; setLevel?: "owner" | "admin" | "architect" }
 export interface Mandate {
   kind: "mandate/1";
   standing?: Standing;
@@ -206,7 +209,8 @@ export function mandateCovers(input: {
   const byLevel = typeof mandate === "object" && mandate !== null && (mandate as { by?: unknown }).by === "level";
   // Level contexts given but malformed are the callee's own fault, never "reads no levels" (actionDecision's levels-invalid).
   if (input.levels !== undefined && !levelContextsWellFormed(input.levels)) return { fault: "levels-invalid" };
-  const standing = isObject(mandate) && mandate.standing !== undefined;
+  // A non-object `standing` is no standing mandate: the schema refuses it (mandate-malformed) wherever it arrives.
+  const standing = isObject(mandate) && isObject(mandate.standing);
   if (standing && input.standing !== true) return { ignored: "standing-not-read" };
   if (byLevel && !isObject(input.levels)) return { ignored: "levels-not-read" };
   const inside = tier === "T0" || tier === "T1";
@@ -240,6 +244,10 @@ export function mandateCovers(input: {
     return { ok: false, code: OUTSIDE_MANDATE, data: { detail: "outside-mandate: spend", ...(call.spendUsd === undefined ? {} : { estimateUsd: call.spendUsd }), perCallMaxUsd: scope.perCallMaxUsd } };
   }
   if (call.project !== undefined && scope.projects !== undefined && !scope.projects.includes(call.project)) return outside("outside-mandate: project");
+  // AU-2: a profile an organization's level holder set covers no action its service declares above that level (LV-7).
+  const setLevel = standing ? (read.standing as Standing).setLevel : undefined;
+  const short = setLevel === undefined ? undefined : levelShortOf(setLevel, call.minLevel, call.project !== undefined);
+  if (short !== undefined) return { ok: false, code: OUTSIDE_MANDATE, data: { detail: short } };
   // AU-6: a call under a profile is recorded `via: profile` with the place, the revision and the digest.
   const profile = standing
     ? { via: "profile" as const, task: read.task, chain: holders, profile: { place: (read.standing as Standing).place, revision: (read.standing as Standing).revision, digest: digest as string } }
@@ -281,10 +289,13 @@ export function handOn(mandate: Mandate, callee: string, at: string, narrower?: 
 function standingFindings(mandate: Mandate): Finding[] {
   if (mandate.standing === undefined) return [];
   const scopes: Array<[string, MandateScope]> = [["/scope", mandate.scope], ...mandate.chain.flatMap((step, i): Array<[string, MandateScope]> => (step.scope ? [[`/chain/${i}/scope`, step.scope]] : []))];
-  return scopes.flatMap(([path, scope]) =>
+  const architect: Finding[] = mandate.standing.setLevel === "architect" && mandate.scope.projects === undefined
+    ? [{ code: "FAC-SEM-173", instancePath: "/scope", message: "a profile an architect set names its projects in the scope: an architect's level stands only for them (DEC-0166 AU-2, DEC-0162 LV-2)" }]
+    : [];
+  return [...architect, ...scopes.flatMap(([path, scope]) =>
     scope.capabilities?.includes(PROFILE_SET_CAPABILITY) || scope.actions?.includes(PROFILE_SET_CAPABILITY) || scope.effects.includes(NEVER_BY_MANDATE)
       ? [{ code: "FAC-SEM-173", instancePath: path, message: `a standing mandate never covers ${PROFILE_SET_CAPABILITY} or ${NEVER_BY_MANDATE}: no profile sets a profile (DEC-0166 AU-5)` }]
-      : []);
+      : [])];
 }
 
 /** FAC-SEM-144 on kind `mandate` (the document itself); FAC-SEM-170 and FAC-SEM-173 on a valid one. */

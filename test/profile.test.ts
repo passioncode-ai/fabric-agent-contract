@@ -5,6 +5,7 @@ import { actionDecision } from "../src/actions.js";
 import { projectRoot } from "../src/contract.js";
 import { type Mandate, mandateCovers, profileDigest } from "../src/mandate.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
+import { levelShortOf } from "../src/levels.js";
 import { buildProfileVectors, VECTOR_FILE } from "../tools/vectors/profile.js";
 
 // DEC-0166: a place's autonomy profile as a standing mandate. The vectors are written by tools/vectors/profile.ts
@@ -32,5 +33,14 @@ describe("profileDigest and mandateCovers on a standing mandate (DEC-0166 AU-3)"
     const base = { mandate, now: "2026-11-12T10:00:00Z", self: "example-deployer", callerAgent: "example-runner", call };
     expect(mandateCovers({ ...base, tier: "T1" })).toEqual({ ignored: "standing-not-read" });
     expect(mandateCovers({ ...base, tier: "T2", standing: true })).toEqual({ ignored: "mandate-at-t2" });
+  });
+});
+
+describe("levelShortOf (DEC-0166 AU-2, DEC-0162 LV-7)", () => {
+  it("ranks a level it does not know below every declared level (the schema admits none), and an owner covers owner acts anywhere", () => {
+    expect(levelShortOf("boss", undefined, true)).toBeUndefined();
+    expect(levelShortOf("boss", "admin", true)).toBe("level-insufficient: admin");
+    expect(levelShortOf("boss", "owner", true)).toBe("level-insufficient: owner");
+    expect(levelShortOf("owner", "owner", false)).toBeUndefined();
   });
 });

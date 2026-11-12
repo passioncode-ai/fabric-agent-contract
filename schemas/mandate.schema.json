@@ -73,6 +73,14 @@
           "minimum": 1,
           "maximum": 2147483647,
           "description": "The profile's revision the hub stated it at; a profile the hub replaced takes effect at the next mandate and token it states."
+        },
+        "setLevel": {
+          "enum": [
+            "owner",
+            "admin",
+            "architect"
+          ],
+          "description": "DEC-0166 AU-2: in an organization's context, the level of the holder who set the profile (an architect's names its projects in the scope, FAC-SEM-173); absent on the operator's own profile. Inside the digest, so a token's prof binds it. A callee that declares actionLevels (extensions/authority/0.1) refuses an action declared above it operator-decision-required with level-insufficient, as LV-7 and LV-10 say."
         }
       }
     },
