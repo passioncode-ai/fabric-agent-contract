@@ -249,13 +249,16 @@ flowchart TD
 - **Goal:** a project spends within a limit the operator chose once, and a spend above the threshold waits for one answer
 - **Entry points:** the first run of a project that would spend money; a grant check above `autoApproveUsd`
 - **Success exit:** the policy recorded with its inputs; the request answered and the spend allowed or not
-- **Task analysis:** the launcher computes options → the operator picks one (one is preselected) → the meter checks each spend against the levels → above the threshold it denies with one filed request → the operator confirms the amount in the operator channel → the agent asks again and is allowed.
+- **Task analysis:** the launcher computes options → the operator picks one (one is preselected; in an organization's project its owner, while the run waits, DEC-0162 LV-7) → the meter checks each spend against the levels → above the threshold it denies with one filed request → the operator confirms the amount in the operator channel → the agent asks again and is allowed.
 - **Rejected shape:** a fixed list of budgets, or an approval in a chat message — rejected because the options must come from the project (spend policy) and a chat message is never the approval (spend policy rule 3).
 - **Flow:**
 
 ```mermaid
 flowchart TD
-  F[First paid run, no policy] --> P[Screen: Spend policy choice]
+  F[First paid run, no policy] --> O{An organization's project?}
+  O -->|no| P[Screen: Spend policy choice]
+  O -->|yes| WO[Screen: the run waits for the organization's owner; nothing spent (DEC-0162 LV-7)]
+  WO -->|the owner records the choice| R
   P --> R[Policy recorded with its inputs]
   R --> C{Grant check}
   C -->|within the levels| A[Allowed, reserved]
@@ -265,7 +268,7 @@ flowchart TD
   M -->|no answer| W[Nothing spent; other work goes on]
 ```
 
-- **Screens traversed:** SCR-13 success; SCR-13 empty; SCR-13 unknown; SCR-11 success; SCR-11 error.
+- **Screens traversed:** SCR-13 success; SCR-13 empty; SCR-13 unknown; SCR-13 waiting; SCR-11 success; SCR-11 error.
 
 ### FLW-11: Operator approves one action for an outside caller
 
@@ -742,7 +745,7 @@ flowchart TD
 - **Goal:** a step the operator would take on a dashboard happens when they tell their agent, recorded as their decision
 - **Entry points:** the operator's chat with their agent; a level holder's chat with their own agent (DEC-0162); a service's `operator-decision-required`; a job waiting for a choice; a word the operator gives in a customer chat a channel agent answers (DEC-0150 CA-8)
 - **Success exit:** the service took the action as the operator's decision (or a level holder's, DEC-0162), and its audit names the agent that relayed it
-- **Task analysis:** the operator tells the agent → the agent calls the action's tool with `_meta.decision` (the action, the object when the operator named one, the quoted sentence, the time) → the service runs `actionDecision` → it acts as its page would and records the decision.
+- **Task analysis:** the operator tells the agent → the agent calls the action's tool with `_meta.decision` (the action, the object when the operator named one, the quoted sentence, the time) → the service runs `actionDecision` → it acts as its page would and records the decision. A level holder's path is the same with a level decision bound by the token's `mem` (DEC-0162), recorded with the level, the organization and the approver.
 - **Rejected shape:** the agent approving without the operator's words, or a service sending the operator to its page for a step its agent was told to take: rejected, because the decision is the operator's and parity is the rule (DEC-0121); the one page-only step is the operator's move of a board slot until its twin ships (DEC-0140, SCN-051). A word the operator gives in a customer chat a channel agent answers, reaching a service action: rejected, because a word given in a customer chat reaches no service action (DEC-0150 CA-8, SCN-043).
 - **Flow:**
 
@@ -755,9 +758,12 @@ flowchart TD
   T -->|T2 without approval| A[approval-required with the digest]
   T -->|any tier, a bound level decision| L[Taken as the level holder's; audited with level, organization and approver]
   T -->|any tier, a level below the action's| N[operator-decision-required with level-insufficient; the agent files one request to a holder of that level through the product's own approval surface]
-  T -->|any tier, a level form that fails| V[decision-invalid with level-unbound, level-audience or level-membership; the agent asks its hub for a fresh, bound attestation]
-  V --> C
-  N --> O
+  T -->|any tier, a level form that fails| V{its detail}
+  V -->|level-unbound, level-audience, level-expired, level-membership| VF[The agent asks its hub for a fresh, bound attestation]
+  VF --> C
+  V -->|level-role, or the form itself| VC[The agent relays the level its holder holds, or the operator's path]
+  N -->|owner or admin| H[The holder of that level's own agent decides under its own level decision]
+  N -->|operator| O
   T -->|T0 or T1| D{decision}
   D -->|none| Q[operator-decision-required; the agent asks the operator]
   Q --> O

@@ -334,7 +334,8 @@ one that came while it was claimed (above), and nothing else does.
 ### Owner settlement
 
 A request in `outcome_unknown` waits for an observed reconciliation by the current responder. When no responder holds
-its slot any more, because the agent was retired or never re-enrolled, the estate owner may settle it (DEC-0081). The
+its slot any more, because the agent was retired or never re-enrolled, the estate owner may settle it (DEC-0081); no
+authority level decides it, the host declaring `operator` for it (DEC-0162 LV-7). The
 owner attests what it observed, and the board never fakes knowledge.
 
 A request reaches `outcome_unknown` by three paths only, and the owner settles it after any of them:

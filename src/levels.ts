@@ -103,7 +103,8 @@ export function levelStanding(input: {
   // A verified role is one of LEVEL_ROLES, so it has a rank; a level that is not a deciding one has none here.
   const rank = DECIDING_LEVELS.includes(level) ? (RANK.get(level) as number) : Number.POSITIVE_INFINITY;
   if (rank > (RANK.get(verdict.role) as number)) return { ok: false, invalid: "level-role" };
-  const projects = verdict.projects ?? [];
+  // A verified `/2` always carries `projects` (empty but for an architect, LV-1).
+  const projects = verdict.projects as string[];
   // LV-7: an act the service keeps for the operator alone is decided by no level (a client key, DEC-0159 CF-3).
   if (input.minLevel === "operator") return { ok: false, insufficient: "level-insufficient: operator" };
   // LV-7: a billing act is the owner's; LV-4: a call in no project is decided at owner or admin.
@@ -138,8 +139,10 @@ function levelDocument(value: JsonObject, projects: unknown[] | undefined, at: s
     // An owner or an admin deciding at the architect level is bounded by the call's project alone (LV-2).
     const own = membership.role === "architect" ? (Array.isArray(membership.projects) ? membership.projects : []) : undefined;
     // An architect attestation decides only in its projects, so it names them; an owner or an admin need not (LV-2).
-    if (own !== undefined && (projects === undefined || projects.length === 0)) flag("/level", "an architect decides only in its projects: the decision names one, a mandate's scope lists them");
-    else if (own !== undefined) for (const project of projects ?? []) if (!own.includes(project)) flag("/membership/projects", `the project ${show(project)} is not among the architect's projects`);
+    if (own !== undefined) {
+      if (projects === undefined || projects.length === 0) flag("/level", "an architect decides only in its projects: the decision names one, a mandate's scope lists them");
+      else for (const project of projects) if (!own.includes(project)) flag("/membership/projects", `the project ${show(project)} is not among the architect's projects`);
+    }
   }
 }
 

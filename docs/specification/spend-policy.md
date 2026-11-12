@@ -17,14 +17,14 @@ The most specific level that exists decides. A level that does not exist is skip
 
 | Level | What it limits | Who sets it, and when |
 |---|---|---|
-| **L0 estate** | the limits no grant can raise: everything the estate spends across all provider keys in a month, **and** each provider key's own ceiling (DEC-0039); the hard stop | the estate's operator, once, and each key's ceiling where the key is issued; the registry alerts at 80%; in an organization's context, the organization's own total, set and changed by its owner (DEC-0162 LV-7) |
+| **L0 estate** | the limits no grant can raise: everything the estate spends across all provider keys in a month, **and** each provider key's own ceiling (DEC-0039); the hard stop | the estate's operator, once, and each key's ceiling where the key is issued; the registry alerts at 80%; in an organization's context, an organization-wide total is not yet specified (who meters it is open), and the estate's L0 holds; changing it there is the owner's billing act (DEC-0162 LV-7) |
 | **L1 project** | every agent working on one project: the monthly limit, the auto-approve threshold per task, the model classes and the credential sources ([spend policy](#the-spend-policy)) | the person, at the project's first paid run, from options computed for that project; in an organization's context, the organization's `owner` sets and changes it (DEC-0162 LV-7, until the operator answers its question 4 otherwise) |
 | **L2 task** | one run of a task whose cost varies, through the presets its agent declares (`costPresets`) | the person at launch, the agent itself within L1's threshold, or the operator's mandate for the task (or a level mandate, DEC-0162 LV-6) within L1's threshold and its own `perCallMaxUsd` ([delegation](delegation.md#the-operators-mandate), DEC-0125) |
 | **L3 call** | one call (`perCallMaxUsd`; a callee's own per-call limit); exceeding it is `limit-reached` with window `call` | derived from L2 |
 
 ## The spend policy
 
-A project's policy is chosen **once**, at the first run that would spend money. In an organization's context the choice is the organization's owner's (DEC-0162 LV-7, until the operator answers its question 4 otherwise): the launcher stops before any spend until the owner records it. It is never a fixed list:
+A project's policy is chosen **once**, at the first run that would spend money. In an organization's context the choice is the organization's owner's (DEC-0162 LV-7, until the operator answers its question 4 otherwise): a launcher that reads levels stops before any spend until the owner records it; one pinned before DEC-0162 still asks the person. It is never a fixed list:
 the launcher computes the options for that project from:
 
 - the presets its agents declare;

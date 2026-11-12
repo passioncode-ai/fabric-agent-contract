@@ -256,7 +256,9 @@ placement requires the token here too ([Remote placement](#remote-placement)).
   ([connections](connections.md), DEC-0096), and, for a service that queues, its load under
   `https://fabric.passioncode.ai/agent-contract/extensions/load/0.1` ([Load](#load), DEC-0104), and the actions its
   pages offer under `https://fabric.passioncode.ai/agent-contract/extensions/actions/0.1` ([Actions](#actions),
-  DEC-0121), and, for a channel agent with no manifest, its declaration under
+  DEC-0121), for a service that reads authority levels its organizations and the level each action needs under
+  `https://fabric.passioncode.ai/agent-contract/extensions/authority/0.1` ([membership](membership.md#levels) LV-5,
+  DEC-0162), and, for a channel agent with no manifest, its declaration under
   `https://fabric.passioncode.ai/agent-contract/extensions/channel-agent/0.1` ([channel agent](channel-agent.md),
   DEC-0150).
 - `surfaces.operatorChannel` MAY name the path of the service's operator-channel status, which

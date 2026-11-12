@@ -2,10 +2,10 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/service-authority-extension.schema.json",
   "title": "extensions/authority/0.1: the organizations whose authority levels a service reads, and the level each relayed action needs (DEC-0162)",
-  "description": "The value of the authority extension key https://fabric.passioncode.ai/agent-contract/extensions/authority/0.1 in a service's well-known document, beside the actions extension (DEC-0121 AP-1), which it never changes: a reader of the actions extension pinned before DEC-0162 ignores this key. A service that reads levels declares levels; the level an action needs is keyed by the action's id in the actions extension. A checker reports an invalid value, an organization named twice and a level for an id that is not a relayed action of the actions extension as FAC-SEM-142. docs/specification/membership.md#levels.",
+  "description": "The value of the authority extension key https://fabric.passioncode.ai/agent-contract/extensions/authority/0.1 in a service's well-known document, beside the actions extension (DEC-0121 AP-1), which it never changes: a reader of the actions extension pinned before DEC-0162 ignores this key. A service that reads levels declares levels; the level an action needs is keyed by the action's id in the actions extension. A reader ignores a member it does not define (a later decision adds members to this key, as DEC-0166 adds standing), so the root is open; the members it defines are closed. A checker reports an invalid value, an organization named twice and a level for an id that is not a relayed action of the actions extension as FAC-SEM-142. docs/specification/membership.md#levels.",
   "type": "object",
   "minProperties": 1,
-  "additionalProperties": false,
+  "additionalProperties": true,
   "properties": {
     "levels": {
       "type": "array",

@@ -5,6 +5,7 @@ import { actionDecision } from "../src/actions.js";
 import { projectRoot } from "../src/contract.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
 import { verifyOrgMembership } from "../src/org-membership.js";
+import { levelStanding } from "../src/levels.js";
 import { buildLevelsVectors, VECTOR_FILE } from "../tools/vectors/levels.js";
 
 // DEC-0162: authority levels. The vectors are written by tools/vectors/levels.ts with hand-written expectations; the
@@ -105,3 +106,14 @@ describe("levelStanding and FAC-SEM-170 at their edges (DEC-0162)", async () => 
     }
   });
 });
+
+describe("levelStanding on inputs a service builds itself (DEC-0162 LV-4)", () => {
+  const admin = vectors.memberships.admin as Json;
+  const contexts = { "org:org-a": { audience: admin.audience, keySet: vectors.keySet } };
+  const base = { org: "org:org-a", at: "2026-10-25T11:00:00Z", contexts, now: Date.parse("2026-10-25T11:00:30Z") };
+  it("refuses an attestation without a subject as malformed, and a level that decides nothing as above the role", () => {
+    expect(levelStanding({ ...base, membership: { ...admin, subject: undefined }, level: "admin", tokenMem: vectors.digests.admin })).toEqual({ ok: false, invalid: "level-membership: malformed" });
+    expect(levelStanding({ ...base, membership: admin, level: "member", tokenMem: vectors.digests.admin })).toEqual({ ok: false, invalid: "level-role" });
+  });
+});
+
