@@ -314,7 +314,8 @@ person pressed (`instruction`: the request's `message`, then `Choice:` and the c
 
 DEC-0121 (`fabric-actions/0.1`) · rule code `FAC-SEM-142` · [service](service.md#actions)
 
-A request's `_meta` MAY carry `decision`, the operator's decision on an action the service declares `relayed`
+A request's `_meta` MAY carry `decision`, the operator's decision on an action the service declares `relayed` (in an organization, a level
+holder's in the level form `{by: "level", ...}`, [membership](membership.md#levels) LV-3, DEC-0162)
 ([`decision.schema.json`](../../schemas/decision.schema.json), a member of
 [`interop-request-meta.schema.json`](../../schemas/interop-request-meta.schema.json)): `{by: "operator", via:
 "relayed-instruction", action, target?, instruction, at, source?}` (DEC-0121 AP-2; `source`, DEC-0126 OA-7, only to a

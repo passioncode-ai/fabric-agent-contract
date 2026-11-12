@@ -760,9 +760,10 @@ flowchart TD
   T -->|any tier, a level below the action's| N[operator-decision-required with level-insufficient; the agent files one request to a holder of that level through the product's own approval surface]
   T -->|any tier, a level form that fails| V{its detail}
   V -->|level-unbound, level-audience, level-expired| VF[The agent asks its hub for a fresh, bound attestation]
-  V -->|level-membership: ended or context-invalid| O
+  V -->|level-membership: any problem, ended, context-invalid and stale-revision among them| O
   VF --> C
   V -->|level-role, or the form itself| VC[The agent relays the level its holder holds, or the operator's path]
+  VC --> C
   N -->|owner or admin| HL[The holder of that level's own agent decides under its own level decision]
   N -->|operator| O
   T -->|T0 or T1| D{decision}

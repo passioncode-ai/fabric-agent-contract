@@ -81,8 +81,9 @@ approval of it: the proposal's `approvedBy` is then the operator's own principal
 audit records the relaying caller ([service](service.md#actions) AP-5, DEC-0121).
 
 A level holder's decision in an organization (DEC-0162) does not weaken this. A holder's agent never approves its own
-promotion, grant, checker rule or policy change on its own account; it MAY relay its holder's decision on it, which the
-service records with the holder's pairwise subject as approver and the relaying caller. `change-policy` is decided by
+promotion, grant, checker rule or policy change on its own account; a proposal's approval takes only the forms
+[proposals](proposals.md) lists in `approvedBy`, none of them a level, so no level decides it (`FAC-SEM-104` keeps a
+checker rule's approval the operator's). `change-policy` is decided by
 the organization's `owner` or an `admin`, and by an `architect` only for a policy of one of its projects; no mandate
 covers it, a level mandate included ([membership](membership.md#levels) LV-7).
 

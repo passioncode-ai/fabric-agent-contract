@@ -155,7 +155,7 @@ export function actionDecision(input: ActionDecisionInput): ActionDecisionAnswer
   const inside = tier === "T0" || tier === "T1";
   // From T2 an operator decision counts for nothing (DL-17), so a level mandate beside one is still read (LV-6).
   const levelMandate = (decision === undefined || (!inside && !levelDecision)) && isObject(input.mandate) && input.mandate.by === "level";
-  // The service's own accepted elicitation is the operator's word at T0 or T1 and is read before a level form (LV-5).
+  // The service's own accepted elicitation is the operator's word at T0 or T1 and is read before a level form (LV-4).
   if (inside && elicited === true) return { ok: true, recordAs: { by: "operator", via: "elicitation", caller } };
   if (isObject(input.levels) && (levelDecision || levelMandate)) {
     const clock = strictTime(now);
@@ -231,7 +231,7 @@ function byMandate(input: ActionDecisionInput, action: DeclaredAction, caller: s
  * LV-11), at any tier: the decision has its schema's level form and is for this action and target; it was made within
  * AP-2's window; it names the project the call acts in, when it names one; the level stands (`levelStanding`). A failed
  * check is `decision-invalid`, with the level's detail where the level fails; a level below what the call needs is
- * `operator-decision-required` with `level-insufficient: admin`.
+ * `operator-decision-required` with `level-insufficient: owner`, `admin` or `operator`.
  */
 function byLevel(input: ActionDecisionInput, action: DeclaredAction, caller: string, clock: number): ActionDecisionAnswer {
   decisionShape ??= schema("decision.schema.json");
