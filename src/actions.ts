@@ -164,13 +164,15 @@ export function actionDecision(input: ActionDecisionInput): ActionDecisionAnswer
   if (inside && elicited === true) return { ok: true, recordAs: { by: "operator", via: "elicitation", caller } };
   // DEC-0166 AU-3: a standing mandate (a place's autonomy profile) is read at every tier by a service that declares
   // `standing`; from T2 it stands only when the call's token binds it by `prof`.
-  const standingMandate = decision === undefined && input.standing === true && isObject(input.mandate) && input.mandate.standing !== undefined;
+  // As a level mandate: from T2 an operator decision, or a level decision where no levels are read, counts for nothing.
+  const levelRead = levelDecision && isObject(input.levels);
+  const standingMandate = (decision === undefined || (!inside && !levelRead)) && input.standing === true && isObject(input.mandate) && input.mandate.standing !== undefined;
   if ((isObject(input.levels) && (levelDecision || levelMandate)) || standingMandate) {
     const clock = strictTime(now);
     if (Number.isNaN(clock)) return { fault: "now-unreadable" };
     // At T2 every refusal on this branch keeps DL-18's route open, so the service owes the action's digest here too.
     if (!inside && (typeof actionDigest !== "string" || !SHA256.test(actionDigest))) return { fault: "digest-missing" };
-    const read = levelDecision ? byLevel(input, action, caller, clock) : byMandate(input, action, caller);
+    const read = levelRead ? byLevel(input, action, caller, clock) : byMandate(input, action, caller);
     // Ignored (an unbound standing mandate from T2, a standing level mandate where no levels are read): as if absent.
     if ("ignored" in read) return inside ? { ok: false, code: OPERATOR_DECISION_REQUIRED } : { ok: false, code: APPROVAL_REQUIRED, data: { actionDigest: actionDigest as string } };
     const answer = read;

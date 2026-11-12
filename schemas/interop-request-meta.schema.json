@@ -27,7 +27,7 @@
     },
     "mandate": {
       "$ref": "mandate.schema.json",
-      "description": "DEC-0125 (MD-3): the operator's mandate for the task a T0 or T1 caller works under; a callee takes a call it covers as the operator's decision and answers operator-decision-required with data.detail naming the part it does not cover, decision-invalid for one that is not valid (docs/specification/delegation.md#the-operators-mandate). A level mandate (DEC-0162 LV-6, by: level) is forwarded from any origin with the origin's delegation token, and taken at every tier by a service that reads levels, only at the service its attestation is for."
+      "description": "DEC-0125 (MD-3): the operator's mandate for the task a T0 or T1 caller works under; a callee takes a call it covers as the operator's decision and answers operator-decision-required with data.detail naming the part it does not cover, decision-invalid for one that is not valid (docs/specification/delegation.md#the-operators-mandate). A level mandate (DEC-0162 LV-6, by: level) and a place's standing mandate (DEC-0166 AU-3, whose token's prof binds it; only to a callee that declares standing) are forwarded from any origin with the origin's delegation token, and taken at every tier by a service that reads levels, only at the service its attestation is for."
     }
   },
   "additionalProperties": true

@@ -806,7 +806,7 @@ flowchart TD
 
 ### FLW-31: The operator's task, from one agent to the agents it engages
 
-- **Traces:** ST-037 (JTBD-07, JRN-06/#3)
+- **Traces:** ST-037, ST-043 (JTBD-07, JRN-06/#3)
 - **Goal:** the operator gives a task once; every agent the task reaches acts on their words within what the words cover
 - **Entry points:** the operator's chat with their agent; a board request from one of the operator's projects; a callee's `operator-decision-required` naming `outside-mandate`; a relay of the operator's approval from another of their agents (DEC-0126 OA-2)
 - **Success exit:** the callee took the call as the operator's decision, recorded `via: mandate` with the task and the chain, or, for an approval relayed for one action, `via: relayed-instruction`; a relayed approval also records `source`, where the operator said it (DEC-0126)
@@ -824,6 +824,7 @@ flowchart TD
   L --> C[Calls the next agent with it, narrowed]
   C --> T{caller's tier}
   T -->|T2| X[mandate ignored: the whole profile applies]
+  T -->|T2, a place's standing mandate its token binds by prof| PF[Taken as the place's profile; recorded via profile, DEC-0166]
   T -->|T0 or T1| V{mandate valid}
   V -->|no| I[decision-invalid with the reason]
   V -->|yes| K{covers the call}

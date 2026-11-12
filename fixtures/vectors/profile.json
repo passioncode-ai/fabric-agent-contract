@@ -1,5 +1,5 @@
 {
-  "about": "Vectors for a place's autonomy profile, a standing mandate (mandate/1 with standing, DEC-0166), written by tools/vectors/profile.ts, never by hand. actions: actionDecision's answer for each input (a service declaring standing passes standing: true; tokenProf is the prof claim of the call's verified delegation token, the sha256 of the settings-form canonical JSON of the mandate without its chain). documents: the codes and paths of evaluateSemanticRules(\"mandate\", mandate), in order.",
+  "about": "Vectors for a place's autonomy profile, a standing mandate (mandate/1 with standing, DEC-0166), written by tools/vectors/profile.ts, never by hand. actions: actionDecision's answer for each input (a service declaring standing passes standing: true; tokenProf is the prof claim of the call's verified delegation token, the sha256 of the RFC 8785 canonical JSON of the mandate without its chain). documents: the codes and paths of evaluateSemanticRules(\"mandate\", mandate), in order.",
   "actions": [
     {
       "name": "a headless profile covers a deploy, from T1",
@@ -23,7 +23,7 @@
             "revision": 3
           },
           "task": "assignment:alpha-0412",
-          "instruction": "On a headless place every act finishes end to end.",
+          "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
           "at": "2026-11-12T09:00:00Z",
           "expiresAt": "2026-11-13T08:00:00Z",
           "scope": {
@@ -63,7 +63,7 @@
           "profile": {
             "place": "studio-space-1",
             "revision": 3,
-            "digest": "sha256:31a9584d312efa30bdb6ed77a42b53943b2c8ec9adc42477e7dd9cca367a0064"
+            "digest": "sha256:bd69d0805efcf0d4447c5329fcab479bbdd9d1af30fab1465cb86dcb6764beb6"
           },
           "caller": "agent:example-runner"
         }
@@ -91,7 +91,7 @@
             "revision": 3
           },
           "task": "assignment:alpha-0412",
-          "instruction": "On a headless place every act finishes end to end.",
+          "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
           "at": "2026-11-12T09:00:00Z",
           "expiresAt": "2026-11-13T08:00:00Z",
           "scope": {
@@ -117,7 +117,7 @@
         "now": "2026-11-12T10:00:00Z",
         "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
         "standing": true,
-        "tokenProf": "sha256:31a9584d312efa30bdb6ed77a42b53943b2c8ec9adc42477e7dd9cca367a0064"
+        "tokenProf": "sha256:bd69d0805efcf0d4447c5329fcab479bbdd9d1af30fab1465cb86dcb6764beb6"
       },
       "expected": {
         "ok": true,
@@ -132,7 +132,7 @@
           "profile": {
             "place": "studio-space-1",
             "revision": 3,
-            "digest": "sha256:31a9584d312efa30bdb6ed77a42b53943b2c8ec9adc42477e7dd9cca367a0064"
+            "digest": "sha256:bd69d0805efcf0d4447c5329fcab479bbdd9d1af30fab1465cb86dcb6764beb6"
           },
           "caller": "agent:example-runner"
         }
@@ -160,7 +160,7 @@
             "revision": 3
           },
           "task": "assignment:alpha-0412",
-          "instruction": "On a headless place every act finishes end to end.",
+          "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
           "at": "2026-11-12T09:00:00Z",
           "expiresAt": "2026-11-13T08:00:00Z",
           "scope": {
@@ -186,7 +186,7 @@
         "now": "2026-11-12T10:00:00Z",
         "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
         "standing": true,
-        "tokenProf": "sha256:31a9584d312efa30bdb6ed77a42b53943b2c8ec9adc42477e7dd9cca367a0064"
+        "tokenProf": "sha256:bd69d0805efcf0d4447c5329fcab479bbdd9d1af30fab1465cb86dcb6764beb6"
       },
       "expected": {
         "ok": true,
@@ -201,7 +201,7 @@
           "profile": {
             "place": "studio-space-1",
             "revision": 3,
-            "digest": "sha256:31a9584d312efa30bdb6ed77a42b53943b2c8ec9adc42477e7dd9cca367a0064"
+            "digest": "sha256:bd69d0805efcf0d4447c5329fcab479bbdd9d1af30fab1465cb86dcb6764beb6"
           },
           "caller": "agent:example-runner"
         }
@@ -229,7 +229,7 @@
             "revision": 3
           },
           "task": "assignment:alpha-0412",
-          "instruction": "On a headless place every act finishes end to end.",
+          "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
           "at": "2026-11-12T09:00:00Z",
           "expiresAt": "2026-11-13T08:00:00Z",
           "scope": {
@@ -286,7 +286,7 @@
             "revision": 3
           },
           "task": "assignment:alpha-0412",
-          "instruction": "On a headless place every act finishes end to end.",
+          "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
           "at": "2026-11-12T09:00:00Z",
           "expiresAt": "2026-11-13T08:00:00Z",
           "scope": {
@@ -345,7 +345,7 @@
             "revision": 3
           },
           "task": "assignment:alpha-0412",
-          "instruction": "On a headless place every act finishes end to end.",
+          "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
           "at": "2026-11-12T09:00:00Z",
           "expiresAt": "2026-11-13T08:00:00Z",
           "scope": {
@@ -403,7 +403,7 @@
             "revision": 3
           },
           "task": "assignment:alpha-0412",
-          "instruction": "On a headless place every act finishes end to end.",
+          "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
           "at": "2026-11-12T09:00:00Z",
           "expiresAt": "2026-11-13T08:00:00Z",
           "scope": {
@@ -429,7 +429,7 @@
         "now": "2026-11-12T10:00:00Z",
         "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
         "standing": true,
-        "tokenProf": "sha256:d958fbc6624b64bbc600782182511140ed8f6a99c11a9e7160ce66f16343cd0a"
+        "tokenProf": "sha256:b73f8d1e0e52d4d042219c7df031b92707df449b5816853e7005996226f7b4ca"
       },
       "expected": {
         "ok": false,
@@ -462,7 +462,7 @@
             "revision": 3
           },
           "task": "assignment:alpha-0412",
-          "instruction": "On a headless place every act finishes end to end.",
+          "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
           "at": "2026-11-12T09:00:00Z",
           "expiresAt": "2026-11-13T08:00:00Z",
           "scope": {
@@ -515,7 +515,7 @@
             "revision": 3
           },
           "task": "assignment:alpha-0412",
-          "instruction": "On a headless place every act finishes end to end.",
+          "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
           "at": "2026-11-12T09:00:00Z",
           "expiresAt": "2026-11-13T08:00:00Z",
           "scope": {
@@ -540,7 +540,7 @@
         "effect": "deploy",
         "now": "2026-11-12T10:00:00Z",
         "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
-        "tokenProf": "sha256:31a9584d312efa30bdb6ed77a42b53943b2c8ec9adc42477e7dd9cca367a0064"
+        "tokenProf": "sha256:bd69d0805efcf0d4447c5329fcab479bbdd9d1af30fab1465cb86dcb6764beb6"
       },
       "expected": {
         "ok": false,
@@ -572,7 +572,7 @@
             "revision": 3
           },
           "task": "assignment:alpha-0412",
-          "instruction": "On a headless place every act finishes end to end.",
+          "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
           "at": "2026-11-12T09:00:00Z",
           "expiresAt": "2026-11-13T08:00:00Z",
           "scope": {
@@ -631,7 +631,7 @@
             "revision": 3
           },
           "task": "assignment:alpha-0412",
-          "instruction": "On a headless place every act finishes end to end.",
+          "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
           "at": "2026-11-12T09:00:00Z",
           "expiresAt": "2026-11-13T08:00:00Z",
           "scope": {
@@ -690,7 +690,7 @@
             "revision": 3
           },
           "task": "assignment:alpha-0412",
-          "instruction": "On a headless place every act finishes end to end.",
+          "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
           "at": "2026-11-12T09:00:00Z",
           "expiresAt": "2026-11-13T08:00:00Z",
           "scope": {
@@ -747,7 +747,7 @@
             "revision": 3
           },
           "task": "assignment:alpha-0412",
-          "instruction": "On a headless place every act finishes end to end.",
+          "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
           "at": "2026-11-12T09:00:00Z",
           "expiresAt": "2026-11-13T10:00:00Z",
           "scope": {
@@ -804,7 +804,7 @@
             "revision": 3
           },
           "task": "assignment:alpha-0412",
-          "instruction": "On a headless place every act finishes end to end.",
+          "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
           "at": "2026-11-12T09:00:00Z",
           "expiresAt": "2026-11-13T08:00:00Z",
           "scope": {
@@ -861,7 +861,7 @@
             "revision": 3
           },
           "task": "assignment:alpha-0412",
-          "instruction": "On a headless place every act finishes end to end.",
+          "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
           "at": "2026-11-12T09:00:00Z",
           "expiresAt": "2026-11-13T08:00:00Z",
           "scope": {
@@ -899,6 +899,274 @@
       }
     },
     {
+      "name": "a profile with a fractional per-call ceiling, from T1",
+      "input": {
+        "action": {
+          "id": "deploy-site",
+          "title": "Deploy the site",
+          "tool": "site.deploy",
+          "gate": "relayed"
+        },
+        "tier": "T1",
+        "caller": "agent:example-runner",
+        "callerAgent": "example-runner",
+        "self": "example-deployer",
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "operator",
+          "standing": {
+            "place": "studio-space-1",
+            "placeKind": "headless",
+            "revision": 3
+          },
+          "task": "assignment:alpha-0412",
+          "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
+          "at": "2026-11-12T09:00:00Z",
+          "expiresAt": "2026-11-13T08:00:00Z",
+          "scope": {
+            "capabilities": [
+              "site.deploy"
+            ],
+            "effects": [
+              "deploy"
+            ],
+            "perCallMaxUsd": 0.5
+          },
+          "chain": [
+            {
+              "agent": "example-runner",
+              "at": "2026-11-12T09:00:05Z"
+            },
+            {
+              "agent": "example-deployer",
+              "at": "2026-11-12T09:30:00Z"
+            }
+          ]
+        },
+        "effect": "deploy",
+        "now": "2026-11-12T10:00:00Z",
+        "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
+        "standing": true,
+        "spendUsd": 0.1
+      },
+      "expected": {
+        "ok": true,
+        "recordAs": {
+          "by": "operator",
+          "via": "profile",
+          "task": "assignment:alpha-0412",
+          "chain": [
+            "example-runner",
+            "example-deployer"
+          ],
+          "profile": {
+            "place": "studio-space-1",
+            "revision": 3,
+            "digest": "sha256:3f7a58796c15a6b2a887bbb89bcbeb892dee9ce3bae3961fb8a76944d013462e"
+          },
+          "caller": "agent:example-runner"
+        }
+      }
+    },
+    {
+      "name": "the same from T2 with its prof",
+      "input": {
+        "action": {
+          "id": "deploy-site",
+          "title": "Deploy the site",
+          "tool": "site.deploy",
+          "gate": "relayed"
+        },
+        "tier": "T2",
+        "caller": "agent:example-runner",
+        "callerAgent": "example-runner",
+        "self": "example-deployer",
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "operator",
+          "standing": {
+            "place": "studio-space-1",
+            "placeKind": "headless",
+            "revision": 3
+          },
+          "task": "assignment:alpha-0412",
+          "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
+          "at": "2026-11-12T09:00:00Z",
+          "expiresAt": "2026-11-13T08:00:00Z",
+          "scope": {
+            "capabilities": [
+              "site.deploy"
+            ],
+            "effects": [
+              "deploy"
+            ],
+            "perCallMaxUsd": 0.5
+          },
+          "chain": [
+            {
+              "agent": "example-runner",
+              "at": "2026-11-12T09:00:05Z"
+            },
+            {
+              "agent": "example-deployer",
+              "at": "2026-11-12T09:30:00Z"
+            }
+          ]
+        },
+        "effect": "deploy",
+        "now": "2026-11-12T10:00:00Z",
+        "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
+        "standing": true,
+        "tokenProf": "sha256:3f7a58796c15a6b2a887bbb89bcbeb892dee9ce3bae3961fb8a76944d013462e",
+        "spendUsd": 0.1
+      },
+      "expected": {
+        "ok": true,
+        "recordAs": {
+          "by": "operator",
+          "via": "profile",
+          "task": "assignment:alpha-0412",
+          "chain": [
+            "example-runner",
+            "example-deployer"
+          ],
+          "profile": {
+            "place": "studio-space-1",
+            "revision": 3,
+            "digest": "sha256:3f7a58796c15a6b2a887bbb89bcbeb892dee9ce3bae3961fb8a76944d013462e"
+          },
+          "caller": "agent:example-runner"
+        }
+      }
+    },
+    {
+      "name": "a bound profile beside an operator decision, from T2",
+      "input": {
+        "action": {
+          "id": "deploy-site",
+          "title": "Deploy the site",
+          "tool": "site.deploy",
+          "gate": "relayed"
+        },
+        "tier": "T2",
+        "caller": "agent:example-runner",
+        "callerAgent": "example-runner",
+        "self": "example-deployer",
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "operator",
+          "standing": {
+            "place": "studio-space-1",
+            "placeKind": "headless",
+            "revision": 3
+          },
+          "task": "assignment:alpha-0412",
+          "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
+          "at": "2026-11-12T09:00:00Z",
+          "expiresAt": "2026-11-13T08:00:00Z",
+          "scope": {
+            "capabilities": [
+              "site.deploy"
+            ],
+            "effects": [
+              "deploy"
+            ]
+          },
+          "chain": [
+            {
+              "agent": "example-runner",
+              "at": "2026-11-12T09:00:05Z"
+            },
+            {
+              "agent": "example-deployer",
+              "at": "2026-11-12T09:30:00Z"
+            }
+          ]
+        },
+        "effect": "deploy",
+        "now": "2026-11-12T10:00:00Z",
+        "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
+        "standing": true,
+        "tokenProf": "sha256:bd69d0805efcf0d4447c5329fcab479bbdd9d1af30fab1465cb86dcb6764beb6",
+        "decision": {
+          "by": "operator",
+          "via": "relayed-instruction",
+          "action": "deploy-site",
+          "instruction": "deploy it",
+          "at": "2026-11-12T09:59:00Z"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "recordAs": {
+          "by": "operator",
+          "via": "profile",
+          "task": "assignment:alpha-0412",
+          "chain": [
+            "example-runner",
+            "example-deployer"
+          ],
+          "profile": {
+            "place": "studio-space-1",
+            "revision": 3,
+            "digest": "sha256:bd69d0805efcf0d4447c5329fcab479bbdd9d1af30fab1465cb86dcb6764beb6"
+          },
+          "caller": "agent:example-runner"
+        }
+      }
+    },
+    {
+      "name": "a task's mandate naming autonomy.profile.set, from T1",
+      "input": {
+        "action": {
+          "id": "set-profile",
+          "title": "Set the place's profile",
+          "tool": "autonomy.profile.set",
+          "gate": "relayed"
+        },
+        "tier": "T1",
+        "caller": "agent:example-runner",
+        "callerAgent": "example-runner",
+        "self": "example-deployer",
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "operator",
+          "task": "assignment:alpha-0412",
+          "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
+          "at": "2026-11-12T09:00:00Z",
+          "expiresAt": "2026-11-14T09:00:00Z",
+          "scope": {
+            "capabilities": [
+              "autonomy.profile.set"
+            ],
+            "effects": [
+              "deploy"
+            ]
+          },
+          "chain": [
+            {
+              "agent": "example-runner",
+              "at": "2026-11-12T09:00:05Z"
+            },
+            {
+              "agent": "example-deployer",
+              "at": "2026-11-12T09:30:00Z"
+            }
+          ]
+        },
+        "effect": "deploy",
+        "now": "2026-11-12T10:00:00Z",
+        "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a"
+      },
+      "expected": {
+        "ok": false,
+        "code": "operator-decision-required",
+        "data": {
+          "detail": "outside-mandate: capability"
+        }
+      }
+    },
+    {
       "name": "a task's mandate from T2 with a prof",
       "input": {
         "action": {
@@ -915,7 +1183,7 @@
           "kind": "mandate/1",
           "by": "operator",
           "task": "assignment:alpha-0412",
-          "instruction": "On a headless place every act finishes end to end.",
+          "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
           "at": "2026-11-12T09:00:00Z",
           "expiresAt": "2026-11-14T09:00:00Z",
           "scope": {
@@ -941,7 +1209,7 @@
         "now": "2026-11-12T10:00:00Z",
         "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
         "standing": true,
-        "tokenProf": "sha256:31a9584d312efa30bdb6ed77a42b53943b2c8ec9adc42477e7dd9cca367a0064"
+        "tokenProf": "sha256:bd69d0805efcf0d4447c5329fcab479bbdd9d1af30fab1465cb86dcb6764beb6"
       },
       "expected": {
         "ok": false,
@@ -964,7 +1232,7 @@
           "revision": 3
         },
         "task": "assignment:alpha-0412",
-        "instruction": "On a headless place every act finishes end to end.",
+        "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
         "at": "2026-11-12T09:00:00Z",
         "expiresAt": "2026-11-13T08:00:00Z",
         "scope": {
@@ -999,7 +1267,7 @@
           "revision": 3
         },
         "task": "assignment:alpha-0412",
-        "instruction": "On a headless place every act finishes end to end.",
+        "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
         "at": "2026-11-12T09:00:00Z",
         "expiresAt": "2026-11-13T08:00:00Z",
         "scope": {
@@ -1036,7 +1304,7 @@
           "revision": 3
         },
         "task": "assignment:alpha-0412",
-        "instruction": "On a headless place every act finishes end to end.",
+        "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
         "at": "2026-11-12T09:00:00Z",
         "expiresAt": "2026-11-13T08:00:00Z",
         "scope": {
@@ -1074,7 +1342,7 @@
           "revision": 3
         },
         "task": "assignment:alpha-0412",
-        "instruction": "On a headless place every act finishes end to end.",
+        "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
         "at": "2026-11-12T09:00:00Z",
         "expiresAt": "2026-11-13T08:00:00Z",
         "scope": {
@@ -1122,7 +1390,7 @@
           "revision": 3
         },
         "task": "assignment:alpha-0412",
-        "instruction": "On a headless place every act finishes end to end.",
+        "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
         "at": "2026-11-12T09:00:00Z",
         "expiresAt": "2026-11-13T10:00:00Z",
         "scope": {
@@ -1146,6 +1414,95 @@
       },
       "findings": [
         "FAC-SEM-144 "
+      ]
+    },
+    {
+      "name": "a profile stated by a level",
+      "mandate": {
+        "kind": "mandate/1",
+        "by": "level",
+        "standing": {
+          "place": "studio-space-1",
+          "placeKind": "headless",
+          "revision": 3
+        },
+        "task": "assignment:alpha-0412",
+        "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
+        "at": "2026-11-12T09:00:00Z",
+        "expiresAt": "2026-11-13T08:00:00Z",
+        "scope": {
+          "capabilities": [
+            "site.deploy"
+          ],
+          "effects": [
+            "deploy"
+          ]
+        },
+        "chain": [
+          {
+            "agent": "example-runner",
+            "at": "2026-11-12T09:00:05Z"
+          },
+          {
+            "agent": "example-deployer",
+            "at": "2026-11-12T09:30:00Z"
+          }
+        ],
+        "level": "admin",
+        "org": "org:org-a",
+        "membership": {
+          "kind": "an attestation"
+        }
+      },
+      "findings": [
+        "FAC-SEM-144 "
+      ]
+    },
+    {
+      "name": "a widened profile whose chain step names autonomy.profile.set",
+      "mandate": {
+        "kind": "mandate/1",
+        "by": "operator",
+        "standing": {
+          "place": "studio-space-1",
+          "placeKind": "headless",
+          "revision": 3
+        },
+        "task": "assignment:alpha-0412",
+        "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
+        "at": "2026-11-12T09:00:00Z",
+        "expiresAt": "2026-11-13T08:00:00Z",
+        "scope": {
+          "capabilities": [
+            "site.deploy"
+          ],
+          "effects": [
+            "deploy"
+          ]
+        },
+        "chain": [
+          {
+            "agent": "example-runner",
+            "at": "2026-11-12T09:00:05Z"
+          },
+          {
+            "agent": "example-deployer",
+            "at": "2026-11-12T09:30:00Z",
+            "scope": {
+              "capabilities": [
+                "site.deploy",
+                "autonomy.profile.set"
+              ],
+              "effects": [
+                "deploy"
+              ]
+            }
+          }
+        ]
+      },
+      "findings": [
+        "FAC-SEM-144 ",
+        "FAC-SEM-173 /chain/1/scope"
       ]
     }
   ]

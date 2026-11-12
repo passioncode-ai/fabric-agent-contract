@@ -669,7 +669,11 @@ decision of 2026-11-09, fabric-workspace `knowledge/authority.md`, *Autonomy by 
 - **AU-1, the profile is a standing mandate.** A place's hub (the machine's, the OS space's, the VM's or the cloud's)
   holds the place's profile at a rising revision and states it, for each assignment it starts there, as a `mandate/1`
   with the member `standing` (`place`, `placeKind` `headless` or `person`, `revision`), `task` naming the assignment,
-  `by` and `instruction` the setter's (AU-2), the profile's `scope`, and a chain starting at the assigned agent. It
+  `by: "operator"` (the operator of the estate the place belongs to; in an organization's context the operator of the
+  estate its instance runs in, DEC-0162 LV-7), `instruction` the setter's recorded words (AU-2; AU-4's for a default),
+  the profile's `scope`, and a chain starting at the assigned agent. A standing mandate is never stated `by: "level"`
+  (the schema): the setter's level is checked once, at the set, and recorded there, so the stated mandate carries no
+  attestation, its digest does not change with one, and it stands at every service its token reaches. It
   stands at most 24 hours after `at` (`FAC-SEM-144`); the hub states it again from the profile for a longer
   assignment. Every rule of a task's mandate applies unchanged: MD-2 and MD-2a narrow it at each hand-over, MD-3 says
   what it covers, MD-4 what it refuses, MD-6 what never travels. AP-3's "a standing rule in a file is not a decision"
@@ -683,17 +687,25 @@ decision of 2026-11-09, fabric-workspace `knowledge/authority.md`, *Autonomy by 
   (`extensions/authority/0.1`, `service-authority-extension.schema.json`); an agent sends one, and the hub forwards one, only to such a callee, and
   one that does not declare it answers as if the call carried no mandate. Inside the boundary (T0, T1) a standing
   mandate is taken as MD-3 says. From T2 it is taken only when the call's delegation token carries the claim `prof`,
-  the mandate's `profileDigest` (sha256 of the settings canonical JSON of the mandate without its `chain`), which the
+  the mandate's `profileDigest` (sha256 of the RFC 8785 canonical JSON of the mandate without its `chain`), which the
   hub writes when it mints the assignment's token; a T2 call without `prof` changes nothing (MD-5), and a `prof` that
   is not the mandate's, at any tier, is `decision-invalid` `profile-unbound`. An onward token keeps the parent's
   `prof` or none (`FAC-SEM-050`). A revision the hub replaced binds no token minted after it, so a narrower revision is
   outrun by an older one for no longer than that token's life (at most 600 seconds, DL-13) and the older mandate's day.
+  Inside the boundary no token binds it, so a narrowed revision, or a place whose watcher stops answering (AU-6),
+  reaches an assignment already running only at its stated mandate's `expiresAt`, at most 24 hours later. An origin
+  sends a standing mandate only to a hub whose `protocols` list `standing/1`, which forwards it from any origin with
+  the origin's token (interop C3.5).
 - **AU-4, the defaults.** A place with no profile recorded behaves by its kind. `headless`: the hub states a profile
   covering every effect class but `change-policy` (deploy, merge, publish, send, delete, charge within the limits),
-  stated `by` the operator in the personal context. `person`: nothing beyond what the session's own person decides,
+  in the personal context, its `instruction` the operator's recorded words of 2026-11-09 and its `source` that record
+  (fabric-workspace `knowledge/authority.md`, *Autonomy by place*); in an organization's context it states nothing
+  until the organization's `owner` or an `admin` records a profile (question 4's default in DEC-0166, until the
+  operator answers otherwise). A profile decides no credential request: that stays as
+  [credentials](credentials.md) has it (the administrator or the auto-approval policy, DEC-0111; question 5). `person`: nothing beyond what the session's own person decides,
   until the person, or in an organization's context on that computer its administrator, records a profile, chosen from
   the hub's presets (none, drafts only, finish everything) or set in full.
-- **AU-5, the bounds.** No profile covers what MD-6 lists (a human step of AP-4, spend above a limit, a source hand-over,
+- **AU-5, the bounds.** No mandate of any kind, a task's included, covers `autonomy.profile.set`, and no profile covers what MD-6 lists (a human step of AP-4, spend above a limit, a source hand-over,
   approving one's own promotion, grant, checker rule or policy change), nor `autonomy.profile.set`, so no assignment
   raises its own place's autonomy: a standing mandate naming it, or listing `change-policy`, is `FAC-SEM-173`, and a
   call of it is `outside-mandate: capability`. The money limits bind as everywhere (L0, the project's L1, each key's

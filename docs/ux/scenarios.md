@@ -53,6 +53,7 @@
 | SCN-042 | See every call between agents, and nobody's prompts | credentials | P-02 | ST-034, FLW-28 | draft | not audited |
 | SCN-043 | Tell my agent to approve: the service takes it as my decision | delegation | P-02 | ST-035, FLW-29 | draft | not audited |
 | SCN-060 | As my organization's administrator, my agent's command runs at the organization's services without an approval | delegation | P-02 | ST-035, FLW-29 | draft | not audited |
+| SCN-061 | My headless place finishes a deploy under its profile, and nothing raises its autonomy | delegation | P-02 | ST-043, FLW-31 | draft | not audited |
 | SCN-044 | Open a service's page from my agent: in Fabric Dashboards, never a raw address | service | P-02 | ST-036, FLW-30 | draft | not audited |
 | SCN-045 | Give a task once: the research agent my developer agent engages runs it without asking me again | delegation | P-02 | ST-037, FLW-31 | draft | not audited |
 | SCN-046 | Approve once in one agent's chat: the agent that holds the key acts without asking me again | delegation | P-02 | ST-037, FLW-31 | draft | not audited |
@@ -1053,6 +1054,26 @@ independent agent author and P-02 project operator.
 - **Errors & recovery:** a copied attestation without the token's `mem` -> `level-unbound`; an attestation for another service -> `level-audience`; the agent asks its hub for a fresh, bound one.
 - **Status:** draft
 - **Coverage:** DEC-0162 LV-1 to LV-11, `actionDecision` in `src/actions.ts`, `levelStanding` in `src/levels.ts` (`FAC-SEM-169`, `FAC-SEM-170`), `fixtures/vectors/levels.json`, `test/levels.test.ts`
+- **Product:** unobserved
+
+### SCN-061: My headless place finishes a deploy under its profile, and nothing raises its autonomy
+
+- **Persona:** P-02
+- **Feature:** delegation
+- **Traces:** ST-043, FLW-31 (JTBD-07, JRN-06/#3)
+- **Entry point:** an assignment the always-on machine's hub starts (no person watching)
+- **Preconditions:** the place's record names its watcher, which answers; its profile (revision 3) covers `site.deploy` with effect `deploy`; `example-deployer` declares `standing` in `extensions/authority/0.1`; the hub lists `standing/1`
+- **Steps:**
+  1. The hub starts the assignment -> it states the profile as a standing mandate (`by: operator`, `standing {place, placeKind: headless, revision: 3}`, at most 24 hours) and mints the assignment's token with `prof`, its digest.
+  2. The runner calls `site.deploy` on `example-deployer` with the mandate, its chain ending at the deployer -> the deployer takes it as MD-3 says, from T2 only because the token's `prof` binds it.
+  3. The deployer deploys -> its audit records `via: profile` with the place, revision 3, the digest, the assignment and the chain.
+- **Expected result:** the deploy finishes with no question to anyone, recorded as the profile's.
+- **Alt paths:** the assignment calls `autonomy.profile.set` -> `outside-mandate: capability`; no assignment raises its own autonomy. A payment -> `human-step-required` with its link. A token without `prof` from T2 -> the profile changes nothing (`approval-required`). A token bound to an older revision -> `profile-unbound`. The watcher stops answering -> the next assignment runs as on a person's computer. The operator narrows the profile -> new assignments get the new revision; a running one keeps its stated mandate until its `expiresAt`, at most 24 hours. A service that does not declare `standing` -> answered as if no mandate came.
+- **UI elements:** none on the page; the hub's profile setting and the service's audit row (via profile, place, revision).
+- **States covered:** success, error
+- **Errors & recovery:** a fractional per-call ceiling is digested (RFC 8785) and bound like any other; a stale revision or an unwatched place never reaches a callee, since the hub states no mandate in them.
+- **Status:** draft
+- **Coverage:** DEC-0166 AU-1 to AU-7, `mandateCovers` and `profileDigest` in `src/mandate.ts`, `actionDecision` in `src/actions.ts`, `fixtures/vectors/profile.json`, `test/profile.test.ts`
 - **Product:** unobserved
 
 ### SCN-044: Open a service's page from my agent: in Fabric Dashboards, never a raw address

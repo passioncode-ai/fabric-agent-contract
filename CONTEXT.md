@@ -152,14 +152,15 @@ only by its members, needs none).
 (capabilities, relayed actions, an effect ceiling, a per-call spend ceiling, projects) and the chain of agents that
 held it, each call appending its callee and never widening the scope. A callee that is the chain's last agent, called
 from T0 or T1 (by the agent before it, where it authenticated its caller's agent id), takes a call it covers as the operator's decision and refuses only the part it does
-not cover, so the operator is asked again for that alone; a T2 caller's operator mandate changes nothing (a level mandate its token binds is taken, DEC-0162 LV-6), beyond the estate a
+not cover, so the operator is asked again for that alone; a T2 caller's operator mandate changes nothing (a level mandate its token binds is taken, DEC-0162 LV-6, and a place's standing mandate its token binds by `prof`, DEC-0166 AU-3), beyond the estate a
 delegation token carries the authority. A job's step is read under the job's capability (MJ-1, DEC-0141; `actionDecision`'s
 `mandateCapability`) (`mandateCovers`, [delegation](docs/specification/delegation.md#the-operators-mandate), DEC-0125).
 A mandate never covers a **Source hand-over** ([source](docs/specification/source.md#handing-over), DEC-0149).
 
 **Autonomy profile**: Which acts an agent finishes end to end without a person at one place (a machine, an OS space,
 a VM, a cloud), set per place by the operator or, in an organization, a level holder within its level, never a
-constant. The place's hub holds it at a rising revision and states it, for each assignment it starts there, as a
+constant. Not a **Profile** (a compatibility mode), a **Machine profile**, a **Model profile** or a **Runner profile**;
+an audit's `via: profile` and the token's `prof` name this one. The place's hub holds it at a rising revision and states it, for each assignment it starts there, as a
 **standing mandate** (`mandate/1` with `standing`: the place, `headless` or `person`, the revision), at most a day
 long; a callee that declares `standing` takes it as a task's mandate inside the boundary and, from T2, only when the
 assignment token's `prof` binds it. No profile covers a human step, spend above a limit, a source hand-over or

@@ -1,0 +1,62 @@
+{
+  "description": "The same call answered as if the profile were not bound: FAC-SEM-142 reports an answer actionDecision would not give (DEC-0166 AU-3).",
+  "kind": "action-call",
+  "expect": [
+    "FAC-SEM-142"
+  ],
+  "input": {
+    "action": {
+      "id": "deploy-site",
+      "title": "Deploy the site",
+      "tool": "site.deploy",
+      "gate": "relayed"
+    },
+    "tier": "T2",
+    "caller": "agent:example-runner",
+    "callerAgent": "example-runner",
+    "self": "example-deployer",
+    "mandate": {
+      "kind": "mandate/1",
+      "by": "operator",
+      "standing": {
+        "place": "studio-space-1",
+        "placeKind": "headless",
+        "revision": 3
+      },
+      "task": "assignment:alpha-0412",
+      "instruction": "\u041f\u043e \u0434\u0435\u0444\u043e\u043b\u0442\u0443 \u0432\u043e\u043e\u0431\u0449\u0435 \u0432\u0441\u0435, \u0447\u0442\u043e \u0440\u0430\u0431\u043e\u0442\u0430\u0435\u0442 \u043d\u0430 \u0441\u0442\u0443\u0434\u0438\u0438, \u0434\u043e\u043b\u0436\u043d\u043e \u043a\u0430\u043a \u0431\u044b \u0434\u043e\u0432\u043e\u0434\u0438\u0442\u044c\u0441\u044f \u0434\u043e \u043a\u043e\u043d\u0446\u0430 \u0430\u0432\u0442\u043e\u043d\u043e\u043c\u043d\u043e.",
+      "at": "2026-11-12T09:00:00Z",
+      "expiresAt": "2026-11-13T08:00:00Z",
+      "scope": {
+        "capabilities": [
+          "site.deploy"
+        ],
+        "effects": [
+          "deploy"
+        ]
+      },
+      "chain": [
+        {
+          "agent": "example-runner",
+          "at": "2026-11-12T09:00:05Z"
+        },
+        {
+          "agent": "example-deployer",
+          "at": "2026-11-12T09:30:00Z"
+        }
+      ]
+    },
+    "effect": "deploy",
+    "now": "2026-11-12T10:00:00Z",
+    "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
+    "standing": true,
+    "tokenProf": "sha256:bd69d0805efcf0d4447c5329fcab479bbdd9d1af30fab1465cb86dcb6764beb6",
+    "answer": {
+      "ok": false,
+      "code": "approval-required",
+      "data": {
+        "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a"
+      }
+    }
+  }
+}

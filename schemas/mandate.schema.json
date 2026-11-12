@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/mandate.schema.json",
   "title": "The operator's mandate a task carries down a chain of agents (mandate/1, DEC-0125)",
-  "description": "The operator's instruction for one task (or, with standing, a place's autonomy profile for one assignment, DEC-0166), carried by the agent leading it and handed on, narrowed, to the agents it engages (docs/specification/delegation.md#the-operators-mandate). It travels in a request's _meta.mandate, a hub agent.call's or a sealed call's call.mandate, or a project-board request's body. A callee takes a call it covers from a T0 or T1 caller as the operator's decision (MD-3); a T2 caller's mandate changes nothing (MD-5), save a level mandate its delegation token binds (DEC-0162 LV-6). mandateCovers in src/mandate.ts is the reference; FAC-SEM-144 checks the document.",
+  "description": "The operator's instruction for one task (or, with standing, a place's autonomy profile for one assignment, DEC-0166), carried by the agent leading it and handed on, narrowed, to the agents it engages (docs/specification/delegation.md#the-operators-mandate). It travels in a request's _meta.mandate, a hub agent.call's or a sealed call's call.mandate, or a project-board request's body. A callee takes a call it covers from a T0 or T1 caller as the operator's decision (MD-3); a T2 caller's mandate changes nothing (MD-5), save a level mandate its delegation token binds (DEC-0162 LV-6) and a standing mandate its token binds by prof (DEC-0166 AU-3). mandateCovers in src/mandate.ts is the reference; FAC-SEM-144 checks the document.",
   "type": "object",
   "required": [
     "kind",
@@ -296,6 +296,10 @@
           ]
         }
       }
+    },
+    {
+      "if": { "required": ["standing"], "properties": { "standing": true } },
+      "then": { "properties": { "by": { "const": "operator" } } }
     }
   ]
 }

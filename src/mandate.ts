@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import type { ValidateFunction } from "ajv/dist/2020.js";
-import { settingsCanonicalJson } from "./canonical.js";
+import { rfc8785 } from "./canonical.js";
 import { SCHEMA_PREFIX } from "./contract.js";
 import { effectClosure } from "./delegation.js";
 import { type Finding, type JsonObject, isObject } from "./findings.js";
@@ -138,12 +138,14 @@ export function scopeWithin(child: MandateScope, parent: MandateScope): boolean 
 }
 
 /**
- * The digest a delegation token's `prof` claim carries for a standing mandate (DEC-0166 AU-3): sha256 of the settings
- * canonical JSON of the mandate without its `chain`, which grows at every hand-over while the profile does not.
+ * The digest a delegation token's `prof` claim carries for a standing mandate (DEC-0166 AU-3): sha256 of the RFC 8785
+ * canonical JSON of the mandate without its `chain`, which grows at every hand-over while the profile does not. RFC 8785
+ * has a form for a fractional ceiling (`perCallMaxUsd` 0.5); it throws on a lone surrogate, which a caller answers as a
+ * malformed mandate.
  */
 export function profileDigest(mandate: Mandate): string {
   const { chain: _chain, ...stated } = mandate;
-  return `sha256:${createHash("sha256").update(settingsCanonicalJson(stated), "utf8").digest("hex")}`;
+  return `sha256:${createHash("sha256").update(rfc8785(stated), "utf8").digest("hex")}`;
 }
 
 /** The first problem of a mandate as a document (FAC-SEM-144), or undefined. */
@@ -204,12 +206,16 @@ export function mandateCovers(input: {
   if (standing && input.standing !== true) return { ignored: "standing-not-read" };
   if (byLevel && !isObject(input.levels)) return { ignored: "levels-not-read" };
   const inside = tier === "T0" || tier === "T1";
-  // A standing mandate from T2 needs the token's `prof` (AU-3); without one it changes nothing, as MD-5 says.
-  if (!byLevel && !inside && (!standing || input.tokenProf === undefined)) return { ignored: "mandate-at-t2" };
+  // A standing mandate from T2 needs the token's `prof` (AU-3), whoever stated it; without one it changes nothing, as
+  // MD-5 says. A task's operator mandate from T2 changes nothing either.
+  if (!inside && (standing ? input.tokenProf === undefined : !byLevel)) return { ignored: "mandate-at-t2" };
   const problem = mandateProblem(mandate);
   if (problem) return { ok: false, code: MANDATE_INVALID, data: { detail: problem } };
   const read = mandate as Mandate;
-  const digest = standing ? profileDigest(read) : undefined;
+  let digest: string | undefined;
+  if (standing) {
+    try { digest = profileDigest(read); } catch { return { ok: false, code: MANDATE_INVALID, data: { detail: "mandate-malformed" } }; }
+  }
   if (standing && input.tokenProf !== undefined && input.tokenProf !== digest) return { ok: false, code: MANDATE_INVALID, data: { detail: "profile-unbound" } };
   const holders = read.chain.map((step) => step.agent);
   if (holders.length < 2 || holders[holders.length - 1] !== self || (callerAgent !== undefined && holders[holders.length - 2] !== callerAgent)) {
@@ -285,7 +291,7 @@ export function mandateRules(kind: string, value: JsonObject): Finding[] | undef
     const problem = mandateProblem(value);
     // DEC-0162: a level mandate's attestation, checked without a key (FAC-SEM-170, src/levels.ts).
     const level = problem === "mandate-malformed" ? [] : (levelRules(kind, value) as Finding[]);
-    const standing = problem === undefined ? standingFindings(value as unknown as Mandate) : [];
+    const standing = problem === "mandate-malformed" ? [] : standingFindings(value as unknown as Mandate);
     return [...(problem ? [{ code: "FAC-SEM-144", instancePath: "", message: `the mandate is not valid: ${problem} (DEC-0125 MD-1, MD-2; DEC-0136 MD-2a)` }] : []), ...level, ...standing];
   }
   return undefined;

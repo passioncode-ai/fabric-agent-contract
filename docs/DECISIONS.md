@@ -11496,8 +11496,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Decision:**
   1. **The profile is a standing mandate (AU-1).** `mandate.schema.json` gains the optional member `standing`
      (`place`, `placeKind` `headless` or `person`, `revision`). The place's hub states the profile, for each assignment
-     it starts there, as a `mandate/1` with `standing`, `task` naming the assignment, the setter's `by` and words, the
-     profile's scope and a chain starting at the assigned agent; it stands at most 24 hours after `at`
+     it starts there, as a `mandate/1` with `standing`, `task` naming the assignment, `by: "operator"` (the operator of
+     the estate the place belongs to, in an organization's context the estate its instance runs in) with the setter's
+     recorded words, the profile's scope and a chain starting at the assigned agent; it stands at most 24 hours after `at`
      (`FAC-SEM-144` amended) and the hub restates it. MD-2, MD-2a, MD-3, MD-4 and MD-6 apply unchanged.
   2. **Who sets it (AU-2).** The hub's relayed action `autonomy.profile.set`, effect `change-policy`: by AP-2's decision
      in the personal context, by a level decision (DEC-0162 LV-3) in an organization's (`owner` or `admin` for any
@@ -11505,12 +11506,14 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   3. **Binding (AU-3).** A callee reads standing mandates only when its authority extension declares `standing`; an agent
      sends one, and the hub forwards one, only to such a callee, and the protocol name `standing/1` gates the form
      toward a hub. From T0 or T1 it is taken as MD-3 says; from T2 only when the call's delegation token carries the new
-     claim `prof`, the mandate's `profileDigest` (sha256 of the settings canonical JSON of the mandate without its
+     claim `prof`, the mandate's `profileDigest` (sha256 of the RFC 8785 canonical JSON of the mandate without its
      `chain`), which the hub writes for the assignment's token; a `prof` that is not the mandate's is `decision-invalid`
      `profile-unbound` at any tier; an onward token keeps the parent's `prof` or none (`FAC-SEM-050`).
   4. **Defaults, bounds, watching, refusals (AU-4 to AU-7).** A headless place with no recorded profile covers every
      effect class but `change-policy`; a person's computer nothing beyond its person's own decisions until a profile is
-     recorded from the hub's presets. No profile covers MD-6's list or `autonomy.profile.set` (`FAC-SEM-173` on the
+     recorded from the hub's presets; in an organization's context a headless place with no recorded profile states
+     nothing until its owner or an administrator records one (question 4). A profile decides no credential request
+     (question 5). No mandate of any kind covers `autonomy.profile.set`, and no profile covers MD-6's list or `autonomy.profile.set` (`FAC-SEM-173` on the
      document, `outside-mandate: capability` on the call). The hub states a headless profile only while the place's
      watcher answers. A call taken under it is recorded `via: profile` with the place, revision, digest, assignment,
      chain and caller; refusals are MD-4's, `profile-unbound` and the mandate's own details, from T2 with the digest.
@@ -11528,10 +11531,17 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `profile-unwatched` as callee refusals (refused: a callee cannot know the hub's latest revision or its watcher, so
   they are the hub's states, in which it states no mandate); a standing mandate living 7 days as a task's (refused: the
   hub restates it daily, so a narrowed profile reaches every assignment within a day); a T2 standing mandate without a
-  token (refused, as DEC-0162 refused a level without one: a copied mandate would serve any caller); `standing` as a member of the actions extension, as the first cut had it (refused: that extension is closed and every deployed reader refuses unknown members, so `standing` sits in DEC-0162's authority extension, `extensions/authority/0.1`).
+  token (refused, as DEC-0162 refused a level without one: a copied mandate would serve any caller); a standing
+  mandate stated by its setter's `by` (`by: "level"` for an administrator's profile), as round 0 had it (refused in
+  round 1: a level mandate stands only at its attestation's audience and the hub writes `mem` only for its own
+  principal (DEC-0162 LV-5, LV-6), so an organization's headless place, with no person, could state none, and a fresh
+  attestation would change the digest; the setter's level is checked once, at `autonomy.profile.set`, and recorded
+  there); the profile's digest in the settings canonical form (refused in round 1: it has no form for a fractional
+  `perCallMaxUsd`, so RFC 8785, as `actionDigest`); `standing` as a member of the actions extension, as the first cut had it (refused: that extension is closed and every deployed reader refuses unknown members, so `standing` sits in DEC-0162's authority extension, `extensions/authority/0.1`).
 - **Compatibility:** additive, gated by `standing` in the callee's authority extension and `standing/1` toward a hub. A
   reader pinned before this decision refuses a standing mandate as `mandate-malformed` (its schema closes `mandate/1`),
-  so no agent sends it there. Read on 2026-11-12: no hub states a profile and no service declares `standing` yet. Owed:
+  so no agent sends it there; a port pinned past this decision adds `standing` ['1'] to the adapter kits' hand-kept
+  `PROTOCOL_REVISIONS` whether or not it reads standing (their feed-protocols test checks it). Read on 2026-11-12: no hub states a profile and no service declares `standing` yet. Owed:
   Fabric (CO-547: the dispatcher and headless assignments read the profile, its hub writes `prof`, its floor treats a
   covered effect as decided; ADR-0168's machine permission choice stays the runner's prompt mode), the organization
   product (who may change a profile, shown per place), the PM agent, the host's admin agent (records a place's kind and
@@ -11540,15 +11550,22 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   users, and a project that wants the gate narrows its own profile; (2) an organization administrator sets a profile
   on a member's computer only inside the organization's context there; (3) watched means a monitoring agent declared in
   the place's record and answering its probe; (4, added) a headless place of an organization with no recorded profile
-  takes the default only once its owner or an administrator records it, and states nothing until then. The operator may
-  answer otherwise until 2026-11-21.
+  takes the default only once its owner or an administrator records it, and states nothing until then (written into
+  AU-4); (5, added in round 1) a profile decides no credential request, which stays the administrator's or the
+  auto-approval policy's (credentials, DEC-0111), although the operator's record lists key issuance through
+  Observatory's doors among a headless place's acts: a key a place's own estate issues through its own doors is that
+  estate's relayed act, which the profile covers as any other. The questions are posted on thread `8da128cf` before
+  acceptance (the board answered HTTP 503 through 2026-11-12). The operator may answer otherwise until 2026-11-21.
 - **Consequences / affects:** `schemas/mandate.schema.json` (`standing`), `schemas/delegation-token.schema.json`
   (`prof`), `schemas/service-authority-extension.schema.json` (`standing`); `src/mandate.ts`, `src/actions.ts`,
   `src/delegation.ts`, `src/delegation-rules.ts`, `src/protocol-revisions.ts` (`standing/1`);
   `fixtures/vectors/profile.json`, `tools/vectors/profile.ts`, `tools/vectors/run.ts`, `test/profile.test.ts`,
   `test/meter-grant.test.ts`; `docs/specification/delegation.md` (the section, MD-5, the `prof` row, `FAC-SEM-050`,
   `FAC-SEM-144`, `FAC-SEM-173`), `service.md` (the `actionDecision` table), `interop.md` (C3.5), `versioning.md`,
-  `conformance.md` (rows, module, register), `CONTEXT.md` (Autonomy profile). Not decided here: the monitoring agent's
+  `conformance.md` (rows, module, register), `CONTEXT.md` (Autonomy profile, Mandate), `service.md` (AP-2's inputs,
+  AP-3's routes), `schemas/interop-agent-call.schema.json` and `interop-request-meta.schema.json` (the hub forwards a
+  standing mandate), `src/semantic-kinds.ts` and `fixtures/semantic/action-call-profile*.json`, `docs/ux/foundation.md` (ST-043),
+  `docs/ux/scenarios.md` (SCN-061), `docs/ux/flows.md` (FLW-31), `docs/ux/screens.md` (SCR-30). Not decided here: the monitoring agent's
   own contract (the North Star's monitoring role, G27); rollback at the process level (each product's checks and
   receipts).
 - **Source:** the design `docs/evidence/plans/2026-11-12-ct285-autonomy-profile.md`; the operator's decision of
