@@ -3,8 +3,8 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0160` (the CAS counter's next value when this line was last written; read
-`refs/agent-sync/ids/DEC` on origin for the current one)
+**Next free ID:** `DEC-0162` (the CAS counter's next value when this line was last written, DEC-0156 to DEC-0158, DEC-0160
+and DEC-0161 being reserved by sibling branches; read `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
 `DEC-0028` is not used: two runs reserved under one key (`usage-budgets-20261007`); the first wrote DEC-0027 and
@@ -11420,8 +11420,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   3. CF-3: people's coding agents and callers outside the estate reach its MCP surface and its HTTP API with client keys
      in `Authorization: Bearer`. The HTTP API is the routes a client key opens, the page's routes those the session cookie
      opens with the custom request header, a route opening to one or the other, never both; the descriptor's token keeps
-     the well-known document, the declared events, usage, operator-channel and load paths, and the login code. A key is
-     one per client and scoped; issuing, rotating and revoking are the operator's alone, through the agent's own CLI run
+     the well-known document, the declared events, usage, operator-channel and load paths, and the login code. A key
+     belongs to one client, is never shared, and is scoped; issuing, rotating and revoking are the operator's alone, through the agent's own CLI run
      from the operator's computer (on it, or as a one-off process of the platform it starts; not a descriptor `commands`
      entry), the operator's page, or that page action's agent twin declared `gate: "relayed"` (the operator's decision,
      AP-2, or an accepted `approval/1`; a caller reaching the cloud origin directly is T2 unless the platform proves its
@@ -11571,7 +11571,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `id` already marks it, and a host that shows products by `id` needs nothing more); a semantic rule that checks the
   cloud instance declares `own` (rejected for now: the declaration is in the well-known document behind the token, which
   a checker of descriptors does not read).
-- **Compatibility:** additive, with one change on the wire that reaches every service, not the form alone: DL-19's
+- **Compatibility:** a client key carries no level or place profile (the CT-250 and CT-285 designs bind them only by
+  token), so CF-4 holds on a headless place too (the operator's decision of 2026-11-09), and CT-285's and CT-250's DECs
+  restate CF-3 and CF-4 for a token-bound caller (main's CT-285 and CT-250 rows). Beyond that: additive, with one change on the wire that reaches every service, not the form alone: DL-19's
   header sentence now asks a bare `WWW-Authenticate: Bearer` on a `401` for a request that carried no credential,
   where its old text put `error="invalid_token"` on every `401` (RFC 6750 section 3.1); its dependants are named below.
   One change in how callers read the wire also reaches every service: DL-19's row now makes `issuer-unavailable`

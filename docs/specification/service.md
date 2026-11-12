@@ -976,7 +976,8 @@ cloud instance's well-known document, declaring `surfaces.mcp.auth: "own"` and `
   [Surfaces](#surfaces) table; a route opens to one or the other, never both. The descriptor's token keeps its own
   routes, named by surface: the well-known document, the paths that document declares for the events feed, the usage
   report, the operator channel and the load extension, and the login code (`POST /fabric/v1/login-code`)
-  ([MCP credentials](#mcp-credentials), DEC-0024). A client key is one per client and carries the scopes it allows.
+  ([MCP credentials](#mcp-credentials), DEC-0024). A client key belongs to one client, is never shared between clients, and carries the scopes it allows; an agent that
+  holds the key-management key the operator issued it may also hold the keys the twin issues it (below).
   Issuing, rotating and revoking client keys are the operator's alone, through three doors: the agent's own CLI, which
   the operator runs from their own computer (on it, or as a one-off process of the platform it starts), not a
   descriptor `commands` entry, which a remote placement limits to `doctor`; an action on the operator's page; and that
@@ -1191,6 +1192,11 @@ cloud instance's well-known document, declaring `surfaces.mcp.auth: "own"` and `
     another computer that shows the page; until then the job keeps reading `working` and a repeated call is refused
     again. A page for members needs a credential per person that can be revoked one by one and mints no operator
     session, which a later decision adds.
+  A client key carries no level and no place profile, which bind only through a delegation token (CT-250's `mem` claim,
+  CT-285's `prof` claim, both designs on 2026-11-12): so at an instance in this form a client-key caller's choice waits
+  for the operator even on a place the operator's decision of 2026-11-09 makes headless (fabric-workspace
+  `knowledge/authority.md`, *Autonomy by place*), and an instance that agents of the estate call from a headless place
+  declares `auth.delegation`, so the profile can reach it by token; the body's gates (AP-4) stay the person's either way.
 - **CF-5, provider keys stay on the server.** The provider keys the cloud instance uses live only in the platform's
   secrets: set from the owner's vault by reference, the move recorded where the vault records moves, never in the
   repository, a descriptor, a client's configuration, an answer, a page, a log or a report. A client of the cloud

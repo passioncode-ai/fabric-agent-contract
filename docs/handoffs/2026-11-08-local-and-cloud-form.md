@@ -14,6 +14,10 @@ repository names; those commits were public on `origin` (this repository is publ
 was deleted from `origin` and replaced by this squash. Commit-addressed references in the rounds below (`a6fde192` to
 `cc78d063`) name commits of the deleted branch.
 
+origin/main `d40ae936` was merged in as `6b5fa9ee` on 2026-11-12 (gate exit 0, 11185 tests), and `2b0bcd55` as
+`00c317c9` the same day (the backlog conflict at CT-285 resolved before the commit: this branch's CT-270 to CT-283 rows,
+then main's CT-285 row).
+
 ## Done
 
 - DEC-0159 (Proposed), reserved with `agent_sync.py reserve DEC`; `Next free ID` set to `DEC-0160`.
@@ -127,7 +131,9 @@ a client-key caller input for CF-4's `operator-step` (FAA-204).
   transcript; such a door returns no value, and the organization's north star plans its administrator agent issuing
   members' keys into the vault through the doors. Until answered, CF-3's ban covers that route too, and the member's
   key is issued by the operator in their own terminal or on the page; a yes is new mechanics (a door, its record of
-  the move, its scope), filed as a backlog row then.
+  the move, its scope), filed as a backlog row then. The operator's decision of 2026-11-09 (fabric-workspace `knowledge/authority.md`,
+  *Autonomy by place*) has key issuance through the doors finish on a headless place while a secret handed out stays a
+  body gate (CT-285's AU-4 and AU-5): the question goes to CT-285's DEC as one of its operator questions.
 - CT-279 (filed in round 12): a reference input marking a client-key caller, so that `FAC-SEM-142`'s client-key
   exception has a machine check; until then the conformance row's evidence for CF-4's human path is the service's
   own test alone.
@@ -227,7 +233,17 @@ a client-key caller input for CF-4's `operator-step` (FAA-204).
   and `grep -n 'DEC-0158' docs/specification/conformance.md | grep 'dispatched run' | grep -c 'operator-step'` prints
   at least 1. This requirement binds whichever of DEC-0158 and DEC-0159 lands second; the note is written on this
   branch only, and its relay to DEC-0158's branch is owed by the coordinator (not seen on that branch at round 14's
-  reading); until it is relayed, a lander of DEC-0158 that lands second makes the edit from this note.
+  reading; carried in DEC-0158's handoff since, its lines 327-330); until it is relayed, a lander of DEC-0158 that lands
+  second makes the edit from this note. Restated in round 16 (product): `operator-step: <humanStep>` is a human-step stop
+  and `operator-step: choice` an `input_required` stop; DEC-0158's OS-6 and OS-7 are being re-cut as one table of stops
+  (its round 20), so the checks become `grep -c 'operator-step'` over `docs/specification/project-comms.md` and over the
+  dispatched-run conformance row, not a bullet range.
+- Landing note for CT-250's and CT-285's decisions (round 16, product): binding on whichever of DEC-0159 and either DEC
+  lands second: that DEC lists CF-3 (keys the operator's alone, the key twin's gate) and CF-4 (choices and the twins of
+  page answers) among the rules it restates, and states whether a bound level decision or a place profile stands there
+  for a token-bound caller. Main's CT-285 and CT-250 rows carry it since 2026-11-12 (#275).
+- At landing: CT-287's DEC-0159 entry closed (its rounds, landed, the PR and merge commit) in the same change, and the
+  handoffs index row restated as accepted and merged.
 
 ## Rounds
 
@@ -760,6 +776,17 @@ a client-key caller input for CF-4's `operator-step` (FAA-204).
   and `pnpm typecheck` were not run here (no source, schema, fixture or vector changed); `docs:check` ran before this
   paragraph replaced its placeholder.
 
+- Round 16 (on `6b5fa9ee`, main `d40ae936` merged): seam clean; unit and product not clean. Breaks folded: "a client key
+  is one per client" left the key twin's issuing branch unreachable, since its only caller already holds a key; it now
+  reads that a key belongs to one client and is never shared, and an agent with the key-management key may hold the keys
+  the twin issues it (service.md, DEC-0159 item 3, the conformance row, CONTEXT) (unit); CF-4 met the operator's decision
+  of 2026-11-09 for headless places without naming it; CF-4 and the Compatibility now say a client key carries no level
+  or profile, so a client-key caller's choice waits for the operator even there, and an instance called from a headless
+  place declares `auth.delegation`; main's CT-285 and CT-250 rows name CF-3 and CF-4 (#275) (product); the handoff did
+  not record the merges of 2026-11-12 or close CT-287 at landing; Branch and the landing list now do (product). Risks
+  folded: the DEC-0158 note restated against its re-cut table; the second operator question cites the decision of
+  2026-11-09 and goes to CT-285's DEC; CF-3 and the levels are joined by the landing note. Declined: none.
+
 ## Next task
 
-Round 16 of the blind readings (unit, seam, product) of branch `agent/ct218-local-cloud-v2` (DEC-0159).
+Round 17 of the blind readings (unit, seam, product) of branch `agent/ct218-local-cloud-v2` (DEC-0159).

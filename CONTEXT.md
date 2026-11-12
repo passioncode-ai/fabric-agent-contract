@@ -567,7 +567,7 @@ extension — on the operator's own computer, supervised by the operating system
 platform (a **remote placement**, DEC-0019).
 
 **Local and cloud form**: One agent run as two instances of one `id`: the local one on its owner's computer and a
-cloud one at an `https` origin, which a team reaches with client keys of their own (one per client, held as a hash,
+cloud one at an `https` origin, which a team reaches with client keys of their own (each held by one client and never shared, held as a hash,
 revoked one by one) while the provider keys stay on the server and only the operator opens its page, with the host's
 one-time login code. The standard way to give a team an agent that holds keys without handing the keys out (CF-1 to CF-7,
 DEC-0159).
