@@ -1,7 +1,7 @@
 import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { actionDecision, actionRules, actionsExtensionRules, actionsView, authorityView } from "../src/actions.js";
+import { actionDecision, actionRules, actionsExtensionRules, actionsView, authorityExtensionRules, authorityView } from "../src/actions.js";
 import { SCHEMA_PREFIX, projectRoot } from "../src/contract.js";
 import { EXTENSION_KEYS } from "../src/extensions.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
@@ -102,15 +102,23 @@ describe("FAC-SEM-142 on a well-known document (DEC-0121 AP-1)", () => {
     expect(authorityView(doc({ standing: true }))).toEqual({ declared: true, valid: true, standing: true });
     expect(actionsView(doc({ levels }))).toEqual({ declared: true, valid: true, actions: actions.actions });
     const key = `/extensions/${EXTENSION_KEYS.authority.replace(/\//g, "~1")}`;
-    const paths = (authority: unknown) => actionsExtensionRules(doc(authority)).map((finding) => finding.instancePath);
+    const paths = (authority: unknown) => authorityExtensionRules(doc(authority)).map((finding) => finding.instancePath);
+    expect(actionsExtensionRules(doc({ levels: [...levels, ...levels] }))).toEqual([]);
+    expect(authorityView(doc({ levels, later: { member: true } }))).toEqual({ declared: true, valid: true, levels });
     expect(paths({})).toEqual([key]);
     expect(paths({ levels: [...levels, { org: "org:example-org", audience: "b.default" }], actionLevels: { retry: "owner", "approve-reply": "operator", "never-declared": "admin" } }))
       .toEqual([`${key}/levels/1/org`, `${key}/actionLevels/retry`, `${key}/actionLevels/never-declared`]);
-    expect(actionsExtensionRules({ extensions: { [EXTENSION_KEYS.authority]: { actionLevels: { "approve-reply": "admin" } } } }).map((f) => f.instancePath)).toEqual([`${key}/actionLevels/approve-reply`]);
+    expect(authorityExtensionRules({ extensions: { [EXTENSION_KEYS.authority]: { actionLevels: { "approve-reply": "admin" } } } }).map((f) => f.instancePath)).toEqual([`${key}/actionLevels/approve-reply`]);
   });
   it("answers the service's own fault when its level contexts are not a map (DEC-0162)", () => {
     const action = { id: "approve-reply", title: "Approve", tool: "reviews.approve", gate: "relayed" };
     expect(actionDecision({ action, tier: "T0", caller: "agent:x", now: "2026-10-25T11:30:00Z", levels: [{ org: "org:a", audience: "s.default" }] })).toEqual({ fault: "levels-invalid" });
+  });
+  it("answers the service's own fault when the level it declares for the action is not one (DEC-0162 LV-7)", () => {
+    const action = { id: "approve-reply", title: "Approve", tool: "reviews.approve", gate: "relayed" };
+    for (const actionLevel of ["Owner", 42, null]) {
+      expect(actionDecision({ action, tier: "T0", caller: "agent:x", now: "2026-10-25T11:30:00Z", actionLevel }), String(actionLevel)).toEqual({ fault: "action-level-invalid" });
+    }
   });
   it("reads surfaces that are not objects as no capability list", () => {
     const value = { actions: [{ id: "approve-reply", title: "Approve", tool: "reviews.approve", gate: "relayed" }] };
@@ -122,7 +130,7 @@ describe("FAC-SEM-142 on a well-known document (DEC-0121 AP-1)", () => {
 
 describe("kind action-call (FAC-SEM-142)", () => {
   const dir = path.join(projectRoot(), "fixtures/semantic");
-  const fixtures = readdirSync(dir).filter((name) => /^(action-call|service-well-known-actions)-/.test(name)).map((name) => ({ name, ...(JSON.parse(readFileSync(path.join(dir, name), "utf8")) as { kind: string; expect: string[]; input: Json }) }));
+  const fixtures = readdirSync(dir).filter((name) => /^(action-call|service-well-known-actions|service-well-known-authority)-/.test(name)).map((name) => ({ name, ...(JSON.parse(readFileSync(path.join(dir, name), "utf8")) as { kind: string; expect: string[]; input: Json }) }));
   it("has fixtures for both kinds, and each finds what it expects", () => {
     expect(fixtures.filter((f) => f.kind === "action-call").length).toBeGreaterThan(5);
     expect(fixtures.filter((f) => f.kind === "service-well-known").length).toBeGreaterThan(5);

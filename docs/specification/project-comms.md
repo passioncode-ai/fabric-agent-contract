@@ -334,7 +334,8 @@ one that came while it was claimed (above), and nothing else does.
 ### Owner settlement
 
 A request in `outcome_unknown` waits for an observed reconciliation by the current responder. When no responder holds
-its slot any more, because the agent was retired or never re-enrolled, the estate owner may settle it (DEC-0081). The
+its slot any more, because the agent was retired or never re-enrolled, the estate owner may settle it (DEC-0081); no
+authority level decides it: it is the owning principal's own `com.reconcile`, not a relayed action (DEC-0162 LV-7). The
 owner attests what it observed, and the board never fakes knowledge.
 
 A request reaches `outcome_unknown` by three paths only, and the owner settles it after any of them:
@@ -682,7 +683,7 @@ The boundary:
   names who set it. Every object in the schema is closed, so a reader
   refuses an answer that carries more.
 - **Not the caller itself.** The caller's own Project is not listed; `com.status` describes it.
-- **Opt-out.** A Project can be unlisted. Its operator decides it, in the host (in Fabric per Project) or through their
+- **Opt-out.** A Project can be unlisted. Its operator decides it (in an organization, the member who owns the Project; no level decides it, the host declaring `operator` for its list and unlist actions, DEC-0162 LV-7), in the host (in Fabric per Project) or through their
   agent, which relays the decision to the host's list and unlist actions (`gate: relayed`, [service](service.md#actions)
   AP-2, DEC-0121; the host's tools are CT-125); an agent never lists or unlists a Project on its own account. An unlisted Project is absent from every page and every
   capability filter.

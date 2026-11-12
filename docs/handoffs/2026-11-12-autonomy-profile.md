@@ -38,6 +38,10 @@ organization slice of 2026-11-21: a place's profile as a standing `mandate/1` it
 ## Checks run
 
 - `pnpm run check` exit 0 on the first cut (11294 tests passed, 3 skipped), and after the merge of DEC-0162 round 3 with `standing` moved to the authority extension (11301 passed, 3 skipped; coverage floors met; UX lint, docs check with 0 markdownlint errors, privacy check 0 findings).
+- Merged DEC-0162's round-6 head `30fe601c` (conflicts in the authority schema's title and description, `src/actions.ts`'s
+  imports, `src/mandate.ts`'s `levels-invalid` fault beside `standing-not-read`, conformance's actions and mandate rows,
+  the handoffs index; each resolved keeping both sides): `pnpm run check` exit 0 (11305 passed, 3 skipped), 34 vector
+  files match their generators.
 
 ## Next task
 

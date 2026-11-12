@@ -134,7 +134,7 @@ function actionCases(): Json[] {
     // LV-7: an act the service keeps for the operator alone (a client key, DEC-0159 CF-3) is decided by no level.
     ["the owner on an act no level decides", call("T1", { ...decided("owner", OWNER), action: "issue-key" }, { action: clientKey, actionLevel: "operator", tokenMem: digest(OWNER) }), { ok: false, code: "operator-decision-required", data: { detail: "level-insufficient: operator" } }],
     ["the operator's own decision on an act no level decides, from T0", call("T0", { by: "operator", via: "relayed-instruction", action: "issue-key", instruction: "Issue the key for the support bot", at: "2026-10-25T11:29:00Z" }, { action: clientKey, actionLevel: "operator" }), { ok: true, recordAs: { by: "operator", via: "relayed-instruction", caller: CALLER } }],
-    // LV-5: the service's own accepted elicitation is the operator's word, read before a level form.
+    // LV-4: the service's own accepted elicitation is the operator's word, read before a level form.
     ["an accepted elicitation beside an unbound level decision, from T0", call("T0", decided("admin", ADMIN), { elicited: true }), { ok: true, recordAs: { by: "operator", via: "elicitation", caller: CALLER } }],
     // OM-4, LV-11: an older active revision after the issuer stated the end at a higher one.
     ["an older revision after an ended one", call("T2", decided("admin", ADMIN), { tokenMem: digest(ADMIN), levels: { [ORG]: { audience: SERVICE, keySet: KEY_SET, held: { [ADMIN.subject]: { subject: ADMIN.subject, revision: 9, digest: `sha256:${"cd".repeat(32)}` } } } } }), invalid("level-membership: stale-revision")],
@@ -194,6 +194,8 @@ function mandateCases(): Json[] {
     // LV-6, MD-5 amended: a bound level mandate is taken from a T2 caller.
     ["an architect's level mandate from T2, covered", mandateCall("T2", levelMandate(ARCHITECT, "architect", ALPHA), { tokenMem: digest(ARCHITECT) }), byLevelMandate(ARCHITECT, "architect")],
     ["an administrator's level mandate from T1, covered", mandateCall("T1", levelMandate(ADMIN, "admin", ALPHA), { tokenMem: digest(ADMIN) }), byLevelMandate(ADMIN, "admin")],
+    // DL-17: from T2 an operator decision counts for nothing, so a bound level mandate beside one is read.
+    ["a bound level mandate beside an operator decision, from T2", mandateCall("T2", levelMandate(ADMIN, "admin", ALPHA), { tokenMem: digest(ADMIN), decision: { by: "operator", via: "relayed-instruction", action: "approve-reply", instruction: "approve it", at: "2026-10-25T11:29:00Z" } }), byLevelMandate(ADMIN, "admin")],
     ["an architect's level mandate from T2 on a project outside its own", mandateCall("T2", levelMandate(ARCHITECT, "architect", { ...ALPHA, projects: ["alpha", "gamma"] }), { tokenMem: digest(ARCHITECT), project: "gamma" }), insufficient],
     ["a level mandate outside its scope's projects", mandateCall("T2", levelMandate(ADMIN, "admin", ALPHA), { tokenMem: digest(ADMIN), project: "beta" }), { ok: false, code: "operator-decision-required", data: { detail: "outside-mandate: project" } }],
     ["a level mandate without the token's mem", mandateCall("T2", levelMandate(ADMIN, "admin", ALPHA)), { ok: false, code: "decision-invalid", data: { detail: "level-unbound" } }],

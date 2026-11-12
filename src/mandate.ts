@@ -96,7 +96,7 @@ export type MandateAnswer =
    * A level mandate at a callee that reads no levels is ignored the same way, at every tier (LV-10). */
   | { ignored: "mandate-at-t2" | "levels-not-read" | "standing-not-read" }
   /** The callee's own fault, never sent: its clock does not read. */
-  | { fault: "now-unreadable" };
+  | { fault: "now-unreadable" | "levels-invalid" };
 
 let shape: ValidateFunction | undefined;
 const mandateShape = () => (shape ??= createValidatorSync().getSchema(`${SCHEMA_PREFIX}schemas/mandate.schema.json`) as ValidateFunction);
@@ -198,6 +198,8 @@ export function mandateCovers(input: {
   const clock = strictTime(now);
   if (Number.isNaN(clock)) return { fault: "now-unreadable" };
   const byLevel = typeof mandate === "object" && mandate !== null && (mandate as { by?: unknown }).by === "level";
+  // Level contexts given but not a map are the callee's own fault, never "reads no levels" (actionDecision's levels-invalid).
+  if (input.levels !== undefined && !isObject(input.levels)) return { fault: "levels-invalid" };
   const standing = isObject(mandate) && mandate.standing !== undefined;
   if (standing && input.standing !== true) return { ignored: "standing-not-read" };
   if (byLevel && !isObject(input.levels)) return { ignored: "levels-not-read" };

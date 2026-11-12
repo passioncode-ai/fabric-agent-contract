@@ -4,7 +4,7 @@ import { SCHEMA_PREFIX } from "./contract.js";
 import { EXTENSION_KEYS } from "./extensions.js";
 import { type Finding, type JsonObject, isObject } from "./findings.js";
 import { CLOCK_SKEW_SECONDS, strictTime } from "./rfc3339.js";
-import { type LevelContexts, type LevelRecord, levelStanding } from "./levels.js";
+import { type LevelContexts, type LevelRecord, levelStanding, ACTION_LEVELS } from "./levels.js";
 import { type OperatorSource, type ProfileRecord, mandateCovers } from "./mandate.js";
 import { createValidatorSync } from "./validator.js";
 
@@ -30,7 +30,7 @@ export type CallerTier = "T0" | "T1" | "T2";
 /** One entry of `actions[]` (`service-actions-extension.schema.json#/$defs/action`). */
 export interface DeclaredAction { id: string; title: string; tool: string; gate: ActionGate; humanStep?: HumanStep }
 /** The levels an action may need, as the authority extension declares them (DEC-0162 LV-7). */
-export const ACTION_LEVELS = ["operator", "owner", "admin", "architect"] as const;
+export { ACTION_LEVELS } from "./levels.js";
 
 export interface ActionDecisionInput {
   /** The service's own declaration of the action being called. */
@@ -101,7 +101,7 @@ export type ActionDecisionAnswer =
   | { ok: false; code: typeof APPROVAL_REQUIRED; data: { actionDigest: string } }
   | { ok: false; code: typeof OPERATOR_DECISION_REQUIRED | typeof DECISION_INVALID; data?: { detail?: string; estimateUsd?: number; perCallMaxUsd?: number; actionDigest?: string } }
   /** The service's own fault, never sent to a caller: an input it owes is missing or unreadable. */
-  | { fault: "action-invalid" | "caller-missing" | "levels-invalid" | "now-unreadable" | "digest-missing" | "url-missing" | "effect-missing" | "self-missing" | "mandate-capability-missing" };
+  | { fault: "action-invalid" | "caller-missing" | "levels-invalid" | "action-level-invalid" | "now-unreadable" | "digest-missing" | "url-missing" | "effect-missing" | "self-missing" | "mandate-capability-missing" };
 
 /** How long after the operator decided a relayed decision still stands: approval/1's lifetime (DL-17, FAC-SEM-051). */
 export const DECISION_LIFETIME_SECONDS = 24 * 60 * 60;
@@ -151,13 +151,16 @@ export function actionDecision(input: ActionDecisionInput): ActionDecisionAnswer
   if (!nonEmpty(caller)) return { fault: "caller-missing" };
   // The service's level contexts are a map by organization; an array (the authority declaration itself) is its fault.
   if (input.levels !== undefined && !isObject(input.levels)) return { fault: "levels-invalid" };
+  // A level the service declares for the action that is not one of ACTION_LEVELS is its fault, never "none declared".
+  if (input.actionLevel !== undefined && !(ACTION_LEVELS as readonly unknown[]).includes(input.actionLevel)) return { fault: "action-level-invalid" };
   if (acceptedApproval(approval)) return { ok: true, recordAs: { by: approval.approver, via: "approval", caller } };
   // DEC-0162: a level decision, or a level mandate on a call without a decision, is read at every tier by a service
   // that reads levels (LV-6); one that reads none answers as if the call carried neither (LV-10).
   const levelDecision = isObject(decision) && decision.by === "level";
-  const levelMandate = decision === undefined && isObject(input.mandate) && input.mandate.by === "level";
-  // The service's own accepted elicitation is the operator's word at T0 or T1 and is read before a level form (LV-5).
   const inside = tier === "T0" || tier === "T1";
+  // From T2 an operator decision counts for nothing (DL-17), so a level mandate beside one is still read (LV-6).
+  const levelMandate = (decision === undefined || (!inside && !levelDecision)) && isObject(input.mandate) && input.mandate.by === "level";
+  // The service's own accepted elicitation is the operator's word at T0 or T1 and is read before a level form (LV-4).
   if (inside && elicited === true) return { ok: true, recordAs: { by: "operator", via: "elicitation", caller } };
   // DEC-0166 AU-3: a standing mandate (a place's autonomy profile) is read at every tier by a service that declares
   // `standing`; from T2 it stands only when the call's token binds it by `prof`.
@@ -200,9 +203,8 @@ export function actionDecision(input: ActionDecisionInput): ActionDecisionAnswer
   return { ok: true, recordAs: { by: "operator", via: "relayed-instruction", caller, ...(read.source ? { source: { ...read.source } } : {}) } };
 }
 
-/** The level the service declares the action needs, when it is one of ACTION_LEVELS (LV-7); anything else, none. */
-const minLevelOf = (input: ActionDecisionInput): string | undefined =>
-  typeof input.actionLevel === "string" && (ACTION_LEVELS as readonly string[]).includes(input.actionLevel) ? input.actionLevel : undefined;
+/** The level the service declares the action needs (LV-7); `actionDecision` refused any other value as its own fault. */
+const minLevelOf = (input: ActionDecisionInput): string | undefined => input.actionLevel as string | undefined;
 
 /** The tool of a job's input request (C3.3, AP-2): the call that answers it is `fabric.job.get`. */
 export const JOB_STEP_TOOL = "fabric.job.get" as const;
@@ -240,7 +242,7 @@ function byMandate(input: ActionDecisionInput, action: DeclaredAction, caller: s
  * LV-11), at any tier: the decision has its schema's level form and is for this action and target; it was made within
  * AP-2's window; it names the project the call acts in, when it names one; the level stands (`levelStanding`). A failed
  * check is `decision-invalid`, with the level's detail where the level fails; a level below what the call needs is
- * `operator-decision-required` with `level-insufficient: admin`.
+ * `operator-decision-required` with `level-insufficient: owner`, `admin` or `operator`.
  */
 function byLevel(input: ActionDecisionInput, action: DeclaredAction, caller: string, clock: number): ActionDecisionAnswer {
   decisionShape ??= schema("decision.schema.json");
@@ -313,12 +315,19 @@ const flag = (instancePath: string, message: string): Finding => ({ code: "FAC-S
  * FAC-SEM-142 on a well-known document (kind `service-well-known`) that carries the actions key: a value that is not
  * its schema's (a reader treats it as not declared and reports it, as FAC-SEM-133 does for load); an `id` named twice; a
  * `humanStep` present without `gate: human` or absent with it; a `tool` that a present `surfaces.mcp.capabilities` does
- * not list: a button without an agent twin (DEC-0121 AP-1). On the authority key (DEC-0162): a value that is not its
- * schema's, an organization named twice in `levels`, and a level for an id that is not a relayed action of the actions
- * declaration (LV-5, LV-7).
+ * not list: a button without an agent twin (DEC-0121 AP-1). The authority key is `authorityExtensionRules`'s.
  */
 export function actionsExtensionRules(wellKnown: JsonObject): Finding[] {
-  return [...actionsKeyFindings(wellKnown), ...authorityKeyFindings(wellKnown)];
+  return actionsKeyFindings(wellKnown);
+}
+
+/**
+ * FAC-SEM-142 on the authority key of a well-known document (kind `service-well-known`, DEC-0162 LV-5, LV-7): a value
+ * that is not its schema's, an organization named twice in `levels`, and a level for an id that is not a relayed action
+ * of the actions declaration. Its own function, so a port of `actionsExtensionRules` keeps reading the actions key alone.
+ */
+export function authorityExtensionRules(wellKnown: JsonObject): Finding[] {
+  return authorityKeyFindings(wellKnown);
 }
 
 const AUTHORITY_PATH = `/extensions/${pointerToken(EXTENSION_KEYS.authority)}`;

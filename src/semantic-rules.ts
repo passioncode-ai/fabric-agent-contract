@@ -47,7 +47,7 @@ import { orgMembershipRules } from "./org-membership.js";
 import { shareRegistrationRules } from "./share-registration.js";
 import { nodeSummaryRules } from "./node-summary.js";
 import { agentNetworkRules, loadExtensionRules } from "./agent-network.js";
-import { actionRules, actionsExtensionRules } from "./actions.js";
+import { actionRules, actionsExtensionRules, authorityExtensionRules } from "./actions.js";
 import { channelAgentRules } from "./channel-agent.js";
 import { machineCallRules } from "./machine-call.js";
 import { machineReportRules } from "./machine-report.js";
@@ -211,7 +211,7 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   if (kind === "service-well-known") findings.push(...dashboardDeclarationRules(value));
   if (kind === "service-well-known") findings.push(...connectionsRules(value));
   if (kind === "service-well-known") findings.push(...loadExtensionRules(value));
-  if (kind === "service-well-known") findings.push(...actionsExtensionRules(value));
+  if (kind === "service-well-known") findings.push(...actionsExtensionRules(value), ...authorityExtensionRules(value));
   if (kind === "service-well-known") findings.push(...channelAgentRules(value, "well-known"));
   if (kind === "service-well-known") findings.push(...embeddedProtocolsFindings(value.protocols, "/protocols"));
   if (kind === "service-descriptor") findings.push(...serviceCommands(value), ...remoteShape(value), ...commandLines(kind, value), ...descriptorPeerRules(value), ...digestFoldersRules(value));

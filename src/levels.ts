@@ -2,6 +2,9 @@ import { type Finding, type JsonObject, isObject, show } from "./findings.js";
 import { type HeldMembership, ORG_MEMBERSHIP_2_TYPE, verifyOrgMembership } from "./org-membership.js";
 import { strictTime } from "./rfc3339.js";
 
+/** The levels a service may declare an action needs (DEC-0162 LV-7), in its authority extension's `actionLevels`. */
+export const ACTION_LEVELS = ["operator", "owner", "admin", "architect"] as const;
+
 // #region levels (docs: docs/specification/membership.md#levels)
 // DEC-0162: the role of an accepted `org-membership/2` attestation is its holder's level in that organization, for
 // decisions only (LV-2). A level decision (decision.schema.json's level form, LV-3) or a level mandate (mandate/1 with
@@ -103,9 +106,11 @@ export function levelStanding(input: {
   // A verified role is one of LEVEL_ROLES, so it has a rank; a level that is not a deciding one has none here.
   const rank = DECIDING_LEVELS.includes(level) ? (RANK.get(level) as number) : Number.POSITIVE_INFINITY;
   if (rank > (RANK.get(verdict.role) as number)) return { ok: false, invalid: "level-role" };
-  const projects = verdict.projects ?? [];
-  // LV-7: an act the service keeps for the operator alone is decided by no level (a client key, DEC-0159 CF-3).
-  if (input.minLevel === "operator") return { ok: false, insufficient: "level-insufficient: operator" };
+  // A verified `/2` always carries `projects` (empty but for an architect, LV-1).
+  const projects = verdict.projects as string[];
+  // LV-7: an act the service keeps for the operator alone is decided by no level (a client key, DEC-0159 CF-3). A level
+  // that is not one of ACTION_LEVELS is read as the strictest, so a mistyped declaration never opens an act.
+  if (input.minLevel === "operator" || (input.minLevel !== undefined && !(ACTION_LEVELS as readonly string[]).includes(input.minLevel))) return { ok: false, insufficient: "level-insufficient: operator" };
   // LV-7: a billing act is the owner's; LV-4: a call in no project is decided at owner or admin.
   if (input.minLevel === "owner" && rank < (RANK.get("owner") as number)) return { ok: false, insufficient: "level-insufficient: owner" };
   if ((input.minLevel === "admin" || project === undefined) && rank < (RANK.get("admin") as number)) return { ok: false, insufficient: "level-insufficient: admin" };
@@ -138,8 +143,10 @@ function levelDocument(value: JsonObject, projects: unknown[] | undefined, at: s
     // An owner or an admin deciding at the architect level is bounded by the call's project alone (LV-2).
     const own = membership.role === "architect" ? (Array.isArray(membership.projects) ? membership.projects : []) : undefined;
     // An architect attestation decides only in its projects, so it names them; an owner or an admin need not (LV-2).
-    if (own !== undefined && (projects === undefined || projects.length === 0)) flag("/level", "an architect decides only in its projects: the decision names one, a mandate's scope lists them");
-    else if (own !== undefined) for (const project of projects ?? []) if (!own.includes(project)) flag("/membership/projects", `the project ${show(project)} is not among the architect's projects`);
+    if (own !== undefined) {
+      if (projects === undefined || projects.length === 0) flag("/level", "an architect decides only in its projects: the decision names one, a mandate's scope lists them");
+      else for (const project of projects) if (!own.includes(project)) flag("/membership/projects", `the project ${show(project)} is not among the architect's projects`);
+    }
   }
 }
 
