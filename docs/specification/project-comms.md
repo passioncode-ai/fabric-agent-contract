@@ -735,7 +735,7 @@ scope with `held` and never refuses a call that settles, reports on or keeps ali
 A hold never refuses the current responder's calls on started work; if that responder's session ends under a slot or
 Project hold, enrollment and replacement wait for the lift, and its accepted work is kept as C4 says.
 
-- **Who sets it.** Only the operator decides a hold: in the host, or through their agent, which relays the decision to
+- **Who sets it.** Only the operator decides a hold, in an organization's context too: a host declares `operator` for its set and lift actions in its authority extension, so no level decides them (DEC-0162 LV-7): in the host, or through their agent, which relays the decision to
   the host's set, lift and list actions (`gate: relayed`, [service](service.md#actions) AP-1 and AP-2, DEC-0121; the
   host's tools are CT-125). An agent never holds or releases work on its own account. A hold is not a grant change and not an authority revision: it never
   answers `authority_changed`, and it resets no cursor.
@@ -788,7 +788,7 @@ constraint (`comms-refusal.schema.json`).
 ## The operator moves a slot
 
 **PR-2 (DEC-0140).** The operator who owns the Project (in an organization, that member only, as in [owner
-settlement](#owner-settlement)) may move an occupied (Project, capability) responder slot (one `com.status` shows `active` or `stale`) from its
+settlement](#owner-settlement); no level decides the move, the host declaring `operator` for its twin in its authority extension, DEC-0162 LV-7) may move an occupied (Project, capability) responder slot (one `com.status` shows `active` or `stale`) from its
 holder to another live
 session of that Project, in the host's operator controls. Until that host ships the move's agent twin, an agent does not move a slot, on its
 own account or as a relay: the move's agent twin ([service](service.md#actions) AP-1) is owed: its contract half is CT-181, then the host's with the board's other operator controls

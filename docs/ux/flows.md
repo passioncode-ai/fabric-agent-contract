@@ -740,8 +740,8 @@ flowchart TD
 
 - **Traces:** ST-035 (JTBD-07, JRN-06/#3)
 - **Goal:** a step the operator would take on a dashboard happens when they tell their agent, recorded as their decision
-- **Entry points:** the operator's chat with their agent; a service's `operator-decision-required`; a job waiting for a choice; a word the operator gives in a customer chat a channel agent answers (DEC-0150 CA-8)
-- **Success exit:** the service took the action as the operator's decision, and its audit names the agent that relayed it
+- **Entry points:** the operator's chat with their agent; a level holder's chat with their own agent (DEC-0162); a service's `operator-decision-required`; a job waiting for a choice; a word the operator gives in a customer chat a channel agent answers (DEC-0150 CA-8)
+- **Success exit:** the service took the action as the operator's decision (or a level holder's, DEC-0162), and its audit names the agent that relayed it
 - **Task analysis:** the operator tells the agent → the agent calls the action's tool with `_meta.decision` (the action, the object when the operator named one, the quoted sentence, the time) → the service runs `actionDecision` → it acts as its page would and records the decision.
 - **Rejected shape:** the agent approving without the operator's words, or a service sending the operator to its page for a step its agent was told to take: rejected, because the decision is the operator's and parity is the rule (DEC-0121); the one page-only step is the operator's move of a board slot until its twin ships (DEC-0140, SCN-051). A word the operator gives in a customer chat a channel agent answers, reaching a service action: rejected, because a word given in a customer chat reaches no service action (DEC-0150 CA-8, SCN-043).
 - **Flow:**
@@ -754,7 +754,10 @@ flowchart TD
   G -->|relayed| T{tier}
   T -->|T2 without approval| A[approval-required with the digest]
   T -->|any tier, a bound level decision| L[Taken as the level holder's; audited with level, organization and approver]
-  T -->|any tier, a level below the action's| N[operator-decision-required with level-insufficient; the agent files one request to a holder of that level]
+  T -->|any tier, a level below the action's| N[operator-decision-required with level-insufficient; the agent files one request to a holder of that level through the product's own approval surface]
+  T -->|any tier, a level form that fails| V[decision-invalid with level-unbound, level-audience or level-membership; the agent asks its hub for a fresh, bound attestation]
+  V --> C
+  N --> O
   T -->|T0 or T1| D{decision}
   D -->|none| Q[operator-decision-required; the agent asks the operator]
   Q --> O

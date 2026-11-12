@@ -28,7 +28,9 @@ export type HumanStep = "sign-in" | "consent" | "payment" | "secret" | "spend-ab
 export type CallerTier = "T0" | "T1" | "T2";
 
 /** One entry of `actions[]` (`service-actions-extension.schema.json#/$defs/action`). */
-export interface DeclaredAction { id: string; title: string; tool: string; gate: ActionGate; humanStep?: HumanStep; level?: "operator" | "owner" | "admin" | "architect" }
+export interface DeclaredAction { id: string; title: string; tool: string; gate: ActionGate; humanStep?: HumanStep }
+/** The levels an action may need, as the authority extension declares them (DEC-0162 LV-7). */
+export const ACTION_LEVELS = ["operator", "owner", "admin", "architect"] as const;
 
 export interface ActionDecisionInput {
   /** The service's own declaration of the action being called. */
@@ -73,7 +75,10 @@ export interface ActionDecisionInput {
   levels?: unknown;
   /** The `mem` claim of the call's verified delegation token, absent when it presented none (DEC-0162 LV-5). */
   tokenMem?: unknown;
-  /** True when this service declares `standing` in its actions extension (DEC-0166 AU-3): it reads standing mandates. */
+  /** The level the service's authority extension declares for this action (`actionLevels`, DEC-0162 LV-7); absent: an
+   * architect in the call's project, admin for a call in no project. */
+  actionLevel?: unknown;
+  /** True when this service declares `standing` in its authority extension (DEC-0166 AU-3): it reads standing mandates. */
   standing?: unknown;
   /** The `prof` claim of the call's verified delegation token, absent when it presented none (DEC-0166 AU-3). */
   tokenProf?: unknown;
@@ -96,7 +101,7 @@ export type ActionDecisionAnswer =
   | { ok: false; code: typeof APPROVAL_REQUIRED; data: { actionDigest: string } }
   | { ok: false; code: typeof OPERATOR_DECISION_REQUIRED | typeof DECISION_INVALID; data?: { detail?: string; estimateUsd?: number; perCallMaxUsd?: number; actionDigest?: string } }
   /** The service's own fault, never sent to a caller: an input it owes is missing or unreadable. */
-  | { fault: "action-invalid" | "caller-missing" | "now-unreadable" | "digest-missing" | "url-missing" | "effect-missing" | "self-missing" | "mandate-capability-missing" };
+  | { fault: "action-invalid" | "caller-missing" | "levels-invalid" | "now-unreadable" | "digest-missing" | "url-missing" | "effect-missing" | "self-missing" | "mandate-capability-missing" };
 
 /** How long after the operator decided a relayed decision still stands: approval/1's lifetime (DL-17, FAC-SEM-051). */
 export const DECISION_LIFETIME_SECONDS = 24 * 60 * 60;
@@ -144,6 +149,8 @@ export function actionDecision(input: ActionDecisionInput): ActionDecisionAnswer
     return { ok: false, code: HUMAN_STEP_REQUIRED, data: { humanStep: action.humanStep as HumanStep, url: humanStepUrl } };
   }
   if (!nonEmpty(caller)) return { fault: "caller-missing" };
+  // The service's level contexts are a map by organization; an array (the authority declaration itself) is its fault.
+  if (input.levels !== undefined && !isObject(input.levels)) return { fault: "levels-invalid" };
   if (acceptedApproval(approval)) return { ok: true, recordAs: { by: approval.approver, via: "approval", caller } };
   // DEC-0162: a level decision, or a level mandate on a call without a decision, is read at every tier by a service
   // that reads levels (LV-6); one that reads none answers as if the call carried neither (LV-10).
@@ -175,7 +182,8 @@ export function actionDecision(input: ActionDecisionInput): ActionDecisionAnswer
   }
   const clock = strictTime(now);
   if (Number.isNaN(clock)) return { fault: "now-unreadable" };
-  if (decision === undefined && input.mandate !== undefined) {
+  // A level decision at a service that reads no levels is as if absent (LV-10), so a mandate the call carries is read.
+  if ((decision === undefined || levelDecision) && input.mandate !== undefined) {
     const answer = byMandate(input, action, caller);
     return "ignored" in answer ? { ok: false, code: OPERATOR_DECISION_REQUIRED } : answer;
   }
@@ -191,6 +199,10 @@ export function actionDecision(input: ActionDecisionInput): ActionDecisionAnswer
   // A decision relayed from another of the operator's agents keeps where the operator said it (DEC-0126 OA-6).
   return { ok: true, recordAs: { by: "operator", via: "relayed-instruction", caller, ...(read.source ? { source: { ...read.source } } : {}) } };
 }
+
+/** The level the service declares the action needs, when it is one of ACTION_LEVELS (LV-7); anything else, none. */
+const minLevelOf = (input: ActionDecisionInput): string | undefined =>
+  typeof input.actionLevel === "string" && (ACTION_LEVELS as readonly string[]).includes(input.actionLevel) ? input.actionLevel : undefined;
 
 /** The tool of a job's input request (C3.3, AP-2): the call that answers it is `fabric.job.get`. */
 export const JOB_STEP_TOOL = "fabric.job.get" as const;
@@ -215,7 +227,7 @@ function byMandate(input: ActionDecisionInput, action: DeclaredAction, caller: s
     ...(input.callerAgent === undefined ? {} : { callerAgent: input.callerAgent }),
     ...(isObject(input.levels) ? { levels: input.levels as LevelContexts, tokenMem: input.tokenMem } : {}),
     ...(input.standing === true ? { standing: true, ...(input.tokenProf === undefined ? {} : { tokenProf: input.tokenProf }) } : {}),
-    call: { capability, action: action.id, effect, ...(typeof spendUsd === "number" ? { spendUsd } : {}), ...(typeof project === "string" ? { project } : {}), ...(action.level === undefined ? {} : { minLevel: action.level }) }
+    call: { capability, action: action.id, effect, ...(typeof spendUsd === "number" ? { spendUsd } : {}), ...(typeof project === "string" ? { project } : {}), ...(minLevelOf(input) === undefined ? {} : { minLevel: minLevelOf(input) as string }) }
   });
   if ("recordAs" in answer) return { ok: true, recordAs: { ...answer.recordAs, caller } };
   // `ignored`: a T2 operator mandate (MD-5), or a level mandate at a service that reads no levels (LV-10); the caller
@@ -242,7 +254,7 @@ function byLevel(input: ActionDecisionInput, action: DeclaredAction, caller: str
   if (read.project !== undefined && read.project !== project) return { ok: false, code: DECISION_INVALID };
   const standing = levelStanding({
     membership: read.membership, org: read.org, level: read.level, at: read.at,
-    ...(project === undefined ? {} : { project }), ...(action.level === undefined ? {} : { minLevel: action.level }),
+    ...(project === undefined ? {} : { project }), ...(minLevelOf(input) === undefined ? {} : { minLevel: minLevelOf(input) as string }),
     contexts: input.levels as LevelContexts, tokenMem: input.tokenMem, now: clock
   });
   if (!standing.ok) {
@@ -258,7 +270,7 @@ function byLevel(input: ActionDecisionInput, action: DeclaredAction, caller: str
 export type ActionsView =
   | { declared: false }
   | { declared: true; valid: false; errors: string[] }
-  | { declared: true; valid: true; actions: DeclaredAction[]; levels?: Array<{ org: string; audience: string }>; standing?: true };
+  | { declared: true; valid: true; actions: DeclaredAction[] };
 
 /** The host reader of extensions/actions/0.1 (DEC-0121 AP-1), as `connectionsView` is for connections. */
 export function actionsView(wellKnown: unknown): ActionsView {
@@ -269,8 +281,28 @@ export function actionsView(wellKnown: unknown): ActionsView {
   if (extensionShape(value) !== true) {
     return { declared: true, valid: false, errors: (extensionShape.errors as ErrorObject[]).map((error) => `${error.instancePath || "/"} ${error.keyword}`) };
   }
-  const { actions, levels, standing } = value as { actions: DeclaredAction[]; levels?: Array<{ org: string; audience: string }>; standing?: true };
-  return { declared: true, valid: true, actions, ...(levels === undefined ? {} : { levels }), ...(standing === undefined ? {} : { standing }) };
+  return { declared: true, valid: true, actions: (value as { actions: DeclaredAction[] }).actions };
+}
+
+/** What a host reads of a well-known document's authority declaration (DEC-0162): the organizations whose levels the
+ * service reads and the level each action needs, or why it is not declared. */
+export type AuthorityView =
+  | { declared: false }
+  | { declared: true; valid: false; errors: string[] }
+  | { declared: true; valid: true; levels?: Array<{ org: string; audience: string }>; actionLevels?: Record<string, (typeof ACTION_LEVELS)[number]>; standing?: true };
+
+let authorityShape: ValidateFunction | undefined;
+/** The host reader of extensions/authority/0.1 (DEC-0162 LV-5, LV-7), beside `actionsView`, which it never changes. */
+export function authorityView(wellKnown: unknown): AuthorityView {
+  const extensions = isObject(wellKnown) && isObject(wellKnown.extensions) ? wellKnown.extensions : undefined;
+  if (extensions === undefined || !Object.hasOwn(extensions, EXTENSION_KEYS.authority)) return { declared: false };
+  authorityShape ??= schema("service-authority-extension.schema.json");
+  const value = extensions[EXTENSION_KEYS.authority];
+  if (authorityShape(value) !== true) {
+    return { declared: true, valid: false, errors: (authorityShape.errors as ErrorObject[]).map((error) => `${error.instancePath || "/"} ${error.keyword}`) };
+  }
+  const { levels, actionLevels, standing } = value as { levels?: Array<{ org: string; audience: string }>; actionLevels?: Record<string, (typeof ACTION_LEVELS)[number]>; standing?: true };
+  return { declared: true, valid: true, ...(levels === undefined ? {} : { levels }), ...(actionLevels === undefined ? {} : { actionLevels }), ...(standing === undefined ? {} : { standing }) };
 }
 
 const pointerToken = (token: string) => token.replace(/~/g, "~0").replace(/\//g, "~1");
@@ -281,10 +313,36 @@ const flag = (instancePath: string, message: string): Finding => ({ code: "FAC-S
  * FAC-SEM-142 on a well-known document (kind `service-well-known`) that carries the actions key: a value that is not
  * its schema's (a reader treats it as not declared and reports it, as FAC-SEM-133 does for load); an `id` named twice; a
  * `humanStep` present without `gate: human` or absent with it; a `tool` that a present `surfaces.mcp.capabilities` does
- * not list: a button without an agent twin (DEC-0121 AP-1); a `level` on an action that is not `relayed`, and an
- * organization named twice in `levels` (DEC-0162 LV-5, LV-7).
+ * not list: a button without an agent twin (DEC-0121 AP-1). On the authority key (DEC-0162): a value that is not its
+ * schema's, an organization named twice in `levels`, and a level for an id that is not a relayed action of the actions
+ * declaration (LV-5, LV-7).
  */
 export function actionsExtensionRules(wellKnown: JsonObject): Finding[] {
+  return [...actionsKeyFindings(wellKnown), ...authorityKeyFindings(wellKnown)];
+}
+
+const AUTHORITY_PATH = `/extensions/${pointerToken(EXTENSION_KEYS.authority)}`;
+
+/** The authority key's findings (DEC-0162 LV-5, LV-7), read against the actions declaration when it is valid. */
+function authorityKeyFindings(wellKnown: JsonObject): Finding[] {
+  const view = authorityView(wellKnown);
+  if (!view.declared) return [];
+  if (!view.valid) return [flag(AUTHORITY_PATH, `the authority declaration is invalid (${view.errors.join("; ")}); a reader treats it as not declared and reports it (DEC-0162)`)];
+  const findings: Finding[] = [];
+  const orgs = new Set<string>();
+  (view.levels ?? []).forEach((entry, i) => {
+    if (orgs.has(entry.org)) findings.push(flag(`${AUTHORITY_PATH}/levels/${i}/org`, `organization ${entry.org} is named twice (DEC-0162 LV-5)`));
+    orgs.add(entry.org);
+  });
+  const actions = actionsView(wellKnown);
+  const relayed = new Set(actions.declared && actions.valid ? actions.actions.filter((action) => action.gate === "relayed").map((action) => action.id) : []);
+  for (const id of Object.keys(view.actionLevels ?? {})) {
+    if (!relayed.has(id)) findings.push(flag(`${AUTHORITY_PATH}/actionLevels/${pointerToken(id)}`, `${id} is not a relayed action of the actions declaration: a level is declared only for one (DEC-0162 LV-7)`));
+  }
+  return findings;
+}
+
+function actionsKeyFindings(wellKnown: JsonObject): Finding[] {
   const view = actionsView(wellKnown);
   if (!view.declared) return [];
   if (!view.valid) return [flag(KEY_PATH, `the actions declaration is invalid (${view.errors.join("; ")}); a reader treats it as not declared and reports it (DEC-0121)`)];
@@ -299,12 +357,6 @@ export function actionsExtensionRules(wellKnown: JsonObject): Finding[] {
     seen.add(action.id);
     if ((action.gate === "human") !== (action.humanStep !== undefined)) findings.push(flag(`${at}/humanStep`, "humanStep is present exactly when gate is human (DEC-0121 AP-4)"));
     if (capabilities !== undefined && !capabilities.includes(action.tool)) findings.push(flag(`${at}/tool`, `the MCP surface does not serve ${action.tool}: a button without an agent twin (DEC-0121 AP-1)`));
-    if (action.level !== undefined && action.gate !== "relayed") findings.push(flag(`${at}/level`, "a level is declared only on a relayed action (DEC-0162 LV-7)"));
-  });
-  const orgs = new Set<string>();
-  (view.levels ?? []).forEach((entry, i) => {
-    if (orgs.has(entry.org)) findings.push(flag(`${KEY_PATH}/levels/${i}/org`, `organization ${entry.org} is named twice (DEC-0162 LV-5)`));
-    orgs.add(entry.org);
   });
   return findings;
 }

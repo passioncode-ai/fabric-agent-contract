@@ -116,6 +116,8 @@ export const NOT_SWEPT: readonly string[] = [
   // `service-well-known`), and a call's decision against the action and the tier (kind `action-call`); a level
   // decision (DEC-0162) is swept as kind `decision` (FAC-SEM-170).
   "service-actions-extension.schema.json",
+  // The authority extension (DEC-0162) is checked inside a well-known document as well (FAC-SEM-142).
+  "service-authority-extension.schema.json",
   // A manifest's or a well-known answer's channel-agent declaration (DEC-0150) is checked inside that document
   // (FAC-SEM-162 to FAC-SEM-165, kinds `manifest` and `service-well-known`), whose positive fixtures
   // manifest-channel-agent.json and service-well-known-channel-agent.json the sweep runs.

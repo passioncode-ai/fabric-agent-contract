@@ -1,0 +1,12 @@
+{
+  "levels": [
+    {
+      "org": "org:example-org",
+      "audience": "example-publisher.default"
+    }
+  ],
+  "actionLevels": {
+    "change-plan": "owner",
+    "issue-key": "operator"
+  }
+}

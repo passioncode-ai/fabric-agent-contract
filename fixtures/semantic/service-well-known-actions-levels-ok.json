@@ -1,5 +1,5 @@
 {
-  "description": "Levels read in one organization and a relayed action declaring its level (DEC-0162 LV-5, LV-7).",
+  "description": "Levels read in one organization and a relayed action's level, in the authority key beside the actions key (DEC-0162 LV-5, LV-7).",
   "kind": "service-well-known",
   "expect": [],
   "input": {
@@ -65,8 +65,7 @@
             "id": "approve-reply",
             "title": "Approve the reply",
             "tool": "reviews.approve",
-            "gate": "relayed",
-            "level": "admin"
+            "gate": "relayed"
           },
           {
             "id": "retry",
@@ -74,13 +73,18 @@
             "tool": "jobs.retry",
             "gate": "none"
           }
-        ],
+        ]
+      },
+      "https://fabric.passioncode.ai/agent-contract/extensions/authority/0.1": {
         "levels": [
           {
             "org": "org:example-org",
             "audience": "example-agent.default"
           }
-        ]
+        ],
+        "actionLevels": {
+          "approve-reply": "admin"
+        }
       }
     }
   }

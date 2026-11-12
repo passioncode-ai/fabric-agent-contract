@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/service-authority-extension.schema.json",
+  "title": "extensions/authority/0.1: the organizations whose authority levels a service reads, the level each relayed action needs (DEC-0162) and whether it reads standing mandates (DEC-0166)",
+  "description": "The value of the authority extension key https://fabric.passioncode.ai/agent-contract/extensions/authority/0.1 in a service's well-known document, beside the actions extension (DEC-0121 AP-1), which it never changes: a reader of the actions extension pinned before DEC-0162 ignores this key. A service that reads levels declares levels; the level an action needs is keyed by the action's id in the actions extension. A checker reports an invalid value, an organization named twice and a level for an id that is not a relayed action of the actions extension as FAC-SEM-142. docs/specification/membership.md#levels.",
+  "type": "object",
+  "minProperties": 1,
+  "additionalProperties": false,
+  "properties": {
+    "standing": {
+      "const": true,
+      "description": "DEC-0166 AU-3: this service reads standing mandates (a place's autonomy profile, mandate/1 with standing); the hub forwards one, and an agent sends one directly, only to a service that declares it. Absent: the service reads none and answers a call carrying one as if it carried no mandate."
+    },
+    "levels": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 16,
+      "description": "DEC-0162 LV-5: the organizations whose levels this service reads, each with the audience that organization's issuer registered it by as an org-membership/2 reader; the hub fetches a level holder's attestation for that audience and binds it by mem. Absent: the service reads no levels (LV-10).",
+      "items": {
+        "type": "object",
+        "required": [
+          "org",
+          "audience"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "org": {
+            "type": "string",
+            "maxLength": 132,
+            "pattern": "^org:[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+          },
+          "audience": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:~-]{0,127}$"
+          }
+        }
+      }
+    },
+    "actionLevels": {
+      "type": "object",
+      "minProperties": 1,
+      "maxProperties": 128,
+      "description": "DEC-0162 LV-7: the lowest level that decides this relayed action in an organization: owner for a billing act (the organization's plan, its payment method, its invoices, setting or changing L0, a project's L1 or a key's ceiling); operator for an act no level decides (issuing, rotating or revoking a client key, DEC-0159 CF-3; a board hold's set and lift and the move of a responder slot, project-comms). An action this map leaves out is decided by an architect in the call's project, by admin for a call in no project.",
+      "propertyNames": {
+        "$ref": "interop-common.schema.json#/$defs/requestKey"
+      },
+      "additionalProperties": {
+        "enum": [
+          "operator",
+          "owner",
+          "admin",
+          "architect"
+        ]
+      }
+    }
+  }
+}

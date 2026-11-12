@@ -1,5 +1,5 @@
 {
-  "description": "A level declared on an action that is not relayed (FAC-SEM-142, DEC-0162 LV-7).",
+  "description": "A level declared for an action that is not relayed (FAC-SEM-142, DEC-0162 LV-7).",
   "kind": "service-well-known",
   "expect": [
     "FAC-SEM-142"
@@ -67,23 +67,26 @@
             "id": "approve-reply",
             "title": "Approve the reply",
             "tool": "reviews.approve",
-            "gate": "relayed",
-            "level": "admin"
+            "gate": "relayed"
           },
           {
             "id": "retry",
             "title": "Retry",
             "tool": "jobs.retry",
-            "gate": "none",
-            "level": "owner"
+            "gate": "none"
           }
-        ],
+        ]
+      },
+      "https://fabric.passioncode.ai/agent-contract/extensions/authority/0.1": {
         "levels": [
           {
             "org": "org:example-org",
             "audience": "example-agent.default"
           }
-        ]
+        ],
+        "actionLevels": {
+          "retry": "owner"
+        }
       }
     }
   }

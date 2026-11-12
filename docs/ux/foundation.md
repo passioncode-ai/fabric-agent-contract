@@ -419,8 +419,8 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Traces:** JTBD-07, JRN-06/#1
 - **Acceptance criteria:**
   - Given a project with no policy, when a run would first spend money, then the launcher offers options computed from the agents' presets, the recent spend and the kind of work, names those inputs, and preselects one.
-  - Given I choose "no project limit", then it is recorded as my choice and only the estate total (L0) stops spending.
-  - Given a policy is recorded, then the launcher never asks again for that project.
+  - Given I choose "no project limit", then it is recorded as my choice and only the estate total (L0) stops spending.  - Given a policy is recorded, then the launcher never asks again for that project.
+  - Given an organization's project, when a run would first spend money, then the choice is the organization's owner's (DEC-0162 LV-7): the launcher stops before any spend, the starter sees the run waiting for the owner, and the owner's choice is recorded as theirs.
 - **Priority:** must
 - **Status:** draft
 - **Product:** unobserved
@@ -708,7 +708,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
   - Given a service that declares an action `relayed`, when my agent calls its tool from my machine with my decision naming the action and quoting me, then the service takes it as my decision and its audit names the agent it authenticated (`actionDecision`, DEC-0121).
   - Given my agent calls without my decision, when the service answers `operator-decision-required`, then the agent asks me and calls again with my answer quoted.
   - Given a step only I can take (a sign-in, a consent, a payment, a secret, a passkey signature, spend above a limit, a comparison of codes with another person or the choice to share without one), when my agent calls it, then the service answers `human-step-required` with the link to that step.
-  - Given I am an owner, administrator or architect of an organization and a service declares `levels` for it, when my agent calls a relayed action with my level decision bound to its delegation token, then the service takes it as my level's decision at every tier and audits the level, the organization and me as approver; and when the action needs a level I do not hold, it answers `operator-decision-required` with `level-insufficient` and my agent files one request to a holder of that level (DEC-0162).
+  - Given I am an owner, administrator or architect of an organization and a service declares `levels` for it in its authority extension, when my agent calls a relayed action with my level decision bound to its delegation token, then the service takes it as my level's decision at every tier and audits the level, the organization and me as approver; and when the action needs a level I do not hold, it answers `operator-decision-required` with `level-insufficient` and my agent files one request to a holder of that level (DEC-0162).
 - **Priority:** must
 - **Status:** draft
 - **Product:** unobserved

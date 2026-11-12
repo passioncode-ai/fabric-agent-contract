@@ -655,7 +655,7 @@ reaches no reader who could not read it already and is no hand-over, when an ear
 owner's own act, made it public. Material already public needs no word by any route (a file, copied content, a package,
 a push, a release, serving).
 
-Each hand-over needs the operator's word for that act, in one of the three forms (above), naming the agent, the target
+Each hand-over needs the operator's word for that act (or, for an organization's own agent from T0 or T1, a level decision with the exact target, DEC-0162 LV-6), in one of the three forms (above), naming the agent, the target
 and the recipient: the target is the source commit, except for an organization agent's private home made public (a
 visibility change) or given new readers outside the organization, where it is the repository as the action names it;
 an organization's first public release from a private home names its source commit. A local source export needs

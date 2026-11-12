@@ -12,7 +12,7 @@ organization slice of 2026-11-21: a place's profile as a standing `mandate/1` it
 
 - DEC-0166 proposed in `docs/DECISIONS.md`; [delegation](../specification/delegation.md#a-places-standing-mandate-dec-0166)
   AU-1 to AU-7, MD-5 amended, the `prof` claim row, `FAC-SEM-050`, `FAC-SEM-144`, `FAC-SEM-173`.
-- Schemas: `mandate.schema.json` `standing`, `delegation-token.schema.json` `prof`, `service-actions-extension.schema.json`
+- Schemas: `mandate.schema.json` `standing`, `delegation-token.schema.json` `prof`, `service-authority-extension.schema.json`
   `standing`. Code: `mandateCovers` and `profileDigest` (`src/mandate.ts`), `actionDecision`'s `standing` and
   `tokenProf` (`src/actions.ts`), `prof` in `src/delegation.ts` and `src/delegation-rules.ts`, `standing/1` in
   `src/protocol-revisions.ts`.
@@ -37,7 +37,7 @@ organization slice of 2026-11-21: a place's profile as a standing `mandate/1` it
 
 ## Checks run
 
-- `pnpm run check` exit 0 on the first cut (11294 tests passed, 3 skipped; coverage floors met; UX lint, docs check with 0 markdownlint errors, privacy check 0 findings).
+- `pnpm run check` exit 0 on the first cut (11294 tests passed, 3 skipped), and after the merge of DEC-0162 round 3 with `standing` moved to the authority extension (11301 passed, 3 skipped; coverage floors met; UX lint, docs check with 0 markdownlint errors, privacy check 0 findings).
 
 ## Next task
 
