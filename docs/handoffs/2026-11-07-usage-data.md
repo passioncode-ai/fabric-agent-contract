@@ -10,6 +10,10 @@ decision of 2026-11-04.
 
 - DEC-0157 reserved by git CAS on 2026-11-07 and drafted (Proposed); the register's next free id line reads `DEC-0160`
   after the merge of `origin/main` on 2026-11-08 (the CAS counter's next value then).
+- `origin/main` merged again on 2026-11-12 (`bd1271e5`, main `d40ae936`, and `d683e2b3`, main `b8a6af95`): it brought
+  the four North Star designs (CT-250, CT-252, CT-259, CT-285), CT-287 (this branch named among six paused DECs) and
+  the CT-250, CT-252, CT-259 and CT-285 rows naming UD-4 and UD-6; no file this branch owns conflicted. The next free
+  id is `DEC-0162` (the counter on origin since 2026-11-08T11:39Z, DEC-0160 and DEC-0161 reserved by siblings).
 - [Usage data](../specification/usage-data.md): UD-1 (on by default, told once by a notice that is not a question, no
   answer meaning on, told again when the notice changes),
   UD-2 (the product's own switch), UD-3 (anonymous), UD-4 (the switch is the person's, a `relayed` action on the
@@ -62,7 +66,8 @@ decision of 2026-11-04.
 ## Open
 
 - The coordinator's blind readings until two consecutive clean rounds; the gate; the pull request, merge, tag and
-  release; at merge DEC-0157 Accepted and CT-216 done, and the products told on the board what each owes, in one
+  release; at merge DEC-0157 Accepted and CT-216 done, CT-287's DEC-0157 clause marked landed (the pull request and the merge
+  commit), the `Next free ID` line written from the counter read then, and the products told on the board what each owes, in one
   message on the plans thread `e1cb9f7e` (where each product reports plans.md items A to D) addressed to every product
   owner, with a general line first (any product that sends usage or error data checks itself against UD-1 to UD-6
   before its next release) and then a line per product, as DEC-0157's Compatibility lists it (Fabric, with the collector row's UD-6 condition as the digest collector, and
@@ -912,7 +917,18 @@ not pushed for the same reason; the round entries' commits resolve only there.
   MUST carrying the UD-2 exception, and `grep -n -E '(product|device)[^.|]{0,30} ignore'` over CONTEXT.md,
   DECISIONS.md, usage-data.md, devices.md, flows.md and scenarios.md prints "the device and the product" on each of
   its six lines. The U+2014 count over the added lines is run on the commit. Not the full gate.
+- Round 22 (on `bd1271e5`): seam clean; unit and product not clean. Breaks folded: UD-2 made a shared off present
+  before a product's first send a permanent earlier no that the person's own switch set on in that product could not
+  end, so a person who once declined under the shared switch and later turned a new product on got a product that
+  never sends; the earlier no now holds only on an install whose own switch the person has not set on, and setting it
+  on ends it for that product without writing the shared file (usage-data.md, DEC-0157 items 1 and 2, the product's
+  conformance row, CONTEXT, DOCMAP) (unit). The handoff did not record the merge of 2026-11-12 and its landing step
+  left CT-287 false on main; Done and the landing step now say both (product). Risks folded: UD-1 reads "for a new
+  install and for an existing one, each that never answered and never declined" (unit); the next free id here is
+  `DEC-0162` (seam). Risks recorded on main instead of here (main `b8a6af95`): CT-250 and CT-285 keep UD-4 (no level or
+  profile turns a declined switch back on), CT-252 keeps MD-3 for slots, CT-259 restates UD-6 (seam, product).
+  Carried, not folded: the lock exception's executable proof stays CT-280 (unit). Declined: none.
 
 ## Next task
 
-Round 22 of the blind readings of branch `agent/ct216-usage-data-v2` (DEC-0157): unit, seam and product.
+Round 23 of the blind readings of branch `agent/ct216-usage-data-v2` (DEC-0157): unit, seam and product.

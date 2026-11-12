@@ -25,7 +25,8 @@ by device policy on their enrolled devices (UD-2).
 The key words MUST, MUST NOT, SHOULD and MAY are used as in RFC 2119.
 
 - **UD-1, on by default, told once.** A product that collects usage or error data collects it from its first start, for
-  a new install and for an install that never answered its switch and never declined it (UD-2); a person answers a
+  a new install and for an existing one, each that never answered its switch and never declined it (UD-2, a shared
+  earlier no included); a person answers a
   switch by setting it under a prompt or in a product's settings. It MUST NOT send any of it before its notice has been
   shown once where the person reads it: at the first start that opens its window, or for a product without one (an
   agent, a command line tool, a service) or one that starts without opening it (at login, in the background, by a silent
@@ -74,7 +75,10 @@ The key words MUST, MUST NOT, SHOULD and MAY are used as in RFC 2119.
   (an `analytics: false` written in a shared file under a prompt or a setting that said it governed every app reading
   that file) given before this product first sends, which is an earlier no and stays off for it. Since the shared file records
   neither who wrote an off nor under what words, a product that can read the shared file where it runs treats any shared
-  `analytics: false` present before its first send as that earlier no; a product that cannot read it there (a browser
+  `analytics: false` present before its first send, on an install whose own switch the person has not set on, as that
+  earlier no; the person setting this product's own switch on (in its settings, or through an agent on the operator's word under
+  UD-4) is their answer for this product: it ends that earlier no for this product without writing the shared file, from
+  then its own switch alone governs it, and an unreadable shared file no longer holds its send; a product that cannot read it there (a browser
   build, a component on a server) owes no read of it, and only its own switch's off is its decline. For an install that sent before the product's version that meets this rule, the first
   run of that version at which the shared file is read, or found absent, stands in for the first send: a shared
   `analytics: false` present then, on an install whose own switch the person never set, is read as the earlier no.

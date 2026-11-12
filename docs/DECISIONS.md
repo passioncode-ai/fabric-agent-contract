@@ -3,8 +3,8 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0160` (the CAS counter's next value when this line was last written; read
-`refs/agent-sync/ids/DEC` on origin for the current one)
+**Next free ID:** `DEC-0162` (the CAS counter's next value when this line was last written, DEC-0156 and DEC-0158 to DEC-0161
+being reserved by sibling branches; read `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
 `DEC-0028` is not used: two runs reserved under one key (`usage-budgets-20261007`); the first wrote DEC-0027 and
@@ -11401,8 +11401,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   asked whether a service declares it, what anonymous leaves out, that a switch is honoured, and how it relates to
   activity telemetry (DEC-0030, DEC-0031).
 - **Decision:**
-  1. UD-1: a product that collects it does so from the first start, for a new install and for one that never answered
-     and never declined, and sends nothing before its notice was shown once where the person reads it (the first start
+  1. UD-1: a product that collects it does so from the first start, for a new install and for an existing one, each that never answered
+     and never declined (a shared earlier no included), and sends nothing before its notice was shown once where the person reads it (the first start
      that opens its window, or for a product without one or that starts without it its first output to the person, a
      line only an agent's tool reads not counting; for an existing install, the first after the version that turns it
      on); the notice names what it collects, its purposes (improving the product, and, when its id is shared, counting
@@ -11442,7 +11442,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      operator's decision); an off in a shared file, written under words that governed every reader, is a decline for a
      product only when it was given before that product first sends (an earlier no stays off), and since the shared
      file records neither who wrote an off nor under what words, a product that can read the shared file where it runs
-     treats any shared off present before its first send as that earlier no (one that cannot read it there, such as a
+     treats any shared off present before its first send, on an install whose own switch the person has not set on, as
+     that earlier no, and the person setting this product's own switch on ends it for this product without writing the
+     shared file (one that cannot read it there, such as a
      browser build or a component on a server, owes no read of it); for an install that sent before the product's version that meets UD-2, the first
      run of that version at which the shared file is read, or found absent, stands in for the first send, so a shared
      off present then, on an install whose own switch the person never set, is read as the earlier no; after that
