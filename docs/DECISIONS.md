@@ -11622,7 +11622,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   reads the manifest only from the descriptor's own `fabricManifest` (`check_service.py` lines 592 to 595 and 675 to
   681), so for the cloud descriptor it finds none (CF-1). An older caller kit reads CF-4's operator step as a missing scope until it reads `data.detail`:
   the adapter's kits answer `scope-not-granted` with the token's message ("The called capability is not in the token's
-  scope.", `fabric_delegation.py` line 81 and `fabric-delegation.mjs` line 45) and `refusal_from_action`
+  scope.", `fabric_delegation.py` line 81 and `fabric-delegation.mjs` line 45, both at fabric-agent-adapter
+  `1364a2ac`, its last 2026-11-08 commit, as are the other kit lines below) and `refusal_from_action`
   (`fabric_delegation.py` line 866) has no client-key caller. DL-19's header change reaches the adapter's kits, their
   tests and reference, and every service that vendors the kits (Fabric Dashboards' sample among them), each following
   when it re-copies the kit; all still send or teach `WWW-Authenticate: Bearer error="invalid_token"` on every `401`,
@@ -11633,7 +11634,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   106), and Fabric Dashboards' sample service, a copy of the Python kit (`test/fixtures/sample-service/fabric_delegation.py`
   line 915). FAA-204 is to carry the header change for the adapter although it is not specific to the form, since it
   reaches every service built on the kits, and the landing message to the adapter names it; Fabric Dashboards is told
-  at landing that its sample copies the kit. Under FAA-204 the kits also owe recording a job's caller as `jobCallerKey(accepted, credential)`, the client key as the credential when no token came (the Python kit records an owner only for a delegation token, `fabric_interop.py` line 316 at `97ca5b5e`), and answering another caller's job id `unknown-job`, not `scope-not-granted` `job-of-another-caller` (lines 918 to 920), at an instance in the form whether or not it queues, with a kit test of one key reading or cancelling another key's job; a message for `operator-step`,
+  at landing that its sample copies the kit. Under FAA-204 the kits also owe recording a job's caller as `jobCallerKey(accepted, credential)`, the client key's record id, never its value, as the credential when no token came (the Python kit records an owner only for a delegation token, `fabric_interop.py` line 316 at `97ca5b5e`), and answering another caller's job id `unknown-job`, not `scope-not-granted` `job-of-another-caller` (lines 918 to 920), at an instance in the form whether or not it queues, with a kit test of one key reading or cancelling another key's job; a message for `operator-step`,
   and a kit input marking a client-key caller so that the kit answers every `human` action and input request as
   CF-4 says (the job, or `scope-not-granted` with `operator-step: <humanStep>`) and raises the event once per open
   step; the kits' answer to an approval at an instance without the estate's issuer, `issuer-unavailable` with

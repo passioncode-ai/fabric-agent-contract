@@ -82,7 +82,8 @@ with `jobCallerKey(accepted, credential)`: for a call whose delegation token it 
 `Fabric-Delegation` on a call the hub forwards, DL-10), what `verifyDelegation` names, `principal` (the token's
 `sub`) and `caller` (the outermost actor), and the partner organization when the chain ends in one (DEC-0090); for a
 call that presented no token, the credential it knows the caller by (T0 or T1, DL-26; a stdio caller is its
-connection). A call whose token it refused is refused, never keyed. So an owner's agent and a partner's agent are two
+connection; or, at a cloud instance in the local and cloud form, the client key the call presented, by its record id, never its
+value, [service](service.md#the-local-and-cloud-form-of-one-agent) CF-3, CF-4, DEC-0159). A call whose token it refused is refused, never keyed. So an owner's agent and a partner's agent are two
 callers even under one `sub` and one agent id, and neither reads the other's jobs; two people the hub forwards under
 one credential are two callers once it attaches their tokens; an agent's sessions share its jobs. A provider that
 does not queue keeps its repeated keys as DEC-0087 left them. Fabric's hub

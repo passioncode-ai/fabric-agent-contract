@@ -99,7 +99,9 @@ function directoryRule(value: Json): Finding[] {
  * The key of a job's caller at a node that queues (DEC-0104): for a call whose delegation token the node accepted, what
  * `verifyDelegation` names, `principal` (the token's `sub`) and `caller` (the outermost actor), and the partner
  * organization when the chain ends in one (DEC-0090); for a call that presented no token, the authenticated credential
- * the node knows the caller by (T0 or T1, DL-26; a gate's pass with no token, `principal: null`, is that case too). So an owner's agent and a partner's agent are two callers even under
+ * the node knows the caller by (T0 or T1, DL-26; a gate's pass with no token, `principal: null`, is that case too; at
+ * a cloud instance in the local and cloud form, the client key the call presented, by its record id, never its value,
+ * CF-3, CF-4, DEC-0159). So an owner's agent and a partner's agent are two callers even under
  * one `sub` and one agent id, and two people the hub forwards under one credential are two callers once it attaches
  * their tokens (DL-10). A refused verdict (`ok: false`) has no key: that call is refused, never keyed (DL-10). A
  * session is not a caller of its own: an agent's sessions share its jobs. `undefined` when nothing is readable. The key

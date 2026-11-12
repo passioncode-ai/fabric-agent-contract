@@ -16,7 +16,7 @@ was deleted from `origin` and replaced by this squash. Commit-addressed referenc
 
 origin/main `d40ae936` was merged in as `6b5fa9ee` on 2026-11-12 (gate exit 0, 11185 tests), and `2b0bcd55` as
 `00c317c9` the same day (the backlog conflict at CT-285 resolved before the commit: this branch's CT-270 to CT-283 rows,
-then main's CT-285 row), `21f8097e` as `8563ee71` and `53835d18` as `e4710ba2` the same day (no conflict).
+then main's CT-285 row), `21f8097e` as `8563ee71`, `53835d18` as `e4710ba2` and `e9bb7ac7` as `0018bacb` the same day (no conflict).
 
 ## Done
 
@@ -160,8 +160,8 @@ a client-key caller input for CF-4's `operator-step` (FAA-204).
   *Levels*, DEC-0159 *Compatibility*). That relaxes L0's hard stop for this one kind of spend. Does the operator accept it, or should the
   form wait until such a service reserves its spend with the estate's meter at the call? Until answered the text states
   the relaxation plainly; the landing message to the operator asks it.
-- A second question for the operator (not reserved as an `OQ` id): is a door that issues a member's key straight into
-  that member's vault, by reference, never returning the value to its caller, a conformant route for an agent? CF-3
+- A second question for the operator (not reserved as an `OQ` id): is a door that issues a member's or another
+  agent's key straight into that holder's vault, by reference, never returning the value to its caller, a conformant route for an agent? CF-3
   forbids an agent to issue or rotate a member's key because the key comes back in the agent's answer and so in its
   transcript; such a door returns no value, and the organization's north star plans its administrator agent issuing
   members' keys into the vault through the doors. Until answered, CF-3's ban covers that route too, and the member's
@@ -177,7 +177,7 @@ a client-key caller input for CF-4's `operator-step` (FAA-204).
   the message asks it to revoke and to route key management through its operator's CLI or page, or through a `relayed`
   twin, and the list tool's holder names).
 - At landing, to the adapter, under FAA-204: round 20's (the kits key every job by `jobCallerKey`, a client key the
-  credential when no token came, and answer another caller's job `unknown-job`, not `job-of-another-caller`, at an
+  credential (the key's record id, never its value) when no token came, and answer another caller's job `unknown-job`, not `job-of-another-caller`, at an
   instance in the form, with a kit test); round 4's two items (`fabricManifest` off the cloud descriptor, the
   refusal mapping), round 5's two (the manifest's resolution for a descriptor without `fabricManifest`, the kits'
   `operator-step` message and client-key caller input), round 7's (the kits answering every `human` action and input
@@ -218,11 +218,12 @@ a client-key caller input for CF-4's `operator-step` (FAA-204).
   naming a change to a service's own budget or a per-key cap (CF-3, CF-4) is that change, not a widening by OW-1, and
   never moves L0 or L1 (check: `awk '/^- \*\*OW-5/,/^- \*\*OW-6/' docs/specification/governance-and-roles.md | grep -c
   'CF-4'` prints at least 1). DEC-0156's handoff carries both.
-- At landing, beside DEC-0156 (branch `agent/ct220-operators-word-v2`), DEC-0157 (branch `agent/ct216-usage-data-v2`)
-  and DEC-0158 (branch `agent/ct215-on-demand-20261108`), the second lander resolves each conflict in
+- At landing, beside DEC-0156 (branch `agent/ct220-operators-word-v2`), DEC-0157 (branch `agent/ct216-usage-data-v2`),
+  DEC-0158 (branch `agent/ct215-on-demand-20261108`), DEC-0160 (branch `agent/ct228-port-claim-20261108`) and DEC-0161
+  (branch `agent/ct288-system-domain-20261108`), the second lander resolves each conflict in
   `docs/DECISIONS.md`, `docs/backlog.md` and `docs/handoffs/README.md` as the adjacent appends they are: both sides
-  kept, in id order. On the merged tree: `grep -n '^### DEC-015[6-9]' docs/DECISIONS.md` prints four lines in
-  ascending order, `grep -c '^### DEC-0159' docs/DECISIONS.md` prints 1, and `grep -rn '^<<<<<<<\|^>>>>>>>' docs`
+  kept, in id order. On the merged tree: `grep -n '^### DEC-01\(5[6-9]\|6[01]\)' docs/DECISIONS.md` prints the
+  landed ones in ascending id order with no id twice (round 21, seam), `grep -c '^### DEC-0159' docs/DECISIONS.md` prints 1, and `grep -rn '^<<<<<<<\|^>>>>>>>' docs`
   prints nothing.
 - The merged text with DEC-0156. SCN-044's *Alt paths* and *Coverage* keep both sides: DEC-0156's update alt path and
   its `DEC-0156 OW-1 to OW-4` coverage, and this branch's one sentence for the cloud instance's page and its
@@ -902,6 +903,16 @@ a client-key caller input for CF-4's `operator-step` (FAA-204).
   is per step, and a need declined and raised again by a new call is a new step (the text says so; product, risk).
   Declined: none.
 
+- Checks run on the round-20 fold (`27f136ad`): `pnpm run check` exit 0 (11185 tests), before round 21 was read.
+- Round 21 (on `27f136ad`): unit and seam clean; product not clean. Break folded: round 20's rule that a step closes
+  once its need is found met never reached ST-041, ST-042, FLW-36 or SCR-36, which still promised a fresh ask after
+  every decline; each now names the met need and the step that closes by itself (product). Risks folded: CF-4's twin
+  sentence and the conformance row name the keying "whether or not it queues" and the call that finds the need met;
+  a job is keyed by the client key's record id, never its value (CF-4, the FAA-204 debt, agent-network's caller and
+  `jobCallerKey`'s doc comment); the adapter's kit lines pinned at `1364a2ac`; the register note covers DEC-0160 and
+  DEC-0161; the vault question names another agent's key; Branch names the fifth merge (unit, product, seam). Left to
+  the landing step: CT-287's stale DEC-0159 clause on main (product, risk). Declined: none.
+
 ## Next task
 
-Round 21 of the blind readings (unit, seam, product) of branch `agent/ct218-local-cloud-v2` (DEC-0159).
+Round 22 of the blind readings (unit, seam, product) of branch `agent/ct218-local-cloud-v2` (DEC-0159).

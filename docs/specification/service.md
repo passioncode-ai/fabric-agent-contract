@@ -1134,13 +1134,14 @@ cloud instance's well-known document, declaring `surfaces.mcp.auth: "own"` and `
     it and, for a choice, the request's message and options, and records the operator's answer as theirs
     (AP-1): taking a step is the step itself, the operator's `human` action (AP-4); choosing and declining are
     `relayed` actions of the page, each with its agent twin (AP-1), a tool of its own that addresses the step by its
-    opaque id, not `fabric.job.get` on the member's job (which a queuing instance answers `unknown-job` to anyone but
-    the job's own caller, [agent network](agent-network.md#call-queue)), and which a caller reaches as CF-3's key twin is (the
+    opaque id, not `fabric.job.get` on the member's job (which the instance answers `unknown-job` to any key but the
+    one that started the job, whether or not it queues, *What the caller reads* below), and which a caller reaches as CF-3's key twin is (the
     operator's decision from a T0 or T1 caller, or an accepted `approval/1`, with the gate below), so an operator whose
     computer shows no page can answer a choice or decline a step through their own agent where that gate lets the agent
     through, else by their agent running the agent's CLI on the operator's computer on their word (*Where the operator
     is*, below), or with their operator channel's buttons, which perform the page's own operation (OC-5).
-  - **What the caller reads.** The instance keys every job by the client key that started it and answers
+  - **What the caller reads.** The instance keys every job by the client key that started it (the key's record id,
+    never its value, CF-3) and answers
     `fabric.job.get` and `fabric.job.cancel` for another key's job `unknown-job`, whether or not it queues, so a member
     never reads or cancels another member's job. A job reads `working` to that caller, its `statusMessage` starting
     `operator-step <humanStep>` (`operator-step choice` for a choice), optionally followed by a colon, a space and a
