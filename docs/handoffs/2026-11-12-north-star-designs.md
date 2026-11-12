@@ -32,6 +32,11 @@ close the board requests.
 - The first branch of this work (`agent/ct250-levels-design-20261112`, commit `4707e6da`) carried a private name and
   was deleted unmerged; the commit may stay fetchable by SHA until GitHub collects it. No secret was in it.
 
+- The six proposed DECs on branches (CT-287): DEC-0156, DEC-0157, DEC-0158 and DEC-0159 had main merged in on
+  2026-11-12 and are read again (status in CT-287's row); DEC-0158 waits for a re-cut of OS-6 and OS-7 (its handoff);
+  DEC-0160 and DEC-0161 (CT-228, CT-284) untouched. The CT-285, CT-250, CT-252 and CT-259 rows name the branch rules
+  their DECs restate (#273).
+
 ## Decisions
 
 - `taskClassMap` is `{id, revision}` with an integer revision, chosen over a `sha256:` digest of the map: a reader
@@ -45,6 +50,7 @@ close the board requests.
 
 ## Next task
 
-Draft the CT-250 DEC on a branch `agent/ct250-dec-<date>`: reserve a DEC id, `org-membership/2`, the level form in
+Fold the running blind readings of DEC-0156 (round 26) and DEC-0157 (round 23) and land each after two clean
+rounds; read DEC-0159 (round 16). Then draft the CT-250 DEC on a branch `agent/ct250-dec-<date>`: reserve a DEC id, `org-membership/2`, the level form in
 `decision.schema.json`, the `mem` claim in `delegation-token.schema.json`, the OL-6 amendment, FAC-SEM codes and
 vectors, as the design's "What the DEC owes" lists.
