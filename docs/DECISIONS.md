@@ -11453,9 +11453,14 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      session the person is in and that nobody submits the request to the board again, the person's session that
      performs the act recording that in the request's thread and the requester submitting nothing; one whose asked
      act was done, with only a side act left open, settled `completed` with the open act named in its result), every
-     other step that waits in such a session named the same way, a request settled `failed_known` there submitted
-     again only where what the person does lets a session with no person take the step (an answer, a decision or a
-     relay naming the step, a grant, a human step cleared), by the operator's session in the requesting Project (its agent,
+     other step that waits in such a session named the same way, one of OW-3's three waits also asked as the
+     operator's decision of 2026-11-12 for a run with no person says (Fabric's on-demand spec §3.10, `9420da79`):
+     settled first by the recorded decisions, the goal and the safest reversible option, then once per task to the
+     project offering `people.ask` (the organization's PM agent) or through the host's question surface, the answer
+     starting the asking project's next run, which takes the step (the operator's word only from the operator's own
+     surface or as an accepted relay), a request settled `failed_known` there submitted
+     again only where what the person does lets a session with no person take the step and no such next run has
+     taken it (a decision or a relay naming the step, a grant, a human step cleared), by the operator's session in the requesting Project (its agent,
      on their word) when they own the requesting Project and by the requester otherwise, a relay or a mandate that names the
      act changing neither mode, being the reason the one ask quotes, not the agreement the gate holds the act for; the
      agent adds no question of its own
@@ -11508,7 +11513,13 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   decided, AP-3); and it states a corrected way it takes as under way with how to stop it, asking a question only for
   a step that waits. The operator's decision of 2026-11-09 (fabric-workspace `knowledge/authority.md`, *Autonomy by
   place*: on a headless place no act waits for a person) bears on question `46167c9f` for headless places; CT-285's
-  decision states what OW-3's no-person case and its own stop become there.
+  decision states what OW-3's no-person case and its own stop become there. The operator's decision of 2026-11-07
+  (agents run without permission prompts; questions and the task's bounds settled when the task is set, after that
+  only delegation and execution, the same page) bears on the host's gate OW-3 keeps and on OW-3's own stop and its
+  question for a step that waits; it is put to question `46167c9f` beside `add1df7c`, and until they are answered OW-3
+  holds as written. The operator's decision of 2026-11-12 for a run with no person (Fabric's on-demand spec §3.10,
+  `QUESTIONS_RULE`, `9420da79`: decide first, then ask a person through the organization's PM agent or the host's
+  question surface, the answer starting the next run) is how OW-3's no-person case asks for its three waits.
 - **Alternatives considered:** leave it to each product's prompt (the products diverged: some shipped it, some did
   not, so the operator repeated the word); make it a host setting the operator switches on (the operator's word was a
   rule for every agent, not a mode); stop at every risk until the operator answers (the operator's word says to
@@ -11542,7 +11553,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   with the rest. Whether the operator's words pass that gate without a second ask the operator has decided in principle
   (2026-10-26: no second approval, fabric-workspace `knowledge/agents-first.md`, *One approval binds all*; 2026-11-06: a
   command of the owner, an administrator or an architect, or their agents, runs without a prompt of its own, not built
-  yet, `knowledge/authority.md`, *Access levels*); until CT-250's decision and Fabric's answer to question `add1df7c`
+  yet, `knowledge/authority.md`, *Access levels*; 2026-11-07: agents run without permission prompts, questions and bounds settled when the task is set, `knowledge/authority.md`, *Agents run without permission prompts*); until CT-250's decision and Fabric's answer to question `add1df7c`
   land, the floor asks as Fabric does today, and Fabric owes nothing for it here. Noted beside that question: Fabric's
   relay test for the production stop (a relay whose scope names the step) is narrower than a mandate handed on as MD-2
   says, whose scope names capabilities (`mandate.schema.json`) and whose `source` may be absent (OA-7); until Fabric
@@ -11583,7 +11594,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   a later grant or a later decision allowing the same floor class and target, in the project or estate-wide, resolves
   it first, `shared/attention.ts` `openRefusals` from line 222 (Fabric main `0e7a8a00`); the
   button reads "Allow once" (in Russian «Разрешить один раз», the card's kind «заблокировано» or «Отказано» and its
-  status «Разрешено один раз, до {time}», `renderer/src/i18n/ru.ts` lines 2419, 2423 to 2424 and 476) and issues a
+  status «Разрешено один раз, до {time}», `renderer/src/i18n/ru.ts` lines 2419, 2423 to 2424 and 476; from Fabric `5676cd88`, after release 0.3.19, the kind reads «Ждёт разрешения» and the card is headed by its floor class) and issues a
   single-use one-hour grant scoped to the project, the floor class and the target with no action class, the
   `attentionGrant` handler with `ttlMs: 60 * 60 * 1000` at `main/index.ts` line 4192, which `main/policy.ts`
   `findGrantFor` (lines 208 to 237) hands to any session of the project that keeps its runner gate and asks for the
@@ -11635,7 +11646,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   second makes OW-3 cite it. The same OA-4 change reaches three statements of the relayed approval here (SCN-046,
   CONTEXT's *Relayed approval*, the relay receiver's conformance row), which say that a host's gate on a floored act
   still asks once, quoting the relayed words as its reason; and two consumer copies, owed: fabric-workspace's "One
-  approval binds all" items 1 and 5 say the same, as Fabric's current behaviour pending CT-250's decision and Fabric's answer to question `add1df7c` (the operator's decisions of 2026-10-26 and 2026-11-06), and Fabric's session obligation `operator.told-one-is-told-all`
+  approval binds all" items 1 and 5 say the same, as Fabric's current behaviour pending CT-250's decision and Fabric's answer to question `add1df7c` (the operator's decisions of 2026-10-26, 2026-11-06 and 2026-11-07), and Fabric's session obligation `operator.told-one-is-told-all`
   ("do not ask the operator again (DEC-0126)") names the floor's one ask (OW-3). `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `docs/specification/governance-and-roles.md` (the section *The operator's word, carried
   out the first time*), `docs/specification/conformance.md` (one row for every agent that takes the operator's words),

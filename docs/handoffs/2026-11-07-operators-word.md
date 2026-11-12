@@ -75,7 +75,10 @@ contract already has.
   (no second approval) and 2026-11-06 (a level holder's command runs without a host's prompt, `knowledge/authority.md`,
   *Access levels*) and of 2026-11-07 (agents run without permission prompts, questions and bounds settled when the
   task is set, the same page, round 28, product): the question is how Fabric's floor carries them, not whether the
-  operator wants a second ask, and whether the FA-09 chat question stays under the 2026-11-07 decision.
+  operator wants a second ask, and whether the FA-09 chat question stays under the 2026-11-07 decision. Add the
+  operator's decision of 2026-11-12 that Fabric shipped as `QUESTIONS_RULE` (`9420da79`): OW-3 now asks its three
+  waits that way in a session with no person, and the question is whether a floored act's agreement may come the same
+  way (round 29, seam).
 - DEC-0158's re-cut (its round 20, 2026-11-12): that branch's OS-6 and this branch's OW-3 state opposite rules for a
   no-person run's notice question at a refused note and for the no-note resubmission at a host's gate (DEC-0158 round
   20, seam). DEC-0158's OS-6 and OS-7 are to be re-cut as one table of stops; the two are reconciled (round 26, seam): OW-3's session holds
@@ -98,15 +101,15 @@ contract already has.
   on the merged tree: `awk '/^- \*\*OW-3/,/^- \*\*OW-4/' docs/specification/governance-and-roles.md | grep -c CT-285`
   prints at least 1; `grep '^| CT-285' docs/backlog.md | grep -c 'OW-3'` prints 1 until that DEC lands (main's CT-285 row
   carries it since 2026-11-12).
-- Landing note for CT-292's decision (round 28, seam and product): binding on whichever of DEC-0156 and CT-292's DEC
-  lands second. TC-3 calls an unsettled task context a step that waits (OW-3), and TC-4 has a session with no person
-  ask it through the host's question surface (`fabric_question_ask`), while OW-3's no-person case asks no question from
-  that session and names the waiting step in its board reply, and TC-6 keeps the candidates out of every board thread.
-  CT-292's DEC makes the two name one outcome: either OW-3's no-person paragraph names the context question as its
-  exception (asked through the host's question surface, the board reply naming only an open step that waits for the
-  operator, never the candidates), with the DEC saying how the answer reaches a session that can act (TC-5's record,
-  the reason rounds 13 and 19 dropped that route), or TC-4 takes OW-3's route with the candidates left out of the board
-  reply; OW-3 cites CT-292; FLW-29 and the OW conformance row follow. Checks: `grep '^| CT-292' docs/backlog.md | grep -c
+- Landing note for CT-292's decision (rounds 28 and 29, seam and product): binding on whichever of DEC-0156 and
+  CT-292's DEC lands second. TC-3 calls an unsettled task context a step that waits (OW-3), and TC-4 has a session with
+  no person ask it through the host's question surface (`fabric_question_ask`); since round 29 OW-3's no-person case
+  asks its three waits by the operator's decision of 2026-11-12 (Fabric's `QUESTIONS_RULE`, `9420da79`), through the
+  organization's PM agent (`people.ask`) or the host's question surface, so the two agree on the route. One difference
+  stays: the `people.ask` route is a board request, and TC-6 keeps the candidate organizations out of every board
+  thread, so CT-292's DEC makes OW-3 send the context question only through the host's question surface (the board
+  reply naming the open step, never the candidates), and says how the answer reaches the run that acts (TC-5's record
+  and Fabric's next run, §3.8); OW-3 cites CT-292; FLW-29 and the OW conformance row follow. Checks: `grep '^| CT-292' docs/backlog.md | grep -c
   'OW-3'` prints 1 on the merged tree (main's row carries it since 2026-11-12); after that DEC,
   `awk '/^- \*\*OW-3/,/^- \*\*OW-4/' docs/specification/governance-and-roles.md | grep -c 'CT-292'` prints at least 1.
 - Landing note for CT-293's decision (round 28, seam and product): binding on whichever of DEC-0156 and CT-293's DEC
@@ -135,8 +138,15 @@ contract already has.
     back on); UD-4 cites OW-1. Checks, on the merged tree, all three required:
     `awk '/^- \*\*OW-1/,/^- \*\*OW-2/' docs/specification/governance-and-roles.md | grep -c UD-4` prints at least 1,
     `awk '/^- \*\*OW-5/,/^- \*\*OW-6/' docs/specification/governance-and-roles.md | grep -c UD-4` prints at least 1,
-    and `grep -c OW-1 docs/specification/usage-data.md` prints at least 1.
-  - DEC-0158 (OS-6, no person in a dispatched run): this requirement is written here and binds whichever of DEC-0156
+    and `grep -c OW-1 docs/specification/usage-data.md` prints at least 1. DEC-0157's round 25 adds that an agent does
+    not delete or rewrite a shared file it cannot read to end a hold and points the person to the product's own switch;
+    the merged text reads it with UD-4 and OW-2: on the operator's word naming the switch, the agent sets the product's
+    own switch on through its relayed action, and only anyone else is pointed to the switch (round 29, seam). Check:
+    `grep -n 'cannot read' docs/specification/usage-data.md | grep -c 'OW-2'` prints at least 1 on the merged tree.
+  - DEC-0158 (OS-6, no person in a dispatched run): OS-6's notice question that "the run never reads" meets Fabric's
+    `9420da79` (the operator's decision of 2026-11-12: a run's question goes to the organization's PM agent or through
+    `fabric_question_ask`, and the answer starts the next run); the re-cut table of stops takes OW-3's no-person route
+    for its waits (round 29, seam; relayed to that branch's handoff). Also: this requirement is written here and binds whichever of DEC-0156
     and DEC-0158 lands second, whether or not the other branch's handoff repeats it (the coordinator relays it to that
     branch's owner). `docs/specification/conformance.md` keeps the board-client row in DEC-0158's form (with "a
     dispatched run follows its own row below (OS-4, OS-7)"), then the OW row, then DEC-0158's rows; OW-3 and OS-6 cite
@@ -181,7 +191,15 @@ contract already has.
     stop is lifted by the relayed words naming the step).
   - DEC-0159 (CT-218, members' client keys): this requirement is written here and binds whichever of DEC-0156 and
     DEC-0159 lands second, whether or not the other branch's handoff repeats it (the coordinator relays it to that
-    branch's owner). SCN-059 states the key split. Issuing and rotating a member's key are
+    branch's owner). In `conformance.md` the merge leaves one hunk over two adjacent rows, each changed on one side
+    only: the lander keeps DEC-0159's "a callee that serves the family" row and DEC-0156's "an agent receiving a relay"
+    row, never one side of the hunk (round 29, seam); checks on the merged tree: `grep '^| a callee that serves the
+    family' docs/specification/conformance.md | grep -c 'save the one exception'` and `grep '^| an agent receiving a
+    relay' docs/specification/conformance.md | grep -c "a host's gate on a floored act still asking once"` each print 1.
+    OW-5 says that a relayed decision naming a change to a service's own budget or a per-key cap (AP-2, AP-5; DEC-0159
+    CF-3, CF-4, round 18) is that change, not a widening by OW-1, and never moves L0 or L1 (DEC-0159 round 19, seam);
+    check on the merged tree: `awk '/^- \*\*OW-5/,/^- \*\*OW-6/' docs/specification/governance-and-roles.md | grep -c
+    'CF-4'` prints at least 1. SCN-059 states the key split. Issuing and rotating a member's key are
     OW-4's secret step, from the operator's terminal or the page, so the value never enters an agent's transcript (CF-3);
     revoking is the agent's step on the operator's decision (OW-2), through the `relayed` twin where the instance checks
     `approval/1`, else by the agent running the agent's own CLI on the operator's computer (CF-4). OW-4 says that an
@@ -899,6 +917,7 @@ counter, and the board told what each consumer owes (DEC-0156's Compatibility).
   grant note, false under FA-09 (seam).
 - On the round-26 fold (`3e3f8628`): `pnpm run check` exit 0 (11175 tests) before round 27 was read.
 - On the round-27 fold (`9b35a554`): `pnpm run check` exit 0 (11175 tests) before round 28 was read.
+- On the round-28 fold (`04707957`): `pnpm run check` exit 0 (11175 tests) before round 29 was read.
 
 - Round 28 (on `9b35a554`, main `2b0bcd55` merged): product clean; unit and seam not clean. Breaks folded: the handoffs
   index called round 26's seam clean, which the round record says was not (unit); main's CT-292 (TC-4, a no-person
@@ -912,6 +931,19 @@ counter, and the board told what each consumer owes (DEC-0156's Compatibility).
   `53835d18` merged as `cc5885a5` (the backlog's adjacent CT-291 and CT-292 to CT-294 appends resolved, no markers,
   checked). Declined: none.
 
+- Round 29 (on `04707957`, main `53835d18` merged): unit and product clean; seam not clean. Break folded: Fabric
+  `9420da79` (after round 28) ships the operator's decision of 2026-11-12 for a run with no person (on-demand spec
+  §3.10, `QUESTIONS_RULE`: decide first, then ask a person through the organization's PM agent or `fabric_question_ask`,
+  the answer starting the next run), which OW-3's no-person case contradicted; OW-3 now asks its three waits that way
+  (the answer the operator's word only from their own surface or as an accepted relay; an act a host's gate holds and
+  the FA-09 case still ask nothing from that session), with DEC-0156 item 3, the Why, the OW conformance row, SCN-057
+  and FLW-29's Q1 following, the CT-292 note restated, the `add1df7c` step and the DEC-0158 note naming it (seam).
+  Risks folded: the 2026-11-07 decision named in the Compatibility, the Why, the owed item's framing and SCN-046; the
+  card labels given by Fabric version (0.3.19 «Отказано», `5676cd88` «Ждёт разрешения»); `intake.spec-first`'s
+  questions with no person take the same route (SCN-057); the index's clean list scoped to rounds 25 to 29; two
+  backlog full stops; the DEC-0159 conformance hunk and DEC-0157's hold bullet read with OW-2 added to their notes
+  (unit, product, seam). Declined: none.
+
 ## Next task
 
-Round 29 blind readings of branch `agent/ct220-operators-word-v2` (DEC-0156), all three tiers.
+Round 30 blind readings of branch `agent/ct220-operators-word-v2` (DEC-0156), all three tiers.

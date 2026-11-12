@@ -176,7 +176,8 @@ words AP-2 and OA-1 already name; the rules hold for any owner.
   push it out, or a later grant or a later decision allowing the same floor class and target, in the project or
   estate-wide, resolves it). The card is no question the agent asks: the agent's chat question is the one the operator answers, and it says
   that the card does not allow the act, naming the card by its label in the operator's interface language (in Russian
-  «Разрешить один раз», under «заблокировано» or «Отказано»), for example: "Fabric refused publishing this project's
+  «Разрешить один раз», on a card whose kind reads «Отказано» in Fabric 0.3.19 and «Ждёт разрешения» from Fabric
+  `5676cd88`, headed by its floor class, for a publish «Разрешить публикацию наружу?»), for example: "Fabric refused publishing this project's
   release in this session; its "Allow once" card does not allow it here. You said "release it"; shall I publish it
   myself?". The agent's report, and with no person in the session's chat its board reply too, says that the card does
   not allow the act, that the act stays refused and that its "Allow once" would leave such a grant.
@@ -188,11 +189,22 @@ words AP-2 and OA-1 already name; the rules hold for any owner.
   not repeat the message. An answer that names another way is a new word under OW-1; a bare refusal undoes the
   corrected way where it undoes cleanly and leaves the step open, and the agent asks further only as AP-3 does.
   In a session with no person in its chat, every step that waits under this rule (one of the three waits above, an act
-  a host's gate holds, or the FA-09 case) has the one place the FA-09 case names: the agent asks no question from that
-  session, leaves the step open and names it, in its board reply and its report, as a step for a session the person is
-  in (a host's gate still asks as it does), and settles the board request as that case does, save for who submits it again: a request
-  settled `failed_known` this way is submitted to the board again only where what the person does lets a session with no
-  person take the step (an answer, a decision or a relay naming the step, a grant, a human step cleared); then the
+  a host's gate holds, or the FA-09 case) is left open and named, in its board reply and its report, and the board
+  request is settled as the FA-09 case does, save for two things. First, for one of the three waits above the agent
+  asks as the operator's decision of 2026-11-12 for a run with no person (Fabric's on-demand spec §3.10, the `QUESTIONS_RULE` both packets of a board-started run carry, `9420da79`) says: it first settles what it can by the project's recorded
+  decisions, its goal and the safest reversible option (the corrected way above), records why, and takes a question
+  that still needs a person once per task, with its options and their consequences, to the project offering
+  `people.ask` in `com.directory` (the organization's PM agent), or through the host's question surface
+  (`fabric_question_ask`) where no project offers it, doing the independent parts meanwhile; its board reply names the
+  open step and where the question went. The answer, a message in the asking project's thread, starts that project's
+  next run (Fabric's on-demand spec §3.8), which takes the step under it and records it in the request's thread, as a
+  session the person is in does: the answer is the operator's word only when it comes from the operator's own question
+  surface or as a relay OA-2 and OA-3 accept, and another person's answer through the PM agent is that person's word,
+  the operator's only where CT-266 or CT-250's decision says so. An act a host's gate holds, and the FA-09 case, ask
+  nothing from that session (a host's gate still asks as it does), since only a session the person is in gives the
+  agreement they hold. Second, who submits it again: a request settled `failed_known` this way is submitted to the
+  board again only where what the person does lets a session with no person take the step and no next run of the
+  asking project has taken it (a decision or a relay naming the step, a grant, a human step cleared); then the
   operator's session in the requesting Project (its agent, on their word) submits it again when they own the requesting Project, and the requester otherwise, and the `com.reply`
   names which. An act that only a session the person is in can take (the FA-09 case) is never submitted again, as
   that case says. On a place the operator's decision of 2026-11-09 makes headless (fabric-workspace
