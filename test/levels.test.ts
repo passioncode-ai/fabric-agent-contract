@@ -114,6 +114,8 @@ describe("levelStanding on inputs a service builds itself (DEC-0162 LV-4)", () =
   it("refuses an attestation without a subject as malformed, and a level that decides nothing as above the role", () => {
     expect(levelStanding({ ...base, membership: { ...admin, subject: undefined }, level: "admin", tokenMem: vectors.digests.admin })).toEqual({ ok: false, invalid: "level-membership: malformed" });
     expect(levelStanding({ ...base, membership: admin, level: "member", tokenMem: vectors.digests.admin })).toEqual({ ok: false, invalid: "level-role" });
+    // A level the service declares that is not one of the four is read as the strictest (LV-7).
+    expect(levelStanding({ ...base, membership: admin, level: "admin", tokenMem: vectors.digests.admin, minLevel: "Owner" })).toEqual({ ok: false, insufficient: "level-insufficient: operator" });
   });
 });
 

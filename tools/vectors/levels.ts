@@ -194,6 +194,8 @@ function mandateCases(): Json[] {
     // LV-6, MD-5 amended: a bound level mandate is taken from a T2 caller.
     ["an architect's level mandate from T2, covered", mandateCall("T2", levelMandate(ARCHITECT, "architect", ALPHA), { tokenMem: digest(ARCHITECT) }), byLevelMandate(ARCHITECT, "architect")],
     ["an administrator's level mandate from T1, covered", mandateCall("T1", levelMandate(ADMIN, "admin", ALPHA), { tokenMem: digest(ADMIN) }), byLevelMandate(ADMIN, "admin")],
+    // DL-17: from T2 an operator decision counts for nothing, so a bound level mandate beside one is read.
+    ["a bound level mandate beside an operator decision, from T2", mandateCall("T2", levelMandate(ADMIN, "admin", ALPHA), { tokenMem: digest(ADMIN), decision: { by: "operator", via: "relayed-instruction", action: "approve-reply", instruction: "approve it", at: "2026-10-25T11:29:00Z" } }), byLevelMandate(ADMIN, "admin")],
     ["an architect's level mandate from T2 on a project outside its own", mandateCall("T2", levelMandate(ARCHITECT, "architect", { ...ALPHA, projects: ["alpha", "gamma"] }), { tokenMem: digest(ARCHITECT), project: "gamma" }), insufficient],
     ["a level mandate outside its scope's projects", mandateCall("T2", levelMandate(ADMIN, "admin", ALPHA), { tokenMem: digest(ADMIN), project: "beta" }), { ok: false, code: "operator-decision-required", data: { detail: "outside-mandate: project" } }],
     ["a level mandate without the token's mem", mandateCall("T2", levelMandate(ADMIN, "admin", ALPHA)), { ok: false, code: "decision-invalid", data: { detail: "level-unbound" } }],

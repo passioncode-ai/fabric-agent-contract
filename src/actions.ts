@@ -4,7 +4,7 @@ import { SCHEMA_PREFIX } from "./contract.js";
 import { EXTENSION_KEYS } from "./extensions.js";
 import { type Finding, type JsonObject, isObject } from "./findings.js";
 import { CLOCK_SKEW_SECONDS, strictTime } from "./rfc3339.js";
-import { type LevelContexts, type LevelRecord, levelStanding } from "./levels.js";
+import { type LevelContexts, type LevelRecord, levelStanding, ACTION_LEVELS } from "./levels.js";
 import { type OperatorSource, mandateCovers } from "./mandate.js";
 import { createValidatorSync } from "./validator.js";
 
@@ -30,7 +30,7 @@ export type CallerTier = "T0" | "T1" | "T2";
 /** One entry of `actions[]` (`service-actions-extension.schema.json#/$defs/action`). */
 export interface DeclaredAction { id: string; title: string; tool: string; gate: ActionGate; humanStep?: HumanStep }
 /** The levels an action may need, as the authority extension declares them (DEC-0162 LV-7). */
-export const ACTION_LEVELS = ["operator", "owner", "admin", "architect"] as const;
+export { ACTION_LEVELS } from "./levels.js";
 
 export interface ActionDecisionInput {
   /** The service's own declaration of the action being called. */
@@ -152,9 +152,10 @@ export function actionDecision(input: ActionDecisionInput): ActionDecisionAnswer
   // DEC-0162: a level decision, or a level mandate on a call without a decision, is read at every tier by a service
   // that reads levels (LV-6); one that reads none answers as if the call carried neither (LV-10).
   const levelDecision = isObject(decision) && decision.by === "level";
-  const levelMandate = decision === undefined && isObject(input.mandate) && input.mandate.by === "level";
-  // The service's own accepted elicitation is the operator's word at T0 or T1 and is read before a level form (LV-5).
   const inside = tier === "T0" || tier === "T1";
+  // From T2 an operator decision counts for nothing (DL-17), so a level mandate beside one is still read (LV-6).
+  const levelMandate = (decision === undefined || (!inside && !levelDecision)) && isObject(input.mandate) && input.mandate.by === "level";
+  // The service's own accepted elicitation is the operator's word at T0 or T1 and is read before a level form (LV-5).
   if (inside && elicited === true) return { ok: true, recordAs: { by: "operator", via: "elicitation", caller } };
   if (isObject(input.levels) && (levelDecision || levelMandate)) {
     const clock = strictTime(now);
@@ -192,7 +193,7 @@ export function actionDecision(input: ActionDecisionInput): ActionDecisionAnswer
   return { ok: true, recordAs: { by: "operator", via: "relayed-instruction", caller, ...(read.source ? { source: { ...read.source } } : {}) } };
 }
 
-/** The level the service declares the action needs, when it is one of ACTION_LEVELS (LV-7); anything else, none. */
+/** The level the service declares the action needs (LV-7); `actionDecision` refused any other value as its own fault. */
 const minLevelOf = (input: ActionDecisionInput): string | undefined => input.actionLevel as string | undefined;
 
 /** The tool of a job's input request (C3.3, AP-2): the call that answers it is `fabric.job.get`. */

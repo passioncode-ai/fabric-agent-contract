@@ -516,8 +516,9 @@ known-good earlier payload; it does not reactivate or edit history
 - [ ] Every button the dashboard shows has a tool, declared in `extensions/actions/0.1`, and a `relayed` action takes
   the operator's relayed decision (DEC-0121).
 - [ ] A service that reads authority levels declares them in `extensions/authority/0.1`, and there in `actionLevels`
-  `owner` for every billing act and `operator` for client keys, board holds and slot moves (DEC-0162 LV-7): an action
-  left out is decided by an architect in the call's project.
+  `owner` for every billing act and `operator` for client keys, a board hold's set and lift, a slot move and an owner's
+  settlement (DEC-0162 LV-7): an action left out is decided by an architect in the call's project, or by `admin` for a
+  call in no project.
 
 ## Operator checklist
 

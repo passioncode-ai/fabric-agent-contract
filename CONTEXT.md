@@ -865,7 +865,8 @@ of its own (DEC-0128, [devices](docs/specification/devices.md#unlinkable-enrollm
 
 **Membership attestation**: What an organization server states about one person's membership of one organization,
 for one reader, for at most a day: the organization, a subject pairwise to that reader, a role (`owner`, `admin`,
-`member`), `active` or `ended`, and a revision (`org-membership/1`, DEC-0127). Signed by a key of the organization's
+`member`), `active` or `ended`, and a revision (`org-membership/1`, DEC-0127; or `/2`, for a reader of levels, with
+`architect` and its `projects`, DEC-0162). Signed by a key of the organization's
 `org-key-set/1`, whose root the person pins in their estate record (`organizations`) when they join, with no
 administrator's acceptance. Any organization server issues it, so a reader works with any of them
 ([membership](docs/specification/membership.md)).
