@@ -192,7 +192,7 @@ words AP-2 and OA-1 already name; the rules hold for any owner.
   corrected way where it undoes cleanly and leaves the step open, and the agent asks further only as AP-3 does.
   In a session with no person in its chat, every step that waits under this rule (one of the three waits above, an act
   a host's gate holds, or the FA-09 case) is left open and named, in its board reply and its report, and the board
-  request is settled as the FA-09 case does, save for two things. First, for one of the three waits above the agent
+  request is settled as the FA-09 case does, save for two things (and, for a session without the board's tools, the settlement that session's result gives, below). First, for one of the three waits above the agent
   asks as the operator's word of 2026-11-12 (questions to the people who decide go through the organization's PM
   agent) says, as Fabric's `QUESTIONS_RULE` carries it in both packets of a board-started run, with its fallback to the
   host's question surface (Fabric's on-demand spec §3.10, `9420da79`): it first settles what it can by the project's
@@ -225,11 +225,10 @@ words AP-2 and OA-1 already name; the rules hold for any owner.
   without the board's tools (Fabric's run on another machine, which writes its answer as the run's result) writes each
   open step and its question into that result, which reaches the request's thread only as the host posts it: Fabric
   today posts an `answered` result only, as a reply from the target that settles the request `answered`, so such a run
-  writes `answered` with the open step and its question in the text, since a `blocked` result posts nothing and is run
-  again up to three times before it reaches the operator without its text (its on-demand spec §3.10 at `92da0efc`,
+  writes `answered` with the open step and its question in the text, and, for each open step, what the settlement below says of its resubmission (who submits it again, or, for the FA-09 case, that nobody does), since a `blocked` result posts nothing and counts as an empty run, the third of which (`EMPTY_RUNS_TO_OPERATOR`, three runs in all) hands the request to the operator without its text (its on-demand spec §3.10 at `92da0efc`,
   `boardDispatch.ts`'s `EMPTY_RUNS_TO_OPERATOR`; posting a blocked result's body is asked of Fabric). An act a host's gate holds, and the FA-09 case, ask
   nothing from that session (a host's gate still asks as it does), since only a session the person is in gives the
-  agreement they hold. Second, who submits it again: a request settled `failed_known` this way is submitted to the
+  agreement they hold. Second, who submits it again: a request settled `failed_known` this way, or `answered` by such a run with an open step named in its text, is submitted to the
   board again only where what the person does lets a session with no person take the step and no next run of the
   asking project has taken it (a decision or a relay naming the step, an answered question among them, a grant, a
   human step cleared); then the

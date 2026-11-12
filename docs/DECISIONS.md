@@ -11462,9 +11462,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      and asks the operator once, naming the request and posting in its thread what the second route's reply says,
      while an answer through `fabric_question_ask` starts no run and wakes nobody, so the
      reply tells the requester that the request is submitted again only on the operator's word relayed to it, or by the operator's own session when they own the requesting Project, the
-     answer able to sit unacted on until Fabric wakes the asking project (asked under `add1df7c`); a request settled `failed_known` there submitted
+     answer able to sit unacted on until Fabric wakes the asking project (asked under `add1df7c`); a session without the board's tools writing `answered` with the open step, its question and its resubmission in the result, read as `failed_known` is; a request settled `failed_known` there, or `answered` so, submitted
      again only where what the person does lets a session with no person take the step and no such next run has
-     taken it (a decision or a relay naming the step, a grant, a human step cleared), by the operator's session in the requesting Project (its agent,
+     taken it (a decision or a relay naming the step, an answered question among them, a grant, a human step cleared), by the operator's session in the requesting Project (its agent,
      on their word) when they own the requesting Project and by the requester otherwise, a relay or a mandate that names the
      act changing neither mode, being the reason the one ask quotes, not the agreement the gate holds the act for; the
      agent adds no question of its own
@@ -11639,7 +11639,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (DEC-0149's word where the act is a source hand-over), the agent performing it. Fabric owes the same for `floor.ask-first`'s own text ("Ask again once they have agreed"), which tells a session
   with no runner gate to wait for agreement that changes nothing under FA-09; in that default mode OW-3's FA-09 reading
   has the agent ask once in the chat instead (or, with no person in the chat, leave the act for a session the person
-  is in), which the operator's answer to question `add1df7c` may change. fabric-workspace's section on refusals (`knowledge/agents-first.md`, never work around a
+  is in), which the operator's answer to question `add1df7c` may change. Fabric's board shows a request settled `failed_known` with `observed: false` as failed («сбой (причина известна)», "failed (known)") and drops it from «Ждут ответа» ("Waiting for an answer"), its feed reading `failed_known` as settled (`CommsFeed.tsx` lines 23 to 25 at `ebbdf32d`); Fabric owes showing one whose reply names an open step as waiting on the operator and keeping it in that filter; until then the reply and the report say that the board shows it as failed (known) (round 33, product). fabric-workspace's section on refusals (`knowledge/agents-first.md`, never work around a
   refusal) agrees with OW-4; its CT-220 bullet (a refusal goes to the person "after the agent tried every route of its
   own") owes the same exception, beside the link to the OW rules, OW-3's waits, its message form and OW-4's list. Owed
   item, owner fabric-workspace's knowledge base, the whole of its list above: `knowledge/agents-first.md` links the OW

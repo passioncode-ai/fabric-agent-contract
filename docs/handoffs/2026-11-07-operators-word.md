@@ -84,9 +84,7 @@ contract already has.
   another machine posts only an answered result, so a blocked one's open step is lost (round 31, product and seam). Add that Fabric's `answer_question` wakes nobody and an ended session's continuation reads
   `needs_restart`, so an answer through `fabric_question_ask` from a board-started run starts no run; OW-3 has the
   request submitted again on it only on the operator's word relayed to the requester (or by the owner's own session), that a run on another machine writes `answered` with
-  the open step because a `blocked` result posts nothing and is run again up to three times (round 32, seam), and that
-  the next run after a PM agent's non-operator answer asks the operator directly, not again through `people.ask`, and asks Fabric to start the asking project's next run on an answered question
-  (round 30, seam and product), and that no project offers `people.ask` yet (CO-569).
+  the open step and its resubmission because a `blocked` result posts nothing and counts as an empty run, the third of which hands the request to the operator (round 32, seam; three runs in all, round 33, seam), and that the next run after a PM agent's non-operator answer asks the operator directly, not again through `people.ask` (round 32). Ask Fabric to start the asking project's next run on an answered question (round 30, seam and product), and to show a `failed_known` request whose reply names an open step as waiting on the operator and keep it in «Ждут ответа» (round 33, product), and add that no project offers `people.ask` yet (CO-569).
 - DEC-0158's re-cut (its round 20, 2026-11-12): that branch's OS-6 and this branch's OW-3 state opposite rules for a
   no-person run's notice question at a refused note and for the no-note resubmission at a host's gate (DEC-0158 round
   20, seam). DEC-0158's OS-6 and OS-7 are to be re-cut as one table of stops; the two are reconciled (round 26, seam): OW-3's session holds
@@ -108,7 +106,9 @@ contract already has.
   and FA-09 branches, with the four statements of the amended OA-4 that a host's gate still asks once
   (`docs/specification/delegation.md` OA-4, CONTEXT's *Relayed approval*, SCN-046, the relay receiver's conformance
   row). Main's CT-285 row reads DEC-0158's OS-6 as "never resubmitted" at the production stop; the split both branches
-  agreed resubmits there once the relayed words name the step, and CT-285's DEC restates it so (round 27, seam). Checks,
+  agreed resubmits there once the relayed words name the step, and CT-285's DEC restates it so (round 27, seam); after
+  that DEC, `grep '^| CT-285 ' docs/backlog.md | grep -c 'production stop and a host.s gate, never resubmitted'`
+  prints 0 (round 33, seam). Checks,
   on the merged tree after CT-285's DEC (each fails today, round 30, seam): `awk '/^- \*\*OW-3/,/^- \*\*OW-4/'
   docs/specification/governance-and-roles.md | grep -c 'until it lands they hold as written'` prints 0;
   `awk '/^### SCN-057/,/^### SCN-058/' docs/ux/scenarios.md | grep -c 'until it lands, as here'` prints 0;
@@ -179,10 +179,18 @@ contract already has.
     stop for a decision outside the mandate and at the source hand-over stop, which are OW-3's first two waits, a
     dispatched run asks once per task by OW-3's route, its notice question at a human step and after a refused note
     unchanged (round 32, seam: OS-6 at `cb7009d7` asks nothing at those two stops). Checks on the merged tree: in bullet
-    form, `awk '/^- \*\*OS-6/,/^- \*\*OS-7/' docs/specification/project-comms.md | grep -c 'people.ask'` prints at least 1;
+    form, `awk '/^- \*\*OS-6/,/^- \*\*OS-7/' docs/specification/project-comms.md | grep -c 'people.ask'` and the same range
+    with `grep -c 'starts no run'` each print at least 1 (round 33, seam);
     in table form, `grep -c 'people.ask' docs/specification/project-comms.md` and `grep -c 'starts no run'
     docs/specification/project-comms.md` each print at least 1, and (judgement) the table's rows for those two stops
-    name the question. The re-cut table of stops takes OW-3's no-person route for its waits (round 29, seam; relayed
+    name the question. The table also has a row for OW-3's third wait (an effect outside a grant, CT-293's narrow
+    grant applying where it lands) and for OW-3's own stop (no corrected way that both undoes cleanly and still meets
+    the word), each naming OW-3's question route, and the OW-3 text that stays says so; and the re-cut says what a
+    dispatched run without the board's tools (Fabric's run on another machine) settles: OW-3's `answered` with the
+    open step, its question and its resubmission as Fabric's current behaviour, or a row of its own (round 33, seam).
+    Checks on the merged tree: `grep -c 'undoes cleanly' docs/specification/project-comms.md`, `grep -c 'outside a
+    grant' docs/specification/project-comms.md` and `grep -c "board's tools" docs/specification/project-comms.md` each
+    print at least 1 (0 on a simulated merge today). The re-cut table of stops takes OW-3's no-person route for its waits (round 29, seam; relayed
     to DEC-0158's handoff in round 32, not there at `cb7009d7`). Also: this requirement is written here and binds whichever of DEC-0156
     and DEC-0158 lands second, whether or not the other branch's handoff repeats it (the coordinator relays it to that
     branch's owner). `docs/specification/conformance.md` keeps the board-client row in DEC-0158's form (with "a
@@ -251,7 +259,11 @@ contract already has.
     member's key are the operator's, from their own terminal; revoking is the agent's, on the operator's word, through
     the agent's CLI on the operator's computer), so no SCN-044 line has the operator manage client keys. Checks:
     `awk '/^### SCN-044/,/^### SCN-058/' docs/ux/scenarios.md | grep -c 'operator manages client keys'` prints 0, and
-    the same range with `grep -c 'revok'` prints at least 1 (judgement: revoking named as the agent's). The SCN-044
+    the same range with `grep -c 'revok'` prints at least 1 (judgement: revoking named as the agent's); the same range
+    with `grep -c 'asks once whether to update'` prints 1 and with `grep -c 'how to update'` prints 0; `awk '/^### SCN-044/,/^### SCN-058/'
+    docs/ux/scenarios.md | grep '^- \*\*Coverage' | grep 'DEC-0156 OW-1 to OW-4' | grep -c 'DEC-0159 CF-1'` prints 1;
+    and the second lander writes OW-4 into SCN-059, `awk '/^### SCN-059/,/^### SCN-045/' docs/ux/scenarios.md | grep -v
+    'the update alt path' | grep -c 'OW-4'` printing at least 1 (round 33, seam). The SCN-044
     Coverage conflict hunk carries SCN-058 and the scenarios after it on DEC-0159's side, which the lander keeps whole,
     never resolving that hunk by taking one side. Check, on the resolved tree:
     `grep -c '^### SCN-05[89]' docs/ux/scenarios.md` prints 2 and `python3 docs/ux/lint.py` exits 0. OW-4 names, as a human step's exact step, a command the person runs in their own
@@ -1023,10 +1035,25 @@ counter, and the board told what each consumer owes (DEC-0156's Compatibility).
   checks both the bullet and the table form, and the relay is made to DEC-0158's handoff (seam). Risks folded: the
   `add1df7c` step says "asked", not "owes"; four summaries carry the relayed-word condition; the next run after a PM
   agent's non-operator answer asks directly, names the request and posts the reply's notice in its thread; a run on
-  another machine writes `answered` with the open step (a `blocked` result posts nothing and runs again three times);
+  another machine writes `answered` with the open step (a `blocked` result posts nothing and counts as an empty run, three runs in all);
   the CT-285, CT-250 and CT-293 notes check every place they name; the table-form checks cover each bullet-form one;
   CT-220's range reads 25 to 32; the round-31 fold's checks recorded (unit, product, seam). Declined: none.
 
+- On the round-32 fold (`cc9bf40d`): `pnpm run check` exit 0 (11175 tests, read by round 33's unit reading).
+- On the round-33 fold: `pnpm run check` failed only on `test/validate-cli.test.ts`'s afterAll hook timing out at 10 s under a parallel test run; that file alone then passed (1956 tests), and `docs:check`, `ux/lint.py` and `privacy:check` exit 0 (the fold changed only Markdown).
+- Round 33 (on `cc9bf40d`): seam and product clean; unit not clean. Break folded: a run without the board's tools
+  settles `answered`, which OW-3's "save for two things" and its resubmission rule (`failed_known` only) did not cover,
+  so an FA-09 act there could be resubmitted at once; OW-3 now names that settlement, has such a run write each open
+  step's resubmission, and extends the rule to a request so `answered`; DEC-0156 item 3 and the OW row read it as
+  `failed_known` is (unit, seam). Risks folded: Fabric runs a blocked remote result three times in all, two of them
+  reruns (seam); item 3 lists an answered question among what lets a no-person session take the step (unit); the
+  `add1df7c` step's two asks split (unit); Fabric's board shows such a request as failed (known) outside «Ждут ответа»,
+  owed in the Compatibility and the `add1df7c` step (product); CT-220's row names the operator's session as the one
+  who resubmits (product); CT-250, CT-285, CT-292 and CT-293 rows link this handoff's notes, the CT-285 note checks
+  its row's correction, the DEC-0159 note checks SCN-044's update question, Coverage and SCN-059's OW-4, the DEC-0158
+  note requires rows for OW-3's third wait and own stop and a no-board-tools run, and checks "starts no run" in
+  bullet form (seam). Declined: none.
+
 ## Next task
 
-Round 33 blind readings of branch `agent/ct220-operators-word-v2` (DEC-0156), all three tiers.
+Round 34 blind readings of branch `agent/ct220-operators-word-v2` (DEC-0156), all three tiers.
