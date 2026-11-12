@@ -11,6 +11,9 @@ board message `123d3dba` (thread `77d88a2e`, 2026-11-06): Fabric's review M194 (
 version of its own until the DEC lands. North Star gap G10 (Fabric as the main agent; its manager session is wave D of
 Fabric's CO-522).
 
+Line numbers in this design cite the repository at `a054fdc6` (main on 2026-11-12, when it was written); a
+later change may move them, so read each citation by its rule id or section first.
+
 ## What the contract says today
 
 | Where | What it says | Why it blocks the manager |
