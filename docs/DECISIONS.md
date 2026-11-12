@@ -3,8 +3,8 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0160` (the CAS counter's next value when this line was last written; read
-`refs/agent-sync/ids/DEC` on origin for the current one)
+**Next free ID:** `DEC-0162` (the CAS counter's next value when this line was last written, DEC-0156, DEC-0157 and DEC-0159 to
+DEC-0161 being reserved by sibling branches; read `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
 `DEC-0028` is not used: two runs reserved under one key (`usage-budgets-20261007`); the first wrote DEC-0027 and

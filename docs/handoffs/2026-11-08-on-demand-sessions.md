@@ -1098,7 +1098,41 @@ Its check: the knowledge base's own gate on the change, then a reading of the me
   over the six files and CONTEXT prints two lines, neither a rule: the round 17 entry above (a record of that round)
   and this entry's own command.
 
+- Round 20 (on `a0bce3b1`, main `d40ae936` merged in on 2026-11-12; main `b8a6af95` merged again as `e450910f`):
+  none clean, not folded; the coordinator's judgement below. Findings, each with its fix in the readings' reports:
+  (1) unit, breaks: at a job's `input_required`, an `operator-decision-required` outside the mandate, a source
+  hand-over without its decision and OS-7's expired mandate or missing registry id, the note names the operator as the
+  one who submits again while neither the run's question (human steps only) nor OS-5's showing reaches the operator;
+  (2) product, breaks: OS-2, OS-6 and OS-7 make the production stop and a host's gate permanent for every dispatched
+  run, while the operator's decision of 2026-11-09 (fabric-workspace `knowledge/authority.md`, *Autonomy by place*;
+  CT-285's design on main) has a headless place finish everything with no act waiting for a person, and neither names
+  the other; (3) seam, breaks: the operator's decision of 2026-11-10 (fabric-workspace `e83781d0`, `agents-first.md`
+  item 5; Fabric CO-559) wakes a session for every message addressed to a Project, while OS-7, DEC-0152's annotation,
+  CT-272 and the drafted item 5 still say a question or an announcement waits for the Project's next session, and the
+  draft, pinned at `c84c7a40`, would overwrite the 2026-11-10 paragraph; (4) seam, breaks: this branch's landing note
+  and DEC-0156's (OW-3) state opposite rules for the notice question at a refused note and for the no-note
+  resubmission at a host's gate, and both bind the second lander; (5) product, breaks: Done and the landing list do
+  not record the merge of 2026-11-12 or close CT-287's clause. Risks: OS-4's 60-second lease is Fabric's value, not
+  the contract's (renew before the receipt's `leaseExpiresAt`); the next free id line reads DEC-0160 (the counter
+  reads 162); OS-7 does not say which registry agent id wins when the host's and the target folder's differ.
+- The coordinator's judgement after round 20 (2026-11-12): twenty rounds and none clean, and findings (2) to (4) are
+  not wording: the operator's decisions of 2026-11-09 and 2026-11-10 changed what OS-6's stops and OS-7's waiting are
+  for, and OS-6 has grown past what a reader can apply (one paragraph of about 70 lines). Folding round 20 as patches
+  would grow it again. Decision: OS-6 and OS-7's stop and wake rules are re-cut, not patched, against CT-285's decision
+  (the place profile the dispatcher hands a run) and the 2026-11-10 wake rule: one table of stops (rows: human step,
+  input_required, decision outside the mandate, source hand-over, production stop, host's gate, expired mandate, no
+  registry id; columns: covered by, settles as, note's directive, who is told), replacing the prose; OW-3's no-person
+  case (DEC-0156) points at that table instead of restating it. The rest of DEC-0158 (OS-1 to OS-5, MD-2's sentence,
+  the vectors) stands. CT-272's open question narrows to the contract's wording of the 2026-11-10 wake. Until the re-cut,
+  this branch is not landed; CT-287 carries it.
+
 ## Next task
+
+Re-cut OS-6 and OS-7's stop and wake rules as one table (the coordinator's judgement after round 20, above), with
+CT-285's DEC or right after it, folding round 20's findings (1) to (5) and its risks into the table and the handoff;
+redraft the knowledge-base item 5 against fabric-workspace `agents-first.md` at its current main, keeping the
+2026-11-10 paragraph word for word; then round 21 blind readings of all three tiers. Superseded plan, kept for the
+record:
 
 Round 20 blind readings (unit, seam, product), read against the table: branch `agent/ct215-on-demand-20261108`
 (DEC-0158), all three tiers (the seam and product tiers last ran in round 15; rounds 16 to 19 ran the unit tier only),
