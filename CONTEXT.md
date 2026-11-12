@@ -870,6 +870,12 @@ for one reader, for at most a day: the organization, a subject pairwise to that 
 administrator's acceptance. Any organization server issues it, so a reader works with any of them
 ([membership](docs/specification/membership.md)).
 
+**Level**: The role of an accepted `org-membership/2` attestation (`owner`, `admin`, `architect` in its projects,
+`member`), read as its holder's authority for decisions in that organization, never for signing (DEC-0162). A level
+holder's decision, or a level mandate, bound to the caller by the delegation token's `mem`, stands as the operator's
+word inside the level at a service that reads levels; a `member` decides nothing by its level, and no level covers the
+person's own steps or spend above a limit ([membership](docs/specification/membership.md#levels)).
+
 **Draft exchange**: How an organization server's unsigned draft of a key set or a member list reaches the person who
 signs it and comes back signed (DEC-0131): the server serves a key set's (`org-key-set/1`) draft at a public route and a member list's
 draft only to the organization's administrators and its relay (OX-6), the owner's Fabric (a key set, with the root) or

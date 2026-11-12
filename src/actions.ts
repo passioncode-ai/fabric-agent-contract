@@ -147,8 +147,8 @@ export function actionDecision(input: ActionDecisionInput): ActionDecisionAnswer
     const clock = strictTime(now);
     if (Number.isNaN(clock)) return { fault: "now-unreadable" };
     if (levelDecision) return byLevel(input, action, caller, clock);
-    const answer = byMandate(input, action, caller);
-    if (!("ignored" in answer)) return answer;
+    // A level mandate at a service given `levels` is never ignored: mandateCovers reads it at every tier.
+    return byMandate(input, action, caller) as ActionDecisionAnswer;
   }
   if (tier !== "T0" && tier !== "T1") {
     if (typeof actionDigest !== "string" || !SHA256.test(actionDigest)) return { fault: "digest-missing" };

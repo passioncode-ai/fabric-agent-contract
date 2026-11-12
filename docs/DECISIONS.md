@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0156` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0163` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -11384,3 +11384,96 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `peer_owner` 1.3.0 proposal (`914c0383`), sshlg-fabric-server's (`ed799cae`, `93886034`) and the adapter's (`b8053022`)
   inputs; backlog CT-261.
 
+
+### DEC-0162: authority levels: `org-membership/2`, the level decision and the level mandate
+
+- **Date:** 2026-11-12
+- **Status:** Proposed 2026-11-12, from the design `docs/evidence/plans/2026-11-12-ct250-authority-levels.md` (CT-250),
+  the operator-question defaults taken as the design states them; accepted when the coordinator's blind readings are
+  clean on two consecutive rounds. It adds a membership type, a decision form, a mandate form, a token claim and two
+  rule codes (`FAC-SEM-169`, `FAC-SEM-170`); nothing existing changes meaning.
+- **Context:** the operator decided four access levels on 2026-11-06 (fabric-workspace session `74a9440a`, relayed on
+  board threads `eefa7959`, message `23746581`, and `8bd78e76`; recorded verbatim in fabric-workspace
+  `knowledge/authority.md`, *Access levels: who approves*, at `73171ed0`): the organization's owner, the organization's
+  administrator, the project architect and the user. A command from the owner, an administrator, or an architect in
+  their project, and from the agents acting for them, is approved at once and recorded with the approver; a user's
+  request goes through the approvals the product provides; only the person's physical steps stay (North Star gap G2).
+  The contract had no architect, read a role as no authority (OL-6, DEC-0133), let only the operator decide a relayed
+  action (AP-2, DEC-0121), asked a T2 caller for an `approval/1` per effect (DL-17, DL-18), and ignored a T2 caller's
+  mandate (MD-5, DEC-0125), so an administrator's agent on the administrator's own machine, T2 to the organization's
+  services, waited on an approval for each effect. fabric-workspace asked for the decision for the organization slice of
+  2026-11-21 (board request `4a1bf8d6`, thread `8da128cf`, line 1.2).
+- **Decision:** [membership](specification/membership.md#levels) LV-1 to LV-11.
+  1. **`org-membership/2` (LV-1).** `/1` with `role` among `owner`, `admin`, `architect`, `member`, and `projects`, always
+     present: 1 to 64 projects for an architect, each once, none for any other role (`FAC-SEM-169`). Registered in the
+     signing register as `org-membership/2` over every member but `type` and `sig`. An issuer issues it only to a reader
+     it registered for `/2`; to a `/1` reader it issues `/1`, an architect read as `member`. `verifyOrgMembership` reads
+     `/2` only for a reader with `levels: true` and refuses it `malformed` otherwise; its verdict for `/2` adds `type`,
+     `projects` and `expiresAt`, and its verdict for `/1` keeps its shape.
+  2. **A role is a level, for decisions only (LV-2; OL-6 amended).** `owner` covers `admin`, `admin` covers every
+     `architect`, an `architect` covers only its `projects`, `member` decides nothing; a level never makes a signer.
+  3. **The level decision (LV-3, LV-4).** `decision.schema.json` is the operator's form or `{by: "level", via:
+     "level-command", level, org, project?, action, target?, instruction, at, membership}`, `project` required for an
+     architect. A service that reads levels takes it, at every tier, when the decision is for the called action and
+     target, within AP-2's window, naming the call's project when it names one; the attestation verifies for this
+     service's audience under the organization's applied key set, is active, covers the level and, for an architect,
+     the call's project; the decision was made before the attestation's `expiresAt`; and the token binds it (item 4).
+  4. **Binding (LV-5).** `delegation-token.schema.json` gains the optional claim `mem`, an attestation's digest the hub
+     writes only for its own principal's attestation (OM-2); an onward token keeps the parent's `mem` or none
+     (`FAC-SEM-050`). A level is taken only from a call whose verified token carries the attestation's digest as `mem`;
+     a T0 or T1 caller presents a token to carry a level (DL-26) and without one keeps the operator's path.
+  5. **What a level stands as (LV-6).** The operator's decision of AP-2, the `approval/1` of DL-17 and DL-18 for a T2
+     caller, and the operator's word in a mandate: `mandate/1` takes `by: "level"` with `level`, `org` and
+     `membership` (an architect's scope lists its `projects`), taken from any tier when bound (MD-3; MD-5 amended), and
+     lives at most as long as its attestation.
+  6. **Bounds, the user, the record, refusals, ending (LV-7 to LV-11).** No level covers a human step, spend above a
+     limit, a personal context or another organization; `change-policy` is decided by `owner` or `admin`, and by an
+     architect only in its projects, never by a mandate; approval separation holds for a holder's agent. A member's
+     request carries no level. The record is `{by: "level", via, level, org, project?, approver, membershipDigest,
+     revision, caller}`, `approver` the attestation's pairwise subject, `instruction` in the service's own audit only.
+     No new error code: `operator-decision-required` with `level-insufficient: admin`; `decision-invalid` with
+     `level-membership: <problem>`, `level-unbound`, `level-audience`, `level-expired` or `level-role`; a service that
+     reads no levels answers as if the call carried no decision or mandate. An ended or suspended membership ends its
+     level at once.
+  7. **The reference.** `src/levels.ts` (`levelStanding`, `levelRules` for `FAC-SEM-170` on kinds `decision` and
+     `mandate`), read by `actionDecision` (inputs `levels` and `tokenMem`) and `mandateCovers`; the vectors
+     `fixtures/vectors/levels.json`, written by `tools/vectors/levels.ts`.
+- **Why:** the operator's decision makes an owner's, an administrator's and an architect's word the operator's within
+  their scope; a signed, short-lived, audience-bound attestation from the organization's own issuer is the only proof
+  of a role the contract already verifies, and binding it to the caller through the hub's token keeps a copied
+  attestation from deciding anything. Keeping the level for decisions only leaves signing, and the person's own steps,
+  where they were.
+- **Alternatives considered:** a level read from `/1`'s `extensions` (refused: OM-1 says an extension grants nothing,
+  and a reader could not tell an architect's projects); a level decision without a token at T0 or T1 (refused, design
+  question 5: a local process could replay a copied attestation, CT-168); an organization product's own signed
+  delegation travelling to other products (refused, design question 6: it stays inside that product, and what travels
+  is the level decision and a `mandate/1`); `projects` present only for an architect, as the design first said
+  (refused: OM-1 and the signing register keep every member present, so it is always present and empty for others); a
+  level mandate with its own `project` (refused: its scope's `projects` already names where it acts).
+- **Compatibility:** additive. A `/1` reader never receives `/2` and refuses it if it does; a service that reads no
+  levels answers a level form as if absent, so its callers fall back to the operator's decision. Read on 2026-11-12:
+  no product issues `/2` or writes `mem` yet. Owed: the organization product issues `/2` to the readers it registers
+  (its levels row); Fabric's hub writes `mem` and its Agent access and board gates read levels (CO-523); every service
+  with `relayed` actions reads level decisions and mandates (the adapter's kits FAA-249, Project Observatory OBS-377,
+  Switchboard SB-291, Fabric Inbox B-232, Fabric Dashboards FD-164, the launcher PC-162, the copy service AUTH-01, the
+  platform PLAT-141 and PLAT-146). Until a product adopts it, its agents keep treating an administrator's relayed
+  command as the operator's under «one approval for all agents» (`knowledge/authority.md`), which this decision does
+  not change. The design's operator questions take their defaults: a level stands for a source hand-over for an
+  organization's own agents with the exact target (DEC-0149), an architect may change its own projects' policies, 64
+  projects per attestation, no billing level beyond `admin`, no level without a token, and no traveling product
+  delegation; the operator may answer otherwise.
+- **Consequences / affects:** `schemas/org-membership-2.schema.json` (new), `schemas/decision.schema.json` (the level
+  form), `schemas/mandate.schema.json` (`by: "level"`), `schemas/delegation-token.schema.json` (`mem`);
+  `src/org-membership.ts`, `src/signing-challenges.ts`, `src/levels.ts` (new), `src/actions.ts`, `src/mandate.ts`,
+  `src/delegation.ts`, `src/delegation-rules.ts`, `src/semantic-kinds.ts`, `src/semantic-rules.ts`,
+  `src/protocol-revisions.ts` (`org-membership` 1 and 2); `fixtures/vectors/levels.json`, `tools/vectors/levels.ts`,
+  `test/levels.test.ts`, positive, negative and semantic fixtures; `docs/specification/membership.md` (`/2`, OL-6,
+  *Levels*, rules, adopters, not decided), `service.md` (AP-2 to AP-5 and the `actionDecision` table), `delegation.md`
+  (`mem`, DL-18, DL-26, MD-3, MD-5, MD-6), `governance-and-roles.md` (approval separation), `source.md` (a level
+  decision as the word for an organization's own agent's hand-over), `conformance.md` (rows, modules, rule codes,
+  signing register). Not decided here: the autonomy profile per place (CT-285), the estate-scoped
+  manager (CT-252), calls only within an organization (CT-251), how the hub learns a service's audience, and a faster end
+  than an attestation's day.
+- **Source:** the design `docs/evidence/plans/2026-11-12-ct250-authority-levels.md`; the operator's decision of
+  2026-11-06 as recorded in fabric-workspace `knowledge/authority.md`; board request `4a1bf8d6` (thread `8da128cf`);
+  backlog CT-250.

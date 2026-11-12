@@ -92,7 +92,9 @@ export function levelStanding(input: {
   if (verdict.status !== "active") return { ok: false, invalid: "level-membership: ended" };
   if (tokenMem !== verdict.digest) return { ok: false, invalid: "level-unbound" };
   if (!(strictTime(at) < strictTime(verdict.expiresAt as string))) return { ok: false, invalid: "level-expired" };
-  if (!((RANK.get(level) ?? 4) <= (RANK.get(verdict.role) ?? -1)) || !DECIDING_LEVELS.includes(level)) return { ok: false, invalid: "level-role" };
+  // A verified role is one of LEVEL_ROLES, so it has a rank; a level that is not a deciding one has none here.
+  const rank = DECIDING_LEVELS.includes(level) ? (RANK.get(level) as number) : Number.POSITIVE_INFINITY;
+  if (rank > (RANK.get(verdict.role) as number)) return { ok: false, invalid: "level-role" };
   const projects = verdict.projects ?? [];
   if (level === "architect" && (project === undefined || !projects.includes(project))) return { ok: false, insufficient: "level-insufficient: admin" };
   return { ok: true, level, org, approver: verdict.held.subject, membershipDigest: verdict.digest, revision: verdict.held.revision, projects };

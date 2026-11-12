@@ -100,7 +100,7 @@ const DIGEST = `sha256:${"ab".repeat(32)}`;
 const URL = "https://store.example/connect";
 const LEVELS = { [ORG]: { audience: SERVICE, keySet: KEY_SET } };
 
-const decided = (level: string, held: Json, extra: Json = {}) => ({
+const decided = (level: string, held: Json, extra: Json = {}): Json => ({
   by: "level", via: "level-command", level, org: ORG, action: "approve-reply",
   instruction: "approve the reply to the review from Anna", at: AT, membership: held, ...extra
 });

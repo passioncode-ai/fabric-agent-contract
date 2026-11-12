@@ -226,7 +226,7 @@ export function mandateRules(kind: string, value: JsonObject): Finding[] | undef
   if (kind === "mandate") {
     const problem = mandateProblem(value);
     // DEC-0162: a level mandate's attestation, checked without a key (FAC-SEM-170, src/levels.ts).
-    const level = problem === "mandate-malformed" ? [] : (levelRules(kind, value) ?? []);
+    const level = problem === "mandate-malformed" ? [] : (levelRules(kind, value) as Finding[]);
     return [...(problem ? [{ code: "FAC-SEM-144", instancePath: "", message: `the mandate is not valid: ${problem} (DEC-0125 MD-1, MD-2; DEC-0136 MD-2a)` }] : []), ...level];
   }
   return undefined;

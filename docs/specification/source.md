@@ -486,7 +486,10 @@ may add a job form later. The one period this section specifies runs until a ser
 CT-181. In it the word on a service's action comes from a T0 or T1 caller ([DL-25](delegation.md#trust-tiers)) in one
 of two forms, and in no other:
 
-- a valid decision (DEC-0121 AP-2) whose `target` is the one exact string below; or
+- a valid decision (DEC-0121 AP-2) whose `target` is the one exact string below, or, for an organization's own agent
+  only, a level decision ([membership](membership.md#levels) LV-3 to LV-5, DEC-0162) with that exact `target`, by
+  `owner` or `admin`, or by an `architect` when the agent's project is among its `projects`; never for a personal
+  agent; or
 - the service's own elicitation in the call's form: an MCP `elicitation/create` sent within the hand-over's `tools/call`,
   in form mode, under [C3.3](interop.md#c33-awaiting-a-choice)'s form constraints (`FAC-SEM-018`), never
   `input_required` on a Task or a job, answered by a person and accepted, whose message names the agent, the target

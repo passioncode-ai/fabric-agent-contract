@@ -93,6 +93,27 @@ describe("2 — the task claim (DEC-0041)", () => {
     expect(codes("delegation-mint", meterKept)).toEqual([]);
   });
 
+  it("DEC-0162: mem is an optional sha256 digest the verifier types, and an onward token keeps the parent's or none", () => {
+    const digest = `sha256:${"ab".repeat(32)}`;
+    expect(valid("delegation-token.schema.json", { ...claims, mem: digest })).toBe(true);
+    expect(valid("delegation-token.schema.json", { ...claims, mem: "sha256:AB" })).toBe(false);
+    expect(verifyDelegation(sign({ ...claims, mem: digest }), call)).toMatchObject({ ok: true, claims: { mem: digest } });
+    for (const mem of [42, "", "sha256:AB"]) {
+      expect(verifyDelegation(sign({ ...claims, mem }), call), String(mem)).toMatchObject({ ok: false, code: "unauthenticated", detail: "malformed-claims" });
+    }
+    const kept = load("semantic/delegation-mint-task-kept.json");
+    const withMem = (parentMem: string | undefined, tokenMem: string | undefined) => ({
+      ...kept,
+      parent: { ...(kept.parent as Json), ...(parentMem ? { mem: parentMem } : {}) },
+      token: { ...(kept.token as Json), ...(tokenMem ? { mem: tokenMem } : {}) }
+    });
+    const other = `sha256:${"cd".repeat(32)}`;
+    expect(codes("delegation-mint", withMem(digest, digest))).toEqual([]);
+    expect(codes("delegation-mint", withMem(digest, undefined))).toEqual([]);
+    expect(paths("delegation-mint", withMem(digest, other))).toEqual(["/token/mem"]);
+    expect(paths("delegation-mint", withMem(undefined, digest))).toEqual(["/token/mem"]);
+  });
+
   it("keys the meter's task window on task, else on the first session along the actor chain, else on the grant", () => {
     const meterToken = load("semantic/delegation-mint-meter-ok.json").token as delegation.DelegationClaims;
     const ref = meterToken.grant[0] as string;

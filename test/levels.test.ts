@@ -58,3 +58,48 @@ describe("FAC-SEM-169 and FAC-SEM-170 (DEC-0162)", () => {
     expect(codes("mandate", { ...mandate, scope: { capabilities: ["reviews.approve"], effects: ["reply"] } })).toEqual(["FAC-SEM-170 /level"]);
   });
 });
+
+describe("levelStanding and FAC-SEM-170 at their edges (DEC-0162)", async () => {
+  const { levelStanding, levelRules } = await import("../src/levels.js");
+  const { actionDecision: decide } = await import("../src/actions.js");
+  const now = Date.parse("2026-10-25T11:30:00Z");
+  const contexts = { "org:org-a": { audience: "reviews-service-a1", keySet: vectors.keySet } };
+  const admin = vectors.memberships.admin as Json;
+  const base = { membership: admin, org: "org:org-a", level: "admin", at: "2026-10-25T11:20:00Z", contexts, tokenMem: vectors.digests.admin, now };
+  it("stands, with a held record in the context", () => {
+    const held = { subject: admin.subject, revision: admin.revision, digest: vectors.digests.admin };
+    expect(levelStanding({ ...base, contexts: { "org:org-a": { ...contexts["org:org-a"], held } } })).toMatchObject({ ok: true, level: "admin" });
+  });
+  it("refuses a /1 attestation, a decision made after the attestation expires, and a level that decides nothing", () => {
+    expect(levelStanding({ ...base, membership: vectors.memberships.v1Member, tokenMem: vectors.digests.v1Member })).toEqual({ ok: false, invalid: "level-membership: malformed" });
+    expect(levelStanding({ ...base, at: "2026-10-25T12:00:00Z" })).toEqual({ ok: false, invalid: "level-expired" });
+    expect(levelStanding({ ...base, level: "member" })).toEqual({ ok: false, invalid: "level-role" });
+    expect(levelStanding({ ...base, level: "boss" })).toEqual({ ok: false, invalid: "level-role" });
+  });
+  it("answers a level decision's own faults and its target", () => {
+    const call = vectors.actions[1].input as Json;
+    expect(decide({ ...call, now: "not a time" })).toEqual({ fault: "now-unreadable" });
+    expect(decide({ ...call, decision: { ...call.decision, target: "review-7" }, target: "review-7" })).toMatchObject({ ok: true, recordAs: { by: "level" } });
+    expect(decide({ ...call, decision: { ...call.decision, target: "review-7" }, target: "review-8" })).toEqual({ ok: false, code: "decision-invalid" });
+  });
+  it("covers a level mandate's call in no project", () => {
+    const call = vectors.mandates[1].input as Json;
+    const { project: _p, ...noProject } = call;
+    expect(decide({ ...noProject, mandate: { ...call.mandate, scope: { capabilities: ["reviews.approve"], effects: ["reply"] } } })).toMatchObject({ ok: true, recordAs: { by: "level", via: "mandate" } });
+  });
+  it("reads only kinds decision and mandate, and documents with odd members", () => {
+    const flags = (kind: string, value: Json) => (levelRules(kind, value) ?? []).map((f) => f.instancePath);
+    expect(levelRules("org-membership", {})).toBeUndefined();
+    expect(flags("decision", { by: "level", level: "boss", org: "org:org-a", at: "2026-10-25T11:20:00Z", membership: { ...admin, role: "guest" } })).toEqual(["/level"]);
+    expect(flags("decision", { by: "level", level: "architect", org: "org:org-a", project: "alpha", at: "2026-10-25T11:20:00Z", membership: { ...admin, projects: "alpha" } })).toEqual(["/membership/projects"]);
+    expect(flags("mandate", { by: "level", level: "admin", org: "org:org-a", at: "2026-10-25T11:20:00Z", membership: admin, scope: "all" })).toEqual([]);
+    expect(evaluateSemanticRules("mandate", { kind: "x" }).map((f) => f.code)).toEqual(["FAC-SEM-144"]);
+  });
+  it("refuses /2 projects of the wrong shape", () => {
+    const architect = vectors.memberships.architect as Json;
+    const trust = { now: new Date(now), org: "org:org-a", audience: "reviews-service-a1", keySet: vectors.keySet, levels: true };
+    for (const projects of ["alpha", Array.from({ length: 65 }, (_, i) => `p${i}`), ["bad project"], ["alpha", "alpha"]]) {
+      expect(verifyOrgMembership({ ...architect, projects }, trust)).toEqual({ ok: false, problem: "malformed" });
+    }
+  });
+});
