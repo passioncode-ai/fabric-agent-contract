@@ -992,7 +992,9 @@ cloud instance's well-known document, declaring `surfaces.mcp.auth: "own"` and `
   key without the twin's key-management scope is refused `scope-not-granted`, as any key outside its scopes is, and a
   key whose scopes cover the twin but that comes with no accepted approval is refused `approval-required` (DL-17),
   since its caller is T2. The twin never issues a key whose scopes let it issue, rotate or revoke keys, nor rotates
-  one (rotating issues a key with the same scopes): it refuses either `scope-not-granted` (`403`), and a key with such
+  one (rotating issues a key with the same scopes): it refuses either `scope-not-granted` (`403`). No door, the
+  agent's CLI included, widens an existing key's scopes to one its issuing could not carry (a key-management scope,
+  or for a member's key a `relayed` action's tool other than `fabric.job.get`), and a key with such
   a scope is issued and rotated through the CLI or the page only, and issued only to an agent that acts on the operator's recorded decisions,
   never to a member of the team, whose keys carry no key-management scope. Where the instance declares
   `auth.delegation`, agents of the estate hold no client key (below), so the operator issues no key-management client
@@ -1050,7 +1052,9 @@ cloud instance's well-known document, declaring `surfaces.mcp.auth: "own"` and `
   For a rolling budget the window names its length class, not the calendar reset at UTC midnight that spend policy's
   windows have. Raising the
   ceiling is the operator's decision, carried out by their own agent with the agent's CLI on their computer or by the
-  operator on the page, so the caller tells its person to ask
+  operator on the page; raising a service budget or a per-key cap changes the service's own limits, a policy change
+  the agent relays on the operator's word (AP-2, AP-5), not AP-4's spend above a limit, which an `approval` threshold
+  an order crosses remains; so the caller tells its person to ask
   the operator (the hand-over note names whom) and does not resend until the operator says so (interop's resend after an approval through
   SCN-017 reaches the caller's own operator, not this service's). An `approval` threshold an order crosses is a step,
   spend above a limit, and goes to the operator as CF-4 says.
@@ -1156,8 +1160,8 @@ cloud instance's well-known document, declaring `surfaces.mcp.auth: "own"` and `
     top-up or a consent at the provider) is found met by the next call, which goes on with no step. A call to a tool that is not job-backed and cannot go on without a choice is refused the same way
     with `operator-step: choice` and raises no event, since no later call carries the operator's answer: its message
     says the call needs a choice that is the operator's and the tool cannot wait for it, and the caller does not repeat
-    the call, which would be refused again. A member's key should therefore not carry such a tool: the operator runs it
-    themselves, or removes it from members' scopes.
+    the call, which would be refused again. A member's key should therefore not carry such a tool: the operator's agent runs it
+    on the operator's word with the agent's CLI on the operator's computer, or removes it from members' keys' scopes.
     `human-step-required` does not fit, because its `data.url` is required
     ([`delegation-refusal.schema.json`](../../schemas/delegation-refusal.schema.json)) and is a page this caller is not
     given.
@@ -1183,14 +1187,20 @@ cloud instance's well-known document, declaring `surfaces.mcp.auth: "own"` and `
     on the operator's computers alone (CF-2); a member sees it as an MCP server their coding agent is configured with.
     Where no host on the operator's computer signs the operator in to the page (Fabric Dashboards cannot show it there,
     `not_installed` or `unsupported`, [PL-3](#page-links), and no other host, Fabric for one, mints a login code for a
-    browser there, [HA-2](#ha-2)), the operator issues and rotates keys in their own terminal with the agent's CLI, their
+    browser there, [HA-2](#ha-2)), the operator issues and rotates a member's or another agent's key in their own terminal with the agent's CLI, their
     own agent revokes one on the operator's word by running that CLI on the operator's computer (CF-3), and the operator
     takes a body step (AP-4) from another computer of theirs that shows the page. Every act that hands out no value
     (answering a choice, declining a step, revoking, capping a key, raising a ceiling, changing a scope) is carried out
-    by the operator's own agent on their word: through the page actions' agent twins where the gate above lets the agent
-    through, otherwise by running the agent's CLI on the operator's computer, which offers choose and decline as it
-    offers revoke, or through the operator channel's buttons (above); only issuing or rotating a key, a secret handed
-    out (CF-3), and a body step stay the operator's own; until then the job keeps reading `working` and a repeated call is refused
+    by the operator's own agent on their word: answering a choice and declining a step through their agent twins where
+    the gate above lets the agent through, revoking through the key twin likewise (CF-3), and any of them, capping a key,
+    changing its scopes and raising a ceiling included, by running the agent's CLI on the operator's computer, which
+    offers choosing and declining an open step by its opaque id, revoking, capping a key, changing its scopes and
+    raising a ceiling; the operator channel's buttons (above) also answer a choice or decline a step. On that CLI path
+    the CLI records the operator's instruction, its `at` and the agent as the relaying caller, as a twin call's
+    decision is recorded ([AP-3](#actions), AP-5), and the page shows the act as the operator's. Only issuing or
+    rotating a key for anyone but the calling agent (a member's or another agent's key, a secret handed out, CF-3) and
+    a body step stay the operator's own; the key twin's issuing and rotating of its own caller's key, on the operator's
+    decision, is the agent's (CF-3). Until then the job keeps reading `working` and a repeated call is refused
     again. A page for members needs a credential per person that can be revoked one by one and mints no operator
     session, which a later decision adds.
   A client key carries no level and no place profile, which bind at T2 only through a delegation token (CT-250's `mem` claim,

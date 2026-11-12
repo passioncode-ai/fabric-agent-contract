@@ -11525,7 +11525,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      or tells the member), and a call to such a tool
      that cannot go on without a choice `operator-step: choice`, raising nothing, since no later call carries the
      answer, its message saying the tool cannot wait for the operator's choice and the caller not repeating it, so a
-     member's key should not carry such a tool (the operator runs it, or removes it from members' scopes); `human-step-required` does not
+     member's key should not carry such a tool (the operator's agent runs it on the operator's word with the agent's CLI on the operator's computer, or removes it from members' keys' scopes); `human-step-required` does not
      fit, because it requires the `data.url` this caller is not given. A `relayed` action keeps its own gate after the
      key's scopes (`approval-required`, DL-17; a source hand-over's T2 answer, `handover-needs-estate-route`); an
      instance without the estate's issuer and key set takes no `approval/1` for any of them: a T2 caller with none is
@@ -11540,9 +11540,14 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      `approval-required`.
      Where no host on the operator's computer signs the operator in to the page (Fabric Dashboards cannot show it,
      PL-3, and no other host, Fabric for one, mints a login code for a browser there), the operator issues and rotates
-     keys in their own terminal with the CLI, their own agent revokes one on the operator's word with that CLI on the
-     operator's computer, and the operator takes a step from another computer of theirs that shows the page, or answers through the channel's
-     buttons. Only the operator sees the cloud
+     a member's or another agent's key in their own terminal with the CLI, and takes a body step from another computer
+     of theirs that shows the page; their own agent, on the operator's word, revokes a key, caps one, changes its
+     scopes, raises a ceiling, and answers a choice or declines a step, through the twins where their gate lets it
+     through, else with the agent's CLI on the operator's computer, which offers choosing and declining an open step
+     by its opaque id beside revoking, capping, rescoping and raising a ceiling, and records the operator's instruction,
+     its `at` and the agent as relayer (AP-3); the channel's buttons also answer a choice or decline a step. Raising a
+     service budget or a per-key cap changes the service's own limits, the operator's decision relayed (AP-2, AP-5),
+     not AP-4's spend above a limit, and no door widens a key's scopes to one its issuing could not carry. Only the operator sees the cloud
      instance in Fabric Dashboards; a member sees it as an MCP server. A page for members needs a per-person
      credential a later decision adds. AP-2's elicitation clause, AP-4, PL-4, the note under `actionDecision`'s table,
      `FAC-SEM-142`, interop C3.3 and its caller-action table, and DL-19's row say the same in one clause each.
@@ -11584,7 +11589,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   client-key spend at a cloud instance in the form reaches no grant check, so at the call it is bound only by each
   provider key's own ceiling and the service's own budgets, not by L0's monthly total or a project's L1; only L0's
   monthly total sees it, after the fact, where a reader totals the usage report (CF-3; spend policy's Levels name the exception). Whether the operator accepts it is asked in
-  the handoff's *Open*. Read on 2026-11-08 at each default branch. Fabric Dashboards
+  the handoff's *Open*. Read on 2026-11-08 at each default branch; Fabric Dashboards at `e23551e8`, whose main has
+  moved the lines since (the symbols: `monitor.ts`'s `DEFAULT_INTERVALS.remote` and the events poll's `baselined`
+  branch, `notify.ts`'s `COOLDOWN_MS.ask`, `outage-alerts.ts`'s `ASK_REPEAT_MS`). Fabric Dashboards
   groups services by `id` and opens the `default` instance first (`src/core/products.ts`), never calls a remote `/mcp`
   with the descriptor's token, and its descriptor check admits both fixtures; it owes `peer.custody`
   `processor-hosted` (DEC-0099), which it refuses today. It raises an event with `notify: true` as an ask when its `kind`

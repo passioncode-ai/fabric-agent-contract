@@ -87,6 +87,12 @@ then main's CT-285 row).
   issuing or rotating a key and a body step stay the operator's (CF-3, CF-4, DL-19, DEC-0159 item 4, the conformance row,
   SCN-059, FLW-36, SCR-36); SCN-059 and FLW-36 entries name the twins and the channel's buttons; knowledge citations
   pinned at fabric-workspace `235933b5`.
+- Round 18: the rule narrowed and carried everywhere: only a member's or another agent's key, issued or rotated, and a
+  body step stay the operator's; the key twin's issuing of its caller's own key is the agent's (CF-3, CF-4); the agent's
+  CLI on the operator's computer offers choose, decline, revoke, cap, rescope and ceiling and records the operator's
+  instruction (AP-3), named in the conformance row, DEC-0159 item 4, SCN-059, FLW-36 and SCR-36; raising a budget or a
+  cap is a relayed change to the service's own limits (AP-5); no door widens a key's scopes beyond what its issuing
+  could carry; Fabric Dashboards citations pinned at `e23551e8`.
 
 ## Compared with the first implementation
 
@@ -128,6 +134,19 @@ a client-key caller input for CF-4's `operator-step` (FAA-204).
 ## Open
 
 - The coordinator's blind readings until two consecutive clean rounds.
+- Landing note for CT-292's decision (round 18, seam and product): binding on whichever of DEC-0159 and CT-292's DEC
+  lands second. A client key at a cloud instance in the form carries no grant and no context (CF-3; `contexts.md`), so
+  TC-2's grant claim is absent for it: CT-292's DEC states that a client-key call's claim is the callee instance's
+  context (DL-29), read as the place, and that TC-6 covers a client key as a credential. Check, on the merged tree after
+  that DEC: `awk '/^### DEC-0159/,0' docs/DECISIONS.md | grep -c 'CT-292'` prints at least 1, or main's CT-292 row names
+  DEC-0159.
+- Landing note for CT-293's decision (round 18, seam): binding on whichever of DEC-0159 and CT-293's DEC lands second.
+  CT-293 has the decision for an act cover issuing the narrow grant, scope or key that act needs; its DEC lists DEC-0159
+  CF-3 (a member's or another agent's client key is issued and rotated only by the operator in their own terminal or on
+  the page; the key twin issues only its caller's key; no door widens a key's scopes to one its issuing could not carry)
+  and CF-4 (a key's scopes changed by the operator's agent on the operator's word) among the rules it restates, and says
+  whether an act's decision covers the caller's own client key or a scope change. Check, on the merged tree:
+  `grep '^| CT-293' docs/backlog.md | grep -c 'DEC-0159'` prints 1 once that row is edited.
 - A question for the operator (not reserved as an `OQ` id): client-key spend at a cloud instance in the form reaches no
   grant check, so at the call it is bound only by each provider key's own ceiling and the service's own budgets, not by
   L0's monthly total or a project's L1, and only L0's monthly total sees it, after the fact (CF-3, spend policy's
@@ -822,6 +841,21 @@ a client-key caller input for CF-4's `operator-step` (FAA-204).
   Done carries rounds 16 and 17 and a checks line; the DEC-0156 note covers OW-4's `operator-step`; the vault question
   and L0's knowledge lines are on the landing list (unit, product, seam). Declined: none.
 
+- Checks run on the round-17 fold (`d179d6ee`): `pnpm run check` exit 0 (11185 tests), before round 18 was read.
+- Round 18 (on `d179d6ee`, main `21f8097e` merged; main `53835d18` merged as `e4710ba2` before this fold): none clean.
+  Breaks folded: CF-4 kept every key's issuing for the operator, against CF-3's twin that issues its caller's own key;
+  CF-4 now keeps only a member's or another agent's key (unit); SCN-059, FLW-36 and DEC-0159 item 4 still sent the
+  operator, on an issuer-less instance with no page, to the channel's buttons or another computer to answer a choice,
+  and FLW-36 left capping with the operator; the agent's CLI on the operator's computer now answers, declines, caps,
+  rescopes and raises a ceiling there (unit, product); CF-4 and DEC-0159 item 1 had "the operator runs" a tool that
+  cannot wait for a choice; the operator's agent runs it (product, unit); Fabric Dashboards citations pinned at
+  `e23551e8` with their symbols (seam). Risks folded: the CLI's choose, decline, cap, rescope and ceiling are in the
+  conformance row, DEC-0159 item 4 and SCR-36; each act is given only to a door that offers it (twins for choose,
+  decline and revoke; the CLI for all); raising a budget or cap is a relayed change to the service's own limits (AP-2,
+  AP-5), not AP-4's spend above a limit; the CLI path records the operator's instruction (AP-3); no door widens a key's
+  scopes to one its issuing could not carry (CF-3, conformance); CT-292 and CT-293 landing notes; a checks line for the
+  round-17 fold. Declined: none.
+
 ## Next task
 
-Round 18 of the blind readings (unit, seam, product) of branch `agent/ct218-local-cloud-v2` (DEC-0159).
+Round 19 of the blind readings (unit, seam, product) of branch `agent/ct218-local-cloud-v2` (DEC-0159).
