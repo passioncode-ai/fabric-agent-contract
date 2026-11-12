@@ -11415,12 +11415,15 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Compatibility:** looser only for this repository's checker: every report that passed still passes. Read on
   2026-11-12, the copies of the rule that do not read it from here and keep the fixed tolerance: the adapter's kit in
   Python and Node (`fabric_usage.py`, `fabric-usage.mjs`) and the probe that runs it, which owe the per-row allowance
-  and a test of ten rows rounded up (FAA-310 part 2); another service's vendored copy of the kit and Fabric Dashboards'
-  sample-service fixture, at their next kit refresh. Until each changes, a service that rounds its rows is refused by
-  that reader, so a service writes rounded rows only once its readers are pinned at or after this decision. No vector
-  file covers FAC-SEM-025's sums: `test/usage-rules.test.ts` holds the cases, and the adapter generates its usage vectors
+  and a test of ten rows rounded up (FAA-310 part 2); every service that vendors the kit (34 copies counted on the operator's machine on 2026-11-12, Fabric
+  Dashboards' sample-service fixture among them), at its next kit refresh. Until each changes, a service that rounds its
+  rows is refused by that reader, so a service writes rounded rows only once its readers apply this decision; a pin alone
+  is not enough for a copy, so the positive fixture `service-usage-rounded-rows.json` (ten rows rounded to 6 places),
+  which a copy's parity test reads with the other positive usage fixtures, fails that test at repin until the copy
+  changes. No vector
+  file covers FAC-SEM-025's sums: `test/usage-rules.test.ts` and the rounded-rows fixture hold the cases, and the adapter generates its usage vectors
   from `usageRules` at its pin.
-- **Consequences / affects:** `src/usage-rules.ts` (`exceeds` and `ROW_ROUNDING_USD`, exported; the day check's
+- **Consequences / affects:** `src/usage-rules.ts` (`allowance`, `exceeds` and `ROW_ROUNDING_USD`, exported; the day check's
   `close`), `docs/specification/service.md` (the usage report's sentence on rounding and `FAC-SEM-025`'s row),
-  `test/usage-rules.test.ts` (ten rows rounded up, and an excess beyond rounding).
+  `test/usage-rules.test.ts` (ten rows rounded up, an excess beyond rounding, each count at its boundary), `fixtures/positive/service-usage-rounded-rows.json` and `fixtures/catalogue.json`, DOCMAP, the DEC-0021 and DEC-0065 annotations.
 - **Source:** fabric-agent-adapter's board request `785fd306` (FAA-310); backlog CT-295.

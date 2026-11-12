@@ -211,6 +211,31 @@ describe("FAC-SEM-025: sums of rows rounded to 6 places one by one (DEC-0163, CT
     const projects = Array.from({ length: 10 }, (_, i) => ({ projectId: `urn:project:p${i}`, calls: 1, unpricedCalls: 0, costUsd: 0.100001, taskRuns: [] }));
     expect(paths({ ...report, days: [day(1.000005, Array.from({ length: 10 }, () => 0.1000005))], byProject: projects })).toEqual([]);
   });
+  it("pins each count at its boundary: the project, the day and the days each add a row", () => {
+    const at = (value: unknown, path: string) => paths(value).includes(`FAC-SEM-025 ${path}`);
+    const one = (projectCost: number, runCost: number) => ({ ...report, days: [day(2, [2])], byProject: [{ projectId: "urn:project:p", calls: 1, unpricedCalls: 0, costUsd: projectCost, taskRuns: [run(0, runCost)] }] });
+    // A project and its one run: two rows, 0.000002.
+    expect(at(one(1, 1.0000019), "/byProject/0/taskRuns")).toBe(false);
+    expect(at(one(1, 1.0000021), "/byProject/0/taskRuns")).toBe(true);
+    // A day and its one model: two rows.
+    expect(at({ ...report, byProject: undefined, days: [day(1, [1.0000019])] }, "/days/0/costUsd")).toBe(false);
+    expect(at({ ...report, byProject: undefined, days: [day(1, [1.0000021])] }, "/days/0/costUsd")).toBe(true);
+    // One project against one day: two rows, the day's among them.
+    const projectDay = (projectCost: number) => ({ ...report, days: [day(1, [1])], byProject: [{ projectId: "urn:project:p", calls: 1, unpricedCalls: 0, costUsd: projectCost, taskRuns: [] }] });
+    expect(at(projectDay(1.0000019), "/byProject")).toBe(false);
+    expect(at(projectDay(1.0000021), "/byProject")).toBe(true);
+    // Twenty null-cost runs add nothing to a project and its one priced run.
+    const nullRun = (i: number) => ({ taskRunId: `null-${i}`, calls: 1, unpricedCalls: 1, costUsd: null });
+    const withNulls = { ...report, days: [{ ...day(2, [2]), calls: 21, byModel: [{ ...day(2, [2]).byModel[0], calls: 21, unpricedCalls: 20 }], unpricedCalls: 20 }], byProject: [{ projectId: "urn:project:p", calls: 21, unpricedCalls: 20, costUsd: 1, taskRuns: [run(0, 1.0000021), ...Array.from({ length: 20 }, (_, i) => nullRun(i))] }] };
+    expect(at(withNulls, "/byProject/0/taskRuns")).toBe(true);
+    // A negative model cost is summed but widens nothing; Infinity is never close.
+    expect(at({ ...report, byProject: undefined, days: [day(1, [1.0000024, -0.0000001])] }, "/days/0/costUsd")).toBe(true);
+    expect(usageRules({ ...report, byProject: undefined, days: [day(Number.POSITIVE_INFINITY, [1])] }).map((f) => f.instancePath)).toContain("/days/0/costUsd");
+    expect(usageRules({ ...report, byProject: undefined, days: [day(1, [Number.POSITIVE_INFINITY])] }).map((f) => f.instancePath)).toContain("/days/0/costUsd");
+  });
+  it("passes the rounded-rows fixture, which the fixed tolerance refused", () => {
+    expect(paths(JSON.parse(readFileSync(path.join(projectRoot(), "fixtures/positive/service-usage-rounded-rows.json"), "utf8")))).toEqual([]);
+  });
   it("counts only rows with a known cost, and never finds NaN close (DEC-0163)", () => {
     const project = (i: number, costUsd: number | null) => ({ projectId: `urn:project:p${i}`, calls: 1, unpricedCalls: costUsd === null ? 1 : 0, costUsd, taskRuns: [] });
     const nulls = Array.from({ length: 20 }, (_, i) => project(i + 1, null));

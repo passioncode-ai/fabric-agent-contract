@@ -29,11 +29,12 @@ const cost = (value: unknown): number => (typeof value === "number" && Number.is
 /** Half a unit of the sixth decimal place: the most one row's `costUsd` moves when rounded to 6 places (DEC-0163). */
 export const ROW_ROUNDING_USD = 0.0000005;
 /**
- * Whether `a` exceeds `b` by more than rounding: 0.000001 and a relative 1e-9, plus half a millionth for each of the
- * `rows` rows with a known cost summed on either side, so rows rounded to 6 places one by one never fail the sum
- * (DEC-0163, CT-295); a `null` row carries no rounding and widens nothing.
+ * The rounding a cost sum may carry (DEC-0163, CT-295): 0.000001 and a relative 1e-9 of the larger side, plus half a
+ * millionth for each of the `rows` rows with a known cost summed on either side, so rows rounded to 6 places one by one
+ * never fail the sum; a `null` row carries no rounding and widens nothing.
  */
 export const allowance = (a: number, b: number, rows: number) => ROW_ROUNDING_USD * rows + 0.000001 + 1e-9 * Math.max(Math.abs(a), Math.abs(b));
+/** Whether `a` exceeds `b` by more than `allowance`. */
 export const exceeds = (a: number, b: number, rows: number) => a - b > allowance(a, b, rows);
 /** A known cost: a finite, non-negative number, the rows the rounding allowance counts (DEC-0163). */
 const knownCost = (value: unknown): boolean => cost(value) === value;
@@ -133,8 +134,9 @@ function usageArithmetic(value: JsonObject): Finding[] {
   const days = Array.isArray(value.days) ? value.days.filter(isObject) : [];
   const money = (x: unknown) => (typeof x === "number" ? x : null);
   // DEC-0163: within rounding both ways, the day's row and each model's row counted.
-  // Written as a distance, so a cost that is not a number (NaN, in memory) is never close to anything.
-  const close = (a: number, b: number, rows: number) => Math.abs(a - b) <= allowance(a, b, rows);
+  // Written as a distance over finite values, so a cost that is not a finite number (NaN or Infinity, in memory) is never
+  // close to anything.
+  const close = (a: number, b: number, rows: number) => Number.isFinite(a) && Number.isFinite(b) && Math.abs(a - b) <= allowance(a, b, rows);
   const priced = (row: JsonObject, at: string) => findings.push(...pricedRow(row, at));
   let previous = "";
   days.forEach((day, i) => {
@@ -157,7 +159,9 @@ function usageArithmetic(value: JsonObject): Finding[] {
     }
     const known = models.map((m) => money(m.costUsd)).filter((x): x is number => x !== null);
     const dayCost = money(day.costUsd);
-    if (dayCost !== null && !close(dayCost, known.reduce((n, x) => n + x, 0), known.length + 1)) findings.push({ code: "FAC-SEM-025", instancePath: `${at}/costUsd`, message: "the day's cost is not the sum of its models' known costs" });
+    // The rows counted are the known costs, as everywhere (a negative or not-finite cost is summed and widens nothing).
+    const counted = models.filter((m) => knownCost(m.costUsd)).length + (knownCost(day.costUsd) ? 1 : 0);
+    if (dayCost !== null && !close(dayCost, known.reduce((n, x) => n + x, 0), counted)) findings.push({ code: "FAC-SEM-025", instancePath: `${at}/costUsd`, message: "the day's cost is not the sum of its models' known costs" });
   });
   return findings;
 }

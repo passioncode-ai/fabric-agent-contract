@@ -328,7 +328,7 @@ provider.
   there was activity today. A day without calls MAY be omitted. There is no paging and no query. Every date exists,
   is not after the UTC date of `generatedAt` and is at most 30 days before it (`FAC-SEM-025`, DEC-0065).
 - Each day carries totals and `byModel` rows (`provider`, `model`); the totals are the sums of
-  the rows, and a day without rows has no calls, tokens or cost (`FAC-SEM-025`). Tokens follow the interop `usage` block
+  the rows (a day's cost within the rounding of DEC-0163, below), and a day without rows has no calls, tokens or cost (`FAC-SEM-025`). Tokens follow the interop `usage` block
   ([interop C3.2](interop.md#c32-jobs), `common.schema.json#/$defs/usage`): the same call reported in a job
   result and here is counted with the same measured numbers. A count a job result reported as `null` (DEC-0087)
   adds the lower bound the service measured, so the day's token totals are a lower bound. `unmeasuredCalls` (optional
@@ -378,7 +378,7 @@ provider.
   write each `projectId` in its normal form — and each task run one row within its project; a project holds at least its task runs' calls, all projects together no more than the days, and
   the known costs add up the same way — a project costs at least its task runs (when its own cost is known) and all
   projects together no more than the days, a `null` cost counting as none, and a project holds at least its task runs'
-  priced calls (CT-40). The sums are checked within 0.000001, plus 0.0000005 for each row with a known cost summed on either side of the comparison, plus 1e-9 of the larger sum (DEC-0163), so a service may write each row's `costUsd` rounded to 6 decimal places, or unrounded (from a reader pinned at or after DEC-0163; an earlier reader still asks for unrounded rows); an
+  priced calls (CT-40). The sums are checked within 0.000001, plus 0.0000005 for each row with a known cost summed on either side of the comparison, plus 1e-9 of the larger sum (DEC-0163), so a service may write each row's `costUsd` rounded to 6 decimal places, or unrounded (once its readers apply DEC-0163: this repository's checker at or after it, a copy of the rule once it carries the per-row allowance; a reader that does not still refuses rounded rows); an
   unknown cost is `null` as in a day's rows (`FAC-SEM-025`). A call the service ran for no project is in no row.
 - **For a service offered to others** (a listing, [Offered to others](#offered-to-others)) the report is this same
   object, with nothing added (DEC-0061): its rows are per model and route, `byGrant` attributes spend to each grant that
