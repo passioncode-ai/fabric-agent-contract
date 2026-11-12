@@ -11456,9 +11456,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      promise for a product that has already sent, which the person reads until Fabric's switch for Fabric alone ships
      (CO-496); a product's own switch never writes the shared file's `analytics` field, and a product whose switch
      wrote it under words that governed every reader stops writing it from the version whose switch governs it alone,
-     and leaves an off already written there, which stays the earlier no for products that have not yet sent; a
+     and leaves an off already written there, which stays the earlier no for products that have not yet sent, or not
+     yet had their stand-in run; what a product collected before it read an earlier no it drops when it reads it, and
+     it need keep only that its first send, or its stand-in run, has happened; a
      shared file that exists but cannot be read before a product's first send (or before that stand-in run), on an install whose own switch the person has not set on, is no
-     answer, and the product sends nothing in that run, a run that sent nothing for that reason being no stand-in run, and the product saying beside its switch that nothing
+     answer, and the product sends nothing in that run, a run that sent nothing for that reason being no stand-in run, and the product, on an install whose own switch the person never set, showing its switch as on but not sending and saying beside it (for a product without a window, where its switch is read) that nothing
      is sent until the shared file can be read at its next start and offering there to set its switch on, which is the
      person setting the product's own switch on;
      a device policy whose layer carries a key for a product's switch may lock it off and never locks it on, and
@@ -11466,7 +11468,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      would hold it on, so a lower layer's lock off still holds and, where none holds it off, the person's own setting (or an
      earlier no) governs, never the value of a layer whose lock was dropped; the device lets the person change such a
      key, does not show it as locked on and shows that value as the one the product applies, while its reported
-     `effective` keeps the lock's value (`FAC-SEM-042` compares it with `resolvePolicy`); the product applies this
+     `effective` keeps the lock's value (`FAC-SEM-042` compares it with `resolvePolicy`), once CT-280 names the key
+     (no key name marks a usage switch yet, so until then this binds the device on no key and the product applies it); the product applies this
      after the reference resolution `resolvePolicy`, which does not (the pointer in
      devices.md's "Precedence and locks"; a reference helper and its vectors are CT-280); nor does the reference
      device decision `expectedDecision` (`FAC-SEM-068`) apply it to a local change, which it refuses for any locked
@@ -11512,7 +11515,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      an accepted `approval/1` still decides that relayed action under AP-2 (`actionDecision`'s
      row for a `relayed` action with an accepted approval, DL-18), so the agent-side limit is the only bar on that form,
      and no product-side refusal is added (an approval is a signed approver's decision on the action's digest, DL-17,
-     and a refusal for one action would split AP-2's single table).
+     and a refusal for one action would split AP-2's single table); an agent never deletes or rewrites a shared file
+     it cannot read to end a hold, reporting the hold, setting the product's own switch on through its relayed action
+     on the operator's word naming the switch, and pointing anyone else to that switch.
   5. UD-5: no machine declaration now; each product documents it (its privacy text and a usage data page): what, the
      installation id when it sends one and whether it is shared, where it goes (the receiving organization and its
      host, and every service that reads the data there, with its purpose, described without naming a person), the switch, how long it is kept, the

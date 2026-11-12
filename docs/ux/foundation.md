@@ -369,7 +369,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
   - Given `logging.required` is locked by the server, when I try to switch logging off, then the device refuses and shows the key as locked by the server.
   - Given `x-example.banner` is an unlocked default, when I change it, then my value is the effective one.
   - Given a policy whose signature does not verify, when it arrives, then the device keeps the revision it holds.
-  - Given a server or mdm layer locks a product's usage data switch on and no other layer locks it off, when I switch it off, then the product applies my off, the device shows it as the value the product applies and never shows the switch as locked on; given a lock off on it, my change to on is refused and the switch is shown as locked (UD-2, DEC-0157).
+  - Given a server or mdm layer locks a product's usage data switch on and no other layer locks it off, when I switch it off, then the product applies my off, the device shows it as the value the product applies and never shows the switch as locked on (once CT-280 names the key; until then the device shows and refuses it as any locked key, and the product applies the person's own setting); given a lock off on it, my change to on is refused and the switch is shown as locked (UD-2, DEC-0157).
 - **Priority:** must
 - **Status:** draft
 - **Product:** unobserved

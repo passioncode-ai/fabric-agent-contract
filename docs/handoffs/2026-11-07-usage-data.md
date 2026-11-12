@@ -15,7 +15,9 @@ decision of 2026-11-04.
   the CT-250, CT-252, CT-259 and CT-285 rows naming UD-4 and UD-6; no file this branch owns conflicted. The next free
   id is `DEC-0162` (the counter on origin since 2026-11-08T11:39Z, DEC-0160 and DEC-0161 reserved by siblings).
   A third merge, `45bf544e` (main `2b0bcd55`, #274 and #275), changed CT-250, CT-285 and CT-287 in `docs/backlog.md` and
-  no file this branch owns.
+  no file this branch owns. A fourth, `a3cf5083` (main `53835d18`, #276 to #281: the CT-292 design, CT-293, CT-294,
+  CT-67, a DOCMAP line and the "Read also" lines of the four 2026-11-12 designs), conflicted in no file this branch
+  owns.
 - [Usage data](../specification/usage-data.md): UD-1 (on by default, told once by a notice that is not a question, no
   answer meaning on, told again when the notice changes),
   UD-2 (the product's own switch), UD-3 (anonymous), UD-4 (the switch is the person's, a `relayed` action on the
@@ -68,7 +70,9 @@ decision of 2026-11-04.
 ## Open
 
 - The coordinator's blind readings until two consecutive clean rounds; the gate; the pull request, merge, tag and
-  release; at merge DEC-0157 Accepted and CT-216 done, CT-287's DEC-0157 clause marked landed (the pull request and the merge
+  release; at merge DEC-0157 Accepted and CT-216 done, CT-216's done row keeping its pointer to this handoff's
+  Parallel branches list while any of DEC-0156, DEC-0158 or DEC-0159 is unlanded (check on the landing tree:
+  `grep '^| CT-216 ' docs/backlog.md | grep -c 'Parallel branches'` prints 1; round 26, seam), CT-287's DEC-0157 clause marked landed (the pull request and the merge
   commit), the `Next free ID` line written from the counter read then, CT-250's, CT-252's, CT-259's and CT-293's "(proposed on a branch, CT-287)" after DEC-0157 restated as "(accepted <date>)",
   `docs/handoffs/2026-11-12-north-star-designs.md`'s Next task no longer naming DEC-0157's readings, the handoffs index row's Decisions cell reading
   "DEC-0157 (CT-216; CT-280 filed), accepted <date>; rounds 1 to N not clean, N+1 and N+2 clean" and its Merge cell
@@ -82,8 +86,9 @@ decision of 2026-11-04.
   its `README.md` lines 336 to 338 and its `docs/ANALYTICS.md` lines 92 to 94, the page that README sends readers to
   ("`analytics: false` turns analytics off for every PassionCode app on the machine") and its interface string registry `docs/brand/strings.md` lines 706 and 716, which repeat `en.ts` lines 869 and 870 (all at `eafcf2e4`), the README's "one person using several apps counts once" (line
   336) saying one installation instead, the corrected strings saying, until CO-496 removes the write, that Fabric's off also tells
-  PassionCode apps on this computer that have not yet sent to stay off and that its on clears that (not "for Fabric
-  only", which the write makes false for those apps), and an agent twin for its switch (UD-4) at CO-496;
+  PassionCode apps on this computer that have not yet sent, or have not yet run their updated version, to stay off,
+  and that its on lets those that have not yet read that off send, while an app that already read it stays off until
+  it is turned on in its own settings (not "for Fabric only", which the write makes false for those apps), and an agent twin for its switch (UD-4) at CO-496;
   Switchboard, with an action for its switch and a manifest capability for that tool (UD-4), and UD-1's purpose in its
   notice (its "to help PassionCode.ai improve its apps", `src/main.ts` line 109 at `f6f1dc1`, names every app; its Russian copy is `src/locales/ru.ts` line 68 at its
   `origin/main` `6461505`), and the
@@ -100,7 +105,8 @@ decision of 2026-11-04.
   cannot be read, on an install whose own switch the person has not set on (UD-2, its baseline at `desktop/analytics.cjs` lines 307 to 310), and that its server is counted by
   each member's app under that member's switch, so an organization deploying it holds no switch over those counts (UD-1's
   scope), such counts being per member's app, not per server, so not summed across installs, an organization that
-  wants them off locking its members' switch off by device policy (UD-2); its `README.md` lines 202 to 204 at
+  wants them off locking its members' switch off by device policy (UD-2) once CT-280 names the key, and it owes
+  reading that key; its `README.md` lines 202 to 204 at
   `1395416`, which say its switch turns the counts off "for every PassionCode.ai app on the Mac at once", corrected to
   Fabric Inbox alone and its stale menu label "Share Anonymous Usage Counts" to the menu's "Share Usage Details"
   (`desktop/menu.cjs` line 26 at `c9d9cc7`), a UD-2 debt since they contradict its own notice; and its notice's "counts one person once"
@@ -157,7 +163,10 @@ decision of 2026-11-04.
   before the notice", since its `flush` checks only the switch and its app key (the same file, lines 558 to 580) and its
   maintenance pass flushes what was queued (`observatory/engine/maintenance.py` lines 1117 and 1125 to 1129 at
   `2a11b3fd`), whether or not its notice was shown at a terminal or on its dashboard; its session id is one per
-  process (lines 401 to 409), so it owes UD-3's renewal after an idle hour where a process lives that long; its UD-5
+  process (lines 401 to 409), so it owes UD-3's renewal after an idle hour where a process lives that long; it reads
+  only its own switch file, never the shared file (lines 64 and 153), so it owes UD-2's kept decline (a shared
+  `analytics: false` read as the earlier no at its conforming version's stand-in run, on an install whose own switch
+  the person never set); its UD-5
   page states that store (retention, erasure, off-host copy, both readers) and that its OpenRouter attribution
   goes out whatever its usage data switch says (UD-6); that attribution also sends the legacy `X-Title` header
   (`observatory/engine/agent/providers.py` line 93 at `2a11b3fd`), where DEC-0065 has a product add exactly its headers
@@ -236,7 +245,10 @@ decision of 2026-11-04.
     existing row in place, and two such rows can fall in one hunk, so the second lander takes each row from the branch
     that owns it (CT-216 from this branch, every other row from its own branch), one of each. Checks:
     `grep -c '^| CT-215 ' docs/backlog.md` and `grep -c '^| CT-216 ' docs/backlog.md` each print 1;
-    `grep -o '^| [A-Z]*-[0-9]* ' docs/backlog.md | sort | uniq -d` prints nothing. OQ ids have no compare-and-swap
+    `grep -o '^| [A-Z]*-[0-9]* ' docs/backlog.md | sort | uniq -d` prints nothing; on the handoffs index,
+    `grep -c '2026-11-07-usage-data.md' docs/handoffs/README.md` prints 1, `grep -c 'blob/agent/ct216-usage-data-v2'
+    docs/handoffs/README.md` prints 0, and `grep -o '[0-9-]*-[a-z0-9-]*\.md)' docs/handoffs/README.md | sort | uniq -d`
+    prints nothing (round 26, seam). OQ ids have no compare-and-swap
     counter (only `DEC` and `SEM` do), so the second lander also keeps them unique: an `OQ` id taken on both branches
     stays with the branch that landed first, and the other branch's question is renumbered to the next free id, with
     every reference to it and the file's next free id line. Check: `grep -o '^### OQ-[0-9]*' docs/OPEN_QUESTIONS.md |
@@ -964,11 +976,25 @@ not pushed for the same reason; the round entries' commits resolve only there.
   Risks folded: the product's conformance row and DEC-0157 item 2 carry the hold's display (the line and the offer);
   a product records that its first send or stand-in run has happened, and drops what it collected before it read an
   earlier no; the switch reads "on but not sending" during a hold, the line names the next start and, for a product
-  without a window, its status output; UD-4 forbids an agent to rewrite an unreadable shared file to end a hold;
+  without a window, its status output; an agent may not rewrite an unreadable shared file to end a hold (a separate bullet, moved into UD-4 in round 26);
   devices.md, SCN-011 and SCR-10 say no key name marks a usage switch yet (CT-280); CT-280's row fixed; the landing
   list names CT-293 (main's CT-293 row names UD-3 to UD-5 since #281) (unit, product, seam). Declined: none.
 - Checks run on the round-24 fold (`1e0d70c2`): `pnpm run check` exit 0 (11173 tests).
+- Checks run on the round-25 fold (`fb6ee0a9`): `pnpm run check` exit 0 (11173 tests), before round 26 was read.
+- Round 26 (on `fb6ee0a9`): seam clean; unit and product not clean. Breaks folded: round 25's agent rule sat in an
+  unnumbered bullet that took UD-5's list marker, and the record said UD-4 held it; it is now UD-4's last sentence, in
+  DEC-0157 item 4 and the agent row, the operator's own word naming the switch setting it on through the product's
+  relayed action, and UD-5 is a rule again (unit, product); the board message gave Fabric the wording "its on clears
+  that", which UD-2 makes false for an app that already read the off; it now says those that have not yet read it send,
+  and an app that read it stays off until turned on in its own settings (product). Risks folded: the hold's display
+  scoped to an install whose own switch the person never set and restated in row 219 and DEC item 2 with "on but not
+  sending"; the drop of what was collected before reading an earlier no in UD-1, item 2 and row 219; "or not yet had
+  their stand-in run" beside "not yet sent"; the device-side qualifier (no key name marks a usage switch until CT-280)
+  in UD-2, item 2, row 160, SCN-011, SCR-10 and ST-008; UD-3 and UD-5 name an agent or grant holder reading the raw
+  events (main's CT-293); UD-2 names the shared file and its shape; Observatory owes the kept decline; the scope
+  paragraph's device-policy lock and Fabric Inbox's line wait on CT-280; the Registers item and CT-216's done row carry
+  merged-tree checks; Done names the fourth main merge; CT-280's Goal cell fixed (unit, product, seam). Declined: none.
 
 ## Next task
 
-Round 26 of the blind readings of branch `agent/ct216-usage-data-v2` (DEC-0157): unit, seam and product.
+Round 27 of the blind readings of branch `agent/ct216-usage-data-v2` (DEC-0157): unit, seam and product.

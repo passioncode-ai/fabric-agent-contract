@@ -21,12 +21,12 @@ and each person's Fabric Inbox app sends that server's counts under the app's sw
 organization deploys for several members is counted by each member's app under that member's switch, and the
 organization holds no switch over those counts. Such counts are per member's app, not per server (the events carry no
 server id), so they are not summed across installs; an organization that wants them off locks its members' switch off
-by device policy on their enrolled devices (UD-2).
+by device policy on their enrolled devices (UD-2), once CT-280 names the key and the product reads it.
 The key words MUST, MUST NOT, SHOULD and MAY are used as in RFC 2119.
 
 - **UD-1, on by default, told once.** A product that collects usage or error data collects it from its first start, for
   a new install and for an existing one, each that never answered its switch and never declined it (UD-2, a shared
-  earlier no included); a person answers a
+  earlier no included; what it collected before it reads a shared earlier no it drops then, UD-2); a person answers a
   switch by setting it under a prompt or in a product's settings. It MUST NOT send any of it before its notice has been
   shown once where the person reads it: at the first start that opens its window, or for a product without one (an
   agent, a command line tool, a service) or one that starts without opening it (at login, in the background, by a silent
@@ -94,13 +94,16 @@ The key words MUST, MUST NOT, SHOULD and MAY are used as in RFC 2119.
   reads that no, as off drops what waits to be sent. On an install whose own switch the person has not set on, a shared file that exists but cannot be read when the
   product reads it before its first send (or before that
   stand-in run) is no answer: the product MUST send nothing in that run and reads it again at its next run, and a run
-  that sent nothing for that reason is no stand-in run. While an unreadable shared file holds its send, the product shows its switch as on but not sending, says beside it
+  that sent nothing for that reason is no stand-in run. While an unreadable shared file holds its send (on an install whose
+  own switch the person never set), the product shows its switch as on but not sending, says beside it
   (for a product without a window, where its switch is read, such as a command line tool's status output) that
   nothing is sent until the shared file can be read at its next start, and offers there a control that sets its own
-  switch on for this product, which is the person setting the product's own switch on. A product's own switch MUST NOT write the shared
+  switch on for this product, which is the person setting the product's own switch on. The shared file is `<root>/PassionCode/installation.json`, `<root>` as DEC-0025 defines it, holding
+  `version` 1, `id` (a random UUID), `analytics` (a boolean) and `created_at`, as the products that create it write it
+  (the launcher's `lib/analytics.js` lines 42 to 46 at `ad978a6`). A product's own switch MUST NOT write the shared
   file's `analytics` field; a product whose switch wrote it under words that governed every reader stops writing it
   from the version whose switch governs it alone, and leaves an off already written there, which stays the earlier no
-  for products that have not yet sent. Fabric's live setting says its switch governs every
+  for products that have not yet sent, or not yet had their stand-in run. Fabric's live setting says its switch governs every
   app ("One switch for every PassionCode app on this computer", its `en.ts` line 864 at `eafcf2e4`): for a product that
   has already sent, that is a false promise, which the person reads until Fabric's switch for Fabric alone ships (its
   CO-496). A device policy ([devices](devices.md#policy)) whose layer carries a key for a product's switch MAY lock it
@@ -109,7 +112,8 @@ The key words MUST, MUST NOT, SHOULD and MAY are used as in RFC 2119.
   would hold it on, so a lower layer's lock off still holds and, where none holds it off, the person's own setting (or an earlier
   no) governs, never the value of a layer whose lock was dropped; the device lets the person change the key and shows
   that value as the one the product applies, never as locked on, while its reported `effective` keeps the lock's
-  value (`FAC-SEM-042`). The reference resolution (`resolvePolicy`, [devices](devices.md#policy))
+  value (`FAC-SEM-042`); no key name marks a usage switch yet (CT-280), so until one does this binds the device on no
+  key and the product applies it. The reference resolution (`resolvePolicy`, [devices](devices.md#policy))
   does not apply this limit: the product applies it after resolution, resolving the key again without any lock that
   would hold it on; nor does the reference device decision (`expectedDecision`, `FAC-SEM-068`) apply it to a local
   change, which it refuses for any locked key (a reference helper and its vectors are CT-280).
@@ -131,7 +135,7 @@ The key words MUST, MUST NOT, SHOULD and MAY are used as in RFC 2119.
   installation id bound to no account names no one, and a product that binds either id to an account leaves UD-3
   (below). Whether a stored random id needs prior consent in a given market
   (the EU's ePrivacy rule, which the knowledge base's RM-13 records as the operator's open question) is a product's
-  privacy review, not this rule's. The product, every service it sends the data to, and every service that reads it there, MUST NOT
+  privacy review, not this rule's. The product, every service it sends the data to, and every service or agent that reads it there (a holder of a grant to read the raw events included), MUST NOT
   join either id with an account, purchase, billing or advertising record; data so joined, or bound to an account, is no longer anonymous
   under these rules, is `personal`, or `regulated` where the product's privacy review finds it legally controlled,
   needs its own consent and is never described to the person as anonymous. Properties are facts about the
@@ -176,13 +180,12 @@ The key words MUST, MUST NOT, SHOULD and MAY are used as in RFC 2119.
   An accepted `approval/1` still decides that relayed action at any tier (AP-2; `actionDecision`'s row for a `relayed` action with an accepted approval; DL-18), so the
   agent-side limit above is the only bar on that form: the contract adds no product-side refusal, since an approval is
   a signed decision of an approver the product trusts for that action's digest (DL-17, DL-18), and refusing it for one
-  action would split AP-2's single table.
-- An agent does not delete or rewrite a shared file it cannot read to end a hold: it reports the hold
-  and points the person to the product's own switch.
-
-**UD-5, no machine declaration yet.** A product MUST state in its own documentation (its privacy text and a page on
+  action would split AP-2's single table. An agent MUST NOT delete or rewrite a shared file it cannot read to end a
+  hold (UD-2): it reports the hold and, on the operator's word naming the switch, sets the product's own switch on through
+  the product's relayed action as above; anyone else it points to the product's own switch.
+- **UD-5, no machine declaration yet.** A product MUST state in its own documentation (its privacy text and a page on
   its usage data) what it collects, the installation id it sends (when it sends one) and whether it is shared, where it
-  sends the data (the organization that receives it and its host, and every service that reads the data there, with
+  sends the data (the organization that receives it and its host, and every service or agent that reads the data there (a holder of a grant to read the raw events included), with
   its purpose, described without naming a person), where the switch is, how long the data is kept, the version that turned collection on by default, and
   whether data already sent can be erased and how. Where erasure needs an installation id, the product either shows that
   id beside the switch before off deletes it and keeps its erasure route working with it, or says beside the switch that
@@ -312,7 +315,7 @@ app on the machine", the page its README sends readers to), all at `eafcf2e4`, w
 reaches. Fabric's switch also writes the shared `analytics`
 field both ways (`writeAnalyticsSwitch`, `apps/desktop/src/main/analytics.ts` lines 88 to 96, called by `setEnabled`
 at lines 305 to 308, at `eafcf2e4`), so under UD-2's earlier-no reading its off decides for every product that has
-not yet sent and its on erases a person's earlier no for every product that has not yet read it; CO-496 owes UD-2's rule on writing: Fabric stops writing the
+not yet sent, or not yet had its stand-in run, and its on erases a person's earlier no for every product that has not yet read it; CO-496 owes UD-2's rule on writing: Fabric stops writing the
 field from the version whose switch governs Fabric alone and leaves an off already written there. Fabric Inbox exports
 a writer for the shared field that nothing calls (`writeSwitch`, `desktop/analytics.cjs` lines 96 to 103 at
 `1395416`), so it writes nothing there today, and under UD-2 it stays uncalled. Its `README.md` (lines 202 to 204 at
@@ -343,7 +346,9 @@ its scheduled maintenance pass flushes the queue (`observatory/engine/maintenanc
 `2a11b3fd`), while its notice is printed only to a person's terminal or shown when its dashboard is opened, so what an
 install queued before either is sent at the next pass. That notice also names
 neither the installation id every event carries (its own, unshared: line 12, `install_id` at lines 288 to 300) nor its
-session id, so it owes naming both (UD-1); its session id is one per process (lines 401 to 409), so where a process
+session id, so it owes naming both (UD-1). It reads only its own switch file, never the shared file (`usage_analytics.py` lines
+64 and 153 at `2a11b3fd`), so it owes UD-2's kept decline too: at its conforming version's stand-in run, on an install
+whose own switch the person never set, a shared `analytics: false` is read as the earlier no; its session id is one per process (lines 401 to 409), so where a process
 lives past an idle hour it owes UD-3's renewal. The rest of its sender, whether its MCP
 surface offers its switch (UD-4) included, was not read against these rules. The estate's hosted workspace product is outside the page as a hosted
 service; its self-hosted image, a component an organization deploys on its own server for its members, is under it
