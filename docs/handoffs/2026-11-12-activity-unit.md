@@ -10,8 +10,11 @@ Branch `agent/ct259-activity-unit-20261112`, from main `d69dc363`. Entry point: 
   and class).
 - `src/activity-rules.ts`: `unitSourceKey` and `FAC-SEM-171` (receipt SEM-0171) on `telemetry-event` and `activity-batch`.
 - `tools/vectors/activity-unit.ts`, `fixtures/vectors/activity-unit.json`, `test/activity-unit.test.ts`.
-- Pages: activity (the envelope's kinds, `unit` with AE-1 to AE-5, the rule), conformance (a writer and a reader row,
-  the code). DEC-0164; CT-259's row.
+- Pages: activity (the envelope's kinds, `occurred` for a held unit, `unit` with AE-1 to AE-5, the rule),
+  conformance (a writer, a reader and the batch receiver's rows, the code), contexts (routing's fourth way), membership
+  (OM-7's units row and the enrollment's own events narrowed), CONTEXT.md, versioning and `src/protocol-revisions.ts`
+  (`activity-unit/1`), the specification README, SCN-010 (a read of a unit the member accepted). DEC-0164; CT-259's and
+  CT-297's rows; DOCMAP.
 
 ## Open
 
@@ -28,9 +31,11 @@ Branch `agent/ct259-activity-unit-20261112`, from main `d69dc363`. Entry point: 
 - Landing note with DEC-0157 (`agent/ct216-usage-data-v2`): UD-6 describes activity telemetry as sessions sent by an
   enrolled device; whichever lands second restates it by kind and channel as activity's opening now does (check:
   `awk '/\*\*UD-6/,/\*\*UD-7/' docs/specification/usage-data.md | grep -c 'unit'` prints at least 1 on the merged tree).
-- Operator questions, not decided here (to post on thread `52aa2f93` with the landing notice): a minimum cell for units
-  served per project (a one-person project's count is that person's agents' output), the access-log scope a read of
-  units is logged under, and the retention of a stored `acceptedBy` person subject; and which audience's pairwise
+- Operator questions, not decided here (to post on thread `52aa2f93` with the landing notice): whether a one-person
+  project's units are served (default: no; a unit cell needs 3 distinct roster members of its projects, AE-3), the
+  access-log scope a read of a person acceptance is logged under (default `activity.raw`), the notice purpose a unit
+  event is collected under and the retention of a stored `acceptedBy` person subject (default: the notice's purpose
+  for its agents' activity, `retention.raw_days`); and which audience's pairwise
   subject a kit writes when one unit reaches both the organization's journal and Observatory's local one.
 - CT-297: the route function for a unit and its vectors.
 - Tell Observatory with the landing notice: a unit's `cost` is the spend since its previous transition, summed by a
@@ -76,6 +81,20 @@ Branch `agent/ct259-activity-unit-20261112`, from main `d69dc363`. Entry point: 
   the CT-259 row; a leap second on `occurred` read as its last millisecond, with a vector; the distinct-id assertion.
   Declined: none; the access-log scope and the metric's late acceptances stay operator questions in Open.
 
+- Round 4 (on `68df1910`): unit passed with three risks, seam passed with six risks, product failed. Product, breaks
+  folded: a unit's `occurred` is when its writer recorded the transition and holding never restamps it (the envelope
+  row, the `acceptedAt` row, the decision); the batch receiver's unit sentence moved into the Requirement column; OM-7's
+  enrollment row narrowed to events with no route of their own; a unit cell's 3 counts distinct roster members of its
+  projects, the one-person project's case an operator question (AE-3, Why); a read of a person acceptance is logged in
+  that person's access log, with SCN-010's fourth entry. Product risks folded: a held transition lives no longer than
+  `retention.raw_days` and is dropped on 410; purpose and retention by the personal-data rules, the purpose an operator
+  question; a unit's cost is an attribution never added to usage totals (page and schema); Consequences and Done
+  completed, AE-2a cited by its page; the Next free ID line; the repeated-write test renamed to the shared-id case
+  and a repeated-write test added. Seam risks folded: the cell's measure; a stream holds one event per `eventId` (a
+  batch test pins FAC-SEM-039); cost twice; purpose; `occurred`; the draft writers stay in Open. Unit risks folded: the
+  schema's cost description; the event carries no envelope `task` (schema, a vector); `unit.key` as the tracker's API
+  returns it. Declined: none.
+
 ## Next task
 
-Round 4 of the blind readings (unit, seam, product) of branch `agent/ct259-activity-unit-20261112` (DEC-0164).
+Round 5 of the blind readings (unit, seam, product) of branch `agent/ct259-activity-unit-20261112` (DEC-0164).

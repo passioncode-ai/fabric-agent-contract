@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0165` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0168` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -11400,15 +11400,19 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   1. **AE-1.** A `telemetry-event` of kind `unit` records one transition (`started`, `ended`, `handed-over`,
      `accepted`) of one unit of work; it requires `run.root` and `project.id` and carries no `user` and no `session`.
      `data`: `agent` (`id.instance`), `unit` `{system, key}`, `transition`, `taskClass` (or `unclassified`),
-     `taskClassMap` `{id, revision}` exactly when classified (AE-2a), `outcome` on `ended` only, `evidence` (0 to 8
+     `taskClassMap` `{id, revision}` exactly when classified (a reader of a past month maps a class through its owner's table between revisions, [activity](specification/activity.md#kinds)), `outcome` on `ended` only, `evidence` (0 to 8
      references, never content), `acceptedBy` `{kind: rule|agent|person, ref}` and `acceptedAt` on `accepted` only, and
-     `cost` as the envelope states one (`{usd: null}` when unknown).
+     `cost` as the envelope states one (`{usd: null}` when unknown), the spend since the previous transition, an
+     attribution of usage-line spend never added to it; `occurred` is when the writer recorded the transition, which
+     holding never restamps; the event carries no envelope `task`.
   2. **AE-2.** Its `source` is `unit` and its `sourceKey` the `sha256:` of the settings-form canonical JSON of the agent,
      the unit's system and key, the transition and `run.root` (`unitSourceKey`), so every writer derives one `eventId`
      and a reopened unit accepted again under a new `run.root` is a new event (`FAC-SEM-171`, with an acceptance not
      recorded before it happened).
   3. **AE-3.** No user is attached to a unit, no unit is served by person (units only in agent, project or
-     task-class cells of at least 3, as `result`), and a `person` acceptance stays in the organization's own journal.
+     task-class cells of at least 3 distinct members of the organization's roster for the cell's projects, as `result`;
+     a one-person project's units are then never served, the operator's open question), and a `person` acceptance
+     stays in the organization's own journal, a read of it logged in that person's access log.
   4. **AE-4.** A device collector sends it in its batches, to the enrollment of the organization that owns its
      `project.id` by the device's folder attribution (never for a personal or unattributed project; the route
      function is CT-297); a kit without one records it through Observatory's `activity.unit.record`, bound as
@@ -11420,7 +11424,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      `cost` is the spend since the previous transition, summed by a reader.
 - **Why:** one record per unit transition, owned by the agent and joined by `run.root`, is what the metric counts; a
   derived id makes the count idempotent across writers; keeping the person out of the event and out of every summary
-  keeps it from ever being a person's score.
+  keeps it from being served as a person's score (a cell below 3 roster members is never served; the operator answers
+  whether a one-person project's units should be).
 - **Alternatives considered:** a separate document type for the journal (refused: Observatory confirmed `unit` inside
   `fabric-activity/0.1`, one transport, one attribution, one person rule); `org` in the event (refused: the stream's
   attribution names the organization); `cost` as `null` (refused for the envelope's own form, `{usd: null}`, which
@@ -11431,6 +11436,6 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Consequences / affects:** `schemas/telemetry-event.schema.json` (`$defs/unit` and the kind), `src/activity-rules.ts`
   (`unitSourceKey`, `FAC-SEM-171`), `tools/vectors/activity-unit.ts`, `fixtures/vectors/activity-unit.json`,
   `test/activity-unit.test.ts`; `docs/specification/activity.md` (the envelope's kinds, `unit`, the rule),
-  `docs/specification/conformance.md` (a writer and a reader row, the rule code), `docs/specification/contexts.md` (Routing), `CONTEXT.md` (Activity telemetry, Telemetry event), `docs/specification/README.md`, `src/protocol-revisions.ts` and `docs/specification/versioning.md` (`activity-unit/1`), `fixtures/catalogue.json` and the unit fixtures.
+  `docs/specification/conformance.md` (a writer and a reader row, the rule code), `docs/specification/contexts.md` (Routing), `CONTEXT.md` (Activity telemetry, Telemetry event), `docs/specification/README.md`, `src/protocol-revisions.ts` and `docs/specification/versioning.md` (`activity-unit/1`), `fixtures/catalogue.json` and the unit fixtures; `docs/specification/membership.md` (OM-7's units row, the enrollment's own events narrowed), `docs/ux/scenarios.md` (SCN-010), `docs/backlog.md` (CT-259, CT-297), `docs/DOCMAP.md`.
 - **Source:** the design `docs/evidence/plans/2026-11-12-ct259-activity-unit.md`; board request `e9d30889`; Observatory's
   answers on threads `b83440d6` and `52aa2f93`; backlog CT-259.

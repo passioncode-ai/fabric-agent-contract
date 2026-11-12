@@ -295,7 +295,8 @@ independent agent author and P-02 project operator.
   2. The first entry is `activity.raw` by role `org.admin` with a purpose sentence -> the member sees who read and why.
   3. The second entry is `device.health` with the device id -> the member sees the read of their device's state.
   4. A third entry is a partner organization's read of the usage of its agents the member used (`activity.usage`, service `org:<partnerOrgId>`, role `partner`, per day or period, no device; DEC-0090) -> the member sees which partner read sums that include them.
-- **Expected result:** every read of the member's raw data and device state is listed with role, scope, range and purpose, and so is a partner's read of usage sums; other reads of summaries are not listed, because summaries carry no person.
+  5. A fourth entry is another member's read of a unit of work the member accepted (`activity.raw`, the member's pairwise subject as `acceptedBy`, DEC-0164 AE-3; the scope is the operator's open question) -> the member sees who looked at what agents did on their work.
+- **Expected result:** every read of the member's raw data and device state is listed with role, scope, range and purpose, and so is a partner's read of usage sums and a read of a unit the member accepted; other reads of summaries are not listed, because summaries carry no person.
 - **Alt paths:** no read in the range -> the empty state says so.
 - **UI elements:** entry list, reader role, scope, device, purpose.
 - **States covered:** empty, success

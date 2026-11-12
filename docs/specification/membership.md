@@ -231,7 +231,7 @@ list come from them (DEC-0129):
 | the enrollment's own requests | enrollment (its `org.id`, `device.id`, platform, key description, CSR, an optional platform attestation and its proof), certificate rotation, renewal | [devices](devices.md), DEC-0031, DEC-0094, DEC-0100 |
 | check-ins | the enrollment of that organization, its streams only | [devices](devices.md#check-in), DEC-0031 |
 | a session's events | sessions whose context is that `org:<orgId>`, as `routeTarget` answers | DEC-0082 |
-| the enrollment's own activity events | events that carry no session, such as `policy.violation` | [activity](activity.md), DEC-0052 |
+| the enrollment's own activity events | events that carry no session and have no route of their own below or in [activity](activity.md), such as `policy.violation` (not `grant.usage`, routed by its `data.context`, nor `unit`, routed by its project) | [activity](activity.md), DEC-0052 |
 | units of work | `unit` events whose `project.id` that organization owns by the device's attribution, never a personal or unattributed project; an `acceptedBy` person subject pairwise to that organization | [activity](activity.md#kinds), DEC-0164 AE-3, AE-4 |
 | proposals | proposals submitted to that organization's server | [proposals](proposals.md), DEC-0072 |
 | `grant.usage` and share registrations | grants whose context is that `org:<orgId>` | DEC-0086 |

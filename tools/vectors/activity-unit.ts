@@ -67,6 +67,7 @@ function cases(): Json[] {
     { name: "a unit with a user", event: unit("started", {}, RUN_1, 1, { user: { id: "m-7f3a91c2" } }), schemaValid: false, findings: [] },
     { name: "an outcome on a start", event: unit("started", { outcome: "completed" }), schemaValid: false, findings: [] },
     { name: "an acceptance without who accepted", event: unit("accepted", { acceptedAt: "2026-11-12T09:58:00Z" }), schemaValid: false, findings: [] },
+    { name: "a unit with an envelope task beside its own unit", event: unit("started", {}, RUN_1, 1, { task: { ref: { system: "jira", key: "OTHER-1" } } }), schemaValid: false, findings: [] },
     { name: "a unit without a project", event: (({ project: _p, ...rest }) => rest)(unit("started")), schemaValid: false, findings: [] },
     { name: "an end without its outcome", event: unit("ended"), schemaValid: false, findings: [] },
     { name: "who accepted, on a start", event: unit("started", { acceptedBy: { kind: "rule", ref: "ci-green-and-reviewed" } }), schemaValid: false, findings: [] },

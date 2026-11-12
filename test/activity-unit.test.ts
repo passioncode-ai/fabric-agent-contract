@@ -32,10 +32,18 @@ describe("unit events (DEC-0164)", () => {
     const run1 = ["started", "ended, completed", "accepted by a rule"].map((name) => (vectors.cases.find((c) => c.name === name) as Json).event.data.cost.usd as number);
     expect(run1.reduce((sum, usd) => sum + usd, 0)).toBeCloseTo(0.42, 10);
   });
-  it("writes one transition twice as one event: the same id", () => {
+  it("gives two different acceptances of one unit under one run.root one id, so a stream holds one of them", () => {
     const rule = vectors.cases.find((c) => c.name === "accepted by a rule") as Json;
     const person = vectors.cases.find((c) => c.name.startsWith("accepted by a person")) as Json;
     expect(person.event.eventId).toBe(rule.event.eventId);
+    // A collector writes one event per eventId into its own stream: both in one batch is the batch's FAC-SEM-039.
+    const batch = { protocol: "fabric-activity/0.1", device: { id: "device-1" }, events: [rule.event, { ...person.event, seq: 5 }] };
+    expect(evaluateSemanticRules("activity-batch", batch).map((f) => `${f.code} ${f.instancePath}`)).toContain("FAC-SEM-039 /events/1/eventId");
+  });
+  it("writes one transition twice as one event: the same id", () => {
+    const started = (vectors.cases[0] as Json).event as Json;
+    const again = JSON.parse(JSON.stringify(started)) as Json;
+    expect(activityEventId("unit", unitSourceKey(again.data.agent, again.data.unit, again.data.transition, again.run.root))).toBe(started.eventId);
   });
   it("derives one id for one transition and run.root, and another for a reopened unit (AE-2)", () => {
     const accepted = vectors.cases.filter((c) => c.event.data.transition === "accepted" && c.schemaValid && c.findings.length === 0);

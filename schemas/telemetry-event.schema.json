@@ -431,6 +431,7 @@
           },
           "user": false,
           "session": false,
+          "task": false,
           "data": {
             "$ref": "#/$defs/unit"
           },
@@ -774,7 +775,7 @@
         },
         "unit": {
           "$ref": "activity-common.schema.json#/$defs/taskRef",
-          "description": "The tracker or surface that owns the unit (an open vocabulary: github, jira, store, mail, board) and its stable key there, as task.ref."
+          "description": "The tracker or surface that owns the unit (an open vocabulary: github, jira, store, mail, board) and its stable key there, as task.ref. The key is written as the tracker's API returns it, never retyped or re-cased, so every writer of one unit derives one eventId (AE-2); the event carries no envelope task, data.unit being its task."
         },
         "transition": {
           "enum": [
@@ -854,7 +855,7 @@
         },
         "cost": {
           "$ref": "activity-common.schema.json#/$defs/cost",
-          "description": "The agent's spend on the unit: usd with its basis, or usd null when unknown; never 0 for unknown is the writer's duty."
+          "description": "The agent's spend on the unit since its previous transition (a reader sums a unit's transitions; an attribution of spend its usage lines already carry, never added to them): usd with its basis, or usd null when unknown; never 0 for unknown is the writer's duty."
         }
       },
       "allOf": [
