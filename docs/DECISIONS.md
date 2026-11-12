@@ -11455,15 +11455,14 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      Fabric's live "One switch for every PassionCode app on this computer" (`en.ts` line 864 at `eafcf2e4`) is a false promise for a product past its first send (or, for an install that sent before its conforming version, past a stand-in run that read no earlier no), one that cannot read the shared file, or one whose own switch the person set, and, for its on, for a product that already read an off as an earlier no, which the person reads until Fabric's switch for Fabric alone ships
      (CO-496); a product's own switch never writes the shared file's `analytics` field, and a product whose switch
      wrote it under words that governed every reader stops writing it from the version whose switch governs it alone,
-     and leaves an off already written there, which stays the earlier no for products that have not yet sent, or not
-     yet had their stand-in run; what a product collected before it read an earlier no it drops when it reads it, and
+     and leaves an off already written there, which stays the earlier no for products that have not yet sent, or not yet had their stand-in run, unless the person set that product's own switch on; what a product collected before it read an earlier no it drops when it reads it, and
      it keeps an earlier no it read until the person sets its own switch on, and need not keep a reading that found
      none, only that its first send, or its stand-in run, has happened; a
      shared file that exists but cannot be read before a product's first send (or before that stand-in run), on an install whose own switch the person has not set on, is no
      answer, and the product sends nothing in that run, a run that sent nothing for that reason being no stand-in run, and the product, on an install whose own switch the person never set, showing its switch as on but not sending and saying beside it (for a product without a window, where its switch is read) that nothing
-     is sent until the shared file can be read at its next start and offering there to set its switch on, which is the
+     is sent until the shared file (`<root>/installation.json`) can be read, read again at each start, and offering there to set its switch on, which is the
      person setting the product's own switch on, a product whose only installation id is the shared one offering it
-     only where, once set on, it sends without an installation id, else keeping that display until the file can be read;
+     only where, once set on, it sends without an installation id, else keeping that display until the file can be read, and after its first send too;
      a device policy whose layer carries a key for a product's switch may lock it off and never locks it on, and
      the device and the product ignore a lock that would hold the switch on, resolving the key without any lock that
      would hold it on, so a lower layer's lock off still holds and, where none holds it off, the person's own setting (or an
@@ -11518,9 +11517,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      and no product-side refusal is added (an approval is a signed approver's decision on the action's digest, DL-17,
      and a refusal for one action would split AP-2's single table); an agent never deletes or rewrites a shared file
      it cannot read to end a hold, reporting the hold, setting the product's own switch on through its relayed action
-     on the operator's word naming the switch, and pointing anyone else to that switch, save that for a product whose
-     only installation id is the shared one setting the switch on does not end the hold, so the agent tells the operator
-     the product sends nothing until the file can be read and points anyone else to its hold line.
+     on the operator's word naming the switch, and pointing anyone else to that switch, save that for a product whose only installation id is the shared one and which, once set on, sends nothing without it, setting the switch on does not make it send, so the agent tells the operator the product sends nothing until the file can be read, where the file is and that its repair waits on OQ-0014, and points anyone else to its hold line.
   5. UD-5: no machine declaration now; each product documents it (its privacy text and a usage data page): what, the
      installation id when it sends one and whether it is shared, where it goes (the receiving organization and its
      host, and every service or agent that reads the data there (a holder of a grant to read the raw events included), with its purpose, described without naming a person), the switch, how long it is kept, the
@@ -11783,7 +11780,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   operator chooses whether to accept that or to have those products' events from before their conforming versions
   dropped. `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `docs/specification/usage-data.md` (new), `docs/OPEN_QUESTIONS.md` (OQ-0013, the second
-  purpose and the hosted services' scope, for the operator), `docs/specification/conformance.md` (a product
+  purpose and the hosted services' scope, for the operator; OQ-0014, the repair of a shared file that stays
+  unreadable), `docs/specification/conformance.md` (a product
   row, an agent row, the OD-9 declarer's row, the collector's row, and the rows for a device applying policy and a
   device deciding under its policy), `docs/specification/ops-digest.md` (OD-6 and Not
   decided here point to UD-6), `docs/specification/activity.md` (its purpose points to UD-6's channel separation),

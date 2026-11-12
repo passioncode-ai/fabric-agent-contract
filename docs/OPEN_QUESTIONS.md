@@ -7,7 +7,7 @@ No open questions remain from stage 0. Later stages reserve `OQ-####` before add
 an entry. The coordination config declares no `OQ` id register, so an id is taken
 under the lease on this file, from the line below.
 
-**Next free ID:** `OQ-0014`
+**Next free ID:** `OQ-0015`
 
 The seven questions below were raised by module AR-1 (DEC-0016) about the contracts
 Fabric locked on 2026-09-29. Each names the part that is implemented and the part that
@@ -223,3 +223,18 @@ ruling; DEC-0017 states what holds now.
   (UD-1) and is a new notice under its re-show rule. The page's scope and DEC-0157 item 1 mark the hosted exclusion as
   DEC-0157's reading pending (2); an answer that reaches hosted services is a new decision extending UD-3 and UD-5 to
   them, the switch staying each product's.
+
+### OQ-0014: Usage data: what repair of a shared installation file that stays unreadable may a product offer?
+
+- **Status:** Open
+- **Raised:** 2026-11-12, round 30 of the blind readings of DEC-0157 (CT-216), branch `agent/ct216-usage-data-v2`.
+- **Owner of the answer:** the operator.
+- **Question:** a shared installation file (`<root>/installation.json`) that exists but stays unreadable stops every
+  product that sends only with the shared id (Fabric, Switchboard, the launcher) for good: UD-4 lets no agent rewrite
+  it, the file records no creator, and resetting its id is all the sharing products' (UD-2, UD-5). Which repair may a
+  product offer, on the person's act in its settings or on the operator's word through an agent: (a) none, the hold
+  stays; (b) restoring read permission only, keeping the file's id and answer; (c) (b), and replacing a file that does
+  not parse with a new id and `analytics: false`, as a reset every sharing product accepts? Answer a, b or c.
+- **Meanwhile:** the hold stays; the product's hold line names the file and says it is read again at each start, and
+  the agent tells the operator the file's location and that its repair waits on this answer
+  ([usage data](specification/usage-data.md) UD-2, UD-4; DEC-0157).

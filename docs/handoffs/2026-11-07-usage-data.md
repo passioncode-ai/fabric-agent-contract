@@ -13,7 +13,8 @@ decision of 2026-11-04.
 - `origin/main` merged again on 2026-11-12 (`bd1271e5`, main `d40ae936`, and `d683e2b3`, main `b8a6af95`): it brought
   the four North Star designs (CT-250, CT-252, CT-259, CT-285), CT-287 (this branch named among six paused DECs) and
   the CT-250, CT-252, CT-259 and CT-285 rows naming UD-4 and UD-6; no file this branch owns conflicted. The next free
-  id is `DEC-0162` (the counter on origin since 2026-11-08T11:39Z, DEC-0160 and DEC-0161 reserved by siblings).
+  id is `DEC-0163` since 2026-11-12T09:13:59Z (the counter on origin; DEC-0160 and DEC-0161 reserved by siblings, DEC-0162
+  by CT-250, round 30, seam).
   A third merge, `45bf544e` (main `2b0bcd55`, #274 and #275), changed CT-250, CT-285 and CT-287 in `docs/backlog.md` and
   no file this branch owns. A fourth, `a3cf5083` (main `53835d18`, #276 to #281: the CT-292 design, CT-293, CT-294,
   CT-67, a DOCMAP line and the "Read also" lines of the four 2026-11-12 designs), conflicted in no file this branch
@@ -71,11 +72,11 @@ decision of 2026-11-04.
 
 ## Open
 
-- A question for the operator (round 29, product): a shared file that stays unreadable (a permission error or a
-  corrupt file) holds every product whose only installation id is the shared one for good, since the agent may not
-  rewrite it (UD-4) and no product owns repairing it. Should the product that created the file recreate it, with a
-  new id, on the person's own act? Until answered, the hold line says only that nothing is sent until the file can be
-  read.
+- A question for the operator, filed as OQ-0014 (round 29, product; restated as a closed choice in round 30): a shared
+  file that stays unreadable stops every product that sends only with the shared id for good; may a product offer (a)
+  no repair, (b) restoring read permission only, or (c) (b) and replacing a file that does not parse with a new id and
+  `analytics: false`? Until answered, the hold stays, the hold line names the file, and the agent says the repair waits
+  on OQ-0014.
 - The coordinator's blind readings until two consecutive clean rounds; the gate; the pull request, merge, tag and
   release; at merge DEC-0157 Accepted and CT-216 done, CT-216's done row keeping its pointer to this handoff's
   Parallel branches list while any of DEC-0156, DEC-0158 or DEC-0159 is unlanded (check on the landing tree:
@@ -83,7 +84,7 @@ decision of 2026-11-04.
   commit), the `Next free ID` line written from the counter read then, CT-250's, CT-252's and CT-259's "(proposed on a branch, CT-287)" after DEC-0157 restated as "(accepted <date>)" and
   CT-293's "(both proposed on branches, CT-287)" as "(DEC-0156 proposed on a branch, CT-287; DEC-0157 accepted <date>)",
   or "(both accepted ...)" once DEC-0156 has landed (checks: `grep -E '^\| CT-(250|252|259) ' docs/backlog.md | grep -c
-  'DEC-0157[^(]*(proposed on a branch'` and `grep '^| CT-293 ' docs/backlog.md | grep -c 'both proposed on branches'`
+  'DEC-0157[^(]*(proposed on a branch'` and `grep '^| CT-293 ' docs/backlog.md | grep -c -E 'both proposed on branches|DEC-0157 proposed on a branch'` (widened in round 30, seam)
   each print 0; round 27, seam),
   `docs/handoffs/2026-11-12-north-star-designs.md`'s Next task no longer naming DEC-0157's readings, the handoffs index row's Decisions cell reading
   "DEC-0157 (CT-216; CT-280 filed), accepted <date>; rounds 1 to N not clean, N+1 and N+2 clean" and its Merge cell
@@ -104,7 +105,7 @@ decision of 2026-11-04.
   hold display at CO-496 (and, once the person sets Fabric on, either sending without the shared id or keeping that
   display, since Fabric sends only with the shared id) (not "for Fabric only", which the write makes false for those apps), and an agent twin for its switch (UD-4) at CO-496;
   Switchboard, with an action for its switch and a manifest capability for that tool (UD-4), UD-2's hold display (its
-  status carries only `enabled`, `analytics.rs` lines 372 to 378 at `405b789`; since it sends only with the shared id,
+  status (`available`, `enabled`, `notice_pending`, `analytics.rs` lines 372 to 378 at `405b789`) carries no hold state; since it sends only with the shared id,
   the set-on control only where it would send without one), and UD-1's purpose in its
   notice (its "to help PassionCode.ai improve its apps", `src/main.ts` line 109 at `f6f1dc1`, names every app; its Russian copy is `src/locales/ru.ts` line 68 at its
   `origin/main` `6461505`), and the
@@ -203,6 +204,13 @@ decision of 2026-11-04.
   owners' choice, the estate's privacy page on passioncode.ai (PC-137) being one home; and, once DEC-0156 is on main
   too, that OW-5's limits name UD-4's switch (a mandate from the operator's words never turns a declined switch back
   on).
+  - With DEC-0162 (CT-250, branch `agent/ct250-levels-20261112`; round 30, seam). A level decision stands as the
+    operator's at every tier there, `change-policy` included; UD-4 admits only the operator's own decision or approval
+    for a declined switch. The second lander makes UD-4 say that a level decision is not the person's word for a
+    declined switch unless the level holder is that person's operator, and makes DEC-0162 and membership's *Levels* cite
+    UD-4. Checks on the merged tree: `awk '/\*\*UD-4/,/\*\*UD-5/' docs/specification/usage-data.md | grep -c 'level'`
+    and `git grep -n 'UD-4' -- docs/specification/membership.md docs/DECISIONS.md | grep -c 'DEC-0162\|LV-'` each print
+    at least 1 (relayed to CT-250's handoff).
 - Landing step, the knowledge base (AGENTS.md "After work"), in the same landing: plans.md's Contract row restates
   CT-216 as "what usage data every product shares: UD-1 to UD-6, no machine declaration" (today "what a service
   declares about analytics on by default", line 124 at `c84c7a40`), and roadmap RM-13 links
@@ -218,7 +226,7 @@ decision of 2026-11-04.
   default with a per-product switch (RM-13, `usage-data.md`); and plans.md's
   quality-table Contract row (line 146 at `bdd35d57`, "CT-216 by 2026-11-09") is restated as CT-216 done, linking
   `docs/specification/usage-data.md`; then the workspace sync, checked with
-  `git -C fabric-workspace grep -n 'usage-data' origin/main -- knowledge/roadmap.md knowledge/plans.md` (non-empty),
+  `git -C fabric-workspace grep -n 'usage-data' origin/main -- knowledge/roadmap.md knowledge/plans.md` (non-empty), `git -C fabric-workspace grep -n 'what a service declares about analytics' origin/main -- knowledge/plans.md` (empty, round 30, seam),
   `git -C fabric-workspace grep -n 'backend is hosted outside the organization\|analytics, private by default'
   origin/main -- knowledge/roadmap.md` (empty), `git -C fabric-workspace grep -n 'CT-216 by 2026-11-09' origin/main --
   knowledge/plans.md` (empty), `git -C fabric-workspace grep -n 'Measurement stays local and private by default'
@@ -251,7 +259,7 @@ decision of 2026-11-04.
   lines 76 to 94 at `2a11b3fd`): UD-6 leaves it undecided and asks such a product to say so on its usage data page; a
   question for the operator through Observatory's owner, carried in the board message's Observatory line, not filed
   here as a contract question since DEC-0065 leaves the setting to the product's operator.
-- Parallel branches: DEC-0156, DEC-0158 and DEC-0159 are open on their own branches. What this decision requires of
+- Parallel branches: DEC-0156, DEC-0158, DEC-0159 and DEC-0162 (CT-250) are open on their own branches. What this decision requires of
   the merged text binds whichever branch lands second, this one or the sibling: the session that lands it makes each
   edit below in that landing and runs each check on the merged tree, and copies this list with its checks into its
   pull request body (or merge message). If a sibling lands second, this list is on main in this handoff and is
@@ -259,15 +267,15 @@ decision of 2026-11-04.
   named beside it:
   - Registers (round 24, seam: `docs/handoffs/README.md` is not an append; each branch rewrote its own row): the index
     takes each handoff's row from the branch that owns it, one row per handoff file, with no `blob/agent/` link left
-    for a landed branch. The second lander keeps both sides of a conflict in `docs/DECISIONS.md` (adjacent appends) in id order. A conflict in `docs/backlog.md` is not an append: each branch may rewrite its own
+    for a landed branch. The second lander keeps both sides of a conflict in `docs/DECISIONS.md` (adjacent appends) in id order, save its `**Next free ID:**` line, which is not an append: one line stays, written from the counter read at landing (`git cat-file -p` of `refs/agent-sync/ids/DEC` on origin); check: `grep -c '^\*\*Next free ID:\*\*' docs/DECISIONS.md` prints 1 (round 30, seam). A conflict in `docs/backlog.md` is not an append: each branch may rewrite its own
     existing row in place, and two such rows can fall in one hunk, so the second lander takes each row from the branch
     that owns it (CT-216 from this branch, every other row from its own branch), one of each. Checks:
     `grep -c '^| CT-215 ' docs/backlog.md` and `grep -c '^| CT-216 ' docs/backlog.md` each print 1;
     `grep -o '^| [A-Z]*-[0-9]* ' docs/backlog.md | sort | uniq -d` prints nothing; no row or section either side added
-    is dropped: with `<merge>` the second landing's merge commit, `cat <(git show <merge>^1:docs/backlog.md) <(git show
+    is dropped: with `<merge>` the second landing's two-parent merge of `origin/main` made for the landing, never a squashed commit on main (`git rev-parse --verify -q <merge>^2` succeeds first, else stop; round 30, seam), `cat <(git show <merge>^1:docs/backlog.md) <(git show
     <merge>^2:docs/backlog.md) | grep -o '^| [A-Z]*-[0-9]* ' | sort -u | comm -23 - <(grep -o '^| [A-Z]*-[0-9]* '
     docs/backlog.md | sort -u)` prints nothing, and the same with `grep -o '^### DEC-[0-9]*'` on `docs/DECISIONS.md` and
-    `grep -o '([0-9-]*-[a-z0-9-]*\.md)'` on `docs/handoffs/README.md` (round 29, seam); on the handoffs index,
+    `grep -o '[0-9]\{4\}-[0-9-]*-[a-z0-9-]*\.md)'` on `docs/handoffs/README.md`, which matches a sibling row's blob link too (round 29, seam; anchored on the date in round 30, seam); on the handoffs index,
     `grep -c '2026-11-07-usage-data.md' docs/handoffs/README.md` prints 1, `grep -c 'blob/agent/ct216-usage-data-v2'
     docs/handoffs/README.md` prints 0, and `grep -o '[0-9-]*-[a-z0-9-]*\.md)' docs/handoffs/README.md | sort | uniq -d`
     prints nothing (round 26, seam). OQ ids have no compare-and-swap
@@ -297,7 +305,7 @@ decision of 2026-11-04.
     job-backed answers `scope-not-granted` with `operator-step: consent`; a job-backed tool answers a job reading
     `working` whose `statusMessage` starts with `operator-step consent`. It restates UD-4's "the contract adds no product-side
     refusal" (page, item 4) so that it allows CF-4's refusal of a member key's call on a `relayed` action and of an
-    approval such an instance cannot check, and adds to UD-4's elicitation clause, on a line that names CF-4, AP-2's
+    approval such an instance cannot check (check: `awk '/\*\*UD-4/,/\*\*UD-5/' docs/specification/usage-data.md | grep 'product-side refusal' | grep -c 'CF-4'` prints at least 1, round 30, seam), and adds to UD-4's elicitation clause, on a line that names CF-4, AP-2's
     rule that a cloud instance sends no elicitation to a client-key caller. It also places a cloud instance served to a
     team in UD-1's scope paragraph: an instance on a placement the estate hosts, which installs nothing on a member's
     machine or in an account or server of theirs, is outside the page as a hosted service; an instance an organization
@@ -1062,6 +1070,20 @@ not pushed for the same reason; the round entries' commits resolve only there.
   entry in order (unit, product, seam). Open for the operator: a shared file that stays unreadable holds every product
   sending only with the shared id for good, and no text names who repairs it (product, risk). Declined: none.
 
+- Checks run on the round-29 fold (`96ece407`): `pnpm run check` exit 0 (11173 tests, read by round 30's unit reading).
+- Round 30 (on `96ece407`): product clean; unit and seam not clean. Breaks folded: UD-4 and its three restatements
+  said setting the switch on never ends the hold for a product whose only id is the shared one, against UD-2's set-on
+  control for one that then sends without an id; all four now name only a product that sends nothing without it, and
+  say the switch does not make it send (unit); the handoffs-index union check matched only local links, so a sibling's
+  blob-linked row could be dropped; it now anchors on the date (seam). Risks folded: the earlier no carries the
+  own-switch qualifier in UD-2 and item 2 (unit); the operator question restated as a closed choice and filed as
+  OQ-0014, named in UD-4, item 4, row 220, SCN-043 and the Consequences; the hold line names the file and says it is
+  read again at each start; a shared-only product shows the hold display after its first send too; "cannot be read"
+  defined; CONTEXT carries the shared-only exception (product); DEC-0162 added to the Parallel branches with checks;
+  the plans row's old wording checked gone; the CT-293 grep widened; the product-side refusal check; the Next free ID
+  line excepted from both sides; `<merge>` a two-parent merge; Switchboard's status fields; Done's next id `DEC-0163`
+  (seam). Declined: none.
+
 ## Next task
 
-Round 30 of the blind readings of branch `agent/ct216-usage-data-v2` (DEC-0157): unit, seam and product.
+Round 31 of the blind readings of branch `agent/ct216-usage-data-v2` (DEC-0157): unit, seam and product.

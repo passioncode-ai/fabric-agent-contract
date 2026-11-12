@@ -87,23 +87,21 @@ The key words MUST, MUST NOT, SHOULD and MAY are used as in RFC 2119.
   never turns another off"); an earlier no read at the stand-in run holds, as one read before a first send does, until
   the person sets the product's own switch on. While an earlier no holds, the product shows its own switch as off (where
   it says why, as an earlier choice made for the apps on this computer), and its notice, if shown, says that it is off
-  and where to turn it on; turning it on there is the person setting the product's own switch on. An earlier no is the
-  shared off present at a run before the first send (or at the stand-in run); a product keeps an earlier no it read until the person sets its
+  and where to turn it on; turning it on there is the person setting the product's own switch on. An earlier no is the shared off present at a run before the first send, on an install whose own switch the person has not set on (or at the stand-in run, on one whose own switch the person never set); a product keeps an earlier no it read until the person sets its
   own switch on, and need not keep a reading that found none, only that its first send, or its stand-in run, has happened. What a
   product collected before it read an earlier no, a run held by an unreadable shared file included, it drops when it
-  reads that no, as off drops what waits to be sent. On an install whose own switch the person has not set on, a shared file that exists but cannot be read when the
+  reads that no, as off drops what waits to be sent. On an install whose own switch the person has not set on, a shared file that exists but cannot be read (any read error other than its absence, or content that is not the shape below) when the
   product reads it before its first send (or before that
   stand-in run) is no answer: the product MUST send nothing in that run and reads it again at its next run, and a run
   that sent nothing for that reason is no stand-in run. While an unreadable shared file holds its send (on an install whose
   own switch the person never set), the product shows its switch as on but not sending, says beside it
   (for a product without a window, where its switch is read, such as a command line tool's status output) that
-  nothing is sent until the shared file can be read at its next start, and offers there a control that sets its own
-  switch on for this product, which is the person setting the product's own switch on. A product whose only installation id is the shared one offers that control only where, once its switch is set on, it sends without an installation id (UD-3 requires none); otherwise it offers none and keeps showing its switch as on but not sending, with the line, whether or not the person set it, until the shared file can be read. The shared file is `<root>/installation.json`, `<root>` as DEC-0025 defines it (the `PassionCode` folder), holding
+  nothing is sent until the shared file (`<root>/installation.json`) can be read, which it reads again at each start, and offers there a control that sets its own
+  switch on for this product, which is the person setting the product's own switch on. A product whose only installation id is the shared one offers that control only where, once its switch is set on, it sends without an installation id (UD-3 requires none); otherwise it offers none and keeps showing its switch as on but not sending, with the line, whether or not the person set it, until the shared file can be read. A product whose only installation id is the shared one shows the same display whenever the shared file cannot be read, after its first send too. The shared file is `<root>/installation.json`, `<root>` as DEC-0025 defines it (the `PassionCode` folder), holding
   `version` 1, `id` (a random UUID), `analytics` (a boolean) and `created_at`, as the products that create it write it
   (the launcher's `lib/analytics.js` lines 41 to 46 for the path and line 56 for the shape, at `ad978a6`). A product's own switch MUST NOT write the shared
   file's `analytics` field; a product whose switch wrote it under words that governed every reader stops writing it
-  from the version whose switch governs it alone, and leaves an off already written there, which stays the earlier no
-  for products that have not yet sent, or not yet had their stand-in run. Fabric's live setting says its switch governs every
+  from the version whose switch governs it alone, and leaves an off already written there, which stays the earlier no for products that have not yet sent, or not yet had their stand-in run, unless the person set that product's own switch on. Fabric's live setting says its switch governs every
   app ("One switch for every PassionCode app on this computer", its `en.ts` line 864 at `eafcf2e4`): that is a false promise for a product past its first send (or, for an install that sent before its conforming version, past a stand-in run that read no earlier no), one that cannot read the shared file, or one whose own switch the person set, and, for its on, for a product that already read an off as an earlier no, which the person reads until Fabric's switch for Fabric alone ships (its
   CO-496). A device policy ([devices](devices.md#policy)) whose layer carries a key for a product's switch MAY lock it
   off; it MUST NOT lock it on, since a person who declined stays off and the switch is the person's (UD-4).
@@ -181,7 +179,7 @@ The key words MUST, MUST NOT, SHOULD and MAY are used as in RFC 2119.
   a signed decision of an approver the product trusts for that action's digest (DL-17, DL-18), and refusing it for one
   action would split AP-2's single table. An agent MUST NOT delete or rewrite a shared file it cannot read to end a
   hold (UD-2): it reports the hold and, on the operator's word naming the switch, sets the product's own switch on through
-  the product's relayed action as above; anyone else it points to the product's own switch. For a product whose only installation id is the shared one, setting its switch on does not end the hold: the agent tells the operator the product sends nothing until the shared file can be read, and points anyone else to the product's hold line rather than to its switch.
+  the product's relayed action as above; anyone else it points to the product's own switch. For a product whose only installation id is the shared one and which, once set on, sends nothing without it (one that offers no set-on control at its hold, UD-2), setting its switch on does not make it send: the agent tells the operator the product sends nothing until the shared file can be read, names the file's location and that its repair waits on the operator's answer to OQ-0014, and points anyone else to the product's hold line rather than to its switch.
 - **UD-5, no machine declaration yet.** A product MUST state in its own documentation (its privacy text and a page on
   its usage data) what it collects, the installation id it sends (when it sends one) and whether it is shared, where it
   sends the data (the organization that receives it and its host, and every service or agent that reads the data there (a holder of a grant to read the raw events included), with
@@ -232,7 +230,7 @@ each sends for an install whose person said no under Fabric's shared switch befo
 sends a baseline without an id when the shared file cannot be read (`desktop/analytics.cjs` lines 307 to 310 at
 `1395416`), and Fabric Dashboards sends its events without an id then (`src/core/analytics.ts` lines 59 to 60 and 170
 to 171 at `d43c94e`); both owe UD-2's sending nothing in a run before their first send (or before their conforming
-version's stand-in run) in which the shared file cannot be read, on an install whose own switch the person has not set on, and UD-2's hold display (its switch on but not sending, the next-start line, and the control where UD-2 allows it); Switchboard, which holds its send while the file cannot be read (`analytics.rs` lines 488 to 490 at `405b789`) but whose status carries only `enabled` (lines 372 to 378), owes the same display. Their notices owe
+version's stand-in run) in which the shared file cannot be read, on an install whose own switch the person has not set on, and UD-2's hold display (its switch on but not sending, the next-start line, and the control where UD-2 allows it); Switchboard, which holds its send while the file cannot be read (`analytics.rs` lines 488 to 490 at `405b789`) but whose status (`available`, `enabled`, `notice_pending`, lines 372 to 378) carries no hold state, owes the same display. Their notices owe
 UD-1's contents: Fabric Dashboards' (`src/core/i18n.ts` lines 86 to 88 at `d43c94e`) names no installation id though
 every event carries the shared `install_id`, and no purpose of counting once, so it owes the id, that it is shared and
 with which products, that it ties events together, that turning back on resumes it, and that purpose; Fabric Inbox's
