@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0156` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0165` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -11384,3 +11384,48 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `peer_owner` 1.3.0 proposal (`914c0383`), sshlg-fabric-server's (`ed799cae`, `93886034`) and the adapter's (`b8053022`)
   inputs; backlog CT-261.
 
+### DEC-0164: the unit of work as an activity event, kind `unit`
+
+- **Date:** 2026-11-12
+- **Status:** Proposed 2026-11-12 from the design `docs/evidence/plans/2026-11-12-ct259-activity-unit.md` (CT-259), whose
+  shape Project Observatory confirmed on the board (thread `b83440d6`, message `b8d911c0`; thread `52aa2f93`, message
+  `55fa0fd7`); accepted when the coordinator's blind readings are clean on two consecutive rounds. A new core kind
+  inside `fabric-activity/0.1` and one rule code (`FAC-SEM-171`); nothing existing changes meaning.
+- **Context:** the North Star metric counts accepted units of work per task class (fabric-workspace
+  `knowledge/system/measure.md`, *The activity event*; North Star gap G1-a). The activity protocol had no agent id, no
+  unit and no acceptance: `result` says whether a run met a signal, not which unit was delivered and accepted.
+  fabric-workspace asked for it (board request `e9d30889`, thread `8da128cf`, line 1.1); Observatory's journal
+  (OBS-378) reads it.
+- **Decision:** [activity](specification/activity.md) *Kinds*, `unit`.
+  1. **AE-1.** A `telemetry-event` of kind `unit` records one transition (`started`, `ended`, `handed-over`,
+     `accepted`) of one unit of work; it requires `run.root` and `project.id` and carries no `user` and no `session`.
+     `data`: `agent` (`id.instance`), `unit` `{system, key}`, `transition`, `taskClass` (or `unclassified`),
+     `taskClassMap` `{id, revision}` exactly when classified (AE-2a), `outcome` on `ended` only, `evidence` (0 to 8
+     references, never content), `acceptedBy` `{kind: rule|agent|person, ref}` and `acceptedAt` on `accepted` only, and
+     `cost` as the envelope states one (`{usd: null}` when unknown).
+  2. **AE-2.** Its `source` is `unit` and its `sourceKey` the `sha256:` of the settings-form canonical JSON of the agent,
+     the unit's system and key, the transition and `run.root` (`unitSourceKey`), so every writer derives one `eventId`
+     and a reopened unit accepted again under a new `run.root` is a new event (`FAC-SEM-171`, with an acceptance not
+     recorded before it happened).
+  3. **AE-3.** No user is attached to a unit, no unit is served by person, and a `person` acceptance stays in the
+     organization's own journal.
+  4. **AE-4.** A device collector sends it in its batches; a kit without one records it through Observatory's
+     `activity.unit.record`, bound as `ops.digest.record` is (DEC-0153). **AE-5.** An older reader stores it as an
+     unknown kind and counts nothing.
+- **Why:** one record per unit transition, owned by the agent and joined by `run.root`, is what the metric counts; a
+  derived id makes the count idempotent across writers; keeping the person out of the event and out of every summary
+  keeps it from ever being a person's score.
+- **Alternatives considered:** a separate document type for the journal (refused: Observatory confirmed `unit` inside
+  `fabric-activity/0.1`, one transport, one attribution, one person rule); `org` in the event (refused: the stream's
+  attribution names the organization); `cost` as `null` (refused for the envelope's own form, `{usd: null}`, which
+  `FAC-SEM-038` already reads); an id without `run.root` (refused on Observatory's answer: a second acceptance would be
+  dropped as a repeat).
+- **Compatibility:** additive; an older reader stores `unit` as an unknown kind. Owed: Observatory's journal and its
+  capability `activity.unit.record` (OBS-378, after this decision); the adapter's kit writer (G1-b); the assessment's
+  class map (G1-c); the join into the metric (G1-d).
+- **Consequences / affects:** `schemas/telemetry-event.schema.json` (`$defs/unit` and the kind), `src/activity-rules.ts`
+  (`unitSourceKey`, `FAC-SEM-171`), `tools/vectors/activity-unit.ts`, `fixtures/vectors/activity-unit.json`,
+  `test/activity-unit.test.ts`; `docs/specification/activity.md` (the envelope's kinds, `unit`, the rule),
+  `docs/specification/conformance.md` (a writer and a reader row, the rule code).
+- **Source:** the design `docs/evidence/plans/2026-11-12-ct259-activity-unit.md`; board request `e9d30889`; Observatory's
+  answers on threads `b83440d6` and `52aa2f93`; backlog CT-259.

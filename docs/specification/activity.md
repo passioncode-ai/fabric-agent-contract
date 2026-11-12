@@ -101,7 +101,7 @@ policy key names).
 | Field | Meaning |
 |---|---|
 | `eventId` | The idempotency key ([below](#event-id)). |
-| `kind` | `session.interval`, `usage.line`, `session.annotation`, `buffer.overflow`, `policy.violation`, `grant.usage`, `result`, an extension `x-<namespace>.<kind>`, or a kind a later revision adds. |
+| `kind` | `session.interval`, `usage.line`, `session.annotation`, `buffer.overflow`, `policy.violation`, `grant.usage`, `result`, `unit` (DEC-0164), an extension `x-<namespace>.<kind>`, or a kind a later revision adds. |
 | `source` | Where the collector read it. Open vocabulary; known: `claude_code.otel`, `claude_code.transcript`, `codex.otel`, `codex.rollout`, `switchboard`, `process`. |
 | `sourceKey` | Present exactly when `eventId` is derived. Either the source's own id of the record (a request id, a line uuid) or, for a key derived from a file, `hmac-sha256:` under the device's telemetry key ([below](#event-id)). Never a path: the schema refuses a slash and an encoded home-directory fragment, the dashed form at the start or after any character that is not an ASCII letter or digit (DEC-0105). |
 | `collector.id`, `collector.epoch`, `seq` | The stream position ([below](#streams)). |
@@ -210,6 +210,39 @@ the device's stream, which the receiver attributes to a user by certificate (`FA
 it never attaches a user to a result and serves results only as project or agent cells of at least 3
 (`activity.results`, `FAC-SEM-067`). `data`: `signal` (the declared signal's name),
 `outcome` (`met`, `not_met`) and an optional `count`. A summary gains no person dimension from it.
+
+**`unit`**: one transition of one unit of work an agent did (DEC-0164, North Star gap G1-a): the event the North
+Star metric counts as accepted units per task class. It requires `run.root` and `project.id`, and carries **no `user`
+and no `session`** (schema): a unit is the agent's, never a person's (AE-1). Its `source` is `unit` and its `sourceKey`
+is `sha256:` and the hex SHA-256 of the settings-form canonical JSON `{"agent", "key", "run", "system", "transition"}`
+(the agent, `unit.key`, `run.root`, `unit.system`, the transition), so its derived `eventId` is the same from every
+writer and a repeated write of one transition is one event; a unit reopened and accepted again is a new attempt with
+its own `run.root`, so its second acceptance is a new event (AE-2, [`unitSourceKey`](../../src/activity-rules.ts),
+`FAC-SEM-171`). `data`:
+
+| Field | Rule |
+|---|---|
+| `agent` | the agent that did the work, as its descriptor names it (`id.instance`), never a person |
+| `unit` | `{system, key}`: the tracker or surface that owns the unit (an open vocabulary: `github`, `jira`, `store`, `mail`, `board`) and its stable key there, as `task.ref` |
+| `transition` | `started`, `ended`, `handed-over` or `accepted` |
+| `taskClass` | the assessment's class id, or `unclassified` until its class map names one |
+| `taskClassMap` | `{id, revision}` of the class map `taskClass` was read from, the revision a positive integer its owner raises; present exactly when `taskClass` is not `unclassified`, so a reader of a past month maps a renamed, split or merged class through the owner's table between revisions or counts it under its old name, visibly (AE-2a) |
+| `outcome` | on `ended` only: `completed`, `failed` or `abandoned` |
+| `evidence` | 0 to 8 references, each an http(s) URI, a URN or a `sha256:` digest (a receipt, a test run, a review mark); never content |
+| `acceptedBy` | on `accepted` only: `{kind, ref}`, `kind` being `rule` (`ref` the acceptance rule's id), `agent` (`ref` an agent's id) or `person` (`ref` the person's pairwise membership subject for this reader, [membership](membership.md) OM-1; never a name or an address) |
+| `acceptedAt` | on `accepted` only: when it was accepted, not after the event's `occurred` (60 s of skew, `FAC-SEM-171`) |
+| `cost` | the agent's spend on the unit as the envelope states a cost: `{usd, basis}`, or `{usd: null}` when unknown, never 0 for unknown (`FAC-SEM-038`) |
+
+The receiver never attaches a user to a `unit` event, never puts a unit into a summary cell by person, and serves
+units only per agent, project or task class; an `acceptedBy` of kind `person` stays in the organization's own journal
+for the trust guardrail (members see what agents did on their work) and never reaches a summary, a usage report or
+another organization (AE-3). A device collector sends `unit` events in its activity batches like any kind; a kit with
+no collector records them through Project Observatory's capability `activity.unit.record` (OBS-378), bound as
+[`ops.digest.record`](ops-digest.md) is (an access binding with that scope and effect `propose` over stdio, a hub
+delegation token with that scope on the memory-http door), the event's `project.id` the transport's project and
+`data.agent` a service the registry attributes to it; the event's shape is this one either way (AE-4). A reader at an
+older pin reads `unit` as an unknown kind, stores it and counts nothing (AE-5). A unit event names no organization: the
+stream's attribution does, and a project with no membership keeps it in Observatory's local journal only.
 
 **`session.annotation`** — what a surface reported about a session, read by the device's collector (DEC-0068): Fabric's
 `session.ended` or `terminal.opened`, Switchboard's `journal_launch`. It requires `session` and `runtime`. `data`: `by`
@@ -555,6 +588,7 @@ not an identity: the runtimes' own exports use other names (Claude Code: `input_
 | <a id="fac-sem-040"></a>`FAC-SEM-040` | `activity-summary` | no person dimension, content key or path; no producer kind; no published cell whose population is below `minPopulation` (at least 3) or above its sessions; one cell per agent × skill × project × day × outcome, and at most one other cell per day; every day inside `from`…`to` |
 | <a id="fac-sem-067"></a>`FAC-SEM-067` | `access-log-disclosure` | a read served to a person other than the subject shows the subject's time or presence only under a `purposeId` the subject confirmed, and the subject's usage and cost only per UTC day or billing period |
 | <a id="fac-sem-100"></a>`FAC-SEM-100` | `session-join` | every `session.interval` and `usage.line` of one `session.id` carries one `collector.id`, and the intervals of one session do not overlap; annotations are not counted (DEC-0068) |
+| <a id="fac-sem-171"></a>`FAC-SEM-171` | `activity-batch`, `telemetry-event` | a `unit` event's `source` is `unit` and its `sourceKey` is `unitSourceKey`'s for its agent, unit, transition and `run.root`; its `acceptedAt` is not after its `occurred` (60 s of skew) (DEC-0164 AE-1, AE-2) |
 | <a id="fac-sem-123"></a>`FAC-SEM-123` | `access-log-disclosure` | an entry whose reader's `role` is `partner` is a service's read (no `user`) of `activity.usage`, per UTC day or billing period, keyed by no device ([the partner channel](partner-channel.md), DEC-0090) |
 
 `activity-ack` checks `{known?, batch, ack}`: `known` is the receiver's stream state before the

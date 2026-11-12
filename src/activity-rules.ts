@@ -111,6 +111,17 @@ export function activityEventId(source: string, sourceKey: string): string {
 }
 
 /**
+ * The `sourceKey` of a `unit` event (DEC-0164 AE-2): `sha256:` of the settings-form canonical JSON of the agent, the
+ * unit's system and key, the transition and the attempt's `run.root`, so every writer of one transition (a device
+ * collector or a kit through Observatory's capability) derives one `eventId` with `source` `unit`, and a unit reopened
+ * and accepted again under a new `run.root` is a new event.
+ */
+export function unitSourceKey(agent: string, unit: { system: string; key: string }, transition: string, runRoot: string): string {
+  const fields = { agent, key: unit.key, run: runRoot, system: unit.system, transition };
+  return `sha256:${createHash("sha256").update(settingsCanonicalJson(fields), "utf8").digest("hex")}`;
+}
+
+/**
  * The `sourceKey` of a record identified by its place in a file: `hmac-sha256:` of the canonical
  * `{offset, path}` (path relative to the runtime's own directory) under the device's telemetry key —
  * 32 random bytes the collector keeps and never sends. A plain path would carry the person's home
@@ -281,6 +292,29 @@ function eventIntegrity(event: JsonObject, at: string): Finding[] {
  * sent twice — neither under one id nor, for a grant's daily usage, one (day, grantId) of one stream twice, the grant's id
  * compared by normal form (DEC-0082, DEC-0076).
  */
+/**
+ * FAC-SEM-171 (DEC-0164) on one `unit` event: its source is `unit` and its `sourceKey` is `unitSourceKey`'s for its agent,
+ * unit, transition and `run.root`, so every writer derives one id; an acceptance is not recorded before it happened.
+ */
+function unitEvent(event: JsonObject, at: string): Finding[] {
+  if (event.kind !== "unit") return [];
+  const findings: Finding[] = [];
+  const flag = (path: string, message: string) => findings.push({ code: "FAC-SEM-171", instancePath: `${at}${path}`, message });
+  const d = data(event);
+  const unit = isObject(d.unit) ? d.unit : {};
+  const run = isObject(event.run) ? event.run : {};
+  if (event.source !== "unit") flag("/source", "a unit event's source is unit, so a collector and a kit derive one id for one transition");
+  if (typeof d.agent === "string" && typeof unit.system === "string" && typeof unit.key === "string" && typeof d.transition === "string" && typeof run.root === "string") {
+    let derived: string | null = null;
+    try { derived = unitSourceKey(d.agent, { system: unit.system, key: unit.key }, d.transition, run.root); } catch { flag("/sourceKey", "a unit with a lone surrogate has no canonical form, so no sourceKey derives from it"); }
+    if (derived !== null && event.sourceKey !== derived) flag("/sourceKey", "a unit event's sourceKey derives from its agent, unit, transition and run.root (unitSourceKey)");
+  }
+  if (typeof d.acceptedAt === "string" && typeof event.occurred === "string" && Date.parse(d.acceptedAt) > Date.parse(event.occurred) + 60_000) {
+    flag("/data/acceptedAt", "an acceptance is recorded at or after it happened: acceptedAt is not after occurred (60 s of skew)");
+  }
+  return findings;
+}
+
 function batchIntegrity(value: JsonObject): Finding[] {
   const findings: Finding[] = [];
   const last = new Map<string, number>();
@@ -289,7 +323,7 @@ function batchIntegrity(value: JsonObject): Finding[] {
   const device = deviceId(value);
   indexed(value.events).forEach(([event, i]) => {
     const at = `/events/${i}`;
-    findings.push(...eventIntegrity(event, at));
+    findings.push(...eventIntegrity(event, at), ...unitEvent(event, at));
     const id = show(event.eventId ?? "");
     if (ids.has(id)) findings.push({ code: "FAC-SEM-039", instancePath: `${at}/eventId`, message: `${id} appears twice in one batch` });
     ids.add(id);
@@ -508,7 +542,7 @@ function accessLogDisclosure(value: JsonObject): Finding[] {
 
 export function activityRules(kind: string, value: unknown): Finding[] | undefined {
   if (!isObject(value)) return undefined;
-  if (kind === "telemetry-event") return [...noContentOrPerson(value, [""]), ...eventCost(value, ""), ...eventIntegrity(value, "")];
+  if (kind === "telemetry-event") return [...noContentOrPerson(value, [""]), ...eventCost(value, ""), ...eventIntegrity(value, ""), ...unitEvent(value, "")];
   if (kind === "activity-batch") return [...noContentOrPerson(value, indexed(value.events).map(([, i]) => `/events/${i}`)), ...batchCost(value), ...batchIntegrity(value)];
   if (kind === "activity-ack") return ackIntegrity(value);
   if (kind === "activity-summary") return [...summaryCost(value), ...summaryShape(value)];

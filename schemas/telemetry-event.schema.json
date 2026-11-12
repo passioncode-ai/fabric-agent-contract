@@ -410,6 +410,47 @@
         "type": "object",
         "properties": {
           "kind": {
+            "const": "unit"
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "run": {
+            "type": "object",
+            "properties": {
+              "root": true
+            },
+            "required": [
+              "root"
+            ]
+          },
+          "user": false,
+          "session": false,
+          "data": {
+            "$ref": "#/$defs/unit"
+          },
+          "project": true,
+          "source": {
+            "const": "unit"
+          }
+        },
+        "required": [
+          "run",
+          "project",
+          "sourceKey"
+        ]
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "kind": {
             "enum": [
               "session.interval",
               "usage.line",
@@ -417,6 +458,7 @@
               "policy.violation",
               "grant.usage",
               "result",
+              "unit",
               "session.annotation"
             ]
           }
@@ -712,6 +754,223 @@
       },
       "additionalProperties": false,
       "description": "DEC-0068 (CON-OE-08): a surface's event about a session, read by the device's collector. It carries no start, end, tokens or cost, so it is never counted: session.interval and usage.line are the collector's alone."
+    },
+    "unit": {
+      "type": "object",
+      "description": "One transition of one unit of work an agent did (DEC-0164 AE-1): the agent's, never a person's. Its event's source is unit and its sourceKey unitSourceKey's (FAC-SEM-171).",
+      "required": [
+        "agent",
+        "unit",
+        "transition",
+        "taskClass",
+        "cost"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "agent": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{1,62}\\.[a-z][a-z0-9-]{0,31}$",
+          "description": "The agent that did the work, as its descriptor names it (id.instance); never a person."
+        },
+        "unit": {
+          "$ref": "activity-common.schema.json#/$defs/taskRef",
+          "description": "The tracker or surface that owns the unit (an open vocabulary: github, jira, store, mail, board) and its stable key there, as task.ref."
+        },
+        "transition": {
+          "enum": [
+            "started",
+            "ended",
+            "handed-over",
+            "accepted"
+          ]
+        },
+        "taskClass": {
+          "type": "string",
+          "pattern": "^(unclassified|[a-z][a-z0-9._-]{0,63})$",
+          "description": "The assessment's class id, or unclassified until its map names one."
+        },
+        "taskClassMap": {
+          "type": "object",
+          "required": [
+            "id",
+            "revision"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "$ref": "activity-common.schema.json#/$defs/opaqueId"
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            }
+          },
+          "description": "The class map taskClass was read from and its revision (AE-2a); present exactly when taskClass is not unclassified."
+        },
+        "outcome": {
+          "enum": [
+            "completed",
+            "failed",
+            "abandoned"
+          ],
+          "description": "On ended only."
+        },
+        "evidence": {
+          "type": "array",
+          "maxItems": 8,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "maxLength": 2048,
+            "pattern": "^(sha256:[a-f0-9]{64}|https?://[^\\s]+|urn:[A-Za-z0-9][A-Za-z0-9-]{0,31}:[^\\s]+)$"
+          },
+          "description": "References only (a receipt, a test run, a review mark), each an http(s) URI, a URN or a sha256: digest; never content."
+        },
+        "acceptedBy": {
+          "type": "object",
+          "required": [
+            "kind",
+            "ref"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "enum": [
+                "rule",
+                "agent",
+                "person"
+              ]
+            },
+            "ref": {
+              "$ref": "activity-common.schema.json#/$defs/opaqueId"
+            }
+          },
+          "description": "On accepted only: an acceptance rule's id, an agent's id, or a person's pairwise membership subject for this reader (never a name or an address); a person's stays in the organization's own journal (AE-3)."
+        },
+        "acceptedAt": {
+          "$ref": "common.schema.json#/$defs/timestamp",
+          "description": "On accepted only: when it was accepted."
+        },
+        "cost": {
+          "$ref": "activity-common.schema.json#/$defs/cost",
+          "description": "The agent's spend on the unit: usd with its basis, or usd null when unknown, never 0 for unknown (FAC-SEM-038)."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "transition": {
+                "const": "ended"
+              }
+            },
+            "required": [
+              "transition"
+            ]
+          },
+          "then": {
+            "required": [
+              "outcome"
+            ],
+            "properties": {
+              "outcome": true
+            }
+          },
+          "else": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "outcome"
+                  ],
+                  "properties": {
+                    "outcome": true
+                  }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "transition": {
+                "const": "accepted"
+              }
+            },
+            "required": [
+              "transition"
+            ]
+          },
+          "then": {
+            "required": [
+              "acceptedBy",
+              "acceptedAt"
+            ],
+            "properties": {
+              "acceptedBy": true,
+              "acceptedAt": true
+            }
+          },
+          "else": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "acceptedBy"
+                  ],
+                  "properties": {
+                    "acceptedBy": true
+                  }
+                },
+                {
+                  "required": [
+                    "acceptedAt"
+                  ],
+                  "properties": {
+                    "acceptedAt": true
+                  }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "taskClass": {
+                "const": "unclassified"
+              }
+            },
+            "required": [
+              "taskClass"
+            ]
+          },
+          "then": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "taskClassMap"
+                  ],
+                  "properties": {
+                    "taskClassMap": true
+                  }
+                }
+              ]
+            }
+          },
+          "else": {
+            "required": [
+              "taskClassMap"
+            ],
+            "properties": {
+              "taskClassMap": true
+            }
+          }
+        }
+      ]
     }
   }
 }
