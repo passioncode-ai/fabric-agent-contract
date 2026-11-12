@@ -11448,7 +11448,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      browser build or a component on a server, owes no read of it); for an install that sent before the product's version that meets UD-2, the first
      run of that version at which the shared file is read, or found absent, stands in for the first send, so a shared
      off present then, on an install whose own switch the person never set, is read as the earlier no; after that
-     product's first send (or that stand-in run) its own switch alone governs it (plans.md item D, "one product's switch never turns another off"), so
+     product's first send (or a stand-in run that read no earlier no) its own switch alone governs it (plans.md item D,
+     "one product's switch never turns another off"), an earlier no read at that run holding until the person sets the
+     product's own switch on, the product meanwhile showing its own switch as off and its notice saying where to turn it
+     on, so
      Fabric's live "One switch for every PassionCode app on this computer" (`en.ts` line 864 at `eafcf2e4`) is a false
      promise for a product that has already sent, which the person reads until Fabric's switch for Fabric alone ships
      (CO-496); a product's own switch never writes the shared file's `analytics` field, and a product whose switch

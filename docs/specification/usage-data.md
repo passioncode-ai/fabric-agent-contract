@@ -82,9 +82,15 @@ The key words MUST, MUST NOT, SHOULD and MAY are used as in RFC 2119.
   build, a component on a server) owes no read of it, and only its own switch's off is its decline. For an install that sent before the product's version that meets this rule, the first
   run of that version at which the shared file is read, or found absent, stands in for the first send: a shared
   `analytics: false` present then, on an install whose own switch the person never set, is read as the earlier no.
-  After a product's first send (for such an install, after that stand-in run), its own switch alone governs it, and an
-  off written in the shared file later does not turn it off (plans.md item D, "one product's switch never turns another
-  off"). A shared file that exists but cannot be read when the product reads it before its first send (or before that
+  After a product's first send (for such an install, after a stand-in run that read no earlier no), its own switch alone
+  governs it, and an off written in the shared file later does not turn it off (plans.md item D, "one product's switch
+  never turns another off"); an earlier no read at the stand-in run holds, as one read before a first send does, until
+  the person sets the product's own switch on. While an earlier no holds, the product shows its own switch as off (where
+  it says why, as an earlier choice made for the apps on this computer), and its notice, if shown, says that it is off
+  and where to turn it on; turning it on there is the person setting the product's own switch on. An earlier no is the
+  shared off present at a run before the first send (or at the stand-in run); a product need not keep what an earlier
+  run read. On an install whose own switch the person has not set on, a shared file that exists but cannot be read when the
+  product reads it before its first send (or before that
   stand-in run) is no answer: the product MUST send nothing in that run and reads it again at its next run, and a run
   that sent nothing for that reason is no stand-in run. A product's own switch MUST NOT write the shared
   file's `analytics` field; a product whose switch wrote it under words that governed every reader stops writing it

@@ -8,8 +8,8 @@ decision of 2026-11-04.
 
 ## Done
 
-- DEC-0157 reserved by git CAS on 2026-11-07 and drafted (Proposed); the register's next free id line reads `DEC-0160`
-  after the merge of `origin/main` on 2026-11-08 (the CAS counter's next value then).
+- DEC-0157 reserved by git CAS on 2026-11-07 and drafted (Proposed); the register's next free id line read `DEC-0160`
+  after the merge of `origin/main` on 2026-11-08 and reads `DEC-0162` since 2026-11-12 (the CAS counter's next value).
 - `origin/main` merged again on 2026-11-12 (`bd1271e5`, main `d40ae936`, and `d683e2b3`, main `b8a6af95`): it brought
   the four North Star designs (CT-250, CT-252, CT-259, CT-285), CT-287 (this branch named among six paused DECs) and
   the CT-250, CT-252, CT-259 and CT-285 rows naming UD-4 and UD-6; no file this branch owns conflicted. The next free
@@ -67,7 +67,9 @@ decision of 2026-11-04.
 
 - The coordinator's blind readings until two consecutive clean rounds; the gate; the pull request, merge, tag and
   release; at merge DEC-0157 Accepted and CT-216 done, CT-287's DEC-0157 clause marked landed (the pull request and the merge
-  commit), the `Next free ID` line written from the counter read then, and the products told on the board what each owes, in one
+  commit), the `Next free ID` line written from the counter read then, the handoffs index row's Decisions cell reading
+  "DEC-0157 (CT-216; CT-280 filed), accepted <date>; rounds 1 to N not clean, N+1 and N+2 clean" and its Merge cell
+  "merged <date>, #<PR> `<merge commit>`", and the products told on the board what each owes, in one
   message on the plans thread `e1cb9f7e` (where each product reports plans.md items A to D) addressed to every product
   owner, with a general line first (any product that sends usage or error data checks itself against UD-1 to UD-6
   before its next release) and then a line per product, as DEC-0157's Compatibility lists it (Fabric, with the collector row's UD-6 condition as the digest collector, and
@@ -929,6 +931,18 @@ not pushed for the same reason; the round entries' commits resolve only there.
   profile turns a declined switch back on), CT-252 keeps MD-3 for slots, CT-259 restates UD-6 (seam, product).
   Carried, not folded: the lock exception's executable proof stays CT-280 (unit). Declined: none.
 
+- Round 23 (on `ccd51a73`, origin/main `b8a6af95` merged): seam clean; unit and product not clean. Breaks folded: on
+  the stand-in path an earlier no was read and at once overridden by "its own switch alone governs it"; now only a
+  stand-in run that read no earlier no hands the product to its own switch, and an earlier no read there holds until
+  the person sets the product's own switch on (usage-data.md, DEC-0157 item 2, the product's conformance row) (unit);
+  no text said what the product's own switch shows while an earlier no holds; it shows off, the notice says where to
+  turn it on, and turning it on there ends the no (usage-data.md, DEC-0157, conformance, CONTEXT) (product); the
+  backlog row and the handoffs index were a round behind and the landing list did not name the index row; both now say
+  round 23 folded, round 24 next, and the landing list names the index row (product). Risks folded: the unreadable-file
+  MUST applies on an install whose own switch the person has not set on; an earlier no is the shared off present at a
+  run before the first send, and a product need not keep what an earlier run read (unit); this Done's id line (seam).
+  Declined: none.
+
 ## Next task
 
-Round 23 of the blind readings of branch `agent/ct216-usage-data-v2` (DEC-0157): unit, seam and product.
+Round 24 of the blind readings of branch `agent/ct216-usage-data-v2` (DEC-0157): unit, seam and product.
