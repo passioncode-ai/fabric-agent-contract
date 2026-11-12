@@ -88,11 +88,12 @@ The key words MUST, MUST NOT, SHOULD and MAY are used as in RFC 2119.
   the person sets the product's own switch on. While an earlier no holds, the product shows its own switch as off (where
   it says why, as an earlier choice made for the apps on this computer), and its notice, if shown, says that it is off
   and where to turn it on; turning it on there is the person setting the product's own switch on. An earlier no is the
-  shared off present at a run before the first send (or at the stand-in run); a product need not keep what an earlier
-  run read. On an install whose own switch the person has not set on, a shared file that exists but cannot be read when the
+  shared off present at a run before the first send (or at the stand-in run); a product keeps an earlier no it read until the person sets its
+  own switch on, and need not keep a reading that found none. On an install whose own switch the person has not set on, a shared file that exists but cannot be read when the
   product reads it before its first send (or before that
   stand-in run) is no answer: the product MUST send nothing in that run and reads it again at its next run, and a run
-  that sent nothing for that reason is no stand-in run. A product's own switch MUST NOT write the shared
+  that sent nothing for that reason is no stand-in run. While an unreadable shared file holds its send, the product says beside its switch that nothing is sent until the
+  shared file can be read, and offers there to set its switch on, which is the person setting the product's own switch on. A product's own switch MUST NOT write the shared
   file's `analytics` field; a product whose switch wrote it under words that governed every reader stops writing it
   from the version whose switch governs it alone, and leaves an off already written there, which stays the earlier no
   for products that have not yet sent. Fabric's live setting says its switch governs every
@@ -222,7 +223,7 @@ each sends for an install whose person said no under Fabric's shared switch befo
 sends a baseline without an id when the shared file cannot be read (`desktop/analytics.cjs` lines 307 to 310 at
 `1395416`), and Fabric Dashboards sends its events without an id then (`src/core/analytics.ts` lines 59 to 60 and 170
 to 171 at `d43c94e`); both owe UD-2's sending nothing in a run before their first send (or before their conforming
-version's stand-in run) in which the shared file cannot be read. Their notices owe
+version's stand-in run) in which the shared file cannot be read, on an install whose own switch the person has not set on. Their notices owe
 UD-1's contents: Fabric Dashboards' (`src/core/i18n.ts` lines 86 to 88 at `d43c94e`) names no installation id though
 every event carries the shared `install_id`, and no purpose of counting once, so it owes the id, that it is shared and
 with which products, that it ties events together, that turning back on resumes it, and that purpose; Fabric Inbox's
@@ -304,7 +305,7 @@ app on the machine", the page its README sends readers to), all at `eafcf2e4`, w
 reaches. Fabric's switch also writes the shared `analytics`
 field both ways (`writeAnalyticsSwitch`, `apps/desktop/src/main/analytics.ts` lines 88 to 96, called by `setEnabled`
 at lines 305 to 308, at `eafcf2e4`), so under UD-2's earlier-no reading its off decides for every product that has
-not yet sent and its on erases a person's earlier no; CO-496 owes UD-2's rule on writing: Fabric stops writing the
+not yet sent and its on erases a person's earlier no for every product that has not yet read it; CO-496 owes UD-2's rule on writing: Fabric stops writing the
 field from the version whose switch governs Fabric alone and leaves an off already written there. Fabric Inbox exports
 a writer for the shared field that nothing calls (`writeSwitch`, `desktop/analytics.cjs` lines 96 to 103 at
 `1395416`), so it writes nothing there today, and under UD-2 it stays uncalled. Its `README.md` (lines 202 to 204 at

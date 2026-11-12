@@ -14,6 +14,8 @@ decision of 2026-11-04.
   the four North Star designs (CT-250, CT-252, CT-259, CT-285), CT-287 (this branch named among six paused DECs) and
   the CT-250, CT-252, CT-259 and CT-285 rows naming UD-4 and UD-6; no file this branch owns conflicted. The next free
   id is `DEC-0162` (the counter on origin since 2026-11-08T11:39Z, DEC-0160 and DEC-0161 reserved by siblings).
+  A third merge, `45bf544e` (main `2b0bcd55`, #274 and #275), changed CT-250, CT-285 and CT-287 in `docs/backlog.md` and
+  no file this branch owns.
 - [Usage data](../specification/usage-data.md): UD-1 (on by default, told once by a notice that is not a question, no
   answer meaning on, told again when the notice changes),
   UD-2 (the product's own switch), UD-3 (anonymous), UD-4 (the switch is the person's, a `relayed` action on the
@@ -67,7 +69,8 @@ decision of 2026-11-04.
 
 - The coordinator's blind readings until two consecutive clean rounds; the gate; the pull request, merge, tag and
   release; at merge DEC-0157 Accepted and CT-216 done, CT-287's DEC-0157 clause marked landed (the pull request and the merge
-  commit), the `Next free ID` line written from the counter read then, the handoffs index row's Decisions cell reading
+  commit), the `Next free ID` line written from the counter read then, CT-250's, CT-252's and CT-259's "(proposed on a branch, CT-287)" after DEC-0157 restated as "(accepted <date>)",
+  `docs/handoffs/2026-11-12-north-star-designs.md`'s Next task no longer naming DEC-0157's readings, the handoffs index row's Decisions cell reading
   "DEC-0157 (CT-216; CT-280 filed), accepted <date>; rounds 1 to N not clean, N+1 and N+2 clean" and its Merge cell
   "merged <date>, #<PR> `<merge commit>`", and the products told on the board what each owes, in one
   message on the plans thread `e1cb9f7e` (where each product reports plans.md items A to D) addressed to every product
@@ -94,7 +97,7 @@ decision of 2026-11-04.
   and UD-4's relayed action changes the switch only on the operator's own decision, so the door does not change it for
   the person; whether to build it now is for the operator) and sending
   nothing in a run before its first send (or before its conforming version's stand-in run) in which the shared file
-  cannot be read (UD-2, its baseline at `desktop/analytics.cjs` lines 307 to 310), and that its server is counted by
+  cannot be read, on an install whose own switch the person has not set on (UD-2, its baseline at `desktop/analytics.cjs` lines 307 to 310), and that its server is counted by
   each member's app under that member's switch, so an organization deploying it holds no switch over those counts (UD-1's
   scope), such counts being per member's app, not per server, so not summed across installs, an organization that
   wants them off locking its members' switch off by device policy (UD-2); its `README.md` lines 202 to 204 at
@@ -227,8 +230,9 @@ decision of 2026-11-04.
   pull request body (or merge message). If a sibling lands second, this list is on main in this handoff and is
   pointed to from CT-216's backlog row, so its landing session finds it. Every check below is the check of an edit
   named beside it:
-  - Registers. The second lander keeps both sides of a conflict in `docs/DECISIONS.md` and `docs/handoffs/README.md`
-    (adjacent appends) in id order. A conflict in `docs/backlog.md` is not an append: each branch may rewrite its own
+  - Registers (round 24, seam: `docs/handoffs/README.md` is not an append; each branch rewrote its own row): the index
+    takes each handoff's row from the branch that owns it, one row per handoff file, with no `blob/agent/` link left
+    for a landed branch. The second lander keeps both sides of a conflict in `docs/DECISIONS.md` (adjacent appends) in id order. A conflict in `docs/backlog.md` is not an append: each branch may rewrite its own
     existing row in place, and two such rows can fall in one hunk, so the second lander takes each row from the branch
     that owns it (CT-216 from this branch, every other row from its own branch), one of each. Checks:
     `grep -c '^| CT-215 ' docs/backlog.md` and `grep -c '^| CT-216 ' docs/backlog.md` each print 1;
@@ -943,6 +947,17 @@ not pushed for the same reason; the round entries' commits resolve only there.
   run before the first send, and a product need not keep what an earlier run read (unit); this Done's id line (seam).
   Declined: none.
 
+- Round 24 (on `45bf544e`): seam clean; unit and product not clean. Breaks folded: an earlier no had two lifetimes (held
+  until the person sets the switch on, and "a product need not keep what an earlier run read"); a product now keeps an
+  earlier no it read until the person sets its own switch on and need not keep a reading that found none, and "its on
+  erases a person's earlier no" reads "for every product that has not yet read it" (usage-data.md, DEC-0157 Compatibility)
+  (unit); the unreadable-file hold was stated without round 23's condition in DEC-0157 item 2, the product's conformance
+  row, DOCMAP, the specification README, CONTEXT and the debt lines; each now names an install whose own switch the person
+  has not set on (product). Risks folded: the product says beside its switch that nothing is sent while an unreadable
+  file holds its send (product); the third merge recorded, and the landing names the north-star handoff's Next task and
+  CT-250, CT-252 and CT-259's "(proposed on a branch)" (product, seam); the index takes one row per handoff from its
+  owner (seam); CT-280 first names how a key is known as a usage switch (seam). Declined: none.
+
 ## Next task
 
-Round 24 of the blind readings of branch `agent/ct216-usage-data-v2` (DEC-0157): unit, seam and product.
+Round 25 of the blind readings of branch `agent/ct216-usage-data-v2` (DEC-0157): unit, seam and product.
