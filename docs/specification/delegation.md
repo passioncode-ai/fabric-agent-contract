@@ -359,7 +359,7 @@ unchanged (DL-21 step 6), so a meter's code reaches a caller from a callee.
 | `issuer-unavailable` | no hub to mint, or no usable published keys, or no usable estate revision to certify them (DL-14) | caller, callee (verifier) | 503 |
 | `unknown-state` | the refusing side cannot establish the state; an unknown state is a denial | any | 503 |
 | `operator-decision-required` | a `relayed` action from a T0 or T1 caller without the operator's decision, or a call the caller's mandate does not cover (`error.data.detail` `outside-mandate: <part>`, with `estimateUsd` and `perCallMaxUsd` for spend), or, from any tier, a level below the action's (`error.data.detail` `level-insufficient: owner`, `admin` or `operator`, DEC-0162 LV-10: file one request to a holder of that level through the product's own approval surface, or take `operator` to the operator); ask the operator and call again with their answer in `_meta.decision`, or with a mandate that covers the call ([service](service.md#actions) AP-2, DEC-0121; [MD-4](#the-operators-mandate), DEC-0125); a source hand-over answers this code as [source](source.md#handing-over) specifies (DEC-0149) | callee | 403 |
-| `decision-invalid` | the call's decision is not valid for this action, object or time (AP-2, DEC-0121), or its mandate is not (`error.data.detail`: `mandate-malformed`, `mandate-widened`, `mandate-expired`, `mandate-early`, `mandate-not-for-this-call`; MD-3, DEC-0125), or its level decision or level mandate is not (`level-membership: <problem>`, `level-unbound`, `level-audience`, `level-expired`, `level-role` (DEC-0162 LV-10)); a source hand-over answers this code as [source](source.md#handing-over) specifies (DEC-0149) | callee | 403 |
+| `decision-invalid` | the call's decision is not valid for this action, object or time (AP-2, DEC-0121), or its mandate is not (`error.data.detail`: `mandate-malformed`, `mandate-widened`, `mandate-expired`, `mandate-early`, `mandate-not-for-this-call`; MD-3, DEC-0125), or its level decision or level mandate is not (`level-membership: <problem>`, `level-unbound`, `level-audience`, `level-expired`, `level-role` (DEC-0162 LV-10)), or its standing mandate's token binds another profile (`profile-unbound`, DEC-0166 AU-3, AU-7); a source hand-over answers this code as [source](source.md#handing-over) specifies (DEC-0149) | callee | 403 |
 | `human-step-required` | the action is the person's (a sign-in, a consent, a payment, a secret, spend above a limit, a passkey signature, a comparison of codes between two people or the choice to share without one); `error.data.humanStep` names it and `error.data.url` links to it (AP-4, DEC-0121) | callee | 403 |
 
 A product maps its own authorisation codes onto these and keeps its words in `error.data`. Fabric's hub maps
@@ -673,7 +673,9 @@ decision of 2026-11-09, fabric-workspace `knowledge/authority.md`, *Autonomy by 
   estate its instance runs in, DEC-0162 LV-7), `instruction` the setter's recorded words (AU-2; AU-4's for a default),
   the profile's `scope`, and a chain starting at the assigned agent. A standing mandate is never stated `by: "level"`
   (the schema): the setter's level is checked once, at the set, and recorded there, so the stated mandate carries no
-  attestation, its digest does not change with one, and it stands at every service its token reaches. It
+  attestation, its digest does not change with one, and it stands at every service its token reaches. A project-board
+  request carries no standing mandate: only the place's hub states one, for an assignment it starts (as LV-6 keeps a
+  level mandate off the board). It
   stands at most 24 hours after `at` (`FAC-SEM-144`); the hub states it again from the profile for a longer
   assignment. Every rule of a task's mandate applies unchanged: MD-2 and MD-2a narrow it at each hand-over, MD-3 says
   what it covers, MD-4 what it refuses, MD-6 what never travels. AP-3's "a standing rule in a file is not a decision"
@@ -693,19 +695,25 @@ decision of 2026-11-09, fabric-workspace `knowledge/authority.md`, *Autonomy by 
   `prof` or none (`FAC-SEM-050`). A revision the hub replaced binds no token minted after it, so a narrower revision is
   outrun by an older one for no longer than that token's life (at most 600 seconds, DL-13) and the older mandate's day.
   Inside the boundary no token binds it, so a narrowed revision, or a place whose watcher stops answering (AU-6),
-  reaches an assignment already running only at its stated mandate's `expiresAt`, at most 24 hours later. An origin
+  reaches an assignment already running only at its stated mandate's `expiresAt`, at most 24 hours later; from T2 a
+  token minted at the new revision refuses the older mandate `profile-unbound`, and the agent asks its hub, which
+  restates the current revision. From T2 the token binds the profile, not the chain: a hand-over's narrowing binds a T2
+  presenter only as far as the onward token's own scope, effect and spend (DL-5), so a hand-over to a T2 agent narrows
+  the token as well as the chain. An origin
   sends a standing mandate only to a hub whose `protocols` list `standing/1`, which forwards it from any origin with
   the origin's token (interop C3.5).
 - **AU-4, the defaults.** A place with no profile recorded behaves by its kind. `headless`: the hub states a profile
-  covering every effect class but `change-policy` (deploy, merge, publish, send, delete, charge within the limits),
+  covering every effect class but `change-policy` (deploy, merge, publish, send, delete, charge within the limits)
+  for the capabilities the assignment's own grant names (its `capabilities`, so MD-3's named call holds),
   in the personal context, its `instruction` the operator's recorded words of 2026-11-09 and its `source` that record
   (fabric-workspace `knowledge/authority.md`, *Autonomy by place*); in an organization's context it states nothing
-  until the organization's `owner` or an `admin` records a profile (question 4's default in DEC-0166, until the
+  until the organization's `owner` or an `admin` records a profile (an `architect`'s, for its own projects only, ends
+  the wait for those) (question 4's default in DEC-0166, until the
   operator answers otherwise). A profile decides no credential request: that stays as
   [credentials](credentials.md) has it (the administrator or the auto-approval policy, DEC-0111; question 5). `person`: nothing beyond what the session's own person decides,
   until the person, or in an organization's context on that computer its administrator, records a profile, chosen from
   the hub's presets (none, drafts only, finish everything) or set in full.
-- **AU-5, the bounds.** No mandate of any kind, a task's included, covers `autonomy.profile.set`, and no profile covers what MD-6 lists (a human step of AP-4, spend above a limit, a source hand-over,
+- **AU-5, the bounds.** No mandate of any kind, a task's included, covers `autonomy.profile.set`, the hub's tool name and the action's id alike, and no profile covers what MD-6 lists (a human step of AP-4, spend above a limit, a source hand-over,
   approving one's own promotion, grant, checker rule or policy change), nor `autonomy.profile.set`, so no assignment
   raises its own place's autonomy: a standing mandate naming it, or listing `change-policy`, is `FAC-SEM-173`, and a
   call of it is `outside-mandate: capability`. The money limits bind as everywhere (L0, the project's L1, each key's

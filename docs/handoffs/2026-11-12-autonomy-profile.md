@@ -26,12 +26,12 @@ organization slice of 2026-11-21: a place's profile as a standing `mandate/1` it
 - The design's `profile-stale` and `profile-unwatched` are the hub's states, not callee refusals: a callee cannot know
   the hub's latest revision or its watcher (DEC-0166 Alternatives).
 - `prof` is the digest of the mandate without its chain; it covers `standing.revision`, so no separate revision claim.
-- Operator question 4 added: an organization's headless place takes the default only once its owner or an
+- Operator questions 4 and 5 added: an organization's headless place takes the default only once its owner or an
   administrator records it.
 
 ## Open
 
-- Merge DEC-0162's head after each of its folds (round 6 merged at `30fe601c`; round 8 next on its branch), never a
+- Merge DEC-0162's head after each of its folds (round 9 merged at `a220c1ed`; round 10 next on its branch), never a
   rebase; land after DEC-0162. At that merge `schemas/mandate.schema.json`'s description keeps both clauses: `grep -c
   'never travels over the board' schemas/mandate.schema.json` prints 1 and `grep -c 'standing mandate its token binds
   by prof' schemas/mandate.schema.json` prints 1.
@@ -68,6 +68,21 @@ organization slice of 2026-11-21: a place's profile as a standing `mandate/1` it
   architect's `autonomy.profile.set` outside its projects as a profile vector (the rule is DEC-0162's for any relayed
   action, pinned by `levels.json` "an architect outside its projects"). `pnpm run check` exit 0 on the fold (11315 passed, 3 skipped).
 
+- Merged DEC-0162's round-9 head `a220c1ed` (conflicts in conformance's rows, the mandate description, the actions
+  imports, `mandateCovers`' faults and the handoffs index; both sides kept).
+- Round 2 (on `2c12a3e6`): unit clean. Seam, breaks folded: interop's `_meta.mandate` paragraph names the standing
+  exception; DL-19's `decision-invalid` row lists `profile-unbound`. Product, breaks folded: AU-4's headless default
+  lists the assignment grant's capabilities (MD-3's named call), with a vector; both interop schemas split the level
+  and standing sentences; the agent row in conformance hands a standing mandate only to a callee declaring `standing`
+  and a hub listing `standing/1`; FLW-31 has the hub's entry point, the T2 branch through the checks and `via:
+  profile`; SCR-30's elements, state and coverage; AP-3 names a level decision; "questions 4 and 5". Risks folded:
+  AU-5 reads the action id too (code and vector); a narrowing at T2 refuses `profile-unbound` and the hub restates,
+  in AU-3 and SCN-061; an architect's profile ends the organization's wait for its projects; the schema's "at least
+  once every 24 hours"; a board request carries no standing mandate; from T2 the token binds the profile, not the
+  chain (AU-3, two vectors); a lone surrogate is `mandate-malformed` on the document too (`mandateProblem`); the
+  generator's independence stated as the hashing step; the consumers' parity rows in Compatibility; a DOCMAP row.
+  Declined: the register's order (cosmetic; no test reads it). `pnpm run check` exit 0 (11323 passed, 3 skipped).
+
 ## Next task
 
-Round 2 of the blind readings (unit, seam, product) of branch `agent/ct285-autonomy-profile-20261112` (DEC-0166).
+Round 3 of the blind readings (unit, seam, product) of branch `agent/ct285-autonomy-profile-20261112` (DEC-0166).

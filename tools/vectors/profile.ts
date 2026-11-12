@@ -6,8 +6,8 @@
  *   tsx tools/vectors/profile.ts --write   write it
  *
  * Every vector change is made here and written by `--write`, never by hand; `test/profile.test.ts` runs the check.
- * The `prof` digest is derived here from DEC-0166 AU-3 with the RFC 8785 canonical form, not by importing
- * `src/mandate.ts`, so the gate checks that the reference agrees. Each case's expected answer is written by hand.
+ * The `prof` digest is derived here from DEC-0166 AU-3, not by importing `src/mandate.ts`, so the gate checks that the
+ * reference's hashing agrees; the RFC 8785 form itself is `src/canonical.ts`'s, which `test/canonical.test.ts` checks. Each case's expected answer is written by hand.
  */
 import { createHash } from "node:crypto";
 import { readFileSync, writeFileSync } from "node:fs";
@@ -26,6 +26,7 @@ const RUNNER = "example-runner";
 const CALLER = "agent:example-runner";
 const deploy = { id: "deploy-site", title: "Deploy the site", tool: "site.deploy", gate: "relayed" };
 const setProfile = { id: "set-profile", title: "Set the place's profile", tool: "autonomy.profile.set", gate: "relayed" };
+const settingsAction = { id: "autonomy.profile.set", title: "Set the place's profile", tool: "hub.settings", gate: "relayed" };
 const payment = { id: "top-up", title: "Top up", tool: "billing.topup", gate: "human", humanStep: "payment" };
 const URL = "https://example-deployer.example/billing/top-up";
 
@@ -59,6 +60,8 @@ const task = (scope: Json): Json => (({ standing: _s, ...rest }) => ({ ...rest, 
 function actionCases(): Json[] {
   const p = profile();
   const fractional = profile({}, { capabilities: ["site.deploy"], effects: ["deploy"], perCallMaxUsd: 0.5 });
+  const headlessDefault = profile({}, { capabilities: ["site.deploy"], effects: ["draft", "publish", "send", "reply", "charge", "delete", "merge", "deploy"] });
+  const narrowed = profile({ chain: [{ agent: RUNNER, at: "2026-11-12T09:00:05Z" }, { agent: SELF, at: "2026-11-12T09:30:00Z", scope: { capabilities: ["site.deploy"], effects: ["draft"] } }] });
   const otherProf = `sha256:${"cd".repeat(32)}`;
   return [
     // AU-1, AU-3: inside the boundary the standing mandate is read like a task's (MD-3); recorded via profile (AU-6).
@@ -90,6 +93,15 @@ function actionCases(): Json[] {
     ["a bound profile beside an operator decision, from T2", call("T2", p, { tokenProf: prof(p), decision: { by: "operator", via: "relayed-instruction", action: "deploy-site", instruction: "deploy it", at: "2026-11-12T09:59:00Z" } }), taken(p)],
     // AU-5: no mandate of any kind sets a place's profile, a task's mandate included.
     ["a task's mandate naming autonomy.profile.set, from T1", call("T1", task({ capabilities: ["autonomy.profile.set"], effects: ["deploy"] }), { action: setProfile, effect: "deploy", standing: undefined }), { ok: false, code: "operator-decision-required", data: { detail: "outside-mandate: capability" } }],
+    // AU-5: the bound reads the action id as well as the capability.
+    ["a profile naming the action id autonomy.profile.set under another tool", call("T1", profile({}, { capabilities: ["hub.settings"], actions: ["autonomy.profile.set"], effects: ["deploy"] }), { action: settingsAction, effect: "deploy" }), { ok: false, code: "operator-decision-required", data: { detail: "outside-mandate: capability" } }],
+    // AU-4: a headless place with no recorded profile: the grant's capabilities, every effect class but change-policy.
+    ["a headless place's default profile covers a deploy", call("T1", headlessDefault), taken(headlessDefault)],
+    // AU-3: from T2 the token binds the profile, not the chain; a narrowing in the chain binds while it is presented.
+    ["a narrowing in the chain, presented from T2", call("T2", narrowed, { tokenProf: prof(narrowed) }), { ok: false, code: "operator-decision-required", data: { detail: "outside-mandate: effect", actionDigest: DIGEST } }],
+    ["the same mandate with the narrowing stripped, from T2", call("T2", p, { tokenProf: prof(narrowed) }), taken(p, prof(narrowed))],
+    // AU-3: a profile with no canonical form (a lone surrogate) has no digest.
+    ["a profile whose instruction holds a lone surrogate", call("T1", profile({ instruction: "x\ud800y" })), { ok: false, code: "decision-invalid", data: { detail: "mandate-malformed" } }],
     // A task's mandate is unchanged by DEC-0166: from T2 it is still ignored, whatever prof the token carries.
     ["a task's mandate from T2 with a prof", call("T2", (({ standing: _s, ...rest }) => ({ ...rest, expiresAt: "2026-11-14T09:00:00Z" }))(p), { tokenProf: prof(p) }), { ok: false, code: "approval-required", data: { actionDigest: DIGEST } }]
   ].map(([name, input, expected]) => ({ name, input, expected }));
@@ -103,6 +115,7 @@ function documentCases(): Json[] {
     ["a profile listing change-policy", profile({}, { capabilities: ["site.deploy"], effects: ["deploy", "change-policy"] }), ["FAC-SEM-173 /scope"]],
     ["a profile handed on with autonomy.profile.set in an action list", profile({ chain: [{ agent: RUNNER, at: "2026-11-12T09:00:05Z" }, { agent: SELF, at: "2026-11-12T09:30:00Z", scope: { capabilities: ["site.deploy"], actions: ["autonomy.profile.set"], effects: ["deploy"] } }] }), ["FAC-SEM-173 /chain/1/scope"]],
     ["a profile living longer than a day", profile({ expiresAt: "2026-11-13T10:00:00Z" }), ["FAC-SEM-144 "]],
+    ["a profile whose instruction holds a lone surrogate", profile({ instruction: "x\ud800y" }), ["FAC-SEM-144 "]],
     // AU-1: the hub states a profile by the operator of the place's estate; the setter's level is checked at the set.
     ["a profile stated by a level", profile({ by: "level", level: "admin", org: "org:org-a", membership: { kind: "an attestation" } }), ["FAC-SEM-144 "]],
     // FAC-SEM-173 also reads a widened mandate's chain.

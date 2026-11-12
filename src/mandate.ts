@@ -140,8 +140,8 @@ export function scopeWithin(child: MandateScope, parent: MandateScope): boolean 
 /**
  * The digest a delegation token's `prof` claim carries for a standing mandate (DEC-0166 AU-3): sha256 of the RFC 8785
  * canonical JSON of the mandate without its `chain`, which grows at every hand-over while the profile does not. RFC 8785
- * has a form for a fractional ceiling (`perCallMaxUsd` 0.5); it throws on a lone surrogate, which a caller answers as a
- * malformed mandate.
+ * has a form for a fractional ceiling (`perCallMaxUsd` 0.5); it throws on a lone surrogate, which `mandateProblem` refuses
+ * as a malformed mandate first.
  */
 export function profileDigest(mandate: Mandate): string {
   const { chain: _chain, ...stated } = mandate;
@@ -168,6 +168,10 @@ export function mandateProblem(mandate: unknown): "mandate-malformed" | "mandate
     }
   }
   if (new Set(read.chain.map((step) => step.agent)).size !== read.chain.length) return "mandate-malformed";
+  // A standing mandate whose profile has no canonical form (a lone surrogate) has no digest, so no token binds it.
+  if (read.standing !== undefined) {
+    try { profileDigest(read); } catch { return "mandate-malformed"; }
+  }
   return undefined;
 }
 
@@ -212,10 +216,8 @@ export function mandateCovers(input: {
   const problem = mandateProblem(mandate);
   if (problem) return { ok: false, code: MANDATE_INVALID, data: { detail: problem } };
   const read = mandate as Mandate;
-  let digest: string | undefined;
-  if (standing) {
-    try { digest = profileDigest(read); } catch { return { ok: false, code: MANDATE_INVALID, data: { detail: "mandate-malformed" } }; }
-  }
+  // mandateProblem refused a profile with no canonical form, so its digest is defined here.
+  const digest = standing ? profileDigest(read) : undefined;
   if (standing && input.tokenProf !== undefined && input.tokenProf !== digest) return { ok: false, code: MANDATE_INVALID, data: { detail: "profile-unbound" } };
   const holders = read.chain.map((step) => step.agent);
   if (holders.length < 2 || holders[holders.length - 1] !== self || (callerAgent !== undefined && holders[holders.length - 2] !== callerAgent)) {
@@ -226,7 +228,7 @@ export function mandateCovers(input: {
   const scope = effectiveScope(read);
   const outside = (detail: OutsideDetail): MandateAnswer => ({ ok: false, code: OUTSIDE_MANDATE, data: { detail } });
   // AU-5: no mandate sets a place's profile, so no assignment raises its own autonomy.
-  if (call.capability === PROFILE_SET_CAPABILITY) return outside("outside-mandate: capability");
+  if (call.capability === PROFILE_SET_CAPABILITY || call.action === PROFILE_SET_CAPABILITY) return outside("outside-mandate: capability");
   if (call.action !== undefined && scope.actions !== undefined && !scope.actions.includes(call.action)) return outside("outside-mandate: action");
   if (call.action !== undefined && scope.actions === undefined && scope.capabilities === undefined) return outside("outside-mandate: action");
   if (scope.capabilities !== undefined && !scope.capabilities.includes(call.capability)) return outside("outside-mandate: capability");

@@ -11481,7 +11481,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-11-12
 - **Status:** Proposed 2026-11-12, from the design `docs/evidence/plans/2026-11-12-ct285-autonomy-profile.md` (CT-285),
-  the operator-question defaults taken as the design states them, with question 4 added here; accepted when the
+  the operator-question defaults taken as the design states them, with questions 4 and 5 added here; accepted when the
   coordinator's blind readings are clean on two consecutive rounds. It reads DEC-0162's levels and lands after it: the
   branch `agent/ct285-autonomy-profile-20261112` is stacked on DEC-0162's. An answer from the operator after
   acceptance is a new decision amending this one.
@@ -11542,10 +11542,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   reader pinned before this decision refuses a standing mandate as `mandate-malformed` (its schema closes `mandate/1`),
   so no agent sends it there; a port pinned past this decision adds `standing` ['1'] to the adapter kits' hand-kept
   `PROTOCOL_REVISIONS` whether or not it reads standing (their feed-protocols test checks it). Read on 2026-11-12: no hub states a profile and no service declares `standing` yet. Owed:
-  Fabric (CO-547: the dispatcher and headless assignments read the profile, its hub writes `prof`, its floor treats a
+  Fabric (CO-547, whose hub mirror `hubAuthority.ts` and its parity cases gain a standing case at its repin: the dispatcher and headless assignments read the profile, its hub writes `prof`, its floor treats a
   covered effect as decided; ADR-0168's machine permission choice stays the runner's prompt mode), the organization
   product (who may change a profile, shown per place), the PM agent, the host's admin agent (records a place's kind and
-  watcher), every service with `relayed` actions an assignment calls (the adapter's kits FAA-249). The operator's
+  watcher), every service with `relayed` actions an assignment calls (the adapter's kits FAA-249, whose `mandateCovers` ports run `profile.json` before a kit service may declare `standing`). The operator's
   questions take the design's defaults: (1) the headless default covers a production deploy of a surface with outside
   users, and a project that wants the gate narrows its own profile; (2) an organization administrator sets a profile
   on a member's computer only inside the organization's context there; (3) watched means a monitoring agent declared in

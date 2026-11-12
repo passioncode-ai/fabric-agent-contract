@@ -52,7 +52,7 @@
         "revision"
       ],
       "additionalProperties": false,
-      "description": "DEC-0166 AU-1: present on a place's standing mandate, its autonomy profile, which the place's hub states from the profile at its revision for each assignment it starts there and restates at most every 24 hours (FAC-SEM-144); task then names the assignment. A callee takes it only when its authority extension (extensions/authority/0.1) declares standing (AU-3) and, from T2, only when the call's delegation token binds it by prof (profileDigest); its scope never names autonomy.profile.set (FAC-SEM-173).",
+      "description": "DEC-0166 AU-1: present on a place's standing mandate, its autonomy profile, which the place's hub states from the profile at its revision for each assignment it starts there and restates at least once every 24 hours, a standing mandate living at most a day (FAC-SEM-144); task then names the assignment. A callee takes it only when its authority extension (extensions/authority/0.1) declares standing (AU-3) and, from T2, only when the call's delegation token binds it by prof (profileDigest); its scope never names autonomy.profile.set (FAC-SEM-173).",
       "properties": {
         "place": {
           "type": "string",

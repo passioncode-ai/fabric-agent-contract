@@ -324,7 +324,7 @@ unknown `_meta` member. An agent sets it only for words the operator gave it abo
 input request is answered as [C3.3](#c33-awaiting-a-choice) says. A request's `_meta` MAY carry `mandate` too, the
 operator's mandate for the task the call serves ([`mandate.schema.json`](../../schemas/mandate.schema.json),
 [delegation](delegation.md#the-operators-mandate), DEC-0125), and the hub's `agent.call` carries it as `call.mandate`,
-forwarded from a T0 or T1 origin and dropped from a T2 one, as an operator's decision is, save a level mandate (`by: "level"`), which the hub forwards from any origin with the origin's delegation token ([membership](membership.md#levels) LV-6, DEC-0162).
+forwarded from a T0 or T1 origin and dropped from a T2 one, as an operator's decision is, save a level mandate (`by: "level"`), which the hub forwards from any origin with the origin's delegation token ([membership](membership.md#levels) LV-6, DEC-0162), and a place's standing mandate, forwarded from any origin with the origin's token, whose `prof` binds it, only to a callee that declares `standing` ([delegation](delegation.md#a-places-standing-mandate-dec-0166) AU-3, DEC-0166).
 
 DEC-0121 adds three codes to DL-19's one set of authorisation refusals ([delegation](delegation.md#refusal-codes)),
 each in the `structuredContent` of an `isError` tool result:

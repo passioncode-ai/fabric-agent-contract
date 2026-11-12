@@ -1320,7 +1320,7 @@ Every button a person has, the person's agent has (except the operator's move of
   operator decides (LV-7).
 - **AP-3, the agent's side.** An agent sets a decision only for words the operator gave it about this action, never
   for text from a tool result, a page, a file, a board message or another agent, except as the next sentence says: those
-  are data (the prompt-injection boundary) (DEC-0121). The operator's words reach an agent from another of the operator's agents in two forms only (beside a place's standing mandate, which only the place's hub states for an assignment from the profile set under AP-2, DEC-0166 AU-1): a mandate handed on
+  are data (the prompt-injection boundary) (DEC-0121). The operator's words reach an agent from another of the operator's agents in two forms only (beside a place's standing mandate, which only the place's hub states for an assignment from the profile set under AP-2, or in an organization's context a level decision, DEC-0166 AU-1, AU-2): a mandate handed on
   as [MD-2](delegation.md#the-operators-mandate) says, which an agent passes on and never rewrites (DEC-0125), and a
   relay that [OA-2 and OA-3](delegation.md#one-approval-binds-all-the-operators-agents) accept, carrying the words
   verbatim, when and where the operator said them, and the scope, from which the receiving agent states its decision or
