@@ -40,10 +40,12 @@ describe("unit events (DEC-0164)", () => {
     const batch = { protocol: "fabric-activity/0.1", device: { id: "device-1" }, events: [rule.event, { ...person.event, seq: 5 }] };
     expect(evaluateSemanticRules("activity-batch", batch).map((f) => `${f.code} ${f.instancePath}`)).toContain("FAC-SEM-039 /events/1/eventId");
   });
-  it("writes one transition twice as one event: the same id", () => {
+  it("writes one transition twice as one event: a stream holds it once", () => {
     const started = (vectors.cases[0] as Json).event as Json;
-    const again = JSON.parse(JSON.stringify(started)) as Json;
-    expect(activityEventId("unit", unitSourceKey(again.data.agent, again.data.unit, again.data.transition, again.run.root))).toBe(started.eventId);
+    const again: Json = { ...(JSON.parse(JSON.stringify(started)) as Json), seq: 2 };
+    expect(again.eventId).toBe(started.eventId);
+    const batch = { protocol: "fabric-activity/0.1", device: { id: "device-1" }, events: [started, again] };
+    expect(evaluateSemanticRules("activity-batch", batch).map((f) => `${f.code} ${f.instancePath}`)).toEqual(["FAC-SEM-039 /events/1/eventId"]);
   });
   it("derives one id for one transition and run.root, and another for a reopened unit (AE-2)", () => {
     const accepted = vectors.cases.filter((c) => c.event.data.transition === "accepted" && c.schemaValid && c.findings.length === 0);

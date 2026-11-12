@@ -32,15 +32,17 @@ Branch `agent/ct259-activity-unit-20261112`, from main `d69dc363`. Entry point: 
   enrolled device; whichever lands second restates it by kind and channel as activity's opening now does (check:
   `awk '/\*\*UD-6/,/\*\*UD-7/' docs/specification/usage-data.md | grep -c 'unit'` prints at least 1 on the merged tree).
 - Operator questions, not decided here (to post on thread `52aa2f93` with the landing notice): whether a one-person
-  project's units are served (default: no; a unit cell needs 3 distinct roster members of its projects, AE-3), the
+  project inside a larger organization is served (default: yes; a unit cell needs an organization whose member list
+  names at least 3 members, as Observatory's J4 counts, AE-3), whether a role cut is a permitted cell (default: no), the
   access-log scope a read of a person acceptance is logged under (default `activity.raw`), the notice purpose a unit
   event is collected under and the retention of a stored `acceptedBy` person subject (default: the notice's purpose
   for its agents' activity, `retention.raw_days`); and which audience's pairwise
   subject a kit writes when one unit reaches both the organization's journal and Observatory's local one.
 - CT-297: the route function for a unit and its vectors.
 - Tell Observatory with the landing notice: a unit's `cost` is the spend since its previous transition, summed by a
-  reader (its J4 sums every event, which now matches); a re-acceptance under a new `run.root` needs no `started` (its
-  J2 accepted-twice keys by unit and `run.root`); the minimum cell of 3 for units.
+  reader (its J4 sums every event, which now matches); a re-acceptance under a new `run.root` needs no `started`, so its J2
+  accepted-twice must key a repeated acceptance by unit and `run.root` and allow one with no `started` under the new
+  `run.root` (today it refuses a second acceptance of the same unit and stream without a `started` between); a unit cell needs an organization whose member list names at least 3 members (its J4 count), and a unit's key takes one form per system (`github` `<owner>:<repo>#<number>` lower-cased, `jira` the issue key, `mail` a digest of the Message-ID).
 - Landing with DEC-0162 and DEC-0166 (both add named protocols): `src/protocol-revisions.ts` keeps every entry and
   every `NAMED_ONLY` item (`activity-unit/1`, `levels/1`, `standing/1`), versioning.md every item, conformance every
   rule row (169 to 174) and the next free code from the CAS counter; `pnpm vitest run test/protocol-revisions.test.ts`
@@ -95,6 +97,25 @@ Branch `agent/ct259-activity-unit-20261112`, from main `d69dc363`. Entry point: 
   schema's cost description; the event carries no envelope `task` (schema, a vector); `unit.key` as the tracker's API
   returns it. Declined: none.
 
+- Landing against main: the branch is based on `d69dc363`, and main rewrote the CT-295 and CT-296 backlog rows, so a
+  line union keeps both versions and the gate does not catch it. Take main's CT-295 and CT-296 rows, add CT-297, keep
+  DEC-0163 before DEC-0164 and refresh the index row; check: `for id in CT-295 CT-296 CT-297; do grep -c "^| $id "
+  docs/backlog.md; done` prints 1 1 1, then `pnpm run check` exit 0 on the merged head.
+- Round 5 (on `617e7104`): unit passed with two risks, seam failed, product failed. Product, breaks folded: the
+  access log covers a unit the member accepted, found by the pairwise subject resolved to the `user.id` (activity's
+  Access log, CONTEXT.md, the access-log schema, FLW-06's success exit and task analysis, SCR-09, SCN-010 steps 1 and
+  5); a unit whose `acceptedBy` is a person is personal data whatever channel wrote it, and the monthly counts that
+  outlive retention carry no person. Seam, break folded: one key form per system (`github` lower-cased
+  `<owner>:<repo>#<number>`, `jira` the issue key, `mail` a 40-digit digest of the Message-ID, any other its own id
+  or a digest), with a mail vector. Product and seam risks folded: a unit cell counts the organization's signed
+  member list (as Observatory's J4), the organization's total served, no role or person cut, not an
+  `activity-summary/1` cell; another member's read needs the acceptor's confirmed purpose and serves no cost (SCN-010
+  step 5, `FAC-SEM-067`); a dropped held transition is an accepted, unreported loss, and the journal keeps a
+  person-free `(unit, month)` key; the decision's departures list completed; the J2 accepted-twice line in Open made
+  consistent; the landing step against main with its uniqueness check. Unit risks folded: the `acceptedAt` bound is
+  measured to the millisecond; the repeated-write test puts the two copies in one batch (`FAC-SEM-039`). Declined:
+  rebasing on main now (the branch is pushed and is never force-pushed; the lander merges main as the step above says).
+
 ## Next task
 
-Round 5 of the blind readings (unit, seam, product) of branch `agent/ct259-activity-unit-20261112` (DEC-0164).
+Round 6 of the blind readings (unit, seam, product) of branch `agent/ct259-activity-unit-20261112` (DEC-0164).

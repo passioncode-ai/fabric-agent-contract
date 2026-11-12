@@ -726,7 +726,8 @@ stream rather than rewinding the old one.
 cells of agent × skill × project × UTC day × outcome, with no person dimension.
 
 **Access log**: An `access-log/1` document: who read which scope of one subject's data — keyed by
-their user id or by a device bound to them — when and why, readable by that subject.
+their user id or by a device bound to them, and a unit of work they accepted, by the pairwise subject resolved to
+their user id (DEC-0164) — when and why, readable by that subject.
 
 **Device**: One counted OS account of a computer, or a virtual machine, enrolled with an organization server under
 `fabric-device/0.1` (DEC-0031; DEC-0154; what an estate machine is on such a computer is CT-231):

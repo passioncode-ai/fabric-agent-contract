@@ -35,7 +35,7 @@ const SPEND: Record<string, number> = { started: 0.12, ended: 0.3, "handed-over"
 
 /** One `unit` event, its ids derived, the envelope a device collector writes. */
 function unit(transition: string, extra: Json = {}, root = RUN_1, seq = 1, envelope: Json = {}): Json {
-  const key = sourceKey(AGENT, UNIT, transition, root);
+  const key = sourceKey(AGENT, extra.unit ?? UNIT, transition, root);
   return {
     protocol: "fabric-activity/0.1", eventId: eventId(key), kind: "unit", source: "unit", sourceKey: key,
     collector: { id: "observatory-node", epoch: 4 }, seq, occurred: "2026-11-12T10:00:00Z", bootId: "boot-7c41e2", monotonicNs: "0",
@@ -59,6 +59,8 @@ function cases(): Json[] {
     valid("accepted by a person's pairwise subject, kept in the organization's journal (AE-3)", accepted(RUN_1, 4, { kind: "person", ref: "m-7f3a91c2" })),
     // AE-2: a reopened unit accepted again under a new run.root is a new event.
     valid("accepted again after a reopening, under a new run.root", accepted(RUN_2, 9)),
+    // AE-2: one key form per system, so every writer derives one id: a mail unit by its Message-ID's digest.
+    valid("a mail unit, keyed by the first 40 hex digits of its Message-ID's SHA-256", unit("started", { unit: { system: "mail", key: hex("CAF8x2@mail.example.com").slice(0, 40) } })),
     // AE-1: the class and its map; an unknown cost.
     valid("unclassified, with no map", unit("started", { taskClass: "unclassified", taskClassMap: undefined })),
     valid("an unknown cost is null", unit("started", { cost: { usd: null } })),

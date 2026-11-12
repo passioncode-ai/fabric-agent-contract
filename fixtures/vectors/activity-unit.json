@@ -280,6 +280,49 @@
       "findings": []
     },
     {
+      "name": "a mail unit, keyed by the first 40 hex digits of its Message-ID's SHA-256",
+      "event": {
+        "protocol": "fabric-activity/0.1",
+        "eventId": "sha256:9856576af0ddf2376bdfe820fe58d58f91935167f19811d3b990f38128e9d941",
+        "kind": "unit",
+        "source": "unit",
+        "sourceKey": "sha256:614eb3d42e601dbff63f3e625eff1a90a55138bb6c0f626f7b3e4e0e2ba4a828",
+        "collector": {
+          "id": "observatory-node",
+          "epoch": 4
+        },
+        "seq": 1,
+        "occurred": "2026-11-12T10:00:00Z",
+        "bootId": "boot-7c41e2",
+        "monotonicNs": "0",
+        "project": {
+          "id": "example-project"
+        },
+        "run": {
+          "root": "run-4b1d9e02"
+        },
+        "data": {
+          "agent": "example-writer.default",
+          "unit": {
+            "system": "mail",
+            "key": "e4a88f2c9c2a6c10d0524313b3321167f5ce5f3f"
+          },
+          "transition": "started",
+          "taskClass": "code.change",
+          "taskClassMap": {
+            "id": "classes-2026-11",
+            "revision": 3
+          },
+          "cost": {
+            "usd": 0.12,
+            "basis": "provider"
+          }
+        }
+      },
+      "schemaValid": true,
+      "findings": []
+    },
+    {
       "name": "unclassified, with no map",
       "event": {
         "protocol": "fabric-activity/0.1",

@@ -145,7 +145,7 @@
 ### SCR-09: Access log
 
 - **Used by:** FLW-06
-- **Purpose:** show a member every read of their raw telemetry and of devices bound to them, and each partner
+- **Purpose:** show a member every read of their raw telemetry, of a unit of work they accepted (DEC-0164) and of devices bound to them, and each partner
   organization's read of usage sums that include them.
 - **Elements:** time, reader role (a person's role, or `partner` with the partner organization), scope, device, range,
   purpose (primary action: open the organization's notice).

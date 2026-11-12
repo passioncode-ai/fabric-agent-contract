@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/access-log.schema.json",
   "title": "Access log access-log/1 (DEC-0030)",
-  "description": "Who read which scope of one subject's data — keyed by their user id or by a device bound to them — when and why, so the subject can see every read of their own data.",
+  "description": "Who read which scope of one subject's data — keyed by their user id or by a device bound to them, and a unit of work they accepted, found by the pairwise subject the organization issued them and resolved to their user id (DEC-0164) — when and why, so the subject can see every read of their own data.",
   "type": "object",
   "required": [
     "format",
