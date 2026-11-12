@@ -11511,8 +11511,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      channel, where it has one, sends (OC-4); the page shows it with the holder label of every key listed on
      it and records the operator's answer as theirs: taking a step is the step itself (AP-4), and choosing and declining
      are `relayed` page actions with agent twins (AP-1), each a tool of its own addressing the step by its opaque id,
-     never `fabric.job.get` on the member's job (the instance keys every job by the client key that started it and
-     answers another key's job `unknown-job`, whether or not it queues), reached
+     never `fabric.job.get` on the member's job (the instance keys every job by the client key that started it, the
+     credential `client-key:<record id>` and never its value, and answers another key's job `unknown-job`, whether or
+     not it queues), reached
      as the key twin is, so an operator without the page
      answers through their agent or the operator channel's buttons (OC-5). The caller reads the outcome: a job reads `working`, its `statusMessage` starting `operator-step <humanStep>`
      (`operator-step choice` for a choice) in the style of `FAC-SEM-119`'s pause grammar, then goes on
@@ -11613,8 +11614,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   event time (`src/core/outage-alerts.ts` lines 66 and 182), so a repeat at exactly 24 hours would be muted on about
   half of days. That relay and the service's own operator channel are two channels, and each computer holding the
   descriptor is a host, so CF-4 promises one ask per raise from each host and each channel. Fabric's agent registry refuses the
-  cloud descriptor today: its service fields list no `peer` or `runner` and it takes `installedBy` only as a string
-  (`apps/desktop/src/main/agentRegistry.ts` lines 59, 161 and 179), the lag of DEC-0061 that Fabric tracks as CO-278,
+  cloud descriptor today: its service fields list no `peer` or `runner` (`apps/desktop/src/main/agentRegistry.ts` line
+  59, read at fabric `d83858c5`, where line 161 also took `installedBy` only as a string; since `7795005a` it takes
+  DEC-0061's `installedBy` object, and line 59 still lists no `peer` or `runner`), the lag Fabric tracks as CO-278,
   so until it re-pins an estate agent reaches the cloud instance by a direct call (DL-9), not through the hub's
   `agent.call`; the local descriptor passes. The adapter's probe reads a refusal under
   `own` as conformance (`check_service.py`), and it and the readers of CA-1 owe resolving the manifest for a descriptor
@@ -11634,7 +11636,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   106), and Fabric Dashboards' sample service, a copy of the Python kit (`test/fixtures/sample-service/fabric_delegation.py`
   line 915). FAA-204 is to carry the header change for the adapter although it is not specific to the form, since it
   reaches every service built on the kits, and the landing message to the adapter names it; Fabric Dashboards is told
-  at landing that its sample copies the kit. Under FAA-204 the kits also owe recording a job's caller as `jobCallerKey(accepted, credential)`, the client key's record id, never its value, as the credential when no token came (the Python kit records an owner only for a delegation token, `fabric_interop.py` line 316 at `97ca5b5e`), and answering another caller's job id `unknown-job`, not `scope-not-granted` `job-of-another-caller` (lines 918 to 920), at an instance in the form whether or not it queues, with a kit test of one key reading or cancelling another key's job; a message for `operator-step`,
+  at landing that its sample copies the kit. Under FAA-204 the kits also owe recording a job's caller as `jobCallerKey(accepted, credential)`, the credential `client-key:<record id>`, never the key's value, when no token came (the Python kit records an owner only for a delegation token, `fabric_interop.py` line 316 at `97ca5b5e`), and answering another caller's job id `unknown-job`, not `scope-not-granted` `job-of-another-caller` (lines 918 to 920), at an instance in the form whether or not it queues, with a kit test of one key reading or cancelling another key's job; a message for `operator-step`,
   and a kit input marking a client-key caller so that the kit answers every `human` action and input request as
   CF-4 says (the job, or `scope-not-granted` with `operator-step: <humanStep>`) and raises the event once per open
   step; the kits' answer to an approval at an instance without the estate's issuer, `issuer-unavailable` with
@@ -11721,7 +11723,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/specification/interop.md` (C3.3, one sentence, and a clause in DEC-0121's caller-action table),
   `docs/specification/delegation.md` (DL-8's client-key exception to asking the broker for a token, a clause in DL-19's `scope-not-granted` row and its *Refused by*, one in its
   `issuer-unavailable` row naming `no-trusted-issuer`, and a sentence closing DL-21),
-  `docs/specification/agent-network.md` (one sentence beside CT-84), `docs/specification/channel-agent.md`
+  `docs/specification/agent-network.md` (one sentence beside CT-84, and the call queue's caller: a client key by
+  `client-key:<record id>`), `docs/specification/channel-agent.md`
   (CA-1's manifest declaration and where a reader of the cloud instance finds it), `docs/specification/source.md` and backlog CT-218 ("the operator's
   one-time code for the page"), backlog CT-218 (in progress), CT-270 (filed in round 2, done in round 3: SCN-058) and
   CT-275 (filed in round 5: the key's path from the member's vault into the coding agent's header, and the endpoint's
@@ -11745,7 +11748,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   challenge for none, RFC 6750 section 3.1; the `operator-step: choice` caller instruction in its row; DL-26's grant
   and DL-29's outside-family sentence for a client key), `docs/specification/interop.md` (the caller-action row for
   `operator-step: choice`), `docs/specification/service.md` (the usage report's per-member clause for client-key
-  spend), `src/actions.ts` (`actionDecision`'s doc comment names CF-4's exception; no behaviour change) and
+  spend), `src/actions.ts` (`actionDecision`'s doc comment names CF-4's exception; no behaviour change),
+  `src/agent-network.ts` (`jobCallerKey`'s doc comment names the client-key caller; no behaviour change) and
   `fixtures/semantic/action-call-human.json` (its description; vectors unchanged);
   the handoff `docs/handoffs/2026-11-08-local-and-cloud-form.md` and its row in `docs/handoffs/README.md`.
 - **Source:** the operator's words of 2026-11-04, relayed on board thread `79a9f452` (request `b0c476ec`, message

@@ -1123,7 +1123,10 @@ cloud instance's well-known document, declaring `surfaces.mcp.auth: "own"` and `
     pattern, such as `human_step.opened`); and a `level` of `notice` or higher (Fabric Dashboards' default minimum for a
     banner). A call that reaches a step still open raises no new event. A call that reaches the step's need, or the
     check the service makes before each repeat, that finds the need met outside the page (a top-up or a consent at the
-    provider) closes the step with no event, and its waiting jobs go on. While the step stays open, the service raises
+    provider) closes the step with no event, and its waiting jobs go on; the page checks an open step's need before it
+    lists the step and before the operator takes it, and the agent's CLI offers checking an open step by its opaque id,
+    a step found met there closing the same way, so a met need is never offered to be taken again. While the step stays
+    open, the service raises
     it again, each time no sooner than 25 hours and no later than 48 hours after the previous raise (a host's 24-hour ask hold and its poll
     interval), as a new event with a new `id` (an event id increases) and the same `subject`, `kind` and `link`, until
     the operator takes or declines it or it closes (CF-3; or its need is found met, above). A host holds an ask for one subject for 24 hours from when it
@@ -1140,8 +1143,9 @@ cloud instance's well-known document, declaring `surfaces.mcp.auth: "own"` and `
     computer shows no page can answer a choice or decline a step through their own agent where that gate lets the agent
     through, else by their agent running the agent's CLI on the operator's computer on their word (*Where the operator
     is*, below), or with their operator channel's buttons, which perform the page's own operation (OC-5).
-  - **What the caller reads.** The instance keys every job by the client key that started it (the key's record id,
-    never its value, CF-3) and answers
+  - **What the caller reads.** The instance keys every job by the client key that started it (the credential
+    `client-key:<record id>`, the key's record id and never its value, CF-3, kept apart from any other credential as a
+    relay call's `relay:<from>` is) and answers
     `fabric.job.get` and `fabric.job.cancel` for another key's job `unknown-job`, whether or not it queues, so a member
     never reads or cancels another member's job. A job reads `working` to that caller, its `statusMessage` starting
     `operator-step <humanStep>` (`operator-step choice` for a choice), optionally followed by a colon, a space and a
@@ -1160,11 +1164,11 @@ cloud instance's well-known document, declaring `surfaces.mcp.auth: "own"` and `
     is the operator's) with `error.data.detail` `operator-step: <humanStep>` and an `error.message` saying the operator
     was asked and to repeat the call later. A decline answers the jobs waiting on the step when the operator declines
     it, each ending `failed` with `operator-declined` as above, and closes the step; it lasts for nothing else. A
-    caller of a tool that is not job-backed gets no word of a decline: its repeated call reaches the need again, opens
-    a new step and asks the operator again, so an operator whose no is meant to last has their agent remove that tool
+    caller of a tool that is not job-backed gets no word of a decline: its repeated call reaches the need again and,
+    unless the need was met meanwhile, opens a new step and asks the operator again, so an operator whose no is meant to last has their agent remove that tool
     from the key's scopes on their word (the agent's CLI on the operator's computer), or tells the member. A later call that
-    reaches the same need opens a new step and raises it as above, so a need the operator met outside the page (a
-    top-up or a consent at the provider) is found met by the next call, which goes on with no step. A call to a tool that is not job-backed and cannot go on without a choice is refused the same way
+    reaches the same need finds it again: still unmet, it opens a new step and raises it as above; met outside the page
+    (a top-up or a consent at the provider), the call goes on with no step. A call to a tool that is not job-backed and cannot go on without a choice is refused the same way
     with `operator-step: choice` and raises no event, since no later call carries the operator's answer: its message
     says the call needs a choice that is the operator's and the tool cannot wait for it, and the caller does not repeat
     the call, which would be refused again. A member's key should therefore not carry such a tool: the operator's agent runs it

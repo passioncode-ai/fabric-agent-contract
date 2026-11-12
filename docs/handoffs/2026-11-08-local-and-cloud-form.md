@@ -20,7 +20,7 @@ then main's CT-285 row), `21f8097e` as `8563ee71`, `53835d18` as `e4710ba2` and 
 
 ## Done
 
-- DEC-0159 (Proposed), reserved with `agent_sync.py reserve DEC`; `Next free ID` set to `DEC-0160`.
+- DEC-0159 (Proposed), reserved with `agent_sync.py reserve DEC`; `Next free ID` set to `DEC-0160` then, `DEC-0162` since 2026-11-12 (the counter on origin).
 - `docs/specification/service.md`: the section *The local and cloud form of one agent* (CF-1 to CF-7) and the header
   line.
 - Fixtures: `service-descriptor-cloud-form-local.json`, `service-descriptor-cloud-form-cloud.json` and
@@ -37,7 +37,8 @@ then main's CT-285 row), `21f8097e` as `8563ee71`, `53835d18` as `e4710ba2` and 
 - Round 3: CF-3's three issuing doors (the CLI, the page, the page action's `relayed` twin), the holder label, the
   usage report's attribution (the per-key reference dropped in round 4) and the refusal answers; CF-4's step on the operator's page (`scope-not-granted`,
   `operator-step: <humanStep>`) with the matching sentence in PL-4, AP-4, the note under `actionDecision`'s table,
-  `FAC-SEM-142`'s row and interop C3.3; one sentence each in agent-network (beside CT-84) and channel-agent (CA-1).
+  `FAC-SEM-142`'s row and interop C3.3; one sentence each in agent-network (beside CT-84, and the call queue's
+  caller keyed as `client-key:<record id>`, with `jobCallerKey`'s doc comment) and channel-agent (CA-1).
 - Round 4: CF-1's manifest pair (only the local descriptor carries `fabricManifest`), CF-3's refusal order at the
   twin, its `WWW-Authenticate` per case, the member storing the key in their own vault, client-key spend out of
   `byGrant`, key management through the CLI and the page alone where `auth.delegation` is declared; CF-4's
@@ -97,6 +98,11 @@ then main's CT-285 row), `21f8097e` as `8563ee71`, `53835d18` as `e4710ba2` and 
   stated; a page action's twin for cap, scope or ceiling where the page offers one; an `approval/1` asks the operator.
 - Round 20: a step closes also when a call or the repeat check finds its need met; the adapter kits owe job keying;
   main's CT-285, CT-292 and CT-293 rows name DEC-0159 (#283); the last "operator removes the tool" now the agent's.
+- Round 21: the met-need closure carried into ST-041, ST-042, FLW-36 and SCR-36; jobs keyed by the key's record id;
+  the adapter's kit lines pinned at `1364a2ac`.
+- Round 22: a later call after a decline raises a new step only while the need is unmet, in every restatement; the
+  page and the agent's CLI check an open step's need, so a met need is never offered to be taken again; a client-key
+  caller is keyed as `client-key:<record id>`.
 
 ## Compared with the first implementation
 
@@ -177,7 +183,7 @@ a client-key caller input for CF-4's `operator-step` (FAA-204).
   the message asks it to revoke and to route key management through its operator's CLI or page, or through a `relayed`
   twin, and the list tool's holder names).
 - At landing, to the adapter, under FAA-204: round 20's (the kits key every job by `jobCallerKey`, a client key the
-  credential (the key's record id, never its value) when no token came, and answer another caller's job `unknown-job`, not `job-of-another-caller`, at an
+  credential `client-key:<record id>`, never the key's value, when no token came, and answer another caller's job `unknown-job`, not `job-of-another-caller`, at an
   instance in the form, with a kit test); round 4's two items (`fabricManifest` off the cloud descriptor, the
   refusal mapping), round 5's two (the manifest's resolution for a descriptor without `fabricManifest`, the kits'
   `operator-step` message and client-key caller input), round 7's (the kits answering every `human` action and input
@@ -203,7 +209,11 @@ a client-key caller input for CF-4's `operator-step` (FAA-204).
   issues client keys through each service's issue door), *Leaving* (one command reverses every grant on that
   list, line 144), 226 (the PM agent's row: the issue doors and client keys for members and agents), 235 (its administrator agent "issues client keys"), 263 (the
   administrator agent's key doors and client-key issue doors at onboarding and offboarding) and 539 (members' agents
-  get client keys through the PM agent on the owner's or an administrator's word), with `knowledge/system/base-set.md`
+  get client keys through the PM agent on the owner's or an administrator's word), and lines 303-307 (a headless
+  project agent calls the copy service with a client key and the service checks its grant and spend with Observatory's
+  meter: either the copy service is reached by a delegation token, which keeps the grant and meter checks, or with a
+  client key no grant or meter check applies and the spend is the service's own budget, CF-3 and L0's exception, round
+  22, seam) and 256 ("a client key per caller"), with `knowledge/system/base-set.md`
   line 31 (Administration's client-key doors at onboarding and offboarding), are restated so that an agent issues only its own key, as its operator's
   `relayed` twin, and a member's key is issued by the service's operator in their own terminal or on the page (CF-3),
   pending the vault-delivery question above. Until these land the knowledge base contradicts CF-3; they land in the
@@ -221,7 +231,10 @@ a client-key caller input for CF-4's `operator-step` (FAA-204).
 - At landing, beside DEC-0156 (branch `agent/ct220-operators-word-v2`), DEC-0157 (branch `agent/ct216-usage-data-v2`),
   DEC-0158 (branch `agent/ct215-on-demand-20261108`), DEC-0160 (branch `agent/ct228-port-claim-20261108`) and DEC-0161
   (branch `agent/ct288-system-domain-20261108`), the second lander resolves each conflict in
-  `docs/DECISIONS.md`, `docs/backlog.md` and `docs/handoffs/README.md` as the adjacent appends they are: both sides
+  `docs/DECISIONS.md`, `docs/backlog.md` and `docs/handoffs/README.md` as the adjacent appends they are, save
+  `DECISIONS.md`'s `**Next free ID:**` line, which is not an append: one line stays, with the origin counter's value
+  (`git cat-file -p` of `refs/agent-sync/ids/DEC` on origin) and the ids still unlanded, checked by
+  `grep -c '^\*\*Next free ID:\*\*' docs/DECISIONS.md` printing 1 (round 22, seam). Otherwise both sides
   kept, in id order. On the merged tree: `grep -n '^### DEC-01\(5[6-9]\|6[01]\)' docs/DECISIONS.md` prints the
   landed ones in ascending id order with no id twice (round 21, seam), `grep -c '^### DEC-0159' docs/DECISIONS.md` prints 1, and `grep -rn '^<<<<<<<\|^>>>>>>>' docs`
   prints nothing.
@@ -250,7 +263,10 @@ a client-key caller input for CF-4's `operator-step` (FAA-204).
   no-link case; on the merged tree `awk '/^### ST-035/,/^### ST-036/' docs/ux/foundation.md | grep -c 'DEC-0159 CF-4'`
   prints 1, and the line it prints comes before every line of that range naming `OW-` (a judgement on order). SCR-30's *Scenarios* line does not list SCN-059, which is SCR-36's alone. On
   the merged tree: `python3 docs/ux/lint.py` passes; `grep -c '^### SCN-05[789]' docs/ux/scenarios.md` prints 3;
-  `awk '/^### SCN-059/,/^### SCN-045/' docs/ux/scenarios.md | grep -c 'OW-4'` prints at least 1; each sentence that
+  `awk '/^### SCN-059/,/^### SCN-045/' docs/ux/scenarios.md | grep -v 'the update alt path' | grep -c 'OW-4'` prints at
+  least 1, `awk '/^### SCN-059/,/^### SCN-045/' docs/ux/scenarios.md | grep -c '^- \*\*Coverage'` prints 1, and
+  `awk '/^### SCN-044/,/^### SCN-058/' docs/ux/scenarios.md | grep '^- \*\*Coverage' | grep 'DEC-0156 OW-1 to OW-4' |
+  grep -c 'DEC-0159 CF-1'` prints 1 (round 22, seam: the scenarios hunk spans SCN-044's Coverage to SCN-059); each sentence that
   `awk '/^### SCN-059/,/^### SCN-045/' docs/ux/scenarios.md | grep -o "[^.;]*own terminal[^.;]*"` prints puts issuing
   or rotating a key, never revoking, in the operator's terminal (a judgement over the five sentences it prints here); `awk '/^### SCR-30/,/^### SCR-31/' docs/ux/screens.md | grep -c
   'SCN-059'` prints 0; `grep -rn -A3 'secret step' docs/specification | grep -c 'own terminal'` prints at least 1 (a judgement that the printed line names the command the operator runs and
@@ -262,7 +278,8 @@ a client-key caller input for CF-4's `operator-step` (FAA-204).
   allows CF-4's refusal of a member's key; and it adds to UD-4's elicitation clause "(never sent to a client-key caller
   of a cloud instance in the local and cloud form, CF-4)". Then, on the merged tree: `awk '/\*\*UD-4/,/\*\*UD-5/'
   docs/specification/usage-data.md | grep -c 'operator-step: consent'` prints at least 1, the same range piped through
-  `grep -n 'elicitation' | grep -c 'CF-4'` prints at least 1, and `awk '/^### DEC-0157/,/^### DEC-0158/'
+  `grep -n 'elicitation' | grep -c 'CF-4'` prints at least 1, the same range piped through `grep 'product-side refusal'
+  | grep -c 'CF-4'` prints at least 1 (round 22, seam), and `awk '/^### DEC-0157/,/^### DEC-0158/'
   docs/DECISIONS.md | grep -c 'operator-step: consent'` prints at least 1, and the conformance row DEC-0157 adds for
   the agent carries it too: `grep -n 'DEC-0157' docs/specification/conformance.md | grep -c 'operator-step: consent'`
   prints at least 1. The same lander places a cloud instance in the local and cloud form served to a team in UD-1's
@@ -290,7 +307,9 @@ a client-key caller input for CF-4's `operator-step` (FAA-204).
 - Landing note for CT-250's and CT-285's decisions (round 16, product): binding on whichever of DEC-0159 and either DEC
   lands second: that DEC lists CF-3 (keys the operator's alone, the key twin's gate) and CF-4 (choices and the twins of
   page answers) among the rules it restates, and states whether a bound level decision or a place profile stands there
-  for a token-bound caller. Main's CT-285 and CT-250 rows carry it since 2026-11-12 (#275).
+  for a token-bound caller. Main's CT-285 and CT-250 rows carry it since 2026-11-12 (#275). Check, after either DEC,
+  for each row: `awk -v r=CT-250 'BEGIN{RS="\n### DEC-"} $0 ~ r && !/^0159/ {n += (/DEC-0159/ && /CF-3/ && /CF-4/)}
+  END{print n+0}' docs/DECISIONS.md`, and the same with `r=CT-285`, prints at least 1 (round 22, seam).
 - The merged text with DEC-0156 also (round 17, seam): whichever lands second adds to OW-4 that an answer whose
   `data.detail` or job `statusMessage` starts with `operator-step` is handed to the person as "the operator was asked",
   with no link and no retry under a wider key, and that `operator-step: choice` is not repeated (CF-4, DL-19's row).
@@ -913,6 +932,20 @@ a client-key caller input for CF-4's `operator-step` (FAA-204).
   DEC-0161; the vault question names another agent's key; Branch names the fifth merge (unit, product, seam). Left to
   the landing step: CT-287's stale DEC-0159 clause on main (product, risk). Declined: none.
 
+- Checks run on the round-21 fold (`32106f15`): `pnpm run check` exit 0 (11185 tests), before round 22 was read.
+- Round 22 (on `32106f15`): seam and product clean; unit not clean. Break folded: the conformance row and SCR-36's
+  decline state still said a later call after a decline raises a new step, with no condition; both now say only
+  while the need is unmet (unit). Risks folded: CF-4's decline paragraph as two cases; the page checks an open step's
+  need before listing and taking it, the agent's CLI offers the check, and SCN-058 and SCR-35 name the closure
+  (product); a client-key caller keyed as `client-key:<record id>`, kept apart from other credentials, outside the T0
+  and T1 parenthetical in agent-network and `jobCallerKey`'s comment, and in DEC-0159 item 4 and the FAA-204 debt;
+  Consequences and Done name agent-network's caller and `src/agent-network.ts`; the SCN-059 OW-4 check made to fail
+  on a markers-only resolution, with Coverage counts; the `Next free ID` line is not an append; Fabric's registry
+  claim pinned at `d83858c5`; north-star.md lines 303-307 and 256 on the restate list; checks for the CT-250 and
+  CT-285 notes and for UD-4's product-side refusal; Done carries rounds 21 and 22; the README row's clean list
+  (unit, product, seam). Not done: a caller vector for `client-key:` (no behaviour change; the kits' FAA-204 work
+  carries the test). Declined: none.
+
 ## Next task
 
-Round 22 of the blind readings (unit, seam, product) of branch `agent/ct218-local-cloud-v2` (DEC-0159).
+Round 23 of the blind readings (unit, seam, product) of branch `agent/ct218-local-cloud-v2` (DEC-0159).
