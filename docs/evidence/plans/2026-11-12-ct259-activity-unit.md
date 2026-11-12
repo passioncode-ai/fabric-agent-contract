@@ -35,6 +35,7 @@ the agent's, never a person's. `data`:
 | `unit` | `{system, key}`: the tracker or surface that owns the unit (`github`, `jira`, `store`, `mail`, `board`, an open vocabulary) and its stable key there (a PR, an issue, a release, a message id); the same rules as `task.ref` |
 | `transition` | `started`, `ended`, `handed-over` or `accepted` |
 | `taskClass` | the assessment's class id, or `unclassified` |
+| `taskClassMap` | `{id, revision}` of the class map `taskClass` was read from (`revision` a positive integer the map's owner increments); required unless `taskClass` is `unclassified` |
 | `outcome` | on `ended` only: `completed`, `failed` or `abandoned` |
 | `evidence` | 0 to 8 references, each a URI (a receipt, a test run, a review mark) or a `sha256:` digest; never content |
 | `acceptedBy` | on `accepted` only: `{kind, ref}`, `kind` being `rule` (an automatic acceptance rule, `ref` its id), `agent` (`ref` an agent's id) or `person` (`ref` the person's pairwise membership subject for this reader, [membership](../../specification/membership.md) OM-1; never a name or an address) |
@@ -42,9 +43,16 @@ the agent's, never a person's. `data`:
 | `cost` | the agent's spend on the unit as the envelope states a cost: `{usd, basis}`, or `null` when unknown, never 0 |
 
 **AE-2, identity and idempotency.** The event id is derived (activity's *Event id*) from `agent`, `unit.system`,
-`unit.key`, `transition` and, for `ended` and `handed-over`, the attempt's `run.root`, so a kit that writes the same
-transition twice writes one event. One unit has at most one `accepted` event; a unit accepted, reopened and accepted
-again writes a second `started`, and the reader counts the last acceptance in a month once.
+`unit.key`, `transition` and the attempt's `run.root`, for all four transitions, so a kit that writes the same
+transition twice writes one event. A unit has at most one `accepted` event per `run.root`; a unit accepted, reopened
+and accepted again is a new attempt with its own `run.root`, so its second `accepted` is a new event, not a repeat of
+the first, and the reader counts the last acceptance in a month once. (Corrected 2026-11-12 on Observatory's answer:
+without `run.root` the second `accepted` would have the first one's id and be dropped as a repeat.)
+
+**AE-2a, the class map's revision.** `taskClassMap` names the revision of the assessment's class map the class was
+read from. The map renames, splits and merges classes; with the revision a reader of a past month either maps the
+class through the owner's table between revisions or counts it under its old name, visibly, and the past month's
+number does not change behind its back.
 
 **AE-3, the person rule.** The receiver never attaches a user to a `unit` event (as `result`, `FAC-SEM-067`), never
 puts a unit into a summary cell by person, and serves units only per agent, project or task class. `acceptedBy` of
@@ -53,8 +61,10 @@ work) and never reaches a summary, a usage report or another organization.
 
 **AE-4, two ways in.** A device collector sends `unit` events in its activity batches like any kind. A kit that has
 no collector records them through Observatory's own capability for the journal, as a product records its operations
-digest (`ops.digest.record`, DEC-0153): the capability's name and its binding are Observatory's (OBS-378); the
-event's shape is this one either way.
+digest (`ops.digest.record`, DEC-0153): the capability is Observatory's `activity.unit.record` (OBS-378), bound as
+`ops.digest.record` is (an access binding with that scope and effect `propose` over stdio, a hub delegation token with
+that scope on the memory-http door); the event's `project.id` must be the transport's project and `data.agent` a
+service the registry attributes to it. The event's shape is this one either way.
 
 **AE-5, what a reader does with unknowns.** A reader at an older pin reads `unit` as an unknown kind (activity's
 *Extension and unknown kinds*), stores it and counts nothing, so emitting it early breaks no receiver.
@@ -63,11 +73,28 @@ event's shape is this one either way.
 
 - **Schemas:** `telemetry-event.schema.json` gains `$defs/unit` and the kind; `activity-common` the `acceptedBy` shape.
 - **Rules:** one `FAC-SEM` code (reserved with the DEC): `outcome` only on `ended`, `acceptedBy` and `acceptedAt`
-  only on `accepted`, at most one `accepted` per unit and stream.
+  only on `accepted`, `taskClassMap` present unless `taskClass` is `unclassified`, at most one `accepted` per unit and
+  `run.root`.
 - **Vectors:** each transition; a `person` acceptance kept out of a summary; a repeated write deduplicated; a
-  reopened unit accepted twice; an unknown cost as `null`; a `unit` with a `user` (refused).
+  reopened unit accepted twice under two `run.root` values (two events); a classified unit without `taskClassMap`
+  (refused); an unknown cost as `null`; a `unit` with a `user` (refused).
 
-## Questions for Project Observatory (to confirm before the DEC)
+## Observatory's answers (2026-11-12)
+
+Project Observatory answered on the board (thread `b83440d6`, message `b8d911c0`; and thread `52aa2f93`, message
+`55fa0fd7`, with its journal design `docs/design/ACTIVITY-JOURNAL.md`, project-observatory-dashboard PR #511):
+
+1. `unit` inside `fabric-activity/0.1`: confirmed. The node already keeps one stream per organization membership
+   (DEC-0082) and a server pinned before the DEC refuses the kind by purpose, so AE-5 already holds there.
+2. No `org` in the event: confirmed. The stream names the organization; a project with no membership keeps the
+   event in Observatory's local journal only.
+3. The capability: `activity.unit.record`, bound as `ops.digest.record` (written into AE-4).
+4. `taskClass` alone is not enough: the class map's revision is added (`taskClassMap`, AE-2a).
+
+And one correction: the event id includes `run.root` for every transition (AE-2). With these the shape is confirmed
+and the DEC is written with its schema and vectors.
+
+## The questions put to Observatory
 
 1. Is `unit` inside `fabric-activity/0.1` right for the journal, or does OBS-378 need a separate document type?
    Proposed: inside, so one transport, one attribution and one person rule.

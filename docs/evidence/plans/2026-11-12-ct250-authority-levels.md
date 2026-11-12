@@ -153,6 +153,13 @@ The DEC takes each default unless the operator answers otherwise before 2026-11-
    step (AP-4), and the owner's level decides everything an administrator's does.
 5. **A level decision without a delegation token at T0 or T1** (LV-5)? Default: not taken; the call keeps the
    operator's path. This also leaves CT-168's question (a hostile local process) where it is.
+6. **Does an organization product's own signed delegation travel to other products?** The organization product
+   (its levels row) designed one (asked on the board 2026-11-11, thread `eefa7959`, message `6cb2a333`): an owner or
+   an administrator signs once, with a passkey, a delegation to one agent token for named kinds of act and up to 90
+   days, and the agent then acts inside it with each act journaled. Default: it stays inside that product, as its own
+   record in its own namespace. What travels between products is the level decision (LV-3) and, where an act needs
+   standing permission, a `mandate/1` the hub issues on that decision (DEC-0125); a product that later needs to honour
+   such a delegation asks for it here and it is mapped onto `mandate/1`, never added as a second traveling form.
 
 ## Not decided here
 
