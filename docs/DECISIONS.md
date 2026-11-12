@@ -11453,12 +11453,13 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      product's own switch on, the product meanwhile showing its own switch as off and its notice saying where to turn it
      on, so
      Fabric's live "One switch for every PassionCode app on this computer" (`en.ts` line 864 at `eafcf2e4`) is a false
-     promise for a product that has already sent, which the person reads until Fabric's switch for Fabric alone ships
+     promise for a product that has already sent, or whose own switch the person set on, which the person reads until Fabric's switch for Fabric alone ships
      (CO-496); a product's own switch never writes the shared file's `analytics` field, and a product whose switch
      wrote it under words that governed every reader stops writing it from the version whose switch governs it alone,
      and leaves an off already written there, which stays the earlier no for products that have not yet sent, or not
      yet had their stand-in run; what a product collected before it read an earlier no it drops when it reads it, and
-     it need keep only that its first send, or its stand-in run, has happened; a
+     it keeps an earlier no it read until the person sets its own switch on, and need not keep a reading that found
+     none, only that its first send, or its stand-in run, has happened; a
      shared file that exists but cannot be read before a product's first send (or before that stand-in run), on an install whose own switch the person has not set on, is no
      answer, and the product sends nothing in that run, a run that sent nothing for that reason being no stand-in run, and the product, on an install whose own switch the person never set, showing its switch as on but not sending and saying beside it (for a product without a window, where its switch is read) that nothing
      is sent until the shared file can be read at its next start and offering there to set its switch on, which is the
@@ -11743,7 +11744,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   person's terminal or its opened dashboard, so what an install queued before either is sent at the next pass; that notice also names neither its own, unshared
   installation id (line 12, `install_id` at lines 288 to 300) nor its session id, so it owes naming both (UD-1), and
   its session id is one per process (lines 401 to 409), so where a process lives past an idle hour it owes UD-3's
-  renewal; the rest of its sender, whether its MCP surface offers its switch (UD-4) included, was not read against these rules. It also sends OpenRouter attribution on every
+  renewal; it reads only its own switch file, never the shared file (`usage_analytics.py` lines 64 and 154 at `2a11b3fd`), so it owes UD-2's kept decline (a shared off read before a new install's first send and at its conforming version's stand-in run) and UD-2's hold on an unreadable shared file; the rest of its sender, whether its MCP surface offers its switch (UD-4) included, was not read against these rules. It also sends OpenRouter attribution on every
   request it makes to OpenRouter whatever its usage data switch says (`observatory/engine/agent/providers.py` lines 76
   to 94), which UD-6 leaves outside the page and asks it to say on its usage data page, and that attribution carries
   the legacy `X-Title` header too (line 93), where DEC-0065 has a product add exactly its headers and send the
@@ -11765,7 +11766,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/agents/mcp.md` line 278 at `1395416`, B-205) answers the person's own agent from the server the person deploys,
   a read UD-6 allows since no product owner receives the data. A product's install and active counts move at the version that
   meets UD-1 and UD-2: they drop where the product sent before its notice or past an earlier no (Switchboard, Fabric
-  Inbox, Fabric Dashboards), and rise where it waited for an answer (Fabric, whose never-answered installs send nothing
+  Inbox, Fabric Dashboards) or when the shared file could not be read (Fabric Inbox's baseline and Fabric Dashboards'
+  events without an id), and rise where it waited for an answer (Fabric, whose never-answered installs send nothing
   today and come on after its notice at CO-496); an installation id a product owns, made anew at re-enable (UD-2),
   counts that install again. That version is to be marked where its counts are read. Events the host already
   received past an earlier no (from Switchboard, Fabric Inbox and Fabric Dashboards before their conforming versions)

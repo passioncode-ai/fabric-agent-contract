@@ -175,10 +175,10 @@ flowchart TD
 ### FLW-07: Device applies policy layers
 
 - **Traces:** ST-008 (JTBD-04, JRN-03/#2)
-- **Goal:** the effective setting is the resolution of signed layers, and a locked key is never overridden locally, save a lock that would hold a product's usage data switch on, which the device and the product ignore (UD-2, DEC-0157)
+- **Goal:** the effective setting is the resolution of signed layers, and a locked key is never overridden locally, save a lock that would hold a product's usage data switch on, which the device and the product ignore (once CT-280 names the key; until then the device shows and refuses it as any locked key, and the product applies the person's own setting or an earlier no) (UD-2, DEC-0157)
 - **Entry points:** a policy in a check-in response; a local settings change; a 410 `organization-closed` answer (DEC-0103)
 - **Success exit:** effective settings shown with the layer each came from and its lock; for a closed organization, its sentence and date with its server locks lifted
-- **Task analysis:** verify signature and revision → resolve lock, then the user's value (never for `harness.baseline` or `repair.packages`, DEC-0102), then the highest default → resolve a product's usage data switch again without any lock that would hold it on, so a lower layer's lock off still holds and otherwise the person's own setting or an earlier no governs (UD-2, DEC-0157) → show each key's source → refuse a local change to a locked key, save a usage data switch held on only by locks UD-2 ignores, whose person's value the device shows as the one the product applies while its reported `effective` keeps the lock's value.
+- **Task analysis:** verify signature and revision → resolve lock, then the user's value (never for `harness.baseline` or `repair.packages`, DEC-0102), then the highest default → resolve a product's usage data switch again without any lock that would hold it on, so a lower layer's lock off still holds and otherwise the person's own setting or an earlier no governs (UD-2, DEC-0157) → show each key's source → refuse a local change to a locked key, save (once CT-280 names the key) a usage data switch held on only by locks UD-2 ignores, whose person's value the device shows as the one the product applies while its reported `effective` keeps the lock's value.
 - **Rejected shape:** let the highest layer always win — rejected because an unlocked default would leave the person no choice at all.
 - **Flow:**
 

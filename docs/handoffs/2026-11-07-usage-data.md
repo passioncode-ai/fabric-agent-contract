@@ -73,7 +73,11 @@ decision of 2026-11-04.
   release; at merge DEC-0157 Accepted and CT-216 done, CT-216's done row keeping its pointer to this handoff's
   Parallel branches list while any of DEC-0156, DEC-0158 or DEC-0159 is unlanded (check on the landing tree:
   `grep '^| CT-216 ' docs/backlog.md | grep -c 'Parallel branches'` prints 1; round 26, seam), CT-287's DEC-0157 clause marked landed (the pull request and the merge
-  commit), the `Next free ID` line written from the counter read then, CT-250's, CT-252's, CT-259's and CT-293's "(proposed on a branch, CT-287)" after DEC-0157 restated as "(accepted <date>)",
+  commit), the `Next free ID` line written from the counter read then, CT-250's, CT-252's and CT-259's "(proposed on a branch, CT-287)" after DEC-0157 restated as "(accepted <date>)" and
+  CT-293's "(both proposed on branches, CT-287)" as "(DEC-0156 proposed on a branch, CT-287; DEC-0157 accepted <date>)",
+  or "(both accepted ...)" once DEC-0156 has landed (checks: `grep -E '^\| CT-(250|252|259) ' docs/backlog.md | grep -c
+  'DEC-0157[^(]*(proposed on a branch'` and `grep '^| CT-293 ' docs/backlog.md | grep -c 'both proposed on branches'`
+  each print 0; round 27, seam),
   `docs/handoffs/2026-11-12-north-star-designs.md`'s Next task no longer naming DEC-0157's readings, the handoffs index row's Decisions cell reading
   "DEC-0157 (CT-216; CT-280 filed), accepted <date>; rounds 1 to N not clean, N+1 and N+2 clean" and its Merge cell
   "merged <date>, #<PR> `<merge commit>`", and the products told on the board what each owes, in one
@@ -86,9 +90,11 @@ decision of 2026-11-04.
   its `README.md` lines 336 to 338 and its `docs/ANALYTICS.md` lines 92 to 94, the page that README sends readers to
   ("`analytics: false` turns analytics off for every PassionCode app on the machine") and its interface string registry `docs/brand/strings.md` lines 706 and 716, which repeat `en.ts` lines 869 and 870 (all at `eafcf2e4`), the README's "one person using several apps counts once" (line
   336) saying one installation instead, the corrected strings saying, until CO-496 removes the write, that Fabric's off also tells
-  PassionCode apps on this computer that have not yet sent, or have not yet run their updated version, to stay off,
-  and that its on lets those that have not yet read that off send, while an app that already read it stays off until
-  it is turned on in its own settings (not "for Fabric only", which the write makes false for those apps), and an agent twin for its switch (UD-4) at CO-496;
+  PassionCode apps on this computer that have not yet sent, or have not yet run their updated version, to read it as
+  a no, unless that app's own switch was set (an app turned on in its own settings keeps sending), and that its on lets
+  those that have not yet read that off send, while an app that already read it stays off until it is turned on in its
+  own settings; and its hold line `analytics.noFile` (`en.ts` line 866, `ru.ts` lines 2490 to 2491) replaced by UD-2's
+  hold display at CO-496 (not "for Fabric only", which the write makes false for those apps), and an agent twin for its switch (UD-4) at CO-496;
   Switchboard, with an action for its switch and a manifest capability for that tool (UD-4), and UD-1's purpose in its
   notice (its "to help PassionCode.ai improve its apps", `src/main.ts` line 109 at `f6f1dc1`, names every app; its Russian copy is `src/locales/ru.ts` line 68 at its
   `origin/main` `6461505`), and the
@@ -102,7 +108,7 @@ decision of 2026-11-04.
   and UD-4's relayed action changes the switch only on the operator's own decision, so the door does not change it for
   the person; whether to build it now is for the operator) and sending
   nothing in a run before its first send (or before its conforming version's stand-in run) in which the shared file
-  cannot be read, on an install whose own switch the person has not set on (UD-2, its baseline at `desktop/analytics.cjs` lines 307 to 310), and that its server is counted by
+  cannot be read, on an install whose own switch the person has not set on (UD-2, its baseline at `desktop/analytics.cjs` lines 307 to 310), showing that hold as UD-2 says beside its switch, and that its server is counted by
   each member's app under that member's switch, so an organization deploying it holds no switch over those counts (UD-1's
   scope), such counts being per member's app, not per server, so not summed across installs, an organization that
   wants them off locking its members' switch off by device policy (UD-2) once CT-280 names the key, and it owes
@@ -112,7 +118,8 @@ decision of 2026-11-04.
   (`desktop/menu.cjs` line 26 at `c9d9cc7`), a UD-2 debt since they contradict its own notice; and its notice's "counts one person once"
   (`desktop/main.cjs` line 937) saying "one installation" (or "this computer") rather than "one person", a new notice
   under UD-1's re-show rule (OQ-0013), with its `docs/ANALYTICS.md` lines 10 to 11 at `1395416`, which carry the same
-  "one person ... counts once"; Fabric Dashboards, the same for its events sent without an id (`src/core/analytics.ts` lines 59 to 60 and 170
+  "one person ... counts once"; Fabric Dashboards, the same for its events sent without an id, showing the hold as
+  UD-2 says beside its switch (`src/core/analytics.ts` lines 59 to 60 and 170
   to 171 at `d43c94e`), FD-175 and a manifest capability for that tool included, its switch's action refusing
   `operator-decision-required` without a decision rather than run as the caller's own act (`src/mcp/server.ts` lines
   332 to 333 at `d43c94e`); the launcher (PC-123, before 0.2.76 is tagged):
@@ -164,9 +171,9 @@ decision of 2026-11-04.
   maintenance pass flushes what was queued (`observatory/engine/maintenance.py` lines 1117 and 1125 to 1129 at
   `2a11b3fd`), whether or not its notice was shown at a terminal or on its dashboard; its session id is one per
   process (lines 401 to 409), so it owes UD-3's renewal after an idle hour where a process lives that long; it reads
-  only its own switch file, never the shared file (lines 64 and 153), so it owes UD-2's kept decline (a shared
-  `analytics: false` read as the earlier no at its conforming version's stand-in run, on an install whose own switch
-  the person never set); its UD-5
+  only its own switch file, never the shared file (lines 64 and 154), so it owes UD-2's kept decline (a shared
+  `analytics: false` read as the earlier no before a new install's first send and at its conforming version's stand-in
+  run, on an install whose own switch the person never set) and UD-2's hold on an unreadable shared file; its UD-5
   page states that store (retention, erasure, off-host copy, both readers) and that its OpenRouter attribution
   goes out whatever its usage data switch says (UD-6); that attribution also sends the legacy `X-Title` header
   (`observatory/engine/agent/providers.py` line 93 at `2a11b3fd`), where DEC-0065 has a product add exactly its headers
@@ -264,12 +271,15 @@ decision of 2026-11-04.
     at least 1:
     `awk '/^- \*\*OW-1/,/^- \*\*OW-2/' docs/specification/governance-and-roles.md | grep -c UD-4`;
     `awk '/^- \*\*OW-5/,/^- \*\*OW-6/' docs/specification/governance-and-roles.md | grep -c UD-4`;
-    `grep -c 'OW-1' docs/specification/usage-data.md`.
+    `grep -c 'OW-1' docs/specification/usage-data.md`. DEC-0156's round 29 adds: the merged UD-4 sentence on a shared
+    file the agent cannot read cites OW-2 (the agent takes the step itself on the operator's word); check, scoped to that
+    sentence: `awk '/\*\*UD-4/,/\*\*UD-5/' docs/specification/usage-data.md | tr '\n' ' ' | grep -o 'shared file it
+    cannot read[^;]*;[^;]*' | grep -c 'OW-2'` prints at least 1 (round 27, seam; relayed to DEC-0156's owner).
   - With DEC-0159. The second lander restates UD-4's ask-first sentence, DEC-0157 item 4 and the conformance agent row
     so that a client-key caller of a cloud instance, on a call the instance refuses for want of the operator, reads that
     refusal in both forms the merged CF-4 gives it, and tells the person the operator was asked: a tool that is not
     job-backed answers `scope-not-granted` with `operator-step: consent`; a job-backed tool answers a job reading
-    `working` whose `statusMessage` is `operator-step consent`. It restates UD-4's "the contract adds no product-side
+    `working` whose `statusMessage` starts with `operator-step consent`. It restates UD-4's "the contract adds no product-side
     refusal" (page, item 4) so that it allows CF-4's refusal of a member key's call on a `relayed` action and of an
     approval such an instance cannot check, and adds to UD-4's elicitation clause, on a line that names CF-4, AP-2's
     rule that a cloud instance sends no elicitation to a client-key caller. It also places a cloud instance served to a
@@ -981,6 +991,7 @@ not pushed for the same reason; the round entries' commits resolve only there.
   list names CT-293 (main's CT-293 row names UD-3 to UD-5 since #281) (unit, product, seam). Declined: none.
 - Checks run on the round-24 fold (`1e0d70c2`): `pnpm run check` exit 0 (11173 tests).
 - Checks run on the round-25 fold (`fb6ee0a9`): `pnpm run check` exit 0 (11173 tests), before round 26 was read.
+- Checks run on the round-26 fold (`71f40e77`): `pnpm run check` exit 0 (11173 tests), before round 27 was read.
 - Round 26 (on `fb6ee0a9`): seam clean; unit and product not clean. Breaks folded: round 25's agent rule sat in an
   unnumbered bullet that took UD-5's list marker, and the record said UD-4 held it; it is now UD-4's last sentence, in
   DEC-0157 item 4 and the agent row, the operator's own word naming the switch setting it on through the product's
@@ -995,6 +1006,19 @@ not pushed for the same reason; the round entries' commits resolve only there.
   paragraph's device-policy lock and Fabric Inbox's line wait on CT-280; the Registers item and CT-216's done row carry
   merged-tree checks; Done names the fourth main merge; CT-280's Goal cell fixed (unit, product, seam). Declined: none.
 
+- Round 27 (on `71f40e77`): none clean. Breaks folded: UD-2 named the shared file `<root>/PassionCode/installation.json`,
+  a path no product uses, since DEC-0025's `<root>` already is the `PassionCode` folder; it is `<root>/installation.json`
+  (unit, seam); DEC-0157 item 2 and row 219 kept "only that its first send or stand-in run happened", losing an earlier
+  no read at the stand-in run; both keep that no (unit); row 206 stated the device's exception without CT-280's
+  condition (unit); the board wording for Fabric still kept off an app the person turned on in its own settings; it now
+  says "unless that app's own switch was set" (product); Observatory's kept-decline debt was missing from DEC-0157's
+  Compatibility and the specification README row (product). Risks folded: CT-280's qualifier in FLW-07, JTBD-04, JRN-03
+  and CONTEXT; CONTEXT's hold display scoped; the citation's path and shape lines; "or an earlier no" in the interim
+  device clauses; Fabric's `analytics.noFile` owed to the hold display; Fabric Inbox and Dashboards show the hold; the
+  counts-move sentence names the hold's drop; SCN-043 gains the agent path for an unreadable file; the DEC-0156 note's
+  OW-2 check scoped to the UD-4 sentence; CT-293's restatement named exactly; "starts with `operator-step consent`";
+  Observatory's line 154 (unit, product, seam). Declined: none.
+
 ## Next task
 
-Round 27 of the blind readings of branch `agent/ct216-usage-data-v2` (DEC-0157): unit, seam and product.
+Round 28 of the blind readings of branch `agent/ct216-usage-data-v2` (DEC-0157): unit, seam and product.

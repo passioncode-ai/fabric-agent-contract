@@ -98,14 +98,14 @@ The key words MUST, MUST NOT, SHOULD and MAY are used as in RFC 2119.
   own switch the person never set), the product shows its switch as on but not sending, says beside it
   (for a product without a window, where its switch is read, such as a command line tool's status output) that
   nothing is sent until the shared file can be read at its next start, and offers there a control that sets its own
-  switch on for this product, which is the person setting the product's own switch on. The shared file is `<root>/PassionCode/installation.json`, `<root>` as DEC-0025 defines it, holding
+  switch on for this product, which is the person setting the product's own switch on. The shared file is `<root>/installation.json`, `<root>` as DEC-0025 defines it (the `PassionCode` folder), holding
   `version` 1, `id` (a random UUID), `analytics` (a boolean) and `created_at`, as the products that create it write it
-  (the launcher's `lib/analytics.js` lines 42 to 46 at `ad978a6`). A product's own switch MUST NOT write the shared
+  (the launcher's `lib/analytics.js` lines 41 to 46 for the path and line 56 for the shape, at `ad978a6`). A product's own switch MUST NOT write the shared
   file's `analytics` field; a product whose switch wrote it under words that governed every reader stops writing it
   from the version whose switch governs it alone, and leaves an off already written there, which stays the earlier no
   for products that have not yet sent, or not yet had their stand-in run. Fabric's live setting says its switch governs every
   app ("One switch for every PassionCode app on this computer", its `en.ts` line 864 at `eafcf2e4`): for a product that
-  has already sent, that is a false promise, which the person reads until Fabric's switch for Fabric alone ships (its
+  has already sent, or whose own switch the person set on, that is a false promise, which the person reads until Fabric's switch for Fabric alone ships (its
   CO-496). A device policy ([devices](devices.md#policy)) whose layer carries a key for a product's switch MAY lock it
   off; it MUST NOT lock it on, since a person who declined stays off and the switch is the person's (UD-4).
   The device and the product ignore a lock that would hold the switch on, resolving the key without any lock that
@@ -316,7 +316,11 @@ reaches. Fabric's switch also writes the shared `analytics`
 field both ways (`writeAnalyticsSwitch`, `apps/desktop/src/main/analytics.ts` lines 88 to 96, called by `setEnabled`
 at lines 305 to 308, at `eafcf2e4`), so under UD-2's earlier-no reading its off decides for every product that has
 not yet sent, or not yet had its stand-in run, and its on erases a person's earlier no for every product that has not yet read it; CO-496 owes UD-2's rule on writing: Fabric stops writing the
-field from the version whose switch governs Fabric alone and leaves an off already written there. Fabric Inbox exports
+field from the version whose switch governs Fabric alone and leaves an off already written there, and replaces its hold
+line `analytics.noFile` ("Usage counts are off: the shared PassionCode file could not be read, so nothing is sent.",
+`en.ts` line 866 and `ru.ts` lines 2490 to 2491 at `eafcf2e4`) with UD-2's hold display (on but not sending, the
+next-start line, the set-on control), an install whose own switch the person set on sending despite an unreadable file.
+Fabric Inbox exports
 a writer for the shared field that nothing calls (`writeSwitch`, `desktop/analytics.cjs` lines 96 to 103 at
 `1395416`), so it writes nothing there today, and under UD-2 it stays uncalled. Its `README.md` (lines 202 to 204 at
 `1395416`) says its switch turns the counts off "for every PassionCode.ai app on the Mac at once", which contradicts
@@ -347,8 +351,9 @@ its scheduled maintenance pass flushes the queue (`observatory/engine/maintenanc
 install queued before either is sent at the next pass. That notice also names
 neither the installation id every event carries (its own, unshared: line 12, `install_id` at lines 288 to 300) nor its
 session id, so it owes naming both (UD-1). It reads only its own switch file, never the shared file (`usage_analytics.py` lines
-64 and 153 at `2a11b3fd`), so it owes UD-2's kept decline too: at its conforming version's stand-in run, on an install
-whose own switch the person never set, a shared `analytics: false` is read as the earlier no; its session id is one per process (lines 401 to 409), so where a process
+64 and 154 at `2a11b3fd`), so it owes UD-2's kept decline too: before a new install's first send and at its conforming
+version's stand-in run, on an install whose own switch the person never set, a shared `analytics: false` is read as the
+earlier no, and it owes UD-2's hold on an unreadable shared file; its session id is one per process (lines 401 to 409), so where a process
 lives past an idle hour it owes UD-3's renewal. The rest of its sender, whether its MCP
 surface offers its switch (UD-4) included, was not read against these rules. The estate's hosted workspace product is outside the page as a hosted
 service; its self-hosted image, a component an organization deploys on its own server for its members, is under it
@@ -361,7 +366,8 @@ whose tool's effect is `change-policy`. Its design plans to declare its counting
 CT-216 lands (its `docs/design/2026-11-04-analytics-default.md` line 301 at `855f7a37`); UD-5 defines no such member, so it has
 nothing to declare until a later decision adds one. A product's install and active counts move at the version that meets UD-1
 and UD-2: they drop where the product sent before its notice or past an earlier no (Switchboard, Fabric Inbox, Fabric
-Dashboards), and rise where it waited for an answer (Fabric, whose never-answered installs send nothing today and come
+Dashboards) or when the shared file could not be read (Fabric Inbox's baseline and Fabric Dashboards' events without an
+id), and rise where it waited for an answer (Fabric, whose never-answered installs send nothing today and come
 on after its notice at CO-496); an installation id a product owns, made anew at re-enable (UD-2), counts that install
 again. That version is to be marked where its counts are read.
 Fabric, the operations digests' collector (its CO-503), sends only its own daily lines, to the local Project
