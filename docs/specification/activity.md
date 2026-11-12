@@ -10,7 +10,7 @@ DEC-0030, amended by DEC-0052, DEC-0068, DEC-0082, DEC-0090 and DEC-0164; its tr
 [`activity-common`](../../schemas/activity-common.schema.json)
 
 Activity telemetry records **when an agent session worked, waited or idled, and what each model
-call used** — for debugging, for memory of how work went, and for spend reconciliation — and, since DEC-0164, the
+call used** — for debugging, for memory of how work went, and for spend reconciliation. Since DEC-0164 it also records the
 **units of work an agent did** (`unit`), which a device's collector sends or a kit records through Project
 Observatory's capability. A collector
 on a device reads what coding-agent runtimes already emit (OpenTelemetry exports, transcripts,
