@@ -11459,8 +11459,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      and the safest reversible option, then once per task to the project offering `people.ask` or through
      `fabric_question_ask`; a `people.ask` reply starts the asking project's next run, which takes the step only on the
      operator's word (their own surface or an accepted relay) and otherwise leaves a step only that word decides open
-     and asks the operator once, while an answer through `fabric_question_ask` starts no run and is a decision naming
-     the step, on which the request is submitted again; a request settled `failed_known` there submitted
+     and asks the operator once, while an answer through `fabric_question_ask` starts no run and wakes nobody, so the
+     reply tells the requester that the request is submitted again only on the operator's word relayed to it, the
+     answer able to sit unacted on until Fabric wakes the asking project (asked under `add1df7c`); a request settled `failed_known` there submitted
      again only where what the person does lets a session with no person take the step and no such next run has
      taken it (a decision or a relay naming the step, a grant, a human step cleared), by the operator's session in the requesting Project (its agent,
      on their word) when they own the requesting Project and by the requester otherwise, a relay or a mandate that names the
@@ -11621,7 +11622,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   that waits; a risk on a step a host's gate holds carried as that gate's one ask), its bare refusal and its one
   question in the chat under an FA-09 refusal and, with no person in the chat, the act left open and named for a
   session the person is in (Fabric's refused card no question of the agent's); the asks other rules require for the
-  same act named (rule 3's approval request, DEC-0149's word); OW-4's full list with the word for a source hand-over (DEC-0149) and the rule that
+  same act named (rule 3's approval request, DEC-0149's word); working-with-fabric `references/on-demand-session.md`
+  asking OW-3's three waits by the no-person route (its step 7's "step 3's gate question is the only one" excepting
+  that question, lines 183 to 202 at `97ca5b5e`), with its eval; OW-4's full list with the word for a source hand-over (DEC-0149) and the rule that
   a refusal by its own tool or harness is never routed around and is handed over without first trying other routes
   (its `references/practices.md` says "after the agent's own routes"); the floor line above; its prose test and
   behaviour eval with them; and its operator-channel references (`operator-channel-and-repository.md` in

@@ -761,7 +761,7 @@ flowchart TD
   O -->|a whole task| K1[The agent takes each step itself: commands, builds, the acts the words name, OW-1 and OW-2]
   K1 -->|at a step with a risk| R1{a risk the words did not name}
   R1 -->|corrected way undoes cleanly and meets the word, no gate| T1[One message with the corrected way; taken and reported; the rest goes on]
-  R1 -->|a relayed act neither named nor covered, a gate of OW-5 other than a human step, a reserved control or a host's gate, or no clean corrected way| Q1[One question; that step waits, the rest goes on; unanswered, it stays open in the report; with no person in the chat, asked once through the organization's PM agent, whose reply starts the next run, or the host's question surface, whose answer is a decision the request is submitted again on]
+  R1 -->|a relayed act neither named nor covered, a gate of OW-5 other than a human step, a reserved control or a host's gate, or no clean corrected way| Q1[One question; that step waits, the rest goes on; unanswered, it stays open in the report; with no person in the chat, asked once through the organization's PM agent, whose reply starts the next run, which takes the step only on the operator's word or an accepted relay and otherwise asks the operator once, or the host's question surface, whose answer starts no run and on which the request is submitted again only on the operator's word relayed to the requester]
   T1 -->|the operator names another way| K1
   T1 -->|a bare no| U1[The corrected way undone where it can; the step left open]
   Q1 -->|yes, or another way named| K1

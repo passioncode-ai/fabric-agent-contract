@@ -197,8 +197,10 @@ words AP-2 and OA-1 already name; the rules hold for any owner.
   agent) says, as Fabric's `QUESTIONS_RULE` carries it in both packets of a board-started run, with its fallback to the
   host's question surface (Fabric's on-demand spec §3.10, `9420da79`): it first settles what it can by the project's
   recorded decisions, its goal and the safest reversible option (the corrected way above), records why, and takes a
-  question that still needs a person once per task, with its options and their consequences and saying that the step
-  needs the operator's word (relayed as OA-2 and OA-3 accept), to the project offering `people.ask` in `com.directory`
+  question that still needs a person once per task (beside the one question to the operator that the next run asks
+  when the PM agent's reply is not the operator's word, below), with its options and their consequences, saying that
+  the step needs the operator's word (relayed as OA-2 and OA-3 accept) and naming the request, its thread, the step and
+  who submits the request again, to the project offering `people.ask` in `com.directory`
   (the organization's PM agent), or through the host's question surface (`fabric_question_ask`) where no project offers
   it, doing the independent parts meanwhile; a wait that arises after the task's question has gone is named with it in
   the report and the board reply, never a second question. Its `com.reply` names the open step and where the question
@@ -211,9 +213,16 @@ words AP-2 and OA-1 already name; the rules hold for any owner.
   stop under AP-3) open and named in the request's thread, and that run asks the operator once through the host's
   question surface. Through `fabric_question_ask` the answer is recorded as the project's decision and starts no run
   (Fabric's `answer_question` wakes nobody, and an ended session's continuation reads `needs_restart`), so the step
-  stays open and the answer is a decision naming the step, on which the request is submitted again as below; Fabric's
-  waking of the asking project on an answered question is owed (the handoff's `add1df7c` step). While no project
-  offers `people.ask` (Fabric CO-569), every such question takes the second route. An act a host's gate holds, and the FA-09 case, ask
+  stays open: an answer agreeing to the step is a decision naming it, on which the request is submitted again as
+  below, and a refusal leaves it open as a bare refusal does. Nobody is woken by that answer, and `fabric_question_check`
+  reads only the asking project's own questions, so the `com.reply` tells the requester that the request waits on the
+  operator's answer and is submitted again only on the operator's word relayed to it (OA-2, OA-3), or by the operator's
+  own session when they own the requesting Project; until the host wakes the asking project on an answered question
+  (asked of Fabric, the handoff's `add1df7c` step), such an answer can sit unacted on, a risk the reply and the report
+  name. While no project offers `people.ask` (Fabric CO-569), every such question takes the second route. A session
+  without the board's tools (Fabric's run on another machine, which writes its answer as the run's result) writes each
+  open step and its question into that result, which reaches the request's thread only as the host posts it (Fabric
+  posts an answered result only today, its on-demand spec §3.10 at `92da0efc`). An act a host's gate holds, and the FA-09 case, ask
   nothing from that session (a host's gate still asks as it does), since only a session the person is in gives the
   agreement they hold. Second, who submits it again: a request settled `failed_known` this way is submitted to the
   board again only where what the person does lets a session with no person take the step and no next run of the
