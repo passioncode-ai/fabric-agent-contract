@@ -191,12 +191,12 @@ ruling; DEC-0017 states what holds now.
   answer to a repeated key, `null` and `partial` in `usage` under the revision `fabric-interop/0.2` a caller names in
   `_meta.protocols`; `FAC-SEM-119`, `FAC-SEM-120`. C4 stays adapter guidance.
 
-### OQ-0015: Is a one-person project's unit count served inside a larger organization?
+### OQ-0015: Is a unit cell drawn from one member's work served inside a larger organization?
 
 - **Status:** Open
 - **Raised:** 2026-11-12, DEC-0164 (CT-259) blind readings
-- **Question:** Units are served only for an organization whose signed member list names at least 3 members ([activity](specification/activity.md#kinds), DEC-0164 AE-3). Inside such an organization a project with one member has a project cell that is that person's agents' output. Serve it, or fold it into the organization's total?
-- **Meanwhile:** served (the default), as Observatory's journal counts it; the operator answers before the first monthly number is published.
+- **Question:** Units are served only for an organization whose signed member list names at least 3 members ([activity](specification/activity.md#kinds), DEC-0164 AE-3). Inside such an organization a project with one member, an agent only one member runs, or a task class only one member's work falls into gives a cell that is that person's agents' output. Serve such cells, or fold them into the organization's total?
+- **Meanwhile:** folded into the organization's total (the safer, reversible default); the operator answers before the first monthly number is published.
 
 ### OQ-0016: Under which access-log scope is a read of a person acceptance logged?
 
@@ -212,9 +212,9 @@ ruling; DEC-0017 states what holds now.
 - **Question:** A member holds one pairwise subject per (organization, audience) (OM-1). A unit can reach the organization's journal and Observatory's local journal; which audience's subject does a writer put in `acceptedBy.ref`?
 - **Meanwhile:** the organization's own journal's audience; a receiver resolves any audience's subject it issued for that member.
 
-### OQ-0018: Is a cut of units by role a permitted cell?
+### OQ-0018: Is a cell counting units by the members' own role permitted?
 
 - **Status:** Open
 - **Raised:** 2026-11-12, DEC-0164 (CT-259) blind readings
-- **Question:** The North Star plan (fabric-workspace `knowledge/system/measure.md`, step G1-e) shows the metric per role cut (G26). DEC-0164 serves units only by agent, project, task class and the organization's total. Is a role cut permitted, and with what minimum?
-- **Meanwhile:** no role cut is served; G1-e's role view waits for the answer.
+- **Question:** DEC-0164 serves units only by agent, project, task class and the organization's total. May a cell count units by the role of the members whose work they are (owner, administrator, architect, member), and with what minimum? This is not the North Star's G26, whose role cut is a dashboard per viewer role built from the cells already served (the owner's view is the organization's total).
+- **Meanwhile:** no cell counts units by the members' role; G1-e's per-role dashboards are views over the served cells and wait on nothing here.

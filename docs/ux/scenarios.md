@@ -289,7 +289,7 @@ independent agent author and P-02 project operator.
 - **Feature:** telemetry
 - **Traces:** ST-007, FLW-06 (JTBD-04, JRN-03/#3)
 - **Entry point:** the organization's member page
-- **Preconditions:** the member's device is enrolled; an administrator read the member's raw events and their device's health this week
+- **Preconditions:** the member's device is enrolled; an administrator read the member's raw events and their device's health this week; a partner organization read usage sums that include the member (DEC-0090); a colleague read a unit the member accepted, under a purpose the member confirmed (DEC-0164)
 - **Steps:**
   1. Member opens the access log -> the receiver lists `access-log/1` entries for the member's `user.id`, bound devices and the pairwise subjects the organization issued them for each audience (resolved to the `user.id`, DEC-0164).
   2. The first entry is `activity.raw` by role `org.admin` with a purpose sentence -> the member sees who read and why.

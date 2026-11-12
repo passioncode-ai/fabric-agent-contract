@@ -307,10 +307,13 @@ function unitEvent(event: JsonObject, at: string): Finding[] {
     if (derived !== null && event.sourceKey !== derived) flag("/sourceKey", "a unit event's sourceKey derives from its agent, unit, transition and run.root (unitSourceKey)");
   }
   // AE-2: the key forms the page fixes, so two writers of one unit derive one id: a github key is lower-cased
-  // `<owner>:<repo>#<number>` or, over the key's 64 characters, the first 40 hex digits of its SHA-256; a mail key is that
-  // digest of the Message-ID.
+  // `<owner>:<repo>#<number>` (a managed user's owner holds `_`; the number as GitHub returns it, no leading zero), a jira
+  // key the issue key with no system prefix, each over the key's 64 characters the first 40 hex digits of its SHA-256;
+  // a mail key is that digest of the Message-ID.
   const DIGEST_KEY = /^[0-9a-f]{40}$/;
-  if (typeof unit.key === "string" && ((unit.system === "github" && !/^[a-z0-9-]+:[a-z0-9._-]+#[0-9]+$/.test(unit.key) && !DIGEST_KEY.test(unit.key)) || (unit.system === "mail" && !DIGEST_KEY.test(unit.key)))) {
+  const FORMS: Record<string, RegExp> = { github: /^[a-z0-9_-]+:[a-z0-9._-]+#[1-9][0-9]*$/, jira: /^[A-Z][A-Z0-9_]*-[1-9][0-9]*$/, mail: /^(?!)/ };
+  const form = typeof unit.system === "string" && Object.hasOwn(FORMS, unit.system) ? FORMS[unit.system] : undefined;
+  if (typeof unit.key === "string" && form !== undefined && !form.test(unit.key) && !DIGEST_KEY.test(unit.key)) {
     flag("/data/unit/key", `a ${unit.system} unit's key takes the form the activity page fixes for it (lower case), so every writer derives one id`);
   }
   // A leap second (`:60`), which the date-time format admits and Date.parse does not, reads as the last millisecond

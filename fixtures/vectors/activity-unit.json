@@ -454,6 +454,182 @@
       ]
     },
     {
+      "name": "a github unit owned by a managed user, whose owner holds an underscore",
+      "event": {
+        "protocol": "fabric-activity/0.1",
+        "eventId": "sha256:650657fe64d3c8ab05136efe7e67ca73b1a72b6587997ce27e0513fe2cedd8cb",
+        "kind": "unit",
+        "source": "unit",
+        "sourceKey": "sha256:89c7f15e0ef4bf78aafcb0d98fb9af76ffb53662c4f9a1bcbede74c6b448eaac",
+        "collector": {
+          "id": "observatory-node",
+          "epoch": 4
+        },
+        "seq": 1,
+        "occurred": "2026-11-12T10:00:00Z",
+        "bootId": "boot-7c41e2",
+        "monotonicNs": "0",
+        "project": {
+          "id": "example-project"
+        },
+        "run": {
+          "root": "run-4b1d9e02"
+        },
+        "data": {
+          "agent": "example-writer.default",
+          "unit": {
+            "system": "github",
+            "key": "mona-cat_octo:site#4"
+          },
+          "transition": "started",
+          "taskClass": "code.change",
+          "taskClassMap": {
+            "id": "classes-2026-11",
+            "revision": 3
+          },
+          "cost": {
+            "usd": 0.12,
+            "basis": "provider"
+          }
+        }
+      },
+      "schemaValid": true,
+      "findings": []
+    },
+    {
+      "name": "a github number with a leading zero",
+      "event": {
+        "protocol": "fabric-activity/0.1",
+        "eventId": "sha256:cbbd0357a2f41a5951738052c2fb0fd2bae724636a42960ecc359f79d4411344",
+        "kind": "unit",
+        "source": "unit",
+        "sourceKey": "sha256:91f2ca4dccd79f6ac9c87205b158096269c95b6340add2f62bf3493d51ff6a58",
+        "collector": {
+          "id": "observatory-node",
+          "epoch": 4
+        },
+        "seq": 1,
+        "occurred": "2026-11-12T10:00:00Z",
+        "bootId": "boot-7c41e2",
+        "monotonicNs": "0",
+        "project": {
+          "id": "example-project"
+        },
+        "run": {
+          "root": "run-4b1d9e02"
+        },
+        "data": {
+          "agent": "example-writer.default",
+          "unit": {
+            "system": "github",
+            "key": "example-org:site#0412"
+          },
+          "transition": "started",
+          "taskClass": "code.change",
+          "taskClassMap": {
+            "id": "classes-2026-11",
+            "revision": 3
+          },
+          "cost": {
+            "usd": 0.12,
+            "basis": "provider"
+          }
+        }
+      },
+      "schemaValid": true,
+      "findings": [
+        "FAC-SEM-171 /data/unit/key"
+      ]
+    },
+    {
+      "name": "a jira unit keyed by its issue key",
+      "event": {
+        "protocol": "fabric-activity/0.1",
+        "eventId": "sha256:9801cb94cfca45c698134cde8716e5a970404ba2c730254911424de539373014",
+        "kind": "unit",
+        "source": "unit",
+        "sourceKey": "sha256:14de91f7bb1a9b42e184ad6a95557430b53d1190c50b8bf750dd3b41bdaa3827",
+        "collector": {
+          "id": "observatory-node",
+          "epoch": 4
+        },
+        "seq": 1,
+        "occurred": "2026-11-12T10:00:00Z",
+        "bootId": "boot-7c41e2",
+        "monotonicNs": "0",
+        "project": {
+          "id": "example-project"
+        },
+        "run": {
+          "root": "run-4b1d9e02"
+        },
+        "data": {
+          "agent": "example-writer.default",
+          "unit": {
+            "system": "jira",
+            "key": "PROJ-412"
+          },
+          "transition": "started",
+          "taskClass": "code.change",
+          "taskClassMap": {
+            "id": "classes-2026-11",
+            "revision": 3
+          },
+          "cost": {
+            "usd": 0.12,
+            "basis": "provider"
+          }
+        }
+      },
+      "schemaValid": true,
+      "findings": []
+    },
+    {
+      "name": "a jira key carrying a system prefix",
+      "event": {
+        "protocol": "fabric-activity/0.1",
+        "eventId": "sha256:d0c33c0bdd3f453880c189e1a2d28c644d5031e583e3ca473aa82f8abc9770fd",
+        "kind": "unit",
+        "source": "unit",
+        "sourceKey": "sha256:2b8ed17554d1d182c6b0c2bd1a55199881edcd284c22b572d4081187285ac144",
+        "collector": {
+          "id": "observatory-node",
+          "epoch": 4
+        },
+        "seq": 1,
+        "occurred": "2026-11-12T10:00:00Z",
+        "bootId": "boot-7c41e2",
+        "monotonicNs": "0",
+        "project": {
+          "id": "example-project"
+        },
+        "run": {
+          "root": "run-4b1d9e02"
+        },
+        "data": {
+          "agent": "example-writer.default",
+          "unit": {
+            "system": "jira",
+            "key": "jira:PROJ-412"
+          },
+          "transition": "started",
+          "taskClass": "code.change",
+          "taskClassMap": {
+            "id": "classes-2026-11",
+            "revision": 3
+          },
+          "cost": {
+            "usd": 0.12,
+            "basis": "provider"
+          }
+        }
+      },
+      "schemaValid": true,
+      "findings": [
+        "FAC-SEM-171 /data/unit/key"
+      ]
+    },
+    {
       "name": "a mail key that is the Message-ID itself",
       "event": {
         "protocol": "fabric-activity/0.1",

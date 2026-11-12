@@ -422,7 +422,11 @@ set and is the draft). A relay reads the signed list from `GET .../authority`. A
 subject, role, `iss` and keys, so unlike a key set it is not public: the server answers the two authority GETs only to
 a caller it authenticates as one of the organization's administrators or its relay, and `404` to anyone else; how it
 authenticates them is the server's (DEC-0134 OR-4: a credential it issues when it sets the relay up). A POST still needs no credential: only
-an administrator's passkey makes a list that passes.
+an administrator's passkey makes a list that passes. The server derives from the signed list only the number of its
+members, the list in force on a period's last day, and gives that count, no subject, to the organization's own
+journal, which gates a `unit` cell by it ([activity](activity.md#kinds), DEC-0164 AE-3); the North Star metric's
+per-person denominator is a separate roster (fabric-workspace `knowledge/system/measure.md`), and the two are kept
+from the same members.
 
 ## The adaptation plan
 

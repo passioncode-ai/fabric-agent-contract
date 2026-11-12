@@ -30,8 +30,9 @@ Branch `agent/ct259-activity-unit-20261112`, from main `d69dc363`. Entry point: 
   record per unit): rewrite it to DEC-0164 in fabric-workspace when this lands (no `org`; `acceptedBy` pairwise;
   `cost` the spend since the previous transition, summed, an attribution never added to usage; `acceptedAt` the month
   key, a reopened unit accepted again counting in both months; the member-list threshold of 3 beside the data room's
-  roster as the denominator; G1-e's role cut waiting on OQ-0018; held transitions dropped by design), then the
-  workspace sync. Check: `git -C fabric-workspace grep -c 'accepted_by\|cost_usd' origin/main -- knowledge/system/measure.md` prints 0 and `git -C fabric-workspace grep -c 'OQ-0018\|role cut' origin/main -- knowledge/system/measure.md` at least 1.
+  roster as the denominator; G1-e's per-role dashboards as views over the served cells, OQ-0018 asking only about a cell counting units by the members' own role; held transitions dropped by design), then the
+  workspace sync. Check: `git -C fabric-workspace grep -c 'accepted_by\|cost_usd' origin/main -- knowledge/system/measure.md` prints 0 and `git -C fabric-workspace grep -c 'DEC-0164' origin/main -- knowledge/system/measure.md` at least 1.
+- Landing notices for Observatory and the assessment also carry: J3 deletes a person acceptance at the organization's `retention.raw_days` and keeps person-free monthly counts and `(unit, month)` keys (its design keeps every event 400 days); draft-shape records already written (`activity-event/0-draft`) are not counted toward M, or are re-derived to DEC-0164's id before the first monthly number; a jira key carries no `jira:` or `tracker:` prefix (`FAC-SEM-171` refuses one).
 - Landing notices beyond Observatory and the assessment: the PM agent's owner (its digest reads a colleague's person
   acceptance only under a purpose that colleague confirmed, without cost, logged per recipient); Fabric Dashboards
   (FD-165: it writes no unit without `run.root` and the key form, names no organization in the event, and sends spend
@@ -43,12 +44,12 @@ Branch `agent/ct259-activity-unit-20261112`, from main `d69dc363`. Entry point: 
 - Landing note with DEC-0157 (`agent/ct216-usage-data-v2`): UD-6 describes activity telemetry as sessions sent by an
   enrolled device; whichever lands second restates it by kind and channel as activity's opening now does (check:
   `awk '/\*\*UD-6/,/\*\*UD-7/' docs/specification/usage-data.md | grep -c 'unit'` prints at least 1 on the merged tree).
-- Operator questions, registered as OQ-0015 to OQ-0018 in `docs/OPEN_QUESTIONS.md` (the landing renumbers them if `agent/ct216-usage-data-v2`'s OQ-0013 and OQ-0014 have not landed first) and to post on thread `52aa2f93` with the landing notice: whether a one-person
-  project inside a larger organization is served (default: yes; a unit cell needs an organization whose member list
-  names at least 3 members, as Observatory's J4 counts, AE-3), whether a role cut is a permitted cell (default: no), the
-  access-log scope a read of a person acceptance is logged under (default `activity.raw`), the notice purpose a unit
-  event is collected under and the retention of a stored `acceptedBy` person subject (default: the notice's purpose
-  for its agents' activity, `retention.raw_days`); and which audience's pairwise
+- Operator questions, registered as OQ-0015 to OQ-0018 in `docs/OPEN_QUESTIONS.md` (stable ids: the register already skips `agent/ct216-usage-data-v2`'s OQ-0013 and OQ-0014) and to post on thread `52aa2f93` with the landing notice: whether a cell drawn
+  from one member's work (a one-person project, an agent or task class only one member's work reaches) is served
+  inside a larger organization (OQ-0015, default: folded into the total; a unit cell needs an organization whose member
+  list names at least 3 members, AE-3), whether a cell may count units by the members' own role (OQ-0018, default: no;
+  not G26's per-role dashboards), the
+  access-log scope a read of a person acceptance is logged under (default `activity.raw`), (the notice purpose and the retention of a stored person subject are decided by the personal-data rules, not open: the notice's purpose for its agents' activity, `retention.raw_days`); and which audience's pairwise
   subject a kit writes when one unit reaches both the organization's journal and Observatory's local one.
 - CT-297: the route function for a unit and its vectors.
 - Tell Observatory with the landing notice: a unit's `cost` is the spend since its previous transition, summed by a
@@ -141,6 +142,18 @@ Branch `agent/ct259-activity-unit-20261112`, from main `d69dc363`. Entry point: 
   DEC-0129 cited, the list in force on the period's last day; OQ-0015 to OQ-0018 registered; landing notices for the
   PM agent's owner, FD-165, FAA-269, the jira/tracker split and DEC-0157's run. Declined: none.
 
+- Round 7 (on `cae628c6`): unit failed, seam failed, product failed. Breaks folded: a github owner may hold `_` (a
+  managed user's), with a vector; the OTLP intake maps a unit's `acceptedBy` and the "not exported" row is for other
+  backends; OQ-0018 asks only about a cell counting units by the members' role, G26's per-role dashboards being views
+  over the served cells (OQ register, page, AE-3, Why, measure.md note); the personal-data bullet and the reader row
+  name the `(unit, month)` keys; the rule row, AE-2 and the writer row name the key forms. Risks folded: a github
+  number has no leading zero and a jira key no prefix (`FAC-SEM-171`, three vectors), the digest only for a form that
+  does not fit; OQ-0015 widened to any cell drawn from one member's work, its default now folding into the total; the
+  member count the organization server gives the journal (OX-6) beside the metric's roster; a project with no
+  membership records no person acceptance; the purpose and retention question marked decided; landing notices for
+  J3's retention, draft-shape records and the jira prefix; the renumbering clause dropped; Consequences completed;
+  SCN-010's preconditions. Declined: none.
+
 ## Next task
 
-Round 7 of the blind readings (unit, seam, product) of branch `agent/ct259-activity-unit-20261112` (DEC-0164).
+Round 8 of the blind readings (unit, seam, product) of branch `agent/ct259-activity-unit-20261112` (DEC-0164).
