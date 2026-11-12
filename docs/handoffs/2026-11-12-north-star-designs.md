@@ -37,6 +37,14 @@ close the board requests.
   DEC-0160 and DEC-0161 (CT-228, CT-284) untouched. The CT-285, CT-250, CT-252 and CT-259 rows name the branch rules
   their DECs restate (#273).
 
+- The operator's word of 2026-11-12 (this session): an agent that can reach several organizations asks which one a
+  task is for when the project's context does not settle it, done in the protocol and the skills, not as one agent's
+  rule. [The task context design](../evidence/plans/2026-11-12-ct292-task-context.md) (CT-292, TC-1 to TC-6, #277); the
+  adapter asked for the skills (board request `bfc0e14e`, due 2026-11-19), the agents database for the templates
+  (`2290a5cd`, due 2026-11-21), fabric-workspace for the knowledge base (`fc55c15a`). From the same review of which of
+  the operator's standing rules belong in the protocol: CT-293 (an order carries the access it needs, #278). The review
+  itself is private to the operator and kept outside this public repository.
+
 ## Decisions
 
 - `taskClassMap` is `{id, revision}` with an integer revision, chosen over a `sha256:` digest of the map: a reader
@@ -50,7 +58,9 @@ close the board requests.
 
 ## Next task
 
-Fold the running blind readings of DEC-0156 (round 26) and DEC-0157 (round 23) and land each after two clean
+Fold the blind readings already returned (DEC-0156 round 27, DEC-0157 round 24, DEC-0159 round 17; their
+findings are in this session's record and each branch's handoff names the round next), then the next round of each;
+then the CT-250 DEC, and the CT-292 DEC with `resolveTaskContext` and its vectors. Earlier plan, kept: Fold the running blind readings of DEC-0156 (round 26) and DEC-0157 (round 23) and land each after two clean
 rounds; read DEC-0159 (round 16). Then draft the CT-250 DEC on a branch `agent/ct250-dec-<date>`: reserve a DEC id, `org-membership/2`, the level form in
 `decision.schema.json`, the `mem` claim in `delegation-token.schema.json`, the OL-6 amendment, FAC-SEM codes and
 vectors, as the design's "What the DEC owes" lists.

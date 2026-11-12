@@ -14,6 +14,9 @@ agent that did the work through its kit and read by Observatory, must carry the 
 task class (`unclassified` until the assessment's map names it), a stable unit id, the evidence, who or what accepted
 it and when, and the agent's spend on it, `null` when unknown and never 0. It is never a person's score.
 
+Line numbers in this design cite the repository at `a054fdc6` (main on 2026-11-12, when it was written); a
+later change may move them, so read each citation by its rule id or section first.
+
 ## What the contract has today
 
 | Where | What it has | What is missing |

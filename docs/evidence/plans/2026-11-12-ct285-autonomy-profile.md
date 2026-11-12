@@ -14,6 +14,9 @@ VM, its cloud) finishes everything by default, watched by agents and by each pro
 computer follows the scenario the person or their administrator chooses. The owner, an organization administrator or
 a project architect sets it within their level; the only gates left everywhere are the body's. North Star gap G19.
 
+Line numbers in this design cite the repository at `a054fdc6` (main on 2026-11-12, when it was written); a
+later change may move them, so read each citation by its rule id or section first.
+
 ## What the contract says today
 
 | Where | What it says | Why it blocks a profile |
