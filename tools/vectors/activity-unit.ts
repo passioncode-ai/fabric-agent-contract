@@ -79,6 +79,17 @@ function cases(): Json[] {
   late.name = "an acceptance recorded before it happened";
   late.event.data.acceptedAt = "2026-11-12T10:05:00Z";
   late.findings = ["FAC-SEM-171 /data/acceptedAt"];
+  // The 60 s of skew, at its boundary, and a leap second the date-time format admits.
+  const at = (name: string, acceptedAt: string, findings: string[]): Json => {
+    const event = JSON.parse(JSON.stringify(accepted(RUN_1, 4)));
+    event.data.acceptedAt = acceptedAt;
+    return { name, event, schemaValid: true, findings };
+  };
+  list.push(
+    at("an acceptance 60 s after occurred, within the skew", "2026-11-12T10:01:00Z", []),
+    at("an acceptance 60.001 s after occurred", "2026-11-12T10:01:00.001Z", ["FAC-SEM-171 /data/acceptedAt"]),
+    at("an acceptance at a leap second weeks after occurred", "2026-12-31T23:59:60Z", ["FAC-SEM-171 /data/acceptedAt"])
+  );
   return list;
 }
 

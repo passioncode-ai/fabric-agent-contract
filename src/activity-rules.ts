@@ -290,6 +290,8 @@ function eventIntegrity(event: JsonObject, at: string): Finding[] {
 /**
  * FAC-SEM-171 (DEC-0164) on one `unit` event: its source is `unit` and its `sourceKey` is `unitSourceKey`'s for its agent,
  * unit, transition and `run.root`, so every writer derives one id; an acceptance is not recorded before it happened.
+ * The schema pins `source` to `unit` for kind `unit` as well (`telemetry-event.schema.json`); the rule repeats it for a
+ * reader that runs only the rules, so an edit to one changes both.
  */
 function unitEvent(event: JsonObject, at: string): Finding[] {
   if (event.kind !== "unit") return [];
@@ -304,7 +306,9 @@ function unitEvent(event: JsonObject, at: string): Finding[] {
     try { derived = unitSourceKey(d.agent, { system: unit.system, key: unit.key }, d.transition, run.root); } catch { flag("/sourceKey", "a unit with a lone surrogate has no canonical form, so no sourceKey derives from it"); }
     if (derived !== null && event.sourceKey !== derived) flag("/sourceKey", "a unit event's sourceKey derives from its agent, unit, transition and run.root (unitSourceKey)");
   }
-  if (typeof d.acceptedAt === "string" && typeof event.occurred === "string" && Date.parse(d.acceptedAt) > Date.parse(event.occurred) + 60_000) {
+  // A leap second (`:60`), which the date-time format admits and Date.parse does not, reads as the second before it.
+  const instant = (time: string) => Date.parse(time.replace(/:60(?=(?:\.\d+)?(?:[Zz]|[+-]\d))/, ":59"));
+  if (typeof d.acceptedAt === "string" && typeof event.occurred === "string" && instant(d.acceptedAt) > instant(event.occurred) + 60_000) {
     flag("/data/acceptedAt", "an acceptance is recorded at or after it happened: acceptedAt is not after occurred (60 s of skew)");
   }
   return findings;

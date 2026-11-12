@@ -899,6 +899,154 @@
       "findings": [
         "FAC-SEM-171 /data/acceptedAt"
       ]
+    },
+    {
+      "name": "an acceptance 60 s after occurred, within the skew",
+      "event": {
+        "protocol": "fabric-activity/0.1",
+        "eventId": "sha256:96bd9ab3be93e07049613eb26994dd806095c6238021f29645b1a37462288d2b",
+        "kind": "unit",
+        "source": "unit",
+        "sourceKey": "sha256:255bc1cb7269a627538a993dff506552bb230ea150f61f86edb82aade9491e85",
+        "collector": {
+          "id": "observatory-node",
+          "epoch": 4
+        },
+        "seq": 4,
+        "occurred": "2026-11-12T10:00:00Z",
+        "bootId": "boot-7c41e2",
+        "monotonicNs": "0",
+        "project": {
+          "id": "example-project"
+        },
+        "run": {
+          "root": "run-4b1d9e02"
+        },
+        "data": {
+          "agent": "example-writer.default",
+          "unit": {
+            "system": "github",
+            "key": "example-org:site#412"
+          },
+          "transition": "accepted",
+          "taskClass": "code.change",
+          "taskClassMap": {
+            "id": "classes-2026-11",
+            "revision": 3
+          },
+          "cost": {
+            "usd": 0.42,
+            "basis": "provider"
+          },
+          "acceptedBy": {
+            "kind": "rule",
+            "ref": "ci-green-and-reviewed"
+          },
+          "acceptedAt": "2026-11-12T10:01:00Z"
+        }
+      },
+      "schemaValid": true,
+      "findings": []
+    },
+    {
+      "name": "an acceptance 60.001 s after occurred",
+      "event": {
+        "protocol": "fabric-activity/0.1",
+        "eventId": "sha256:96bd9ab3be93e07049613eb26994dd806095c6238021f29645b1a37462288d2b",
+        "kind": "unit",
+        "source": "unit",
+        "sourceKey": "sha256:255bc1cb7269a627538a993dff506552bb230ea150f61f86edb82aade9491e85",
+        "collector": {
+          "id": "observatory-node",
+          "epoch": 4
+        },
+        "seq": 4,
+        "occurred": "2026-11-12T10:00:00Z",
+        "bootId": "boot-7c41e2",
+        "monotonicNs": "0",
+        "project": {
+          "id": "example-project"
+        },
+        "run": {
+          "root": "run-4b1d9e02"
+        },
+        "data": {
+          "agent": "example-writer.default",
+          "unit": {
+            "system": "github",
+            "key": "example-org:site#412"
+          },
+          "transition": "accepted",
+          "taskClass": "code.change",
+          "taskClassMap": {
+            "id": "classes-2026-11",
+            "revision": 3
+          },
+          "cost": {
+            "usd": 0.42,
+            "basis": "provider"
+          },
+          "acceptedBy": {
+            "kind": "rule",
+            "ref": "ci-green-and-reviewed"
+          },
+          "acceptedAt": "2026-11-12T10:01:00.001Z"
+        }
+      },
+      "schemaValid": true,
+      "findings": [
+        "FAC-SEM-171 /data/acceptedAt"
+      ]
+    },
+    {
+      "name": "an acceptance at a leap second weeks after occurred",
+      "event": {
+        "protocol": "fabric-activity/0.1",
+        "eventId": "sha256:96bd9ab3be93e07049613eb26994dd806095c6238021f29645b1a37462288d2b",
+        "kind": "unit",
+        "source": "unit",
+        "sourceKey": "sha256:255bc1cb7269a627538a993dff506552bb230ea150f61f86edb82aade9491e85",
+        "collector": {
+          "id": "observatory-node",
+          "epoch": 4
+        },
+        "seq": 4,
+        "occurred": "2026-11-12T10:00:00Z",
+        "bootId": "boot-7c41e2",
+        "monotonicNs": "0",
+        "project": {
+          "id": "example-project"
+        },
+        "run": {
+          "root": "run-4b1d9e02"
+        },
+        "data": {
+          "agent": "example-writer.default",
+          "unit": {
+            "system": "github",
+            "key": "example-org:site#412"
+          },
+          "transition": "accepted",
+          "taskClass": "code.change",
+          "taskClassMap": {
+            "id": "classes-2026-11",
+            "revision": 3
+          },
+          "cost": {
+            "usd": 0.42,
+            "basis": "provider"
+          },
+          "acceptedBy": {
+            "kind": "rule",
+            "ref": "ci-green-and-reviewed"
+          },
+          "acceptedAt": "2026-12-31T23:59:60Z"
+        }
+      },
+      "schemaValid": true,
+      "findings": [
+        "FAC-SEM-171 /data/acceptedAt"
+      ]
     }
   ]
 }

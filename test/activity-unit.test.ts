@@ -21,6 +21,13 @@ describe("unit events (DEC-0164)", () => {
     expect(valid(c.event)).toBe(c.schemaValid);
     if (c.schemaValid) expect(findings(c.event)).toEqual(c.findings);
   });
+  it("reads at an older pin as an unknown kind: stored without evidence, refused with it (AE-5)", () => {
+    // A receiver pinned before DEC-0164 validates `unit` as it validates any kind it does not know, which today's schema
+    // applies to a kind no revision has added yet: its data is extension data, which has no array.
+    const older = vectors.cases.filter((c) => c.schemaValid).map((c) => ({ name: c.name, evidence: Array.isArray(c.event.data.evidence), ok: valid({ ...c.event, kind: "later.kind" }) }));
+    expect(older.filter((c) => c.evidence).length).toBeGreaterThan(0);
+    for (const c of older) expect([c.name, c.ok]).toEqual([c.name, !c.evidence]);
+  });
   it("writes one transition twice as one event: the same id", () => {
     const rule = vectors.cases.find((c) => c.name === "accepted by a rule") as Json;
     const person = vectors.cases.find((c) => c.name.startsWith("accepted by a person")) as Json;

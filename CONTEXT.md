@@ -703,12 +703,13 @@ login, only in its vendor's runner and unmetered; `key` is an issued key whose m
 
 **Activity telemetry**: The `fabric-activity/0.1` protocol (DEC-0030): records of when an
 agent session worked, waited or idled and what each model call used, sent by a collector on a
-device in batches. It carries no content and no person attribute; a person appears only as an
-opaque `user.id`.
+device in batches, and the units of work an agent did (`unit`, DEC-0164), sent by a device's collector or recorded by
+a kit through Project Observatory's capability. It carries no content and no person attribute; a person appears only
+as an opaque `user.id`, or as a unit acceptance's pairwise subject.
 
 **Telemetry event**: One record of activity telemetry (`telemetry-event.schema.json`) — a
-`session.interval`, a `usage.line`, a `buffer.overflow`, a `policy.violation` (by UTC day), a `result`, or a
-kind the reader does not know — positioned in a stream by `(device.id, collector.id, collector.epoch, seq)`. It
+`session.interval`, a `usage.line`, a `buffer.overflow`, a `policy.violation` (by UTC day), a `result`, a `unit`
+(DEC-0164), or a kind the reader does not know — positioned in a stream by `(device.id, collector.id, collector.epoch, seq)`. It
 may name its `account.class` and its root `run` (DEC-0052).
 
 **Account class**: The class of the account a session ran on — `organization` (one of the policy's tenants),

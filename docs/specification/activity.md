@@ -1,6 +1,6 @@
 # Activity telemetry `fabric-activity/0.1`
 
-DEC-0030, amended by DEC-0052, DEC-0068, DEC-0082 and DEC-0090; its transport by DEC-0056 · rule codes `FAC-SEM-037`…`FAC-SEM-040`, `FAC-SEM-067`, `FAC-SEM-100`, `FAC-SEM-123` (and `FAC-SEM-045`,
+DEC-0030, amended by DEC-0052, DEC-0068, DEC-0082, DEC-0090 and DEC-0164; its transport by DEC-0056 · rule codes `FAC-SEM-037`…`FAC-SEM-040`, `FAC-SEM-067`, `FAC-SEM-100`, `FAC-SEM-123`, `FAC-SEM-171` (and `FAC-SEM-045`,
 [devices](devices.md#attribution)) · schemas [`telemetry-event`](../../schemas/telemetry-event.schema.json),
 [`activity-batch`](../../schemas/activity-batch.schema.json),
 [`activity-batch-ack`](../../schemas/activity-batch-ack.schema.json),
@@ -10,7 +10,9 @@ DEC-0030, amended by DEC-0052, DEC-0068, DEC-0082 and DEC-0090; its transport by
 [`activity-common`](../../schemas/activity-common.schema.json)
 
 Activity telemetry records **when an agent session worked, waited or idled, and what each model
-call used** — for debugging, for memory of how work went, and for spend reconciliation. A collector
+call used** — for debugging, for memory of how work went, and for spend reconciliation — and, since DEC-0164, the
+**units of work an agent did** (`unit`), which a device's collector sends or a kit records through Project
+Observatory's capability. A collector
 on a device reads what coding-agent runtimes already emit (OpenTelemetry exports, transcripts,
 rollout files, the desktop switchboard, process sampling). It turns that into telemetry events of
 this shape and sends them in batches to an organization server (the **receiver**). Only a receiver
@@ -18,8 +20,8 @@ builds summaries.
 
 The contract names every field it defines and closes every object it defines. A collector MUST NOT
 add content or person attributes: no prompt, response, command line, window title or diff, and no
-name, address, team or rank. A person appears only as an opaque `user.id`, in raw events only;
-summaries have no person dimension. `FAC-SEM-037` is a **best-effort key filter** — a deny-list of
+name, address, team or rank. A person appears only as an opaque `user.id`, in raw events only, or as a unit acceptance's pairwise subject
+(`acceptedBy`, kept in the organization's own journal, DEC-0164 AE-3); summaries have no person dimension. `FAC-SEM-037` is a **best-effort key filter** — a deny-list of
 names checked in every spelling, plus a refusal of home paths in values — and not a proof that no
 content passes. The schema's bounds on extension data (two levels, short tokens without whitespace)
 are the stronger guard.
@@ -102,7 +104,7 @@ policy key names).
 |---|---|
 | `eventId` | The idempotency key ([below](#event-id)). |
 | `kind` | `session.interval`, `usage.line`, `session.annotation`, `buffer.overflow`, `policy.violation`, `grant.usage`, `result`, `unit` (DEC-0164), an extension `x-<namespace>.<kind>`, or a kind a later revision adds. |
-| `source` | Where the collector read it. Open vocabulary; known: `claude_code.otel`, `claude_code.transcript`, `codex.otel`, `codex.rollout`, `switchboard`, `process`. |
+| `source` | Where the collector read it. Open vocabulary; known: `claude_code.otel`, `claude_code.transcript`, `codex.otel`, `codex.rollout`, `switchboard`, `process`, `unit` (DEC-0164). |
 | `sourceKey` | Present exactly when `eventId` is derived. Either the source's own id of the record (a request id, a line uuid) or, for a key derived from a file, `hmac-sha256:` under the device's telemetry key ([below](#event-id)). Never a path: the schema refuses a slash and an encoded home-directory fragment, the dashed form at the start or after any character that is not an ASCII letter or digit (DEC-0105). A `unit` event's is `sha256:` of its own fields (`unitSourceKey`, DEC-0164), with `source` `unit`. |
 | `collector.id`, `collector.epoch`, `seq` | The stream position ([below](#streams)). |
 | `occurred` | The device's wall clock when it happened. |
@@ -228,18 +230,25 @@ its own `run.root`, so its second acceptance is a new event (AE-2, [`unitSourceK
 | `taskClass` | the assessment's class id, or `unclassified` until its class map names one |
 | `taskClassMap` | `{id, revision}` of the class map `taskClass` was read from, the revision a positive integer its owner raises; present exactly when `taskClass` is not `unclassified`, so a reader of a past month maps a renamed, split or merged class through the owner's table between revisions or counts it under its old name, visibly (AE-2a) |
 | `outcome` | on `ended` only: `completed`, `failed` or `abandoned` |
-| `evidence` | 0 to 8 references, each an http(s) URI without user information, a URN or a `sha256:` digest (a receipt, a test run, a review mark); never content, which the writer keeps out of a query string too |
+| `evidence` | 0 to 8 references, each an http(s) URI without user information, a URN or a `sha256:` digest (a receipt, a test run, a review mark); never content, which the writer keeps out of a query string too; a link with a home-path segment (`/Users/<name>/`) is refused as any value is (`FAC-SEM-037`) |
 | `acceptedBy` | on `accepted` only: `{kind, ref}`, `kind` being `rule` (`ref` the acceptance rule's id), `agent` (`ref` an agent's id) or `person` (`ref` the person's pairwise membership subject for this reader, [membership](membership.md) OM-1; never a name or an address) |
-| `acceptedAt` | on `accepted` only: when it was accepted, not after the event's `occurred` (60 s of skew, `FAC-SEM-171`); it is the month an acceptance counts in, `occurred` being when the event was written |
+| `acceptedAt` | on `accepted` only: when it was accepted, not after the event's `occurred` (60 s of skew, `FAC-SEM-171`); it is the month an acceptance counts in, `occurred` being when the event was written; a reader counts a unit accepted once per month of its `acceptedAt`, the last acceptance if several |
 | `cost` | the agent's spend on the unit as the envelope states a cost: `{usd, basis}`, or `{usd: null}` when unknown (the cost's own form: an unknown carries no basis); never 0 for unknown is the writer's duty, with no tokens on the event to check it against |
 
 The receiver never attaches a user to a `unit` event, never puts a unit into a summary cell by person, and serves
 units only per agent, project or task class; an `acceptedBy` of kind `person` stays in the organization's own journal
 for the trust guardrail (members see what agents did on their work) and never reaches a summary, a usage report or
 another organization (AE-3). A device collector sends `unit` events in its activity batches like any kind; a kit with
-no collector records them through Project Observatory's capability `activity.unit.record` (OBS-378), bound as [`ops.digest.record`](ops-digest.md) is (an access binding with that scope and effect `propose` over stdio, a hub delegation token with that scope on the memory-http door), the event's `project.id` the transport's project and `data.agent` a service the registry attributes to it; there the capability is the collector and writes the envelope's `collector`, `seq`, `bootId` and `monotonicNs` itself; the event's shape is this one either way (AE-4). A reader at an
-older pin reads `unit` as an unknown kind, stores it and counts nothing (AE-5). A unit event names no organization: the
-stream's attribution does, and a project with no membership keeps it in Observatory's local journal only.
+no collector records them through Project Observatory's capability `activity.unit.record` (OBS-378), bound as Observatory's `ops.digest.record` is, by Observatory's own answer on the board (thread `52aa2f93`, messages `b8d911c0` and `55fa0fd7`: an access binding with that scope and effect `propose` over stdio, a hub delegation token with that scope on the memory-http door), the event's `project.id` the transport's project and `data.agent` a service the registry attributes to it; there the capability is the collector and writes the envelope's `collector`, `seq`, `bootId` and `monotonicNs` itself; the event's shape is this one either way (AE-4). A reader at an
+older pin reads `unit` as an unknown kind and validates its `data` as extension data: one that fits (no `evidence`,
+no string over 64 characters) it stores and counts nothing, and any other it refuses as that event's `schema`
+rejection, which is consumed (AE-5, as `grant.usage` [above](#kinds)). So a collector sends `unit` events only to a
+receiver whose latest `protocols` list names `activity-unit/1`, and keeps them until it does. A unit event names no organization: a device collector sends it to the enrollment of the organization that owns its
+`project.id` as the device's folder attribution names it, never for a personal or unattributed project, and on a
+device that cannot tell sends none ([contexts](contexts.md#routing); the route function is CT-297); a project with no
+membership keeps it in Observatory's local journal only. Two different acceptances of one unit under one `run.root`
+(a rule's, then a person's) have one `eventId`, so the receiver keeps the first; a person who accepts after a rule
+does so under a new `run.root`.
 
 **`session.annotation`** — what a surface reported about a session, read by the device's collector (DEC-0068): Fabric's
 `session.ended` or `terminal.opened`, Switchboard's `journal_launch`. It requires `session` and `runtime`. `data`: `by`
@@ -339,7 +348,7 @@ A collector MUST drop content and person attributes at the source. Claude Code's
 
 ### Event id
 
-`eventId` makes delivery idempotent: a receiver keeps one event per (`device.id`, `eventId`), save a `unit` event, which it keeps once per `eventId` within the organization's stream whatever device or channel wrote it, since its id derives from the unit and not from a device (DEC-0164 AE-2).
+`eventId` makes delivery idempotent: a receiver keeps one event per (`device.id`, `eventId`), save a `unit` event, which it keeps once per `eventId` within the organization whatever device or channel wrote it (a copy from a second device is counted in `duplicates` and consumes its `seq` in the sending stream), since its id derives from the unit and not from a device (DEC-0164 AE-2).
 
 - An event read from a source that can be read again — an export that is retried, a transcript that
   is re-scanned after a restart — MUST carry a **derived** id, so a second read yields the same id.
@@ -406,7 +415,8 @@ A mismatch is refused (`FAC-SEM-045`, [devices](devices.md#attribution)). The re
 
 - `accepted`, `duplicates`, `rejected[]` — one of the three for every event, so
   `accepted + duplicates + rejected.length` equals the batch's event count (`FAC-SEM-039`). A
-  duplicate (`device.id`, `eventId`) is accepted again and counted, never an error. A retried batch
+  duplicate (`device.id`, `eventId`), or a `unit` event's `eventId` the organization already holds, is accepted
+  again and counted, never an error. A retried batch
   is harmless.
 - `rejected[]` — `eventId` and `reason`: `schema`, `content-field`, `person-field`, `stream`,
   `attribution`, `purpose`, `before-purpose`. **A rejected event is consumed with a rejection.** The collector does not resend
@@ -543,8 +553,8 @@ events as OTLP logs, mapped by the table below. The second intake changes no rul
   ([devices](devices.md#attribution));
 - each log record is mapped back to a telemetry event and checked against the same schema and the
   same `FAC-SEM-037`…`039` rules;
-- deduplication is the same: on (`device.id`, `eventId`), and on `dedupeKey` for usage lines, across
-  both intakes;
+- deduplication is the same: on (`device.id`, `eventId`), a `unit` event once per `eventId` within the organization
+  ([Event id](#event-id)), and on `dedupeKey` for usage lines, across both intakes;
 - an OTLP record that does not map to a valid event is refused, as in a batch.
 
 OTLP's own acknowledgement carries no stream position, so a collector that sends over OTLP still
@@ -596,7 +606,7 @@ access log and the subject's `consent` messages.
 - Fixtures: `fixtures/positive/telemetry-event-*`, `activity-*` and `access-log.json`;
   `fixtures/negative/telemetry-event-*`, `activity-*` and `access-log-*`.
 - Rule inputs: `fixtures/semantic/telemetry-event-*`, `activity-*` and `access-log-*`.
-- Tests: `test/activity-rules.test.ts`.
+- Tests: `test/activity-rules.test.ts`, `test/activity-unit.test.ts`; vectors `fixtures/vectors/activity-unit.json`.
 
 ## Decided after the first draft
 
