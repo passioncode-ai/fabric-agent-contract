@@ -382,14 +382,14 @@ carries a decision from what it remembered of the same call without one; the cal
 delegation token names as the relaying caller (DEC-0121). The hub's own `fabric.job.get` forwards a T0 or T1 origin's
 `_meta.decision` to the callee the same way (DEC-0121). `mandate` is the operator's mandate for the task
 ([delegation](delegation.md#the-operators-mandate), DEC-0125), and the hub treats it as it treats `decision`: it
-forwards a T0 or T1 origin's to the callee as `_meta.mandate` (on `agent.call` and on its own `fabric.job.get`), drops a T2 origin's operator mandate and forwards a level mandate from any origin (DEC-0162), passes the callee's refusals back unchanged and never answers a resend that carries a mandate from what
+forwards a T0 or T1 origin's to the callee as `_meta.mandate` (on `agent.call` and on its own `fabric.job.get`), drops a T2 origin's operator mandate and forwards a level mandate from any origin (DEC-0162), a level decision or level mandate only to a callee whose actions extension declares `levels` for its organization, passes the callee's refusals back unchanged and never answers a resend that carries a mandate from what
 it remembered of the same call without one. The hub is not an agent of the chain: the origin appends the callee before
 it calls, and the callee compares the origin the hub's delegation token names, when one is present, with the agent
 before it; the hub's own id is never the caller's agent id for this check, and without a token the chain's end alone
 binds the mandate. An origin sends `mandate` only to a hub whose `protocols` list `mandate/1`, since a hub pinned before
 DEC-0125 refuses the member, and a decision or mandate carrying `source` only when the hub and the callee both list
 `operator-source/1`, which the origin cannot read of a callee today (the directory carries no `protocols`), so until
-then it keeps `source` in its own record (DEC-0126 OA-7).
+then it keeps `source` in its own record (DEC-0126 OA-7). An origin sends a level decision or a level mandate only to a hub whose `protocols` list `levels/1`, since a reader pinned before DEC-0162 refuses the form (DEC-0162 LV-5).
 
 **Amendment (DEC-0039).** The hub is the only **issuer** between agents, not the only
 **route**. It signs a [delegation token](delegation.md) naming the person the work is for,

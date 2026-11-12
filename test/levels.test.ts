@@ -79,6 +79,8 @@ describe("levelStanding and FAC-SEM-170 at their edges (DEC-0162)", async () => 
   it("answers a level decision's own faults and its target", () => {
     const call = vectors.actions[1].input as Json;
     expect(decide({ ...call, now: "not a time" })).toEqual({ fault: "now-unreadable" });
+    const t2 = vectors.actions[0].input as Json;
+    expect(decide({ ...t2, actionDigest: undefined })).toEqual({ fault: "digest-missing" });
     expect(decide({ ...call, decision: { ...call.decision, target: "review-7" }, target: "review-7" })).toMatchObject({ ok: true, recordAs: { by: "level" } });
     expect(decide({ ...call, decision: { ...call.decision, target: "review-7" }, target: "review-8" })).toEqual({ ok: false, code: "decision-invalid" });
   });

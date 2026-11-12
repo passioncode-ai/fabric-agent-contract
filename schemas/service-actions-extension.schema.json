@@ -90,11 +90,12 @@
         },
         "level": {
           "enum": [
+            "operator",
             "owner",
             "admin",
             "architect"
           ],
-          "description": "DEC-0162 LV-7: the lowest level that decides this relayed action in an organization, owner for a billing act (the organization's plan, payment method, invoices, a money limit); absent: an architect in the call's project, admin for a call in no project."
+          "description": "DEC-0162 LV-7: the lowest level that decides this relayed action in an organization, owner for a billing act (the organization's plan, its payment method, its invoices, setting or changing L0, a project's L1 or a key's ceiling), operator for an act no level decides (issuing, rotating or revoking a client key, DEC-0159 CF-3); absent: an architect in the call's project, admin for a call in no project. Only on a relayed action (FAC-SEM-142)."
         }
       }
     }

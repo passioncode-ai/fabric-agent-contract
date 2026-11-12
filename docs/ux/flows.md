@@ -753,6 +753,8 @@ flowchart TD
   G -->|human| H[human-step-required with the link; the agent hands it over]
   G -->|relayed| T{tier}
   T -->|T2 without approval| A[approval-required with the digest]
+  T -->|any tier, a bound level decision| L[Taken as the level holder's; audited with level, organization and approver]
+  T -->|any tier, a level below the action's| N[operator-decision-required with level-insufficient; the agent files one request to a holder of that level]
   T -->|T0 or T1| D{decision}
   D -->|none| Q[operator-decision-required; the agent asks the operator]
   Q --> O

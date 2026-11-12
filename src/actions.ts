@@ -28,7 +28,7 @@ export type HumanStep = "sign-in" | "consent" | "payment" | "secret" | "spend-ab
 export type CallerTier = "T0" | "T1" | "T2";
 
 /** One entry of `actions[]` (`service-actions-extension.schema.json#/$defs/action`). */
-export interface DeclaredAction { id: string; title: string; tool: string; gate: ActionGate; humanStep?: HumanStep; level?: "owner" | "admin" | "architect" }
+export interface DeclaredAction { id: string; title: string; tool: string; gate: ActionGate; humanStep?: HumanStep; level?: "operator" | "owner" | "admin" | "architect" }
 
 export interface ActionDecisionInput {
   /** The service's own declaration of the action being called. */
@@ -89,7 +89,7 @@ export type ActionDecisionAnswer =
   | { ok: true; recordAs: DecisionRecord }
   | { ok: false; code: typeof HUMAN_STEP_REQUIRED; data: { humanStep: HumanStep; url: string } }
   | { ok: false; code: typeof APPROVAL_REQUIRED; data: { actionDigest: string } }
-  | { ok: false; code: typeof OPERATOR_DECISION_REQUIRED | typeof DECISION_INVALID; data?: { detail: string; estimateUsd?: number; perCallMaxUsd?: number; actionDigest?: string } }
+  | { ok: false; code: typeof OPERATOR_DECISION_REQUIRED | typeof DECISION_INVALID; data?: { detail?: string; estimateUsd?: number; perCallMaxUsd?: number; actionDigest?: string } }
   /** The service's own fault, never sent to a caller: an input it owes is missing or unreadable. */
   | { fault: "action-invalid" | "caller-missing" | "now-unreadable" | "digest-missing" | "url-missing" | "effect-missing" | "self-missing" | "mandate-capability-missing" };
 
@@ -122,8 +122,9 @@ function acceptedApproval(approval: unknown): approval is { ok: true; approver: 
  * - `none`: the caller's own act.
  * - `human`: refused `human-step-required` with the step and its direct link, at every tier.
  * - `relayed`, in this order: an accepted approval (any tier) is the approver's decision; a T2 caller without one is
- *   refused `approval-required` with the action's digest, whatever its call carries; the service's own record of an
- *   accepted elicitation is the operator's decision; without a decision `operator-decision-required`; a decision not
+ *   refused `approval-required` with the action's digest, whatever operator form its call carries; the service's own
+ *   record of an accepted elicitation is the operator's decision at T0 or T1; at a service given `levels`, a level
+ *   decision or level mandate is read at every tier (DEC-0162 LV-6), a T2 refusal on it carrying the digest too; without a decision `operator-decision-required`; a decision not
  *   valid against `decision.schema.json`, for another action, naming a `target` the call does not act on, or whose
  *   `at` does not read strictly, lies more than
  *   CLOCK_SKEW_SECONDS after `now` or more than DECISION_LIFETIME_SECONDS before it, `decision-invalid`; otherwise the
@@ -149,11 +150,12 @@ export function actionDecision(input: ActionDecisionInput): ActionDecisionAnswer
   if (isObject(input.levels) && (levelDecision || levelMandate)) {
     const clock = strictTime(now);
     if (Number.isNaN(clock)) return { fault: "now-unreadable" };
+    // At T2 every refusal on this branch keeps DL-18's route open, so the service owes the action's digest here too.
+    if (!inside && (typeof actionDigest !== "string" || !SHA256.test(actionDigest))) return { fault: "digest-missing" };
     // A level mandate at a service given `levels` is never ignored: mandateCovers reads it at every tier.
     const answer = levelDecision ? byLevel(input, action, caller, clock) : (byMandate(input, action, caller) as ActionDecisionAnswer);
-    // At T2 a refused level keeps DL-18's route open: the refusal carries the action's digest for an approval/1.
-    if (!inside && "ok" in answer && !answer.ok && answer.data !== undefined && "detail" in answer.data && typeof actionDigest === "string" && SHA256.test(actionDigest)) {
-      return { ...answer, data: { ...answer.data, actionDigest } } as ActionDecisionAnswer;
+    if (!inside && "ok" in answer && !answer.ok && (answer.code === OPERATOR_DECISION_REQUIRED || answer.code === DECISION_INVALID)) {
+      return { ...answer, data: { ...(answer.data ?? {}), actionDigest } } as ActionDecisionAnswer;
     }
     return answer;
   }
@@ -245,7 +247,7 @@ function byLevel(input: ActionDecisionInput, action: DeclaredAction, caller: str
 export type ActionsView =
   | { declared: false }
   | { declared: true; valid: false; errors: string[] }
-  | { declared: true; valid: true; actions: DeclaredAction[] };
+  | { declared: true; valid: true; actions: DeclaredAction[]; levels?: Array<{ org: string; audience: string }> };
 
 /** The host reader of extensions/actions/0.1 (DEC-0121 AP-1), as `connectionsView` is for connections. */
 export function actionsView(wellKnown: unknown): ActionsView {
@@ -256,7 +258,8 @@ export function actionsView(wellKnown: unknown): ActionsView {
   if (extensionShape(value) !== true) {
     return { declared: true, valid: false, errors: (extensionShape.errors as ErrorObject[]).map((error) => `${error.instancePath || "/"} ${error.keyword}`) };
   }
-  return { declared: true, valid: true, actions: (value as { actions: DeclaredAction[] }).actions };
+  const { actions, levels } = value as { actions: DeclaredAction[]; levels?: Array<{ org: string; audience: string }> };
+  return { declared: true, valid: true, actions, ...(levels === undefined ? {} : { levels }) };
 }
 
 const pointerToken = (token: string) => token.replace(/~/g, "~0").replace(/\//g, "~1");
@@ -267,7 +270,8 @@ const flag = (instancePath: string, message: string): Finding => ({ code: "FAC-S
  * FAC-SEM-142 on a well-known document (kind `service-well-known`) that carries the actions key: a value that is not
  * its schema's (a reader treats it as not declared and reports it, as FAC-SEM-133 does for load); an `id` named twice; a
  * `humanStep` present without `gate: human` or absent with it; a `tool` that a present `surfaces.mcp.capabilities` does
- * not list: a button without an agent twin (DEC-0121 AP-1).
+ * not list: a button without an agent twin (DEC-0121 AP-1); a `level` on an action that is not `relayed`, and an
+ * organization named twice in `levels` (DEC-0162 LV-5, LV-7).
  */
 export function actionsExtensionRules(wellKnown: JsonObject): Finding[] {
   const view = actionsView(wellKnown);
@@ -284,6 +288,12 @@ export function actionsExtensionRules(wellKnown: JsonObject): Finding[] {
     seen.add(action.id);
     if ((action.gate === "human") !== (action.humanStep !== undefined)) findings.push(flag(`${at}/humanStep`, "humanStep is present exactly when gate is human (DEC-0121 AP-4)"));
     if (capabilities !== undefined && !capabilities.includes(action.tool)) findings.push(flag(`${at}/tool`, `the MCP surface does not serve ${action.tool}: a button without an agent twin (DEC-0121 AP-1)`));
+    if (action.level !== undefined && action.gate !== "relayed") findings.push(flag(`${at}/level`, "a level is declared only on a relayed action (DEC-0162 LV-7)"));
+  });
+  const orgs = new Set<string>();
+  (view.levels ?? []).forEach((entry, i) => {
+    if (orgs.has(entry.org)) findings.push(flag(`${KEY_PATH}/levels/${i}/org`, `organization ${entry.org} is named twice (DEC-0162 LV-5)`));
+    orgs.add(entry.org);
   });
   return findings;
 }

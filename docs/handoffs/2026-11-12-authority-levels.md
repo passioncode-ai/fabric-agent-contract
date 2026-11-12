@@ -33,22 +33,20 @@ into one decision with its schemas, reference code, vectors and pages, by the or
 - Landing note with DEC-0156 (`agent/ct220-operators-word-v2`), binding whichever lands second: DEC-0162 item 8
   decides it (a bound level holder's words carry a task inside the level; a host's gate taking AP-2's decision takes a
   bound level decision; every other ask stays); the second lander writes it into OW-6 ("the operator's or, in an
-  organization, a level holder's within LV-2"), OW-1, OW-2, OW-5 and OA-4, and drops OW-3's "until CT-250's decision".
-  Checks on the merged tree (DEC-0156's own): `awk '/^- \*\*OW-6/,/^## Semantic rules/'
-  docs/specification/governance-and-roles.md | grep -c CT-250`, `awk '/^- \*\*OA-4/,/^- \*\*OA-5/'
-  docs/specification/delegation.md | grep -c CT-250`, and the same OW-2 and OW-5 ranges, each print at least 1;
+  organization, a level holder's within LV-2"), OW-1, OW-2, OW-5 and OA-4, and drops OW-3's "until CT-250's decision".  Checks on the merged tree (DEC-0156's own): `awk '/^- \*\*OW-6/,/^## Semantic rules/'
+  docs/specification/governance-and-roles.md | grep -c DEC-0162`, `awk '/^- \*\*OA-4/,/^- \*\*OA-5/'
+  docs/specification/delegation.md | grep -c DEC-0162`, and the same OW-1, OW-2 and OW-5 ranges (`awk '/^- \*\*OW-1/,/^- \*\*OW-2/'` and so on), each print at least 1 (0 on the merged tree before the edit, round 2 seam);
   `awk '/^- \*\*OW-3/,/^- \*\*OW-4/' docs/specification/governance-and-roles.md | grep -c "until CT-250's decision and
   Fabric"` prints 0 (round 1, seam and product).
 - Landing note with DEC-0159 (`agent/ct218-local-cloud-v2`): DEC-0162 item 8 decides it (no level for a client-key
   caller; keys stay the operator's; CF-4's twins take a bound level decision); the second lander restates CF-3 and
-  CF-4 so. Check on the merged tree: `awk -v r=CT-250 'BEGIN{RS="\n### DEC-"} $0 ~ r && !/^0159/ {n += (/DEC-0159/ &&
-  /CF-3/ && /CF-4/)} END{print n+0}' docs/DECISIONS.md` prints at least 1 (round 1, seam).
-- Landing step, the knowledge base: fabric-workspace `knowledge/authority.md`'s "Not built yet" cites DEC-0162 and
-  names what remains (the hub route CO-523, the adopters), and `knowledge/north-star.md` G2's status cell reads
+  CF-4 so: CF-3's key twins declare `level: operator`, the client key carries no `mem`, CF-4's twins take a bound level decision, and the pending "CT-250's `mem` claim" citation goes. Check on the merged tree: `awk '/^- \*\*CF-3/,/^- \*\*CF-5/' docs/specification/service.md | grep -c 'DEC-0162'` prints at least 1 (0 before the edit) and the same range with `grep -c "CT-250's"` prints 0 (1 before the edit) (round 2 seam replaced round 1's check, which this decision's own item 8 already satisfied).
+- Landing note with DEC-0158 (`agent/ct215-on-demand-20261108`): a level holder's task travels over the board as words a dispatched run reads, never as a service mandate (LV-6, *The board*); the second lander says so beside OS-7. Check: `grep -c 'DEC-0162' docs/specification/project-comms.md` on the merged tree prints at least 1 (round 2 seam).
+- Landing step, the knowledge base: fabric-workspace `knowledge/authority.md`'s "Not built yet" cites DEC-0162,
+  names what remains (the hub route CO-523, the adopters), and bounds the interim reading as membership.md does (inside one product only; on the wire `by: operator` only for the operator's own words, AP-3); `knowledge/agents-first.md` replaces "decided by the contract's CT-250" with DEC-0162 and source.md's level rule; `north-star.md` G26 and `system/engineer.md` E4 name DEC-0162 where they wait on "the roles DEC (CT-250)"; and `knowledge/north-star.md` G2's status cell reads
   "contract DEC-0162 landed; adopters open"; then the workspace sync. Check: `git -C fabric-workspace grep -c
-  'DEC-0162' origin/main -- knowledge/authority.md knowledge/north-star.md` prints at least 1 for each (round 1).
-- The operator's questions: post the seven with their defaults and the date 2026-11-21 on board thread `8da128cf`, and
-  record the message id here (round 1, product).
+  'DEC-0162' origin/main -- knowledge/authority.md knowledge/north-star.md knowledge/agents-first.md knowledge/system/engineer.md` prints at least 1 for each, and `git -C fabric-workspace grep -c "decided by the contract's CT-250" origin/main -- knowledge/agents-first.md` prints 0 (rounds 1 and 2). The Telegram gateway's owner is asked on the board for its row (the adopter line names none yet).
+- The operator's questions: posted as board message `b719b08e` on thread `8da128cf` (round 1, product); question 4's widened text (who sets and who changes L1) and question 8 (client keys of an instance the organization deploys) follow in a reply after round 2's fold.
 - With DEC-0157 (`agent/ct216-usage-data-v2`, its round 30 seam): UD-4 admits only the operator's own decision for a
   declined usage switch; LV-7 says a level decision is not that word unless the holder is that person's operator.
   Whichever lands second makes UD-4 say so and cite DEC-0162, and LV-7 cite UD-4 by its landed link. Checks on the
@@ -72,9 +70,27 @@ into one decision with its schemas, reference code, vectors and pages, by the or
   named; T2 refusals carry the digest; UD-4 for an organization's deployed component; the agent-side conformance
   row; OL-6 and source wording; the record's approver resolved by the issuer (question 7); the interim reading;
   the knowledge-base landing step. Declined: none.
-- `pnpm run check` exit 0 on the round-1 head (11250 tests passed, 3 skipped), and on the round-1 fold (11259 passed, 3 skipped; coverage floors met; UX lint, docs
+- `pnpm run check` exit 0 on the round-1 head (11250 tests passed, 3 skipped), on the round-1 fold (11259 passed, 3 skipped) and on the round-2 fold (11269 passed, 3 skipped; coverage floors met; UX lint, docs
   check with 0 markdownlint errors, privacy check).
+
+- Round 2 (on `001d55f7`): none clean. Unit: T2 refusals on the level branch without `data.actionDigest`, a T2 call
+  without a digest not a fault, the `actionDecision` docstring; folded. Seam, breaks folded: readers pinned before
+  DEC-0162 refuse a level form rather than ignore it (the protocol name `levels/1` gates it; LV-5, LV-10, interop
+  C3.5, Compatibility); client keys were open to an administrator's level decision (an action's `level: operator`,
+  refused `level-insufficient: operator`; CF-3's key twins declare it); the DEC-0159 landing check was already green
+  on this branch (now a check on CF-3 to CF-5's text); the knowledge-base step missed `agents-first.md`, G26 and E4.
+  Seam risks folded: `actionsView` returns `levels`, FAC-SEM-142 flags a `level` on a non-relayed action and an
+  organization named twice (fixtures); the DEC-0156 checks grep DEC-0162 and cover OW-1; a level holder's task over
+  the board (LV-6, a landing note with DEC-0158). Product, breaks folded: the hub's check of a declared audience is
+  stated as open (Not decided, Consequences); SCN-060 on P-02, ST-035's level criterion, FLW-29's level branches,
+  SCR-30's level state and audit fields; the interim reading bounded by AP-3 in membership.md and the landing step.
+  Product risks folded: a board hold and a slot move stay the operator's (LV-7); L1 set and changed by the owner in an
+  organization (spend-policy's L1 row, question 4 widened, the schema's billing list exactly LV-7's); the source
+  hand-over default bounded to T0 or T1 in Compatibility; client keys as question 8; the Telegram gateway's row asked
+  at landing and the organization product's VES-AUTHORITY-LEVELS row; the re-carried mandate keeps `instruction`,
+  `at`, `expiresAt` and scope. Declined: none.
 
 ## Next task
 
-Round 2 of the blind readings (unit, seam, product) of branch `agent/ct250-levels-20261112` (DEC-0162).
+Round 3 of the blind readings (unit, seam, product) of branch `agent/ct250-levels-20261112` (DEC-0162), then the reply
+on thread `8da128cf` with question 4's widened text and question 8.

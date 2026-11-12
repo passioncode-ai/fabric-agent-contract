@@ -91,6 +91,17 @@ describe("FAC-SEM-142 on a well-known document (DEC-0121 AP-1)", () => {
     expect(actionsView(null)).toEqual({ declared: false });
     expect(actionsView({ extensions: { [EXTENSION_KEYS.actions]: value } })).toEqual({ declared: true, valid: true, actions: value.actions });
     expect(actionsView({ extensions: { [EXTENSION_KEYS.actions]: {} } })).toEqual({ declared: true, valid: false, errors: ["/ required"] });
+    const levels = [{ org: "org:example-org", audience: "example-agent.default" }];
+    expect(actionsView({ extensions: { [EXTENSION_KEYS.actions]: { ...value, levels } } })).toEqual({ declared: true, valid: true, actions: value.actions, levels });
+  });
+  it("flags a level on an action that is not relayed and an organization named twice (DEC-0162 LV-5, LV-7)", () => {
+    const actions = [{ id: "retry", title: "Retry", tool: "jobs.retry", gate: "none", level: "owner" }];
+    const levels = [{ org: "org:example-org", audience: "a.default" }, { org: "org:example-org", audience: "b.default" }];
+    const found = actionsExtensionRules({ extensions: { [EXTENSION_KEYS.actions]: { actions, levels } } });
+    expect(found.map((finding) => finding.instancePath)).toEqual([
+      `/extensions/${EXTENSION_KEYS.actions.replace(/\//g, "~1")}/actions/0/level`,
+      `/extensions/${EXTENSION_KEYS.actions.replace(/\//g, "~1")}/levels/1/org`
+    ]);
   });
   it("reads surfaces that are not objects as no capability list", () => {
     const value = { actions: [{ id: "approve-reply", title: "Approve", tool: "reviews.approve", gate: "relayed" }] };

@@ -96,6 +96,7 @@ const MEMBERSHIPS: Record<string, Json> = { owner: OWNER, admin: ADMIN, architec
 const relayed = { id: "approve-reply", title: "Approve the reply", tool: "reviews.approve", gate: "relayed" };
 /** A billing act: the organization's plan, declared as the owner's (LV-7). */
 const billing = { id: "change-plan", title: "Change the plan", tool: "billing.plan", gate: "relayed", level: "owner" };
+const clientKey = { id: "issue-key", title: "Issue a client key", tool: "keys.issue", gate: "relayed", level: "operator" };
 const human = { id: "connect-store", title: "Do it yourself", tool: "accounts.connect", gate: "human", humanStep: "payment" };
 const CALLER = "agent:claude-code";
 const DIGEST = `sha256:${"ab".repeat(32)}`;
@@ -130,6 +131,9 @@ function actionCases(): Json[] {
     // LV-7: a billing act is the owner's.
     ["the owner decides a billing act", call("T2", { ...decided("owner", OWNER), action: "change-plan" }, { action: billing, tokenMem: digest(OWNER) }), level("owner", OWNER)],
     ["an administrator on a billing act", call("T2", { ...decided("admin", ADMIN), action: "change-plan" }, { action: billing, tokenMem: digest(ADMIN) }), { ok: false, code: "operator-decision-required", data: { detail: "level-insufficient: owner" } }],
+    // LV-7: an act the service keeps for the operator alone (a client key, DEC-0159 CF-3) is decided by no level.
+    ["the owner on an act no level decides", call("T1", { ...decided("owner", OWNER), action: "issue-key" }, { action: clientKey, tokenMem: digest(OWNER) }), { ok: false, code: "operator-decision-required", data: { detail: "level-insufficient: operator" } }],
+    ["the operator's own decision on an act no level decides, from T0", call("T0", { by: "operator", via: "relayed-instruction", action: "issue-key", instruction: "Issue the key for the support bot", at: "2026-10-25T11:29:00Z" }, { action: clientKey }), { ok: true, recordAs: { by: "operator", via: "relayed-instruction", caller: CALLER } }],
     // LV-5: the service's own accepted elicitation is the operator's word, read before a level form.
     ["an accepted elicitation beside an unbound level decision, from T0", call("T0", decided("admin", ADMIN), { elicited: true }), { ok: true, recordAs: { by: "operator", via: "elicitation", caller: CALLER } }],
     // OM-4, LV-11: an older active revision after the issuer stated the end at a higher one.
@@ -164,7 +168,7 @@ function actionCases(): Json[] {
 
 /** At T2 a refused level keeps DL-18's route: the refusal carries the action's digest (LV-10). */
 function withDigest(input: Json, expected: Json): Json {
-  const refusedLevel = expected.ok === false && expected.data?.detail !== undefined && input.tier === "T2" && input.levels !== undefined && input.actionDigest !== undefined;
+  const refusedLevel = expected.ok === false && (expected.code === "operator-decision-required" || expected.code === "decision-invalid") && input.tier === "T2" && input.levels !== undefined && input.actionDigest !== undefined;
   return refusedLevel ? { ...expected, data: { ...expected.data, actionDigest: input.actionDigest } } : expected;
 }
 
@@ -200,6 +204,7 @@ function mandateCases(): Json[] {
     // LV-6: a level mandate stands only at the service its attestation is for; handed on to another, it does not.
     ["a level mandate handed on to a service its attestation is not for", mandateCall("T2", levelMandate(ADMIN, "admin", ALPHA), { tokenMem: digest(ADMIN), levels: { [ORG]: { audience: "crawler-service-c3", keySet: KEY_SET } } }), { ok: false, code: "decision-invalid", data: { detail: "level-audience" } }],
     ["an administrator's level mandate on a billing act", mandateCall("T2", levelMandate(ADMIN, "admin", { capabilities: ["billing.plan"], effects: ["reply"], projects: ["alpha"] }), { action: billing, tokenMem: digest(ADMIN) }), { ok: false, code: "operator-decision-required", data: { detail: "level-insufficient: owner" } }],
+    ["the owner's level mandate on an act no level decides", mandateCall("T2", levelMandate(OWNER, "owner", { capabilities: ["keys.issue"], effects: ["reply"], projects: ["alpha"] }), { action: clientKey, tokenMem: digest(OWNER) }), { ok: false, code: "operator-decision-required", data: { detail: "level-insufficient: operator" } }],
     ["an operator's mandate from T2 still changes nothing (MD-5)", mandateCall("T2", { ...(({ level: _a, org: _b, membership: _c, ...rest }) => rest)(levelMandate(ADMIN, "admin", ALPHA)), by: "operator" }, { tokenMem: digest(ADMIN) }), { ok: false, code: "approval-required", data: { actionDigest: DIGEST } }]
   ];
   return list.map(([name, input, expected]) => ({ name, input, expected: withDigest(input, expected) }));

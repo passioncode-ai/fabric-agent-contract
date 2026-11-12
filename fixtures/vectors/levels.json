@@ -797,7 +797,10 @@
       },
       "expected": {
         "ok": false,
-        "code": "decision-invalid"
+        "code": "decision-invalid",
+        "data": {
+          "actionDigest": "sha256:abababababababababababababababababababababababababababababababab"
+        }
       }
     },
     {
@@ -1140,6 +1143,142 @@
       }
     },
     {
+      "name": "the owner on an act no level decides",
+      "input": {
+        "action": {
+          "id": "issue-key",
+          "title": "Issue a client key",
+          "tool": "keys.issue",
+          "gate": "relayed",
+          "level": "operator"
+        },
+        "tier": "T1",
+        "caller": "agent:claude-code",
+        "decision": {
+          "by": "level",
+          "via": "level-command",
+          "level": "owner",
+          "org": "org:org-a",
+          "action": "issue-key",
+          "instruction": "approve the reply to the review from Anna",
+          "at": "2026-10-25T11:20:00Z",
+          "membership": {
+            "type": "org-membership/2",
+            "issuer": "https://orgs.example",
+            "org": "org:org-a",
+            "audience": "reviews-service-a1",
+            "subject": "m-owner-01",
+            "role": "owner",
+            "projects": [],
+            "external": false,
+            "status": "active",
+            "revision": 3,
+            "membershipEndsAt": null,
+            "issuedAt": "2026-10-25T11:00:00Z",
+            "notBefore": "2026-10-25T11:00:00Z",
+            "expiresAt": "2026-10-25T12:00:00Z",
+            "extensions": {},
+            "alg": "EdDSA",
+            "kid": "mem-2026-10",
+            "sig": "DWXhTb1wl4-GuoOEi148WMcPzY-rWvxeCnECywHvCNsQLsSO3n0TlMlsybW3anYPQ8fdK_VD4DauMmC42sxXBw"
+          }
+        },
+        "now": "2026-10-25T11:30:00Z",
+        "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
+        "levels": {
+          "org:org-a": {
+            "audience": "reviews-service-a1",
+            "keySet": {
+              "type": "org-key-set/1",
+              "issuer": "https://orgs.example",
+              "org": "org:org-a",
+              "revision": 1,
+              "issuedAt": "2026-10-15T00:00:00Z",
+              "keys": [
+                {
+                  "kid": "mem-2026-10",
+                  "alg": "EdDSA",
+                  "x": "YxEDJVK86TVti3mnfdU9cSSlKdjXDJM9A3eKVqIxr7U",
+                  "notBefore": "2026-10-15T00:00:00Z",
+                  "notAfter": "2027-01-01T00:00:00Z"
+                }
+              ],
+              "revoked": [],
+              "administrators": [],
+              "alg": "EdDSA",
+              "kid": "root-org-a-1",
+              "sig": "vufCXJ4roCUAM3MEuAikBXHXZ8mdhK7hyiZkkFzc14MuJ8fvPq6zYxOOOH8KtIuBEIUcXesvsy1NXXs9rYqIBw"
+            }
+          }
+        },
+        "tokenMem": "sha256:614fc6f0c76021eb1a4a6de48c6a4c674992936d83d94d33630d956224d997a0"
+      },
+      "expected": {
+        "ok": false,
+        "code": "operator-decision-required",
+        "data": {
+          "detail": "level-insufficient: operator"
+        }
+      }
+    },
+    {
+      "name": "the operator's own decision on an act no level decides, from T0",
+      "input": {
+        "action": {
+          "id": "issue-key",
+          "title": "Issue a client key",
+          "tool": "keys.issue",
+          "gate": "relayed",
+          "level": "operator"
+        },
+        "tier": "T0",
+        "caller": "agent:claude-code",
+        "decision": {
+          "by": "operator",
+          "via": "relayed-instruction",
+          "action": "issue-key",
+          "instruction": "Issue the key for the support bot",
+          "at": "2026-10-25T11:29:00Z"
+        },
+        "now": "2026-10-25T11:30:00Z",
+        "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
+        "levels": {
+          "org:org-a": {
+            "audience": "reviews-service-a1",
+            "keySet": {
+              "type": "org-key-set/1",
+              "issuer": "https://orgs.example",
+              "org": "org:org-a",
+              "revision": 1,
+              "issuedAt": "2026-10-15T00:00:00Z",
+              "keys": [
+                {
+                  "kid": "mem-2026-10",
+                  "alg": "EdDSA",
+                  "x": "YxEDJVK86TVti3mnfdU9cSSlKdjXDJM9A3eKVqIxr7U",
+                  "notBefore": "2026-10-15T00:00:00Z",
+                  "notAfter": "2027-01-01T00:00:00Z"
+                }
+              ],
+              "revoked": [],
+              "administrators": [],
+              "alg": "EdDSA",
+              "kid": "root-org-a-1",
+              "sig": "vufCXJ4roCUAM3MEuAikBXHXZ8mdhK7hyiZkkFzc14MuJ8fvPq6zYxOOOH8KtIuBEIUcXesvsy1NXXs9rYqIBw"
+            }
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "recordAs": {
+          "by": "operator",
+          "via": "relayed-instruction",
+          "caller": "agent:claude-code"
+        }
+      }
+    },
+    {
       "name": "an accepted elicitation beside an unbound level decision, from T0",
       "input": {
         "action": {
@@ -1381,7 +1520,10 @@
       },
       "expected": {
         "ok": false,
-        "code": "decision-invalid"
+        "code": "decision-invalid",
+        "data": {
+          "actionDigest": "sha256:abababababababababababababababababababababababababababababababab"
+        }
       }
     },
     {
@@ -2248,7 +2390,10 @@
       },
       "expected": {
         "ok": false,
-        "code": "decision-invalid"
+        "code": "decision-invalid",
+        "data": {
+          "actionDigest": "sha256:abababababababababababababababababababababababababababababababab"
+        }
       }
     },
     {
@@ -2323,7 +2468,10 @@
       },
       "expected": {
         "ok": false,
-        "code": "decision-invalid"
+        "code": "decision-invalid",
+        "data": {
+          "actionDigest": "sha256:abababababababababababababababababababababababababababababababab"
+        }
       }
     },
     {
@@ -2402,7 +2550,10 @@
       },
       "expected": {
         "ok": false,
-        "code": "decision-invalid"
+        "code": "decision-invalid",
+        "data": {
+          "actionDigest": "sha256:abababababababababababababababababababababababababababababababab"
+        }
       }
     },
     {
@@ -2477,7 +2628,10 @@
       },
       "expected": {
         "ok": false,
-        "code": "decision-invalid"
+        "code": "decision-invalid",
+        "data": {
+          "actionDigest": "sha256:abababababababababababababababababababababababababababababababab"
+        }
       }
     },
     {
@@ -3788,6 +3942,112 @@
         "code": "operator-decision-required",
         "data": {
           "detail": "level-insufficient: owner",
+          "actionDigest": "sha256:abababababababababababababababababababababababababababababababab"
+        }
+      }
+    },
+    {
+      "name": "the owner's level mandate on an act no level decides",
+      "input": {
+        "action": {
+          "id": "issue-key",
+          "title": "Issue a client key",
+          "tool": "keys.issue",
+          "gate": "relayed",
+          "level": "operator"
+        },
+        "tier": "T2",
+        "caller": "agent:claude-code",
+        "now": "2026-10-25T11:30:00Z",
+        "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
+        "self": "example-reviewer",
+        "callerAgent": "example-developer",
+        "effect": "reply",
+        "project": "alpha",
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "level",
+          "level": "owner",
+          "org": "org:org-a",
+          "membership": {
+            "type": "org-membership/2",
+            "issuer": "https://orgs.example",
+            "org": "org:org-a",
+            "audience": "reviews-service-a1",
+            "subject": "m-owner-01",
+            "role": "owner",
+            "projects": [],
+            "external": false,
+            "status": "active",
+            "revision": 3,
+            "membershipEndsAt": null,
+            "issuedAt": "2026-10-25T11:00:00Z",
+            "notBefore": "2026-10-25T11:00:00Z",
+            "expiresAt": "2026-10-25T12:00:00Z",
+            "extensions": {},
+            "alg": "EdDSA",
+            "kid": "mem-2026-10",
+            "sig": "DWXhTb1wl4-GuoOEi148WMcPzY-rWvxeCnECywHvCNsQLsSO3n0TlMlsybW3anYPQ8fdK_VD4DauMmC42sxXBw"
+          },
+          "task": "answer the reviews of the week",
+          "instruction": "answer this week's reviews in project alpha",
+          "at": "2026-10-25T11:20:00Z",
+          "expiresAt": "2026-10-26T11:20:00Z",
+          "scope": {
+            "capabilities": [
+              "keys.issue"
+            ],
+            "effects": [
+              "reply"
+            ],
+            "projects": [
+              "alpha"
+            ]
+          },
+          "chain": [
+            {
+              "agent": "example-developer",
+              "at": "2026-10-25T11:20:00Z"
+            },
+            {
+              "agent": "example-reviewer",
+              "at": "2026-10-25T11:25:00Z"
+            }
+          ]
+        },
+        "levels": {
+          "org:org-a": {
+            "audience": "reviews-service-a1",
+            "keySet": {
+              "type": "org-key-set/1",
+              "issuer": "https://orgs.example",
+              "org": "org:org-a",
+              "revision": 1,
+              "issuedAt": "2026-10-15T00:00:00Z",
+              "keys": [
+                {
+                  "kid": "mem-2026-10",
+                  "alg": "EdDSA",
+                  "x": "YxEDJVK86TVti3mnfdU9cSSlKdjXDJM9A3eKVqIxr7U",
+                  "notBefore": "2026-10-15T00:00:00Z",
+                  "notAfter": "2027-01-01T00:00:00Z"
+                }
+              ],
+              "revoked": [],
+              "administrators": [],
+              "alg": "EdDSA",
+              "kid": "root-org-a-1",
+              "sig": "vufCXJ4roCUAM3MEuAikBXHXZ8mdhK7hyiZkkFzc14MuJ8fvPq6zYxOOOH8KtIuBEIUcXesvsy1NXXs9rYqIBw"
+            }
+          }
+        },
+        "tokenMem": "sha256:614fc6f0c76021eb1a4a6de48c6a4c674992936d83d94d33630d956224d997a0"
+      },
+      "expected": {
+        "ok": false,
+        "code": "operator-decision-required",
+        "data": {
+          "detail": "level-insufficient: operator",
           "actionDigest": "sha256:abababababababababababababababababababababababababababababababab"
         }
       }

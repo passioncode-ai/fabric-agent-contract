@@ -150,8 +150,8 @@ export function mandateProblem(mandate: unknown): "mandate-malformed" | "mandate
  * placed the caller's tier (DL-25). `self` is the callee's own agent id: the mandate is for this call only when the
  * chain ends in it. `callerAgent` is the caller's agent id when the callee authenticated one (a per-agent credential,
  * a delegation token's outermost actor, the hub's attested origin); it must then be the agent before `self`. Without
- * one (the shared descriptor token on loopback) the chain's end alone binds the mandate (MD-3). A T2 caller's mandate is
- * ignored. An invalid, widened, expired, not yet given or misaddressed mandate is `decision-invalid`; a valid one that
+ * one (the shared descriptor token on loopback) the chain's end alone binds the mandate (MD-3). A T2 caller's operator
+ * mandate is ignored; a level mandate is read at every tier by a callee given `levels` (DEC-0162 LV-6). An invalid, widened, expired, not yet given or misaddressed mandate is `decision-invalid`; a valid one that
  * does not cover the call is `operator-decision-required`, its detail naming the first part not covered (MD-4).
  */
 export function mandateCovers(input: {

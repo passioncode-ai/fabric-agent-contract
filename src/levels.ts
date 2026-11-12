@@ -34,7 +34,7 @@ export type LevelDetail =
   | "level-expired"
   | "level-role";
 /** The level a call needs and the holder does not have: `operator-decision-required` with this detail (LV-10). */
-export type InsufficientDetail = "level-insufficient: admin" | "level-insufficient: owner";
+export type InsufficientDetail = "level-insufficient: admin" | "level-insufficient: owner" | "level-insufficient: operator";
 
 export type LevelStanding =
   | { ok: true; level: string; org: string; approver: string; membershipDigest: string; revision: number; projects: string[] }
@@ -57,7 +57,7 @@ export interface LevelRecord {
  * service's key set for that organization with this service as its audience (a reader of `/2`), and is `active`; the
  * call's delegation token binds it (`mem` is its digest); the decision was made before it expires; the level is at
  * most the attestation's role. Then the level covers the call: at least `minLevel` when the service's action declares
- * one (`owner` for a billing act, LV-7), at least `admin` for a call in no project, and for an `architect` attestation
+ * one (`owner` for a billing act, LV-7; `operator`, an act no level decides), at least `admin` for a call in no project, and for an `architect` attestation
  * the call's project among its projects (an owner or an admin deciding at the architect level is bounded by the call's
  * project alone). A level mandate's scope `projects` are checked against the attestation by `FAC-SEM-170`, each call's
  * project here. It answers and never throws.
@@ -73,8 +73,8 @@ export function levelStanding(input: {
   contexts: LevelContexts;
   /** The `mem` claim of the call's delegation token, absent when the call presented none. */
   tokenMem?: unknown;
-  /** The lowest level that decides this action, as the service declares it (`owner` for a billing act); absent: the
-   * project rule alone. */
+  /** The lowest level that decides this action, as the service declares it (`owner` for a billing act, `operator` for
+   * an act no level decides); absent: the project rule alone. */
   minLevel?: string;
   now: number;
 }): LevelStanding {
@@ -104,6 +104,8 @@ export function levelStanding(input: {
   const rank = DECIDING_LEVELS.includes(level) ? (RANK.get(level) as number) : Number.POSITIVE_INFINITY;
   if (rank > (RANK.get(verdict.role) as number)) return { ok: false, invalid: "level-role" };
   const projects = verdict.projects ?? [];
+  // LV-7: an act the service keeps for the operator alone is decided by no level (a client key, DEC-0159 CF-3).
+  if (input.minLevel === "operator") return { ok: false, insufficient: "level-insufficient: operator" };
   // LV-7: a billing act is the owner's; LV-4: a call in no project is decided at owner or admin.
   if (input.minLevel === "owner" && rank < (RANK.get("owner") as number)) return { ok: false, insufficient: "level-insufficient: owner" };
   if ((input.minLevel === "admin" || project === undefined) && rank < (RANK.get("admin") as number)) return { ok: false, insufficient: "level-insufficient: admin" };
