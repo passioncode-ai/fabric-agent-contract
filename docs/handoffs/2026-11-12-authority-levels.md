@@ -236,7 +236,7 @@ into one decision with its schemas, reference code, vectors and pages, by the or
   departure from the administrator's "every ... setting"; question 12 (an architect and its project's credential
   requests). Unit and seam risk folded: `levelContextOk` in `src/org-membership.ts` applies `verifyOrgMembership`'s own
   trust clauses (an opaque audience, an EdDSA key set of that organization) and the held map, and
-  `levelContextsWellFormed` reads every entry with it (four tests). `pnpm run check` exit 0 on the round-10 fold (11277 passed, 3 skipped) and on this fold (11282 passed, 3 skipped).
+  `levelContextsWellFormed` reads every entry with it (four tests). `pnpm run check` exit 0 on the round-10 fold (11282 passed, 3 skipped, `ct250-r10.log`) and on this fold (11282 passed, 3 skipped).
   Declined: none.
 
 ## Next task
