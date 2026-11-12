@@ -152,7 +152,7 @@ only by its members, needs none).
 (capabilities, relayed actions, an effect ceiling, a per-call spend ceiling, projects) and the chain of agents that
 held it, each call appending its callee and never widening the scope. A callee that is the chain's last agent, called
 from T0 or T1 (by the agent before it, where it authenticated its caller's agent id), takes a call it covers as the operator's decision and refuses only the part it does
-not cover, so the operator is asked again for that alone; a T2 caller's mandate changes nothing, beyond the estate a
+not cover, so the operator is asked again for that alone; a T2 caller's operator mandate changes nothing (a level mandate its token binds is taken, DEC-0162 LV-6), beyond the estate a
 delegation token carries the authority. A job's step is read under the job's capability (MJ-1, DEC-0141; `actionDecision`'s
 `mandateCapability`) (`mandateCovers`, [delegation](docs/specification/delegation.md#the-operators-mandate), DEC-0125).
 A mandate never covers a **Source hand-over** ([source](docs/specification/source.md#handing-over), DEC-0149).

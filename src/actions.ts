@@ -28,7 +28,7 @@ export type HumanStep = "sign-in" | "consent" | "payment" | "secret" | "spend-ab
 export type CallerTier = "T0" | "T1" | "T2";
 
 /** One entry of `actions[]` (`service-actions-extension.schema.json#/$defs/action`). */
-export interface DeclaredAction { id: string; title: string; tool: string; gate: ActionGate; humanStep?: HumanStep }
+export interface DeclaredAction { id: string; title: string; tool: string; gate: ActionGate; humanStep?: HumanStep; level?: "owner" | "admin" | "architect" }
 
 export interface ActionDecisionInput {
   /** The service's own declaration of the action being called. */
@@ -89,7 +89,7 @@ export type ActionDecisionAnswer =
   | { ok: true; recordAs: DecisionRecord }
   | { ok: false; code: typeof HUMAN_STEP_REQUIRED; data: { humanStep: HumanStep; url: string } }
   | { ok: false; code: typeof APPROVAL_REQUIRED; data: { actionDigest: string } }
-  | { ok: false; code: typeof OPERATOR_DECISION_REQUIRED | typeof DECISION_INVALID; data?: { detail: string; estimateUsd?: number; perCallMaxUsd?: number } }
+  | { ok: false; code: typeof OPERATOR_DECISION_REQUIRED | typeof DECISION_INVALID; data?: { detail: string; estimateUsd?: number; perCallMaxUsd?: number; actionDigest?: string } }
   /** The service's own fault, never sent to a caller: an input it owes is missing or unreadable. */
   | { fault: "action-invalid" | "caller-missing" | "now-unreadable" | "digest-missing" | "url-missing" | "effect-missing" | "self-missing" | "mandate-capability-missing" };
 
@@ -143,18 +143,24 @@ export function actionDecision(input: ActionDecisionInput): ActionDecisionAnswer
   // that reads levels (LV-6); one that reads none answers as if the call carried neither (LV-10).
   const levelDecision = isObject(decision) && decision.by === "level";
   const levelMandate = decision === undefined && isObject(input.mandate) && input.mandate.by === "level";
+  // The service's own accepted elicitation is the operator's word at T0 or T1 and is read before a level form (LV-5).
+  const inside = tier === "T0" || tier === "T1";
+  if (inside && elicited === true) return { ok: true, recordAs: { by: "operator", via: "elicitation", caller } };
   if (isObject(input.levels) && (levelDecision || levelMandate)) {
     const clock = strictTime(now);
     if (Number.isNaN(clock)) return { fault: "now-unreadable" };
-    if (levelDecision) return byLevel(input, action, caller, clock);
     // A level mandate at a service given `levels` is never ignored: mandateCovers reads it at every tier.
-    return byMandate(input, action, caller) as ActionDecisionAnswer;
+    const answer = levelDecision ? byLevel(input, action, caller, clock) : (byMandate(input, action, caller) as ActionDecisionAnswer);
+    // At T2 a refused level keeps DL-18's route open: the refusal carries the action's digest for an approval/1.
+    if (!inside && "ok" in answer && !answer.ok && answer.data !== undefined && "detail" in answer.data && typeof actionDigest === "string" && SHA256.test(actionDigest)) {
+      return { ...answer, data: { ...answer.data, actionDigest } } as ActionDecisionAnswer;
+    }
+    return answer;
   }
   if (tier !== "T0" && tier !== "T1") {
     if (typeof actionDigest !== "string" || !SHA256.test(actionDigest)) return { fault: "digest-missing" };
     return { ok: false, code: APPROVAL_REQUIRED, data: { actionDigest } };
   }
-  if (elicited === true) return { ok: true, recordAs: { by: "operator", via: "elicitation", caller } };
   const clock = strictTime(now);
   if (Number.isNaN(clock)) return { fault: "now-unreadable" };
   if (decision === undefined && input.mandate !== undefined) {
@@ -196,7 +202,7 @@ function byMandate(input: ActionDecisionInput, action: DeclaredAction, caller: s
     mandate: input.mandate, tier: input.tier, now: input.now, self: input.self,
     ...(input.callerAgent === undefined ? {} : { callerAgent: input.callerAgent }),
     ...(isObject(input.levels) ? { levels: input.levels as LevelContexts, tokenMem: input.tokenMem } : {}),
-    call: { capability, action: action.id, effect, ...(typeof spendUsd === "number" ? { spendUsd } : {}), ...(typeof project === "string" ? { project } : {}) }
+    call: { capability, action: action.id, effect, ...(typeof spendUsd === "number" ? { spendUsd } : {}), ...(typeof project === "string" ? { project } : {}), ...(action.level === undefined ? {} : { minLevel: action.level }) }
   });
   if ("recordAs" in answer) return { ok: true, recordAs: { ...answer.recordAs, caller } };
   // `ignored`: a T2 operator mandate (MD-5), or a level mandate at a service that reads no levels (LV-10); the caller
@@ -223,7 +229,8 @@ function byLevel(input: ActionDecisionInput, action: DeclaredAction, caller: str
   if (read.project !== undefined && read.project !== project) return { ok: false, code: DECISION_INVALID };
   const standing = levelStanding({
     membership: read.membership, org: read.org, level: read.level, at: read.at,
-    ...(project === undefined ? {} : { project }), contexts: input.levels as LevelContexts, tokenMem: input.tokenMem, now: clock
+    ...(project === undefined ? {} : { project }), ...(action.level === undefined ? {} : { minLevel: action.level }),
+    contexts: input.levels as LevelContexts, tokenMem: input.tokenMem, now: clock
   });
   if (!standing.ok) {
     return "invalid" in standing

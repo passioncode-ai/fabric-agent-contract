@@ -19,8 +19,9 @@ export interface LevelContext {
   audience: string;
   /** The organization's key set the service applied under the root its estate pins (`verifyOrgKeySet`). */
   keySet: JsonObject;
-  /** The attestation it holds for the subject, if any (OM-4). */
-  held?: HeldMembership;
+  /** The attestation it holds for each subject it has read, by subject (OM-4), so an older revision after a later
+   * one (an `ended` one included) is refused `stale-revision`. */
+  held?: Record<string, HeldMembership>;
 }
 /** The organizations a service reads levels in, by `org:<orgId>`. Absent: the service reads no level (LV-10). */
 export type LevelContexts = Record<string, LevelContext>;
@@ -33,7 +34,7 @@ export type LevelDetail =
   | "level-expired"
   | "level-role";
 /** The level a call needs and the holder does not have: `operator-decision-required` with this detail (LV-10). */
-export type InsufficientDetail = "level-insufficient: admin";
+export type InsufficientDetail = "level-insufficient: admin" | "level-insufficient: owner";
 
 export type LevelStanding =
   | { ok: true; level: string; org: string; approver: string; membershipDigest: string; revision: number; projects: string[] }
@@ -55,9 +56,11 @@ export interface LevelRecord {
  * Whether a level stands for one call (DEC-0162 LV-4, LV-5, LV-11), in this order: the attestation verifies under the
  * service's key set for that organization with this service as its audience (a reader of `/2`), and is `active`; the
  * call's delegation token binds it (`mem` is its digest); the decision was made before it expires; the level is at
- * most the attestation's role. Then, for an architect, the call's project is among its projects, and a call in no
- * project needs `admin`. `projects` (an architect's level mandate) are the projects the scope lists: each must be
- * among the attestation's. It answers and never throws.
+ * most the attestation's role. Then the level covers the call: at least `minLevel` when the service's action declares
+ * one (`owner` for a billing act, LV-7), at least `admin` for a call in no project, and for an `architect` attestation
+ * the call's project among its projects (an owner or an admin deciding at the architect level is bounded by the call's
+ * project alone). A level mandate's scope `projects` are checked against the attestation by `FAC-SEM-170`, each call's
+ * project here. It answers and never throws.
  */
 export function levelStanding(input: {
   membership: unknown;
@@ -70,16 +73,21 @@ export function levelStanding(input: {
   contexts: LevelContexts;
   /** The `mem` claim of the call's delegation token, absent when the call presented none. */
   tokenMem?: unknown;
+  /** The lowest level that decides this action, as the service declares it (`owner` for a billing act); absent: the
+   * project rule alone. */
+  minLevel?: string;
   now: number;
 }): LevelStanding {
   const { membership, org, level, at, project, contexts, tokenMem, now } = input;
-  const context = Object.hasOwn(contexts, org) ? contexts[org] : undefined;
+  const context = isObject(contexts) && Object.hasOwn(contexts, org) ? contexts[org] : undefined;
+  const subject = isObject(membership) && typeof membership.subject === "string" ? membership.subject : undefined;
+  const heldBySubject = isObject(context) && isObject(context.held) && subject !== undefined && Object.hasOwn(context.held, subject) ? (context.held as Record<string, HeldMembership>)[subject] : undefined;
   const verdict = verifyOrgMembership(membership, {
     now: new Date(now),
     org,
     audience: isObject(context) ? (context.audience as string) : "",
     keySet: isObject(context) ? context.keySet : ({} as JsonObject),
-    ...(isObject(context) && context.held !== undefined ? { held: context.held } : {}),
+    ...(heldBySubject !== undefined ? { held: heldBySubject } : {}),
     levels: true
   });
   if (!verdict.ok) {
@@ -96,7 +104,10 @@ export function levelStanding(input: {
   const rank = DECIDING_LEVELS.includes(level) ? (RANK.get(level) as number) : Number.POSITIVE_INFINITY;
   if (rank > (RANK.get(verdict.role) as number)) return { ok: false, invalid: "level-role" };
   const projects = verdict.projects ?? [];
-  if (level === "architect" && (project === undefined || !projects.includes(project))) return { ok: false, insufficient: "level-insufficient: admin" };
+  // LV-7: a billing act is the owner's; LV-4: a call in no project is decided at owner or admin.
+  if (input.minLevel === "owner" && rank < (RANK.get("owner") as number)) return { ok: false, insufficient: "level-insufficient: owner" };
+  if ((input.minLevel === "admin" || project === undefined) && rank < (RANK.get("admin") as number)) return { ok: false, insufficient: "level-insufficient: admin" };
+  if (verdict.role === "architect" && project !== undefined && !projects.includes(project)) return { ok: false, insufficient: "level-insufficient: admin" };
   return { ok: true, level, org, approver: verdict.held.subject, membershipDigest: verdict.digest, revision: verdict.held.revision, projects };
 }
 
@@ -122,9 +133,10 @@ function levelDocument(value: JsonObject, projects: unknown[] | undefined, at: s
   const decided = strictTime(at);
   if (!(decided < strictTime(membership.expiresAt))) flag("/at", "the holder decides before the attestation's expiresAt");
   if (value.level === "architect") {
-    const own = Array.isArray(membership.projects) ? membership.projects : [];
+    // An owner or an admin deciding at the architect level is bounded by the call's project alone (LV-2).
+    const own = membership.role === "architect" ? (Array.isArray(membership.projects) ? membership.projects : []) : undefined;
     if (projects === undefined || projects.length === 0) flag("/level", "an architect decides only in its projects: the decision names one, a mandate's scope lists them");
-    else for (const project of projects) if (!own.includes(project)) flag("/membership/projects", `the project ${show(project)} is not among the architect's projects`);
+    else if (own !== undefined) for (const project of projects) if (!own.includes(project)) flag("/membership/projects", `the project ${show(project)} is not among the architect's projects`);
   }
 }
 

@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/decision.schema.json",
   "title": "A decision a call carries in _meta.decision (fabric-actions/0.1, DEC-0121 AP-2; the level form, DEC-0162 LV-3)",
-  "description": "The operator's decision on one relayed action, or a level holder's (DEC-0162 LV-3),, carried by a T0 or T1 caller in its request's _meta.decision, or in a hub agent.call's or sealed call's call.decision (DEC-0121 AP-2). An agent sets it only for the operator's own words, from the sources and in the form AP-3 names (docs/specification/service.md#actions); an elicitation the person accepted is the service's own record, never this. action is the declared action's id and must be the called one; target, when present, the one object the operator named, which the service compares with the call's. A service reads at strictly (src/rfc3339.ts strictTime) and refuses decision-invalid a decision more than 60 s after its clock or more than 24 h before it.",
+  "description": "The operator's decision on one relayed action, or a level holder's (DEC-0162 LV-3), carried in a request's _meta.decision (the operator's form by a T0 or T1 caller, the level form at every tier, DEC-0162 LV-6), or in a hub agent.call's or sealed call's call.decision (DEC-0121 AP-2). An agent sets it only for the operator's own words, from the sources and in the form AP-3 names (docs/specification/service.md#actions); an elicitation the person accepted is the service's own record, never this. action is the declared action's id and must be the called one; target, when present, the one object the operator named, which the service compares with the call's. A service reads at strictly (src/rfc3339.ts strictTime) and refuses decision-invalid a decision more than 60 s after its clock or more than 24 h before it.",
   "oneOf": [
     {
       "$ref": "#/$defs/operator"
@@ -86,11 +86,16 @@
           "description": "The level the holder decides at: at most the attestation's role (FAC-SEM-170)."
         },
         "org": {
-          "$ref": "org-membership.schema.json#/$defs/org",
+          "type": "string",
+          "maxLength": 132,
+          "pattern": "^org:[A-Za-z0-9][A-Za-z0-9_-]{0,127}$",
           "description": "The organization the level is in: the attestation's org (FAC-SEM-170)."
         },
         "project": {
-          "$ref": "org-membership-2.schema.json#/$defs/project",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$",
           "description": "The project the action acts in, required when level is architect and then among the attestation's projects (LV-4)."
         },
         "action": {
@@ -114,8 +119,8 @@
           "description": "When the holder decided: within AP-2's window and before the attestation's expiresAt (LV-4)."
         },
         "membership": {
-          "$ref": "org-membership-2.schema.json",
-          "description": "The holder's org-membership/2 attestation, whose audience is the service that reads it (LV-3)."
+          "type": "object",
+          "description": "The holder's org-membership/2 attestation (org-membership-2.schema.json), whose audience is the service that reads it; the service verifies it (verifyOrgMembership, levels: true) rather than this schema, so a consumer that vendors this schema vendors no membership schema (DEC-0162)."
         }
       },
       "if": {

@@ -322,7 +322,7 @@ unknown `_meta` member. An agent sets it only for words the operator gave it abo
 input request is answered as [C3.3](#c33-awaiting-a-choice) says. A request's `_meta` MAY carry `mandate` too, the
 operator's mandate for the task the call serves ([`mandate.schema.json`](../../schemas/mandate.schema.json),
 [delegation](delegation.md#the-operators-mandate), DEC-0125), and the hub's `agent.call` carries it as `call.mandate`,
-forwarded from a T0 or T1 origin and dropped from a T2 one, as a decision is.
+forwarded from a T0 or T1 origin and dropped from a T2 one, as a decision is, save a level mandate (`by: "level"`), which the hub forwards from any origin with the origin's delegation token ([membership](membership.md#levels) LV-6, DEC-0162).
 
 DEC-0121 adds three codes to DL-19's one set of authorisation refusals ([delegation](delegation.md#refusal-codes)),
 each in the `structuredContent` of an `isError` tool result:
@@ -333,8 +333,7 @@ each in the `structuredContent` of an `isError` tool result:
 | `decision-invalid` | the decision is not valid against its schema, names another action or another object, its `at` is not read strictly, is more than 60 s after the service's clock or more than 24 h before it; or the mandate is not valid (`data.detail` `mandate-*`, DEC-0125); a source hand-over answers as [source](source.md#handing-over) specifies (DEC-0149) | the service | corrects the decision it relays; an agent not sure the operator decided asks them (AP-3); for a source hand-over, as [source](source.md#handing-over) specifies |
 | `human-step-required` | the action is a step only the person takes (`gate: human`): sign-in, consent, payment, secret, spend above a limit, a passkey signature, a comparison of codes between two people or the choice to share without one | the service, with `error.data.humanStep` and `error.data.url`, the direct link to the step | hands the person that link |
 
-A `relayed` action from a T2 caller keeps [delegation](delegation.md#refusal-codes)'s `approval-required` (DL-17); its
-`_meta.decision` changes nothing; a source hand-over answers as [source](source.md#handing-over) specifies (DEC-0149).
+A `relayed` action from a T2 caller keeps [delegation](delegation.md#refusal-codes)'s `approval-required` (DL-17) unless a level decision or level mandate its delegation token binds stands at a service that reads levels ([membership](membership.md#levels) LV-6, DEC-0162); an operator's `_meta.decision` from it changes nothing; a source hand-over answers as [source](source.md#handing-over) specifies (DEC-0149).
 `actionDecision` in [`src/actions.ts`](../../src/actions.ts) is the reference, with
 the vectors [`actions.json`](../../fixtures/vectors/actions.json) (DEC-0121).
 
@@ -377,15 +376,13 @@ one estate the same arguments travel over the relay inside a sealed `fabric-agen
 `agentId` is a registry id — a provider id, or a service `id` optionally followed by
 `.instance`. The schema admits no field beyond these, `decision` and `mandate`, so a credential cannot ride in
 the arguments. `decision` is the operator's decision on a `relayed` action ([service](service.md#actions) AP-2): the hub
-forwards a T0 or T1 origin's to the callee as the hop's `_meta.decision`, unchanged, and drops a T2 origin's, which
-would change nothing there; it passes the callee's DL-19 refusals (`operator-decision-required`, `decision-invalid`,
+forwards a T0 or T1 origin's to the callee as the hop's `_meta.decision`, unchanged, and drops a T2 origin's operator decision, which would change nothing there, while it forwards a level decision (`by: "level"`) from any origin unchanged with the origin's delegation token, whose `mem` binds it (DEC-0162 LV-5, LV-6); it passes the callee's DL-19 refusals (`operator-decision-required`, `decision-invalid`,
 `human-step-required` with their `data`) back unchanged, never as a product error, and never answers a resend that
 carries a decision from what it remembered of the same call without one; the callee records the hub and the origin its
 delegation token names as the relaying caller (DEC-0121). The hub's own `fabric.job.get` forwards a T0 or T1 origin's
 `_meta.decision` to the callee the same way (DEC-0121). `mandate` is the operator's mandate for the task
 ([delegation](delegation.md#the-operators-mandate), DEC-0125), and the hub treats it as it treats `decision`: it
-forwards a T0 or T1 origin's to the callee as `_meta.mandate` (on `agent.call` and on its own `fabric.job.get`), drops
-a T2 origin's, passes the callee's refusals back unchanged and never answers a resend that carries a mandate from what
+forwards a T0 or T1 origin's to the callee as `_meta.mandate` (on `agent.call` and on its own `fabric.job.get`), drops a T2 origin's operator mandate and forwards a level mandate from any origin (DEC-0162), passes the callee's refusals back unchanged and never answers a resend that carries a mandate from what
 it remembered of the same call without one. The hub is not an agent of the chain: the origin appends the callee before
 it calls, and the callee compares the origin the hub's delegation token names, when one is present, with the agent
 before it; the hub's own id is never the caller's agent id for this check, and without a token the chain's end alone

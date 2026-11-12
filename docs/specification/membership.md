@@ -246,6 +246,7 @@ list come from them (DEC-0129):
 | the member list's own entry | the context's `iss` (DEC-0128), so the server can draft `org-authority/1`; the enrollment's `#sig` key it already holds from the enrollment | DEC-0129 |
 | an adaptation plan's organization part (TP-03) | what the person chose to bring into that organization (projects, history, results, schedules), by reference, the text the person typed for it (labels, the resources asked for, notes, purposes), and the person's requests to its administrators; never the plan's draft, its inventory or anything the person did not choose; sent as `org-adaptation/1` ([the adaptation plan](#the-adaptation-plan)) | DEC-0129, DEC-0138 |
 | a membership refresh | the audience and the subject the issuer gave | DEC-0127 |
+| a level attestation request | the audience a service's actions extension declares for that organization (`levels`), for the person's own `org-membership/2`, over the person's own authenticated session with the issuer; nothing about the service's call | DEC-0162 LV-5 |
 
 Personal work beyond the references the person chose, and the text they typed, in an adaptation plan (never content
 Fabric reads from the estate), another
@@ -529,7 +530,7 @@ its request, not the item the request names: changing an item's label or kind do
 decision grants nothing by itself: an access or a spend
 reaches the person only through the organization's own grants and budgets, and a granted `admin` role reaches the
 person as the role their attestation carries, the member list following when it is next drafted, which is display
-and routing, never authority (OL-6).
+and routing, never authority (OL-6; a level for decisions, LV-2).
 Authority to sign as an administrator comes only from a signing credential the person's Fabric registers for that
 organization alone, listed in a key set the owner's root signs once the owner confirms (OM-3); how a later
 administrator's credential reaches the owner's draft is CT-158.
@@ -573,53 +574,44 @@ vectors [`levels.json`](../../fixtures/vectors/levels.json).
   the operator's: the decision has its schema's form, names the called action and the target the call acts on, and was
   made within AP-2's window; it names the project the call acts in, when it names one; the attestation verifies
   (`verifyOrgMembership`, `levels: true`, under the key set the service applied for that organization's pinned root),
-  its `audience` is this service, its `status` is `active`, its role covers `level`, and for an architect the call's
-  project is among its `projects`; the decision was made before the attestation's `expiresAt`; and the call binds the
-  attestation to its caller (LV-5). An action in no project is decided only at `owner` or `admin`.
+  its `audience` is this service, its `status` is `active`, its role covers `level`, and the level covers the call: at least the level the service declares on the action (`level` in its actions extension, `owner` for a billing act, LV-7), at least `admin` for a call in no project, and for an `architect` attestation the call's project among its `projects` (an `owner` or an `admin` deciding at the `architect` level is bounded by the call's project alone); the decision was made before the attestation's `expiresAt`; and the call binds the attestation to its caller (LV-5). The service's own accepted elicitation is read before a level form at T0 or T1, as the operator's word (AP-2).
 - **LV-5, binding the attestation to the caller.** An attestation names a person's pairwise subject, not the caller, so
   a copy decides nothing by itself. A level decision or a level mandate is taken only from a call whose delegation token
   ([delegation](delegation.md) DL-13) carries the claim `mem`, the attestation's digest: the hub that mints the token
   writes `mem` only for an attestation it verified as its own principal's in that organization's context (OM-2). That
   holds at every tier: at T2 the token is required anyway (DL-8), and a T0 or T1 caller presents one when it carries a
   level (DL-26 lets it). A T0 or T1 call without a token keeps the operator's path (AP-2, MD-3), never a level. An
-  onward token keeps its parent's `mem` or none, never another (`FAC-SEM-050`).
+  onward token keeps its parent's `mem` or none, never another (`FAC-SEM-050`). **The route.** A service that reads levels declares `levels` in its actions extension (`service-actions-extension.schema.json`): each organization it reads them in and the audience that organization's issuer registered it by as an `org-membership/2` reader. Before calling it, the hub reads that declaration, asks the organization's issuer for its principal's `org-membership/2` for that audience over the principal's own authenticated session with the issuer (OM-7's row for a level attestation request), verifies it (OM-2), writes its digest as the token's `mem`, and the call carries the attestation in its level decision or level mandate; the hub forwards a level form from any origin ([interop](interop.md) C3.5).
 - **LV-6, what a level stands as.** Inside its scope (its organization, and for an architect its projects), at a
   service that reads levels: the operator's decision of AP-2 for a `relayed` action, at every tier; the `approval/1` of
   DL-17 and DL-18 for a T2 caller's effect, so a T2 caller with a bound level decision is not refused
   `approval-required`; the operator's word in a mandate, as a level mandate (`mandate/1` with `by: "level"`, `level`,
-  `org` and `membership`; an architect's lists its `projects` in its scope), which travels as MD-2 says and is taken
-  from a T2 caller too when its token binds it (MD-5 amended), covered calls recorded `via: mandate` with the level; and
+  `org` and `membership`; an architect's lists its `projects` in its scope), taken from a T2 caller too when its token binds it (MD-5 amended), covered calls recorded `via: mandate` with the level, and standing only at the service its attestation's audience names: handed on as MD-2 says to another service, it is refused `level-audience` there, so to engage another service the hub states a new level mandate with that service's attestation and a token whose `mem` binds it; and
   any approval a product asks before a step, as MD-3 says of a mandate. A level mandate's level stands only while the
   service accepts its attestation (LV-11), so it lives at most as long as that attestation; the hub states a new
-  mandate on a fresh one.
+  mandate on a fresh one. **Tasks and gates.** Inside its level and bound as LV-5 says, a level holder's words carry a task for the organization's own agents as the operator's do (DEC-0156 OW-1 and OW-6, on branch `agent/ct220-operators-word-v2` until it lands); a host's gate that takes AP-2's decision (Fabric's Agent access and board gates, OW-2's kept press) takes a bound level decision the same way, and every other ask stays (OW-2, OW-3, OW-5, OA-4). **Client keys.** A client key carries no `mem`, so no level stands for a client-key caller; issuing, rotating and revoking client keys stay the operator's (DEC-0159 CF-3, on branch `agent/ct218-local-cloud-v2` until it lands), and CF-4's twins of page answers take a bound level decision as AP-2's.
 - **LV-7, the bounds.** A level never covers what AP-4 and MD-6 keep for the person's body: a sign-in, a consent, a
   payment or top-up, a secret typed in or handed out, a passkey signature, a comparison of codes, spend above a limit.
   The money limits bind at every level (L0, the project's L1, each key's own ceiling). AP-5 and governance's approval
   separation hold: a holder's agent never approves its own promotion, grant, checker rule or policy change on its own
-  account. `change-policy` is decided by `owner` or `admin`, and by an `architect` only for a policy of one of its
+  account. A billing act (the organization's plan and payment method, its invoices, a change to L0, to the project's L1 or to a key's ceiling) is the `owner`'s, as the operator's decision of 2026-11-06 gives billing to the owner alone: the service declares it with `level: owner` on the action, and a lower level is refused `level-insufficient: owner`; a payment or top-up itself stays the person's step (AP-4). `change-policy` is decided by `owner` or `admin`, and by an `architect` only for a policy of one of its
   projects; no mandate covers it, a level mandate included (MD-3). A personal context has no levels: there the operator
   is the only approver and AP-2 is unchanged. A level of one organization decides nothing in another organization or in
-  a personal context. A level decision is not a person's word for a usage-data switch that person declined (DEC-0157
-  UD-4, on its branch `agent/ct216-usage-data-v2` until it lands) unless the level holder is that person's operator.
-- **LV-8, the user.** A `member`'s request carries no level decision. It goes through what the product provides: an
-  `approval/1` from a level holder, the service's own elicitation, or the operator's decision where the product is the
-  operator's. A product never turns a member's request into a level decision.
+  a personal context. A level decision is not a person's word for a usage-data switch that person turned off, unless the level holder is that person's operator; for a switch of a component the organization deploys, an `owner`'s or an `admin`'s level decision is the organization's word (DEC-0157 UD-4, on branch `agent/ct216-usage-data-v2` until it lands); the bar is the agent's, as UD-4 says, since a service cannot tell whose switch it is.
+- **LV-8, the user.** A `member`'s request carries no level decision. It goes through what the product provides: the member's own `approval/1` (DL-18) within what its grant covers, the service's own elicitation, a level holder's agent acting on the member's request under its own level decision, or the operator's decision where the product is the operator's. A product never turns a member's request into a level decision.
 - **LV-9, the record.** The service records `{by: "level", via, level, org, project?, approver, membershipDigest,
   revision, caller}` (`via` is `level-command` for a decision, `mandate` with the task and the chain for a mandate),
   `approver` being the attestation's pairwise `subject` and `caller` the identity the service authenticated, never one
-  the call names. As for AP-2, `instruction` stays in the service's own audit record and never reaches the events
+  the call names. The organization's issuer resolves `approver` to its member for that organization's `owner` and `admin` on its own page, so the record names who decided without a name in it (an operator question with this default, DEC-0162). As for AP-2, `instruction` stays in the service's own audit record and never reaches the events
   feed, a usage report or a page another party reads.
-- **LV-10, refusals.** No new error code. A level below what the call needs (an architect outside its projects, or a
-  call in no project) is `operator-decision-required` with `data.detail` `level-insufficient: admin`; the agent asks a
-  holder of that level, as MD-4 asks for the rest. A level decision or mandate that fails LV-4 or LV-5 is
+- **LV-10, refusals.** No new error code. A level below what the call needs is `operator-decision-required` with `data.detail` `level-insufficient: owner` (a billing act) or `level-insufficient: admin` (an architect outside its projects, or a level below `admin` on a call in no project); the agent files one request to a holder of that level in the organization (on the project board, or the product's own approval surface), whose own agent performs the act under its own level decision, recorded with that holder as approver. A level decision naming a project the call does not act in is `decision-invalid` with no detail. A level decision or mandate that fails LV-4 or LV-5 is
   `decision-invalid` with `data.detail` `level-membership: <problem>` (the verifier's problem name, `ended` for a
-  membership that ended), `level-unbound`, `level-audience`, `level-expired` or `level-role` (a level above the
-  attestation's role). A level decision whose own form, action, target, window or project fails is `decision-invalid`
+  membership that ended), `level-unbound`, `level-audience`, `level-expired` or `level-role` (a level above the attestation's role); an organization the service reads no levels in is `level-membership: context-invalid`. At T2 a refused level carries `data.actionDigest` too, so the caller may still take DL-18's route. A level decision whose own form, action, target, window or project fails is `decision-invalid`
   with no detail, as AP-2's. A service that reads no levels answers as if the call carried neither the decision nor the
   mandate: `operator-decision-required` from T0 or T1, `approval-required` from T2, which is safe: the agent falls back
   to the operator's decision.
 - **LV-11, ending.** A membership that ends or is suspended (OM-5, OM-6) ends its level at once: a decision or mandate
-  that carries an attestation the service no longer accepts is `decision-invalid`, even inside AP-2's window.
+  that carries an attestation the service no longer accepts is `decision-invalid`, even inside AP-2's window. The service keeps the attestation it accepted last per subject (OM-4), so an older active revision after a later `ended` one is `level-membership: stale-revision`.
 
 ## Semantic rules
 
@@ -640,7 +632,7 @@ vectors [`levels.json`](../../fixtures/vectors/levels.json).
   levels row, the roles' source of truth); the platform (PLAT-141, PLAT-146); Fabric's hub writes `mem` and its Agent
   access and board gates read levels (CO-523); Project Observatory (OBS-377), Switchboard (SB-291), Fabric Inbox
   (B-232), Fabric Dashboards (FD-164), the adapter's kits' `actionDecision` (FAA-249), the launcher (PC-162), the copy
-  service (AUTH-01) and every agent with `relayed` actions read level decisions and mandates and run
+  service (AUTH-01), the Telegram gateway's send approvals and every agent with `relayed` actions read level decisions and mandates and run
   `fixtures/vectors/levels.json`. Until a product adopts it, its agents keep treating an administrator's relayed command
   as the operator's under the operator's rule «one approval for all agents» (fabric-workspace `knowledge/authority.md`),
   which DEC-0162 does not change.
@@ -733,7 +725,7 @@ its relay (OX-6).
   role slot (CT-252), each its own decision reading LV-2's levels; calls only within an organization (CT-251), which
   bounds where a level can be presented; how the hub learns which audience a service is, to fetch the attestation it
   presents (beside attestation delivery above).
-- What each role may do in a reader beyond OL-6 (display and routing, never authority): the reader's. An administrator's signature to release a project from an
+- What each role may do in a reader beyond OL-6 (display and routing, never authority, save a level for decisions, LV-2): the reader's. An administrator's signature to release a project from an
   organization (MC-13) is not an attestation, and never a signature inside the member's estate. Fabric ADR-0180
   proposes a release statement an administrator's listed credential signs over a register challenge (as OL-2 signs a
   list), naming the organization, the project by the reference it came in with and a rising revision; the member's

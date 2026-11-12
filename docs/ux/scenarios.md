@@ -1034,6 +1034,26 @@ independent agent author and P-02 project operator.
 - **Coverage:** DEC-0121, DEC-0150 CA-8 (owed: each producer's own test (adoption rows)), `actionDecision` in `src/actions.ts` (`FAC-SEM-142`), `fixtures/vectors/actions.json`, `fixtures/semantic/action-call-*`, `test/actions.test.ts`
 - **Product:** unobserved
 
+### SCN-060: As my organization's administrator, my agent's command runs at the organization's services without an approval
+
+- **Persona:** P-03
+- **Feature:** delegation
+- **Traces:** ST-035, FLW-29 (JTBD-07, JRN-06/#3)
+- **Entry point:** an organization administrator's chat with their own coding agent
+- **Preconditions:** the organization's issuer issues `org-membership/2` and registered `example-publisher` as a `/2` reader; `example-publisher` declares under `extensions/actions/0.1` the action `approve-reply` (`gate: relayed`) and `levels` (that organization and its audience at the issuer); the administrator's hub writes `mem`
+- **Steps:**
+  1. The administrator writes to their agent "approve the reply to the review from Anna" -> the hub fetches the administrator's `org-membership/2` for `example-publisher`'s declared audience, verifies it, and mints a token whose `mem` is its digest.
+  2. The agent calls `reviews.approve` with a level decision `{by: level, via: level-command, level: admin, org, action: approve-reply, target, instruction, at, membership}` -> the service verifies the attestation for its audience, active, its role covering `admin`, bound by `mem`: the administrator's decision, at T2 as at T0.
+  3. The service approves the reply -> its audit records the level, the organization, the approver (the attestation's pairwise subject, which the issuer's page resolves for the organization's administrators) and the caller it authenticated.
+- **Expected result:** the reply is approved once with no approval asked of anyone, recorded with the administrator as approver; the administrator never opened the page.
+- **Alt paths:** an architect of project alpha decides an action in project beta -> `operator-decision-required` with `level-insufficient: admin`; the agent files one request to an administrator, whose own agent acts under its own level decision. An administrator changes the organization's plan (`level: owner` on the action) -> `level-insufficient: owner`; the owner's agent does it, and a payment stays the person's step. A member asks -> no level; the product's own approval decides. A service that reads no levels -> answered as if no level were sent: the operator's decision path (`operator-decision-required` from T0 or T1, `approval-required` from T2). The membership ended this morning -> `decision-invalid` with `level-membership: ended`, even inside the day. A payment or a sign-in -> `human-step-required` with its link.
+- **UI elements:** none on the page; the agent's chat and the service's audit row (by level, level, approver, relayed by).
+- **States covered:** success, error
+- **Errors & recovery:** a copied attestation without the token's `mem` -> `level-unbound`; an attestation for another service -> `level-audience`; the agent asks its hub for a fresh, bound one.
+- **Status:** draft
+- **Coverage:** DEC-0162 LV-1 to LV-11, `actionDecision` in `src/actions.ts`, `levelStanding` in `src/levels.ts` (`FAC-SEM-169`, `FAC-SEM-170`), `fixtures/vectors/levels.json`, `test/levels.test.ts`
+- **Product:** unobserved
+
 ### SCN-044: Open a service's page from my agent: in Fabric Dashboards, never a raw address
 
 - **Persona:** P-02

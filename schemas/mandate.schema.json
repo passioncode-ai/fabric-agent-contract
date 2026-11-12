@@ -35,12 +35,14 @@
       "description": "With by level: the level the holder gives the mandate at, at most the attestation's role; an architect's mandate lists projects in its scope, each among the attestation's (FAC-SEM-170)."
     },
     "org": {
-      "$ref": "org-membership.schema.json#/$defs/org",
+      "type": "string",
+      "maxLength": 132,
+      "pattern": "^org:[A-Za-z0-9][A-Za-z0-9_-]{0,127}$",
       "description": "With by level: the organization the level is in, the attestation's org."
     },
     "membership": {
-      "$ref": "org-membership-2.schema.json",
-      "description": "With by level: the holder's org-membership/2 attestation for the service the chain ends in; the mandate's level stands only while the service accepts it (LV-11), so a level mandate lives at most as long as its attestation."
+      "type": "object",
+      "description": "The holder's org-membership/2 attestation (org-membership-2.schema.json), whose audience is the service that reads it; the service verifies it (verifyOrgMembership, levels: true) rather than this schema, so a consumer that vendors this schema vendors no membership schema (DEC-0162)."
     },
     "task": {
       "type": "string",

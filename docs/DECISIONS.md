@@ -11390,8 +11390,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-11-12
 - **Status:** Proposed 2026-11-12, from the design `docs/evidence/plans/2026-11-12-ct250-authority-levels.md` (CT-250),
   the operator-question defaults taken as the design states them; accepted when the coordinator's blind readings are
-  clean on two consecutive rounds. It adds a membership type, a decision form, a mandate form, a token claim and two
-  rule codes (`FAC-SEM-169`, `FAC-SEM-170`); nothing existing changes meaning.
+  clean on two consecutive rounds; round 1 (2026-11-12) was clean on no tier and is folded. It adds a membership type, a decision form, a mandate form, a token claim, two members of the actions extension (`levels`, an action's `level`) and two rule codes (`FAC-SEM-169`, `FAC-SEM-170`); nothing existing changes meaning. The operator's questions with their defaults (below) are open to an answer until 2026-11-21, the organization slice.
 - **Context:** the operator decided four access levels on 2026-11-06 (fabric-workspace session `74a9440a`, relayed on
   board threads `eefa7959`, message `23746581`, and `8bd78e76`; recorded verbatim in fabric-workspace
   `knowledge/authority.md`, *Access levels: who approves*, at `73171ed0`): the organization's owner, the organization's
@@ -11417,27 +11416,32 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      architect. A service that reads levels takes it, at every tier, when the decision is for the called action and
      target, within AP-2's window, naming the call's project when it names one; the attestation verifies for this
      service's audience under the organization's applied key set, is active, covers the level and, for an architect,
-     the call's project; the decision was made before the attestation's `expiresAt`; and the token binds it (item 4).
+     the call's project; the decision was made before the attestation's `expiresAt`; and the token binds it (item 4). The level covers the call when it is at least the level the service declares on the action (`level`, `owner` for a billing act), at least `admin` for a call in no project, and, for an `architect` attestation, the call's project is among its `projects`; an owner or an admin deciding at the architect level is bounded by the call's project alone. The service's own accepted elicitation at T0 or T1 is read first, as the operator's word.
   4. **Binding (LV-5).** `delegation-token.schema.json` gains the optional claim `mem`, an attestation's digest the hub
      writes only for its own principal's attestation (OM-2); an onward token keeps the parent's `mem` or none
      (`FAC-SEM-050`). A level is taken only from a call whose verified token carries the attestation's digest as `mem`;
-     a T0 or T1 caller presents a token to carry a level (DL-26) and without one keeps the operator's path.
+     a T0 or T1 caller presents a token to carry a level (DL-26) and without one keeps the operator's path. The route: a service declares `levels` in its actions extension (each organization and the audience its issuer registered it by); the hub reads it, asks the issuer for its principal's `org-membership/2` for that audience over the principal's own session (a new OM-7 row), verifies it and writes `mem`; the hub forwards a level form from any origin (interop C3.5 amended), dropping only a T2 origin's operator forms.
   5. **What a level stands as (LV-6).** The operator's decision of AP-2, the `approval/1` of DL-17 and DL-18 for a T2
      caller, and the operator's word in a mandate: `mandate/1` takes `by: "level"` with `level`, `org` and
-     `membership` (an architect's scope lists its `projects`), taken from any tier when bound (MD-3; MD-5 amended), and
-     lives at most as long as its attestation.
-  6. **Bounds, the user, the record, refusals, ending (LV-7 to LV-11).** No level covers a human step, spend above a
-     limit, a personal context or another organization; `change-policy` is decided by `owner` or `admin`, and by an
+     `membership` (an architect's scope lists its `projects`), taken from any tier when bound (MD-3; MD-5 amended), lives at most as long as its attestation, and stands only at the service its attestation is for: to engage another service the hub states a new one.
+  6. **Bounds, the user, the record, refusals, ending (LV-7 to LV-11).** No level covers a human step, spend above a limit, a personal context or another organization; a billing act (the plan, the payment method, invoices, a change to L0, L1 or a key's ceiling) is the `owner`'s, as the operator's decision of 2026-11-06 gives billing to the owner alone; `change-policy` is decided by `owner` or `admin`, and by an
      architect only in its projects, never by a mandate; approval separation holds for a holder's agent. A member's
      request carries no level. The record is `{by: "level", via, level, org, project?, approver, membershipDigest,
      revision, caller}`, `approver` the attestation's pairwise subject, `instruction` in the service's own audit only.
-     No new error code: `operator-decision-required` with `level-insufficient: admin`; `decision-invalid` with
+     No new error code: `operator-decision-required` with `level-insufficient: owner` or `level-insufficient: admin` (the agent files one request to a holder of that level, whose own agent acts under its own level decision); `decision-invalid` with
      `level-membership: <problem>`, `level-unbound`, `level-audience`, `level-expired` or `level-role`; a service that
-     reads no levels answers as if the call carried no decision or mandate. An ended or suspended membership ends its
-     level at once.
+     reads no levels answers as if the call carried no decision or mandate; from T2 a level refusal carries the action's digest too. An ended or suspended membership ends its level at once, and the service keeps the attestation it accepted last per subject. The organization's issuer resolves `approver` for the organization's owner and administrators.
   7. **The reference.** `src/levels.ts` (`levelStanding`, `levelRules` for `FAC-SEM-170` on kinds `decision` and
      `mandate`), read by `actionDecision` (inputs `levels` and `tokenMem`) and `mandateCovers`; the vectors
-     `fixtures/vectors/levels.json`, written by `tools/vectors/levels.ts`.
+     `fixtures/vectors/levels.json`, written by `tools/vectors/levels.ts`; the scenario SCN-060.
+  8. **Tasks, gates and keys.** Inside its level and bound as item 4 says, a level holder's words carry a task for the
+     organization's own agents as the operator's do under DEC-0156 OW-1 and OW-6 (OW-6 reading "the operator's or, in an
+     organization, a level holder's within LV-2"); a host's gate that takes AP-2's decision (Fabric's Agent access and
+     board gates, OW-2's kept press) takes a bound level decision the same way, and every other ask stays (OW-2, OW-3,
+     OW-5, OA-4); CT-266 is decided with it. A client key carries no `mem`, so no level stands for a client-key caller:
+     issuing, rotating and revoking client keys stay the operator's (DEC-0159 CF-3), and CF-4's twins of page answers
+     take a bound level decision as AP-2's. Whichever of DEC-0156, DEC-0159 and this decision lands second restates its
+     texts to agree (the handoff's landing notes).
 - **Why:** the operator's decision makes an owner's, an administrator's and an architect's word the operator's within
   their scope; a signed, short-lived, audience-bound attestation from the organization's own issuer is the only proof
   of a role the contract already verifies, and binding it to the caller through the hub's token keeps a copied
@@ -11449,23 +11453,19 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   delegation travelling to other products (refused, design question 6: it stays inside that product, and what travels
   is the level decision and a `mandate/1`); `projects` present only for an architect, as the design first said
   (refused: OM-1 and the signing register keep every member present, so it is always present and empty for others); a
-  level mandate with its own `project` (refused: its scope's `projects` already names where it acts).
+  level mandate with its own `project` (refused: its scope's `projects` already names where it acts); the design's single `level-insufficient: <level>` (refused for two details, `owner` and `admin`, the only levels a call can need beyond an architect's own); the level mandate's record without `project` (refused: it carries the call's project when there is one); a level form outranking the service's own accepted elicitation (refused: the elicitation is the operator's word, read first).
 - **Compatibility:** additive. A `/1` reader never receives `/2` and refuses it if it does; a service that reads no
   levels answers a level form as if absent, so its callers fall back to the operator's decision. Read on 2026-11-12:
   no product issues `/2` or writes `mem` yet. Owed: the organization product issues `/2` to the readers it registers
   (its levels row); Fabric's hub writes `mem` and its Agent access and board gates read levels (CO-523); every service
   with `relayed` actions reads level decisions and mandates (the adapter's kits FAA-249, Project Observatory OBS-377,
   Switchboard SB-291, Fabric Inbox B-232, Fabric Dashboards FD-164, the launcher PC-162, the copy service AUTH-01, the
-  platform PLAT-141 and PLAT-146). Until a product adopts it, its agents keep treating an administrator's relayed
-  command as the operator's under «one approval for all agents» (`knowledge/authority.md`), which this decision does
-  not change. The design's operator questions take their defaults: a level stands for a source hand-over for an
-  organization's own agents with the exact target (DEC-0149), an architect may change its own projects' policies, 64
-  projects per attestation, no billing level beyond `admin`, no level without a token, and no traveling product
-  delegation; the operator may answer otherwise.
+  platform PLAT-141 and PLAT-146). Until a product adopts it, fabric-workspace's interim reading (`knowledge/authority.md`, «one approval for all agents») is that product's own; under the contract an agent sets `by: operator` only for the operator's words (AP-3). The level form's schemas reference no membership schema (`org` and `project` patterns inline, `membership` an object the service verifies), so a consumer that vendors `decision.schema.json` or `mandate.schema.json` vendors nothing new. The design's operator questions take their defaults: a level stands for a source hand-over for an
+  organization's own agents with the exact target (DEC-0149), an architect may change its own projects' policies, 64 projects per attestation, no level without a token, no traveling product delegation, and the issuer resolving `approver` for the organization's owner and administrators (question 7); question 4 is answered by the operator's record (billing is the owner's alone), and asks only whether an administrator may change L1 within an estate total the owner set (default: no); the operator may answer otherwise until 2026-11-21.
 - **Consequences / affects:** `schemas/org-membership-2.schema.json` (new), `schemas/decision.schema.json` (the level
   form), `schemas/mandate.schema.json` (`by: "level"`), `schemas/delegation-token.schema.json` (`mem`);
   `src/org-membership.ts`, `src/signing-challenges.ts`, `src/levels.ts` (new), `src/actions.ts`, `src/mandate.ts`,
-  `src/delegation.ts`, `src/delegation-rules.ts`, `src/semantic-kinds.ts`, `src/semantic-rules.ts`,
+  `src/delegation.ts`, `src/delegation-rules.ts`, `src/semantic-kinds.ts`, `src/semantic-rules.ts`, `schemas/service-actions-extension.schema.json` (`levels`, an action's `level`), `schemas/interop-agent-call.schema.json` and `interop-request-meta.schema.json` (descriptions), `docs/specification/interop.md` (C3.5 and the actions section), `docs/ux/scenarios.md` (SCN-060) and `screens.md`, `CONTEXT.md` (Level, Mandate),
   `src/protocol-revisions.ts` (`org-membership` 1 and 2); `fixtures/vectors/levels.json`, `tools/vectors/levels.ts`,
   `test/levels.test.ts`, positive, negative and semantic fixtures; `docs/specification/membership.md` (`/2`, OL-6,
   *Levels*, rules, adopters, not decided), `service.md` (AP-2 to AP-5 and the `actionDecision` table), `delegation.md`

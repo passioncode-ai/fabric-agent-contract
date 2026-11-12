@@ -474,7 +474,7 @@ departures) is an act of effect class `publish` (`schemas/common.schema.json`), 
 ([external effects](governance-and-roles.md#external-effects)). The hand-over action declares the gate `relayed`
 ([actions](service.md#actions), DEC-0121).
 
-**The rule.** A hand-over is taken only on the operator's word naming the agent, the target (the source commit, or
+**The rule.** A hand-over is taken only on the operator's word (or, for an organization's own agent, a level decision as below) naming the agent, the target (the source commit, or
 the repository for the two organization acts below: making a private organization agent's source public by a
 visibility change, and giving it new readers outside the organization) and the recipient, in one of three forms and in no other: on a
 service's action, the decision with its exact target or the service's in-call elicitation (both below); outside a
@@ -520,16 +520,14 @@ token needs none ([DL-26](delegation.md#trust-tiers)).
 - **An invalid decision** from a T0 or T1 caller is refused `decision-invalid`, and the operator is never elicited for
   that call; the refusal carries exactly one `error.data.detail`, the first that applies in this order: (a) a fault AP-2 finds itself (an `at` out of its window, another action's id, a
   schema fault): `decision-ap2`, since AP-2 names no detail of its own; (b) no `target`: `decision-without-target`;
-  (c) a `target` other than the exact string: `decision-target-unbound`; (d) a decision already consumed:
-  `decision-consumed`. A `decision-consumed` refusal means an effect may have begun under that word: the session
+  (c) a `target` other than the exact string: `decision-target-unbound`; (d) a decision already consumed: `decision-consumed`; (e) a level decision that fails LV-4 or LV-5: its LV-10 detail ([membership](membership.md#levels), DEC-0162). A `decision-consumed` refusal means an effect may have begun under that word: the session
   reports the outcome as unknown and never asks the operator for a new word for the same act.
 - **No word.** A T0 or T1 caller with neither form and no decision gets `operator-decision-required` with the detail
   `handover-needs-operator`; a service that can elicit from that caller's client asks the operator instead, once per
   call; a cancelled or unanswered elicitation (a client that cannot show it to a person cancels it) is refused the same
   way (`handover-needs-operator`) and not asked again within that call, and a decision with the exact target may follow
   in the same task. A person who declines gives the operator's no, refused `operator-decision-required` with its own
-  detail, `handover-declined`: the caller does not ask again within this task and reports to the coordinator. A T2 caller gets
-  `operator-decision-required` with the detail `handover-needs-estate-route` whatever it carries, and is not asked: its decision is no decision (AP-2), and its remedy is that the operator acts through a T0
+  detail, `handover-declined`: the caller does not ask again within this task and reports to the coordinator. A T2 caller gets `operator-decision-required` with the detail `handover-needs-estate-route` whatever it carries, a level decision included (a level stands for a hand-over only where the holder's agent is T0 or T1 to that service, DEC-0162), and is not asked: its decision is no decision (AP-2), and its remedy is that the operator acts through a T0
   or T1 route. A T2 caller that reaches the action has passed DL-13 with a delegation token (a caller no rule places is
   T2 by default, and one the relay cannot place is refused before the action, [DL-28](delegation.md#trust-tiers),
   [machine calls](machine-calls.md#the-t1-binding-over-the-relay)), so the T2 case has this one code for the word; the

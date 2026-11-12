@@ -625,9 +625,9 @@ it reaches acts on them without asking, within what they cover.
   "level"`, DEC-0162) is a level holder's words in an organization, carrying `level`, `org` and the holder's
   `org-membership/2` attestation (`membership`); a callee that reads levels takes it from any tier, after every check
   above, when the call's token binds the attestation by `mem` and the holder's level covers the call (an architect's,
-  the call's project among its projects), and records `{by: "level", level, org, approver, membershipDigest, revision,
-  via: "mandate", task, chain}` ([membership](membership.md#levels) LV-6, LV-9, LV-10); a callee that reads no levels
-  answers as if the call carried no mandate.
+  the call's project among its projects), and records `{by: "level", level, org, approver, membershipDigest, revision,  via: "mandate", task, chain}` ([membership](membership.md#levels) LV-6, LV-9, LV-10); it stands only at the service its
+  attestation's audience names, so handed on to another it is refused `level-audience` and the hub states a new one
+  for that service; a callee that reads no levels answers as if the call carried no mandate.
 - **MD-4, asking only for the rest.** A call the mandate does not cover is refused `operator-decision-required` with
   `data.detail` `outside-mandate: <action|capability|effect|spend|project>`, naming the first part not covered, and for
   spend `estimateUsd` and `perCallMaxUsd`; a job's step it does not cover waits `input_required`, naming the part. The

@@ -382,7 +382,7 @@
 - **Elements:** the agent's reply (what it called, the service's answer, a link to hand over for a human step, a service's page as its `open_link`; where Fabric Dashboards is not installed, or unsupported on this system, and the service's listener is another OS account's, or its owner cannot be told, the `foreign-user` line for that case, "Another account on this computer is using this service's port; nothing was sent to it." or "This computer would not say who is using this service's port; nothing was sent to it.", and nothing opened, DEC-0154 HA-2); the audit row (decided by, via, relayed by the authenticated caller, when; under a mandate also the task, the chain and the operator's words, for the operator's own view; for a relayed approval also where the operator said it, `source`, DEC-0126).
 - **States:** success, the action taken as the operator's; error, `operator-decision-required`, `decision-invalid` or `human-step-required` with its link; error, `foreign-user`: no service card is on the agent's path, so the reply itself shows the line and opens nothing.
 - **Coverage:** `src/actions.ts` (`actionDecision`, `FAC-SEM-142`), `test/actions.test.ts`; `foreign-user`: owed by CT-229
-- **Scenarios:** SCN-043, SCN-044, SCN-045, SCN-046
+- **Scenarios:** SCN-043, SCN-044, SCN-045, SCN-046, SCN-060
 - **Resources:** service specification, Actions
 - **Status:** proposed
 

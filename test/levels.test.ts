@@ -91,7 +91,7 @@ describe("levelStanding and FAC-SEM-170 at their edges (DEC-0162)", async () => 
     const flags = (kind: string, value: Json) => (levelRules(kind, value) ?? []).map((f) => f.instancePath);
     expect(levelRules("org-membership", {})).toBeUndefined();
     expect(flags("decision", { by: "level", level: "boss", org: "org:org-a", at: "2026-10-25T11:20:00Z", membership: { ...admin, role: "guest" } })).toEqual(["/level"]);
-    expect(flags("decision", { by: "level", level: "architect", org: "org:org-a", project: "alpha", at: "2026-10-25T11:20:00Z", membership: { ...admin, projects: "alpha" } })).toEqual(["/membership/projects"]);
+    expect(flags("decision", { by: "level", level: "architect", org: "org:org-a", project: "alpha", at: "2026-10-25T11:20:00Z", membership: { ...admin, projects: "alpha" } })).toEqual([]);
     expect(flags("mandate", { by: "level", level: "admin", org: "org:org-a", at: "2026-10-25T11:20:00Z", membership: admin, scope: "all" })).toEqual([]);
     expect(evaluateSemanticRules("mandate", { kind: "x" }).map((f) => f.code)).toEqual(["FAC-SEM-144"]);
   });
