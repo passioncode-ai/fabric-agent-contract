@@ -26,12 +26,24 @@ Branch `agent/ct259-activity-unit-20261112`, from main `d69dc363`. Entry point: 
 - Ask the assessment's owner on the board for the draft writer's mapping (`activity-event/0-draft`, in
   company-assessment-agent and the agents database's template): `urn:jira:KEY` evidence, `unit {system, key}`, no
   `org`, a named `agent`, and which writer holds `run.root` for an acceptance observed outside the run.
-- The knowledge base's `knowledge/system/measure.md` still describes the draft (`org`, `accepted_by`): rewrite it to
-  DEC-0164 in fabric-workspace when this lands, then the workspace sync.
+- The knowledge base's `knowledge/system/measure.md` still describes the draft (`org`, `accepted_by`, `cost_usd`, one
+  record per unit): rewrite it to DEC-0164 in fabric-workspace when this lands (no `org`; `acceptedBy` pairwise;
+  `cost` the spend since the previous transition, summed, an attribution never added to usage; `acceptedAt` the month
+  key, a reopened unit accepted again counting in both months; the member-list threshold of 3 beside the data room's
+  roster as the denominator; G1-e's role cut waiting on OQ-0018; held transitions dropped by design), then the
+  workspace sync. Check: `git -C fabric-workspace grep -c 'accepted_by\|cost_usd' origin/main -- knowledge/system/measure.md` prints 0 and `git -C fabric-workspace grep -c 'OQ-0018\|role cut' origin/main -- knowledge/system/measure.md` at least 1.
+- Landing notices beyond Observatory and the assessment: the PM agent's owner (its digest reads a colleague's person
+  acceptance only under a purpose that colleague confirmed, without cost, logged per recipient); Fabric Dashboards
+  (FD-165: it writes no unit without `run.root` and the key form, names no organization in the event, and sends spend
+  as usage lines, never as unit cost); the adapter (FAA-269's wait re-pointed from OBS-378 to DEC-0164); the assessment's
+  two draft writers map one Jira issue to `{system: jira, key: <issue key>}` (company-assessment-agent writes `jira:`,
+  the agents database's template `tracker:`, which would split one issue into two units); and the run of DEC-0157
+  (`agent/ct216-usage-data-v2`), whose own handoff does not carry the UD-6 note below, so it is sent to that run on the
+  board when this lands first.
 - Landing note with DEC-0157 (`agent/ct216-usage-data-v2`): UD-6 describes activity telemetry as sessions sent by an
   enrolled device; whichever lands second restates it by kind and channel as activity's opening now does (check:
   `awk '/\*\*UD-6/,/\*\*UD-7/' docs/specification/usage-data.md | grep -c 'unit'` prints at least 1 on the merged tree).
-- Operator questions, not decided here (to post on thread `52aa2f93` with the landing notice): whether a one-person
+- Operator questions, registered as OQ-0015 to OQ-0018 in `docs/OPEN_QUESTIONS.md` (the landing renumbers them if `agent/ct216-usage-data-v2`'s OQ-0013 and OQ-0014 have not landed first) and to post on thread `52aa2f93` with the landing notice: whether a one-person
   project inside a larger organization is served (default: yes; a unit cell needs an organization whose member list
   names at least 3 members, as Observatory's J4 counts, AE-3), whether a role cut is a permitted cell (default: no), the
   access-log scope a read of a person acceptance is logged under (default `activity.raw`), the notice purpose a unit
@@ -116,6 +128,19 @@ Branch `agent/ct259-activity-unit-20261112`, from main `d69dc363`. Entry point: 
   measured to the millisecond; the repeated-write test puts the two copies in one batch (`FAC-SEM-039`). Declined:
   rebasing on main now (the branch is pushed and is never force-pushed; the lander merges main as the step above says).
 
+- Round 6 (on `a7e12111`): unit failed, seam failed, product failed, on the same key-form break. Breaks folded: the
+  page cites `taskRef.key`'s pattern (an underscore included) and a form that does not fit it, a github key over 64
+  characters included, takes the 40-digit digest (two vectors); the reader's conformance row restated from the page;
+  the personal-data section and `retention.raw_days` name a unit with a person acceptance on any channel, the server
+  layer governing a unit no device wrote, and the person-free counts that outlive retention; the role cut is OQ-0018
+  (default none) in the page and AE-3, with G1-e in the measure.md note; the person acceptance's subject is one phrase
+  everywhere (OQ-0017's audience, any audience resolved), SCN-010 and FLW-06 in the plural. Risks folded: `FAC-SEM-171`
+  refuses a github key outside lower-case `<owner>:<repo>#<number>` or its digest, and a mail key not a digest (two
+  vectors); the OTLP export gives a unit's cost its own attribute and does not export a person acceptance; the PM
+  agent's digest is logged per recipient, so `FAC-SEM-067` holds; the member count is the organization server's,
+  DEC-0129 cited, the list in force on the period's last day; OQ-0015 to OQ-0018 registered; landing notices for the
+  PM agent's owner, FD-165, FAA-269, the jira/tracker split and DEC-0157's run. Declined: none.
+
 ## Next task
 
-Round 6 of the blind readings (unit, seam, product) of branch `agent/ct259-activity-unit-20261112` (DEC-0164).
+Round 7 of the blind readings (unit, seam, product) of branch `agent/ct259-activity-unit-20261112` (DEC-0164).

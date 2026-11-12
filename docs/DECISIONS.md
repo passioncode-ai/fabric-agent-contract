@@ -11411,9 +11411,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      recorded before it happened).
   3. **AE-3.** No user is attached to a unit, no unit is served by person (units only in agent, project or
      task-class cells and the organization's total, of an organization whose signed member list names at least 3
-     members, as `result`, never by role or person; a one-person project inside a larger organization is served, the
-     operator's open question), and a `person` acceptance stays in the organization's own journal, a read of it logged
-     in that person's access log under a purpose the person confirmed; a unit with a person acceptance is personal data
+     members, as `result`, never by person, by role only once OQ-0018 allows it; a one-person project inside a larger organization is
+     served, OQ-0015), and a `person` acceptance stays in the organization's own journal, a read of it logged
+     in that person's access log under a purpose the person confirmed (OQ-0016; the subject's audience OQ-0017); a unit with a person acceptance is personal data
      whatever channel wrote it.
   4. **AE-4.** A device collector sends it in its batches, to the enrollment of the organization that owns its
      `project.id` by the device's folder attribution (never for a personal or unattributed project; the route

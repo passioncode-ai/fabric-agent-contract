@@ -7,7 +7,7 @@ No open questions remain from stage 0. Later stages reserve `OQ-####` before add
 an entry. The coordination config declares no `OQ` id register, so an id is taken
 under the lease on this file, from the line below.
 
-**Next free ID:** `OQ-0013`
+**Next free ID:** `OQ-0019` (`OQ-0013` and `OQ-0014` are taken on branch `agent/ct216-usage-data-v2`)
 
 The seven questions below were raised by module AR-1 (DEC-0016) about the contracts
 Fabric locked on 2026-09-29. Each names the part that is implemented and the part that
@@ -190,3 +190,31 @@ ruling; DEC-0017 states what holds now.
   `outcome-unknown`, the caller's act (`jobCallerAction`), the intent's key (`intentIdempotencyKey`), the provider's
   answer to a repeated key, `null` and `partial` in `usage` under the revision `fabric-interop/0.2` a caller names in
   `_meta.protocols`; `FAC-SEM-119`, `FAC-SEM-120`. C4 stays adapter guidance.
+
+### OQ-0015 — Is a one-person project's unit count served inside a larger organization?
+
+- **Status:** Open
+- **Raised:** 2026-11-12, DEC-0164 (CT-259) blind readings
+- **Question:** Units are served only for an organization whose signed member list names at least 3 members ([activity](specification/activity.md#kinds), DEC-0164 AE-3). Inside such an organization a project with one member has a project cell that is that person's agents' output. Serve it, or fold it into the organization's total?
+- **Meanwhile:** served (the default), as Observatory's journal counts it; the operator answers before the first monthly number is published.
+
+### OQ-0016 — Under which access-log scope is a read of a person acceptance logged?
+
+- **Status:** Open
+- **Raised:** 2026-11-12, DEC-0164 (CT-259) blind readings
+- **Question:** A read of a unit whose `acceptedBy` is a person is logged in that person's access log. Under `activity.raw` (which `FAC-SEM-067` narrows to a purpose the person confirmed, served without cost) or a scope of its own?
+- **Meanwhile:** `activity.raw`.
+
+### OQ-0017 — Which audience's pairwise subject does a person acceptance carry?
+
+- **Status:** Open
+- **Raised:** 2026-11-12, DEC-0164 (CT-259) blind readings
+- **Question:** A member holds one pairwise subject per (organization, audience) (OM-1). A unit can reach the organization's journal and Observatory's local journal; which audience's subject does a writer put in `acceptedBy.ref`?
+- **Meanwhile:** the organization's own journal's audience; a receiver resolves any audience's subject it issued for that member.
+
+### OQ-0018 — Is a cut of units by role a permitted cell?
+
+- **Status:** Open
+- **Raised:** 2026-11-12, DEC-0164 (CT-259) blind readings
+- **Question:** The North Star plan (fabric-workspace `knowledge/system/measure.md`, step G1-e) shows the metric per role cut (G26). DEC-0164 serves units only by agent, project, task class and the organization's total. Is a role cut permitted, and with what minimum?
+- **Meanwhile:** no role cut is served; G1-e's role view waits for the answer.

@@ -306,6 +306,13 @@ function unitEvent(event: JsonObject, at: string): Finding[] {
     try { derived = unitSourceKey(d.agent, { system: unit.system, key: unit.key }, d.transition, run.root); } catch { flag("/sourceKey", "a unit with a lone surrogate has no canonical form, so no sourceKey derives from it"); }
     if (derived !== null && event.sourceKey !== derived) flag("/sourceKey", "a unit event's sourceKey derives from its agent, unit, transition and run.root (unitSourceKey)");
   }
+  // AE-2: the key forms the page fixes, so two writers of one unit derive one id: a github key is lower-cased
+  // `<owner>:<repo>#<number>` or, over the key's 64 characters, the first 40 hex digits of its SHA-256; a mail key is that
+  // digest of the Message-ID.
+  const DIGEST_KEY = /^[0-9a-f]{40}$/;
+  if (typeof unit.key === "string" && ((unit.system === "github" && !/^[a-z0-9-]+:[a-z0-9._-]+#[0-9]+$/.test(unit.key) && !DIGEST_KEY.test(unit.key)) || (unit.system === "mail" && !DIGEST_KEY.test(unit.key)))) {
+    flag("/data/unit/key", `a ${unit.system} unit's key takes the form the activity page fixes for it (lower case), so every writer derives one id`);
+  }
   // A leap second (`:60`), which the date-time format admits and Date.parse does not, reads as the last millisecond
   // before the next minute, so the bound moves by at most a millisecond on either side.
   const instant = (time: string) => Date.parse(time.replace(/:60(?:\.\d+)?(?=[Zz]|[+-]\d)/, ":59.999"));
