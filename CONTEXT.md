@@ -157,6 +157,15 @@ delegation token carries the authority. A job's step is read under the job's cap
 `mandateCapability`) (`mandateCovers`, [delegation](docs/specification/delegation.md#the-operators-mandate), DEC-0125).
 A mandate never covers a **Source hand-over** ([source](docs/specification/source.md#handing-over), DEC-0149).
 
+**Autonomy profile**: Which acts an agent finishes end to end without a person at one place (a machine, an OS space,
+a VM, a cloud), set per place by the operator or, in an organization, a level holder within its level, never a
+constant. The place's hub holds it at a rising revision and states it, for each assignment it starts there, as a
+**standing mandate** (`mandate/1` with `standing`: the place, `headless` or `person`, the revision), at most a day
+long; a callee that declares `standing` takes it as a task's mandate inside the boundary and, from T2, only when the
+assignment token's `prof` binds it. No profile covers a human step, spend above a limit, a source hand-over or
+setting a profile (`autonomy.profile.set`) ([delegation](docs/specification/delegation.md#a-places-standing-mandate-dec-0166),
+DEC-0166 AU-1 to AU-7). Not a spend level (L0 to L3) and not an authority level.
+
 **Relayed approval**: The operator's approval, given in one agent's session, carried to another of their agents by a
 relay: the words verbatim, when and where they were said (`source`: the project, and the session or the board thread)
 and the approved scope. Accepted only from one of the operator's own Projects on their board or a session on their own

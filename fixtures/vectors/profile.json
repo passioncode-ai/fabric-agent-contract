@@ -1,0 +1,1152 @@
+{
+  "about": "Vectors for a place's autonomy profile, a standing mandate (mandate/1 with standing, DEC-0166), written by tools/vectors/profile.ts, never by hand. actions: actionDecision's answer for each input (a service declaring standing passes standing: true; tokenProf is the prof claim of the call's verified delegation token, the sha256 of the settings-form canonical JSON of the mandate without its chain). documents: the codes and paths of evaluateSemanticRules(\"mandate\", mandate), in order.",
+  "actions": [
+    {
+      "name": "a headless profile covers a deploy, from T1",
+      "input": {
+        "action": {
+          "id": "deploy-site",
+          "title": "Deploy the site",
+          "tool": "site.deploy",
+          "gate": "relayed"
+        },
+        "tier": "T1",
+        "caller": "agent:example-runner",
+        "callerAgent": "example-runner",
+        "self": "example-deployer",
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "operator",
+          "standing": {
+            "place": "studio-space-1",
+            "placeKind": "headless",
+            "revision": 3
+          },
+          "task": "assignment:alpha-0412",
+          "instruction": "On a headless place every act finishes end to end.",
+          "at": "2026-11-12T09:00:00Z",
+          "expiresAt": "2026-11-13T08:00:00Z",
+          "scope": {
+            "capabilities": [
+              "site.deploy"
+            ],
+            "effects": [
+              "deploy"
+            ]
+          },
+          "chain": [
+            {
+              "agent": "example-runner",
+              "at": "2026-11-12T09:00:05Z"
+            },
+            {
+              "agent": "example-deployer",
+              "at": "2026-11-12T09:30:00Z"
+            }
+          ]
+        },
+        "effect": "deploy",
+        "now": "2026-11-12T10:00:00Z",
+        "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
+        "standing": true
+      },
+      "expected": {
+        "ok": true,
+        "recordAs": {
+          "by": "operator",
+          "via": "profile",
+          "task": "assignment:alpha-0412",
+          "chain": [
+            "example-runner",
+            "example-deployer"
+          ],
+          "profile": {
+            "place": "studio-space-1",
+            "revision": 3,
+            "digest": "sha256:31a9584d312efa30bdb6ed77a42b53943b2c8ec9adc42477e7dd9cca367a0064"
+          },
+          "caller": "agent:example-runner"
+        }
+      }
+    },
+    {
+      "name": "the same from T1 with the token's prof",
+      "input": {
+        "action": {
+          "id": "deploy-site",
+          "title": "Deploy the site",
+          "tool": "site.deploy",
+          "gate": "relayed"
+        },
+        "tier": "T1",
+        "caller": "agent:example-runner",
+        "callerAgent": "example-runner",
+        "self": "example-deployer",
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "operator",
+          "standing": {
+            "place": "studio-space-1",
+            "placeKind": "headless",
+            "revision": 3
+          },
+          "task": "assignment:alpha-0412",
+          "instruction": "On a headless place every act finishes end to end.",
+          "at": "2026-11-12T09:00:00Z",
+          "expiresAt": "2026-11-13T08:00:00Z",
+          "scope": {
+            "capabilities": [
+              "site.deploy"
+            ],
+            "effects": [
+              "deploy"
+            ]
+          },
+          "chain": [
+            {
+              "agent": "example-runner",
+              "at": "2026-11-12T09:00:05Z"
+            },
+            {
+              "agent": "example-deployer",
+              "at": "2026-11-12T09:30:00Z"
+            }
+          ]
+        },
+        "effect": "deploy",
+        "now": "2026-11-12T10:00:00Z",
+        "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
+        "standing": true,
+        "tokenProf": "sha256:31a9584d312efa30bdb6ed77a42b53943b2c8ec9adc42477e7dd9cca367a0064"
+      },
+      "expected": {
+        "ok": true,
+        "recordAs": {
+          "by": "operator",
+          "via": "profile",
+          "task": "assignment:alpha-0412",
+          "chain": [
+            "example-runner",
+            "example-deployer"
+          ],
+          "profile": {
+            "place": "studio-space-1",
+            "revision": 3,
+            "digest": "sha256:31a9584d312efa30bdb6ed77a42b53943b2c8ec9adc42477e7dd9cca367a0064"
+          },
+          "caller": "agent:example-runner"
+        }
+      }
+    },
+    {
+      "name": "a headless profile covers a deploy from T2 when the token binds it",
+      "input": {
+        "action": {
+          "id": "deploy-site",
+          "title": "Deploy the site",
+          "tool": "site.deploy",
+          "gate": "relayed"
+        },
+        "tier": "T2",
+        "caller": "agent:example-runner",
+        "callerAgent": "example-runner",
+        "self": "example-deployer",
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "operator",
+          "standing": {
+            "place": "studio-space-1",
+            "placeKind": "headless",
+            "revision": 3
+          },
+          "task": "assignment:alpha-0412",
+          "instruction": "On a headless place every act finishes end to end.",
+          "at": "2026-11-12T09:00:00Z",
+          "expiresAt": "2026-11-13T08:00:00Z",
+          "scope": {
+            "capabilities": [
+              "site.deploy"
+            ],
+            "effects": [
+              "deploy"
+            ]
+          },
+          "chain": [
+            {
+              "agent": "example-runner",
+              "at": "2026-11-12T09:00:05Z"
+            },
+            {
+              "agent": "example-deployer",
+              "at": "2026-11-12T09:30:00Z"
+            }
+          ]
+        },
+        "effect": "deploy",
+        "now": "2026-11-12T10:00:00Z",
+        "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
+        "standing": true,
+        "tokenProf": "sha256:31a9584d312efa30bdb6ed77a42b53943b2c8ec9adc42477e7dd9cca367a0064"
+      },
+      "expected": {
+        "ok": true,
+        "recordAs": {
+          "by": "operator",
+          "via": "profile",
+          "task": "assignment:alpha-0412",
+          "chain": [
+            "example-runner",
+            "example-deployer"
+          ],
+          "profile": {
+            "place": "studio-space-1",
+            "revision": 3,
+            "digest": "sha256:31a9584d312efa30bdb6ed77a42b53943b2c8ec9adc42477e7dd9cca367a0064"
+          },
+          "caller": "agent:example-runner"
+        }
+      }
+    },
+    {
+      "name": "from T2 without prof the profile changes nothing (MD-5)",
+      "input": {
+        "action": {
+          "id": "deploy-site",
+          "title": "Deploy the site",
+          "tool": "site.deploy",
+          "gate": "relayed"
+        },
+        "tier": "T2",
+        "caller": "agent:example-runner",
+        "callerAgent": "example-runner",
+        "self": "example-deployer",
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "operator",
+          "standing": {
+            "place": "studio-space-1",
+            "placeKind": "headless",
+            "revision": 3
+          },
+          "task": "assignment:alpha-0412",
+          "instruction": "On a headless place every act finishes end to end.",
+          "at": "2026-11-12T09:00:00Z",
+          "expiresAt": "2026-11-13T08:00:00Z",
+          "scope": {
+            "capabilities": [
+              "site.deploy"
+            ],
+            "effects": [
+              "deploy"
+            ]
+          },
+          "chain": [
+            {
+              "agent": "example-runner",
+              "at": "2026-11-12T09:00:05Z"
+            },
+            {
+              "agent": "example-deployer",
+              "at": "2026-11-12T09:30:00Z"
+            }
+          ]
+        },
+        "effect": "deploy",
+        "now": "2026-11-12T10:00:00Z",
+        "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
+        "standing": true
+      },
+      "expected": {
+        "ok": false,
+        "code": "approval-required",
+        "data": {
+          "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a"
+        }
+      }
+    },
+    {
+      "name": "a token bound to another profile, from T2",
+      "input": {
+        "action": {
+          "id": "deploy-site",
+          "title": "Deploy the site",
+          "tool": "site.deploy",
+          "gate": "relayed"
+        },
+        "tier": "T2",
+        "caller": "agent:example-runner",
+        "callerAgent": "example-runner",
+        "self": "example-deployer",
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "operator",
+          "standing": {
+            "place": "studio-space-1",
+            "placeKind": "headless",
+            "revision": 3
+          },
+          "task": "assignment:alpha-0412",
+          "instruction": "On a headless place every act finishes end to end.",
+          "at": "2026-11-12T09:00:00Z",
+          "expiresAt": "2026-11-13T08:00:00Z",
+          "scope": {
+            "capabilities": [
+              "site.deploy"
+            ],
+            "effects": [
+              "deploy"
+            ]
+          },
+          "chain": [
+            {
+              "agent": "example-runner",
+              "at": "2026-11-12T09:00:05Z"
+            },
+            {
+              "agent": "example-deployer",
+              "at": "2026-11-12T09:30:00Z"
+            }
+          ]
+        },
+        "effect": "deploy",
+        "now": "2026-11-12T10:00:00Z",
+        "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
+        "standing": true,
+        "tokenProf": "sha256:cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd"
+      },
+      "expected": {
+        "ok": false,
+        "code": "decision-invalid",
+        "data": {
+          "detail": "profile-unbound",
+          "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a"
+        }
+      }
+    },
+    {
+      "name": "a token bound to another profile, from T0",
+      "input": {
+        "action": {
+          "id": "deploy-site",
+          "title": "Deploy the site",
+          "tool": "site.deploy",
+          "gate": "relayed"
+        },
+        "tier": "T0",
+        "caller": "agent:example-runner",
+        "callerAgent": "example-runner",
+        "self": "example-deployer",
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "operator",
+          "standing": {
+            "place": "studio-space-1",
+            "placeKind": "headless",
+            "revision": 3
+          },
+          "task": "assignment:alpha-0412",
+          "instruction": "On a headless place every act finishes end to end.",
+          "at": "2026-11-12T09:00:00Z",
+          "expiresAt": "2026-11-13T08:00:00Z",
+          "scope": {
+            "capabilities": [
+              "site.deploy"
+            ],
+            "effects": [
+              "deploy"
+            ]
+          },
+          "chain": [
+            {
+              "agent": "example-runner",
+              "at": "2026-11-12T09:00:05Z"
+            },
+            {
+              "agent": "example-deployer",
+              "at": "2026-11-12T09:30:00Z"
+            }
+          ]
+        },
+        "effect": "deploy",
+        "now": "2026-11-12T10:00:00Z",
+        "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
+        "standing": true,
+        "tokenProf": "sha256:cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd"
+      },
+      "expected": {
+        "ok": false,
+        "code": "decision-invalid",
+        "data": {
+          "detail": "profile-unbound"
+        }
+      }
+    },
+    {
+      "name": "an older revision under a token of the newer",
+      "input": {
+        "action": {
+          "id": "deploy-site",
+          "title": "Deploy the site",
+          "tool": "site.deploy",
+          "gate": "relayed"
+        },
+        "tier": "T2",
+        "caller": "agent:example-runner",
+        "callerAgent": "example-runner",
+        "self": "example-deployer",
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "operator",
+          "standing": {
+            "place": "studio-space-1",
+            "placeKind": "headless",
+            "revision": 3
+          },
+          "task": "assignment:alpha-0412",
+          "instruction": "On a headless place every act finishes end to end.",
+          "at": "2026-11-12T09:00:00Z",
+          "expiresAt": "2026-11-13T08:00:00Z",
+          "scope": {
+            "capabilities": [
+              "site.deploy"
+            ],
+            "effects": [
+              "deploy"
+            ]
+          },
+          "chain": [
+            {
+              "agent": "example-runner",
+              "at": "2026-11-12T09:00:05Z"
+            },
+            {
+              "agent": "example-deployer",
+              "at": "2026-11-12T09:30:00Z"
+            }
+          ]
+        },
+        "effect": "deploy",
+        "now": "2026-11-12T10:00:00Z",
+        "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
+        "standing": true,
+        "tokenProf": "sha256:d958fbc6624b64bbc600782182511140ed8f6a99c11a9e7160ce66f16343cd0a"
+      },
+      "expected": {
+        "ok": false,
+        "code": "decision-invalid",
+        "data": {
+          "detail": "profile-unbound",
+          "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a"
+        }
+      }
+    },
+    {
+      "name": "a service that reads no standing mandates, from T1",
+      "input": {
+        "action": {
+          "id": "deploy-site",
+          "title": "Deploy the site",
+          "tool": "site.deploy",
+          "gate": "relayed"
+        },
+        "tier": "T1",
+        "caller": "agent:example-runner",
+        "callerAgent": "example-runner",
+        "self": "example-deployer",
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "operator",
+          "standing": {
+            "place": "studio-space-1",
+            "placeKind": "headless",
+            "revision": 3
+          },
+          "task": "assignment:alpha-0412",
+          "instruction": "On a headless place every act finishes end to end.",
+          "at": "2026-11-12T09:00:00Z",
+          "expiresAt": "2026-11-13T08:00:00Z",
+          "scope": {
+            "capabilities": [
+              "site.deploy"
+            ],
+            "effects": [
+              "deploy"
+            ]
+          },
+          "chain": [
+            {
+              "agent": "example-runner",
+              "at": "2026-11-12T09:00:05Z"
+            },
+            {
+              "agent": "example-deployer",
+              "at": "2026-11-12T09:30:00Z"
+            }
+          ]
+        },
+        "effect": "deploy",
+        "now": "2026-11-12T10:00:00Z",
+        "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a"
+      },
+      "expected": {
+        "ok": false,
+        "code": "operator-decision-required"
+      }
+    },
+    {
+      "name": "a service that reads no standing mandates, from T2",
+      "input": {
+        "action": {
+          "id": "deploy-site",
+          "title": "Deploy the site",
+          "tool": "site.deploy",
+          "gate": "relayed"
+        },
+        "tier": "T2",
+        "caller": "agent:example-runner",
+        "callerAgent": "example-runner",
+        "self": "example-deployer",
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "operator",
+          "standing": {
+            "place": "studio-space-1",
+            "placeKind": "headless",
+            "revision": 3
+          },
+          "task": "assignment:alpha-0412",
+          "instruction": "On a headless place every act finishes end to end.",
+          "at": "2026-11-12T09:00:00Z",
+          "expiresAt": "2026-11-13T08:00:00Z",
+          "scope": {
+            "capabilities": [
+              "site.deploy"
+            ],
+            "effects": [
+              "deploy"
+            ]
+          },
+          "chain": [
+            {
+              "agent": "example-runner",
+              "at": "2026-11-12T09:00:05Z"
+            },
+            {
+              "agent": "example-deployer",
+              "at": "2026-11-12T09:30:00Z"
+            }
+          ]
+        },
+        "effect": "deploy",
+        "now": "2026-11-12T10:00:00Z",
+        "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
+        "tokenProf": "sha256:31a9584d312efa30bdb6ed77a42b53943b2c8ec9adc42477e7dd9cca367a0064"
+      },
+      "expected": {
+        "ok": false,
+        "code": "approval-required",
+        "data": {
+          "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a"
+        }
+      }
+    },
+    {
+      "name": "a profile setting its own place's profile",
+      "input": {
+        "action": {
+          "id": "set-profile",
+          "title": "Set the place's profile",
+          "tool": "autonomy.profile.set",
+          "gate": "relayed"
+        },
+        "tier": "T1",
+        "caller": "agent:example-runner",
+        "callerAgent": "example-runner",
+        "self": "example-deployer",
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "operator",
+          "standing": {
+            "place": "studio-space-1",
+            "placeKind": "headless",
+            "revision": 3
+          },
+          "task": "assignment:alpha-0412",
+          "instruction": "On a headless place every act finishes end to end.",
+          "at": "2026-11-12T09:00:00Z",
+          "expiresAt": "2026-11-13T08:00:00Z",
+          "scope": {
+            "capabilities": [
+              "autonomy.profile.set",
+              "site.deploy"
+            ],
+            "effects": [
+              "deploy"
+            ]
+          },
+          "chain": [
+            {
+              "agent": "example-runner",
+              "at": "2026-11-12T09:00:05Z"
+            },
+            {
+              "agent": "example-deployer",
+              "at": "2026-11-12T09:30:00Z"
+            }
+          ]
+        },
+        "effect": "deploy",
+        "now": "2026-11-12T10:00:00Z",
+        "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
+        "standing": true
+      },
+      "expected": {
+        "ok": false,
+        "code": "operator-decision-required",
+        "data": {
+          "detail": "outside-mandate: capability"
+        }
+      }
+    },
+    {
+      "name": "a payment under a headless profile",
+      "input": {
+        "action": {
+          "id": "top-up",
+          "title": "Top up",
+          "tool": "billing.topup",
+          "gate": "human",
+          "humanStep": "payment"
+        },
+        "tier": "T1",
+        "caller": "agent:example-runner",
+        "callerAgent": "example-runner",
+        "self": "example-deployer",
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "operator",
+          "standing": {
+            "place": "studio-space-1",
+            "placeKind": "headless",
+            "revision": 3
+          },
+          "task": "assignment:alpha-0412",
+          "instruction": "On a headless place every act finishes end to end.",
+          "at": "2026-11-12T09:00:00Z",
+          "expiresAt": "2026-11-13T08:00:00Z",
+          "scope": {
+            "capabilities": [
+              "site.deploy"
+            ],
+            "effects": [
+              "deploy"
+            ]
+          },
+          "chain": [
+            {
+              "agent": "example-runner",
+              "at": "2026-11-12T09:00:05Z"
+            },
+            {
+              "agent": "example-deployer",
+              "at": "2026-11-12T09:30:00Z"
+            }
+          ]
+        },
+        "effect": "deploy",
+        "now": "2026-11-12T10:00:00Z",
+        "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
+        "standing": true,
+        "humanStepUrl": "https://example-deployer.example/billing/top-up"
+      },
+      "expected": {
+        "ok": false,
+        "code": "human-step-required",
+        "data": {
+          "humanStep": "payment",
+          "url": "https://example-deployer.example/billing/top-up"
+        }
+      }
+    },
+    {
+      "name": "a merge outside the profile's effects",
+      "input": {
+        "action": {
+          "id": "deploy-site",
+          "title": "Deploy the site",
+          "tool": "site.deploy",
+          "gate": "relayed"
+        },
+        "tier": "T1",
+        "caller": "agent:example-runner",
+        "callerAgent": "example-runner",
+        "self": "example-deployer",
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "operator",
+          "standing": {
+            "place": "studio-space-1",
+            "placeKind": "headless",
+            "revision": 3
+          },
+          "task": "assignment:alpha-0412",
+          "instruction": "On a headless place every act finishes end to end.",
+          "at": "2026-11-12T09:00:00Z",
+          "expiresAt": "2026-11-13T08:00:00Z",
+          "scope": {
+            "capabilities": [
+              "site.deploy"
+            ],
+            "effects": [
+              "deploy"
+            ]
+          },
+          "chain": [
+            {
+              "agent": "example-runner",
+              "at": "2026-11-12T09:00:05Z"
+            },
+            {
+              "agent": "example-deployer",
+              "at": "2026-11-12T09:30:00Z"
+            }
+          ]
+        },
+        "effect": "merge",
+        "now": "2026-11-12T10:00:00Z",
+        "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
+        "standing": true
+      },
+      "expected": {
+        "ok": false,
+        "code": "operator-decision-required",
+        "data": {
+          "detail": "outside-mandate: effect"
+        }
+      }
+    },
+    {
+      "name": "a profile living longer than a day",
+      "input": {
+        "action": {
+          "id": "deploy-site",
+          "title": "Deploy the site",
+          "tool": "site.deploy",
+          "gate": "relayed"
+        },
+        "tier": "T1",
+        "caller": "agent:example-runner",
+        "callerAgent": "example-runner",
+        "self": "example-deployer",
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "operator",
+          "standing": {
+            "place": "studio-space-1",
+            "placeKind": "headless",
+            "revision": 3
+          },
+          "task": "assignment:alpha-0412",
+          "instruction": "On a headless place every act finishes end to end.",
+          "at": "2026-11-12T09:00:00Z",
+          "expiresAt": "2026-11-13T10:00:00Z",
+          "scope": {
+            "capabilities": [
+              "site.deploy"
+            ],
+            "effects": [
+              "deploy"
+            ]
+          },
+          "chain": [
+            {
+              "agent": "example-runner",
+              "at": "2026-11-12T09:00:05Z"
+            },
+            {
+              "agent": "example-deployer",
+              "at": "2026-11-12T09:30:00Z"
+            }
+          ]
+        },
+        "effect": "deploy",
+        "now": "2026-11-12T10:00:00Z",
+        "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
+        "standing": true
+      },
+      "expected": {
+        "ok": false,
+        "code": "decision-invalid",
+        "data": {
+          "detail": "mandate-malformed"
+        }
+      }
+    },
+    {
+      "name": "an expired profile",
+      "input": {
+        "action": {
+          "id": "deploy-site",
+          "title": "Deploy the site",
+          "tool": "site.deploy",
+          "gate": "relayed"
+        },
+        "tier": "T1",
+        "caller": "agent:example-runner",
+        "callerAgent": "example-runner",
+        "self": "example-deployer",
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "operator",
+          "standing": {
+            "place": "studio-space-1",
+            "placeKind": "headless",
+            "revision": 3
+          },
+          "task": "assignment:alpha-0412",
+          "instruction": "On a headless place every act finishes end to end.",
+          "at": "2026-11-12T09:00:00Z",
+          "expiresAt": "2026-11-13T08:00:00Z",
+          "scope": {
+            "capabilities": [
+              "site.deploy"
+            ],
+            "effects": [
+              "deploy"
+            ]
+          },
+          "chain": [
+            {
+              "agent": "example-runner",
+              "at": "2026-11-12T09:00:05Z"
+            },
+            {
+              "agent": "example-deployer",
+              "at": "2026-11-12T09:30:00Z"
+            }
+          ]
+        },
+        "effect": "deploy",
+        "now": "2026-11-13T08:00:00Z",
+        "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
+        "standing": true
+      },
+      "expected": {
+        "ok": false,
+        "code": "decision-invalid",
+        "data": {
+          "detail": "mandate-expired"
+        }
+      }
+    },
+    {
+      "name": "a level holder's profile where no levels are read, from T1",
+      "input": {
+        "action": {
+          "id": "deploy-site",
+          "title": "Deploy the site",
+          "tool": "site.deploy",
+          "gate": "relayed"
+        },
+        "tier": "T1",
+        "caller": "agent:example-runner",
+        "callerAgent": "example-runner",
+        "self": "example-deployer",
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "level",
+          "standing": {
+            "place": "studio-space-1",
+            "placeKind": "headless",
+            "revision": 3
+          },
+          "task": "assignment:alpha-0412",
+          "instruction": "On a headless place every act finishes end to end.",
+          "at": "2026-11-12T09:00:00Z",
+          "expiresAt": "2026-11-13T08:00:00Z",
+          "scope": {
+            "capabilities": [
+              "site.deploy"
+            ],
+            "effects": [
+              "deploy"
+            ]
+          },
+          "chain": [
+            {
+              "agent": "example-runner",
+              "at": "2026-11-12T09:00:05Z"
+            },
+            {
+              "agent": "example-deployer",
+              "at": "2026-11-12T09:30:00Z"
+            }
+          ],
+          "level": "admin",
+          "org": "org:org-a",
+          "membership": {
+            "kind": "an attestation the service never reads"
+          }
+        },
+        "effect": "deploy",
+        "now": "2026-11-12T10:00:00Z",
+        "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
+        "standing": true
+      },
+      "expected": {
+        "ok": false,
+        "code": "operator-decision-required"
+      }
+    },
+    {
+      "name": "a task's mandate from T2 with a prof",
+      "input": {
+        "action": {
+          "id": "deploy-site",
+          "title": "Deploy the site",
+          "tool": "site.deploy",
+          "gate": "relayed"
+        },
+        "tier": "T2",
+        "caller": "agent:example-runner",
+        "callerAgent": "example-runner",
+        "self": "example-deployer",
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "operator",
+          "task": "assignment:alpha-0412",
+          "instruction": "On a headless place every act finishes end to end.",
+          "at": "2026-11-12T09:00:00Z",
+          "expiresAt": "2026-11-14T09:00:00Z",
+          "scope": {
+            "capabilities": [
+              "site.deploy"
+            ],
+            "effects": [
+              "deploy"
+            ]
+          },
+          "chain": [
+            {
+              "agent": "example-runner",
+              "at": "2026-11-12T09:00:05Z"
+            },
+            {
+              "agent": "example-deployer",
+              "at": "2026-11-12T09:30:00Z"
+            }
+          ]
+        },
+        "effect": "deploy",
+        "now": "2026-11-12T10:00:00Z",
+        "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
+        "standing": true,
+        "tokenProf": "sha256:31a9584d312efa30bdb6ed77a42b53943b2c8ec9adc42477e7dd9cca367a0064"
+      },
+      "expected": {
+        "ok": false,
+        "code": "approval-required",
+        "data": {
+          "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a"
+        }
+      }
+    }
+  ],
+  "documents": [
+    {
+      "name": "a headless profile",
+      "mandate": {
+        "kind": "mandate/1",
+        "by": "operator",
+        "standing": {
+          "place": "studio-space-1",
+          "placeKind": "headless",
+          "revision": 3
+        },
+        "task": "assignment:alpha-0412",
+        "instruction": "On a headless place every act finishes end to end.",
+        "at": "2026-11-12T09:00:00Z",
+        "expiresAt": "2026-11-13T08:00:00Z",
+        "scope": {
+          "capabilities": [
+            "site.deploy"
+          ],
+          "effects": [
+            "deploy"
+          ]
+        },
+        "chain": [
+          {
+            "agent": "example-runner",
+            "at": "2026-11-12T09:00:05Z"
+          },
+          {
+            "agent": "example-deployer",
+            "at": "2026-11-12T09:30:00Z"
+          }
+        ]
+      },
+      "findings": []
+    },
+    {
+      "name": "a profile naming autonomy.profile.set",
+      "mandate": {
+        "kind": "mandate/1",
+        "by": "operator",
+        "standing": {
+          "place": "studio-space-1",
+          "placeKind": "headless",
+          "revision": 3
+        },
+        "task": "assignment:alpha-0412",
+        "instruction": "On a headless place every act finishes end to end.",
+        "at": "2026-11-12T09:00:00Z",
+        "expiresAt": "2026-11-13T08:00:00Z",
+        "scope": {
+          "capabilities": [
+            "autonomy.profile.set"
+          ],
+          "effects": [
+            "deploy"
+          ]
+        },
+        "chain": [
+          {
+            "agent": "example-runner",
+            "at": "2026-11-12T09:00:05Z"
+          },
+          {
+            "agent": "example-deployer",
+            "at": "2026-11-12T09:30:00Z"
+          }
+        ]
+      },
+      "findings": [
+        "FAC-SEM-173 /scope"
+      ]
+    },
+    {
+      "name": "a profile listing change-policy",
+      "mandate": {
+        "kind": "mandate/1",
+        "by": "operator",
+        "standing": {
+          "place": "studio-space-1",
+          "placeKind": "headless",
+          "revision": 3
+        },
+        "task": "assignment:alpha-0412",
+        "instruction": "On a headless place every act finishes end to end.",
+        "at": "2026-11-12T09:00:00Z",
+        "expiresAt": "2026-11-13T08:00:00Z",
+        "scope": {
+          "capabilities": [
+            "site.deploy"
+          ],
+          "effects": [
+            "deploy",
+            "change-policy"
+          ]
+        },
+        "chain": [
+          {
+            "agent": "example-runner",
+            "at": "2026-11-12T09:00:05Z"
+          },
+          {
+            "agent": "example-deployer",
+            "at": "2026-11-12T09:30:00Z"
+          }
+        ]
+      },
+      "findings": [
+        "FAC-SEM-173 /scope"
+      ]
+    },
+    {
+      "name": "a profile handed on with autonomy.profile.set in an action list",
+      "mandate": {
+        "kind": "mandate/1",
+        "by": "operator",
+        "standing": {
+          "place": "studio-space-1",
+          "placeKind": "headless",
+          "revision": 3
+        },
+        "task": "assignment:alpha-0412",
+        "instruction": "On a headless place every act finishes end to end.",
+        "at": "2026-11-12T09:00:00Z",
+        "expiresAt": "2026-11-13T08:00:00Z",
+        "scope": {
+          "capabilities": [
+            "site.deploy"
+          ],
+          "effects": [
+            "deploy"
+          ]
+        },
+        "chain": [
+          {
+            "agent": "example-runner",
+            "at": "2026-11-12T09:00:05Z"
+          },
+          {
+            "agent": "example-deployer",
+            "at": "2026-11-12T09:30:00Z",
+            "scope": {
+              "capabilities": [
+                "site.deploy"
+              ],
+              "actions": [
+                "autonomy.profile.set"
+              ],
+              "effects": [
+                "deploy"
+              ]
+            }
+          }
+        ]
+      },
+      "findings": [
+        "FAC-SEM-173 /chain/1/scope"
+      ]
+    },
+    {
+      "name": "a profile living longer than a day",
+      "mandate": {
+        "kind": "mandate/1",
+        "by": "operator",
+        "standing": {
+          "place": "studio-space-1",
+          "placeKind": "headless",
+          "revision": 3
+        },
+        "task": "assignment:alpha-0412",
+        "instruction": "On a headless place every act finishes end to end.",
+        "at": "2026-11-12T09:00:00Z",
+        "expiresAt": "2026-11-13T10:00:00Z",
+        "scope": {
+          "capabilities": [
+            "site.deploy"
+          ],
+          "effects": [
+            "deploy"
+          ]
+        },
+        "chain": [
+          {
+            "agent": "example-runner",
+            "at": "2026-11-12T09:00:05Z"
+          },
+          {
+            "agent": "example-deployer",
+            "at": "2026-11-12T09:30:00Z"
+          }
+        ]
+      },
+      "findings": [
+        "FAC-SEM-144 "
+      ]
+    }
+  ]
+}

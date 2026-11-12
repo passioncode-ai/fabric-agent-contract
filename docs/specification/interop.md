@@ -382,7 +382,7 @@ carries a decision from what it remembered of the same call without one; the cal
 delegation token names as the relaying caller (DEC-0121). The hub's own `fabric.job.get` forwards a T0 or T1 origin's
 `_meta.decision` to the callee the same way (DEC-0121). `mandate` is the operator's mandate for the task
 ([delegation](delegation.md#the-operators-mandate), DEC-0125), and the hub treats it as it treats `decision`: it
-forwards a T0 or T1 origin's to the callee as `_meta.mandate` (on `agent.call` and on its own `fabric.job.get`), drops a T2 origin's operator mandate and forwards a level mandate from any origin (DEC-0162), a level decision or level mandate only to a callee whose actions extension declares `levels` for its organization, passes the callee's refusals back unchanged and never answers a resend that carries a mandate from what
+forwards a T0 or T1 origin's to the callee as `_meta.mandate` (on `agent.call` and on its own `fabric.job.get`), drops a T2 origin's operator mandate and forwards a level mandate from any origin (DEC-0162), a level decision or level mandate only to a callee whose actions extension declares `levels` for its organization, a place's standing mandate (DEC-0166 AU-3) only to a callee that declares `standing`, passes the callee's refusals back unchanged and never answers a resend that carries a mandate from what
 it remembered of the same call without one. The hub is not an agent of the chain: the origin appends the callee before
 it calls, and the callee compares the origin the hub's delegation token names, when one is present, with the agent
 before it; the hub's own id is never the caller's agent id for this check, and without a token the chain's end alone

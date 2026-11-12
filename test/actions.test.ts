@@ -93,6 +93,7 @@ describe("FAC-SEM-142 on a well-known document (DEC-0121 AP-1)", () => {
     expect(actionsView({ extensions: { [EXTENSION_KEYS.actions]: {} } })).toEqual({ declared: true, valid: false, errors: ["/ required"] });
     const levels = [{ org: "org:example-org", audience: "example-agent.default" }];
     expect(actionsView({ extensions: { [EXTENSION_KEYS.actions]: { ...value, levels } } })).toEqual({ declared: true, valid: true, actions: value.actions, levels });
+    expect(actionsView({ extensions: { [EXTENSION_KEYS.actions]: { ...value, standing: true } } })).toEqual({ declared: true, valid: true, actions: value.actions, standing: true });
   });
   it("flags a level on an action that is not relayed and an organization named twice (DEC-0162 LV-5, LV-7)", () => {
     const actions = [{ id: "retry", title: "Retry", tool: "jobs.retry", gate: "none", level: "owner" }];

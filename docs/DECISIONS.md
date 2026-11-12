@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0163` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0167` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -11477,3 +11477,81 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Source:** the design `docs/evidence/plans/2026-11-12-ct250-authority-levels.md`; the operator's decision of
   2026-11-06 as recorded in fabric-workspace `knowledge/authority.md`; board request `4a1bf8d6` (thread `8da128cf`);
   backlog CT-250.
+
+### DEC-0166: a place's autonomy profile as a standing mandate
+
+- **Date:** 2026-11-12
+- **Status:** Proposed 2026-11-12, from the design `docs/evidence/plans/2026-11-12-ct285-autonomy-profile.md` (CT-285),
+  the operator-question defaults taken as the design states them, with question 4 added here; accepted when the
+  coordinator's blind readings are clean on two consecutive rounds. It reads DEC-0162's levels and lands after it: the
+  branch `agent/ct285-autonomy-profile-20261112` is stacked on DEC-0162's. An answer from the operator after
+  acceptance is a new decision amending this one.
+- **Context:** the operator decided on 2026-11-09 (fabric-workspace session `a616cbcb`, recorded verbatim in
+  fabric-workspace `knowledge/authority.md`, *Autonomy by place*, at `73171ed0`; board request `921edc61`, thread
+  `a3a97cef`) that which acts an agent finishes end to end without a person is a setting per place: a headless place
+  finishes everything by default, watched by agents and each process's own checks; a person's own computer follows the
+  scenario the person or their administrator chooses; the owner, an organization administrator or a project's
+  architect sets it within their level; only the body's gates stay everywhere. North Star gap G19. The contract had a
+  per-task mandate (DEC-0125) and the operator's decision per action (AP-2, DEC-0121), and AP-3 refuses a standing rule
+  in a file, so a headless assignment had nobody to ask.
+- **Decision:**
+  1. **The profile is a standing mandate (AU-1).** `mandate.schema.json` gains the optional member `standing`
+     (`place`, `placeKind` `headless` or `person`, `revision`). The place's hub states the profile, for each assignment
+     it starts there, as a `mandate/1` with `standing`, `task` naming the assignment, the setter's `by` and words, the
+     profile's scope and a chain starting at the assigned agent; it stands at most 24 hours after `at`
+     (`FAC-SEM-144` amended) and the hub restates it. MD-2, MD-2a, MD-3, MD-4 and MD-6 apply unchanged.
+  2. **Who sets it (AU-2).** The hub's relayed action `autonomy.profile.set`, effect `change-policy`: by AP-2's decision
+     in the personal context, by a level decision (DEC-0162 LV-3) in an organization's (`owner` or `admin` for any
+     place, an `architect` for a profile within its projects).
+  3. **Binding (AU-3).** A callee reads standing mandates only when its actions extension declares `standing`; an agent
+     sends one, and the hub forwards one, only to such a callee, and the protocol name `standing/1` gates the form
+     toward a hub. From T0 or T1 it is taken as MD-3 says; from T2 only when the call's delegation token carries the new
+     claim `prof`, the mandate's `profileDigest` (sha256 of the settings canonical JSON of the mandate without its
+     `chain`), which the hub writes for the assignment's token; a `prof` that is not the mandate's is `decision-invalid`
+     `profile-unbound` at any tier; an onward token keeps the parent's `prof` or none (`FAC-SEM-050`).
+  4. **Defaults, bounds, watching, refusals (AU-4 to AU-7).** A headless place with no recorded profile covers every
+     effect class but `change-policy`; a person's computer nothing beyond its person's own decisions until a profile is
+     recorded from the hub's presets. No profile covers MD-6's list or `autonomy.profile.set` (`FAC-SEM-173` on the
+     document, `outside-mandate: capability` on the call). The hub states a headless profile only while the place's
+     watcher answers. A call taken under it is recorded `via: profile` with the place, revision, digest, assignment,
+     chain and caller; refusals are MD-4's, `profile-unbound` and the mandate's own details, from T2 with the digest.
+  5. **Reference and vectors.** `mandateCovers` and `profileDigest` in `src/mandate.ts`, `actionDecision` in
+     `src/actions.ts` (`standing`, `tokenProf`), the `prof` claim in `src/delegation.ts` and `src/delegation-rules.ts`;
+     `fixtures/vectors/profile.json`, written by `tools/vectors/profile.ts`; `test/profile.test.ts`.
+- **Why:** reusing the mandate keeps one way to say "these acts need no further word", with its narrowing, refusals and
+  bounds already read by every service; a profile bound to the assignment's token reaches a T2 callee without a person
+  in the loop, as DEC-0162 binds a level; a day's life and a token's ten minutes bound how long a narrower revision is
+  outrun.
+- **Alternatives considered:** a new document type for profiles (refused: a second form of "no further word" every
+  service would read separately); `kind` changed for a standing mandate (refused: `standing` under `mandate/1` makes a
+  reader at an older pin refuse it as `mandate-malformed`, and the protocol name gates it); `prof` carrying the
+  revision beside the digest (refused: the digest covers `standing.revision`); the design's `profile-stale` and
+  `profile-unwatched` as callee refusals (refused: a callee cannot know the hub's latest revision or its watcher, so
+  they are the hub's states, in which it states no mandate); a standing mandate living 7 days as a task's (refused: the
+  hub restates it daily, so a narrowed profile reaches every assignment within a day); a T2 standing mandate without a
+  token (refused, as DEC-0162 refused a level without one: a copied mandate would serve any caller).
+- **Compatibility:** additive, gated by `standing` in the callee's actions extension and `standing/1` toward a hub. A
+  reader pinned before this decision refuses a standing mandate as `mandate-malformed` (its schema closes `mandate/1`),
+  so no agent sends it there. Read on 2026-11-12: no hub states a profile and no service declares `standing` yet. Owed:
+  Fabric (CO-547: the dispatcher and headless assignments read the profile, its hub writes `prof`, its floor treats a
+  covered effect as decided; ADR-0168's machine permission choice stays the runner's prompt mode), the organization
+  product (who may change a profile, shown per place), the PM agent, the host's admin agent (records a place's kind and
+  watcher), every service with `relayed` actions an assignment calls (the adapter's kits FAA-249). The operator's
+  questions take the design's defaults: (1) the headless default covers a production deploy of a surface with outside
+  users, and a project that wants the gate narrows its own profile; (2) an organization administrator sets a profile
+  on a member's computer only inside the organization's context there; (3) watched means a monitoring agent declared in
+  the place's record and answering its probe; (4, added) a headless place of an organization with no recorded profile
+  takes the default only once its owner or an administrator records it, and states nothing until then. The operator may
+  answer otherwise until 2026-11-21.
+- **Consequences / affects:** `schemas/mandate.schema.json` (`standing`), `schemas/delegation-token.schema.json`
+  (`prof`), `schemas/service-actions-extension.schema.json` (`standing`); `src/mandate.ts`, `src/actions.ts`,
+  `src/delegation.ts`, `src/delegation-rules.ts`, `src/protocol-revisions.ts` (`standing/1`);
+  `fixtures/vectors/profile.json`, `tools/vectors/profile.ts`, `tools/vectors/run.ts`, `test/profile.test.ts`,
+  `test/meter-grant.test.ts`; `docs/specification/delegation.md` (the section, MD-5, the `prof` row, `FAC-SEM-050`,
+  `FAC-SEM-144`, `FAC-SEM-173`), `service.md` (the `actionDecision` table), `interop.md` (C3.5), `versioning.md`,
+  `conformance.md` (rows, module, register), `CONTEXT.md` (Autonomy profile). Not decided here: the monitoring agent's
+  own contract (the North Star's monitoring role, G27); rollback at the process level (each product's checks and
+  receipts).
+- **Source:** the design `docs/evidence/plans/2026-11-12-ct285-autonomy-profile.md`; the operator's decision of
+  2026-11-09 as recorded in fabric-workspace `knowledge/authority.md`; board requests `921edc61` (thread `a3a97cef`)
+  and `4a1bf8d6` (thread `8da128cf`); backlog CT-285.

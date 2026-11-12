@@ -1,4 +1,6 @@
+import { createHash } from "node:crypto";
 import type { ValidateFunction } from "ajv/dist/2020.js";
+import { settingsCanonicalJson } from "./canonical.js";
 import { SCHEMA_PREFIX } from "./contract.js";
 import { effectClosure } from "./delegation.js";
 import { type Finding, type JsonObject, isObject } from "./findings.js";
@@ -15,6 +17,9 @@ import { createValidatorSync } from "./validator.js";
 // (MD-4). A T2 caller's operator mandate changes nothing (MD-5); human steps and the money limits never travel (MD-6).
 // DEC-0162 LV-6: a level mandate (`by: "level"`) is a level holder's words in an organization; a callee that reads
 // levels takes it from any tier when the call's delegation token binds its attestation, within the holder's level.
+// DEC-0166 AU-1 to AU-7: a place's autonomy profile is a standing mandate (`standing`), stated by the place's hub for
+// each assignment at the profile's revision; a callee that declares `standing` reads it, from T2 only when the call's
+// delegation token binds it by `prof`; it lives at most a day and never covers `autonomy.profile.set`.
 
 /** The longest a mandate stands after the operator gave it. */
 export const MANDATE_LIFETIME_SECONDS = 7 * 24 * 60 * 60;
@@ -25,6 +30,10 @@ export const MANDATE_INVALID = "decision-invalid";
 const READS_AND_DRAFTS = new Set(["none", "draft"]);
 /** An effect no mandate covers: approving one's own promotion, grant, checker rule or policy change (AP-5). */
 const NEVER_BY_MANDATE = "change-policy";
+/** The longest a standing mandate stands: the hub restates it from the profile at least daily (DEC-0166 AU-3). */
+export const STANDING_LIFETIME_SECONDS = 24 * 60 * 60;
+/** The hub's action that sets a place's profile; no profile covers it, so no assignment raises its own autonomy (AU-5). */
+export const PROFILE_SET_CAPABILITY = "autonomy.profile.set";
 
 export interface MandateScope {
   capabilities?: string[];
@@ -39,8 +48,11 @@ export interface OperatorSource {
   session?: string;
   thread?: string;
 }
+/** A place's standing mandate (DEC-0166 AU-1): the place, its kind and the profile's revision. */
+export interface Standing { place: string; placeKind: "headless" | "person"; revision: number }
 export interface Mandate {
   kind: "mandate/1";
+  standing?: Standing;
   by: "operator" | "level";
   /** With `by: "level"` (DEC-0162 LV-6): the level, its organization and the holder's `org-membership/2` attestation. */
   level?: string;
@@ -72,15 +84,17 @@ export interface MandateCall {
 }
 
 export type OutsideDetail = "outside-mandate: capability" | "outside-mandate: action" | "outside-mandate: effect" | "outside-mandate: spend" | "outside-mandate: project";
-export type InvalidDetail = "mandate-malformed" | "mandate-widened" | "mandate-expired" | "mandate-early" | "mandate-not-for-this-call" | LevelDetail;
+export type InvalidDetail = "mandate-malformed" | "mandate-widened" | "mandate-expired" | "mandate-early" | "mandate-not-for-this-call" | "profile-unbound" | LevelDetail;
+/** The profile a call was taken under (DEC-0166 AU-6): the place, the revision and the standing mandate's digest. */
+export interface ProfileRecord { place: string; revision: number; digest: string }
 export type MandateAnswer =
-  | { ok: true; recordAs: { by: "operator"; via: "mandate"; task: string; chain: string[]; source?: OperatorSource } }
-  | { ok: true; recordAs: LevelRecord & { via: "mandate"; task: string; chain: string[] } }
+  | { ok: true; recordAs: { by: "operator"; via: "mandate" | "profile"; task: string; chain: string[]; source?: OperatorSource; profile?: ProfileRecord } }
+  | { ok: true; recordAs: LevelRecord & { via: "mandate" | "profile"; task: string; chain: string[]; profile?: ProfileRecord } }
   | { ok: false; code: typeof OUTSIDE_MANDATE; data: { detail: OutsideDetail | InsufficientDetail; estimateUsd?: number; perCallMaxUsd?: number } }
   | { ok: false; code: typeof MANDATE_INVALID; data: { detail: InvalidDetail } }
   /** A T2 caller's operator mandate changes nothing: the callee applies the whole profile as if it were absent (MD-5).
    * A level mandate at a callee that reads no levels is ignored the same way, at every tier (LV-10). */
-  | { ignored: "mandate-at-t2" | "levels-not-read" }
+  | { ignored: "mandate-at-t2" | "levels-not-read" | "standing-not-read" }
   /** The callee's own fault, never sent: its clock does not read. */
   | { fault: "now-unreadable" };
 
@@ -123,13 +137,23 @@ export function scopeWithin(child: MandateScope, parent: MandateScope): boolean 
     && ceilingWithin(child.perCallMaxUsd, parent.perCallMaxUsd);
 }
 
+/**
+ * The digest a delegation token's `prof` claim carries for a standing mandate (DEC-0166 AU-3): sha256 of the settings
+ * canonical JSON of the mandate without its `chain`, which grows at every hand-over while the profile does not.
+ */
+export function profileDigest(mandate: Mandate): string {
+  const { chain: _chain, ...stated } = mandate;
+  return `sha256:${createHash("sha256").update(settingsCanonicalJson(stated), "utf8").digest("hex")}`;
+}
+
 /** The first problem of a mandate as a document (FAC-SEM-144), or undefined. */
 export function mandateProblem(mandate: unknown): "mandate-malformed" | "mandate-widened" | undefined {
   if (mandateShape()(mandate) !== true) return "mandate-malformed";
   const read = mandate as Mandate;
   const at = strictTime(read.at);
   const expires = strictTime(read.expiresAt);
-  if (Number.isNaN(at) || Number.isNaN(expires) || expires <= at || expires > at + MANDATE_LIFETIME_SECONDS * 1000) return "mandate-malformed";
+  const lifetime = read.standing === undefined ? MANDATE_LIFETIME_SECONDS : STANDING_LIFETIME_SECONDS;
+  if (Number.isNaN(at) || Number.isNaN(expires) || expires <= at || expires > at + lifetime * 1000) return "mandate-malformed";
   let held = read.scope;
   let last = at;
   for (const step of read.chain) {
@@ -165,16 +189,26 @@ export function mandateCovers(input: {
   levels?: LevelContexts;
   /** The `mem` claim of the call's delegation token (LV-5). */
   tokenMem?: unknown;
+  /** True when this callee declares `standing` (DEC-0166 AU-3); absent, it reads no standing mandate. */
+  standing?: boolean;
+  /** The `prof` claim of the call's delegation token (AU-3), absent when it presented none. */
+  tokenProf?: unknown;
 }): MandateAnswer {
   const { mandate, tier, now, self, callerAgent, call } = input;
   const clock = strictTime(now);
   if (Number.isNaN(clock)) return { fault: "now-unreadable" };
   const byLevel = typeof mandate === "object" && mandate !== null && (mandate as { by?: unknown }).by === "level";
+  const standing = isObject(mandate) && mandate.standing !== undefined;
+  if (standing && input.standing !== true) return { ignored: "standing-not-read" };
   if (byLevel && !isObject(input.levels)) return { ignored: "levels-not-read" };
-  if (!byLevel && tier !== "T0" && tier !== "T1") return { ignored: "mandate-at-t2" };
+  const inside = tier === "T0" || tier === "T1";
+  // A standing mandate from T2 needs the token's `prof` (AU-3); without one it changes nothing, as MD-5 says.
+  if (!byLevel && !inside && (!standing || input.tokenProf === undefined)) return { ignored: "mandate-at-t2" };
   const problem = mandateProblem(mandate);
   if (problem) return { ok: false, code: MANDATE_INVALID, data: { detail: problem } };
   const read = mandate as Mandate;
+  const digest = standing ? profileDigest(read) : undefined;
+  if (standing && input.tokenProf !== undefined && input.tokenProf !== digest) return { ok: false, code: MANDATE_INVALID, data: { detail: "profile-unbound" } };
   const holders = read.chain.map((step) => step.agent);
   if (holders.length < 2 || holders[holders.length - 1] !== self || (callerAgent !== undefined && holders[holders.length - 2] !== callerAgent)) {
     return { ok: false, code: MANDATE_INVALID, data: { detail: "mandate-not-for-this-call" } };
@@ -183,6 +217,8 @@ export function mandateCovers(input: {
   if (clock >= strictTime(read.expiresAt)) return { ok: false, code: MANDATE_INVALID, data: { detail: "mandate-expired" } };
   const scope = effectiveScope(read);
   const outside = (detail: OutsideDetail): MandateAnswer => ({ ok: false, code: OUTSIDE_MANDATE, data: { detail } });
+  // AU-5: no mandate sets a place's profile, so no assignment raises its own autonomy.
+  if (call.capability === PROFILE_SET_CAPABILITY) return outside("outside-mandate: capability");
   if (call.action !== undefined && scope.actions !== undefined && !scope.actions.includes(call.action)) return outside("outside-mandate: action");
   if (call.action !== undefined && scope.actions === undefined && scope.capabilities === undefined) return outside("outside-mandate: action");
   if (scope.capabilities !== undefined && !scope.capabilities.includes(call.capability)) return outside("outside-mandate: capability");
@@ -194,23 +230,27 @@ export function mandateCovers(input: {
     return { ok: false, code: OUTSIDE_MANDATE, data: { detail: "outside-mandate: spend", ...(call.spendUsd === undefined ? {} : { estimateUsd: call.spendUsd }), perCallMaxUsd: scope.perCallMaxUsd } };
   }
   if (call.project !== undefined && scope.projects !== undefined && !scope.projects.includes(call.project)) return outside("outside-mandate: project");
+  // AU-6: a call under a profile is recorded `via: profile` with the place, the revision and the digest.
+  const profile = standing
+    ? { via: "profile" as const, task: read.task, chain: holders, profile: { place: (read.standing as Standing).place, revision: (read.standing as Standing).revision, digest: digest as string } }
+    : { via: "mandate" as const, task: read.task, chain: holders };
   if (byLevel) {
     // LV-6: the level stands as the operator's word only inside its scope, after every check of the mandate itself.
-    const standing = levelStanding({
+    const levelAnswer = levelStanding({
       membership: read.membership, org: read.org as string, level: read.level as string, at: read.at,
       ...(call.project === undefined ? {} : { project: call.project }), ...(call.minLevel === undefined ? {} : { minLevel: call.minLevel }),
       contexts: input.levels as LevelContexts, tokenMem: input.tokenMem, now: clock
     });
-    if (!standing.ok) {
-      return "invalid" in standing
-        ? { ok: false, code: MANDATE_INVALID, data: { detail: standing.invalid } }
-        : { ok: false, code: OUTSIDE_MANDATE, data: { detail: standing.insufficient } };
+    if (!levelAnswer.ok) {
+      return "invalid" in levelAnswer
+        ? { ok: false, code: MANDATE_INVALID, data: { detail: levelAnswer.invalid } }
+        : { ok: false, code: OUTSIDE_MANDATE, data: { detail: levelAnswer.insufficient } };
     }
-    const { approver, membershipDigest, revision, level, org } = standing;
-    return { ok: true, recordAs: { by: "level", level, org, ...(call.project === undefined ? {} : { project: call.project }), approver, membershipDigest, revision, via: "mandate", task: read.task, chain: holders } };
+    const { approver, membershipDigest, revision, level, org } = levelAnswer;
+    return { ok: true, recordAs: { by: "level", level, org, ...(call.project === undefined ? {} : { project: call.project }), approver, membershipDigest, revision, ...profile } };
   }
   // Where the operator said it travels into the record, as the reason the callee acted (DEC-0126 OA-6).
-  return { ok: true, recordAs: { by: "operator", via: "mandate", task: read.task, chain: holders, ...(read.source ? { source: { ...read.source } } : {}) } };
+  return { ok: true, recordAs: { by: "operator", ...profile, ...(read.source ? { source: { ...read.source } } : {}) } };
 }
 
 /**
@@ -224,13 +264,27 @@ export function handOn(mandate: Mandate, callee: string, at: string, narrower?: 
   return next;
 }
 
-/** FAC-SEM-144 on kind `mandate` (the document itself). */
+/**
+ * FAC-SEM-173 (DEC-0166 AU-5): a standing mandate whose scope, or a chain step's, names `autonomy.profile.set` among
+ * its capabilities or actions, or `change-policy` among its effects: a profile never sets a profile.
+ */
+function standingFindings(mandate: Mandate): Finding[] {
+  if (mandate.standing === undefined) return [];
+  const scopes: Array<[string, MandateScope]> = [["/scope", mandate.scope], ...mandate.chain.flatMap((step, i): Array<[string, MandateScope]> => (step.scope ? [[`/chain/${i}/scope`, step.scope]] : []))];
+  return scopes.flatMap(([path, scope]) =>
+    scope.capabilities?.includes(PROFILE_SET_CAPABILITY) || scope.actions?.includes(PROFILE_SET_CAPABILITY) || scope.effects.includes(NEVER_BY_MANDATE)
+      ? [{ code: "FAC-SEM-173", instancePath: path, message: `a standing mandate never covers ${PROFILE_SET_CAPABILITY} or ${NEVER_BY_MANDATE}: no profile sets a profile (DEC-0166 AU-5)` }]
+      : []);
+}
+
+/** FAC-SEM-144 on kind `mandate` (the document itself); FAC-SEM-170 and FAC-SEM-173 on a valid one. */
 export function mandateRules(kind: string, value: JsonObject): Finding[] | undefined {
   if (kind === "mandate") {
     const problem = mandateProblem(value);
     // DEC-0162: a level mandate's attestation, checked without a key (FAC-SEM-170, src/levels.ts).
     const level = problem === "mandate-malformed" ? [] : (levelRules(kind, value) as Finding[]);
-    return [...(problem ? [{ code: "FAC-SEM-144", instancePath: "", message: `the mandate is not valid: ${problem} (DEC-0125 MD-1, MD-2; DEC-0136 MD-2a)` }] : []), ...level];
+    const standing = problem === undefined ? standingFindings(value as unknown as Mandate) : [];
+    return [...(problem ? [{ code: "FAC-SEM-144", instancePath: "", message: `the mandate is not valid: ${problem} (DEC-0125 MD-1, MD-2; DEC-0136 MD-2a)` }] : []), ...level, ...standing];
   }
   return undefined;
 }

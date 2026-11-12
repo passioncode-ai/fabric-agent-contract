@@ -5,7 +5,7 @@ import { EXTENSION_KEYS } from "./extensions.js";
 import { type Finding, type JsonObject, isObject } from "./findings.js";
 import { CLOCK_SKEW_SECONDS, strictTime } from "./rfc3339.js";
 import { type LevelContexts, type LevelRecord, levelStanding } from "./levels.js";
-import { type OperatorSource, mandateCovers } from "./mandate.js";
+import { type OperatorSource, type ProfileRecord, mandateCovers } from "./mandate.js";
 import { createValidatorSync } from "./validator.js";
 
 // #region actions (docs: docs/specification/service.md#actions)
@@ -73,9 +73,13 @@ export interface ActionDecisionInput {
   levels?: unknown;
   /** The `mem` claim of the call's verified delegation token, absent when it presented none (DEC-0162 LV-5). */
   tokenMem?: unknown;
+  /** True when this service declares `standing` in its actions extension (DEC-0166 AU-3): it reads standing mandates. */
+  standing?: unknown;
+  /** The `prof` claim of the call's verified delegation token, absent when it presented none (DEC-0166 AU-3). */
+  tokenProf?: unknown;
 }
 
-export type DecisionVia = "relayed-instruction" | "elicitation" | "approval" | "mandate" | "level-command";
+export type DecisionVia = "relayed-instruction" | "elicitation" | "approval" | "mandate" | "profile" | "level-command";
 export type DecisionRecord = {
   by: string;
   via: DecisionVia;
@@ -83,6 +87,7 @@ export type DecisionRecord = {
   task?: string;
   chain?: string[];
   source?: OperatorSource;
+  profile?: ProfileRecord;
 } & Partial<Omit<LevelRecord, "by">>;
 export type ActionDecisionAnswer =
   | { ok: true; recordAs: "caller" }
@@ -147,13 +152,18 @@ export function actionDecision(input: ActionDecisionInput): ActionDecisionAnswer
   // The service's own accepted elicitation is the operator's word at T0 or T1 and is read before a level form (LV-5).
   const inside = tier === "T0" || tier === "T1";
   if (inside && elicited === true) return { ok: true, recordAs: { by: "operator", via: "elicitation", caller } };
-  if (isObject(input.levels) && (levelDecision || levelMandate)) {
+  // DEC-0166 AU-3: a standing mandate (a place's autonomy profile) is read at every tier by a service that declares
+  // `standing`; from T2 it stands only when the call's token binds it by `prof`.
+  const standingMandate = decision === undefined && input.standing === true && isObject(input.mandate) && input.mandate.standing !== undefined;
+  if ((isObject(input.levels) && (levelDecision || levelMandate)) || standingMandate) {
     const clock = strictTime(now);
     if (Number.isNaN(clock)) return { fault: "now-unreadable" };
     // At T2 every refusal on this branch keeps DL-18's route open, so the service owes the action's digest here too.
     if (!inside && (typeof actionDigest !== "string" || !SHA256.test(actionDigest))) return { fault: "digest-missing" };
-    // A level mandate at a service given `levels` is never ignored: mandateCovers reads it at every tier.
-    const answer = levelDecision ? byLevel(input, action, caller, clock) : (byMandate(input, action, caller) as ActionDecisionAnswer);
+    const read = levelDecision ? byLevel(input, action, caller, clock) : byMandate(input, action, caller);
+    // Ignored (an unbound standing mandate from T2, a standing level mandate where no levels are read): as if absent.
+    if ("ignored" in read) return inside ? { ok: false, code: OPERATOR_DECISION_REQUIRED } : { ok: false, code: APPROVAL_REQUIRED, data: { actionDigest: actionDigest as string } };
+    const answer = read;
     if (!inside && "ok" in answer && !answer.ok && (answer.code === OPERATOR_DECISION_REQUIRED || answer.code === DECISION_INVALID)) {
       return { ...answer, data: { ...(answer.data ?? {}), actionDigest } } as ActionDecisionAnswer;
     }
@@ -204,6 +214,7 @@ function byMandate(input: ActionDecisionInput, action: DeclaredAction, caller: s
     mandate: input.mandate, tier: input.tier, now: input.now, self: input.self,
     ...(input.callerAgent === undefined ? {} : { callerAgent: input.callerAgent }),
     ...(isObject(input.levels) ? { levels: input.levels as LevelContexts, tokenMem: input.tokenMem } : {}),
+    ...(input.standing === true ? { standing: true, ...(input.tokenProf === undefined ? {} : { tokenProf: input.tokenProf }) } : {}),
     call: { capability, action: action.id, effect, ...(typeof spendUsd === "number" ? { spendUsd } : {}), ...(typeof project === "string" ? { project } : {}), ...(action.level === undefined ? {} : { minLevel: action.level }) }
   });
   if ("recordAs" in answer) return { ok: true, recordAs: { ...answer.recordAs, caller } };
@@ -247,7 +258,7 @@ function byLevel(input: ActionDecisionInput, action: DeclaredAction, caller: str
 export type ActionsView =
   | { declared: false }
   | { declared: true; valid: false; errors: string[] }
-  | { declared: true; valid: true; actions: DeclaredAction[]; levels?: Array<{ org: string; audience: string }> };
+  | { declared: true; valid: true; actions: DeclaredAction[]; levels?: Array<{ org: string; audience: string }>; standing?: true };
 
 /** The host reader of extensions/actions/0.1 (DEC-0121 AP-1), as `connectionsView` is for connections. */
 export function actionsView(wellKnown: unknown): ActionsView {
@@ -258,8 +269,8 @@ export function actionsView(wellKnown: unknown): ActionsView {
   if (extensionShape(value) !== true) {
     return { declared: true, valid: false, errors: (extensionShape.errors as ErrorObject[]).map((error) => `${error.instancePath || "/"} ${error.keyword}`) };
   }
-  const { actions, levels } = value as { actions: DeclaredAction[]; levels?: Array<{ org: string; audience: string }> };
-  return { declared: true, valid: true, actions, ...(levels === undefined ? {} : { levels }) };
+  const { actions, levels, standing } = value as { actions: DeclaredAction[]; levels?: Array<{ org: string; audience: string }>; standing?: true };
+  return { declared: true, valid: true, actions, ...(levels === undefined ? {} : { levels }), ...(standing === undefined ? {} : { standing }) };
 }
 
 const pointerToken = (token: string) => token.replace(/~/g, "~0").replace(/\//g, "~1");
