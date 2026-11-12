@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0156` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0164` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -11384,3 +11384,32 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `peer_owner` 1.3.0 proposal (`914c0383`), sshlg-fabric-server's (`ed799cae`, `93886034`) and the adapter's (`b8053022`)
   inputs; backlog CT-261.
 
+
+### DEC-0163: a usage report's cost sums hold within each row's rounding
+
+- **Date:** 2026-11-12
+- **Status:** Proposed 2026-11-12; accepted when the coordinator's blind readings are clean on two consecutive rounds.
+  It loosens `FAC-SEM-025`'s cost comparisons only; no schema or field changes.
+- **Context:** `FAC-SEM-025` compared a usage report's cost sums (a day against its models, a project against its task
+  runs, the projects against the days) within a fixed 0.000001 and a relative 1e-9, and the service page asked a
+  service to write each row's `costUsd` unrounded. A service that rounds each row to 6 decimal places, as the adapter's
+  kit does, can honestly put N rows up to N x 0.0000005 over their sum: the adapter measured 2.926432 against 2.926429
+  on a run localized into 15 languages (board request `785fd306`, thread `14937b75`, FAA-310).
+- **Decision:** every cost sum `FAC-SEM-025` checks holds within 0.000001, plus 0.0000005 for each row summed on either
+  side of the comparison, plus a relative 1e-9 ([service](specification/service.md#usage-report)): a day against its
+  models counts the day's row and each model's row with a known cost; a project against its task runs counts each run
+  and the project; the projects against the days count each project and each day. A service may write each row's
+  `costUsd` rounded to 6 decimal places or unrounded. Calls and tokens, which are integers, are compared exactly as
+  before.
+- **Why:** the rounding of each written row is independent, so the error bound of a sum grows with the rows in it; a
+  fixed bound fails honest reports on rounding alone, while 0.0000005 per row still catches any real excess above
+  half a millionth per row.
+- **Alternatives considered:** requiring unrounded costs (refused: a service writing JSON from decimal money cannot
+  always keep binary floats unrounded, and the adapter already rounds); a fixed but larger bound (refused: it fails for
+  enough rows and hides an excess for few).
+- **Compatibility:** looser only: every report that passed still passes. Owed: none; the adapter's checker reads
+  `FAC-SEM-025` from this repository (FAA-310).
+- **Consequences / affects:** `src/usage-rules.ts` (`exceeds` and `ROW_ROUNDING_USD`, exported; the day check's
+  `close`), `docs/specification/service.md` (the usage report's sentence on rounding and `FAC-SEM-025`'s row),
+  `test/usage-rules.test.ts` (ten rows rounded up, and an excess beyond rounding).
+- **Source:** fabric-agent-adapter's board request `785fd306` (FAA-310); backlog CT-295.

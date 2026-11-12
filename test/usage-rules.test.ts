@@ -180,3 +180,35 @@ describe("usageSpend: money apart from a subscription's estimate (DEC-0110)", ()
     expect(usageSpend([...rows].reverse())?.moneyUsd).toBe(usageSpend(rows)?.moneyUsd);
   });
 });
+
+describe("FAC-SEM-025: sums of rows rounded to 6 places one by one (DEC-0163, CT-295)", () => {
+  // Ten task runs whose exact costs are 0.1000004 each: each written rounded to 6 places is 0.1, so the project's own
+  // exact total 1.000004 is written 1.000004 and the runs sum to 1.0. The other way: each run rounded up.
+  const run = (i: number, costUsd: number) => ({ taskRunId: `run-${i}`, calls: 1, unpricedCalls: 0, costUsd });
+  const day = (costUsd: number, models: number[]) => ({
+    date: "2026-10-04", calls: models.length, unpricedCalls: 0, inputTokens: 0, outputTokens: 0, costUsd,
+    byModel: models.map((c, i) => ({ provider: "local", model: `m-${i}`, costBasis: "provider", calls: 1, unpricedCalls: 0, inputTokens: 0, outputTokens: 0, costUsd: c }))
+  });
+  const tenRuns = (runCost: number, projectCost: number, dayCost: number) => ({
+    ...report,
+    days: [day(dayCost, Array.from({ length: 10 }, () => dayCost / 10))],
+    byProject: [{ projectId: "urn:project:film", calls: 10, unpricedCalls: 0, costUsd: projectCost, taskRuns: Array.from({ length: 10 }, (_, i) => run(i, runCost)) }]
+  });
+  it("passes ten runs each rounded up by 4e-7, which the fixed 0.000001 refused", () => {
+    // Exact runs 0.2925996 each round to 0.2926; the project's exact 2.925996 rounds to 2.925996.
+    expect(paths(tenRuns(0.2926, 2.925996, 2.926))).toEqual([]);
+  });
+  it("still refuses runs that cost more than rounding allows", () => {
+    // Eleven rows on the two sides allow 0.0000055 + 0.000001; 0.00001 over is beyond it.
+    expect(paths(tenRuns(0.2926, 2.92599, 2.926))).toEqual(["FAC-SEM-025 /byProject/0/taskRuns"]);
+  });
+  it("passes a day whose ten models are each rounded up, and refuses one off by more", () => {
+    const models = Array.from({ length: 10 }, () => 0.100001);
+    expect(paths({ ...report, byProject: undefined, days: [day(1.000005, models)] })).toEqual([]);
+    expect(paths({ ...report, byProject: undefined, days: [day(1.00002, models)] })).toEqual(["FAC-SEM-025 /days/0/costUsd"]);
+  });
+  it("passes projects summed against days within a row's rounding each", () => {
+    const projects = Array.from({ length: 10 }, (_, i) => ({ projectId: `urn:project:p${i}`, calls: 1, unpricedCalls: 0, costUsd: 0.100001, taskRuns: [] }));
+    expect(paths({ ...report, days: [day(1.000005, Array.from({ length: 10 }, () => 0.1000005))], byProject: projects })).toEqual([]);
+  });
+});
