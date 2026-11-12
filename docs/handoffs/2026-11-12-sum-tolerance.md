@@ -21,6 +21,9 @@ Branch `agent/ct295-sum-tolerance-20261112`, from main `d69dc363`. Entry point: 
   owners. Until the kit's copies carry it, the kit (which already rounds) is refused by those readers: track it on
   the same thread. At its repin the adapter's usage parity tests also move their count pin from [208, 8] to [209, 8]
   (the new positive fixture), by hand.
+- The FAA-310 notice also names what the ports owe beyond the per-row allowance: the day check's finiteness (a model
+  costing 1e400 against a finite day is refused now; the kits' old distance passes it), and the message helper that
+  prints a cost of 1e15 or more unscaled; the adapter adds a vendored case for each at its repin.
 - After merge, one board request to each project owning one of the 11 copies that owe the change from their owners
   (the old-name kits, the vendored probes, the probe ports and the vendored `usage-rules.ts`), naming its file.
 - After merge, the knowledge base's mirror of service.md still says "unrounded" until `node scripts/workspace.mjs sync`
@@ -28,7 +31,7 @@ Branch `agent/ct295-sum-tolerance-20261112`, from main `d69dc363`. Entry point: 
 
 ## Checks run
 
-- `pnpm run check` exit 0 (11177 tests passed, 3 skipped), on the round-1 fold (11178 passed, 3 skipped), on the round-2 fold (11184 passed, 3 skipped; coverage floors, UX lint, docs check, privacy check), on the round-3 fold (11184 passed, 3 skipped) on the round-4 fold (11185 passed, 3 skipped) and on the round-5 fold (11185 passed, 3 skipped).
+- `pnpm run check` exit 0 (11177 tests passed, 3 skipped), on the round-1 fold (11178 passed, 3 skipped), on the round-2 fold (11184 passed, 3 skipped; coverage floors, UX lint, docs check, privacy check), on the round-3 fold (11184 passed, 3 skipped), on the round-4 fold (11185 passed, 3 skipped) and on the round-5 fold (11185 passed, 3 skipped).
 - Round 1 (on `65c5b76b`): unit clean (risks folded: null-cost rows no longer widen the allowance; the day's
   comparison is a distance again, so NaN is never close; the test comment matches its cases; the page states the
   relative 1e-9). Product, breaks folded: Compatibility names the copies of the rule that keep the old tolerance and
@@ -58,6 +61,12 @@ Branch `agent/ct295-sum-tolerance-20261112`, from main `d69dc363`. Entry point: 
   overflow are named in Compatibility; a finite cost too large to scale reads as itself in the message; the usage host
   row in conformance.md names DEC-0163's reader and writer duty; CT-295's goal and the course check; the adapter's count
   pin and a notice to each owner of the 11 copies in Open; this list's commas. Declined: none.
+
+## Accepted
+
+Round 6 (on `43d123f2`) clean on all three tiers, after round 5: accepted 2026-11-12. Risks folded at landing: the
+Compatibility sentence names which side's overflow is refused; the notice's port items; the merge with main
+`a050d49c` (the CT-296 row from main kept beside CT-295).
 
 ## Next task
 

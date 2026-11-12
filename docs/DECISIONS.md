@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0164` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0168` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -11390,7 +11390,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 ### DEC-0163: a usage report's cost sums hold within each row's rounding
 
 - **Date:** 2026-11-12
-- **Status:** Proposed 2026-11-12; accepted when the coordinator's blind readings are clean on two consecutive rounds.
+- **Status:** Accepted 2026-11-12, merged with this change: rounds 5 and 6 of the coordinator's blind readings (at `4275ffff` and `43d123f2`) clean on all three tiers; rounds 1 to 4 folded.
   It loosens `FAC-SEM-025`'s cost comparisons only; no schema or field changes.
 - **Amends:** DEC-0065 (the CT-40 annotation's rounding clause, "so rows are written unrounded") and DEC-0021 (the day's cost against its models).
 - **Context:** `FAC-SEM-025` compared a usage report's cost sums (a day against its models, a project against its task
@@ -11414,7 +11414,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Alternatives considered:** requiring unrounded costs (refused: a service writing JSON from decimal money cannot
   always keep binary floats unrounded, and the adapter already rounds); a fixed but larger bound (refused: it fails for
   enough rows and hides an excess for few).
-- **Compatibility:** looser only for this repository's checker: every report whose costs sum to finite numbers that passed still passes; a report whose cost sum overflows to an infinity against a finite one is now refused, and two sums that both overflow cannot be compared and pass. Read on
+- **Compatibility:** looser only for this repository's checker: every report whose costs sum to finite numbers that passed still passes; a report whose bounded side's sum overflows to an infinity while the side bounding it stays finite (runs against their project, projects against the days), or whose models' sum overflows against a finite day, is now refused; two sums that both overflow, or an overflowing bound against a finite sum, pass. Read on
   2026-11-12, the copies of the rule that do not read it from here and keep the fixed tolerance: the adapter's kit in
   Python and Node (`fabric_usage.py`, `fabric-usage.mjs`) and the probe that runs it, which owe the per-row allowance
   and a test of ten rows rounded up (FAA-310 part 2); and every copy outside it, which its owner changes. On the
