@@ -89,6 +89,12 @@ context, DEC-0111, DEC-0114): a device sends each enrollment's check-ins to that
 only to its context's organization, and a grant's usage reaches the grant's organization as a daily `grant.usage`
 event, which carries the grant's own `org:<orgId>` (DEC-0086) ([contexts](docs/specification/contexts.md), DEC-0082).
 
+**Context of a task**: The one context (`personal` or `org:<orgId>`) a task's acts run in, settled before an act that
+crosses from what its sources claim: the operator's words, the board request's Project, the folder's Project, the
+grant, the place. When no source claims and the agent reaches more than one context, or two claims differ, the agent
+asks the operator once, every candidate an option, and never guesses (DEC-0165,
+[contexts](docs/specification/contexts.md#the-context-of-a-task)).
+
 **Network**: A **Context**, seen as the machines that work in it (the operator's NET-1, 2026-10-15, recorded by
 DEC-0084): a person's own network is their personal estate, `personal`, all their own machines; any other network is an
 organization, `org:<orgId>`. Creating a network of one's own machines is the "create my network" ceremony; an

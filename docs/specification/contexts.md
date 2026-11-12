@@ -1,6 +1,6 @@
 # Contexts — `personal` and `org:<orgId>`
 
-DEC-0082 · rule codes `FAC-SEM-110` (here) and `FAC-SEM-111` ([estate record](estate-record.md#semantic-rules)) ·
+DEC-0082, DEC-0165 · rule codes `FAC-SEM-110`, `FAC-SEM-172` (here) and `FAC-SEM-111` ([estate record](estate-record.md#semantic-rules)) ·
 schema [`common.schema.json#/$defs/contextId`](../../schemas/common.schema.json) · code
 [`src/context-route.ts`](../../src/context-route.ts), [`src/context-rules.ts`](../../src/context-rules.ts) · vectors
 [`fixtures/vectors/context-route.json`](../../fixtures/vectors/context-route.json), written by
@@ -259,11 +259,49 @@ then, enrolling in an organization the person does not own stays off (the K-1 co
    60), by the same `extScalar` rule. Its compatibility and the sender gate are in
    [share registration](share-registration.md#compatibility).
 
+## The context of a task
+
+DEC-0165 (CT-292) says how an agent learns the context of the work in front of it. Code
+[`src/task-context.ts`](../../src/task-context.ts) (`resolveTaskContext`), vectors
+[`fixtures/vectors/task-context.json`](../../fixtures/vectors/task-context.json).
+
+- **TC-1, one context before an act that crosses.** Before an agent acts on a resource that belongs to a context (an
+  account, a key, a grant, a board, another agent, a data store, an organization's repository), the task it serves has
+  exactly one context. A task never acts in two; work that needs two is two tasks, each with its own context. Reading
+  the agent's own working folder needs none. A settled context is written into the task's execution context
+  (`execution-context.schema.json`, `context`).
+- **TC-2, the sources.** Each source that names a context is a claim: (1) the operator's words for this task naming an
+  organization, its product or its flow (a relayed word as DEC-0126 accepts it); (2) the board request the task serves,
+  by its requesting Project's organization in the registry; (3) the folder's Project by
+  [folder attribution](folder-attribution.md) (DEC-0089) and that Project's organizations, a Project with none claiming
+  `personal`; (4) the grant the act runs under, when it states `context`; (5) the place, when it belongs to one
+  organization. The context is **settled** when at least one source claims and every claim names the same context; a
+  Project listed for two organizations claims both, which settles nothing. Sources are read, never written.
+- **TC-3, unsettled: ask once.** When no source claims and the agent reaches resources of more than one context, or two
+  claims differ, the context is **unsettled**: the agent asks the operator once, before any act that crosses, naming
+  each candidate context (with the organization's own name where the person knows it by name), the flow or product in
+  each and what the task would do there, each candidate an option. It never guesses, never picks the safest candidate
+  and never splits the task between candidates. The question is a step that waits: every part whose context is settled
+  goes on meanwhile. An agent that reaches one context, or whose context is settled, asks nothing.
+- **TC-4, where the question goes.** With a person in the session, in the chat; with none (a dispatched run, a headless
+  place), through the host's question surface (`fabric_question_ask` or its equal), the open step named in the run's
+  report; a board request it cannot place is answered with a `com.reply` naming the step, never settled in a guessed
+  context. A place's profile never settles a context by itself.
+- **TC-5, the answer is recorded.** The answer is kept with the task (its execution context's `context`, and a session
+  hand-over's `taskContext` `{context, by: "operator", at, scope?}`), so the next session reads a settled context and
+  does not ask again. It applies to the task, or to the Project when the operator says so (`scope: project`); it changes
+  no registry record by itself.
+- **TC-6, contexts stay apart.** The question, its options and its answer go only to the operator's own session or
+  question surface: never to a board thread of either organization and never to another organization's agent, since
+  naming one membership to another links them ([linkability](#linkability)). An answer joins no two contexts: one
+  context's credentials, data and grants are never used for a task settled in another.
+
 ## Semantic rules
 
 | Code | Kind | Rule |
 |---|---|---|
 | <a id="fac-sem-110"></a>`FAC-SEM-110` | `grant`, `estate-record` | a grant whose `principalKind` is `external` never has `context` `personal`; on an estate record, each of its `shareGrants[]` (DEC-0082) |
+| <a id="fac-sem-172"></a>`FAC-SEM-172` | `task-context` | a recorded answer to a task's context is the one `resolveTaskContext` gives for its claims and reachable contexts: one context named by every claim is settled by those sources, claims that differ are a conflict, no claim with several reachable contexts is a question, never a pick (DEC-0165 TC-2, TC-3) |
 
 | Kind | Input |
 |---|---|

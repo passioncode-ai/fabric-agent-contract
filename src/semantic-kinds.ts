@@ -141,6 +141,7 @@ export const SEMANTIC_KINDS: Readonly<Record<string, SemanticKind>> = Object.fre
   "service-usage": doc("service-usage.schema.json"),
   "service-well-known": doc("service-well-known.schema.json"),
   "session-handoff": doc("session-handoff.schema.json"),
+  "task-context": wrap("claims", "reachable", "answer"),
   "session-handoff-folder": wrap("path", "mode", "kind", "permissions", "repository", "entries"),
   "session-join": wrap("events"),
   "settings-backup": doc("settings-backup.schema.json"),

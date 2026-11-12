@@ -36,6 +36,7 @@ import * as machineReport from "./machine-report.js";
 import * as mandate from "./mandate.js";
 import * as pageLinks from "./page-links.js";
 import * as pairing from "./pairing.js";
+import * as taskContext from "./task-context.js";
 import * as partnerUsage from "./partner-usage.js";
 import * as peerShare from "./peer-share.js";
 import * as relayCrypto from "./relay-crypto.js";
@@ -72,6 +73,7 @@ export const GENERATORS: readonly Generator[] = [
   { source: "mandate.ts", build: one(mandate.VECTOR_FILE, mandate.buildMandateVectors) },
   { source: "page-links.ts", build: one(pageLinks.VECTOR_FILE, pageLinks.buildPageLinkVectors) },
   { source: "pairing.ts", build: one(pairing.VECTOR_FILE, pairing.buildPairingVectors) },
+  { source: "task-context.ts", build: one(taskContext.VECTOR_FILE, taskContext.buildTaskContextVectors) },
   { source: "partner-usage.ts", build: one(partnerUsage.VECTOR_FILE, partnerUsage.buildPartnerUsageVectors) },
   { source: "peer-share.ts", build: one(peerShare.VECTOR_FILE, peerShare.buildPeerShareVectors) },
   { source: "relay-crypto.ts", build: () => relayCrypto.buildVectorFiles() },

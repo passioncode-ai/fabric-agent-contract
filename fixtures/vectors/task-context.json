@@ -1,0 +1,399 @@
+{
+  "about": "Vectors for the context of a task (DEC-0165), written by tools/vectors/task-context.ts, never by hand. cases: resolveTaskContext(claims, reachable); claims are {source, contexts} in the order the agent read them (sources: operator, board, folder, grant, place); expected is exactly what the reference returns.",
+  "cases": [
+    {
+      "name": "one reachable context and no claim",
+      "claims": [],
+      "reachable": [
+        "org:org-a"
+      ],
+      "expected": {
+        "settled": "org:org-a",
+        "by": []
+      }
+    },
+    {
+      "name": "nothing reachable and no claim: personal",
+      "claims": [],
+      "reachable": [],
+      "expected": {
+        "settled": "personal",
+        "by": []
+      }
+    },
+    {
+      "name": "the same context reachable twice",
+      "claims": [],
+      "reachable": [
+        "org:org-a",
+        "org:org-a"
+      ],
+      "expected": {
+        "settled": "org:org-a",
+        "by": []
+      }
+    },
+    {
+      "name": "the folder's Project claims one organization",
+      "claims": [
+        {
+          "source": "folder",
+          "contexts": [
+            "org:org-a"
+          ]
+        }
+      ],
+      "reachable": [
+        "org:org-a",
+        "org:org-b",
+        "personal"
+      ],
+      "expected": {
+        "settled": "org:org-a",
+        "by": [
+          "folder"
+        ]
+      }
+    },
+    {
+      "name": "the operator's words and the board request agree",
+      "claims": [
+        {
+          "source": "operator",
+          "contexts": [
+            "org:org-b"
+          ]
+        },
+        {
+          "source": "board",
+          "contexts": [
+            "org:org-b"
+          ]
+        }
+      ],
+      "reachable": [
+        "org:org-a",
+        "org:org-b"
+      ],
+      "expected": {
+        "settled": "org:org-b",
+        "by": [
+          "operator",
+          "board"
+        ]
+      }
+    },
+    {
+      "name": "a Project with no organization claims personal",
+      "claims": [
+        {
+          "source": "folder",
+          "contexts": [
+            "personal"
+          ]
+        }
+      ],
+      "reachable": [
+        "org:org-a",
+        "personal"
+      ],
+      "expected": {
+        "settled": "personal",
+        "by": [
+          "folder"
+        ]
+      }
+    },
+    {
+      "name": "a claim outside the reachable contexts still settles it",
+      "claims": [
+        {
+          "source": "grant",
+          "contexts": [
+            "org:org-a"
+          ]
+        }
+      ],
+      "reachable": [
+        "org:org-b"
+      ],
+      "expected": {
+        "settled": "org:org-a",
+        "by": [
+          "grant"
+        ]
+      }
+    },
+    {
+      "name": "one source named twice",
+      "claims": [
+        {
+          "source": "folder",
+          "contexts": [
+            "org:org-a"
+          ]
+        },
+        {
+          "source": "folder",
+          "contexts": [
+            "org:org-a"
+          ]
+        }
+      ],
+      "reachable": [
+        "org:org-a",
+        "org:org-b"
+      ],
+      "expected": {
+        "settled": "org:org-a",
+        "by": [
+          "folder"
+        ]
+      }
+    },
+    {
+      "name": "no claim, two organizations reachable",
+      "claims": [],
+      "reachable": [
+        "org:org-a",
+        "org:org-b"
+      ],
+      "expected": {
+        "ask": [
+          "org:org-a",
+          "org:org-b"
+        ]
+      }
+    },
+    {
+      "name": "no claim, personal and an organization reachable",
+      "claims": [],
+      "reachable": [
+        "personal",
+        "org:org-a"
+      ],
+      "expected": {
+        "ask": [
+          "personal",
+          "org:org-a"
+        ]
+      }
+    },
+    {
+      "name": "a Project listed for two organizations",
+      "claims": [
+        {
+          "source": "folder",
+          "contexts": [
+            "org:org-a",
+            "org:org-b"
+          ]
+        }
+      ],
+      "reachable": [
+        "org:org-a",
+        "org:org-b"
+      ],
+      "expected": {
+        "conflict": [
+          {
+            "source": "folder",
+            "context": "org:org-a"
+          },
+          {
+            "source": "folder",
+            "context": "org:org-b"
+          }
+        ]
+      }
+    },
+    {
+      "name": "the operator's words against the folder's Project",
+      "claims": [
+        {
+          "source": "operator",
+          "contexts": [
+            "org:org-b"
+          ]
+        },
+        {
+          "source": "folder",
+          "contexts": [
+            "org:org-a"
+          ]
+        }
+      ],
+      "reachable": [
+        "org:org-a",
+        "org:org-b"
+      ],
+      "expected": {
+        "conflict": [
+          {
+            "source": "operator",
+            "context": "org:org-b"
+          },
+          {
+            "source": "folder",
+            "context": "org:org-a"
+          }
+        ]
+      }
+    },
+    {
+      "name": "a grant's context against the place's",
+      "claims": [
+        {
+          "source": "grant",
+          "contexts": [
+            "org:org-a"
+          ]
+        },
+        {
+          "source": "place",
+          "contexts": [
+            "org:org-b"
+          ]
+        }
+      ],
+      "reachable": [
+        "org:org-a",
+        "org:org-b"
+      ],
+      "expected": {
+        "conflict": [
+          {
+            "source": "grant",
+            "context": "org:org-a"
+          },
+          {
+            "source": "place",
+            "context": "org:org-b"
+          }
+        ]
+      }
+    },
+    {
+      "name": "personal against an organization",
+      "claims": [
+        {
+          "source": "board",
+          "contexts": [
+            "personal"
+          ]
+        },
+        {
+          "source": "folder",
+          "contexts": [
+            "org:org-a"
+          ]
+        }
+      ],
+      "reachable": [
+        "org:org-a",
+        "personal"
+      ],
+      "expected": {
+        "conflict": [
+          {
+            "source": "board",
+            "context": "personal"
+          },
+          {
+            "source": "folder",
+            "context": "org:org-a"
+          }
+        ]
+      }
+    },
+    {
+      "name": "two spellings of one id are two contexts",
+      "claims": [
+        {
+          "source": "operator",
+          "contexts": [
+            "org:Org-A"
+          ]
+        },
+        {
+          "source": "folder",
+          "contexts": [
+            "org:org-A"
+          ]
+        }
+      ],
+      "reachable": [
+        "org:org-a"
+      ],
+      "expected": {
+        "conflict": [
+          {
+            "source": "operator",
+            "context": "org:Org-A"
+          },
+          {
+            "source": "folder",
+            "context": "org:org-A"
+          }
+        ]
+      }
+    },
+    {
+      "name": "a claim from an unknown source",
+      "claims": [
+        {
+          "source": "rumour",
+          "contexts": [
+            "org:org-a"
+          ]
+        }
+      ],
+      "reachable": [
+        "org:org-a"
+      ],
+      "expected": {
+        "fault": "claims-invalid"
+      }
+    },
+    {
+      "name": "a claim naming no context",
+      "claims": [
+        {
+          "source": "folder",
+          "contexts": []
+        }
+      ],
+      "reachable": [
+        "org:org-a"
+      ],
+      "expected": {
+        "fault": "claims-invalid"
+      }
+    },
+    {
+      "name": "a claim naming something that is not a context",
+      "claims": [
+        {
+          "source": "folder",
+          "contexts": [
+            "Org A"
+          ]
+        }
+      ],
+      "reachable": [
+        "org:org-a"
+      ],
+      "expected": {
+        "fault": "claims-invalid"
+      }
+    },
+    {
+      "name": "reachable is not a list",
+      "claims": [],
+      "reachable": "org:org-a",
+      "expected": {
+        "fault": "reachable-invalid"
+      }
+    }
+  ]
+}

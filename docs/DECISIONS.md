@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0156` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0166` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -11384,3 +11384,45 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `peer_owner` 1.3.0 proposal (`914c0383`), sshlg-fabric-server's (`ed799cae`, `93886034`) and the adapter's (`b8053022`)
   inputs; backlog CT-261.
 
+### DEC-0165: the context of a task, settled before an agent acts
+
+- **Date:** 2026-11-12
+- **Status:** Proposed 2026-11-12 from the design `docs/evidence/plans/2026-11-12-ct292-task-context.md` (CT-292); accepted
+  when the coordinator's blind readings are clean on two consecutive rounds. One module, one rule code (`FAC-SEM-172`),
+  two optional members; nothing existing changes meaning.
+- **Context:** the operator asked on 2026-11-12, in this repository's session `7c9eb2c2`: «важное правило пероработать
+  что если есть нексколько агентов в разныз организация в доступе то для решения задачи если не понятно из окнтекста
+  проекта то надо явно уточнчить к какому флоу/организауциям обращаземся», then «это не правило а надо все сделать в
+  скилах ... на уровне протокола». The contract routes data by context (DEC-0082) but never said how an agent learns
+  the context of a task, so an agent reaching several organizations guessed, and a wrong guess spends one
+  organization's keys or sends its data for another's task.
+- **Decision:** [contexts](specification/contexts.md#the-context-of-a-task) TC-1 to TC-6.
+  1. **TC-1.** Before an act on a resource of a context, a task has exactly one context; work in two is two tasks.
+  2. **TC-2.** The claims: the operator's words, the board request's Project, the folder's Project (DEC-0089) and its
+     organizations, the grant's `context`, the place. Settled when at least one claims and all name one context; a
+     Project of two organizations claims both.
+  3. **TC-3, TC-4.** Unsettled (no claim with several reachable, or claims that differ): the agent asks the operator once,
+     every candidate an option, never guessing, picking or splitting; in the chat, or with no person through the host's
+     question surface; never on a board thread.
+  4. **TC-5.** The answer is kept with the task: the execution context's optional `context`, a session hand-over's
+     optional `taskContext` `{context, by: "operator", at, scope?}`.
+  5. **TC-6.** The question and its answer stay in the operator's own surface, and one context's credentials, data and
+     grants never serve a task settled in another.
+  6. **The reference.** `resolveTaskContext(claims, reachable)` in `src/task-context.ts` answers `{settled, by}`,
+     `{ask}` or `{conflict}`, never a pick; kind `task-context` holds a recorded answer to it under `FAC-SEM-172`;
+     vectors `fixtures/vectors/task-context.json`.
+- **Why:** a guess between organizations is the harm unlinkable memberships exist to prevent; one explicit question,
+  only when the sources do not settle it, keeps the operator's word carried out the first time everywhere else.
+- **Alternatives considered:** the safest candidate (refused: there is no safe organization to spend another's keys
+  in); a rule in one agent's instructions (refused by the operator: the protocol and the skills); asking on the board
+  (refused: it would name one membership to another, TC-6).
+- **Compatibility:** additive. Owed: the adapter's kits and working-with-Fabric skill, and the agents built from the
+  agents database, read the sources at session start and ask per TC-3 (FAA-299); Fabric's `fabric_whoami` names the
+  reachable and settled contexts; Fabric Switchboard's groups and Project Observatory's `project.resolve` give their
+  claims. With DEC-0156 (`agent/ct220-operators-word-v2`), whichever lands second makes OW-3 name TC-3 as a step that
+  waits (the handoff's landing note).
+- **Consequences / affects:** `src/task-context.ts` (new), `src/semantic-kinds.ts`, `src/semantic-rules.ts`,
+  `schemas/execution-context.schema.json` (`context`), `schemas/session-handoff.schema.json` (`taskContext`),
+  `tools/vectors/task-context.ts`, `fixtures/vectors/task-context.json`, `test/task-context.test.ts`;
+  `docs/specification/contexts.md`, `conformance.md` (rows, module, code), `CONTEXT.md`.
+- **Source:** the operator's words of 2026-11-12 (session `7c9eb2c2`); the design; backlog CT-292.

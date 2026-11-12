@@ -14,6 +14,7 @@
         "kind": { "const": "execution-context" },
         "meta": { "$ref": "common.schema.json#/$defs/revisionMeta" },
         "project": { "$ref": "common.schema.json#/$defs/uri" },
+        "context": { "$ref": "common.schema.json#/$defs/contextId", "description": "DEC-0165 TC-1: the context the task runs in, once settled (TC-2) or answered by the operator (TC-3); the agent acts on no resource of another context." },
         "agent": { "$ref": "common.schema.json#/$defs/uri" },
         "provider": { "$ref": "common.schema.json#/$defs/revisionRef" },
         "workingDirectory": { "type": "object", "required": ["repository", "mode"], "properties": { "repository": { "$ref": "common.schema.json#/$defs/uri" }, "mode": { "enum": ["project-root", "worktree", "temporary"] } }, "additionalProperties": false },
