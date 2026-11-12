@@ -1,0 +1,3203 @@
+{
+  "about": "Vectors for authority levels (DEC-0162), written by tools/vectors/levels.ts, never by hand. keys: Ed25519 test keys, each seed the SHA-256 of a published label (anyone can derive them; nothing trusts them). keySet: organization A's org-key-set/1, signed by root. memberships: org-membership/2 attestations (and the issuer's /1 for a /1 reader) signed by the listed key; digests: sha256 of each one's signed bytes, the value a hub writes as a delegation token's mem. actions: actionDecision(input) with input.levels naming a key set by value. mandates: actionDecision(input) for a call that carries a level mandate. verify: verifyOrgMembership(memberships[name] or the document, trust), trust.now an RFC 3339 string a port parses strictly, trust.keySet the name keySet. expected is exactly what the reference returns.",
+  "keys": {
+    "root": {
+      "seed": "744330c6d908c61b4c1eb511af9ae55b3c015750eff8dea3168a159ac29d61c0",
+      "kid": "root-org-a-1",
+      "x": "qfpyq0FzR5FzMAt22jD2YU3H-o-si5u3WWpz3Z4USuo"
+    },
+    "signing": {
+      "seed": "272d83b3f8b0ac35f2486569512cf5905803abcda7d60cf252096a97f4932b65",
+      "kid": "mem-2026-10",
+      "x": "YxEDJVK86TVti3mnfdU9cSSlKdjXDJM9A3eKVqIxr7U"
+    }
+  },
+  "keySet": {
+    "type": "org-key-set/1",
+    "issuer": "https://orgs.example",
+    "org": "org:org-a",
+    "revision": 1,
+    "issuedAt": "2026-10-15T00:00:00Z",
+    "keys": [
+      {
+        "kid": "mem-2026-10",
+        "alg": "EdDSA",
+        "x": "YxEDJVK86TVti3mnfdU9cSSlKdjXDJM9A3eKVqIxr7U",
+        "notBefore": "2026-10-15T00:00:00Z",
+        "notAfter": "2027-01-01T00:00:00Z"
+      }
+    ],
+    "revoked": [],
+    "administrators": [],
+    "alg": "EdDSA",
+    "kid": "root-org-a-1",
+    "sig": "vufCXJ4roCUAM3MEuAikBXHXZ8mdhK7hyiZkkFzc14MuJ8fvPq6zYxOOOH8KtIuBEIUcXesvsy1NXXs9rYqIBw"
+  },
+  "memberships": {
+    "owner": {
+      "type": "org-membership/2",
+      "issuer": "https://orgs.example",
+      "org": "org:org-a",
+      "audience": "reviews-service-a1",
+      "subject": "m-owner-01",
+      "role": "owner",
+      "projects": [],
+      "external": false,
+      "status": "active",
+      "revision": 3,
+      "membershipEndsAt": null,
+      "issuedAt": "2026-10-25T11:00:00Z",
+      "notBefore": "2026-10-25T11:00:00Z",
+      "expiresAt": "2026-10-25T12:00:00Z",
+      "extensions": {},
+      "alg": "EdDSA",
+      "kid": "mem-2026-10",
+      "sig": "DWXhTb1wl4-GuoOEi148WMcPzY-rWvxeCnECywHvCNsQLsSO3n0TlMlsybW3anYPQ8fdK_VD4DauMmC42sxXBw"
+    },
+    "admin": {
+      "type": "org-membership/2",
+      "issuer": "https://orgs.example",
+      "org": "org:org-a",
+      "audience": "reviews-service-a1",
+      "subject": "m-admin-02",
+      "role": "admin",
+      "projects": [],
+      "external": false,
+      "status": "active",
+      "revision": 3,
+      "membershipEndsAt": null,
+      "issuedAt": "2026-10-25T11:00:00Z",
+      "notBefore": "2026-10-25T11:00:00Z",
+      "expiresAt": "2026-10-25T12:00:00Z",
+      "extensions": {},
+      "alg": "EdDSA",
+      "kid": "mem-2026-10",
+      "sig": "Rg3hZAm3Hgabq5LB3LPvOjkbms6W_jKJaGFFOHyPFOIabVXhP2gvzpb_wXkR30Xxu3UQK-ZW_eTAF9aF6qwQDA"
+    },
+    "architect": {
+      "type": "org-membership/2",
+      "issuer": "https://orgs.example",
+      "org": "org:org-a",
+      "audience": "reviews-service-a1",
+      "subject": "m-arch-03",
+      "role": "architect",
+      "projects": [
+        "alpha",
+        "beta"
+      ],
+      "external": false,
+      "status": "active",
+      "revision": 3,
+      "membershipEndsAt": null,
+      "issuedAt": "2026-10-25T11:00:00Z",
+      "notBefore": "2026-10-25T11:00:00Z",
+      "expiresAt": "2026-10-25T12:00:00Z",
+      "extensions": {},
+      "alg": "EdDSA",
+      "kid": "mem-2026-10",
+      "sig": "RrABkwV8ubdv_gWsjle26Lj5uG4Q4FeAc2qFy7ENRhxw3m8ioGjcxYd3QIiUM-lGgV4jUatmUi2BtWBFGdO-Aw"
+    },
+    "member": {
+      "type": "org-membership/2",
+      "issuer": "https://orgs.example",
+      "org": "org:org-a",
+      "audience": "reviews-service-a1",
+      "subject": "m-member-04",
+      "role": "member",
+      "projects": [],
+      "external": false,
+      "status": "active",
+      "revision": 3,
+      "membershipEndsAt": null,
+      "issuedAt": "2026-10-25T11:00:00Z",
+      "notBefore": "2026-10-25T11:00:00Z",
+      "expiresAt": "2026-10-25T12:00:00Z",
+      "extensions": {},
+      "alg": "EdDSA",
+      "kid": "mem-2026-10",
+      "sig": "j0u4L-y7-4KNK0vGLjpvc7w_dmKUsXOwXzDn9_zOQGck27-FdiY9EZ8690L2KmDav8xJZoM2rIJLgMscXda6Cg"
+    },
+    "ended": {
+      "type": "org-membership/2",
+      "issuer": "https://orgs.example",
+      "org": "org:org-a",
+      "audience": "reviews-service-a1",
+      "subject": "m-admin-05",
+      "role": "admin",
+      "projects": [],
+      "external": false,
+      "status": "ended",
+      "revision": 4,
+      "membershipEndsAt": null,
+      "issuedAt": "2026-10-25T11:00:00Z",
+      "notBefore": "2026-10-25T11:00:00Z",
+      "expiresAt": "2026-10-25T12:00:00Z",
+      "extensions": {},
+      "alg": "EdDSA",
+      "kid": "mem-2026-10",
+      "sig": "Ar-udwEysZng5QtqxS1dN74kRq_VTGZjH2BMvTjruh5wd7qHrHiB5jusgPnj3tjGfAGOM9S1iv7spfCkDwyYAg"
+    },
+    "elsewhere": {
+      "type": "org-membership/2",
+      "issuer": "https://orgs.example",
+      "org": "org:org-a",
+      "audience": "billing-service-b2",
+      "subject": "m-admin-06",
+      "role": "admin",
+      "projects": [],
+      "external": false,
+      "status": "active",
+      "revision": 3,
+      "membershipEndsAt": null,
+      "issuedAt": "2026-10-25T11:00:00Z",
+      "notBefore": "2026-10-25T11:00:00Z",
+      "expiresAt": "2026-10-25T12:00:00Z",
+      "extensions": {},
+      "alg": "EdDSA",
+      "kid": "mem-2026-10",
+      "sig": "ykZrd4dMkHKfilkESUS2pJvCY86rLnqNvtA3nSruoZx91e0qFmLb2bdQk3nX6MR60f6bO67A5LUaTQf9z7JnDA"
+    },
+    "expired": {
+      "type": "org-membership/2",
+      "issuer": "https://orgs.example",
+      "org": "org:org-a",
+      "audience": "reviews-service-a1",
+      "subject": "m-admin-07",
+      "role": "admin",
+      "projects": [],
+      "external": false,
+      "status": "active",
+      "revision": 3,
+      "membershipEndsAt": null,
+      "issuedAt": "2026-10-25T10:00:00Z",
+      "notBefore": "2026-10-25T10:00:00Z",
+      "expiresAt": "2026-10-25T11:25:00Z",
+      "extensions": {},
+      "alg": "EdDSA",
+      "kid": "mem-2026-10",
+      "sig": "a23MMtoOA4ETmx3OY6faRRPWo9hjIQJ18sPz5n5F7l0ODFn4_P3JsTqtrq9uW45NBTWsmdSL9SaZ0EZfxeyTDQ"
+    },
+    "v1Member": {
+      "type": "org-membership/1",
+      "issuer": "https://orgs.example",
+      "org": "org:org-a",
+      "audience": "reviews-service-a1",
+      "subject": "m-arch-03",
+      "role": "member",
+      "external": false,
+      "status": "active",
+      "revision": 3,
+      "membershipEndsAt": null,
+      "issuedAt": "2026-10-25T11:00:00Z",
+      "notBefore": "2026-10-25T11:00:00Z",
+      "expiresAt": "2026-10-25T12:00:00Z",
+      "extensions": {},
+      "alg": "EdDSA",
+      "kid": "mem-2026-10",
+      "sig": "o3l6db0OnVoe5DNAWoghFGrU1UyLx75Ai1XU-tSYUPDJ2Ro_kRzyOCaJaH2E4uTZGUHUSXffoYs5tteKpoHHBg"
+    }
+  },
+  "digests": {
+    "owner": "sha256:614fc6f0c76021eb1a4a6de48c6a4c674992936d83d94d33630d956224d997a0",
+    "admin": "sha256:5858c2d548aaf65bbe4f80625bb7315693cad1e36ac8b30f08e82cf978ec9ff5",
+    "architect": "sha256:3fd5ef20ba24c7a1382e32a720bf915827c2b2f93741802eaf8720157e9f9d8d",
+    "member": "sha256:87a282c8c3a994856a896ad73c590db80cbc1110344990d03bfecfa7a744804d",
+    "ended": "sha256:f4471ff70e4ae340b2341f74c8bccb5c455e63d7fc8c887a7be12ee803c24360",
+    "elsewhere": "sha256:21e66f5d608da41d3698dc93773d770c30b88953416208c15683fe876275f0d5",
+    "expired": "sha256:daac7f5a01e39d31c6b4270823f4ed4e0dab3b68a8b6ff1ccf481c8d8711fd9e",
+    "v1Member": "sha256:6d4e86f99128182be46bb2c3b953321ad25b37dfc1cdb6e9ab7c091a647e4e4f"
+  },
+  "actions": [
+    {
+      "name": "the owner decides a relayed action from T2",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T2",
+        "caller": "agent:claude-code",
+        "decision": {
+          "by": "level",
+          "via": "level-command",
+          "level": "owner",
+          "org": "org:org-a",
+          "action": "approve-reply",
+          "instruction": "approve the reply to the review from Anna",
+          "at": "2026-10-25T11:20:00Z",
+          "membership": {
+            "type": "org-membership/2",
+            "issuer": "https://orgs.example",
+            "org": "org:org-a",
+            "audience": "reviews-service-a1",
+            "subject": "m-owner-01",
+            "role": "owner",
+            "projects": [],
+            "external": false,
+            "status": "active",
+            "revision": 3,
+            "membershipEndsAt": null,
+            "issuedAt": "2026-10-25T11:00:00Z",
+            "notBefore": "2026-10-25T11:00:00Z",
+            "expiresAt": "2026-10-25T12:00:00Z",
+            "extensions": {},
+            "alg": "EdDSA",
+            "kid": "mem-2026-10",
+            "sig": "DWXhTb1wl4-GuoOEi148WMcPzY-rWvxeCnECywHvCNsQLsSO3n0TlMlsybW3anYPQ8fdK_VD4DauMmC42sxXBw"
+          }
+        },
+        "now": "2026-10-25T11:30:00Z",
+        "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
+        "levels": {
+          "org:org-a": {
+            "audience": "reviews-service-a1",
+            "keySet": {
+              "type": "org-key-set/1",
+              "issuer": "https://orgs.example",
+              "org": "org:org-a",
+              "revision": 1,
+              "issuedAt": "2026-10-15T00:00:00Z",
+              "keys": [
+                {
+                  "kid": "mem-2026-10",
+                  "alg": "EdDSA",
+                  "x": "YxEDJVK86TVti3mnfdU9cSSlKdjXDJM9A3eKVqIxr7U",
+                  "notBefore": "2026-10-15T00:00:00Z",
+                  "notAfter": "2027-01-01T00:00:00Z"
+                }
+              ],
+              "revoked": [],
+              "administrators": [],
+              "alg": "EdDSA",
+              "kid": "root-org-a-1",
+              "sig": "vufCXJ4roCUAM3MEuAikBXHXZ8mdhK7hyiZkkFzc14MuJ8fvPq6zYxOOOH8KtIuBEIUcXesvsy1NXXs9rYqIBw"
+            }
+          }
+        },
+        "tokenMem": "sha256:614fc6f0c76021eb1a4a6de48c6a4c674992936d83d94d33630d956224d997a0"
+      },
+      "expected": {
+        "ok": true,
+        "recordAs": {
+          "by": "level",
+          "via": "level-command",
+          "level": "owner",
+          "org": "org:org-a",
+          "approver": "m-owner-01",
+          "membershipDigest": "sha256:614fc6f0c76021eb1a4a6de48c6a4c674992936d83d94d33630d956224d997a0",
+          "revision": 3,
+          "caller": "agent:claude-code"
+        }
+      }
+    },
+    {
+      "name": "an administrator decides from T0",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T0",
+        "caller": "agent:claude-code",
+        "decision": {
+          "by": "level",
+          "via": "level-command",
+          "level": "admin",
+          "org": "org:org-a",
+          "action": "approve-reply",
+          "instruction": "approve the reply to the review from Anna",
+          "at": "2026-10-25T11:20:00Z",
+          "membership": {
+            "type": "org-membership/2",
+            "issuer": "https://orgs.example",
+            "org": "org:org-a",
+            "audience": "reviews-service-a1",
+            "subject": "m-admin-02",
+            "role": "admin",
+            "projects": [],
+            "external": false,
+            "status": "active",
+            "revision": 3,
+            "membershipEndsAt": null,
+            "issuedAt": "2026-10-25T11:00:00Z",
+            "notBefore": "2026-10-25T11:00:00Z",
+            "expiresAt": "2026-10-25T12:00:00Z",
+            "extensions": {},
+            "alg": "EdDSA",
+            "kid": "mem-2026-10",
+            "sig": "Rg3hZAm3Hgabq5LB3LPvOjkbms6W_jKJaGFFOHyPFOIabVXhP2gvzpb_wXkR30Xxu3UQK-ZW_eTAF9aF6qwQDA"
+          }
+        },
+        "now": "2026-10-25T11:30:00Z",
+        "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
+        "levels": {
+          "org:org-a": {
+            "audience": "reviews-service-a1",
+            "keySet": {
+              "type": "org-key-set/1",
+              "issuer": "https://orgs.example",
+              "org": "org:org-a",
+              "revision": 1,
+              "issuedAt": "2026-10-15T00:00:00Z",
+              "keys": [
+                {
+                  "kid": "mem-2026-10",
+                  "alg": "EdDSA",
+                  "x": "YxEDJVK86TVti3mnfdU9cSSlKdjXDJM9A3eKVqIxr7U",
+                  "notBefore": "2026-10-15T00:00:00Z",
+                  "notAfter": "2027-01-01T00:00:00Z"
+                }
+              ],
+              "revoked": [],
+              "administrators": [],
+              "alg": "EdDSA",
+              "kid": "root-org-a-1",
+              "sig": "vufCXJ4roCUAM3MEuAikBXHXZ8mdhK7hyiZkkFzc14MuJ8fvPq6zYxOOOH8KtIuBEIUcXesvsy1NXXs9rYqIBw"
+            }
+          }
+        },
+        "tokenMem": "sha256:5858c2d548aaf65bbe4f80625bb7315693cad1e36ac8b30f08e82cf978ec9ff5"
+      },
+      "expected": {
+        "ok": true,
+        "recordAs": {
+          "by": "level",
+          "via": "level-command",
+          "level": "admin",
+          "org": "org:org-a",
+          "approver": "m-admin-02",
+          "membershipDigest": "sha256:5858c2d548aaf65bbe4f80625bb7315693cad1e36ac8b30f08e82cf978ec9ff5",
+          "revision": 3,
+          "caller": "agent:claude-code"
+        }
+      }
+    },
+    {
+      "name": "an architect decides in its project from T1",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T1",
+        "caller": "agent:claude-code",
+        "decision": {
+          "by": "level",
+          "via": "level-command",
+          "level": "architect",
+          "org": "org:org-a",
+          "action": "approve-reply",
+          "instruction": "approve the reply to the review from Anna",
+          "at": "2026-10-25T11:20:00Z",
+          "membership": {
+            "type": "org-membership/2",
+            "issuer": "https://orgs.example",
+            "org": "org:org-a",
+            "audience": "reviews-service-a1",
+            "subject": "m-arch-03",
+            "role": "architect",
+            "projects": [
+              "alpha",
+              "beta"
+            ],
+            "external": false,
+            "status": "active",
+            "revision": 3,
+            "membershipEndsAt": null,
+            "issuedAt": "2026-10-25T11:00:00Z",
+            "notBefore": "2026-10-25T11:00:00Z",
+            "expiresAt": "2026-10-25T12:00:00Z",
+            "extensions": {},
+            "alg": "EdDSA",
+            "kid": "mem-2026-10",
+            "sig": "RrABkwV8ubdv_gWsjle26Lj5uG4Q4FeAc2qFy7ENRhxw3m8ioGjcxYd3QIiUM-lGgV4jUatmUi2BtWBFGdO-Aw"
+          },
+          "project": "alpha"
+        },
+        "now": "2026-10-25T11:30:00Z",
+        "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
+        "levels": {
+          "org:org-a": {
+            "audience": "reviews-service-a1",
+            "keySet": {
+              "type": "org-key-set/1",
+              "issuer": "https://orgs.example",
+              "org": "org:org-a",
+              "revision": 1,
+              "issuedAt": "2026-10-15T00:00:00Z",
+              "keys": [
+                {
+                  "kid": "mem-2026-10",
+                  "alg": "EdDSA",
+                  "x": "YxEDJVK86TVti3mnfdU9cSSlKdjXDJM9A3eKVqIxr7U",
+                  "notBefore": "2026-10-15T00:00:00Z",
+                  "notAfter": "2027-01-01T00:00:00Z"
+                }
+              ],
+              "revoked": [],
+              "administrators": [],
+              "alg": "EdDSA",
+              "kid": "root-org-a-1",
+              "sig": "vufCXJ4roCUAM3MEuAikBXHXZ8mdhK7hyiZkkFzc14MuJ8fvPq6zYxOOOH8KtIuBEIUcXesvsy1NXXs9rYqIBw"
+            }
+          }
+        },
+        "tokenMem": "sha256:3fd5ef20ba24c7a1382e32a720bf915827c2b2f93741802eaf8720157e9f9d8d",
+        "project": "alpha"
+      },
+      "expected": {
+        "ok": true,
+        "recordAs": {
+          "by": "level",
+          "via": "level-command",
+          "level": "architect",
+          "org": "org:org-a",
+          "project": "alpha",
+          "approver": "m-arch-03",
+          "membershipDigest": "sha256:3fd5ef20ba24c7a1382e32a720bf915827c2b2f93741802eaf8720157e9f9d8d",
+          "revision": 3,
+          "caller": "agent:claude-code"
+        }
+      }
+    },
+    {
+      "name": "the owner decides at the administrator's level",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T2",
+        "caller": "agent:claude-code",
+        "decision": {
+          "by": "level",
+          "via": "level-command",
+          "level": "admin",
+          "org": "org:org-a",
+          "action": "approve-reply",
+          "instruction": "approve the reply to the review from Anna",
+          "at": "2026-10-25T11:20:00Z",
+          "membership": {
+            "type": "org-membership/2",
+            "issuer": "https://orgs.example",
+            "org": "org:org-a",
+            "audience": "reviews-service-a1",
+            "subject": "m-owner-01",
+            "role": "owner",
+            "projects": [],
+            "external": false,
+            "status": "active",
+            "revision": 3,
+            "membershipEndsAt": null,
+            "issuedAt": "2026-10-25T11:00:00Z",
+            "notBefore": "2026-10-25T11:00:00Z",
+            "expiresAt": "2026-10-25T12:00:00Z",
+            "extensions": {},
+            "alg": "EdDSA",
+            "kid": "mem-2026-10",
+            "sig": "DWXhTb1wl4-GuoOEi148WMcPzY-rWvxeCnECywHvCNsQLsSO3n0TlMlsybW3anYPQ8fdK_VD4DauMmC42sxXBw"
+          }
+        },
+        "now": "2026-10-25T11:30:00Z",
+        "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
+        "levels": {
+          "org:org-a": {
+            "audience": "reviews-service-a1",
+            "keySet": {
+              "type": "org-key-set/1",
+              "issuer": "https://orgs.example",
+              "org": "org:org-a",
+              "revision": 1,
+              "issuedAt": "2026-10-15T00:00:00Z",
+              "keys": [
+                {
+                  "kid": "mem-2026-10",
+                  "alg": "EdDSA",
+                  "x": "YxEDJVK86TVti3mnfdU9cSSlKdjXDJM9A3eKVqIxr7U",
+                  "notBefore": "2026-10-15T00:00:00Z",
+                  "notAfter": "2027-01-01T00:00:00Z"
+                }
+              ],
+              "revoked": [],
+              "administrators": [],
+              "alg": "EdDSA",
+              "kid": "root-org-a-1",
+              "sig": "vufCXJ4roCUAM3MEuAikBXHXZ8mdhK7hyiZkkFzc14MuJ8fvPq6zYxOOOH8KtIuBEIUcXesvsy1NXXs9rYqIBw"
+            }
+          }
+        },
+        "tokenMem": "sha256:614fc6f0c76021eb1a4a6de48c6a4c674992936d83d94d33630d956224d997a0"
+      },
+      "expected": {
+        "ok": true,
+        "recordAs": {
+          "by": "level",
+          "via": "level-command",
+          "level": "admin",
+          "org": "org:org-a",
+          "approver": "m-owner-01",
+          "membershipDigest": "sha256:614fc6f0c76021eb1a4a6de48c6a4c674992936d83d94d33630d956224d997a0",
+          "revision": 3,
+          "caller": "agent:claude-code"
+        }
+      }
+    },
+    {
+      "name": "an administrator decides in a project the decision names",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T2",
+        "caller": "agent:claude-code",
+        "decision": {
+          "by": "level",
+          "via": "level-command",
+          "level": "admin",
+          "org": "org:org-a",
+          "action": "approve-reply",
+          "instruction": "approve the reply to the review from Anna",
+          "at": "2026-10-25T11:20:00Z",
+          "membership": {
+            "type": "org-membership/2",
+            "issuer": "https://orgs.example",
+            "org": "org:org-a",
+            "audience": "reviews-service-a1",
+            "subject": "m-admin-02",
+            "role": "admin",
+            "projects": [],
+            "external": false,
+            "status": "active",
+            "revision": 3,
+            "membershipEndsAt": null,
+            "issuedAt": "2026-10-25T11:00:00Z",
+            "notBefore": "2026-10-25T11:00:00Z",
+            "expiresAt": "2026-10-25T12:00:00Z",
+            "extensions": {},
+            "alg": "EdDSA",
+            "kid": "mem-2026-10",
+            "sig": "Rg3hZAm3Hgabq5LB3LPvOjkbms6W_jKJaGFFOHyPFOIabVXhP2gvzpb_wXkR30Xxu3UQK-ZW_eTAF9aF6qwQDA"
+          },
+          "project": "gamma"
+        },
+        "now": "2026-10-25T11:30:00Z",
+        "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
+        "levels": {
+          "org:org-a": {
+            "audience": "reviews-service-a1",
+            "keySet": {
+              "type": "org-key-set/1",
+              "issuer": "https://orgs.example",
+              "org": "org:org-a",
+              "revision": 1,
+              "issuedAt": "2026-10-15T00:00:00Z",
+              "keys": [
+                {
+                  "kid": "mem-2026-10",
+                  "alg": "EdDSA",
+                  "x": "YxEDJVK86TVti3mnfdU9cSSlKdjXDJM9A3eKVqIxr7U",
+                  "notBefore": "2026-10-15T00:00:00Z",
+                  "notAfter": "2027-01-01T00:00:00Z"
+                }
+              ],
+              "revoked": [],
+              "administrators": [],
+              "alg": "EdDSA",
+              "kid": "root-org-a-1",
+              "sig": "vufCXJ4roCUAM3MEuAikBXHXZ8mdhK7hyiZkkFzc14MuJ8fvPq6zYxOOOH8KtIuBEIUcXesvsy1NXXs9rYqIBw"
+            }
+          }
+        },
+        "tokenMem": "sha256:5858c2d548aaf65bbe4f80625bb7315693cad1e36ac8b30f08e82cf978ec9ff5",
+        "project": "gamma"
+      },
+      "expected": {
+        "ok": true,
+        "recordAs": {
+          "by": "level",
+          "via": "level-command",
+          "level": "admin",
+          "org": "org:org-a",
+          "project": "gamma",
+          "approver": "m-admin-02",
+          "membershipDigest": "sha256:5858c2d548aaf65bbe4f80625bb7315693cad1e36ac8b30f08e82cf978ec9ff5",
+          "revision": 3,
+          "caller": "agent:claude-code"
+        }
+      }
+    },
+    {
+      "name": "an architect outside its projects",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T2",
+        "caller": "agent:claude-code",
+        "decision": {
+          "by": "level",
+          "via": "level-command",
+          "level": "architect",
+          "org": "org:org-a",
+          "action": "approve-reply",
+          "instruction": "approve the reply to the review from Anna",
+          "at": "2026-10-25T11:20:00Z",
+          "membership": {
+            "type": "org-membership/2",
+            "issuer": "https://orgs.example",
+            "org": "org:org-a",
+            "audience": "reviews-service-a1",
+            "subject": "m-arch-03",
+            "role": "architect",
+            "projects": [
+              "alpha",
+              "beta"
+            ],
+            "external": false,
+            "status": "active",
+            "revision": 3,
+            "membershipEndsAt": null,
+            "issuedAt": "2026-10-25T11:00:00Z",
+            "notBefore": "2026-10-25T11:00:00Z",
+            "expiresAt": "2026-10-25T12:00:00Z",
+            "extensions": {},
+            "alg": "EdDSA",
+            "kid": "mem-2026-10",
+            "sig": "RrABkwV8ubdv_gWsjle26Lj5uG4Q4FeAc2qFy7ENRhxw3m8ioGjcxYd3QIiUM-lGgV4jUatmUi2BtWBFGdO-Aw"
+          },
+          "project": "gamma"
+        },
+        "now": "2026-10-25T11:30:00Z",
+        "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
+        "levels": {
+          "org:org-a": {
+            "audience": "reviews-service-a1",
+            "keySet": {
+              "type": "org-key-set/1",
+              "issuer": "https://orgs.example",
+              "org": "org:org-a",
+              "revision": 1,
+              "issuedAt": "2026-10-15T00:00:00Z",
+              "keys": [
+                {
+                  "kid": "mem-2026-10",
+                  "alg": "EdDSA",
+                  "x": "YxEDJVK86TVti3mnfdU9cSSlKdjXDJM9A3eKVqIxr7U",
+                  "notBefore": "2026-10-15T00:00:00Z",
+                  "notAfter": "2027-01-01T00:00:00Z"
+                }
+              ],
+              "revoked": [],
+              "administrators": [],
+              "alg": "EdDSA",
+              "kid": "root-org-a-1",
+              "sig": "vufCXJ4roCUAM3MEuAikBXHXZ8mdhK7hyiZkkFzc14MuJ8fvPq6zYxOOOH8KtIuBEIUcXesvsy1NXXs9rYqIBw"
+            }
+          }
+        },
+        "tokenMem": "sha256:3fd5ef20ba24c7a1382e32a720bf915827c2b2f93741802eaf8720157e9f9d8d",
+        "project": "gamma"
+      },
+      "expected": {
+        "ok": false,
+        "code": "operator-decision-required",
+        "data": {
+          "detail": "level-insufficient: admin"
+        }
+      }
+    },
+    {
+      "name": "an architect on a call in no project",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T2",
+        "caller": "agent:claude-code",
+        "decision": {
+          "by": "level",
+          "via": "level-command",
+          "level": "architect",
+          "org": "org:org-a",
+          "action": "approve-reply",
+          "instruction": "approve the reply to the review from Anna",
+          "at": "2026-10-25T11:20:00Z",
+          "membership": {
+            "type": "org-membership/2",
+            "issuer": "https://orgs.example",
+            "org": "org:org-a",
+            "audience": "reviews-service-a1",
+            "subject": "m-arch-03",
+            "role": "architect",
+            "projects": [
+              "alpha",
+              "beta"
+            ],
+            "external": false,
+            "status": "active",
+            "revision": 3,
+            "membershipEndsAt": null,
+            "issuedAt": "2026-10-25T11:00:00Z",
+            "notBefore": "2026-10-25T11:00:00Z",
+            "expiresAt": "2026-10-25T12:00:00Z",
+            "extensions": {},
+            "alg": "EdDSA",
+            "kid": "mem-2026-10",
+            "sig": "RrABkwV8ubdv_gWsjle26Lj5uG4Q4FeAc2qFy7ENRhxw3m8ioGjcxYd3QIiUM-lGgV4jUatmUi2BtWBFGdO-Aw"
+          },
+          "project": "alpha"
+        },
+        "now": "2026-10-25T11:30:00Z",
+        "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
+        "levels": {
+          "org:org-a": {
+            "audience": "reviews-service-a1",
+            "keySet": {
+              "type": "org-key-set/1",
+              "issuer": "https://orgs.example",
+              "org": "org:org-a",
+              "revision": 1,
+              "issuedAt": "2026-10-15T00:00:00Z",
+              "keys": [
+                {
+                  "kid": "mem-2026-10",
+                  "alg": "EdDSA",
+                  "x": "YxEDJVK86TVti3mnfdU9cSSlKdjXDJM9A3eKVqIxr7U",
+                  "notBefore": "2026-10-15T00:00:00Z",
+                  "notAfter": "2027-01-01T00:00:00Z"
+                }
+              ],
+              "revoked": [],
+              "administrators": [],
+              "alg": "EdDSA",
+              "kid": "root-org-a-1",
+              "sig": "vufCXJ4roCUAM3MEuAikBXHXZ8mdhK7hyiZkkFzc14MuJ8fvPq6zYxOOOH8KtIuBEIUcXesvsy1NXXs9rYqIBw"
+            }
+          }
+        },
+        "tokenMem": "sha256:3fd5ef20ba24c7a1382e32a720bf915827c2b2f93741802eaf8720157e9f9d8d"
+      },
+      "expected": {
+        "ok": false,
+        "code": "decision-invalid"
+      }
+    },
+    {
+      "name": "an architect's decision for another project than the call's",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T2",
+        "caller": "agent:claude-code",
+        "decision": {
+          "by": "level",
+          "via": "level-command",
+          "level": "architect",
+          "org": "org:org-a",
+          "action": "approve-reply",
+          "instruction": "approve the reply to the review from Anna",
+          "at": "2026-10-25T11:20:00Z",
+          "membership": {
+            "type": "org-membership/2",
+            "issuer": "https://orgs.example",
+            "org": "org:org-a",
+            "audience": "reviews-service-a1",
+            "subject": "m-arch-03",
+            "role": "architect",
+            "projects": [
+              "alpha",
+              "beta"
+            ],
+            "external": false,
+            "status": "active",
+            "revision": 3,
+            "membershipEndsAt": null,
+            "issuedAt": "2026-10-25T11:00:00Z",
+            "notBefore": "2026-10-25T11:00:00Z",
+            "expiresAt": "2026-10-25T12:00:00Z",
+            "extensions": {},
+            "alg": "EdDSA",
+            "kid": "mem-2026-10",
+            "sig": "RrABkwV8ubdv_gWsjle26Lj5uG4Q4FeAc2qFy7ENRhxw3m8ioGjcxYd3QIiUM-lGgV4jUatmUi2BtWBFGdO-Aw"
+          },
+          "project": "alpha"
+        },
+        "now": "2026-10-25T11:30:00Z",
+        "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
+        "levels": {
+          "org:org-a": {
+            "audience": "reviews-service-a1",
+            "keySet": {
+              "type": "org-key-set/1",
+              "issuer": "https://orgs.example",
+              "org": "org:org-a",
+              "revision": 1,
+              "issuedAt": "2026-10-15T00:00:00Z",
+              "keys": [
+                {
+                  "kid": "mem-2026-10",
+                  "alg": "EdDSA",
+                  "x": "YxEDJVK86TVti3mnfdU9cSSlKdjXDJM9A3eKVqIxr7U",
+                  "notBefore": "2026-10-15T00:00:00Z",
+                  "notAfter": "2027-01-01T00:00:00Z"
+                }
+              ],
+              "revoked": [],
+              "administrators": [],
+              "alg": "EdDSA",
+              "kid": "root-org-a-1",
+              "sig": "vufCXJ4roCUAM3MEuAikBXHXZ8mdhK7hyiZkkFzc14MuJ8fvPq6zYxOOOH8KtIuBEIUcXesvsy1NXXs9rYqIBw"
+            }
+          }
+        },
+        "tokenMem": "sha256:3fd5ef20ba24c7a1382e32a720bf915827c2b2f93741802eaf8720157e9f9d8d",
+        "project": "beta"
+      },
+      "expected": {
+        "ok": false,
+        "code": "decision-invalid"
+      }
+    },
+    {
+      "name": "a copied attestation: the call presented no token",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T0",
+        "caller": "agent:claude-code",
+        "decision": {
+          "by": "level",
+          "via": "level-command",
+          "level": "admin",
+          "org": "org:org-a",
+          "action": "approve-reply",
+          "instruction": "approve the reply to the review from Anna",
+          "at": "2026-10-25T11:20:00Z",
+          "membership": {
+            "type": "org-membership/2",
+            "issuer": "https://orgs.example",
+            "org": "org:org-a",
+            "audience": "reviews-service-a1",
+            "subject": "m-admin-02",
+            "role": "admin",
+            "projects": [],
+            "external": false,
+            "status": "active",
+            "revision": 3,
+            "membershipEndsAt": null,
+            "issuedAt": "2026-10-25T11:00:00Z",
+            "notBefore": "2026-10-25T11:00:00Z",
+            "expiresAt": "2026-10-25T12:00:00Z",
+            "extensions": {},
+            "alg": "EdDSA",
+            "kid": "mem-2026-10",
+            "sig": "Rg3hZAm3Hgabq5LB3LPvOjkbms6W_jKJaGFFOHyPFOIabVXhP2gvzpb_wXkR30Xxu3UQK-ZW_eTAF9aF6qwQDA"
+          }
+        },
+        "now": "2026-10-25T11:30:00Z",
+        "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
+        "levels": {
+          "org:org-a": {
+            "audience": "reviews-service-a1",
+            "keySet": {
+              "type": "org-key-set/1",
+              "issuer": "https://orgs.example",
+              "org": "org:org-a",
+              "revision": 1,
+              "issuedAt": "2026-10-15T00:00:00Z",
+              "keys": [
+                {
+                  "kid": "mem-2026-10",
+                  "alg": "EdDSA",
+                  "x": "YxEDJVK86TVti3mnfdU9cSSlKdjXDJM9A3eKVqIxr7U",
+                  "notBefore": "2026-10-15T00:00:00Z",
+                  "notAfter": "2027-01-01T00:00:00Z"
+                }
+              ],
+              "revoked": [],
+              "administrators": [],
+              "alg": "EdDSA",
+              "kid": "root-org-a-1",
+              "sig": "vufCXJ4roCUAM3MEuAikBXHXZ8mdhK7hyiZkkFzc14MuJ8fvPq6zYxOOOH8KtIuBEIUcXesvsy1NXXs9rYqIBw"
+            }
+          }
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "decision-invalid",
+        "data": {
+          "detail": "level-unbound"
+        }
+      }
+    },
+    {
+      "name": "a token bound to another attestation",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T2",
+        "caller": "agent:claude-code",
+        "decision": {
+          "by": "level",
+          "via": "level-command",
+          "level": "admin",
+          "org": "org:org-a",
+          "action": "approve-reply",
+          "instruction": "approve the reply to the review from Anna",
+          "at": "2026-10-25T11:20:00Z",
+          "membership": {
+            "type": "org-membership/2",
+            "issuer": "https://orgs.example",
+            "org": "org:org-a",
+            "audience": "reviews-service-a1",
+            "subject": "m-admin-02",
+            "role": "admin",
+            "projects": [],
+            "external": false,
+            "status": "active",
+            "revision": 3,
+            "membershipEndsAt": null,
+            "issuedAt": "2026-10-25T11:00:00Z",
+            "notBefore": "2026-10-25T11:00:00Z",
+            "expiresAt": "2026-10-25T12:00:00Z",
+            "extensions": {},
+            "alg": "EdDSA",
+            "kid": "mem-2026-10",
+            "sig": "Rg3hZAm3Hgabq5LB3LPvOjkbms6W_jKJaGFFOHyPFOIabVXhP2gvzpb_wXkR30Xxu3UQK-ZW_eTAF9aF6qwQDA"
+          }
+        },
+        "now": "2026-10-25T11:30:00Z",
+        "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
+        "levels": {
+          "org:org-a": {
+            "audience": "reviews-service-a1",
+            "keySet": {
+              "type": "org-key-set/1",
+              "issuer": "https://orgs.example",
+              "org": "org:org-a",
+              "revision": 1,
+              "issuedAt": "2026-10-15T00:00:00Z",
+              "keys": [
+                {
+                  "kid": "mem-2026-10",
+                  "alg": "EdDSA",
+                  "x": "YxEDJVK86TVti3mnfdU9cSSlKdjXDJM9A3eKVqIxr7U",
+                  "notBefore": "2026-10-15T00:00:00Z",
+                  "notAfter": "2027-01-01T00:00:00Z"
+                }
+              ],
+              "revoked": [],
+              "administrators": [],
+              "alg": "EdDSA",
+              "kid": "root-org-a-1",
+              "sig": "vufCXJ4roCUAM3MEuAikBXHXZ8mdhK7hyiZkkFzc14MuJ8fvPq6zYxOOOH8KtIuBEIUcXesvsy1NXXs9rYqIBw"
+            }
+          }
+        },
+        "tokenMem": "sha256:614fc6f0c76021eb1a4a6de48c6a4c674992936d83d94d33630d956224d997a0"
+      },
+      "expected": {
+        "ok": false,
+        "code": "decision-invalid",
+        "data": {
+          "detail": "level-unbound"
+        }
+      }
+    },
+    {
+      "name": "an attestation for another service",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T2",
+        "caller": "agent:claude-code",
+        "decision": {
+          "by": "level",
+          "via": "level-command",
+          "level": "admin",
+          "org": "org:org-a",
+          "action": "approve-reply",
+          "instruction": "approve the reply to the review from Anna",
+          "at": "2026-10-25T11:20:00Z",
+          "membership": {
+            "type": "org-membership/2",
+            "issuer": "https://orgs.example",
+            "org": "org:org-a",
+            "audience": "billing-service-b2",
+            "subject": "m-admin-06",
+            "role": "admin",
+            "projects": [],
+            "external": false,
+            "status": "active",
+            "revision": 3,
+            "membershipEndsAt": null,
+            "issuedAt": "2026-10-25T11:00:00Z",
+            "notBefore": "2026-10-25T11:00:00Z",
+            "expiresAt": "2026-10-25T12:00:00Z",
+            "extensions": {},
+            "alg": "EdDSA",
+            "kid": "mem-2026-10",
+            "sig": "ykZrd4dMkHKfilkESUS2pJvCY86rLnqNvtA3nSruoZx91e0qFmLb2bdQk3nX6MR60f6bO67A5LUaTQf9z7JnDA"
+          }
+        },
+        "now": "2026-10-25T11:30:00Z",
+        "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
+        "levels": {
+          "org:org-a": {
+            "audience": "reviews-service-a1",
+            "keySet": {
+              "type": "org-key-set/1",
+              "issuer": "https://orgs.example",
+              "org": "org:org-a",
+              "revision": 1,
+              "issuedAt": "2026-10-15T00:00:00Z",
+              "keys": [
+                {
+                  "kid": "mem-2026-10",
+                  "alg": "EdDSA",
+                  "x": "YxEDJVK86TVti3mnfdU9cSSlKdjXDJM9A3eKVqIxr7U",
+                  "notBefore": "2026-10-15T00:00:00Z",
+                  "notAfter": "2027-01-01T00:00:00Z"
+                }
+              ],
+              "revoked": [],
+              "administrators": [],
+              "alg": "EdDSA",
+              "kid": "root-org-a-1",
+              "sig": "vufCXJ4roCUAM3MEuAikBXHXZ8mdhK7hyiZkkFzc14MuJ8fvPq6zYxOOOH8KtIuBEIUcXesvsy1NXXs9rYqIBw"
+            }
+          }
+        },
+        "tokenMem": "sha256:21e66f5d608da41d3698dc93773d770c30b88953416208c15683fe876275f0d5"
+      },
+      "expected": {
+        "ok": false,
+        "code": "decision-invalid",
+        "data": {
+          "detail": "level-audience"
+        }
+      }
+    },
+    {
+      "name": "an ended membership inside the decision's window",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T2",
+        "caller": "agent:claude-code",
+        "decision": {
+          "by": "level",
+          "via": "level-command",
+          "level": "admin",
+          "org": "org:org-a",
+          "action": "approve-reply",
+          "instruction": "approve the reply to the review from Anna",
+          "at": "2026-10-25T11:20:00Z",
+          "membership": {
+            "type": "org-membership/2",
+            "issuer": "https://orgs.example",
+            "org": "org:org-a",
+            "audience": "reviews-service-a1",
+            "subject": "m-admin-05",
+            "role": "admin",
+            "projects": [],
+            "external": false,
+            "status": "ended",
+            "revision": 4,
+            "membershipEndsAt": null,
+            "issuedAt": "2026-10-25T11:00:00Z",
+            "notBefore": "2026-10-25T11:00:00Z",
+            "expiresAt": "2026-10-25T12:00:00Z",
+            "extensions": {},
+            "alg": "EdDSA",
+            "kid": "mem-2026-10",
+            "sig": "Ar-udwEysZng5QtqxS1dN74kRq_VTGZjH2BMvTjruh5wd7qHrHiB5jusgPnj3tjGfAGOM9S1iv7spfCkDwyYAg"
+          }
+        },
+        "now": "2026-10-25T11:30:00Z",
+        "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
+        "levels": {
+          "org:org-a": {
+            "audience": "reviews-service-a1",
+            "keySet": {
+              "type": "org-key-set/1",
+              "issuer": "https://orgs.example",
+              "org": "org:org-a",
+              "revision": 1,
+              "issuedAt": "2026-10-15T00:00:00Z",
+              "keys": [
+                {
+                  "kid": "mem-2026-10",
+                  "alg": "EdDSA",
+                  "x": "YxEDJVK86TVti3mnfdU9cSSlKdjXDJM9A3eKVqIxr7U",
+                  "notBefore": "2026-10-15T00:00:00Z",
+                  "notAfter": "2027-01-01T00:00:00Z"
+                }
+              ],
+              "revoked": [],
+              "administrators": [],
+              "alg": "EdDSA",
+              "kid": "root-org-a-1",
+              "sig": "vufCXJ4roCUAM3MEuAikBXHXZ8mdhK7hyiZkkFzc14MuJ8fvPq6zYxOOOH8KtIuBEIUcXesvsy1NXXs9rYqIBw"
+            }
+          }
+        },
+        "tokenMem": "sha256:f4471ff70e4ae340b2341f74c8bccb5c455e63d7fc8c887a7be12ee803c24360"
+      },
+      "expected": {
+        "ok": false,
+        "code": "decision-invalid",
+        "data": {
+          "detail": "level-membership: ended"
+        }
+      }
+    },
+    {
+      "name": "an attestation expired before the service reads it",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T2",
+        "caller": "agent:claude-code",
+        "decision": {
+          "by": "level",
+          "via": "level-command",
+          "level": "admin",
+          "org": "org:org-a",
+          "action": "approve-reply",
+          "instruction": "approve the reply to the review from Anna",
+          "at": "2026-10-25T11:10:00Z",
+          "membership": {
+            "type": "org-membership/2",
+            "issuer": "https://orgs.example",
+            "org": "org:org-a",
+            "audience": "reviews-service-a1",
+            "subject": "m-admin-07",
+            "role": "admin",
+            "projects": [],
+            "external": false,
+            "status": "active",
+            "revision": 3,
+            "membershipEndsAt": null,
+            "issuedAt": "2026-10-25T10:00:00Z",
+            "notBefore": "2026-10-25T10:00:00Z",
+            "expiresAt": "2026-10-25T11:25:00Z",
+            "extensions": {},
+            "alg": "EdDSA",
+            "kid": "mem-2026-10",
+            "sig": "a23MMtoOA4ETmx3OY6faRRPWo9hjIQJ18sPz5n5F7l0ODFn4_P3JsTqtrq9uW45NBTWsmdSL9SaZ0EZfxeyTDQ"
+          }
+        },
+        "now": "2026-10-25T11:30:00Z",
+        "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
+        "levels": {
+          "org:org-a": {
+            "audience": "reviews-service-a1",
+            "keySet": {
+              "type": "org-key-set/1",
+              "issuer": "https://orgs.example",
+              "org": "org:org-a",
+              "revision": 1,
+              "issuedAt": "2026-10-15T00:00:00Z",
+              "keys": [
+                {
+                  "kid": "mem-2026-10",
+                  "alg": "EdDSA",
+                  "x": "YxEDJVK86TVti3mnfdU9cSSlKdjXDJM9A3eKVqIxr7U",
+                  "notBefore": "2026-10-15T00:00:00Z",
+                  "notAfter": "2027-01-01T00:00:00Z"
+                }
+              ],
+              "revoked": [],
+              "administrators": [],
+              "alg": "EdDSA",
+              "kid": "root-org-a-1",
+              "sig": "vufCXJ4roCUAM3MEuAikBXHXZ8mdhK7hyiZkkFzc14MuJ8fvPq6zYxOOOH8KtIuBEIUcXesvsy1NXXs9rYqIBw"
+            }
+          }
+        },
+        "tokenMem": "sha256:daac7f5a01e39d31c6b4270823f4ed4e0dab3b68a8b6ff1ccf481c8d8711fd9e"
+      },
+      "expected": {
+        "ok": false,
+        "code": "decision-invalid",
+        "data": {
+          "detail": "level-expired"
+        }
+      }
+    },
+    {
+      "name": "a level above the attestation's role",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T2",
+        "caller": "agent:claude-code",
+        "decision": {
+          "by": "level",
+          "via": "level-command",
+          "level": "admin",
+          "org": "org:org-a",
+          "action": "approve-reply",
+          "instruction": "approve the reply to the review from Anna",
+          "at": "2026-10-25T11:20:00Z",
+          "membership": {
+            "type": "org-membership/2",
+            "issuer": "https://orgs.example",
+            "org": "org:org-a",
+            "audience": "reviews-service-a1",
+            "subject": "m-arch-03",
+            "role": "architect",
+            "projects": [
+              "alpha",
+              "beta"
+            ],
+            "external": false,
+            "status": "active",
+            "revision": 3,
+            "membershipEndsAt": null,
+            "issuedAt": "2026-10-25T11:00:00Z",
+            "notBefore": "2026-10-25T11:00:00Z",
+            "expiresAt": "2026-10-25T12:00:00Z",
+            "extensions": {},
+            "alg": "EdDSA",
+            "kid": "mem-2026-10",
+            "sig": "RrABkwV8ubdv_gWsjle26Lj5uG4Q4FeAc2qFy7ENRhxw3m8ioGjcxYd3QIiUM-lGgV4jUatmUi2BtWBFGdO-Aw"
+          }
+        },
+        "now": "2026-10-25T11:30:00Z",
+        "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
+        "levels": {
+          "org:org-a": {
+            "audience": "reviews-service-a1",
+            "keySet": {
+              "type": "org-key-set/1",
+              "issuer": "https://orgs.example",
+              "org": "org:org-a",
+              "revision": 1,
+              "issuedAt": "2026-10-15T00:00:00Z",
+              "keys": [
+                {
+                  "kid": "mem-2026-10",
+                  "alg": "EdDSA",
+                  "x": "YxEDJVK86TVti3mnfdU9cSSlKdjXDJM9A3eKVqIxr7U",
+                  "notBefore": "2026-10-15T00:00:00Z",
+                  "notAfter": "2027-01-01T00:00:00Z"
+                }
+              ],
+              "revoked": [],
+              "administrators": [],
+              "alg": "EdDSA",
+              "kid": "root-org-a-1",
+              "sig": "vufCXJ4roCUAM3MEuAikBXHXZ8mdhK7hyiZkkFzc14MuJ8fvPq6zYxOOOH8KtIuBEIUcXesvsy1NXXs9rYqIBw"
+            }
+          }
+        },
+        "tokenMem": "sha256:3fd5ef20ba24c7a1382e32a720bf915827c2b2f93741802eaf8720157e9f9d8d"
+      },
+      "expected": {
+        "ok": false,
+        "code": "decision-invalid",
+        "data": {
+          "detail": "level-role"
+        }
+      }
+    },
+    {
+      "name": "a member's request carries no level",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T2",
+        "caller": "agent:claude-code",
+        "decision": {
+          "by": "level",
+          "via": "level-command",
+          "level": "architect",
+          "org": "org:org-a",
+          "action": "approve-reply",
+          "instruction": "approve the reply to the review from Anna",
+          "at": "2026-10-25T11:20:00Z",
+          "membership": {
+            "type": "org-membership/2",
+            "issuer": "https://orgs.example",
+            "org": "org:org-a",
+            "audience": "reviews-service-a1",
+            "subject": "m-member-04",
+            "role": "member",
+            "projects": [],
+            "external": false,
+            "status": "active",
+            "revision": 3,
+            "membershipEndsAt": null,
+            "issuedAt": "2026-10-25T11:00:00Z",
+            "notBefore": "2026-10-25T11:00:00Z",
+            "expiresAt": "2026-10-25T12:00:00Z",
+            "extensions": {},
+            "alg": "EdDSA",
+            "kid": "mem-2026-10",
+            "sig": "j0u4L-y7-4KNK0vGLjpvc7w_dmKUsXOwXzDn9_zOQGck27-FdiY9EZ8690L2KmDav8xJZoM2rIJLgMscXda6Cg"
+          },
+          "project": "alpha"
+        },
+        "now": "2026-10-25T11:30:00Z",
+        "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
+        "levels": {
+          "org:org-a": {
+            "audience": "reviews-service-a1",
+            "keySet": {
+              "type": "org-key-set/1",
+              "issuer": "https://orgs.example",
+              "org": "org:org-a",
+              "revision": 1,
+              "issuedAt": "2026-10-15T00:00:00Z",
+              "keys": [
+                {
+                  "kid": "mem-2026-10",
+                  "alg": "EdDSA",
+                  "x": "YxEDJVK86TVti3mnfdU9cSSlKdjXDJM9A3eKVqIxr7U",
+                  "notBefore": "2026-10-15T00:00:00Z",
+                  "notAfter": "2027-01-01T00:00:00Z"
+                }
+              ],
+              "revoked": [],
+              "administrators": [],
+              "alg": "EdDSA",
+              "kid": "root-org-a-1",
+              "sig": "vufCXJ4roCUAM3MEuAikBXHXZ8mdhK7hyiZkkFzc14MuJ8fvPq6zYxOOOH8KtIuBEIUcXesvsy1NXXs9rYqIBw"
+            }
+          }
+        },
+        "tokenMem": "sha256:87a282c8c3a994856a896ad73c590db80cbc1110344990d03bfecfa7a744804d",
+        "project": "alpha"
+      },
+      "expected": {
+        "ok": false,
+        "code": "decision-invalid",
+        "data": {
+          "detail": "level-role"
+        }
+      }
+    },
+    {
+      "name": "a forged signature",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T2",
+        "caller": "agent:claude-code",
+        "decision": {
+          "by": "level",
+          "via": "level-command",
+          "level": "admin",
+          "org": "org:org-a",
+          "action": "approve-reply",
+          "instruction": "approve the reply to the review from Anna",
+          "at": "2026-10-25T11:20:00Z",
+          "membership": {
+            "type": "org-membership/2",
+            "issuer": "https://orgs.example",
+            "org": "org:org-a",
+            "audience": "reviews-service-a1",
+            "subject": "m-admin-02",
+            "role": "owner",
+            "projects": [],
+            "external": false,
+            "status": "active",
+            "revision": 3,
+            "membershipEndsAt": null,
+            "issuedAt": "2026-10-25T11:00:00Z",
+            "notBefore": "2026-10-25T11:00:00Z",
+            "expiresAt": "2026-10-25T12:00:00Z",
+            "extensions": {},
+            "alg": "EdDSA",
+            "kid": "mem-2026-10",
+            "sig": "Rg3hZAm3Hgabq5LB3LPvOjkbms6W_jKJaGFFOHyPFOIabVXhP2gvzpb_wXkR30Xxu3UQK-ZW_eTAF9aF6qwQDA"
+          }
+        },
+        "now": "2026-10-25T11:30:00Z",
+        "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
+        "levels": {
+          "org:org-a": {
+            "audience": "reviews-service-a1",
+            "keySet": {
+              "type": "org-key-set/1",
+              "issuer": "https://orgs.example",
+              "org": "org:org-a",
+              "revision": 1,
+              "issuedAt": "2026-10-15T00:00:00Z",
+              "keys": [
+                {
+                  "kid": "mem-2026-10",
+                  "alg": "EdDSA",
+                  "x": "YxEDJVK86TVti3mnfdU9cSSlKdjXDJM9A3eKVqIxr7U",
+                  "notBefore": "2026-10-15T00:00:00Z",
+                  "notAfter": "2027-01-01T00:00:00Z"
+                }
+              ],
+              "revoked": [],
+              "administrators": [],
+              "alg": "EdDSA",
+              "kid": "root-org-a-1",
+              "sig": "vufCXJ4roCUAM3MEuAikBXHXZ8mdhK7hyiZkkFzc14MuJ8fvPq6zYxOOOH8KtIuBEIUcXesvsy1NXXs9rYqIBw"
+            }
+          }
+        },
+        "tokenMem": "sha256:269365b410d41e8a372c46d55eb5d7baf4d16c604e2c39609044932517bc3907"
+      },
+      "expected": {
+        "ok": false,
+        "code": "decision-invalid",
+        "data": {
+          "detail": "level-membership: bad-signature"
+        }
+      }
+    },
+    {
+      "name": "an organization the service reads no levels in",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T2",
+        "caller": "agent:claude-code",
+        "decision": {
+          "by": "level",
+          "via": "level-command",
+          "level": "admin",
+          "org": "org:org-a",
+          "action": "approve-reply",
+          "instruction": "approve the reply to the review from Anna",
+          "at": "2026-10-25T11:20:00Z",
+          "membership": {
+            "type": "org-membership/2",
+            "issuer": "https://orgs.example",
+            "org": "org:org-a",
+            "audience": "reviews-service-a1",
+            "subject": "m-admin-02",
+            "role": "admin",
+            "projects": [],
+            "external": false,
+            "status": "active",
+            "revision": 3,
+            "membershipEndsAt": null,
+            "issuedAt": "2026-10-25T11:00:00Z",
+            "notBefore": "2026-10-25T11:00:00Z",
+            "expiresAt": "2026-10-25T12:00:00Z",
+            "extensions": {},
+            "alg": "EdDSA",
+            "kid": "mem-2026-10",
+            "sig": "Rg3hZAm3Hgabq5LB3LPvOjkbms6W_jKJaGFFOHyPFOIabVXhP2gvzpb_wXkR30Xxu3UQK-ZW_eTAF9aF6qwQDA"
+          }
+        },
+        "now": "2026-10-25T11:30:00Z",
+        "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
+        "levels": {
+          "org:org-b": {
+            "audience": "reviews-service-a1",
+            "keySet": {
+              "type": "org-key-set/1",
+              "issuer": "https://orgs.example",
+              "org": "org:org-a",
+              "revision": 1,
+              "issuedAt": "2026-10-15T00:00:00Z",
+              "keys": [
+                {
+                  "kid": "mem-2026-10",
+                  "alg": "EdDSA",
+                  "x": "YxEDJVK86TVti3mnfdU9cSSlKdjXDJM9A3eKVqIxr7U",
+                  "notBefore": "2026-10-15T00:00:00Z",
+                  "notAfter": "2027-01-01T00:00:00Z"
+                }
+              ],
+              "revoked": [],
+              "administrators": [],
+              "alg": "EdDSA",
+              "kid": "root-org-a-1",
+              "sig": "vufCXJ4roCUAM3MEuAikBXHXZ8mdhK7hyiZkkFzc14MuJ8fvPq6zYxOOOH8KtIuBEIUcXesvsy1NXXs9rYqIBw"
+            }
+          }
+        },
+        "tokenMem": "sha256:5858c2d548aaf65bbe4f80625bb7315693cad1e36ac8b30f08e82cf978ec9ff5"
+      },
+      "expected": {
+        "ok": false,
+        "code": "decision-invalid",
+        "data": {
+          "detail": "level-membership: context-invalid"
+        }
+      }
+    },
+    {
+      "name": "a /1 attestation in a level decision",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T2",
+        "caller": "agent:claude-code",
+        "decision": {
+          "by": "level",
+          "via": "level-command",
+          "level": "admin",
+          "org": "org:org-a",
+          "action": "approve-reply",
+          "instruction": "approve the reply to the review from Anna",
+          "at": "2026-10-25T11:20:00Z",
+          "membership": {
+            "type": "org-membership/1",
+            "issuer": "https://orgs.example",
+            "org": "org:org-a",
+            "audience": "reviews-service-a1",
+            "subject": "m-arch-03",
+            "role": "member",
+            "external": false,
+            "status": "active",
+            "revision": 3,
+            "membershipEndsAt": null,
+            "issuedAt": "2026-10-25T11:00:00Z",
+            "notBefore": "2026-10-25T11:00:00Z",
+            "expiresAt": "2026-10-25T12:00:00Z",
+            "extensions": {},
+            "alg": "EdDSA",
+            "kid": "mem-2026-10",
+            "sig": "o3l6db0OnVoe5DNAWoghFGrU1UyLx75Ai1XU-tSYUPDJ2Ro_kRzyOCaJaH2E4uTZGUHUSXffoYs5tteKpoHHBg"
+          }
+        },
+        "now": "2026-10-25T11:30:00Z",
+        "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
+        "levels": {
+          "org:org-a": {
+            "audience": "reviews-service-a1",
+            "keySet": {
+              "type": "org-key-set/1",
+              "issuer": "https://orgs.example",
+              "org": "org:org-a",
+              "revision": 1,
+              "issuedAt": "2026-10-15T00:00:00Z",
+              "keys": [
+                {
+                  "kid": "mem-2026-10",
+                  "alg": "EdDSA",
+                  "x": "YxEDJVK86TVti3mnfdU9cSSlKdjXDJM9A3eKVqIxr7U",
+                  "notBefore": "2026-10-15T00:00:00Z",
+                  "notAfter": "2027-01-01T00:00:00Z"
+                }
+              ],
+              "revoked": [],
+              "administrators": [],
+              "alg": "EdDSA",
+              "kid": "root-org-a-1",
+              "sig": "vufCXJ4roCUAM3MEuAikBXHXZ8mdhK7hyiZkkFzc14MuJ8fvPq6zYxOOOH8KtIuBEIUcXesvsy1NXXs9rYqIBw"
+            }
+          }
+        },
+        "tokenMem": "sha256:6d4e86f99128182be46bb2c3b953321ad25b37dfc1cdb6e9ab7c091a647e4e4f"
+      },
+      "expected": {
+        "ok": false,
+        "code": "decision-invalid"
+      }
+    },
+    {
+      "name": "a level decision for another action",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T2",
+        "caller": "agent:claude-code",
+        "decision": {
+          "by": "level",
+          "via": "level-command",
+          "level": "admin",
+          "org": "org:org-a",
+          "action": "delete-reply",
+          "instruction": "approve the reply to the review from Anna",
+          "at": "2026-10-25T11:20:00Z",
+          "membership": {
+            "type": "org-membership/2",
+            "issuer": "https://orgs.example",
+            "org": "org:org-a",
+            "audience": "reviews-service-a1",
+            "subject": "m-admin-02",
+            "role": "admin",
+            "projects": [],
+            "external": false,
+            "status": "active",
+            "revision": 3,
+            "membershipEndsAt": null,
+            "issuedAt": "2026-10-25T11:00:00Z",
+            "notBefore": "2026-10-25T11:00:00Z",
+            "expiresAt": "2026-10-25T12:00:00Z",
+            "extensions": {},
+            "alg": "EdDSA",
+            "kid": "mem-2026-10",
+            "sig": "Rg3hZAm3Hgabq5LB3LPvOjkbms6W_jKJaGFFOHyPFOIabVXhP2gvzpb_wXkR30Xxu3UQK-ZW_eTAF9aF6qwQDA"
+          }
+        },
+        "now": "2026-10-25T11:30:00Z",
+        "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
+        "levels": {
+          "org:org-a": {
+            "audience": "reviews-service-a1",
+            "keySet": {
+              "type": "org-key-set/1",
+              "issuer": "https://orgs.example",
+              "org": "org:org-a",
+              "revision": 1,
+              "issuedAt": "2026-10-15T00:00:00Z",
+              "keys": [
+                {
+                  "kid": "mem-2026-10",
+                  "alg": "EdDSA",
+                  "x": "YxEDJVK86TVti3mnfdU9cSSlKdjXDJM9A3eKVqIxr7U",
+                  "notBefore": "2026-10-15T00:00:00Z",
+                  "notAfter": "2027-01-01T00:00:00Z"
+                }
+              ],
+              "revoked": [],
+              "administrators": [],
+              "alg": "EdDSA",
+              "kid": "root-org-a-1",
+              "sig": "vufCXJ4roCUAM3MEuAikBXHXZ8mdhK7hyiZkkFzc14MuJ8fvPq6zYxOOOH8KtIuBEIUcXesvsy1NXXs9rYqIBw"
+            }
+          }
+        },
+        "tokenMem": "sha256:5858c2d548aaf65bbe4f80625bb7315693cad1e36ac8b30f08e82cf978ec9ff5"
+      },
+      "expected": {
+        "ok": false,
+        "code": "decision-invalid"
+      }
+    },
+    {
+      "name": "a level decision 24 h and 1 s old",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T2",
+        "caller": "agent:claude-code",
+        "decision": {
+          "by": "level",
+          "via": "level-command",
+          "level": "admin",
+          "org": "org:org-a",
+          "action": "approve-reply",
+          "instruction": "approve the reply to the review from Anna",
+          "at": "2026-10-24T11:29:59Z",
+          "membership": {
+            "type": "org-membership/2",
+            "issuer": "https://orgs.example",
+            "org": "org:org-a",
+            "audience": "reviews-service-a1",
+            "subject": "m-admin-02",
+            "role": "admin",
+            "projects": [],
+            "external": false,
+            "status": "active",
+            "revision": 3,
+            "membershipEndsAt": null,
+            "issuedAt": "2026-10-25T11:00:00Z",
+            "notBefore": "2026-10-25T11:00:00Z",
+            "expiresAt": "2026-10-25T12:00:00Z",
+            "extensions": {},
+            "alg": "EdDSA",
+            "kid": "mem-2026-10",
+            "sig": "Rg3hZAm3Hgabq5LB3LPvOjkbms6W_jKJaGFFOHyPFOIabVXhP2gvzpb_wXkR30Xxu3UQK-ZW_eTAF9aF6qwQDA"
+          }
+        },
+        "now": "2026-10-25T11:30:00Z",
+        "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
+        "levels": {
+          "org:org-a": {
+            "audience": "reviews-service-a1",
+            "keySet": {
+              "type": "org-key-set/1",
+              "issuer": "https://orgs.example",
+              "org": "org:org-a",
+              "revision": 1,
+              "issuedAt": "2026-10-15T00:00:00Z",
+              "keys": [
+                {
+                  "kid": "mem-2026-10",
+                  "alg": "EdDSA",
+                  "x": "YxEDJVK86TVti3mnfdU9cSSlKdjXDJM9A3eKVqIxr7U",
+                  "notBefore": "2026-10-15T00:00:00Z",
+                  "notAfter": "2027-01-01T00:00:00Z"
+                }
+              ],
+              "revoked": [],
+              "administrators": [],
+              "alg": "EdDSA",
+              "kid": "root-org-a-1",
+              "sig": "vufCXJ4roCUAM3MEuAikBXHXZ8mdhK7hyiZkkFzc14MuJ8fvPq6zYxOOOH8KtIuBEIUcXesvsy1NXXs9rYqIBw"
+            }
+          }
+        },
+        "tokenMem": "sha256:5858c2d548aaf65bbe4f80625bb7315693cad1e36ac8b30f08e82cf978ec9ff5"
+      },
+      "expected": {
+        "ok": false,
+        "code": "decision-invalid"
+      }
+    },
+    {
+      "name": "an architect's level decision without its project",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T2",
+        "caller": "agent:claude-code",
+        "decision": {
+          "by": "level",
+          "via": "level-command",
+          "level": "architect",
+          "org": "org:org-a",
+          "action": "approve-reply",
+          "instruction": "approve the reply to the review from Anna",
+          "at": "2026-10-25T11:20:00Z",
+          "membership": {
+            "type": "org-membership/2",
+            "issuer": "https://orgs.example",
+            "org": "org:org-a",
+            "audience": "reviews-service-a1",
+            "subject": "m-arch-03",
+            "role": "architect",
+            "projects": [
+              "alpha",
+              "beta"
+            ],
+            "external": false,
+            "status": "active",
+            "revision": 3,
+            "membershipEndsAt": null,
+            "issuedAt": "2026-10-25T11:00:00Z",
+            "notBefore": "2026-10-25T11:00:00Z",
+            "expiresAt": "2026-10-25T12:00:00Z",
+            "extensions": {},
+            "alg": "EdDSA",
+            "kid": "mem-2026-10",
+            "sig": "RrABkwV8ubdv_gWsjle26Lj5uG4Q4FeAc2qFy7ENRhxw3m8ioGjcxYd3QIiUM-lGgV4jUatmUi2BtWBFGdO-Aw"
+          }
+        },
+        "now": "2026-10-25T11:30:00Z",
+        "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
+        "levels": {
+          "org:org-a": {
+            "audience": "reviews-service-a1",
+            "keySet": {
+              "type": "org-key-set/1",
+              "issuer": "https://orgs.example",
+              "org": "org:org-a",
+              "revision": 1,
+              "issuedAt": "2026-10-15T00:00:00Z",
+              "keys": [
+                {
+                  "kid": "mem-2026-10",
+                  "alg": "EdDSA",
+                  "x": "YxEDJVK86TVti3mnfdU9cSSlKdjXDJM9A3eKVqIxr7U",
+                  "notBefore": "2026-10-15T00:00:00Z",
+                  "notAfter": "2027-01-01T00:00:00Z"
+                }
+              ],
+              "revoked": [],
+              "administrators": [],
+              "alg": "EdDSA",
+              "kid": "root-org-a-1",
+              "sig": "vufCXJ4roCUAM3MEuAikBXHXZ8mdhK7hyiZkkFzc14MuJ8fvPq6zYxOOOH8KtIuBEIUcXesvsy1NXXs9rYqIBw"
+            }
+          }
+        },
+        "tokenMem": "sha256:3fd5ef20ba24c7a1382e32a720bf915827c2b2f93741802eaf8720157e9f9d8d",
+        "project": "alpha"
+      },
+      "expected": {
+        "ok": false,
+        "code": "decision-invalid"
+      }
+    },
+    {
+      "name": "a level decision in a personal context",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T2",
+        "caller": "agent:claude-code",
+        "decision": {
+          "by": "level",
+          "via": "level-command",
+          "level": "admin",
+          "org": "personal",
+          "action": "approve-reply",
+          "instruction": "approve the reply to the review from Anna",
+          "at": "2026-10-25T11:20:00Z",
+          "membership": {
+            "type": "org-membership/2",
+            "issuer": "https://orgs.example",
+            "org": "org:org-a",
+            "audience": "reviews-service-a1",
+            "subject": "m-admin-02",
+            "role": "admin",
+            "projects": [],
+            "external": false,
+            "status": "active",
+            "revision": 3,
+            "membershipEndsAt": null,
+            "issuedAt": "2026-10-25T11:00:00Z",
+            "notBefore": "2026-10-25T11:00:00Z",
+            "expiresAt": "2026-10-25T12:00:00Z",
+            "extensions": {},
+            "alg": "EdDSA",
+            "kid": "mem-2026-10",
+            "sig": "Rg3hZAm3Hgabq5LB3LPvOjkbms6W_jKJaGFFOHyPFOIabVXhP2gvzpb_wXkR30Xxu3UQK-ZW_eTAF9aF6qwQDA"
+          }
+        },
+        "now": "2026-10-25T11:30:00Z",
+        "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
+        "levels": {
+          "org:org-a": {
+            "audience": "reviews-service-a1",
+            "keySet": {
+              "type": "org-key-set/1",
+              "issuer": "https://orgs.example",
+              "org": "org:org-a",
+              "revision": 1,
+              "issuedAt": "2026-10-15T00:00:00Z",
+              "keys": [
+                {
+                  "kid": "mem-2026-10",
+                  "alg": "EdDSA",
+                  "x": "YxEDJVK86TVti3mnfdU9cSSlKdjXDJM9A3eKVqIxr7U",
+                  "notBefore": "2026-10-15T00:00:00Z",
+                  "notAfter": "2027-01-01T00:00:00Z"
+                }
+              ],
+              "revoked": [],
+              "administrators": [],
+              "alg": "EdDSA",
+              "kid": "root-org-a-1",
+              "sig": "vufCXJ4roCUAM3MEuAikBXHXZ8mdhK7hyiZkkFzc14MuJ8fvPq6zYxOOOH8KtIuBEIUcXesvsy1NXXs9rYqIBw"
+            }
+          }
+        },
+        "tokenMem": "sha256:5858c2d548aaf65bbe4f80625bb7315693cad1e36ac8b30f08e82cf978ec9ff5"
+      },
+      "expected": {
+        "ok": false,
+        "code": "decision-invalid"
+      }
+    },
+    {
+      "name": "a level decision against a human step",
+      "input": {
+        "action": {
+          "id": "connect-store",
+          "title": "Do it yourself",
+          "tool": "accounts.connect",
+          "gate": "human",
+          "humanStep": "payment"
+        },
+        "tier": "T0",
+        "caller": "agent:claude-code",
+        "decision": {
+          "by": "level",
+          "via": "level-command",
+          "level": "owner",
+          "org": "org:org-a",
+          "action": "approve-reply",
+          "instruction": "approve the reply to the review from Anna",
+          "at": "2026-10-25T11:20:00Z",
+          "membership": {
+            "type": "org-membership/2",
+            "issuer": "https://orgs.example",
+            "org": "org:org-a",
+            "audience": "reviews-service-a1",
+            "subject": "m-owner-01",
+            "role": "owner",
+            "projects": [],
+            "external": false,
+            "status": "active",
+            "revision": 3,
+            "membershipEndsAt": null,
+            "issuedAt": "2026-10-25T11:00:00Z",
+            "notBefore": "2026-10-25T11:00:00Z",
+            "expiresAt": "2026-10-25T12:00:00Z",
+            "extensions": {},
+            "alg": "EdDSA",
+            "kid": "mem-2026-10",
+            "sig": "DWXhTb1wl4-GuoOEi148WMcPzY-rWvxeCnECywHvCNsQLsSO3n0TlMlsybW3anYPQ8fdK_VD4DauMmC42sxXBw"
+          }
+        },
+        "tokenMem": "sha256:614fc6f0c76021eb1a4a6de48c6a4c674992936d83d94d33630d956224d997a0",
+        "now": "2026-10-25T11:30:00Z",
+        "humanStepUrl": "https://store.example/connect",
+        "levels": {
+          "org:org-a": {
+            "audience": "reviews-service-a1",
+            "keySet": {
+              "type": "org-key-set/1",
+              "issuer": "https://orgs.example",
+              "org": "org:org-a",
+              "revision": 1,
+              "issuedAt": "2026-10-15T00:00:00Z",
+              "keys": [
+                {
+                  "kid": "mem-2026-10",
+                  "alg": "EdDSA",
+                  "x": "YxEDJVK86TVti3mnfdU9cSSlKdjXDJM9A3eKVqIxr7U",
+                  "notBefore": "2026-10-15T00:00:00Z",
+                  "notAfter": "2027-01-01T00:00:00Z"
+                }
+              ],
+              "revoked": [],
+              "administrators": [],
+              "alg": "EdDSA",
+              "kid": "root-org-a-1",
+              "sig": "vufCXJ4roCUAM3MEuAikBXHXZ8mdhK7hyiZkkFzc14MuJ8fvPq6zYxOOOH8KtIuBEIUcXesvsy1NXXs9rYqIBw"
+            }
+          }
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "human-step-required",
+        "data": {
+          "humanStep": "payment",
+          "url": "https://store.example/connect"
+        }
+      }
+    },
+    {
+      "name": "a service reading no levels, from T0",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T0",
+        "caller": "agent:claude-code",
+        "decision": {
+          "by": "level",
+          "via": "level-command",
+          "level": "admin",
+          "org": "org:org-a",
+          "action": "approve-reply",
+          "instruction": "approve the reply to the review from Anna",
+          "at": "2026-10-25T11:20:00Z",
+          "membership": {
+            "type": "org-membership/2",
+            "issuer": "https://orgs.example",
+            "org": "org:org-a",
+            "audience": "reviews-service-a1",
+            "subject": "m-admin-02",
+            "role": "admin",
+            "projects": [],
+            "external": false,
+            "status": "active",
+            "revision": 3,
+            "membershipEndsAt": null,
+            "issuedAt": "2026-10-25T11:00:00Z",
+            "notBefore": "2026-10-25T11:00:00Z",
+            "expiresAt": "2026-10-25T12:00:00Z",
+            "extensions": {},
+            "alg": "EdDSA",
+            "kid": "mem-2026-10",
+            "sig": "Rg3hZAm3Hgabq5LB3LPvOjkbms6W_jKJaGFFOHyPFOIabVXhP2gvzpb_wXkR30Xxu3UQK-ZW_eTAF9aF6qwQDA"
+          }
+        },
+        "now": "2026-10-25T11:30:00Z",
+        "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
+        "tokenMem": "sha256:5858c2d548aaf65bbe4f80625bb7315693cad1e36ac8b30f08e82cf978ec9ff5"
+      },
+      "expected": {
+        "ok": false,
+        "code": "operator-decision-required"
+      }
+    },
+    {
+      "name": "a service reading no levels, from T2",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T2",
+        "caller": "agent:claude-code",
+        "decision": {
+          "by": "level",
+          "via": "level-command",
+          "level": "admin",
+          "org": "org:org-a",
+          "action": "approve-reply",
+          "instruction": "approve the reply to the review from Anna",
+          "at": "2026-10-25T11:20:00Z",
+          "membership": {
+            "type": "org-membership/2",
+            "issuer": "https://orgs.example",
+            "org": "org:org-a",
+            "audience": "reviews-service-a1",
+            "subject": "m-admin-02",
+            "role": "admin",
+            "projects": [],
+            "external": false,
+            "status": "active",
+            "revision": 3,
+            "membershipEndsAt": null,
+            "issuedAt": "2026-10-25T11:00:00Z",
+            "notBefore": "2026-10-25T11:00:00Z",
+            "expiresAt": "2026-10-25T12:00:00Z",
+            "extensions": {},
+            "alg": "EdDSA",
+            "kid": "mem-2026-10",
+            "sig": "Rg3hZAm3Hgabq5LB3LPvOjkbms6W_jKJaGFFOHyPFOIabVXhP2gvzpb_wXkR30Xxu3UQK-ZW_eTAF9aF6qwQDA"
+          }
+        },
+        "now": "2026-10-25T11:30:00Z",
+        "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
+        "tokenMem": "sha256:5858c2d548aaf65bbe4f80625bb7315693cad1e36ac8b30f08e82cf978ec9ff5"
+      },
+      "expected": {
+        "ok": false,
+        "code": "approval-required",
+        "data": {
+          "actionDigest": "sha256:abababababababababababababababababababababababababababababababab"
+        }
+      }
+    }
+  ],
+  "mandates": [
+    {
+      "name": "an architect's level mandate from T2, covered",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T2",
+        "caller": "agent:claude-code",
+        "now": "2026-10-25T11:30:00Z",
+        "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
+        "self": "example-reviewer",
+        "callerAgent": "example-developer",
+        "effect": "reply",
+        "project": "alpha",
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "level",
+          "level": "architect",
+          "org": "org:org-a",
+          "membership": {
+            "type": "org-membership/2",
+            "issuer": "https://orgs.example",
+            "org": "org:org-a",
+            "audience": "reviews-service-a1",
+            "subject": "m-arch-03",
+            "role": "architect",
+            "projects": [
+              "alpha",
+              "beta"
+            ],
+            "external": false,
+            "status": "active",
+            "revision": 3,
+            "membershipEndsAt": null,
+            "issuedAt": "2026-10-25T11:00:00Z",
+            "notBefore": "2026-10-25T11:00:00Z",
+            "expiresAt": "2026-10-25T12:00:00Z",
+            "extensions": {},
+            "alg": "EdDSA",
+            "kid": "mem-2026-10",
+            "sig": "RrABkwV8ubdv_gWsjle26Lj5uG4Q4FeAc2qFy7ENRhxw3m8ioGjcxYd3QIiUM-lGgV4jUatmUi2BtWBFGdO-Aw"
+          },
+          "task": "answer the reviews of the week",
+          "instruction": "answer this week's reviews in project alpha",
+          "at": "2026-10-25T11:20:00Z",
+          "expiresAt": "2026-10-26T11:20:00Z",
+          "scope": {
+            "capabilities": [
+              "reviews.approve"
+            ],
+            "effects": [
+              "reply"
+            ],
+            "projects": [
+              "alpha"
+            ]
+          },
+          "chain": [
+            {
+              "agent": "example-developer",
+              "at": "2026-10-25T11:20:00Z"
+            },
+            {
+              "agent": "example-reviewer",
+              "at": "2026-10-25T11:25:00Z"
+            }
+          ]
+        },
+        "levels": {
+          "org:org-a": {
+            "audience": "reviews-service-a1",
+            "keySet": {
+              "type": "org-key-set/1",
+              "issuer": "https://orgs.example",
+              "org": "org:org-a",
+              "revision": 1,
+              "issuedAt": "2026-10-15T00:00:00Z",
+              "keys": [
+                {
+                  "kid": "mem-2026-10",
+                  "alg": "EdDSA",
+                  "x": "YxEDJVK86TVti3mnfdU9cSSlKdjXDJM9A3eKVqIxr7U",
+                  "notBefore": "2026-10-15T00:00:00Z",
+                  "notAfter": "2027-01-01T00:00:00Z"
+                }
+              ],
+              "revoked": [],
+              "administrators": [],
+              "alg": "EdDSA",
+              "kid": "root-org-a-1",
+              "sig": "vufCXJ4roCUAM3MEuAikBXHXZ8mdhK7hyiZkkFzc14MuJ8fvPq6zYxOOOH8KtIuBEIUcXesvsy1NXXs9rYqIBw"
+            }
+          }
+        },
+        "tokenMem": "sha256:3fd5ef20ba24c7a1382e32a720bf915827c2b2f93741802eaf8720157e9f9d8d"
+      },
+      "expected": {
+        "ok": true,
+        "recordAs": {
+          "by": "level",
+          "level": "architect",
+          "org": "org:org-a",
+          "approver": "m-arch-03",
+          "membershipDigest": "sha256:3fd5ef20ba24c7a1382e32a720bf915827c2b2f93741802eaf8720157e9f9d8d",
+          "revision": 3,
+          "via": "mandate",
+          "task": "answer the reviews of the week",
+          "chain": [
+            "example-developer",
+            "example-reviewer"
+          ],
+          "caller": "agent:claude-code"
+        }
+      }
+    },
+    {
+      "name": "an administrator's level mandate from T1, covered",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T1",
+        "caller": "agent:claude-code",
+        "now": "2026-10-25T11:30:00Z",
+        "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
+        "self": "example-reviewer",
+        "callerAgent": "example-developer",
+        "effect": "reply",
+        "project": "alpha",
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "level",
+          "level": "admin",
+          "org": "org:org-a",
+          "membership": {
+            "type": "org-membership/2",
+            "issuer": "https://orgs.example",
+            "org": "org:org-a",
+            "audience": "reviews-service-a1",
+            "subject": "m-admin-02",
+            "role": "admin",
+            "projects": [],
+            "external": false,
+            "status": "active",
+            "revision": 3,
+            "membershipEndsAt": null,
+            "issuedAt": "2026-10-25T11:00:00Z",
+            "notBefore": "2026-10-25T11:00:00Z",
+            "expiresAt": "2026-10-25T12:00:00Z",
+            "extensions": {},
+            "alg": "EdDSA",
+            "kid": "mem-2026-10",
+            "sig": "Rg3hZAm3Hgabq5LB3LPvOjkbms6W_jKJaGFFOHyPFOIabVXhP2gvzpb_wXkR30Xxu3UQK-ZW_eTAF9aF6qwQDA"
+          },
+          "task": "answer the reviews of the week",
+          "instruction": "answer this week's reviews in project alpha",
+          "at": "2026-10-25T11:20:00Z",
+          "expiresAt": "2026-10-26T11:20:00Z",
+          "scope": {
+            "capabilities": [
+              "reviews.approve"
+            ],
+            "effects": [
+              "reply"
+            ],
+            "projects": [
+              "alpha"
+            ]
+          },
+          "chain": [
+            {
+              "agent": "example-developer",
+              "at": "2026-10-25T11:20:00Z"
+            },
+            {
+              "agent": "example-reviewer",
+              "at": "2026-10-25T11:25:00Z"
+            }
+          ]
+        },
+        "levels": {
+          "org:org-a": {
+            "audience": "reviews-service-a1",
+            "keySet": {
+              "type": "org-key-set/1",
+              "issuer": "https://orgs.example",
+              "org": "org:org-a",
+              "revision": 1,
+              "issuedAt": "2026-10-15T00:00:00Z",
+              "keys": [
+                {
+                  "kid": "mem-2026-10",
+                  "alg": "EdDSA",
+                  "x": "YxEDJVK86TVti3mnfdU9cSSlKdjXDJM9A3eKVqIxr7U",
+                  "notBefore": "2026-10-15T00:00:00Z",
+                  "notAfter": "2027-01-01T00:00:00Z"
+                }
+              ],
+              "revoked": [],
+              "administrators": [],
+              "alg": "EdDSA",
+              "kid": "root-org-a-1",
+              "sig": "vufCXJ4roCUAM3MEuAikBXHXZ8mdhK7hyiZkkFzc14MuJ8fvPq6zYxOOOH8KtIuBEIUcXesvsy1NXXs9rYqIBw"
+            }
+          }
+        },
+        "tokenMem": "sha256:5858c2d548aaf65bbe4f80625bb7315693cad1e36ac8b30f08e82cf978ec9ff5"
+      },
+      "expected": {
+        "ok": true,
+        "recordAs": {
+          "by": "level",
+          "level": "admin",
+          "org": "org:org-a",
+          "approver": "m-admin-02",
+          "membershipDigest": "sha256:5858c2d548aaf65bbe4f80625bb7315693cad1e36ac8b30f08e82cf978ec9ff5",
+          "revision": 3,
+          "via": "mandate",
+          "task": "answer the reviews of the week",
+          "chain": [
+            "example-developer",
+            "example-reviewer"
+          ],
+          "caller": "agent:claude-code"
+        }
+      }
+    },
+    {
+      "name": "an architect's level mandate from T2 on a project outside its own",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T2",
+        "caller": "agent:claude-code",
+        "now": "2026-10-25T11:30:00Z",
+        "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
+        "self": "example-reviewer",
+        "callerAgent": "example-developer",
+        "effect": "reply",
+        "project": "gamma",
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "level",
+          "level": "architect",
+          "org": "org:org-a",
+          "membership": {
+            "type": "org-membership/2",
+            "issuer": "https://orgs.example",
+            "org": "org:org-a",
+            "audience": "reviews-service-a1",
+            "subject": "m-arch-03",
+            "role": "architect",
+            "projects": [
+              "alpha",
+              "beta"
+            ],
+            "external": false,
+            "status": "active",
+            "revision": 3,
+            "membershipEndsAt": null,
+            "issuedAt": "2026-10-25T11:00:00Z",
+            "notBefore": "2026-10-25T11:00:00Z",
+            "expiresAt": "2026-10-25T12:00:00Z",
+            "extensions": {},
+            "alg": "EdDSA",
+            "kid": "mem-2026-10",
+            "sig": "RrABkwV8ubdv_gWsjle26Lj5uG4Q4FeAc2qFy7ENRhxw3m8ioGjcxYd3QIiUM-lGgV4jUatmUi2BtWBFGdO-Aw"
+          },
+          "task": "answer the reviews of the week",
+          "instruction": "answer this week's reviews in project alpha",
+          "at": "2026-10-25T11:20:00Z",
+          "expiresAt": "2026-10-26T11:20:00Z",
+          "scope": {
+            "capabilities": [
+              "reviews.approve"
+            ],
+            "effects": [
+              "reply"
+            ],
+            "projects": [
+              "alpha",
+              "gamma"
+            ]
+          },
+          "chain": [
+            {
+              "agent": "example-developer",
+              "at": "2026-10-25T11:20:00Z"
+            },
+            {
+              "agent": "example-reviewer",
+              "at": "2026-10-25T11:25:00Z"
+            }
+          ]
+        },
+        "levels": {
+          "org:org-a": {
+            "audience": "reviews-service-a1",
+            "keySet": {
+              "type": "org-key-set/1",
+              "issuer": "https://orgs.example",
+              "org": "org:org-a",
+              "revision": 1,
+              "issuedAt": "2026-10-15T00:00:00Z",
+              "keys": [
+                {
+                  "kid": "mem-2026-10",
+                  "alg": "EdDSA",
+                  "x": "YxEDJVK86TVti3mnfdU9cSSlKdjXDJM9A3eKVqIxr7U",
+                  "notBefore": "2026-10-15T00:00:00Z",
+                  "notAfter": "2027-01-01T00:00:00Z"
+                }
+              ],
+              "revoked": [],
+              "administrators": [],
+              "alg": "EdDSA",
+              "kid": "root-org-a-1",
+              "sig": "vufCXJ4roCUAM3MEuAikBXHXZ8mdhK7hyiZkkFzc14MuJ8fvPq6zYxOOOH8KtIuBEIUcXesvsy1NXXs9rYqIBw"
+            }
+          }
+        },
+        "tokenMem": "sha256:3fd5ef20ba24c7a1382e32a720bf915827c2b2f93741802eaf8720157e9f9d8d"
+      },
+      "expected": {
+        "ok": false,
+        "code": "operator-decision-required",
+        "data": {
+          "detail": "level-insufficient: admin"
+        }
+      }
+    },
+    {
+      "name": "a level mandate outside its scope's projects",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T2",
+        "caller": "agent:claude-code",
+        "now": "2026-10-25T11:30:00Z",
+        "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
+        "self": "example-reviewer",
+        "callerAgent": "example-developer",
+        "effect": "reply",
+        "project": "beta",
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "level",
+          "level": "admin",
+          "org": "org:org-a",
+          "membership": {
+            "type": "org-membership/2",
+            "issuer": "https://orgs.example",
+            "org": "org:org-a",
+            "audience": "reviews-service-a1",
+            "subject": "m-admin-02",
+            "role": "admin",
+            "projects": [],
+            "external": false,
+            "status": "active",
+            "revision": 3,
+            "membershipEndsAt": null,
+            "issuedAt": "2026-10-25T11:00:00Z",
+            "notBefore": "2026-10-25T11:00:00Z",
+            "expiresAt": "2026-10-25T12:00:00Z",
+            "extensions": {},
+            "alg": "EdDSA",
+            "kid": "mem-2026-10",
+            "sig": "Rg3hZAm3Hgabq5LB3LPvOjkbms6W_jKJaGFFOHyPFOIabVXhP2gvzpb_wXkR30Xxu3UQK-ZW_eTAF9aF6qwQDA"
+          },
+          "task": "answer the reviews of the week",
+          "instruction": "answer this week's reviews in project alpha",
+          "at": "2026-10-25T11:20:00Z",
+          "expiresAt": "2026-10-26T11:20:00Z",
+          "scope": {
+            "capabilities": [
+              "reviews.approve"
+            ],
+            "effects": [
+              "reply"
+            ],
+            "projects": [
+              "alpha"
+            ]
+          },
+          "chain": [
+            {
+              "agent": "example-developer",
+              "at": "2026-10-25T11:20:00Z"
+            },
+            {
+              "agent": "example-reviewer",
+              "at": "2026-10-25T11:25:00Z"
+            }
+          ]
+        },
+        "levels": {
+          "org:org-a": {
+            "audience": "reviews-service-a1",
+            "keySet": {
+              "type": "org-key-set/1",
+              "issuer": "https://orgs.example",
+              "org": "org:org-a",
+              "revision": 1,
+              "issuedAt": "2026-10-15T00:00:00Z",
+              "keys": [
+                {
+                  "kid": "mem-2026-10",
+                  "alg": "EdDSA",
+                  "x": "YxEDJVK86TVti3mnfdU9cSSlKdjXDJM9A3eKVqIxr7U",
+                  "notBefore": "2026-10-15T00:00:00Z",
+                  "notAfter": "2027-01-01T00:00:00Z"
+                }
+              ],
+              "revoked": [],
+              "administrators": [],
+              "alg": "EdDSA",
+              "kid": "root-org-a-1",
+              "sig": "vufCXJ4roCUAM3MEuAikBXHXZ8mdhK7hyiZkkFzc14MuJ8fvPq6zYxOOOH8KtIuBEIUcXesvsy1NXXs9rYqIBw"
+            }
+          }
+        },
+        "tokenMem": "sha256:5858c2d548aaf65bbe4f80625bb7315693cad1e36ac8b30f08e82cf978ec9ff5"
+      },
+      "expected": {
+        "ok": false,
+        "code": "operator-decision-required",
+        "data": {
+          "detail": "outside-mandate: project"
+        }
+      }
+    },
+    {
+      "name": "a level mandate without the token's mem",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T2",
+        "caller": "agent:claude-code",
+        "now": "2026-10-25T11:30:00Z",
+        "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
+        "self": "example-reviewer",
+        "callerAgent": "example-developer",
+        "effect": "reply",
+        "project": "alpha",
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "level",
+          "level": "admin",
+          "org": "org:org-a",
+          "membership": {
+            "type": "org-membership/2",
+            "issuer": "https://orgs.example",
+            "org": "org:org-a",
+            "audience": "reviews-service-a1",
+            "subject": "m-admin-02",
+            "role": "admin",
+            "projects": [],
+            "external": false,
+            "status": "active",
+            "revision": 3,
+            "membershipEndsAt": null,
+            "issuedAt": "2026-10-25T11:00:00Z",
+            "notBefore": "2026-10-25T11:00:00Z",
+            "expiresAt": "2026-10-25T12:00:00Z",
+            "extensions": {},
+            "alg": "EdDSA",
+            "kid": "mem-2026-10",
+            "sig": "Rg3hZAm3Hgabq5LB3LPvOjkbms6W_jKJaGFFOHyPFOIabVXhP2gvzpb_wXkR30Xxu3UQK-ZW_eTAF9aF6qwQDA"
+          },
+          "task": "answer the reviews of the week",
+          "instruction": "answer this week's reviews in project alpha",
+          "at": "2026-10-25T11:20:00Z",
+          "expiresAt": "2026-10-26T11:20:00Z",
+          "scope": {
+            "capabilities": [
+              "reviews.approve"
+            ],
+            "effects": [
+              "reply"
+            ],
+            "projects": [
+              "alpha"
+            ]
+          },
+          "chain": [
+            {
+              "agent": "example-developer",
+              "at": "2026-10-25T11:20:00Z"
+            },
+            {
+              "agent": "example-reviewer",
+              "at": "2026-10-25T11:25:00Z"
+            }
+          ]
+        },
+        "levels": {
+          "org:org-a": {
+            "audience": "reviews-service-a1",
+            "keySet": {
+              "type": "org-key-set/1",
+              "issuer": "https://orgs.example",
+              "org": "org:org-a",
+              "revision": 1,
+              "issuedAt": "2026-10-15T00:00:00Z",
+              "keys": [
+                {
+                  "kid": "mem-2026-10",
+                  "alg": "EdDSA",
+                  "x": "YxEDJVK86TVti3mnfdU9cSSlKdjXDJM9A3eKVqIxr7U",
+                  "notBefore": "2026-10-15T00:00:00Z",
+                  "notAfter": "2027-01-01T00:00:00Z"
+                }
+              ],
+              "revoked": [],
+              "administrators": [],
+              "alg": "EdDSA",
+              "kid": "root-org-a-1",
+              "sig": "vufCXJ4roCUAM3MEuAikBXHXZ8mdhK7hyiZkkFzc14MuJ8fvPq6zYxOOOH8KtIuBEIUcXesvsy1NXXs9rYqIBw"
+            }
+          }
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "decision-invalid",
+        "data": {
+          "detail": "level-unbound"
+        }
+      }
+    },
+    {
+      "name": "a level mandate of an ended membership",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T2",
+        "caller": "agent:claude-code",
+        "now": "2026-10-25T11:30:00Z",
+        "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
+        "self": "example-reviewer",
+        "callerAgent": "example-developer",
+        "effect": "reply",
+        "project": "alpha",
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "level",
+          "level": "admin",
+          "org": "org:org-a",
+          "membership": {
+            "type": "org-membership/2",
+            "issuer": "https://orgs.example",
+            "org": "org:org-a",
+            "audience": "reviews-service-a1",
+            "subject": "m-admin-05",
+            "role": "admin",
+            "projects": [],
+            "external": false,
+            "status": "ended",
+            "revision": 4,
+            "membershipEndsAt": null,
+            "issuedAt": "2026-10-25T11:00:00Z",
+            "notBefore": "2026-10-25T11:00:00Z",
+            "expiresAt": "2026-10-25T12:00:00Z",
+            "extensions": {},
+            "alg": "EdDSA",
+            "kid": "mem-2026-10",
+            "sig": "Ar-udwEysZng5QtqxS1dN74kRq_VTGZjH2BMvTjruh5wd7qHrHiB5jusgPnj3tjGfAGOM9S1iv7spfCkDwyYAg"
+          },
+          "task": "answer the reviews of the week",
+          "instruction": "answer this week's reviews in project alpha",
+          "at": "2026-10-25T11:20:00Z",
+          "expiresAt": "2026-10-26T11:20:00Z",
+          "scope": {
+            "capabilities": [
+              "reviews.approve"
+            ],
+            "effects": [
+              "reply"
+            ],
+            "projects": [
+              "alpha"
+            ]
+          },
+          "chain": [
+            {
+              "agent": "example-developer",
+              "at": "2026-10-25T11:20:00Z"
+            },
+            {
+              "agent": "example-reviewer",
+              "at": "2026-10-25T11:25:00Z"
+            }
+          ]
+        },
+        "levels": {
+          "org:org-a": {
+            "audience": "reviews-service-a1",
+            "keySet": {
+              "type": "org-key-set/1",
+              "issuer": "https://orgs.example",
+              "org": "org:org-a",
+              "revision": 1,
+              "issuedAt": "2026-10-15T00:00:00Z",
+              "keys": [
+                {
+                  "kid": "mem-2026-10",
+                  "alg": "EdDSA",
+                  "x": "YxEDJVK86TVti3mnfdU9cSSlKdjXDJM9A3eKVqIxr7U",
+                  "notBefore": "2026-10-15T00:00:00Z",
+                  "notAfter": "2027-01-01T00:00:00Z"
+                }
+              ],
+              "revoked": [],
+              "administrators": [],
+              "alg": "EdDSA",
+              "kid": "root-org-a-1",
+              "sig": "vufCXJ4roCUAM3MEuAikBXHXZ8mdhK7hyiZkkFzc14MuJ8fvPq6zYxOOOH8KtIuBEIUcXesvsy1NXXs9rYqIBw"
+            }
+          }
+        },
+        "tokenMem": "sha256:f4471ff70e4ae340b2341f74c8bccb5c455e63d7fc8c887a7be12ee803c24360"
+      },
+      "expected": {
+        "ok": false,
+        "code": "decision-invalid",
+        "data": {
+          "detail": "level-membership: ended"
+        }
+      }
+    },
+    {
+      "name": "a level mandate at a service reading no levels, from T2",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T2",
+        "caller": "agent:claude-code",
+        "now": "2026-10-25T11:30:00Z",
+        "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
+        "self": "example-reviewer",
+        "callerAgent": "example-developer",
+        "effect": "reply",
+        "project": "alpha",
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "level",
+          "level": "admin",
+          "org": "org:org-a",
+          "membership": {
+            "type": "org-membership/2",
+            "issuer": "https://orgs.example",
+            "org": "org:org-a",
+            "audience": "reviews-service-a1",
+            "subject": "m-admin-02",
+            "role": "admin",
+            "projects": [],
+            "external": false,
+            "status": "active",
+            "revision": 3,
+            "membershipEndsAt": null,
+            "issuedAt": "2026-10-25T11:00:00Z",
+            "notBefore": "2026-10-25T11:00:00Z",
+            "expiresAt": "2026-10-25T12:00:00Z",
+            "extensions": {},
+            "alg": "EdDSA",
+            "kid": "mem-2026-10",
+            "sig": "Rg3hZAm3Hgabq5LB3LPvOjkbms6W_jKJaGFFOHyPFOIabVXhP2gvzpb_wXkR30Xxu3UQK-ZW_eTAF9aF6qwQDA"
+          },
+          "task": "answer the reviews of the week",
+          "instruction": "answer this week's reviews in project alpha",
+          "at": "2026-10-25T11:20:00Z",
+          "expiresAt": "2026-10-26T11:20:00Z",
+          "scope": {
+            "capabilities": [
+              "reviews.approve"
+            ],
+            "effects": [
+              "reply"
+            ],
+            "projects": [
+              "alpha"
+            ]
+          },
+          "chain": [
+            {
+              "agent": "example-developer",
+              "at": "2026-10-25T11:20:00Z"
+            },
+            {
+              "agent": "example-reviewer",
+              "at": "2026-10-25T11:25:00Z"
+            }
+          ]
+        },
+        "tokenMem": "sha256:5858c2d548aaf65bbe4f80625bb7315693cad1e36ac8b30f08e82cf978ec9ff5"
+      },
+      "expected": {
+        "ok": false,
+        "code": "approval-required",
+        "data": {
+          "actionDigest": "sha256:abababababababababababababababababababababababababababababababab"
+        }
+      }
+    },
+    {
+      "name": "a level mandate at a service reading no levels, from T0",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T0",
+        "caller": "agent:claude-code",
+        "now": "2026-10-25T11:30:00Z",
+        "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
+        "self": "example-reviewer",
+        "callerAgent": "example-developer",
+        "effect": "reply",
+        "project": "alpha",
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "level",
+          "level": "admin",
+          "org": "org:org-a",
+          "membership": {
+            "type": "org-membership/2",
+            "issuer": "https://orgs.example",
+            "org": "org:org-a",
+            "audience": "reviews-service-a1",
+            "subject": "m-admin-02",
+            "role": "admin",
+            "projects": [],
+            "external": false,
+            "status": "active",
+            "revision": 3,
+            "membershipEndsAt": null,
+            "issuedAt": "2026-10-25T11:00:00Z",
+            "notBefore": "2026-10-25T11:00:00Z",
+            "expiresAt": "2026-10-25T12:00:00Z",
+            "extensions": {},
+            "alg": "EdDSA",
+            "kid": "mem-2026-10",
+            "sig": "Rg3hZAm3Hgabq5LB3LPvOjkbms6W_jKJaGFFOHyPFOIabVXhP2gvzpb_wXkR30Xxu3UQK-ZW_eTAF9aF6qwQDA"
+          },
+          "task": "answer the reviews of the week",
+          "instruction": "answer this week's reviews in project alpha",
+          "at": "2026-10-25T11:20:00Z",
+          "expiresAt": "2026-10-26T11:20:00Z",
+          "scope": {
+            "capabilities": [
+              "reviews.approve"
+            ],
+            "effects": [
+              "reply"
+            ],
+            "projects": [
+              "alpha"
+            ]
+          },
+          "chain": [
+            {
+              "agent": "example-developer",
+              "at": "2026-10-25T11:20:00Z"
+            },
+            {
+              "agent": "example-reviewer",
+              "at": "2026-10-25T11:25:00Z"
+            }
+          ]
+        },
+        "tokenMem": "sha256:5858c2d548aaf65bbe4f80625bb7315693cad1e36ac8b30f08e82cf978ec9ff5"
+      },
+      "expected": {
+        "ok": false,
+        "code": "operator-decision-required"
+      }
+    },
+    {
+      "name": "an operator's mandate from T2 still changes nothing (MD-5)",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T2",
+        "caller": "agent:claude-code",
+        "now": "2026-10-25T11:30:00Z",
+        "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
+        "self": "example-reviewer",
+        "callerAgent": "example-developer",
+        "effect": "reply",
+        "project": "alpha",
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "operator",
+          "task": "answer the reviews of the week",
+          "instruction": "answer this week's reviews in project alpha",
+          "at": "2026-10-25T11:20:00Z",
+          "expiresAt": "2026-10-26T11:20:00Z",
+          "scope": {
+            "capabilities": [
+              "reviews.approve"
+            ],
+            "effects": [
+              "reply"
+            ],
+            "projects": [
+              "alpha"
+            ]
+          },
+          "chain": [
+            {
+              "agent": "example-developer",
+              "at": "2026-10-25T11:20:00Z"
+            },
+            {
+              "agent": "example-reviewer",
+              "at": "2026-10-25T11:25:00Z"
+            }
+          ]
+        },
+        "levels": {
+          "org:org-a": {
+            "audience": "reviews-service-a1",
+            "keySet": {
+              "type": "org-key-set/1",
+              "issuer": "https://orgs.example",
+              "org": "org:org-a",
+              "revision": 1,
+              "issuedAt": "2026-10-15T00:00:00Z",
+              "keys": [
+                {
+                  "kid": "mem-2026-10",
+                  "alg": "EdDSA",
+                  "x": "YxEDJVK86TVti3mnfdU9cSSlKdjXDJM9A3eKVqIxr7U",
+                  "notBefore": "2026-10-15T00:00:00Z",
+                  "notAfter": "2027-01-01T00:00:00Z"
+                }
+              ],
+              "revoked": [],
+              "administrators": [],
+              "alg": "EdDSA",
+              "kid": "root-org-a-1",
+              "sig": "vufCXJ4roCUAM3MEuAikBXHXZ8mdhK7hyiZkkFzc14MuJ8fvPq6zYxOOOH8KtIuBEIUcXesvsy1NXXs9rYqIBw"
+            }
+          }
+        },
+        "tokenMem": "sha256:5858c2d548aaf65bbe4f80625bb7315693cad1e36ac8b30f08e82cf978ec9ff5"
+      },
+      "expected": {
+        "ok": false,
+        "code": "approval-required",
+        "data": {
+          "actionDigest": "sha256:abababababababababababababababababababababababababababababababab"
+        }
+      }
+    }
+  ],
+  "verify": [
+    {
+      "name": "a /2 reader verifies an architect",
+      "membership": "architect",
+      "trust": {
+        "now": "2026-10-25T11:30:00Z",
+        "org": "org:org-a",
+        "audience": "reviews-service-a1",
+        "keySet": "keySet",
+        "levels": true
+      },
+      "expected": {
+        "ok": true,
+        "status": "active",
+        "role": "architect",
+        "type": "org-membership/2",
+        "projects": [
+          "alpha",
+          "beta"
+        ],
+        "expiresAt": "2026-10-25T12:00:00Z",
+        "refreshDue": false,
+        "unchanged": false,
+        "digest": "sha256:3fd5ef20ba24c7a1382e32a720bf915827c2b2f93741802eaf8720157e9f9d8d",
+        "held": {
+          "subject": "m-arch-03",
+          "revision": 3,
+          "digest": "sha256:3fd5ef20ba24c7a1382e32a720bf915827c2b2f93741802eaf8720157e9f9d8d"
+        }
+      }
+    },
+    {
+      "name": "a /2 reader verifies an owner",
+      "membership": "owner",
+      "trust": {
+        "now": "2026-10-25T11:30:00Z",
+        "org": "org:org-a",
+        "audience": "reviews-service-a1",
+        "keySet": "keySet",
+        "levels": true
+      },
+      "expected": {
+        "ok": true,
+        "status": "active",
+        "role": "owner",
+        "type": "org-membership/2",
+        "projects": [],
+        "expiresAt": "2026-10-25T12:00:00Z",
+        "refreshDue": false,
+        "unchanged": false,
+        "digest": "sha256:614fc6f0c76021eb1a4a6de48c6a4c674992936d83d94d33630d956224d997a0",
+        "held": {
+          "subject": "m-owner-01",
+          "revision": 3,
+          "digest": "sha256:614fc6f0c76021eb1a4a6de48c6a4c674992936d83d94d33630d956224d997a0"
+        }
+      }
+    },
+    {
+      "name": "a /1 reader given an architect's /2 refuses it: it does not know the type",
+      "membership": "architect",
+      "trust": {
+        "now": "2026-10-25T11:30:00Z",
+        "org": "org:org-a",
+        "audience": "reviews-service-a1",
+        "keySet": "keySet"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
+      "name": "a /1 reader reads the issuer's /1 for it: the architect as member",
+      "membership": "v1Member",
+      "trust": {
+        "now": "2026-10-25T11:30:00Z",
+        "org": "org:org-a",
+        "audience": "reviews-service-a1",
+        "keySet": "keySet"
+      },
+      "expected": {
+        "ok": true,
+        "status": "active",
+        "role": "member",
+        "refreshDue": false,
+        "unchanged": false,
+        "digest": "sha256:6d4e86f99128182be46bb2c3b953321ad25b37dfc1cdb6e9ab7c091a647e4e4f",
+        "held": {
+          "subject": "m-arch-03",
+          "revision": 3,
+          "digest": "sha256:6d4e86f99128182be46bb2c3b953321ad25b37dfc1cdb6e9ab7c091a647e4e4f"
+        }
+      }
+    },
+    {
+      "name": "an architect without projects is malformed",
+      "membership": {
+        "type": "org-membership/2",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "audience": "reviews-service-a1",
+        "subject": "m-arch-03",
+        "role": "architect",
+        "projects": [],
+        "external": false,
+        "status": "active",
+        "revision": 3,
+        "membershipEndsAt": null,
+        "issuedAt": "2026-10-25T11:00:00Z",
+        "notBefore": "2026-10-25T11:00:00Z",
+        "expiresAt": "2026-10-25T12:00:00Z",
+        "extensions": {},
+        "alg": "EdDSA",
+        "kid": "mem-2026-10",
+        "sig": "RrABkwV8ubdv_gWsjle26Lj5uG4Q4FeAc2qFy7ENRhxw3m8ioGjcxYd3QIiUM-lGgV4jUatmUi2BtWBFGdO-Aw"
+      },
+      "trust": {
+        "now": "2026-10-25T11:30:00Z",
+        "org": "org:org-a",
+        "audience": "reviews-service-a1",
+        "keySet": "keySet",
+        "levels": true
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
+      "name": "an administrator with projects is malformed",
+      "membership": {
+        "type": "org-membership/2",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "audience": "reviews-service-a1",
+        "subject": "m-admin-02",
+        "role": "admin",
+        "projects": [
+          "alpha"
+        ],
+        "external": false,
+        "status": "active",
+        "revision": 3,
+        "membershipEndsAt": null,
+        "issuedAt": "2026-10-25T11:00:00Z",
+        "notBefore": "2026-10-25T11:00:00Z",
+        "expiresAt": "2026-10-25T12:00:00Z",
+        "extensions": {},
+        "alg": "EdDSA",
+        "kid": "mem-2026-10",
+        "sig": "Rg3hZAm3Hgabq5LB3LPvOjkbms6W_jKJaGFFOHyPFOIabVXhP2gvzpb_wXkR30Xxu3UQK-ZW_eTAF9aF6qwQDA"
+      },
+      "trust": {
+        "now": "2026-10-25T11:30:00Z",
+        "org": "org:org-a",
+        "audience": "reviews-service-a1",
+        "keySet": "keySet",
+        "levels": true
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    }
+  ]
+}

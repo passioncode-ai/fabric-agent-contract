@@ -18,6 +18,7 @@ import { deviceRules } from "./device-rules.js";
 import { deviceTransportRules } from "./device-transport-rules.js";
 import { delegationRules } from "./delegation-rules.js";
 import { deepLinkRules } from "./fabric-links.js";
+import { levelRules } from "./levels.js";
 import { mandateRules } from "./mandate.js";
 import { pageLinkRules } from "./page-link-rules.js";
 import { sessionHandoffRules } from "./session-handoff.js";
@@ -85,6 +86,8 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   if (pageLink) return pageLink;
   const mandate = mandateRules(kind, value);
   if (mandate) return mandate;
+  // DEC-0162: a level decision's attestation, checked without a key (FAC-SEM-170); a level mandate's is mandateRules'.
+  if (kind === "decision") return levelRules(kind, value) ?? [];
   if (kind === "service-lock-outcome") return lockOutcomeRules(value);
   if (kind === "windows-token-file") return windowsTokenRules(value);
   const profiles = profileRules(kind, value);

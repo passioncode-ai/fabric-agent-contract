@@ -2,6 +2,7 @@ import type { ValidateFunction } from "ajv/dist/2020.js";
 import { SCHEMA_PREFIX } from "./contract.js";
 import { effectClosure } from "./delegation.js";
 import type { Finding, JsonObject } from "./findings.js";
+import { type LevelContexts, type LevelDetail, type LevelRecord, levelRules, levelStanding } from "./levels.js";
 import { CLOCK_SKEW_SECONDS, strictTime } from "./rfc3339.js";
 import { createValidatorSync } from "./validator.js";
 
@@ -12,6 +13,8 @@ import { createValidatorSync } from "./validator.js";
 // caller's agent id), takes a call the mandate covers as
 // the operator's decision (MD-3), and refuses only what it does not cover, so the operator is asked for that part alone
 // (MD-4). A T2 caller's mandate changes nothing (MD-5); human steps and the money limits never travel (MD-6).
+// DEC-0162 LV-6: a level mandate (`by: "level"`) is a level holder's words in an organization; a callee that reads
+// levels takes it from any tier when the call's delegation token binds its attestation, within the holder's level.
 
 /** The longest a mandate stands after the operator gave it. */
 export const MANDATE_LIFETIME_SECONDS = 7 * 24 * 60 * 60;
@@ -38,7 +41,11 @@ export interface OperatorSource {
 }
 export interface Mandate {
   kind: "mandate/1";
-  by: "operator";
+  by: "operator" | "level";
+  /** With `by: "level"` (DEC-0162 LV-6): the level, its organization and the holder's `org-membership/2` attestation. */
+  level?: string;
+  org?: string;
+  membership?: JsonObject;
   task: string;
   instruction: string;
   at: string;
@@ -63,13 +70,15 @@ export interface MandateCall {
 }
 
 export type OutsideDetail = "outside-mandate: capability" | "outside-mandate: action" | "outside-mandate: effect" | "outside-mandate: spend" | "outside-mandate: project";
-export type InvalidDetail = "mandate-malformed" | "mandate-widened" | "mandate-expired" | "mandate-early" | "mandate-not-for-this-call";
+export type InvalidDetail = "mandate-malformed" | "mandate-widened" | "mandate-expired" | "mandate-early" | "mandate-not-for-this-call" | LevelDetail;
 export type MandateAnswer =
   | { ok: true; recordAs: { by: "operator"; via: "mandate"; task: string; chain: string[]; source?: OperatorSource } }
-  | { ok: false; code: typeof OUTSIDE_MANDATE; data: { detail: OutsideDetail; estimateUsd?: number; perCallMaxUsd?: number } }
+  | { ok: true; recordAs: Omit<LevelRecord, "project"> & { via: "mandate"; task: string; chain: string[] } }
+  | { ok: false; code: typeof OUTSIDE_MANDATE; data: { detail: OutsideDetail | "level-insufficient: admin"; estimateUsd?: number; perCallMaxUsd?: number } }
   | { ok: false; code: typeof MANDATE_INVALID; data: { detail: InvalidDetail } }
-  /** A T2 caller's mandate changes nothing: the callee applies the whole profile as if it were absent (MD-5). */
-  | { ignored: "mandate-at-t2" }
+  /** A T2 caller's operator mandate changes nothing: the callee applies the whole profile as if it were absent (MD-5).
+   * A level mandate at a callee that reads no levels is ignored the same way, at every tier (LV-10). */
+  | { ignored: "mandate-at-t2" | "levels-not-read" }
   /** The callee's own fault, never sent: its clock does not read. */
   | { fault: "now-unreadable" };
 
@@ -143,11 +152,24 @@ export function mandateProblem(mandate: unknown): "mandate-malformed" | "mandate
  * ignored. An invalid, widened, expired, not yet given or misaddressed mandate is `decision-invalid`; a valid one that
  * does not cover the call is `operator-decision-required`, its detail naming the first part not covered (MD-4).
  */
-export function mandateCovers(input: { mandate: unknown; tier: unknown; now: unknown; self: unknown; callerAgent?: unknown; call: MandateCall }): MandateAnswer {
+export function mandateCovers(input: {
+  mandate: unknown;
+  tier: unknown;
+  now: unknown;
+  self: unknown;
+  callerAgent?: unknown;
+  call: MandateCall;
+  /** The organizations this callee reads levels in (DEC-0162); absent, it reads none and ignores a level mandate. */
+  levels?: LevelContexts;
+  /** The `mem` claim of the call's delegation token (LV-5). */
+  tokenMem?: unknown;
+}): MandateAnswer {
   const { mandate, tier, now, self, callerAgent, call } = input;
   const clock = strictTime(now);
   if (Number.isNaN(clock)) return { fault: "now-unreadable" };
-  if (tier !== "T0" && tier !== "T1") return { ignored: "mandate-at-t2" };
+  const byLevel = typeof mandate === "object" && mandate !== null && (mandate as { by?: unknown }).by === "level";
+  if (byLevel && input.levels === undefined) return { ignored: "levels-not-read" };
+  if (!byLevel && tier !== "T0" && tier !== "T1") return { ignored: "mandate-at-t2" };
   const problem = mandateProblem(mandate);
   if (problem) return { ok: false, code: MANDATE_INVALID, data: { detail: problem } };
   const read = mandate as Mandate;
@@ -170,6 +192,20 @@ export function mandateCovers(input: { mandate: unknown; tier: unknown; now: unk
     return { ok: false, code: OUTSIDE_MANDATE, data: { detail: "outside-mandate: spend", ...(call.spendUsd === undefined ? {} : { estimateUsd: call.spendUsd }), perCallMaxUsd: scope.perCallMaxUsd } };
   }
   if (call.project !== undefined && scope.projects !== undefined && !scope.projects.includes(call.project)) return outside("outside-mandate: project");
+  if (byLevel) {
+    // LV-6: the level stands as the operator's word only inside its scope, after every check of the mandate itself.
+    const standing = levelStanding({
+      membership: read.membership, org: read.org as string, level: read.level as string, at: read.at,
+      ...(call.project === undefined ? {} : { project: call.project }), contexts: input.levels as LevelContexts, tokenMem: input.tokenMem, now: clock
+    });
+    if (!standing.ok) {
+      return "invalid" in standing
+        ? { ok: false, code: MANDATE_INVALID, data: { detail: standing.invalid } }
+        : { ok: false, code: OUTSIDE_MANDATE, data: { detail: standing.insufficient } };
+    }
+    const { approver, membershipDigest, revision, level, org } = standing;
+    return { ok: true, recordAs: { by: "level", level, org, approver, membershipDigest, revision, via: "mandate", task: read.task, chain: holders } };
+  }
   // Where the operator said it travels into the record, as the reason the callee acted (DEC-0126 OA-6).
   return { ok: true, recordAs: { by: "operator", via: "mandate", task: read.task, chain: holders, ...(read.source ? { source: { ...read.source } } : {}) } };
 }
@@ -189,7 +225,9 @@ export function handOn(mandate: Mandate, callee: string, at: string, narrower?: 
 export function mandateRules(kind: string, value: JsonObject): Finding[] | undefined {
   if (kind === "mandate") {
     const problem = mandateProblem(value);
-    return problem ? [{ code: "FAC-SEM-144", instancePath: "", message: `the mandate is not valid: ${problem} (DEC-0125 MD-1, MD-2; DEC-0136 MD-2a)` }] : [];
+    // DEC-0162: a level mandate's attestation, checked without a key (FAC-SEM-170, src/levels.ts).
+    const level = problem === "mandate-malformed" ? [] : (levelRules(kind, value) ?? []);
+    return [...(problem ? [{ code: "FAC-SEM-144", instancePath: "", message: `the mandate is not valid: ${problem} (DEC-0125 MD-1, MD-2; DEC-0136 MD-2a)` }] : []), ...level];
   }
   return undefined;
 }

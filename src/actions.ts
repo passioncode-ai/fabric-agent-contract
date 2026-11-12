@@ -4,6 +4,7 @@ import { SCHEMA_PREFIX } from "./contract.js";
 import { EXTENSION_KEYS } from "./extensions.js";
 import { type Finding, type JsonObject, isObject } from "./findings.js";
 import { CLOCK_SKEW_SECONDS, strictTime } from "./rfc3339.js";
+import { type LevelContexts, type LevelRecord, levelStanding } from "./levels.js";
 import { type OperatorSource, mandateCovers } from "./mandate.js";
 import { createValidatorSync } from "./validator.js";
 
@@ -12,6 +13,8 @@ import { createValidatorSync } from "./validator.js";
 // surface (AP-1), declared under extensions/actions/0.1; a `relayed` action from a T0 or T1 caller is taken as the
 // operator's when the call carries the operator's decision in `_meta.decision` (AP-2); a `human` action answers
 // `human-step-required` with its step (AP-4). `actionDecision` is the reference a service's tool runs before it acts.
+// DEC-0162: a level holder's decision or mandate, bound to the call by its delegation token's `mem`, stands as the
+// operator's at every tier inside the holder's level (LV-4 to LV-6), at a service that reads levels.
 
 /** The three refusals DEC-0121 adds to DL-19's one code set, and DL-17's refusal a T2 caller still gets. */
 export const OPERATOR_DECISION_REQUIRED = "operator-decision-required";
@@ -63,12 +66,24 @@ export interface ActionDecisionInput {
   mandateCapability?: unknown;
   /** The service's own estimate of what this call spends, USD, to read a mandate's spend. */
   spendUsd?: unknown;
-  /** The project the call acts in, to read a mandate's projects. */
+  /** The project the call acts in, to read a mandate's projects and an architect's level (DEC-0162 LV-4). */
   project?: unknown;
+  /** The organizations this service reads levels in, by `org:<orgId>` (DEC-0162); absent, it reads none, and a level
+   * decision or mandate is answered as if the call carried none (LV-10). */
+  levels?: unknown;
+  /** The `mem` claim of the call's verified delegation token, absent when it presented none (DEC-0162 LV-5). */
+  tokenMem?: unknown;
 }
 
-export type DecisionVia = "relayed-instruction" | "elicitation" | "approval" | "mandate";
-export type DecisionRecord = { by: string; via: DecisionVia; caller: string; task?: string; chain?: string[]; source?: OperatorSource };
+export type DecisionVia = "relayed-instruction" | "elicitation" | "approval" | "mandate" | "level-command";
+export type DecisionRecord = {
+  by: string;
+  via: DecisionVia;
+  caller: string;
+  task?: string;
+  chain?: string[];
+  source?: OperatorSource;
+} & Partial<Omit<LevelRecord, "by">>;
 export type ActionDecisionAnswer =
   | { ok: true; recordAs: "caller" }
   | { ok: true; recordAs: DecisionRecord }
@@ -124,6 +139,17 @@ export function actionDecision(input: ActionDecisionInput): ActionDecisionAnswer
   }
   if (!nonEmpty(caller)) return { fault: "caller-missing" };
   if (acceptedApproval(approval)) return { ok: true, recordAs: { by: approval.approver, via: "approval", caller } };
+  // DEC-0162: a level decision, or a level mandate on a call without a decision, is read at every tier by a service
+  // that reads levels (LV-6); one that reads none answers as if the call carried neither (LV-10).
+  const levelDecision = isObject(decision) && decision.by === "level";
+  const levelMandate = decision === undefined && isObject(input.mandate) && input.mandate.by === "level";
+  if (isObject(input.levels) && (levelDecision || levelMandate)) {
+    const clock = strictTime(now);
+    if (Number.isNaN(clock)) return { fault: "now-unreadable" };
+    if (levelDecision) return byLevel(input, action, caller, clock);
+    const answer = byMandate(input, action, caller);
+    if (!("ignored" in answer)) return answer;
+  }
   if (tier !== "T0" && tier !== "T1") {
     if (typeof actionDigest !== "string" || !SHA256.test(actionDigest)) return { fault: "digest-missing" };
     return { ok: false, code: APPROVAL_REQUIRED, data: { actionDigest } };
@@ -131,8 +157,11 @@ export function actionDecision(input: ActionDecisionInput): ActionDecisionAnswer
   if (elicited === true) return { ok: true, recordAs: { by: "operator", via: "elicitation", caller } };
   const clock = strictTime(now);
   if (Number.isNaN(clock)) return { fault: "now-unreadable" };
-  if (decision === undefined && input.mandate !== undefined) return byMandate(input, action, caller);
-  if (decision === undefined) return { ok: false, code: OPERATOR_DECISION_REQUIRED };
+  if (decision === undefined && input.mandate !== undefined) {
+    const answer = byMandate(input, action, caller);
+    return "ignored" in answer ? { ok: false, code: OPERATOR_DECISION_REQUIRED } : answer;
+  }
+  if (decision === undefined || levelDecision) return { ok: false, code: OPERATOR_DECISION_REQUIRED };
   decisionShape ??= schema("decision.schema.json");
   if (decisionShape(decision) !== true) return { ok: false, code: DECISION_INVALID };
   const read = decision as { action: string; target?: string; at: string; source?: OperatorSource };
@@ -156,7 +185,7 @@ const CAPABILITY_NAME = /^[a-z][a-z0-9._-]{1,127}$/;
  * key: a mandate listing capabilities covers a job's start and its steps alike, and one that also lists actions covers
  * a step only when it names the step's key.
  */
-function byMandate(input: ActionDecisionInput, action: DeclaredAction, caller: string): ActionDecisionAnswer {
+function byMandate(input: ActionDecisionInput, action: DeclaredAction, caller: string): ActionDecisionAnswer | { ignored: string } {
   const { effect, spendUsd, project } = input;
   if (typeof effect !== "string") return { fault: "effect-missing" };
   if (typeof input.self !== "string") return { fault: "self-missing" };
@@ -166,11 +195,43 @@ function byMandate(input: ActionDecisionInput, action: DeclaredAction, caller: s
   const answer = mandateCovers({
     mandate: input.mandate, tier: input.tier, now: input.now, self: input.self,
     ...(input.callerAgent === undefined ? {} : { callerAgent: input.callerAgent }),
+    ...(isObject(input.levels) ? { levels: input.levels as LevelContexts, tokenMem: input.tokenMem } : {}),
     call: { capability, action: action.id, effect, ...(typeof spendUsd === "number" ? { spendUsd } : {}), ...(typeof project === "string" ? { project } : {}) }
   });
   if ("recordAs" in answer) return { ok: true, recordAs: { ...answer.recordAs, caller } };
-  // Never `ignored`: actionDecision reads the tier first, so a T2 call answered approval-required before (MD-5).
-  return answer as Exclude<typeof answer, { ignored: string }>;
+  // `ignored`: a T2 operator mandate (MD-5), or a level mandate at a service that reads no levels (LV-10); the caller
+  // answers as if the call carried no mandate.
+  return answer;
+}
+
+/**
+ * A relayed action's call that carries a level decision, at a service that reads levels (DEC-0162 LV-3 to LV-6, LV-10,
+ * LV-11), at any tier: the decision has its schema's level form and is for this action and target; it was made within
+ * AP-2's window; it names the project the call acts in, when it names one; the level stands (`levelStanding`). A failed
+ * check is `decision-invalid`, with the level's detail where the level fails; a level below what the call needs is
+ * `operator-decision-required` with `level-insufficient: admin`.
+ */
+function byLevel(input: ActionDecisionInput, action: DeclaredAction, caller: string, clock: number): ActionDecisionAnswer {
+  decisionShape ??= schema("decision.schema.json");
+  if (decisionShape(input.decision) !== true) return { ok: false, code: DECISION_INVALID };
+  const read = input.decision as { level: string; org: string; project?: string; action: string; target?: string; at: string; membership: unknown };
+  if (read.action !== action.id || (read.target !== undefined && read.target !== input.target)) return { ok: false, code: DECISION_INVALID };
+  const at = strictTime(read.at);
+  if (Number.isNaN(at) || at > clock + CLOCK_SKEW_SECONDS * 1000 || at < clock - DECISION_LIFETIME_SECONDS * 1000) return { ok: false, code: DECISION_INVALID };
+  const project = typeof input.project === "string" ? input.project : undefined;
+  // A decision for one project decides nothing in another, or in none.
+  if (read.project !== undefined && read.project !== project) return { ok: false, code: DECISION_INVALID };
+  const standing = levelStanding({
+    membership: read.membership, org: read.org, level: read.level, at: read.at,
+    ...(project === undefined ? {} : { project }), contexts: input.levels as LevelContexts, tokenMem: input.tokenMem, now: clock
+  });
+  if (!standing.ok) {
+    return "invalid" in standing
+      ? { ok: false, code: DECISION_INVALID, data: { detail: standing.invalid } }
+      : { ok: false, code: OPERATOR_DECISION_REQUIRED, data: { detail: standing.insufficient } };
+  }
+  const { level, org, approver, membershipDigest, revision } = standing;
+  return { ok: true, recordAs: { by: "level", via: "level-command", level, org, ...(project === undefined ? {} : { project }), approver, membershipDigest, revision, caller } };
 }
 
 /** What a host reads of a well-known document's actions declaration: the actions, or why it is not declared. */

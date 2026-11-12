@@ -361,6 +361,7 @@ decision that lists the change as a narrowing, as DEC-0129 did for `org-key-set/
 | `entitlement/1` | every member of the entitlement but `type` and `sig` | a key: a signing key the issuer's current key set lists | the bytes | `entitlementSigningInput` | DEC-0085, [entitlement](entitlement.md#the-signature) |
 | `entitlement-key-set/1` | every member of the key set but `type` and `sig` | a key: the issuer's root key, pinned by the verifier | the bytes | `entitlementKeySetSigningInput` | DEC-0085, [entitlement](entitlement.md#issuer-keys) |
 | `org-membership/1` | every member of the attestation but `type` and `sig` | a key: a signing key the organization's current key set lists | the bytes | `orgMembershipSigningInput` | DEC-0127, [membership](membership.md#the-signature) |
+| `org-membership/2` | every member of the attestation but `type` and `sig`, its projects among them | a key: a signing key the organization's current key set lists | the bytes | `orgMembershipSigningInput` | DEC-0162, [membership](membership.md#levels) |
 | `org-key-set/1` | every member of the key set but `type` and `sig` | a key: the organization's root key, pinned in the person's estate record | the bytes | `orgKeySetSigningInput` | DEC-0127, [membership](membership.md#the-organizations-keys) |
 | `org-authority/1` | `digest` (the list's, `sha256:`) | a passkey: an administrator's, which the organization's key set lists in `administrators` | the challenge | `signingChallenge`, `verifyOrgAuthority` | DEC-0129, [membership](membership.md#the-organizations-member-list) |
 
@@ -390,7 +391,7 @@ decision names `FAC-SEM-142`, reserved after it. `FAC-SEM-161` was reserved (rec
 `FAC-SEM-156` to `FAC-SEM-160` and is not used: the decision's rules needed five codes. `FAC-SEM-162` to `FAC-SEM-165`
 were reserved by DEC-0150's run (receipts SEM-0162 to SEM-0165).
 
-**Next free rule code:** `FAC-SEM-169` (the CAS counter's next value when this line was last written; read
+**Next free rule code:** `FAC-SEM-171` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/SEM` on origin for the current one)
 
 | Code | Kind | Defined in | Receipt |
@@ -535,7 +536,7 @@ were reserved by DEC-0150's run (receipts SEM-0162 to SEM-0165).
 | `FAC-SEM-142` | `service-well-known`, `action-call` | [service](service.md#semantic-rules) | SEM-0142 |
 | `FAC-SEM-143` | `page-link`, `interop-input-requests` | [service](service.md#semantic-rules) | SEM-0143 |
 | `FAC-SEM-144` | `mandate` | [delegation](delegation.md#semantic-rules) | SEM-0144 |
-| `FAC-SEM-145` | `org-membership` | [membership](membership.md#semantic-rules) | SEM-0145 |
+| `FAC-SEM-145` | `org-membership`, `org-membership-2` | [membership](membership.md#semantic-rules) | SEM-0145 |
 | `FAC-SEM-146` | `org-key-set` | [membership](membership.md#semantic-rules) | SEM-0146 |
 | `FAC-SEM-147` | `estate-record` | [membership](membership.md#semantic-rules) | SEM-0147 |
 | `FAC-SEM-148` | `node-enrollments` | [devices](devices.md#semantic-rules) | SEM-0148 |
@@ -558,6 +559,8 @@ were reserved by DEC-0150's run (receipts SEM-0162 to SEM-0165).
 | `FAC-SEM-166` | `ops-digest-hourly`, `ops-digest-daily` | [operations digests](ops-digest.md#semantic-rules) | SEM-0166 |
 | `FAC-SEM-167` | `ops-digest-hourly`, `ops-digest-daily` | [operations digests](ops-digest.md#semantic-rules) | SEM-0167 |
 | `FAC-SEM-168` | `service-descriptor` | [operations digests](ops-digest.md#semantic-rules) | SEM-0168 |
+| `FAC-SEM-169` | `org-membership-2` | [membership](membership.md#semantic-rules) | SEM-0169 |
+| `FAC-SEM-170` | `decision`, `mandate` | [membership](membership.md#semantic-rules) | SEM-0170 |
 
 ## Compatibility policy
 

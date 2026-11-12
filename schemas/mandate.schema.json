@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/mandate.schema.json",
   "title": "The operator's mandate a task carries down a chain of agents (mandate/1, DEC-0125)",
-  "description": "The operator's instruction for one task, carried by the agent leading it and handed on, narrowed, to the agents it engages (docs/specification/delegation.md#the-operators-mandate). It travels in a request's _meta.mandate, a hub agent.call's or a sealed call's call.mandate, or a project-board request's body. A callee takes a call it covers from a T0 or T1 caller as the operator's decision (MD-3); a T2 caller's mandate changes nothing (MD-5). mandateCovers in src/mandate.ts is the reference; FAC-SEM-144 checks the document.",
+  "description": "The operator's instruction for one task, carried by the agent leading it and handed on, narrowed, to the agents it engages (docs/specification/delegation.md#the-operators-mandate). It travels in a request's _meta.mandate, a hub agent.call's or a sealed call's call.mandate, or a project-board request's body. A callee takes a call it covers from a T0 or T1 caller as the operator's decision (MD-3); a T2 caller's mandate changes nothing (MD-5), save a level mandate its delegation token binds (DEC-0162 LV-6). mandateCovers in src/mandate.ts is the reference; FAC-SEM-144 checks the document.",
   "type": "object",
   "required": [
     "kind",
@@ -20,7 +20,27 @@
       "const": "mandate/1"
     },
     "by": {
-      "const": "operator"
+      "enum": [
+        "operator",
+        "level"
+      ],
+      "description": "operator: the operator's words (MD-1). level: a level holder's words in an organization (DEC-0162 LV-6), with level, org and membership; taken from any tier only when the call's delegation token binds membership by mem (LV-5)."
+    },
+    "level": {
+      "enum": [
+        "owner",
+        "admin",
+        "architect"
+      ],
+      "description": "With by level: the level the holder gives the mandate at, at most the attestation's role; an architect's mandate lists projects in its scope, each among the attestation's (FAC-SEM-170)."
+    },
+    "org": {
+      "$ref": "org-membership.schema.json#/$defs/org",
+      "description": "With by level: the organization the level is in, the attestation's org."
+    },
+    "membership": {
+      "$ref": "org-membership-2.schema.json",
+      "description": "With by level: the holder's org-membership/2 attestation for the service the chain ends in; the mandate's level stands only while the service accepts it (LV-11), so a level mandate lives at most as long as its attestation."
     },
     "task": {
       "type": "string",
@@ -32,7 +52,7 @@
       "type": "string",
       "minLength": 1,
       "maxLength": 500,
-      "description": "The operator's words that gave the task, verbatim, in AP-3's form: their sentence, or the agent's question and their answer."
+      "description": "The operator's words that gave the task, verbatim, in AP-3's form: their sentence, or the agent's question and their answer; for a level mandate, the level holder's words."
     },
     "at": {
       "$ref": "common.schema.json#/$defs/timestamp",
@@ -187,5 +207,61 @@
         }
       }
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "by": {
+            "const": "level"
+          }
+        },
+        "required": [
+          "by"
+        ]
+      },
+      "then": {
+        "required": [
+          "level",
+          "org",
+          "membership"
+        ],
+        "properties": {
+          "level": true,
+          "org": true,
+          "membership": true
+        }
+      },
+      "else": {
+        "not": {
+          "anyOf": [
+            {
+              "required": [
+                "level"
+              ],
+              "properties": {
+                "level": true
+              }
+            },
+            {
+              "required": [
+                "org"
+              ],
+              "properties": {
+                "org": true
+              }
+            },
+            {
+              "required": [
+                "membership"
+              ],
+              "properties": {
+                "membership": true
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
 }

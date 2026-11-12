@@ -2,7 +2,7 @@ import { createHash, createPublicKey, verify as verifySignature } from "node:cry
 import { isSmallOrderKey } from "./ed25519.js";
 import { type Finding, type JsonObject, indexed, isObject, show } from "./findings.js";
 import { CLOCK_SKEW_SECONDS, strictTime } from "./rfc3339.js";
-import { ORG_KEY_SET_FIELDS, ORG_MEMBERSHIP_FIELDS, signingCredentialFindings, signingStatement } from "./signing-challenges.js";
+import { ORG_KEY_SET_FIELDS, ORG_MEMBERSHIP_2_FIELDS, ORG_MEMBERSHIP_FIELDS, signingCredentialFindings, signingStatement } from "./signing-challenges.js";
 import { ASSERTION_ALGORITHMS, credentialKey } from "./webauthn.js";
 
 // #region org-membership, docs: docs/specification/membership.md
@@ -16,6 +16,11 @@ import { ASSERTION_ALGORITHMS, credentialKey } from "./webauthn.js";
  * member list (`org-authority/1`, DEC-0129, `src/org-authority.ts`).
  */
 export const ORG_MEMBERSHIP_TYPE = "org-membership/1";
+/**
+ * `org-membership/2` (DEC-0162 LV-1): `/1` with the role `architect` and `projects`, the projects an architect
+ * administers, empty for every other role. Its role is the holder's level for decisions (LV-2), never a signer's.
+ */
+export const ORG_MEMBERSHIP_2_TYPE = "org-membership/2";
 export const ORG_KEY_SET_TYPE = "org-key-set/1";
 /** Ed25519 only, as every signed record of the contract (DEC-0085 item 2); ES256 may join additively. */
 export const ORG_MEMBERSHIP_ALGORITHMS: readonly string[] = ["EdDSA"];
@@ -25,6 +30,10 @@ export const MAX_ATTESTATION_SECONDS = 24 * 60 * 60;
 export const REFRESH_SECONDS = 15 * 60;
 /** The roles an attestation carries; an issuer maps its own onto these, and a finer one travels in an extension. */
 export const ORG_ROLES: readonly string[] = ["owner", "admin", "member"];
+/** The roles of `org-membership/2`, highest first: each covers the ones after it, an architect within its projects (LV-2). */
+export const LEVEL_ROLES: readonly string[] = ["owner", "admin", "architect", "member"];
+/** The most projects one architect attestation names; more is a second attestation (DEC-0162). */
+export const MAX_PROJECTS = 64;
 export const MEMBERSHIP_STATUSES: readonly string[] = ["active", "ended"];
 /** The most extensions one attestation carries. */
 export const MAX_EXTENSIONS = 16;
@@ -51,6 +60,8 @@ const SIG = /^[A-Za-z0-9_-]{85}[AQgw]$/;
 /** 32 bytes, base64url without padding, canonical. */
 const X = /^[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]$/;
 const SHA256 = /^sha256:[a-f0-9]{64}$/;
+/** `org-membership-2#/$defs/project`: a project as a mandate's projects and a call's project name it. */
+const PROJECT = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/;
 
 const matches = (pattern: RegExp, value: unknown) => isString(value) && pattern.test(value);
 const opaque = (value: unknown) => matches(OPAQUE, value);
@@ -72,9 +83,9 @@ const rawKey = (x: string) => Buffer.from(x, "base64url");
  * form of the document without `sig`. `undefined` when it does not carry exactly the registered members.
  */
 export function orgMembershipSigningInput(attestation: unknown): Buffer | undefined {
-  if (!isObject(attestation) || attestation.type !== ORG_MEMBERSHIP_TYPE) return undefined;
-  const { type: _type, sig: _sig, ...fields } = attestation;
-  return signingStatement(ORG_MEMBERSHIP_TYPE, fields);
+  if (!isObject(attestation) || (attestation.type !== ORG_MEMBERSHIP_TYPE && attestation.type !== ORG_MEMBERSHIP_2_TYPE)) return undefined;
+  const { type, sig: _sig, ...fields } = attestation;
+  return signingStatement(type as string, fields);
 }
 
 /** The bytes the organization's root signs: the register's `org-key-set/1` statement, the set without `sig`. */
@@ -100,16 +111,23 @@ function extensionsOk(value: unknown): boolean {
  * member or an extra one.
  */
 export function orgMembershipWellFormed(doc: JsonObject): boolean {
+  const levels = doc.type === ORG_MEMBERSHIP_2_TYPE;
   return (
-    exactly(doc, [...ORG_MEMBERSHIP_FIELDS, "type", "sig"]) &&
+    exactly(doc, [...(levels ? ORG_MEMBERSHIP_2_FIELDS : ORG_MEMBERSHIP_FIELDS), "type", "sig"]) &&
     issuerOk(doc.issuer) && matches(ORG, doc.org) && opaque(doc.audience) && opaque(doc.subject) &&
-    ORG_ROLES.includes(doc.role as string) && typeof doc.external === "boolean" &&
+    (levels ? LEVEL_ROLES.includes(doc.role as string) && projectsOk(doc.role, doc.projects) : ORG_ROLES.includes(doc.role as string)) && typeof doc.external === "boolean" &&
     MEMBERSHIP_STATUSES.includes(doc.status as string) && positive(doc.revision) &&
     (doc.membershipEndsAt === null || readable(doc.membershipEndsAt)) &&
     readable(doc.issuedAt) && readable(doc.notBefore) && readable(doc.expiresAt) &&
     extensionsOk(doc.extensions) &&
     isString(doc.alg) && opaque(doc.kid) && matches(SIG, doc.sig)
   );
+}
+
+/** `/2`'s projects (FAC-SEM-169): 1 to 64 distinct projects for an architect, none for any other role (DEC-0162 LV-1). */
+function projectsOk(role: unknown, projects: unknown): boolean {
+  if (!Array.isArray(projects) || projects.length > MAX_PROJECTS || !projects.every((project) => matches(PROJECT, project)) || new Set(projects).size !== projects.length) return false;
+  return (role === "architect") === (projects.length > 0);
 }
 
 /** Whether one of a key set's keys is valid at the set's own `issuedAt`: `notBefore` ≤ `issuedAt` < `notAfter`. */
@@ -269,7 +287,21 @@ export type OrgMembershipProblem =
   | "revision-conflict";
 
 export type OrgMembershipVerdict =
-  | { ok: true; status: "active" | "ended"; role: string; refreshDue: boolean; unchanged: boolean; digest: string; held: HeldMembership }
+  | {
+    ok: true;
+    status: "active" | "ended";
+    role: string;
+    /** Present for an `org-membership/2` attestation only (DEC-0162), so a `/1` verdict keeps its shape: the type, an
+     * architect's projects (empty for every other role) and `expiresAt` as written (a level decision is taken only
+     * before it, LV-4). */
+    type?: string;
+    projects?: string[];
+    expiresAt?: string;
+    refreshDue: boolean;
+    unchanged: boolean;
+    digest: string;
+    held: HeldMembership;
+  }
   | { ok: false; problem: OrgMembershipProblem };
 
 export interface OrgMembershipTrust {
@@ -285,6 +317,9 @@ export interface OrgMembershipTrust {
   keySet: JsonObject;
   /** The attestation held for this organization, audience and subject, if any. */
   held?: HeldMembership;
+  /** True for a reader the issuer registered as an `org-membership/2` reader (DEC-0162 LV-1); any other reads `/1` only
+   * and refuses `/2` as `malformed`, since it does not know the type. */
+  levels?: boolean;
 }
 
 const heldMembershipOk = (held: unknown) => held === undefined || (isObject(held) && opaque(held.subject) && positive(held.revision) && matches(SHA256, held.digest));
@@ -292,7 +327,7 @@ const heldMembershipOk = (held: unknown) => held === undefined || (isObject(held
 /** Whether `trust` is a usable context, the clock aside. */
 function usableTrust(trust: OrgMembershipTrust): boolean {
   const keySetOk = isObject(trust.keySet) && orgKeySetWellFormed(trust.keySet) && ORG_MEMBERSHIP_ALGORITHMS.includes(trust.keySet.alg as string);
-  return matches(ORG, trust.org) && opaque(trust.audience) && (trust.subject === undefined || opaque(trust.subject)) && keySetOk && trust.keySet.org === trust.org && heldMembershipOk(trust.held);
+  return matches(ORG, trust.org) && opaque(trust.audience) && (trust.subject === undefined || opaque(trust.subject)) && keySetOk && trust.keySet.org === trust.org && heldMembershipOk(trust.held) && (trust.levels === undefined || typeof trust.levels === "boolean");
 }
 
 /**
@@ -308,7 +343,8 @@ export function verifyOrgMembership(value: unknown, trust: OrgMembershipTrust): 
   const now = trust.now instanceof Date ? trust.now.getTime() : Number.NaN;
   if (!Number.isFinite(now)) return { ok: false, problem: "no-clock" };
   if (!usableTrust(trust)) return { ok: false, problem: "context-invalid" };
-  const input = isObject(value) && orgMembershipWellFormed(value) ? orgMembershipSigningInput(value) : undefined;
+  const known = isObject(value) && (value.type === ORG_MEMBERSHIP_TYPE || (trust.levels === true && value.type === ORG_MEMBERSHIP_2_TYPE));
+  const input = known && orgMembershipWellFormed(value) ? orgMembershipSigningInput(value) : undefined;
   if (!input) return { ok: false, problem: "malformed" };
   const attestation = value as JsonObject;
 
@@ -346,6 +382,7 @@ export function verifyOrgMembership(value: unknown, trust: OrgMembershipTrust): 
     ok: true,
     status: attestation.status === "ended" || now >= endsAt ? "ended" : "active",
     role: attestation.role as string,
+    ...(attestation.type === ORG_MEMBERSHIP_2_TYPE ? { type: ORG_MEMBERSHIP_2_TYPE, projects: [...(attestation.projects as string[])], expiresAt: attestation.expiresAt as string } : {}),
     refreshDue: now >= expiresAt - REFRESH_SECONDS * 1000,
     unchanged,
     digest,
@@ -369,6 +406,18 @@ function membershipDocument(value: JsonObject, flag: Flag): void {
   if (issuedAt > notBefore) flag("/notBefore", "notBefore is at or after issuedAt");
   if (notBefore >= expiresAt) flag("/expiresAt", "expiresAt is after notBefore");
   if (expiresAt - issuedAt > MAX_ATTESTATION_SECONDS * 1000) flag("/expiresAt", `an attestation expires at most ${MAX_ATTESTATION_SECONDS / 3600} hours after it is issued`);
+}
+
+/** FAC-SEM-169 on one `org-membership/2` attestation: projects for an architect and only for one, each once (DEC-0162 LV-1). */
+function projectsDocument(value: JsonObject, flag: Flag): void {
+  const projects = list(value.projects);
+  if (value.role === "architect" && projects.length === 0) flag("/projects", "an architect's attestation names the projects it administers, 1 to 64");
+  if (value.role !== "architect" && projects.length > 0) flag("/projects", `projects is empty for the role ${show(value.role)}: only an architect's level is bounded by projects`);
+  const seen = new Set<unknown>();
+  projects.forEach((project, index) => {
+    if (seen.has(project)) flag(`/projects/${index}`, `the project ${show(project)} is named twice`);
+    seen.add(project);
+  });
 }
 
 /**
@@ -409,6 +458,11 @@ export function orgMembershipRules(kind: string, value: JsonObject): Finding[] |
   const findings: Finding[] = [];
   if (kind === "org-membership") {
     membershipDocument(value, (instancePath, message) => findings.push({ code: "FAC-SEM-145", instancePath, message }));
+    return findings;
+  }
+  if (kind === "org-membership-2") {
+    membershipDocument(value, (instancePath, message) => findings.push({ code: "FAC-SEM-145", instancePath, message }));
+    projectsDocument(value, (instancePath, message) => findings.push({ code: "FAC-SEM-169", instancePath, message }));
     return findings;
   }
   if (kind === "org-key-set") {

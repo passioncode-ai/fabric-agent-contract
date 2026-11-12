@@ -1,7 +1,7 @@
-# Membership: `org-membership/1`, `org-key-set/1` and `org-authority/1`
+# Membership: `org-membership/1` and `/2`, `org-key-set/1` and `org-authority/1`
 
-DEC-0127, DEC-0129, DEC-0131, DEC-0133, DEC-0138 · rule codes `FAC-SEM-145`, `FAC-SEM-146`, `FAC-SEM-147`, `FAC-SEM-150`, `FAC-SEM-151`, `FAC-SEM-153` · schemas
-[`org-membership`](../../schemas/org-membership.schema.json), [`org-key-set`](../../schemas/org-key-set.schema.json),
+DEC-0127, DEC-0129, DEC-0131, DEC-0133, DEC-0138, DEC-0162 · rule codes `FAC-SEM-145`, `FAC-SEM-146`, `FAC-SEM-147`, `FAC-SEM-150`, `FAC-SEM-151`, `FAC-SEM-153`, `FAC-SEM-169`, `FAC-SEM-170` · schemas
+[`org-membership`](../../schemas/org-membership.schema.json), [`org-membership-2`](../../schemas/org-membership-2.schema.json), [`org-key-set`](../../schemas/org-key-set.schema.json),
 [`org-authority`](../../schemas/org-authority.schema.json), the exchange's
 [`org-key-set-draft`](../../schemas/org-key-set-draft.schema.json),
 [`org-authority-draft`](../../schemas/org-authority-draft.schema.json) and
@@ -540,11 +540,13 @@ retention says.
 
 | Code | Kind | Rule |
 |---|---|---|
-| <a id="fac-sem-145"></a>`FAC-SEM-145` | `org-membership` | the times are strict RFC 3339 with at most three fraction digits and `issuedAt` ≤ `notBefore` < `expiresAt`, the life is at most 24 hours, and `membershipEndsAt` is `null` or such a time |
+| <a id="fac-sem-145"></a>`FAC-SEM-145` | `org-membership`, `org-membership-2` | the times are strict RFC 3339 with at most three fraction digits and `issuedAt` ≤ `notBefore` < `expiresAt`, the life is at most 24 hours, and `membershipEndsAt` is `null` or such a time |
 | <a id="fac-sem-146"></a>`FAC-SEM-146` | `org-key-set` | each kid once, the root's kid not among the keys, every key window strict and positive, no revoked kid among the keys, no key of small order, and at least one key valid at the set's `issuedAt`; each administrator's credential once, with a usable key of its algorithm (never of small order), under a signing RP with every origin within it (DEC-0129) |
 | <a id="fac-sem-150"></a>`FAC-SEM-150` | `org-authority` | the window is two strict instants with at most three fraction digits, `expiresAt` after `issuedAt` and at most 7 days after it; at most 1024 members, each an object of 1 to 8 keys, each key an object; each subject, each `iss` and each kid once across the list; every kid a `#sig` kid and every key a P-256 point SEC 1 accepts (DEC-0129) |
 | <a id="fac-sem-151"></a>`FAC-SEM-151` | `org-key-set-draft`, `org-authority-draft` | a draft envelope's `digest` is its draft's (what its signer signs), its draft names the envelope's organization, and its revision is one above its base's (1 with none) (DEC-0131) |
 | <a id="fac-sem-153"></a>`FAC-SEM-153` | `org-adaptation` | an adaptation plan names each item's `ref` once and each request's `id` once, and a request's `itemRef` names one of its items (DEC-0138) |
+| <a id="fac-sem-169"></a>`FAC-SEM-169` | `org-membership-2` | `projects` names 1 to 64 projects, each once, for an `architect` and none for any other role (DEC-0162 LV-1) |
+| <a id="fac-sem-170"></a>`FAC-SEM-170` | `decision`, `mandate` | a level decision or a level mandate (`by: "level"`) carries an `org-membership/2` attestation of its `org`, whose role covers its `level`, made before the attestation's `expiresAt`; an architect's names its project (a decision's `project`, a mandate's scope `projects`), each among the attestation's `projects` (DEC-0162 LV-3, LV-4, LV-6) |
 | <a id="fac-sem-147"></a>`FAC-SEM-147` | `estate-record` | each organization pinned once by its context, and no pinned root of small order; each context issuer once and its opaque part never containing an estate id of eight characters or more (DEC-0128) |
 
 ## Who adopts it

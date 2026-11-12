@@ -22,7 +22,7 @@ const wrap = (...members: string[]): SemanticKind => ({ input: "wrapper", member
 
 export const SEMANTIC_KINDS: Readonly<Record<string, SemanticKind>> = Object.freeze({
   "access-log-disclosure": wrap("log", "consents"),
-  "action-call": wrap("action", "tier", "caller", "decision", "target", "elicited", "approval", "actionDigest", "humanStepUrl", "now", "answer", "mandate", "self", "callerAgent", "effect", "spendUsd", "project", "mandateCapability"),
+  "action-call": wrap("action", "tier", "caller", "decision", "target", "elicited", "approval", "actionDigest", "humanStepUrl", "now", "answer", "mandate", "self", "callerAgent", "effect", "spendUsd", "project", "mandateCapability", "levels", "tokenMem"),
   "activity-ack": wrap("known", "batch", "ack"),
   "activity-batch": doc("activity-batch.schema.json"),
   "activity-summary": doc("activity-summary.schema.json"),
@@ -63,6 +63,7 @@ export const SEMANTIC_KINDS: Readonly<Record<string, SemanticKind>> = Object.fre
   entitlement: doc("entitlement.schema.json"),
   "entitlement-key-set": doc("entitlement-key-set.schema.json"),
   "org-membership": doc("org-membership.schema.json"),
+  "org-membership-2": doc("org-membership-2.schema.json"),
   "org-key-set": doc("org-key-set.schema.json"),
   "org-authority": doc("org-authority.schema.json"),
   "org-key-set-draft": doc("org-key-set-draft.schema.json"),
@@ -92,6 +93,7 @@ export const SEMANTIC_KINDS: Readonly<Record<string, SemanticKind>> = Object.fre
   "local-channel-session": wrap("requests"),
   "machine-call": wrap("caller", "target", "capability", "effect", "answer"),
   "mandate": doc("mandate.schema.json"),
+  "decision": doc("decision.schema.json"),
   "node-enrollments": wrap("estateMachineId", "estatePublicKeys", "enrollments"),
   "check-in-outbound": wrap("checkIn"),
   "check-in-response-outbound": wrap("response"),
