@@ -11455,8 +11455,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      act was done, with only a side act left open, settled `completed` with the open act named in its result), every
      other step that waits in such a session named the same way, a request settled `failed_known` there submitted
      again only where what the person does lets a session with no person take the step (an answer, a decision or a
-     relay naming the step, a grant, a human step cleared), by the operator when they own the requesting Project and by
-     the requester otherwise, a relay or a mandate that names the
+     relay naming the step, a grant, a human step cleared), by the operator's session in the requesting Project (its agent,
+     on their word) when they own the requesting Project and by the requester otherwise, a relay or a mandate that names the
      act changing neither mode, being the reason the one ask quotes, not the agreement the gate holds the act for; the
      agent adds no question of its own
      about an act a host's gate already asks about (a risk on it travels as that gate's one ask), while the asks other
@@ -11539,8 +11539,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   publishing outward and deleting what cannot be restored still stop and ask, ADR-0160 section 4; its stop on spend
   within a limit is Fabric's own gate) is a host's
   gate that OW-3 and OW-5 keep: the agent asks through it once, quoting the operator's words as its reason, and goes on
-  with the rest. Whether the operator's words should pass that gate without a second ask is the operator's decision, not
-  this one's (Fabric question `add1df7c`); until then Fabric owes nothing for it. Noted beside that question: Fabric's
+  with the rest. Whether the operator's words pass that gate without a second ask the operator has decided in principle
+  (2026-10-26: no second approval, fabric-workspace `knowledge/agents-first.md`, *One approval binds all*; 2026-11-06: a
+  command of the owner, an administrator or an architect, or their agents, runs without a prompt of its own, not built
+  yet, `knowledge/authority.md`, *Access levels*); until CT-250's decision and Fabric's answer to question `add1df7c`
+  land, the floor asks as Fabric does today, and Fabric owes nothing for it here. Noted beside that question: Fabric's
   relay test for the production stop (a relay whose scope names the step) is narrower than a mandate handed on as MD-2
   says, whose scope names capabilities (`mandate.schema.json`) and whose `source` may be absent (OA-7); until Fabric
   says otherwise, a relayed mandate that does not name the step meets that stop, which OW-5 keeps. A relay that does name
@@ -11568,7 +11571,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   no receipt in Fabric, only the agent's own report). Third, an FA-09 refusal not offered as a grantable card in its
   attention queue or the OS notification that announces it, issuing no grant (the press creates nothing a later
   session could spend), its status line never reading "Allowed" for an FA-09 refusal, and the card resolving when the
-  agent records the act the operator agreed to in the chat (today every refusal the
+  agent records the act the operator agreed to in the chat, and never showing the grant note Fabric `5676cd88`
+  (2026-11-11) added to every grantable refusal (`launch.board.decide.grantNote`, «он попросит снова, и действие
+  пройдёт», `BoardScreen.tsx` line 495 at Fabric main `2ace88c2`, beside the refused card's new headline by floor class
+  and its kind «Ждёт разрешения», `ru.ts` line 482), which is false under FA-09 (read at `0e7a8a00` before that: every refusal the
   journal records as `policy.decided@1` with the verdict `refuse` becomes a red "refused" card with a grant button,
   `apps/desktop/src/shared/attention.ts` lines 257 to 274, `renderer/src/launch/ObligationActs.tsx` line 108, announced
   once by an OS notification when Fabric is not in front, which carries no button, `shared/notify.ts`

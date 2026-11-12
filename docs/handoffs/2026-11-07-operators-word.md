@@ -56,7 +56,7 @@ contract already has.
   naming the remedy, a receipt for an act agreed in the chat, and an FA-09 refusal no longer offered as a grantable
   card in its attention queue or the OS notification that announces it, issuing no grant (nothing a later session
   could spend), its status line never reading "Allowed" for it, resolved when the agent records the act agreed in the
-  chat), with `floor.ask-first`'s text for a
+  chat, never showing the grant note Fabric `5676cd88` added to a grantable refusal), with `floor.ask-first`'s text for a
   session with no runner gate; the adapter's owed list (its citation, OW-3's waits and message form, OW-4's list, the
   floor line, its operator-channel references and evals, both skills' `references/source-and-instance.md` line 7);
   fabric-workspace's link and rewrite (the landing step below).
@@ -64,14 +64,16 @@ contract already has.
   merge, land the change to `knowledge/agents-first.md` (merged in fabric-workspace, not only opened) that links the OW
   rules, rewrites its stale CT-220 paragraph to
   them (OW-3's waits, its message form, its FA-09 reading, OW-4's list with a refusal never routed around), fixes
-  its refusals section's item 4, and makes its "One approval binds all" items 1 and 5 say that a host's gate (Fabric's
-  `floor.ask-first`) still asks once, quoting the relayed words as its reason, until Fabric question `add1df7c` is
-  answered (round 24, product; OA-4 carries the same pointer to OW-3 and OW-5 here).
+  its refusals section's item 4, and makes its "One approval binds all" items 1 and 5 call the host's gate's one ask (Fabric's
+  `floor.ask-first`, quoting the relayed words as its reason) Fabric's current behaviour pending CT-250's decision and
+  Fabric's answer to question `add1df7c`, citing the operator's decision of 2026-11-06, not a rule (round 24, product; OA-4 carries the same pointer to OW-3 and OW-5 here).
 - Landing step for Fabric question `add1df7c` (round 14): add to it the case of a board request whose relay names a
   floored act; DEC-0156 reads it as the reason the one ask quotes, not the agreement, so the act still goes to a session
   the person is in (OW-3, the Compatibility); and add the operator's word of 2026-11-07 that they press nothing
   (announcement `e6385b29`), set against the one press DEC-0156 keeps, a host gate's agreement (Fabric's "Allow once"
-  under `floor.ask-first`, OW-2 and OW-3), so the answer says whether that press stays.
+  under `floor.ask-first`, OW-2 and OW-3), so the answer says whether that press stays. Add the operator's decisions of 2026-10-26
+  (no second approval) and 2026-11-06 (a level holder's command runs without a host's prompt, `knowledge/authority.md`,
+  *Access levels*): the question is how Fabric's floor carries them, not whether the operator wants a second ask.
 - DEC-0158's re-cut (its round 20, 2026-11-12): that branch's OS-6 and this branch's OW-3 state opposite rules for a
   no-person run's notice question at a refused note and for the no-note resubmission at a host's gate (DEC-0158 round
   20, seam). DEC-0158's OS-6 and OS-7 are to be re-cut as one table of stops; the two are reconciled (round 26, seam): OW-3's session holds
@@ -85,14 +87,20 @@ contract already has.
 - Landing note for CT-285's decision (round 25, product and seam): binding on whichever of DEC-0156 and CT-285's DEC
   lands second: CT-285's DEC amends OW-3's no-person case and OW-3's own stop for a headless place (the operator's
   decision of 2026-11-09, fabric-workspace `knowledge/authority.md`, *Autonomy by place*), and OW-3 cites it, with the three places that restate OW-3's no-person case: the OW conformance row
-  (`docs/specification/conformance.md`), SCN-057's no-person alt path and FLW-29. Checks,
+  (`docs/specification/conformance.md`), SCN-057's no-person alt path and FLW-29; and wherever a profile covers the
+  effect (the headless default or a person place's recorded profile, AU-4), OW-2's kept press and OW-3's host's-gate
+  and FA-09 branches, with the four statements of the amended OA-4 that a host's gate still asks once
+  (`docs/specification/delegation.md` OA-4, CONTEXT's *Relayed approval*, SCN-046, the relay receiver's conformance
+  row). Main's CT-285 row reads DEC-0158's OS-6 as "never resubmitted" at the production stop; the split both branches
+  agreed resubmits there once the relayed words name the step, and CT-285's DEC restates it so (round 27, seam). Checks,
   on the merged tree: `awk '/^- \*\*OW-3/,/^- \*\*OW-4/' docs/specification/governance-and-roles.md | grep -c CT-285`
   prints at least 1; `grep '^| CT-285' docs/backlog.md | grep -c 'OW-3'` prints 1 until that DEC lands (main's CT-285 row
   carries it since 2026-11-12).
 - Landing note for CT-250's decision (round 26, seam and product): binding on whichever of DEC-0156 and CT-250's DEC
   lands second: CT-250's DEC states how a level holder's words read under OW-1 and OW-6 (the operator's decision of
   2026-11-06, fabric-workspace `knowledge/authority.md`, *Access levels*: an administrator's command binds every agent),
-  CT-266 is decided with it, and OW-6 cites it. Checks, on the merged tree: `grep '^| CT-250' docs/backlog.md | grep -c
+  CT-266 is decided with it, and OW-6 cites it; CT-250's DEC also states whether a level holder's command or relay
+  passes a host's gate's ask, amending OW-2's kept press, OW-3, OW-5 and OA-4's pointer (round 27, product). Checks, on the merged tree: `grep '^| CT-250' docs/backlog.md | grep -c
   'OW-6'` prints 1 until that DEC lands (main's row carries it since 2026-11-12); `grep '^| CT-266' docs/backlog.md |
   grep -c CT-250` prints 1.
 - Landing notes for the sibling decisions. Each states what the merged text must say once both branches are on `main`
@@ -854,6 +862,18 @@ counter, and the board told what each consumer owes (DEC-0156's Compatibility).
   "gate exit 0 on each" holds for each branch head, not for that commit. Main `2b0bcd55` merged as `0850d78a` with the
   conflict resolved before the commit (no markers, checked).
 
+- Round 27 (on `3e3f8628`, main `2b0bcd55` merged): seam clean; unit and product not clean. Breaks folded: SCN-046's
+  Fabric alt path gave a session whose runner gate is removed the no-person outcome with the person in its chat; it now
+  asks once in the chat and publishes on the yes (unit); the floor's kept ask cited only the instruction of 2026-10-15,
+  not the operator's decisions of 2026-10-26 and 2026-11-06; OW-3, the Compatibility (no longer "the operator's
+  decision, not this one's"), the `add1df7c` and fabric-workspace landing steps, the CT-250 note and SCN-046's Expected
+  result now name them (product). Risks folded: DEC-0156 item 3 and the OW conformance row name the operator's session
+  as the resubmitter; FLW-29's F1 branches for a session with no person (unit); the CT-285 note covers a person place's
+  profile, OW-2's kept press and the four OA-4 statements, and records the CT-285 row's OS-6 misreading; CT-282 owes
+  `proposal`'s description and the Status table says it now (product, seam); the Compatibility cites Fabric `5676cd88`'s
+  grant note, false under FA-09 (seam).
+- On the round-26 fold (`3e3f8628`): `pnpm run check` exit 0 (11175 tests) before round 27 was read.
+
 ## Next task
 
-Round 27 blind readings of branch `agent/ct220-operators-word-v2` (DEC-0156), all three tiers.
+Round 28 blind readings of branch `agent/ct220-operators-word-v2` (DEC-0156), all three tiers.

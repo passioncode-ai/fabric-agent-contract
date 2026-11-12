@@ -261,6 +261,9 @@ Schema: [`operator-channel-status.schema.json`](../../schemas/operator-channel-s
 | `standby` | bound; another process of the same agent holds the lease | `reason`, `credential`, `receiver.lease: elsewhere`, `binding` |
 | `degraded` | enabled, but the transport or its credential fails, or nobody receives (OC-17) | `reason`, `credential` |
 
+`proposal.answer` is the operator's latest word on the channel: a turn-off is recorded `declined` and a later word
+`accepted`, each with its time `at` (OC-11 step 3); the schema's description says so at its next change (CT-282).
+
 The document carries no chat id, user id, username or token: `binding` holds counts only, and
 `credential` holds the secret's name and whether it is present. `lastSendAt` and
 `lastReceiveAt` are `null` until the first send or update. `outcomeUnknown` counts sends kept
