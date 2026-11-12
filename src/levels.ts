@@ -49,7 +49,8 @@ export function levelContextsWellFormed(levels: unknown): boolean {
  * DEC-0166 AU-2 reads it for a profile an organization's level holder set.
  */
 export function levelShortOf(level: string, minLevel: string | undefined, inProject: boolean): InsufficientDetail | undefined {
-  if (minLevel === "operator") return "level-insufficient: operator";
+  // As levelStanding: a declared level that is not one of ACTION_LEVELS is read as the strictest.
+  if (minLevel === "operator" || (minLevel !== undefined && !(ACTION_LEVELS as readonly string[]).includes(minLevel))) return "level-insufficient: operator";
   const rank = RANK.get(level) ?? 0;
   if (minLevel === "owner" && rank < (RANK.get("owner") as number)) return "level-insufficient: owner";
   if ((minLevel === "admin" || !inProject) && rank < (RANK.get("admin") as number)) return "level-insufficient: admin";

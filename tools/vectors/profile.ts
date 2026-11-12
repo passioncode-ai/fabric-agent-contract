@@ -52,7 +52,7 @@ const call = (tier: string, mandate: Json, extra: Json = {}): Json => ({
   actionDigest: DIGEST, standing: true, ...extra
 });
 const taken = (mandate: Json, digest = prof(mandate)) => ({
-  ok: true, recordAs: { by: "operator", via: "profile", task: mandate.task, chain: [RUNNER, SELF], profile: { place: "studio-space-1", revision: 3, digest }, caller: CALLER }
+  ok: true, recordAs: { by: "operator", via: "profile", task: mandate.task, chain: [RUNNER, SELF], profile: { place: "studio-space-1", revision: 3, digest, ...(mandate.standing.setLevel === undefined ? {} : { setLevel: mandate.standing.setLevel }) }, caller: CALLER }
 });
 
 /** A task's operator mandate (no standing), with a scope. */
@@ -98,6 +98,8 @@ function actionCases(): Json[] {
     ["an administrator's profile at an action declared owner, from T2", call("T2", byAdmin, { actionLevel: "owner", tokenProf: prof(byAdmin) }), { ok: false, code: "operator-decision-required", data: { detail: "level-insufficient: owner", actionDigest: DIGEST } }],
     ["an owner's profile at an action declared owner, from T1", call("T1", byOwner, { actionLevel: "owner" }), taken(byOwner)],
     ["an architect's profile at a call in one of its projects, from T1", call("T1", byArchitect, { actionLevel: "admin", project: "alpha" }), { ok: false, code: "operator-decision-required", data: { detail: "level-insufficient: admin" } }],
+    ["an architect's profile without its projects, at a call in a project, from T1", call("T1", profile({ standing: { ...STANDING, setLevel: "architect" } }), { project: "beta" }), { ok: false, code: "operator-decision-required", data: { detail: "outside-mandate: project" } }],
+    ["an administrator's profile at an action whose declared level is mistyped, as the strictest", call("T1", byAdmin, { actionLevel: "Owner" }), { fault: "action-level-invalid" }],
     ["an architect's profile at a call in no project, from T1", call("T1", byArchitect), { ok: false, code: "operator-decision-required", data: { detail: "level-insufficient: admin" } }],
     ["an architect's profile at a call in one of its projects, no level declared, from T1", call("T1", byArchitect, { project: "alpha" }), taken(byArchitect)],
     ["the operator's own profile at an action declared operator, from T1", call("T1", p, { actionLevel: "operator" }), taken(p)],
@@ -111,7 +113,8 @@ function actionCases(): Json[] {
     ["a task's mandate naming autonomy.profile.set, from T1", call("T1", task({ capabilities: ["autonomy.profile.set"], effects: ["deploy"] }), { action: setProfile, effect: "deploy", standing: undefined }), { ok: false, code: "operator-decision-required", data: { detail: "outside-mandate: capability" } }],
     // AU-5: the bound reads the action id as well as the capability.
     ["a profile naming the action id autonomy.profile.set under another tool", call("T1", profile({}, { capabilities: ["hub.settings"], actions: ["autonomy.profile.set"], effects: ["deploy"] }), { action: settingsAction, effect: "deploy" }), { ok: false, code: "operator-decision-required", data: { detail: "outside-mandate: capability" } }],
-    // AU-4: a headless place with no recorded profile: the grant's capabilities, every effect class but change-policy.
+    // AU-4: a headless place with no recorded profile: every capability of the estate's registered services, which the
+    // hub lists by name, and every effect class but change-policy.
     ["a headless place's default profile covers a deploy", call("T1", headlessDefault), taken(headlessDefault)],
     // AU-3: from T2 the token binds the profile, not the chain; a narrowing in the chain binds while it is presented.
     ["a narrowing in the chain, presented from T2", call("T2", narrowed, { tokenProf: prof(narrowed) }), { ok: false, code: "operator-decision-required", data: { detail: "outside-mandate: effect", actionDigest: DIGEST } }],
@@ -135,6 +138,7 @@ function documentCases(): Json[] {
     // AU-1: the hub states a profile by the operator of the place's estate; the setter's level is checked at the set.
     ["an architect's profile without its projects", profile({ standing: { ...STANDING, setLevel: "architect" } }), ["FAC-SEM-173 /scope"]],
     ["an administrator's profile", profile({ standing: { ...STANDING, setLevel: "admin" } }), []],
+    ["a place recorded by an estate machine id holding a tilde", profile({ standing: { ...STANDING, place: "mac~studio-1" } }), []],
     ["a profile stated by a level", profile({ by: "level", level: "admin", org: "org:org-a", membership: { kind: "an attestation" } }), ["FAC-SEM-144 "]],
     // FAC-SEM-173 also reads a widened mandate's chain.
     ["a widened profile whose chain step names autonomy.profile.set", profile({ chain: [{ agent: RUNNER, at: "2026-11-12T09:00:05Z" }, { agent: SELF, at: "2026-11-12T09:30:00Z", scope: { capabilities: ["site.deploy", "autonomy.profile.set"], effects: ["deploy"] } }] }), ["FAC-SEM-144 ", "FAC-SEM-173 /chain/1/scope"]]

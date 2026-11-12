@@ -791,6 +791,9 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
   - Given a call from T2, when its token carries no `prof` or another profile's, then the profile changes nothing or is refused `profile-unbound` (AU-3).
   - Given a payment, spend above a limit, `change-policy` or `autonomy.profile.set`, when an assignment reaches it, then the profile covers none of them (AU-5).
   - Given a place whose watcher stops answering, when the hub starts the next assignment, then it treats the place as `person` (AU-6).
+  - Given an organization's administrator who sets a place's profile, when an assignment under it reaches an act a service declares `owner` or `operator`, then the service refuses it `level-insufficient` and the agent asks a holder of that level (AU-2).
+  - Given an organization's headless place with no recorded profile, when its hub starts an assignment, then the hub states no profile until the owner, an admin or, for its projects, an architect records one (AU-4).
+  - Given a person's own computer, when no profile is recorded, then nothing goes beyond the person's own decisions until a preset is chosen (AU-4).
 - **Priority:** must
 - **Status:** draft
 - **Product:** unobserved

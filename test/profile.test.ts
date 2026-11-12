@@ -42,5 +42,6 @@ describe("levelShortOf (DEC-0166 AU-2, DEC-0162 LV-7)", () => {
     expect(levelShortOf("boss", "admin", true)).toBe("level-insufficient: admin");
     expect(levelShortOf("boss", "owner", true)).toBe("level-insufficient: owner");
     expect(levelShortOf("owner", "owner", false)).toBeUndefined();
+    expect(levelShortOf("admin", "Owner", true)).toBe("level-insufficient: operator");
   });
 });

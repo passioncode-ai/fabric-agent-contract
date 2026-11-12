@@ -54,6 +54,7 @@
 | SCN-043 | Tell my agent to approve: the service takes it as my decision | delegation | P-02 | ST-035, FLW-29 | draft | not audited |
 | SCN-060 | As my organization's administrator, my agent's command runs at the organization's services without an approval | delegation | P-02 | ST-035, FLW-29 | draft | not audited |
 | SCN-061 | My headless place finishes a deploy under its profile, and nothing raises its autonomy | delegation | P-02 | ST-043, FLW-31 | draft | not audited |
+| SCN-062 | Set a place's profile within my level, and an organization's place waits for one | delegation | P-02 | ST-043, FLW-31 | draft | not audited |
 | SCN-044 | Open a service's page from my agent: in Fabric Dashboards, never a raw address | service | P-02 | ST-036, FLW-30 | draft | not audited |
 | SCN-045 | Give a task once: the research agent my developer agent engages runs it without asking me again | delegation | P-02 | ST-037, FLW-31 | draft | not audited |
 | SCN-046 | Approve once in one agent's chat: the agent that holds the key acts without asking me again | delegation | P-02 | ST-037, FLW-31 | draft | not audited |
@@ -1074,6 +1075,26 @@ independent agent author and P-02 project operator.
 - **Errors & recovery:** a fractional per-call ceiling is digested (RFC 8785) and bound like any other; a stale revision or an unwatched place never reaches a callee, since the hub states no mandate in them.
 - **Status:** draft
 - **Coverage:** DEC-0166 AU-1 to AU-7, `mandateCovers` and `profileDigest` in `src/mandate.ts`, `actionDecision` in `src/actions.ts`, `fixtures/vectors/profile.json`, `test/profile.test.ts`
+- **Product:** unobserved
+
+### SCN-062: Set a place's profile within my level, and an organization's place waits for one
+
+- **Persona:** P-02
+- **Feature:** delegation
+- **Traces:** ST-043, FLW-31 (JTBD-07, JRN-06/#3)
+- **Entry point:** the hub's profile setting for a place, or the operator's words to an agent that relays them
+- **Preconditions:** the place's hub offers `autonomy.profile.set` as a relayed action (effect `change-policy`); in an organization's context the hub reads levels and the setter holds an `org-membership/2` attestation
+- **Steps:**
+  1. In the personal context the operator chooses a preset (none, drafts only, finish everything) or sets the scope in full -> the hub takes it as the operator's decision (AP-2) and records revision 4.
+  2. In an organization's context an administrator's agent calls `autonomy.profile.set` with a bound level decision -> the hub takes it (DEC-0162 LV-3), records the level and the approver (LV-9), and states later profiles with `standing.setLevel: admin`.
+  3. An assignment under that profile reaches a billing act a service declares `owner` -> the service refuses `level-insufficient: owner`; the agent files one request to the owner (DEC-0162 LV-10).
+- **Expected result:** each place carries the profile its setter's level allows; no profile covers more than that level.
+- **Alt paths:** an architect sets a profile naming projects outside its attestation -> refused `level-insufficient: admin`. An architect's profile naming no projects -> `FAC-SEM-173`, and a call in a project under it `outside-mandate: project`. An organization's headless place with no recorded profile -> the hub states nothing, and assignments there ask as on a person's computer until the owner, an admin or (for its projects) an architect records one (question 4). A person's own computer -> nothing beyond the person's decisions until the person or, in the organization's context there, its administrator picks a preset. An assignment calls `autonomy.profile.set` -> `outside-mandate: capability` (AU-5).
+- **UI elements:** the hub's profile setting (presets, scope, the setter's level), the hub's record (revision, setter, approver), the service's audit row ("under a profile set at level X").
+- **States covered:** empty (no profile recorded), success, error
+- **Errors & recovery:** a setter below the level the place needs is refused with the level it needs, and the agent asks a holder of it once.
+- **Status:** draft
+- **Coverage:** DEC-0166 AU-2, AU-4, AU-5; `levelShortOf` in `src/levels.ts`, `mandateCovers` in `src/mandate.ts`, `fixtures/vectors/profile.json`, `test/profile.test.ts`
 - **Product:** unobserved
 
 ### SCN-044: Open a service's page from my agent: in Fabric Dashboards, never a raw address

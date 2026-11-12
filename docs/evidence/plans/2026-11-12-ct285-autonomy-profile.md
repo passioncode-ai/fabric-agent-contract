@@ -1,6 +1,6 @@
 # Design 2026-11-12: an autonomy profile per place (CT-285)
 
-**Status:** the design CT-285 owes by 2026-11-13; the decision (one DEC, designed with CT-250's) follows by the
+**Status:** decided as DEC-0166 (docs/DECISIONS.md); where this design and the decision differ (refusals, the defaults, the questions), the decision wins. Before that: the design CT-285 owes by 2026-11-13; the decision (one DEC, designed with CT-250's) follows by the
 organization slice of 2026-11-21. Rules are proposals numbered `AU-*`. It reads the levels of
 [the authority levels design](2026-11-12-ct250-authority-levels.md) (`LV-*`).
 

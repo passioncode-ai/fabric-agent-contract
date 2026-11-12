@@ -246,11 +246,13 @@ export function mandateCovers(input: {
   if (call.project !== undefined && scope.projects !== undefined && !scope.projects.includes(call.project)) return outside("outside-mandate: project");
   // AU-2: a profile an organization's level holder set covers no action its service declares above that level (LV-7).
   const setLevel = standing ? (read.standing as Standing).setLevel : undefined;
+  // An architect's level stands only in its projects: a profile it set that names none covers no call in a project.
+  if (setLevel === "architect" && scope.projects === undefined && call.project !== undefined) return outside("outside-mandate: project");
   const short = setLevel === undefined ? undefined : levelShortOf(setLevel, call.minLevel, call.project !== undefined);
   if (short !== undefined) return { ok: false, code: OUTSIDE_MANDATE, data: { detail: short } };
   // AU-6: a call under a profile is recorded `via: profile` with the place, the revision and the digest.
   const profile = standing
-    ? { via: "profile" as const, task: read.task, chain: holders, profile: { place: (read.standing as Standing).place, revision: (read.standing as Standing).revision, digest: digest as string } }
+    ? { via: "profile" as const, task: read.task, chain: holders, profile: { place: (read.standing as Standing).place, revision: (read.standing as Standing).revision, digest: digest as string, ...(setLevel === undefined ? {} : { setLevel }) } }
     : { via: "mandate" as const, task: read.task, chain: holders };
   if (byLevel) {
     // LV-6: the level stands as the operator's word only inside its scope, after every check of the mandate itself.

@@ -31,7 +31,8 @@ organization slice of 2026-11-21: a place's profile as a standing `mandate/1` it
 
 ## Open
 
-- Merge DEC-0162's head after each of its folds (round 9 merged at `a220c1ed`; round 10's `ac23deaf` next), never a rebase; land after DEC-0162. At that merge `schemas/mandate.schema.json`'s description keeps both clauses: `grep -c 'neither a level mandate nor a standing mandate travels over the board' schemas/mandate.schema.json` prints 1 and `grep -c 'standing mandate its token binds by prof' schemas/mandate.schema.json` prints 1; `src/levels.ts` keeps both DEC-0162's `levelContextsWellFormed` (round 10's) and this branch's `levelShortOf`.
+- Merge DEC-0162's head after each of its folds (round 9 merged at `a220c1ed`, round 10's `ac23deaf` at `10f57f16`; round 11's next), never a rebase; land after DEC-0162. At that merge `schemas/mandate.schema.json`'s description keeps both clauses: `grep -c 'neither a level mandate nor a standing mandate travels over the board' schemas/mandate.schema.json` prints 1 and `grep -c 'standing mandate its token binds by prof' schemas/mandate.schema.json` prints 1; `src/levels.ts` keeps both DEC-0162's `levelContextsWellFormed` (round 10's) and this branch's `levelShortOf`.
+- Question 1's round-4 clause (a send or publish outside the estate and a force-push, the 2026-11-05 gates) is to be posted on thread `8da128cf` as a reply to `bd18b1fa`; the board's MCP was disconnected at the round-4 fold.
 - The operator's five questions: posted with their defaults and 2026-11-21 as board message `bd18b1fa` on thread `8da128cf` (beside DEC-0162's), 2026-11-12 21:00 UTC. Acceptance waits for no answer; an answer before 2026-11-21 changes DEC-0166, one after it is a new decision.
 - The knowledge base, at landing: fabric-workspace `knowledge/authority.md` *Autonomy by place* and `north-star.md` G19 give an organization's space, VM or cloud the finish-everything default; restate them with question 4 (an organization's headless place states nothing until its owner, an admin or, for its projects, an architect records a profile), question 5 (no credential request) and AU-2's level bound, then the workspace sync. Check: `git -C fabric-workspace grep -c 'DEC-0166' origin/main -- knowledge/authority.md knowledge/north-star.md` prints at least 1 for each.
 - Restatements owed by whichever lands second (the CT-285 row names them): DEC-0156 OW-3 (a profile is a standing
@@ -41,7 +42,7 @@ organization slice of 2026-11-21: a place's profile as a standing `mandate/1` it
   bar once UD-4 lands).
 - The rule register lists `FAC-SEM-173` while 171 and 172 belong to DEC-0164 and DEC-0165 on their branches; the
   last lander writes the next free code from the CAS counter.
-- Tell Fabric (CO-547) and the adapter (FAA-249) when DEC-0166 lands. Fabric's row gains the board-block refusal of `standing` and the forward to a callee declaring `standing` (both owed at any repin past this decision). The adapter's FAA-249 row on its main names neither DEC-0166 nor `profile.json`: amend it at landing (`standing` in the authority extension, `standing` ['1'] in both `PROTOCOL_REVISIONS` twins, `profile.json` in the vendored vectors, `levelShortOf`'s bound). Check: `git -C fabric-agent-adapter grep -c 'DEC-0166' origin/main -- docs/backlog.md` prints at least 1.
+- Tell Fabric (CO-547) and the adapter (FAA-249) when DEC-0166 lands. Fabric's row gains the board-block refusal of `standing` in `boardMandate.ts`, separate from the forward schema it shares with `hubAuthority.ts`, and the forward to a callee declaring `standing` (both owed at any repin past this decision); question 4's organization default (nothing until a profile is recorded), the exclusion of `change-policy` and MD-6's list, and `standing.setLevel` with the setter's level, since CO-547 on Fabric's main still promises an organization's space or VM "all permissions". The adapter's FAA-249 row on its main names neither DEC-0166 nor `profile.json`: amend it at landing (`standing` in the authority extension, `standing` ['1'] in both `PROTOCOL_REVISIONS` twins, `profile.json` in the vendored vectors, `levelShortOf`'s bound). Check: `git -C fabric-agent-adapter grep -c 'DEC-0166' origin/main -- docs/backlog.md` prints at least 1.
 
 ## Checks run
 
@@ -96,7 +97,23 @@ organization slice of 2026-11-21: a place's profile as a standing `mandate/1` it
   non-object `standing` is gated by `isObject`, so it is `mandate-malformed` everywhere (a vector); the T2 chain
   stripping stays AU-3's stated reading (the token's own scope binds, DL-5). Declined: none.
 
+- Round 4 (on `10f57f16`): unit passed with four risks, seam passed with six risks, product failed. Product, breaks
+  folded: every callee reading standing refuses a call in no project under a profile set below admin, and one in a
+  project under an architect's profile naming no projects, whatever its `actionLevels`; a service declaring `standing`
+  declares in `actionLevels` every billing act and every act LV-7 keeps for the operator that it offers (AU-2,
+  conformance, a guide checklist line); the FAC-SEM-173 row names the architect clause; the status lines (backlog,
+  handoffs index, this handoff). Product risks folded: the audit record carries `setLevel` and SCR-30 shows it, the
+  approver read from the hub's record (AU-6); question 1 widened to the 2026-11-05 gates and the Context says the
+  default is narrower than "only the body's gates"; AU-4's key issuance through the estate's own doors; G19's harness
+  part in Not decided; the Fabric item; SCN-062 and three ST-043 criteria for setting a profile, an organization's
+  waiting place and a person's presets; the design's status names DEC-0166, membership's Not decided points to it.
+  Unit and seam risks folded: `mandateCovers` refuses a call in a project under an architect's profile naming no
+  projects (a vector); `levelShortOf` reads a mistyped level as `operator` (a test; `actionDecision` answers its own
+  fault, a vector); `standing.place` admits the estate's `~`; the next free rule code `FAC-SEM-175`; the generator's
+  AU-4 comment. Declined: a prof-typing case in a vector file the kits vendor (the delegation vectors are DEC-0162's
+  and earlier decisions'; FAA-249's amendment at landing names it).
+
 ## Next task
 
-Merge DEC-0162's round-10 head `ac23deaf` into this branch, then round 4 of the blind readings (unit, seam, product)
-of branch `agent/ct285-autonomy-profile-20261112` (DEC-0166).
+Post question 1's round-4 clause on thread `8da128cf`, then round 5 of the blind readings (unit, seam, product) of
+branch `agent/ct285-autonomy-profile-20261112` (DEC-0166).

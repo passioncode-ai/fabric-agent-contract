@@ -519,6 +519,9 @@ known-good earlier payload; it does not reactivate or edit history
   `owner` for every billing act and `operator` for client keys, a board hold's set and lift, a slot move, a Project's
   listing and unlisting and a rule proposal's approval (type `rule`), and `admin` for any other proposal type's approval and a credential request's decision (DEC-0162 LV-7; an owner's settlement is no relayed action): an action left out is decided by an architect in the call's project, or by `admin` for a
   call in no project.
+- [ ] A service that takes a place's standing mandate declares `standing` in `extensions/authority/0.1` and, when it
+  offers a billing act or an act LV-7 keeps for the operator, that act's level in `actionLevels`, so a profile an
+  owner, an admin or an architect set never covers it; it runs `fixtures/vectors/profile.json` (DEC-0166 AU-2, AU-3).
 
 ## Operator checklist
 

@@ -58,8 +58,8 @@
           "type": "string",
           "minLength": 1,
           "maxLength": 128,
-          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$",
-          "description": "The machine, OS space, VM or cloud the profile is for, by the id its hub records."
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:~-]{0,127}$",
+          "description": "The machine, OS space, VM or cloud the profile is for, by the id its hub records (an estate record's machine id, activity-common opaqueId's form)."
         },
         "placeKind": {
           "enum": [
