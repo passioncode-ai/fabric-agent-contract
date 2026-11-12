@@ -429,7 +429,7 @@ independent agent author and P-02 project operator.
 - **Expected result:** one recorded choice per project, its reasons kept beside it; nothing spent before it.
 - **Alt paths:** an organization's project (DEC-0162 LV-7) -> the launcher stops before any spend and the choice goes to the organization's owner through the product's own approval surface; the starter sees the run waiting for the owner's spend choice, and nothing is spent until the owner records it; who carries the request to the owner and how the owner's choice reaches the starter's launcher is not decided (DEC-0162 LV-6, the launcher's PC-162), so until it is the run stays waiting; a starter who is the owner sees the usual choice. operator picks "no project limit" -> recorded as that choice; only the estate total (L0) stops spending. A service in the window ran calls on a subscription -> the project's recent spend is unknown (`recentSpendUsd: null`), and while none of its calls is unpriced the offer's wording may name its cost including estimates as an upper bound, labelled so (DEC-0110).
 - **UI elements:** options, preselected option, inputs, threshold, confirm.
-- **States covered:** success, empty, unknown
+- **States covered:** waiting, success, empty, unknown
 - **Errors & recovery:** a threshold above the monthly limit -> refused (`FAC-SEM-047`) with the limit named; the operator lowers it.
 - **Status:** draft
 - **Coverage:** spend-policy specification, The spend policy; `spend-policy.schema.json`, `test/spend-policy.test.ts`

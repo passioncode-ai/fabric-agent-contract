@@ -4,7 +4,7 @@ import { SCHEMA_PREFIX } from "./contract.js";
 import { EXTENSION_KEYS } from "./extensions.js";
 import { type Finding, type JsonObject, isObject } from "./findings.js";
 import { CLOCK_SKEW_SECONDS, strictTime } from "./rfc3339.js";
-import { type LevelContexts, type LevelRecord, levelStanding, ACTION_LEVELS } from "./levels.js";
+import { type LevelContexts, type LevelRecord, levelContextsWellFormed, levelStanding, ACTION_LEVELS } from "./levels.js";
 import { type OperatorSource, type ProfileRecord, mandateCovers } from "./mandate.js";
 import { createValidatorSync } from "./validator.js";
 
@@ -150,7 +150,7 @@ export function actionDecision(input: ActionDecisionInput): ActionDecisionAnswer
   }
   if (!nonEmpty(caller)) return { fault: "caller-missing" };
   // The service's level contexts are a map by organization; an array (the authority declaration itself) is its fault.
-  if (input.levels !== undefined && !isObject(input.levels)) return { fault: "levels-invalid" };
+  if (input.levels !== undefined && !levelContextsWellFormed(input.levels)) return { fault: "levels-invalid" };
   // A level the service declares for the action that is not one of ACTION_LEVELS is its fault, never "none declared".
   if (input.actionLevel !== undefined && !(ACTION_LEVELS as readonly unknown[]).includes(input.actionLevel)) return { fault: "action-level-invalid" };
   if (acceptedApproval(approval)) return { ok: true, recordAs: { by: approval.approver, via: "approval", caller } };

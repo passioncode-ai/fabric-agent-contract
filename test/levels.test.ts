@@ -84,6 +84,14 @@ describe("levelStanding and FAC-SEM-170 at their edges (DEC-0162)", async () => 
     expect(decide({ ...t2, actionDigest: undefined })).toEqual({ fault: "digest-missing" });
     expect(decide({ ...call, decision: { ...call.decision, target: "review-7" }, target: "review-7" })).toMatchObject({ ok: true, recordAs: { by: "level" } });
     expect(decide({ ...call, decision: { ...call.decision, target: "review-7" }, target: "review-8" })).toEqual({ ok: false, code: "decision-invalid" });
+    // A malformed entry of the service's own level contexts is its fault, an absent organization the caller's refusal.
+    const [org, entry] = Object.entries(call.levels as Json)[0] as [string, Json];
+    expect(decide({ ...call, levels: { [org]: { ...entry, audience: 7 } } })).toEqual({ fault: "levels-invalid" });
+    expect(decide({ ...call, levels: { [org]: { ...entry, keySet: "none" } } })).toEqual({ fault: "levels-invalid" });
+    expect(decide({ ...call, levels: { [org]: { ...entry, audience: "" } } })).toEqual({ fault: "levels-invalid" });
+    expect(decide({ ...call, levels: { [org]: null } })).toEqual({ fault: "levels-invalid" });
+    const mandateCall = vectors.mandates[1].input as Json;
+    expect(decide({ ...mandateCall, levels: { [org]: { ...entry, audience: 7 } } })).toEqual({ fault: "levels-invalid" });
   });
   it("covers a level mandate's call in no project", () => {
     const call = vectors.mandates[1].input as Json;

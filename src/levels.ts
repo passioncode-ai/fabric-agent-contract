@@ -29,6 +29,15 @@ export interface LevelContext {
 /** The organizations a service reads levels in, by `org:<orgId>`. Absent: the service reads no level (LV-10). */
 export type LevelContexts = Record<string, LevelContext>;
 
+/**
+ * Whether a service's level contexts are its own well-formed configuration: a map whose every entry names an audience
+ * and carries a key set object. A malformed one is the service's fault (`levels-invalid`), never a caller's
+ * `level-membership: context-invalid`, which stays the answer for an organization absent from the map (LV-10).
+ */
+export function levelContextsWellFormed(levels: unknown): boolean {
+  return isObject(levels) && Object.values(levels).every((entry) => isObject(entry) && typeof entry.audience === "string" && entry.audience.length > 0 && isObject(entry.keySet));
+}
+
 /** Why a level does not stand, as `data.detail` names it (LV-10). */
 export type LevelDetail =
   | `level-membership: ${string}`
