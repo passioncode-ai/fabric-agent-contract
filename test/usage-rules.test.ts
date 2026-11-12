@@ -182,8 +182,8 @@ describe("usageSpend: money apart from a subscription's estimate (DEC-0110)", ()
 });
 
 describe("FAC-SEM-025: sums of rows rounded to 6 places one by one (DEC-0163, CT-295)", () => {
-  // Ten task runs whose exact costs are 0.1000004 each: each written rounded to 6 places is 0.1, so the project's own
-  // exact total 1.000004 is written 1.000004 and the runs sum to 1.0. The other way: each run rounded up.
+  // Runs and models written rounded to 6 places one by one: ten runs of 0.2926 against a project of 2.925996, models of
+  // 0.100001 against a day of their exact total, and an excess beyond the rounding refused on each comparison.
   const run = (i: number, costUsd: number) => ({ taskRunId: `run-${i}`, calls: 1, unpricedCalls: 0, costUsd });
   const day = (costUsd: number, models: number[]) => ({
     date: "2026-10-04", calls: models.length, unpricedCalls: 0, inputTokens: 0, outputTokens: 0, costUsd,
@@ -210,5 +210,14 @@ describe("FAC-SEM-025: sums of rows rounded to 6 places one by one (DEC-0163, CT
   it("passes projects summed against days within a row's rounding each", () => {
     const projects = Array.from({ length: 10 }, (_, i) => ({ projectId: `urn:project:p${i}`, calls: 1, unpricedCalls: 0, costUsd: 0.100001, taskRuns: [] }));
     expect(paths({ ...report, days: [day(1.000005, Array.from({ length: 10 }, () => 0.1000005))], byProject: projects })).toEqual([]);
+  });
+  it("counts only rows with a known cost, and never finds NaN close (DEC-0163)", () => {
+    const project = (i: number, costUsd: number | null) => ({ projectId: `urn:project:p${i}`, calls: 1, unpricedCalls: costUsd === null ? 1 : 0, costUsd, taskRuns: [] });
+    const nulls = Array.from({ length: 20 }, (_, i) => project(i + 1, null));
+    // One known project and one known day allow 0.000002; twenty null-cost projects add nothing to it.
+    const costMessages = (value: unknown) => evaluateSemanticRules("service-usage", value).map((f) => f.message).filter((m) => m.includes("cost more than the days"));
+    expect(costMessages({ ...report, days: [day(1, [1])], byProject: [project(0, 1.0000025), ...nulls] })).toHaveLength(1);
+    expect(costMessages({ ...report, days: [day(1, [1])], byProject: [project(0, 1.0000015), ...nulls] })).toHaveLength(0);
+    expect(usageRules({ ...report, byProject: undefined, days: [day(Number.NaN, [1])] }).map((f) => f.instancePath)).toContain("/days/0/costUsd");
   });
 });

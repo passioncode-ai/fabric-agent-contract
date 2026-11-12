@@ -30,9 +30,13 @@ const cost = (value: unknown): number => (typeof value === "number" && Number.is
 export const ROW_ROUNDING_USD = 0.0000005;
 /**
  * Whether `a` exceeds `b` by more than rounding: 0.000001 and a relative 1e-9, plus half a millionth for each of the
- * `rows` rows summed on either side, so rows rounded to 6 places one by one never fail the sum (DEC-0163, CT-295).
+ * `rows` rows with a known cost summed on either side, so rows rounded to 6 places one by one never fail the sum
+ * (DEC-0163, CT-295); a `null` row carries no rounding and widens nothing.
  */
-export const exceeds = (a: number, b: number, rows: number) => a - b > ROW_ROUNDING_USD * rows + 0.000001 + 1e-9 * Math.max(Math.abs(a), Math.abs(b));
+export const allowance = (a: number, b: number, rows: number) => ROW_ROUNDING_USD * rows + 0.000001 + 1e-9 * Math.max(Math.abs(a), Math.abs(b));
+export const exceeds = (a: number, b: number, rows: number) => a - b > allowance(a, b, rows);
+/** A known cost: a finite, non-negative number, the rows the rounding allowance counts (DEC-0163). */
+const knownCost = (value: unknown): boolean => cost(value) === value;
 const usd = (value: number) => show(Math.round(value * 1e6) / 1e6);
 
 /** Midnight UTC of a `YYYY-MM-DD` date that exists, or NaN. */
@@ -112,12 +116,12 @@ function usageProjects(value: JsonObject): Finding[] {
     const projectPriced = Math.max(0, count(project.calls) - count(project.unpricedCalls));
     if (runCalls > count(project.calls)) findings.push(flag(`${at}/taskRuns`, `a project's task runs hold more calls than the project (${runCalls} > ${count(project.calls)})`));
     else if (runPriced > projectPriced) findings.push(flag(`${at}/taskRuns`, `a project's task runs hold more priced calls than the project (${runPriced} > ${projectPriced})`));
-    else if (cost(project.costUsd) === project.costUsd && exceeds(runCost, cost(project.costUsd), taskRuns.length + 1)) findings.push(flag(`${at}/taskRuns`, `a project's task runs cost more than the project (${usd(runCost)} > ${usd(cost(project.costUsd))})`));
+    else if (cost(project.costUsd) === project.costUsd && exceeds(runCost, cost(project.costUsd), taskRuns.filter((run) => knownCost(run.costUsd)).length + 1)) findings.push(flag(`${at}/taskRuns`, `a project's task runs cost more than the project (${usd(runCost)} > ${usd(cost(project.costUsd))})`));
   });
   const dayCalls = list(value.days).reduce((n, day) => n + count(day.calls), 0);
   if (projectCalls > dayCalls) findings.push(flag("/byProject", `the projects hold more calls than the days (${projectCalls} > ${dayCalls})`));
   const dayCost = list(value.days).reduce((n, day) => n + cost(day.costUsd), 0);
-  const summed = value.byProject.filter(isObject).length + list(value.days).length;
+  const summed = [...value.byProject.filter(isObject), ...list(value.days)].filter((row) => knownCost(row.costUsd)).length;
   if (exceeds(projectCost, dayCost, summed)) findings.push(flag("/byProject", `the projects cost more than the days (${usd(projectCost)} > ${usd(dayCost)})`));
   return findings;
 }
@@ -129,7 +133,8 @@ function usageArithmetic(value: JsonObject): Finding[] {
   const days = Array.isArray(value.days) ? value.days.filter(isObject) : [];
   const money = (x: unknown) => (typeof x === "number" ? x : null);
   // DEC-0163: within rounding both ways, the day's row and each model's row counted.
-  const close = (a: number, b: number, rows: number) => !exceeds(a, b, rows) && !exceeds(b, a, rows);
+  // Written as a distance, so a cost that is not a number (NaN, in memory) is never close to anything.
+  const close = (a: number, b: number, rows: number) => Math.abs(a - b) <= allowance(a, b, rows);
   const priced = (row: JsonObject, at: string) => findings.push(...pricedRow(row, at));
   let previous = "";
   days.forEach((day, i) => {

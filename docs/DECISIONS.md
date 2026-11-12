@@ -334,6 +334,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Annotated (2026-10-12):** the usage report amended by DEC-0065 (its 31-day window checked; `byProject` attribution by project and task run, never by caller).
 - **Annotated (2026-10-11):** `budget` amended by DEC-0027 (a usage report lists every spending limit the service applies).
 - **Annotated (2026-10-23):** a host sums money over the rows not on a subscription; a `subscription` row's `costUsd` is an estimate, never money (DEC-0110).
+- **Annotated (2026-11-12):** the day's cost against its models holds within each known row's rounding, and rows may be written rounded to 6 places (DEC-0163).
 - **Amends:** the `fabric-service/0.1` extension (additive, DEC-0016 extension policy)
 - **Decision:** A service MAY declare `surfaces.usage.path` in its well-known document and
   answer there, behind the service token, a `service-usage.schema.json` report. The report gives
@@ -3658,6 +3659,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   task runs when its own cost is known, and all projects together no more than the days, a `null` cost counting as
   none, within the rounding the day's cost check allows (so rows are written unrounded); and a project holds at least its
   task runs' priced calls (`src/usage-rules.ts`, test/usage-rules.test.ts).
+- **Annotated (2026-11-12):** the rounding clause above is replaced: cost sums hold within each known row's rounding, and rows may be written rounded to 6 places (DEC-0163).
 - **Annotated (2026-10-13):** amended by DEC-0076: `byProject` names each project once by the normal form of `projectId`, and the finding names the second spelling (`docs/specification/identifiers.md`).
 - **Annotated (2026-10-12):** `attributionHeaders` answers a missing request as `not-openrouter` instead of throwing; vectors pin the default port, a trailing dot, the WHATWG-only forms, the other user-set headers, empty categories and the 64-character slug; adoption.md names how Project Observatory's private node is read (the owed reading of #68; packet P6-08).
 - **Amends:** DEC-0021 (the usage report: the window rule and `byProject`). Annotates DEC-0020…DEC-0029 with measured
@@ -11390,15 +11392,18 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-11-12
 - **Status:** Proposed 2026-11-12; accepted when the coordinator's blind readings are clean on two consecutive rounds.
   It loosens `FAC-SEM-025`'s cost comparisons only; no schema or field changes.
+- **Amends:** DEC-0065 (the CT-40 annotation's rounding clause, "so rows are written unrounded") and DEC-0021 (the day's cost against its models).
 - **Context:** `FAC-SEM-025` compared a usage report's cost sums (a day against its models, a project against its task
   runs, the projects against the days) within a fixed 0.000001 and a relative 1e-9, and the service page asked a
   service to write each row's `costUsd` unrounded. A service that rounds each row to 6 decimal places, as the adapter's
   kit does, can honestly put N rows up to N x 0.0000005 over their sum: the adapter measured 2.926432 against 2.926429
   on a run localized into 15 languages (board request `785fd306`, thread `14937b75`, FAA-310).
-- **Decision:** every cost sum `FAC-SEM-025` checks holds within 0.000001, plus 0.0000005 for each row summed on either
+- **Decision:** every cost sum `FAC-SEM-025` checks holds within 0.000001, plus 0.0000005 for each row with a known cost summed on either
   side of the comparison, plus a relative 1e-9 ([service](specification/service.md#usage-report)): a day against its
   models counts the day's row and each model's row with a known cost; a project against its task runs counts each run
-  and the project; the projects against the days count each project and each day. A service may write each row's
+  with a known cost and the project; the projects against the days count each project and each day with a known cost
+  (a `null` row carries no rounding and widens nothing; the comparison is a distance, so a cost that is not a number is
+  never close). A service may write each row's
   `costUsd` rounded to 6 decimal places or unrounded. Calls and tokens, which are integers, are compared exactly as
   before.
 - **Why:** the rounding of each written row is independent, so the error bound of a sum grows with the rows in it; a
@@ -11407,8 +11412,14 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Alternatives considered:** requiring unrounded costs (refused: a service writing JSON from decimal money cannot
   always keep binary floats unrounded, and the adapter already rounds); a fixed but larger bound (refused: it fails for
   enough rows and hides an excess for few).
-- **Compatibility:** looser only: every report that passed still passes. Owed: none; the adapter's checker reads
-  `FAC-SEM-025` from this repository (FAA-310).
+- **Compatibility:** looser only for this repository's checker: every report that passed still passes. Read on
+  2026-11-12, the copies of the rule that do not read it from here and keep the fixed tolerance: the adapter's kit in
+  Python and Node (`fabric_usage.py`, `fabric-usage.mjs`) and the probe that runs it, which owe the per-row allowance
+  and a test of ten rows rounded up (FAA-310 part 2); another service's vendored copy of the kit and Fabric Dashboards'
+  sample-service fixture, at their next kit refresh. Until each changes, a service that rounds its rows is refused by
+  that reader, so a service writes rounded rows only once its readers are pinned at or after this decision. No vector
+  file covers FAC-SEM-025's sums: `test/usage-rules.test.ts` holds the cases, and the adapter generates its usage vectors
+  from `usageRules` at its pin.
 - **Consequences / affects:** `src/usage-rules.ts` (`exceeds` and `ROW_ROUNDING_USD`, exported; the day check's
   `close`), `docs/specification/service.md` (the usage report's sentence on rounding and `FAC-SEM-025`'s row),
   `test/usage-rules.test.ts` (ten rows rounded up, and an excess beyond rounding).
