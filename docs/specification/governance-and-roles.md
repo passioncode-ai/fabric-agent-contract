@@ -190,7 +190,7 @@ words AP-2 and OA-1 already name; the rules hold for any owner.
   in (a host's gate still asks as it does), and settles the board request as that case does, save for who submits it again: a request
   settled `failed_known` this way is submitted to the board again only where what the person does lets a session with no
   person take the step (an answer, a decision or a relay naming the step, a grant, a human step cleared); then the
-  operator submits it again when they own the requesting Project, and the requester otherwise, and the `com.reply`
+  operator's session in the requesting Project (its agent, on their word) submits it again when they own the requesting Project, and the requester otherwise, and the `com.reply`
   names which. An act that only a session the person is in can take (the FA-09 case) is never submitted again, as
   that case says. On a place the operator's decision of 2026-11-09 makes headless (fabric-workspace
   `knowledge/authority.md`, *Autonomy by place*), where no person's session comes, CT-285's decision states what this

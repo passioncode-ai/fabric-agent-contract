@@ -1210,9 +1210,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-10-10
 - **Status:** Accepted source change (on merge of its pull request); provider adoption pending.
+- **Annotated (2026-10-12):** its *Compatibility* line ("schema is unchanged") is superseded by DEC-0058, which makes a channel nobody receives on representable only as `degraded` with `receiver-missing` and `receiver.lease: none`.
 - **Annotated (2026-11-12):** OC-17 gains, by DEC-0156 (proposed), that a product's own `reason.detail` stays within
   300 characters in every locale it ships.
-- **Annotated (2026-10-12):** its *Compatibility* line ("schema is unchanged") is superseded by DEC-0058, which makes a channel nobody receives on representable only as `degraded` with `receiver-missing` and `receiver.lease: none`.
 - **Amends:** DEC-0034 additively: four rules appended to the
   [operator channel](specification/operator-channel.md) profile and one known reason code. OC-1…
   OC-13 are unchanged; OC-14 narrows the optional refusals of OC-3 and OC-7 to addressed input.

@@ -74,15 +74,27 @@ contract already has.
   under `floor.ask-first`, OW-2 and OW-3), so the answer says whether that press stays.
 - DEC-0158's re-cut (its round 20, 2026-11-12): that branch's OS-6 and this branch's OW-3 state opposite rules for a
   no-person run's notice question at a refused note and for the no-note resubmission at a host's gate (DEC-0158 round
-  20, seam). DEC-0158's OS-6 and OS-7 are to be re-cut as one table of stops; whichever branch lands second makes OW-3's
-  no-person case point at that table instead of restating it. If this branch lands first, OW-3 stands as written and
-  the re-cut aligns to it or amends it in its own DEC.
+  20, seam). DEC-0158's OS-6 and OS-7 are to be re-cut as one table of stops; the two are reconciled (round 26, seam): OW-3's session holds
+  the request (SA-6's `com.accept`), so its `com.reply` carries the fence, which no hold refuses, and it never meets a
+  refused note; the refused-note notice question and the no-note `failed_known` exception at a host's gate are DEC-0158's
+  dispatched run's alone. If this branch lands first, OW-3 stands as written until DEC-0158's re-cut lands; that DEC
+  then makes OW-3's no-person case cite the table, keeping the settlement and the resubmitter split the DEC-0158 note
+  below names. The note's OW-3-range and OS-6-range greps apply while OS-6 is a bullet; once the table lands, its checks
+  are: the OW-3 range with `grep -c OS-6` prints at least 1, the table's host's-gate and production-stop rows name
+  `failed_known` with `observed: false` and the resubmitter split, and DEC-0158's DEC amends OW-3 to cite the table.
 - Landing note for CT-285's decision (round 25, product and seam): binding on whichever of DEC-0156 and CT-285's DEC
   lands second: CT-285's DEC amends OW-3's no-person case and OW-3's own stop for a headless place (the operator's
-  decision of 2026-11-09, fabric-workspace `knowledge/authority.md`, *Autonomy by place*), and OW-3 cites it. Checks,
+  decision of 2026-11-09, fabric-workspace `knowledge/authority.md`, *Autonomy by place*), and OW-3 cites it, with the three places that restate OW-3's no-person case: the OW conformance row
+  (`docs/specification/conformance.md`), SCN-057's no-person alt path and FLW-29. Checks,
   on the merged tree: `awk '/^- \*\*OW-3/,/^- \*\*OW-4/' docs/specification/governance-and-roles.md | grep -c CT-285`
   prints at least 1; `grep '^| CT-285' docs/backlog.md | grep -c 'OW-3'` prints 1 until that DEC lands (main's CT-285 row
   carries it since 2026-11-12).
+- Landing note for CT-250's decision (round 26, seam and product): binding on whichever of DEC-0156 and CT-250's DEC
+  lands second: CT-250's DEC states how a level holder's words read under OW-1 and OW-6 (the operator's decision of
+  2026-11-06, fabric-workspace `knowledge/authority.md`, *Access levels*: an administrator's command binds every agent),
+  CT-266 is decided with it, and OW-6 cites it. Checks, on the merged tree: `grep '^| CT-250' docs/backlog.md | grep -c
+  'OW-6'` prints 1 until that DEC lands (main's row carries it since 2026-11-12); `grep '^| CT-266' docs/backlog.md |
+  grep -c CT-250` prints 1.
 - Landing notes for the sibling decisions. Each states what the merged text must say once both branches are on `main`
   and a check run on the merged tree at landing; none states what a sibling branch says now, since the siblings move
   every round. Whichever of the two branches lands second makes the merged text say it. The branches: DEC-0157 on
@@ -108,7 +120,7 @@ contract already has.
     relay naming the step or a grant can lift is submitted again as OW-3 says, as is one whose human step was cleared or
     whose step a decision names. The resubmitter follows OS-6's split: the operator when they own the requesting
     Project, otherwise the requester. A request whose asked act was done, with only a side act left open, settles
-    `completed` with the open act named in its result, in OW-3 and OS-6 alike. OS-6 asks its notice question (`fabric_question_ask` or the host's equal) only at a human step; at the
+    `completed` with the open act named in its result, in OW-3 and OS-6 alike. OS-6 asks its notice question (`fabric_question_ask` or the host's equal) only at a human step and where its participant stop note was refused (OS-6's own case; OW-3's session replies as the request's holder with its fence, which no hold refuses); at the
     estate's production stop or a step a host's gate holds, a dispatched run asks no question and names the step in
     its thread note and its report, as OW-3 has a session with no person do. Checks, on the merged tree:
     `grep -c 'a dispatched run follows its own row below (OS-4, OS-7)' docs/specification/conformance.md` prints 1,
@@ -119,8 +131,9 @@ contract already has.
     `grep -c 'requester submits it again'` prints 0, with `grep -c 'nobody submits the request to the board again'`
     prints at least 1 and with `grep -c 'when they own the requesting Project'` prints at least 1, and OS-6's paragraph
     names OW-3, settles a stop before an effect as `failed_known` with `observed: false`, names the same resubmitter
-    split, has no FA-09 act submitted again and scopes its notice question to a human step (judgement, where OS-6 is
-    defined). On the resubmission wording, on the merged tree: the OS-6 range
+    split, has no FA-09 act submitted again by a reader of a host's-gate note (OS-6's no-note `failed_known` exception
+    being DEC-0158's run's alone) and asks its notice question at a human step and where its stop note was refused
+    (judgement, where OS-6 is defined). On the resubmission wording, on the merged tree: the OS-6 range
     (`awk '/^- \*\*OS-6/,/^- \*\*OS-7/' docs/specification/project-comms.md`) with `grep -c 'FA-09'` prints at
     least 1, with `grep -c 'a grant'` prints at least 1 and with `grep -c 'side act'` prints at least 1, and the OW-3
     range with `grep -c 'side act'` prints at least 1 (judgement: OS-6's never-resubmit names only OW-3's FA-09 case, a
@@ -825,6 +838,22 @@ counter, and the board told what each consumer owes (DEC-0156's Compatibility).
   owed lists name fabric-workspace's "One approval binds all" items and Fabric's `operator.told-one-is-told-all`; At
   merge restates CT-287 and the annotations (seam). Declined: none.
 
+- Round 26 (on `7a925f19`, origin/main `b8a6af95` merged): unit clean; seam and product not clean. Breaks folded: the
+  handoff's two notes on DEC-0158 bound the second lander to opposite things; they are reconciled (OW-3's session holds
+  the request, so its fenced reply is never refused, and the refused-note question and the no-note exception are
+  DEC-0158's run's alone), the DEC-0158 note's two wording lines restated and its greps scoped to OS-6 as a bullet with
+  the table's checks beside them (seam, product); CT-220's row and the handoffs index were a round behind and now say
+  rounds 25 and 26 folded, round 27 next (product). Risks folded: a new word after a turn-off is recorded as `accepted`
+  (OC-11); DEC-0035's annotations in date order (unit); OW-3 names the operator's session in the requesting Project, its
+  agent on their word, as the resubmitter, not the person; CT-266 and a CT-250 landing note tie OW-1 and OW-6 to the
+  levels of 2026-11-06 (main's CT-250 row names them since #275); SCN-057's no-person alt path names CT-285 (product);
+  the CT-285 note lists the conformance row, SCN-057 and FLW-29 (seam). Declined: none.
+- On the round-25 fold and the 2026-11-12 merges: `pnpm run check` exit 0 on `25a285f5` (merge of main `d40ae936`,
+  11175 tests), on `d451a9ab` (round 25), and on `7a925f19`; the merge `25144f99` was committed with conflict markers in
+  `docs/backlog.md` (the gate failed, 7 markdownlint errors) and fixed by `7a925f19` four minutes later, so CT-287's
+  "gate exit 0 on each" holds for each branch head, not for that commit. Main `2b0bcd55` merged as `0850d78a` with the
+  conflict resolved before the commit (no markers, checked).
+
 ## Next task
 
-Round 26 blind readings of branch `agent/ct220-operators-word-v2` (DEC-0156), all three tiers.
+Round 27 blind readings of branch `agent/ct220-operators-word-v2` (DEC-0156), all three tiers.
