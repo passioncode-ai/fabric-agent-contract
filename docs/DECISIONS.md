@@ -1132,7 +1132,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Annotated (2026-10-12):** the status table's `unlinked` row amended by DEC-0058 (`receiver.lease` `held` or `elsewhere`; a channel nobody receives on is only `degraded` with `receiver-missing`).
 - **Annotated (2026-11-08):** OC-11 amended by DEC-0156 (proposed): of the proposal's four steps, enabling the
   channel and running the link command are the agent's once the operator answers `accepted` and the token is stored
-  (AP-2, OW-2); creating the bot, storing its token and typing the code stay the operator's.
+  (AP-2, OW-2); creating the bot, storing its token and typing the code stay the operator's; and the Status table's
+  `off` row (an `accepted` answer waiting for the token).
 - **Amends:** nothing — a new profile beside `fabric-service/0.1` and `fabric-project-comms/0.1`,
   added under the DEC-0016 extension policy; one optional well-known surface.
 - **Decision:** An agent MAY have an **operator channel** — its own messenger channel to its
@@ -1209,6 +1210,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-10-10
 - **Status:** Accepted source change (on merge of its pull request); provider adoption pending.
+- **Annotated (2026-11-12):** OC-17 gains, by DEC-0156 (proposed), that a product's own `reason.detail` stays within
+  300 characters in every locale it ships.
 - **Annotated (2026-10-12):** its *Compatibility* line ("schema is unchanged") is superseded by DEC-0058, which makes a channel nobody receives on representable only as `degraded` with `receiver-missing` and `receiver.lease: none`.
 - **Amends:** DEC-0034 additively: four rules appended to the
   [operator channel](specification/operator-channel.md) profile and one known reason code. OC-1…
@@ -11503,7 +11506,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   «уточнить» two ways the operator may overrule (Fabric questions `46167c9f` and `add1df7c`): it adds one stop of its
   own, when no corrected way both undoes cleanly and still meets the word (then the agent cannot be sure the operator
   decided, AP-3); and it states a corrected way it takes as under way with how to stop it, asking a question only for
-  a step that waits.
+  a step that waits. The operator's decision of 2026-11-09 (fabric-workspace `knowledge/authority.md`, *Autonomy by
+  place*: on a headless place no act waits for a person) bears on question `46167c9f` for headless places; CT-285's
+  decision states what OW-3's no-person case and its own stop become there.
 - **Alternatives considered:** leave it to each product's prompt (the products diverged: some shipped it, some did
   not, so the operator repeated the word); make it a host setting the operator switches on (the operator's word was a
   rule for every agent, not a mode); stop at every risk until the operator answers (the operator's word says to
@@ -11618,7 +11623,14 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   says a rule's form is chosen before acting, never re-formed; the session that lands this decision lands that change,
   merged in fabric-workspace in the same run (the handoff's landing step). Providers of `fabric-operator-channel/0.1` adopt OC-11's step 3 (the agent enables the
   channel and runs its link command on the `accepted` answer) through the adapter's kits at their next adaptation;
-  this decision changes no provider by itself. `contractVersion` stays `0.1.0`.
+  this decision changes no provider by itself. On a headless place (the operator's decision of 2026-11-09, recorded in
+  fabric-workspace `knowledge/authority.md`, *Autonomy by place*, and designed as CT-285's autonomy profile), OW-3's
+  no-person case and its own stop hold as written until CT-285's decision amends them; whichever of the two lands
+  second makes OW-3 cite it. The same OA-4 change reaches three statements of the relayed approval here (SCN-046,
+  CONTEXT's *Relayed approval*, the relay receiver's conformance row), which say that a host's gate on a floored act
+  still asks once, quoting the relayed words as its reason; and two consumer copies, owed: fabric-workspace's "One
+  approval binds all" items 1 and 5 say the same, and Fabric's session obligation `operator.told-one-is-told-all`
+  ("do not ask the operator again (DEC-0126)") names the floor's one ask (OW-3). `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `docs/specification/governance-and-roles.md` (the section *The operator's word, carried
   out the first time*), `docs/specification/conformance.md` (one row for every agent that takes the operator's words),
   `docs/ux/scenarios.md` (SCN-057 and its index row; SCN-044's alt path, the host app's update asked once and done by
@@ -11655,7 +11667,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   and OW-3; CT-273 names how the operator removes a channel binding they did not make; CT-278 puts the dashboard's
   link code on a screen; CT-282 brings the status schema's `off` description to the Status table), the operator
   channel's Status table (its `off` row: an `accepted` answer waiting for the token, with or without a `credential`
-  member, the tile naming the token to store and saying to tell the agent once it is stored, and with the token present no person step, the agent enabling the channel on its own status read) and OC-17 (a product's own `reason.detail` within 300 characters in every locale it ships); the handoff
+  member, the tile naming the token to store and saying to tell the agent once it is stored, and with the token present no person step, the agent enabling the channel on its own status read, only for a channel not enabled since that `accepted`; a channel the operator turns off stays off, recorded as `declined`, OC-1) and OC-17 (a product's own `reason.detail` within 300 characters in every locale it ships); the handoff
   `docs/handoffs/2026-11-07-operators-word.md` and its row in `docs/handoffs/README.md`.
 - **Source:** the operator's words of 2026-11-04 relayed on board threads `b91254c4` and `a7a9d05d` (message
   `b66a8fae`); their words of 2026-11-07 that they press nothing in any interface (relayed by one of their projects

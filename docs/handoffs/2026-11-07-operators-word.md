@@ -8,7 +8,7 @@ contract already has.
 
 ## Done
 
-- DEC-0156 reserved by git CAS on 2026-11-07 and drafted (Proposed) in `docs/DECISIONS.md`; next free `DEC-0161` at this writing (the CAS counter on origin on 2026-11-08, `DEC-0160` reserved by a sibling branch, which the lander keeps in id order).
+- DEC-0156 reserved by git CAS on 2026-11-07 and drafted (Proposed) in `docs/DECISIONS.md`; next free `DEC-0162` (the CAS counter on origin, `refs/agent-sync/ids/DEC` reading next 162 since 2026-11-08T11:39Z, DEC-0157 to DEC-0161 reserved by sibling branches).
 - [Governance and roles](../specification/governance-and-roles.md#the-operators-word-carried-out-the-first-time): OW-1
   (the word is the task), OW-2 (no command handed over), OW-3 (a risk is a reason to adjust, not to stop), OW-4 (only
   what needs the person), OW-5 (what stays), OW-6 (whose word).
@@ -47,6 +47,10 @@ contract already has.
 
 - The coordinator's blind readings (unit, seam, product) until two consecutive clean rounds; then the gate
   (`pnpm run check`), the pull request, the merge, the tag `v0.1.0+<date>.<n>` and a release.
+- At merge also (round 25, seam and product): CT-287's DEC-0156 clause restated as landed (the PR and merge commit, no
+  longer `bb5b79ab`); the Annotated lines on DEC-0034, DEC-0035, DEC-0126 and DEC-0150 restated without "(proposed)" and
+  with the merge date; CT-220's row states the operator's decision of 2026-11-09 (headless places) beside question
+  `46167c9f`'s answer.
 - At merge: DEC-0156 Accepted, CT-220 done with the tag; tell the consumers on the board what each owes
   (DEC-0156's Compatibility): Fabric's session rules (OW-1 to OW-6) and its three FA-09 changes (the refusal's next line
   naming the remedy, a receipt for an act agreed in the chat, and an FA-09 refusal no longer offered as a grantable
@@ -68,6 +72,12 @@ contract already has.
   the person is in (OW-3, the Compatibility); and add the operator's word of 2026-11-07 that they press nothing
   (announcement `e6385b29`), set against the one press DEC-0156 keeps, a host gate's agreement (Fabric's "Allow once"
   under `floor.ask-first`, OW-2 and OW-3), so the answer says whether that press stays.
+- Landing note for CT-285's decision (round 25, product and seam): binding on whichever of DEC-0156 and CT-285's DEC
+  lands second: CT-285's DEC amends OW-3's no-person case and OW-3's own stop for a headless place (the operator's
+  decision of 2026-11-09, fabric-workspace `knowledge/authority.md`, *Autonomy by place*), and OW-3 cites it. Checks,
+  on the merged tree: `awk '/^- \*\*OW-3/,/^- \*\*OW-4/' docs/specification/governance-and-roles.md | grep -c CT-285`
+  prints at least 1; `grep '^| CT-285' docs/backlog.md | grep -c 'OW-3'` prints 1 until that DEC lands (main's CT-285 row
+  carries it since 2026-11-12).
 - Landing notes for the sibling decisions. Each states what the merged text must say once both branches are on `main`
   and a check run on the merged tree at landing; none states what a sibling branch says now, since the siblings move
   every round. Whichever of the two branches lands second makes the merged text say it. The branches: DEC-0157 on
@@ -798,7 +808,18 @@ counter, and the board told what each consumer owes (DEC-0156's Compatibility).
   in the added lines; `git merge-tree --write-tree HEAD origin/main` clean; on the merged tree with DEC-0158's branch
   (`755023cf`) the new greps print 0, 1, 1, 1 and 1, and with DEC-0159's branch (`cbe9fe94`) the CT duplicate check
   prints nothing and `grep -c '^### SCN-05[89]'` prints 2. The full gate (`pnpm run check`) was not run.
+- Round 25 (on `25a285f5`, main merged in on 2026-11-12, the branch's CT-269 renumbered CT-291): none clean. Breaks
+  folded: OW-3's no-person case and its own stop met the operator's decision of 2026-11-09 for headless places, now on
+  main as CT-285's design, without naming it; OW-3, DEC-0156's Why and Compatibility and a landing note
+  now name it, CT-285's decision to amend OW-3, and main's CT-285 row names OW-3 (product). A channel the operator turned off was enabled again by the
+  next status read; OC-11 step 3, the Status table's `off` row, DEC-0156's Consequences and SCN-012 now keep it off,
+  the word recorded as `declined` (unit). Amended OA-4 was still stated the old way in SCN-046, CONTEXT's *Relayed
+  approval* and the relay receiver's conformance row; each now says a host's gate on a floored act asks once, quoting
+  the words (seam). Risks folded: SCN-057 and FLW-29 name "a reserved control" with OW-3's second wait; this Done's next
+  free id is `DEC-0162`; DEC-0034's Annotated line names the `off` row and DEC-0035 carries one for OC-17 (unit); the
+  owed lists name fabric-workspace's "One approval binds all" items and Fabric's `operator.told-one-is-told-all`; At
+  merge restates CT-287 and the annotations (seam). Declined: none.
 
 ## Next task
 
-Round 25 blind readings of branch `agent/ct220-operators-word-v2` (DEC-0156), all three tiers.
+Round 26 blind readings of branch `agent/ct220-operators-word-v2` (DEC-0156), all three tiers.

@@ -174,7 +174,7 @@ A mandate never covers a **Source hand-over** ([source](docs/specification/sourc
 relay: the words verbatim, when and where they were said (`source`: the project, and the session or the board thread)
 and the approved scope. Accepted only from one of the operator's own Projects on their board or a session on their own
 machine; the receiver acts without asking again, runs its own checks, and asks once only about what the operator did
-not see. Its machine form is a mandate or a decision with `source`
+not see; a host's gate on a floored act still asks once, quoting the relayed words as its reason (DEC-0156 OW-3). Its machine form is a mandate or a decision with `source`
 ([delegation](docs/specification/delegation.md#one-approval-binds-all-the-operators-agents), DEC-0126).
 
 **Operator session**: The signed-in session of a service's dashboard. It ends 12 hours after its last use and
