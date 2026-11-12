@@ -24,7 +24,7 @@ The most specific level that exists decides. A level that does not exist is skip
 
 ## The spend policy
 
-A project's policy is chosen **once**, at the first run that would spend money. In an organization's context the choice is the organization's owner's (DEC-0162 LV-7, until the operator answers its question 4 otherwise): a launcher that reads levels stops before any spend until the owner records it; one pinned before DEC-0162 still asks the person. It is never a fixed list:
+A project's policy is chosen **once**, at the first run that would spend money. In an organization's context the choice is the organization's owner's (DEC-0162 LV-7, until the operator answers its question 4 otherwise; a policy recorded before then stands until the owner changes it): a launcher that reads levels stops before any spend until the owner records it; one pinned before DEC-0162 still asks the person. It is never a fixed list:
 the launcher computes the options for that project from:
 
 - the presets its agents declare;
@@ -96,7 +96,9 @@ Three rules apply to every grant and every reader:
 3. **Approvals never block.** Above `autoApproveUsd`, or with no policy yet, the agent files **one** durable
    approval request (`approvalRequest` in the check's answer). The person answers it through the
    [operator channel](operator-channel.md)'s confirm token, which shows the amount (OC-6). Meanwhile the agent
-   goes on with other work. A chat or cross-session message is never the approval.
+   goes on with other work. A chat or cross-session message is never the approval. In an organization's project with
+   no policy yet the request is the organization's owner's, as [The spend policy](#the-spend-policy) says (DEC-0162
+   LV-7); who answers one above the threshold there is not decided ([membership](membership.md#not-decided-here)).
 
 A **share grant** (`principalKind: external`) lets a person or organization outside the estate call one of
 the owner's agents for a project. It carries a limit, an expiry and a payer, and it can be revoked. Usage

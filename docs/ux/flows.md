@@ -255,7 +255,7 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-  F[First paid run, no policy] --> O{An organization's project?}
+  F[First paid run, no policy] --> O{An organization's project, started by someone other than its owner?}
   O -->|no| P[Screen: Spend policy choice]
   O -->|yes| WO[Screen: the run waits for the organization's owner; nothing spent (DEC-0162 LV-7)]
   WO -->|the owner records the choice, once its route is decided: PC-162| R
@@ -755,7 +755,7 @@ flowchart TD
   C --> G{gate}
   G -->|human| H[human-step-required with the link; the agent hands it over]
   G -->|relayed| T{tier}
-  T -->|T2 without approval| A[approval-required with the digest]
+  T -->|T2 without approval and without a bound level decision| A[approval-required with the digest]
   T -->|any tier, a bound level decision| L[Taken as the level holder's; audited with level, organization and approver]
   T -->|any tier, a level below the action's| N[operator-decision-required with level-insufficient; the agent files one request to a holder of that level through the product's own approval surface]
   T -->|any tier, a level form that fails| V{its detail}

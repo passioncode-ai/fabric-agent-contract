@@ -324,10 +324,14 @@ export interface OrgMembershipTrust {
 
 export const heldMembershipOk = (held: unknown) => held === undefined || (isObject(held) && opaque(held.subject) && positive(held.revision) && matches(SHA256, held.digest));
 
+/** The organization, audience and key set clauses of a usable context, shared by `usableTrust` and `levelContextOk`. */
+function trustClausesOk(org: unknown, audience: unknown, keySet: unknown): boolean {
+  return matches(ORG, org) && opaque(audience) && isObject(keySet) && orgKeySetWellFormed(keySet) && ORG_MEMBERSHIP_ALGORITHMS.includes(keySet.alg as string) && keySet.org === org;
+}
+
 /** Whether `trust` is a usable context, the clock aside. */
 function usableTrust(trust: OrgMembershipTrust): boolean {
-  const keySetOk = isObject(trust.keySet) && orgKeySetWellFormed(trust.keySet) && ORG_MEMBERSHIP_ALGORITHMS.includes(trust.keySet.alg as string);
-  return matches(ORG, trust.org) && opaque(trust.audience) && (trust.subject === undefined || opaque(trust.subject)) && keySetOk && trust.keySet.org === trust.org && heldMembershipOk(trust.held) && (trust.levels === undefined || typeof trust.levels === "boolean");
+  return trustClausesOk(trust.org, trust.audience, trust.keySet) && (trust.subject === undefined || opaque(trust.subject)) && heldMembershipOk(trust.held) && (trust.levels === undefined || typeof trust.levels === "boolean");
 }
 
 /**
@@ -471,17 +475,19 @@ export function orgMembershipRules(kind: string, value: JsonObject): Finding[] |
   }
   return undefined;
 }
-// #endregion org-membership
-
 /**
- * One entry of a service's level contexts (DEC-0162 LV-10), keyed by its organization: the clauses `verifyOrgMembership`
- * applies to its trust (an opaque audience, a well-formed EdDSA key set of that organization), and the attestations it
- * holds keyed by subject, each `{subject, revision, digest}` under its own subject. `levelContextsWellFormed` reads
- * every entry with it, so a context `verifyOrgMembership` would refuse is the service's own fault, never the caller's.
+ * One entry of a service's level contexts (DEC-0162 LV-10), keyed by its organization: `verifyOrgMembership`'s own
+ * context clauses (`trustClausesOk`: an opaque audience, a well-formed EdDSA key set of that organization), every listed
+ * key's algorithm among those the key set admits, and the attestations it holds keyed by subject, each
+ * `{subject, revision, digest}` under its own subject. `levelContextsWellFormed` reads every entry with it, so a context
+ * `verifyOrgMembership` would refuse as `context-invalid`, or whose key it would refuse as `unusable-key` for its
+ * algorithm, is the service's own fault; the key set's signature and a small-order key stay `verifyOrgKeySet`'s, which
+ * the service runs when it applies the set.
  */
 export function levelContextOk(org: string, entry: unknown): boolean {
-  if (!ORG.test(org) || !isObject(entry) || !opaque(entry.audience) || !isObject(entry.keySet)) return false;
-  const keySet = entry.keySet;
-  if (!orgKeySetWellFormed(keySet) || !ORG_MEMBERSHIP_ALGORITHMS.includes(keySet.alg as string) || keySet.org !== org) return false;
+  if (!isObject(entry) || !trustClausesOk(org, entry.audience, entry.keySet)) return false;
+  // A well-formed key set lists its keys as objects (`orgKeySetWellFormed`).
+  if (!((entry.keySet as JsonObject).keys as JsonObject[]).every((key) => ORG_MEMBERSHIP_ALGORITHMS.includes(key.alg as string))) return false;
   return entry.held === undefined || (isObject(entry.held) && Object.entries(entry.held).every(([subject, held]) => heldMembershipOk(held) && isObject(held) && held.subject === subject));
 }
+// #endregion org-membership
