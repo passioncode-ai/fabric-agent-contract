@@ -11532,10 +11532,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      refused `approval-required` (`verifyApproval`'s first refusal) and a caller carrying one `issuer-unavailable`
      (DL-13 row 1, DL-18), answered by the service itself or by `verifyApproval` given a jti store (with none it answers
      `unknown-state` first), with `data.detail` `no-trusted-issuer` where no estate issuer is configured, still HTTP `503` but final for the caller from any callee (DL-19's row; a missing key set stays DL-14's retryable `no-published-keys`), the
-     operator then acting on the page or with the CLI; a
+     operator's agent then acting with the agent's CLI on the operator's computer on the operator's word, or the operator
+     on the page; a
      member's key carries no scope that reaches one's tool other than `fabric.job.get`, which it reaches to read its own
-     job, so the operator takes such an action on the page or with
-     the CLI, and a member's `inputResponses` on `fabric.job.get`, which its key reaches, is refused
+     job, so the operator's agent takes such an action with the agent's CLI on the operator's computer, or the operator
+     on the page, and a member's `inputResponses` on `fabric.job.get`, which its key reaches, is refused
      `approval-required`.
      Where no host on the operator's computer signs the operator in to the page (Fabric Dashboards cannot show it,
      PL-3, and no other host, Fabric for one, mints a login code for a browser there), the operator issues and rotates
@@ -11687,7 +11688,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   too), and the same
   wording as source.md at `knowledge/agents-first.md` line 291, whose "(`peer`, client keys, the one-time code)" becomes
   "(`peer`, client keys, the operator's one-time code for the page)" in the landing. The same landing restates
-  `knowledge/authority.md` line 148, whose T2 row needs a share grant, a token per call and an approval per effect,
+  `knowledge/authority.md`'s T2 row of *Trust by machine* (line 171 at fabric-workspace `235933b5`), which needs a share grant, a token per call and an approval per effect,
   with a clause: at a cloud instance in the form, a caller presenting a client key that instance's operator issued it
   takes the token's place and the grant's (DL-26, CF-3), and the owed page says that issuing a member's key through the north star's administrator agent puts the key
   in that agent's transcript (CF-3), so that agent revokes keys and the operator issues them. `contractVersion` stays
@@ -11705,7 +11706,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   that name a caller's credentials (*Offered to others*, its granting clause included, and the *Surfaces* table) and the
   client-key caller's exception in PL-4, AP-4, AP-1's sentence letting a twin add an act no page offers (round 14), the note under `actionDecision`'s table and `FAC-SEM-142`'s row,
   `docs/specification/interop.md` (C3.3, one sentence, and a clause in DEC-0121's caller-action table),
-  `docs/specification/delegation.md` (a clause in DL-19's `scope-not-granted` row and its *Refused by*, one in its
+  `docs/specification/delegation.md` (DL-8's client-key exception to asking the broker for a token, a clause in DL-19's `scope-not-granted` row and its *Refused by*, one in its
   `issuer-unavailable` row naming `no-trusted-issuer`, and a sentence closing DL-21),
   `docs/specification/agent-network.md` (one sentence beside CT-84), `docs/specification/channel-agent.md`
   (CA-1's manifest declaration and where a reader of the cloud instance finds it), `docs/specification/source.md` and backlog CT-218 ("the operator's

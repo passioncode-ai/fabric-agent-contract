@@ -1049,7 +1049,8 @@ cloud instance's well-known document, declaring `surfaces.mcp.auth: "own"` and `
   (`total` beyond), and `total` for a `since` budget or another with no window; a per-key cap names its own window the same way.
   For a rolling budget the window names its length class, not the calendar reset at UTC midnight that spend policy's
   windows have. Raising the
-  ceiling is the operator's, on the CLI or the page, so the caller tells its person to ask
+  ceiling is the operator's decision, carried out by their own agent with the agent's CLI on their computer or by the
+  operator on the page, so the caller tells its person to ask
   the operator (the hand-over note names whom) and does not resend until the operator says so (interop's resend after an approval through
   SCN-017 reaches the caller's own operator, not this service's). An `approval` threshold an order crosses is a step,
   spend above a limit, and goes to the operator as CF-4 says.
@@ -1172,11 +1173,10 @@ cloud instance's well-known document, declaring `surfaces.mcp.auth: "own"` and `
     passing `verifyApproval` a jti store, since with none DL-18's order answers `unknown-state` first. From an
     instance with no estate issuer configured, `issuer-unavailable` carries `error.data.detail` `no-trusted-issuer` and
     is still HTTP `503`, but final, not retried as DL-14's `503` is (an instance that holds the issuer but has no usable
-    key set answers DL-14's retryable `503`, `no-published-keys`): the caller does not retry it or fetch another approval, and the operator takes the action
-    on the page or with the CLI (DL-19's row). A member's key carries no
+    key set answers DL-14's retryable `503`, `no-published-keys`): the caller does not retry it or fetch another approval, and the operator's agent takes it with the agent's CLI on the operator's computer on the operator's word, or the operator on the page (DL-19's row). A member's key carries no
     scope that reaches a `relayed` action's tool other than `fabric.job.get`, which it reaches to read its own job: a
     member is a T2 caller with no hub of the operator's to ask for an `approval/1`, so a call to any other `relayed`
-    action's tool is refused `scope-not-granted`, and the operator takes the action on the page or with the CLI. A job
+    action's tool is refused `scope-not-granted`, and the operator's agent takes it with the agent's CLI on the operator's computer on the operator's word, or the operator on the page. A job
     step is that one `relayed` action whose tool the member's key reaches, so an `inputResponses` the member sends is
     refused `approval-required` (above).
   - **Where the operator is.** Only the operator sees the cloud instance in Fabric Dashboards, since its descriptor sits
@@ -1184,19 +1184,22 @@ cloud instance's well-known document, declaring `surfaces.mcp.auth: "own"` and `
     Where no host on the operator's computer signs the operator in to the page (Fabric Dashboards cannot show it there,
     `not_installed` or `unsupported`, [PL-3](#page-links), and no other host, Fabric for one, mints a login code for a
     browser there, [HA-2](#ha-2)), the operator issues and rotates keys in their own terminal with the agent's CLI, their
-    own agent revokes one on the operator's word by running that CLI on the operator's computer (CF-3), the operator
-    takes a step from another
-    computer of theirs that shows the page, and may answer a choice or decline a step through the page actions' agent
-    twins where the gate above lets the agent through, or the operator channel's buttons (above), so on an instance
-    without the estate's issuer, unless the platform proves the agent's tier T0 or T1, only through the buttons or from
-    another computer that shows the page; until then the job keeps reading `working` and a repeated call is refused
+    own agent revokes one on the operator's word by running that CLI on the operator's computer (CF-3), and the operator
+    takes a body step (AP-4) from another computer of theirs that shows the page. Every act that hands out no value
+    (answering a choice, declining a step, revoking, capping a key, raising a ceiling, changing a scope) is carried out
+    by the operator's own agent on their word: through the page actions' agent twins where the gate above lets the agent
+    through, otherwise by running the agent's CLI on the operator's computer, which offers choose and decline as it
+    offers revoke, or through the operator channel's buttons (above); only issuing or rotating a key, a secret handed
+    out (CF-3), and a body step stay the operator's own; until then the job keeps reading `working` and a repeated call is refused
     again. A page for members needs a credential per person that can be revoked one by one and mints no operator
     session, which a later decision adds.
-  A client key carries no level and no place profile, which bind only through a delegation token (CT-250's `mem` claim,
+  A client key carries no level and no place profile, which bind at T2 only through a delegation token (CT-250's `mem` claim,
   CT-285's `prof` claim, both designs on 2026-11-12): so at an instance in this form a client-key caller's choice waits
   for the operator even on a place the operator's decision of 2026-11-09 makes headless (fabric-workspace
   `knowledge/authority.md`, *Autonomy by place*), and an instance that agents of the estate call from a headless place
-  declares `auth.delegation`, so the profile can reach it by token; the body's gates (AP-4) stay the person's either way.
+  declares `auth.delegation`, so the profile can reach it by token once CT-285's `prof` claim and Fabric's issuer (MD-5)
+  serve, until then that caller's choice waiting for the operator as above; a client-key caller whose tier the platform
+  proves T0 or T1 may carry a mandate (a profile included) to a `relayed` action as MD-3 says; the body's gates (AP-4) stay the person's either way.
 - **CF-5, provider keys stay on the server.** The provider keys the cloud instance uses live only in the platform's
   secrets: set from the owner's vault by reference, the move recorded where the vault records moves, never in the
   repository, a descriptor, a client's configuration, an answer, a page, a log or a report. A client of the cloud

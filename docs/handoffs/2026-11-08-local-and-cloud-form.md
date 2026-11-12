@@ -79,6 +79,15 @@ then main's CT-285 row).
   keys and the steps members' calls raise (ST-042), OM-5's sentence on client keys, `peer`'s schema description, and
   back-pointers to CF-3 in DL-26, DL-29 and source.md's T2 premise (see *Rounds*).
 
+- Round 16: a key belongs to one client and is never shared, an agent with the key-management key may hold the keys the
+  twin issues it; CF-4 and the Compatibility name the operator's decision of 2026-11-09 (a client key carries no level or
+  place profile); the merges of 2026-11-12 recorded and CT-287 closed at landing.
+- Round 17: one rule for what the operator's hands do: every act that hands out no value (choose, decline, revoke, cap,
+  ceiling, scope) is the operator's agent's, through a twin or the agent's CLI on the operator's computer, and only
+  issuing or rotating a key and a body step stay the operator's (CF-3, CF-4, DL-19, DEC-0159 item 4, the conformance row,
+  SCN-059, FLW-36, SCR-36); SCN-059 and FLW-36 entries name the twins and the channel's buttons; knowledge citations
+  pinned at fabric-workspace `235933b5`.
+
 ## Compared with the first implementation
 
 Read at the CMO project's default branch: its code meets CF-3's key mechanics and its specification CF-5 (config set
@@ -158,13 +167,14 @@ a client-key caller input for CF-4's `operator-step` (FAA-204).
   against the north star's (no grant, not metered by Observatory's meter, issued only by the service's operator) and
   says that issuing a member's key through the north star's administrator agent puts the key in that agent's transcript
   (CF-3); `knowledge/agents-first.md` line 291's "(`peer`, client keys, the one-time code)" becomes "(`peer`, client
-  keys, the operator's one-time code for the page)", as source.md reads; `knowledge/authority.md` line 148's T2 row
+  keys, the operator's one-time code for the page)", as source.md reads; `knowledge/authority.md`'s T2 row of *Trust by machine* (line 171 at fabric-workspace `235933b5`)
   gains the clause "at a cloud instance in the local and cloud form, a caller presenting a client key that instance's
-  operator issued it takes the token's place and the grant's (DL-26, CF-3)"; and `knowledge/north-star.md` lines 204
-  (every service agent's issue door for client keys), 138 (*Joining*: the administrator agent's onboarding checklist
-  issues client keys through each service's issue door), 142 (*Leaving*: one command reverses every grant on that
-  list), 224 (the PM agent's row: the issue doors and client keys for members and agents), 233 (its administrator agent "issues client keys"), 261 (the
-  administrator agent's key doors and client-key issue doors at onboarding and offboarding) and 536 (members' agents
+  operator issued it takes the token's place and the grant's (DL-26, CF-3)"; and `knowledge/north-star.md` (lines at fabric-workspace
+  `235933b5`; re-find each by its text if main moved) lines 206
+  (every service agent's issue door for client keys), 140-141 (*Joining*: the administrator agent's onboarding checklist
+  issues client keys through each service's issue door), *Leaving* (one command reverses every grant on that
+  list, line 144), 226 (the PM agent's row: the issue doors and client keys for members and agents), 235 (its administrator agent "issues client keys"), 263 (the
+  administrator agent's key doors and client-key issue doors at onboarding and offboarding) and 539 (members' agents
   get client keys through the PM agent on the owner's or an administrator's word), with `knowledge/system/base-set.md`
   line 31 (Administration's client-key doors at onboarding and offboarding), are restated so that an agent issues only its own key, as its operator's
   `relayed` twin, and a member's key is issued by the service's operator in their own terminal or on the page (CF-3),
@@ -242,6 +252,17 @@ a client-key caller input for CF-4's `operator-step` (FAA-204).
   lands second: that DEC lists CF-3 (keys the operator's alone, the key twin's gate) and CF-4 (choices and the twins of
   page answers) among the rules it restates, and states whether a bound level decision or a place profile stands there
   for a token-bound caller. Main's CT-285 and CT-250 rows carry it since 2026-11-12 (#275).
+- The merged text with DEC-0156 also (round 17, seam): whichever lands second adds to OW-4 that an answer whose
+  `data.detail` or job `statusMessage` starts with `operator-step` is handed to the person as "the operator was asked",
+  with no link and no retry under a wider key, and that `operator-step: choice` is not repeated (CF-4, DL-19's row).
+  Check on the merged tree: `awk '/^- \*\*OW-4/,/^- \*\*OW-5/' docs/specification/governance-and-roles.md | grep -c
+  'operator-step'` prints at least 1.
+- The vault-delivery question (the second operator question above) is carried by CT-285's DEC as one of its operator
+  questions; until it is answered CF-3's ban stands. Main's CT-285 row is given the clause at landing if it does not
+  carry it by then (round 17, seam).
+- The landing's knowledge edits also restate `knowledge/authority.md` lines 52, 86 and 93 at `235933b5` (L0 stated as
+  hard) with client-key spend as L0's one exception, pointing at the operator's pending answer on it (round 17,
+  product).
 - At landing: CT-287's DEC-0159 entry closed (its rounds, landed, the PR and merge commit) in the same change, and the
   handoffs index row restated as accepted and merged.
 
@@ -787,6 +808,20 @@ a client-key caller input for CF-4's `operator-step` (FAA-204).
   folded: the DEC-0158 note restated against its re-cut table; the second operator question cites the decision of
   2026-11-09 and goes to CT-285's DEC; CF-3 and the levels are joined by the landing note. Declined: none.
 
+- Checks run on the round-16 fold (`285c6939`): `pnpm run check` exit 0 (11185 tests), before round 17 was read.
+- Round 17 (on `285c6939`, main `2b0bcd55` merged; main `21f8097e` merged as `8563ee71` before this fold): none clean.
+  Breaks folded: SCN-059's "(revocation only)" and FLW-36's "for revocation" contradicted CF-4; both entries now name the
+  twins, the agent's CLI on the operator's computer and the channel's buttons (unit); the operator was handed a button
+  for an act that hands out no value; one rule now gives every such act to the operator's agent, through a twin or the
+  agent's CLI on the operator's computer, in CF-3, CF-4, DL-19's row, DEC-0159 item 4, the conformance row, SCN-059,
+  FLW-36 and SCR-36 (product); knowledge citations that moved (authority.md's T2 row, north-star.md's client-key lines)
+  pinned at fabric-workspace `235933b5` (product, seam); CT-232's bare "membership.md line 237", which this branch
+  moves, names the `node-summary/1` row (seam); main's 2026-11-12 designs had their line citations pinned to `a054fdc6`
+  on main (#276) (product). Risks folded: the conformance row bans issuing another agent's key too; DEC-0159's
+  Consequences name DL-8; CF-4's profile sentence names when the `prof` claim serves and the MD-3 case of a proven tier;
+  Done carries rounds 16 and 17 and a checks line; the DEC-0156 note covers OW-4's `operator-step`; the vault question
+  and L0's knowledge lines are on the landing list (unit, product, seam). Declined: none.
+
 ## Next task
 
-Round 17 of the blind readings (unit, seam, product) of branch `agent/ct218-local-cloud-v2` (DEC-0159).
+Round 18 of the blind readings (unit, seam, product) of branch `agent/ct218-local-cloud-v2` (DEC-0159).
