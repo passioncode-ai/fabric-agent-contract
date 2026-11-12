@@ -124,11 +124,24 @@ describe("SECRET_VALUE: a provider prefix needs a boundary before it (DEC-0151)"
     // CPU time of this thread where the runtime offers it, else of the process. Two checks: the time grows less than
     // 8 times when the input grows 4 times (a quadratic read grows 16 times), and stays under a generous 500 ms.
     const usage = (): NodeJS.CpuUsage => ((process as unknown as { threadCpuUsage?: () => NodeJS.CpuUsage }).threadCpuUsage ?? process.cpuUsage)();
-    const cpuMs = (run: () => unknown): number => {
-      const start = usage();
-      run();
+    // The clock can tick coarsely: on Windows the process's CPU time moves in steps of about 15.6 ms, so one read of
+    // the small input measured 0 or 15 ms and decided the ratio (nightly runs of 2026-11-09 to 2026-11-11). A sample
+    // therefore repeats the read until at least 50 ms of CPU time has passed, at most 64 times, and gives the time of
+    // one read.
+    const since = (start: NodeJS.CpuUsage): number => {
       const end = usage();
       return (end.user - start.user + end.system - start.system) / 1000;
+    };
+    const cpuMs = (run: () => unknown): number => {
+      const start = usage();
+      let reads = 0;
+      let spent = 0;
+      do {
+        run();
+        reads += 1;
+        spent = since(start);
+      } while (spent < 50 && reads < 64);
+      return spent / reads;
     };
     const checks = [["SECRET_VALUE.test", (v: string) => SECRET_VALUE.test(v)], ["secretValue", secretValue], ["secretArgument", secretArgument], ["secretUrl", secretUrl]] as const;
     for (const suffix of ["", "-a"]) {
@@ -144,12 +157,12 @@ describe("SECRET_VALUE: a provider prefix needs a boundary before it (DEC-0151)"
         const small = timed(25000);
         const large = timed(100000);
         expect(large, `${name} on 300000 characters`).toBeLessThan(500);
-        expect(large, `${name}: 4 times the input, ${small} ms then ${large} ms`).toBeLessThan(Math.max(8 * small, 40));
+        expect(large, `${name}: 4 times the input, ${small.toFixed(2)} ms then ${large.toFixed(2)} ms`).toBeLessThan(Math.max(8 * small, 40));
       }
     }
-    // Twenty-four timed reads of up to 300000 characters: an explicit timeout, since a loaded machine can pass vitest's
-    // 5000 ms default while every assertion above holds.
-  }, 30000);
+    // Twenty-four timed samples of up to 300000 characters, each at least 50 ms of CPU time: an explicit timeout, since
+    // a loaded machine can pass vitest's 5000 ms default while every assertion above holds.
+  }, 60000);
 
   it("finds every key kind after an octal escape, a double percent-escape and the escaped ESC colour forms (DEC-0151)", () => {
     const hex = tail(64, "0123456789abcdef");
