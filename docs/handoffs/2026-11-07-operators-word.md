@@ -158,7 +158,7 @@ contract already has.
     not delete or rewrite a shared file it cannot read to end a hold and points the person to the product's own switch;
     the merged text reads it with UD-4 and OW-2: on the operator's word naming the switch, the agent sets the product's
     own switch on through its relayed action, and only anyone else is pointed to the switch (round 29, seam). Check:
-    `grep -n 'cannot read' docs/specification/usage-data.md | grep -c 'OW-2'` prints at least 1 on the merged tree.
+    `awk '/\*\*UD-4/,/\*\*UD-5/' docs/specification/usage-data.md | tr '\n' ' ' | grep -o 'shared file it cannot read[^;]*;[^;]*' | grep -c 'OW-2'` prints at least 1 on the merged tree (scoped to the sentence, as DEC-0157's note checks it, round 28 there).
   - DEC-0158 (OS-6, no person in a dispatched run): OS-6's notice question that "the run never reads" meets Fabric's
     `9420da79` (the operator's word of 2026-11-12 as Fabric's `QUESTIONS_RULE` carries it: a run's question goes to the
     organization's PM agent, whose reply starts the next run, or through `fabric_question_ask`, whose answer starts no run
