@@ -288,11 +288,6 @@ function eventIntegrity(event: JsonObject, at: string): Finding[] {
 }
 
 /**
- * FAC-SEM-039 for a batch: each stream is a contiguous slice of the collector's buffer (consecutive seqs), and no event is
- * sent twice — neither under one id nor, for a grant's daily usage, one (day, grantId) of one stream twice, the grant's id
- * compared by normal form (DEC-0082, DEC-0076).
- */
-/**
  * FAC-SEM-171 (DEC-0164) on one `unit` event: its source is `unit` and its `sourceKey` is `unitSourceKey`'s for its agent,
  * unit, transition and `run.root`, so every writer derives one id; an acceptance is not recorded before it happened.
  */
@@ -315,6 +310,11 @@ function unitEvent(event: JsonObject, at: string): Finding[] {
   return findings;
 }
 
+/**
+ * FAC-SEM-039 for a batch: each stream is a contiguous slice of the collector's buffer (consecutive seqs), and no event is
+ * sent twice — neither under one id nor, for a grant's daily usage, one (day, grantId) of one stream twice, the grant's id
+ * compared by normal form (DEC-0082, DEC-0076).
+ */
 function batchIntegrity(value: JsonObject): Finding[] {
   const findings: Finding[] = [];
   const last = new Map<string, number>();

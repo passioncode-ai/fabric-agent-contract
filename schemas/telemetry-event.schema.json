@@ -823,9 +823,9 @@
           "items": {
             "type": "string",
             "maxLength": 2048,
-            "pattern": "^(sha256:[a-f0-9]{64}|https?://[^\\s]+|urn:[A-Za-z0-9][A-Za-z0-9-]{0,31}:[^\\s]+)$"
+            "pattern": "^(sha256:[a-f0-9]{64}|https?://[^\\s/?#@]+(?:[/?#][^\\s]*)?|urn:[A-Za-z0-9][A-Za-z0-9-]{0,31}:[^\\s]+)$"
           },
-          "description": "References only (a receipt, a test run, a review mark), each an http(s) URI, a URN or a sha256: digest; never content."
+          "description": "References only (a receipt, a test run, a review mark), each an http(s) URI without user information, a URN or a sha256: digest; never content."
         },
         "acceptedBy": {
           "type": "object",
@@ -854,7 +854,7 @@
         },
         "cost": {
           "$ref": "activity-common.schema.json#/$defs/cost",
-          "description": "The agent's spend on the unit: usd with its basis, or usd null when unknown, never 0 for unknown (FAC-SEM-038)."
+          "description": "The agent's spend on the unit: usd with its basis, or usd null when unknown; never 0 for unknown is the writer's duty."
         }
       },
       "allOf": [

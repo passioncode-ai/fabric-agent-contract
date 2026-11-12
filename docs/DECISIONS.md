@@ -11418,9 +11418,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Alternatives considered:** a separate document type for the journal (refused: Observatory confirmed `unit` inside
   `fabric-activity/0.1`, one transport, one attribution, one person rule); `org` in the event (refused: the stream's
   attribution names the organization); `cost` as `null` (refused for the envelope's own form, `{usd: null}`, which
-  `FAC-SEM-038` already reads); an id without `run.root` (refused on Observatory's answer: a second acceptance would be
-  dropped as a repeat).
-- **Compatibility:** additive; an older reader stores `unit` as an unknown kind. Owed: Observatory's journal and its
+  `FAC-SEM-038` already reads); an id without `run.root` (refused on Observatory's answer: a second acceptance would be dropped as a repeat). Where the decision departs from the design: `evidence` any URI (narrowed to an http(s) URI without user information, a URN or a `sha256:` digest, so a credential or a local path does not ride as evidence); `taskClassMap` "required unless unclassified" (now present exactly when classified, so an unclassified unit names no map it was not read from); no bound on `acceptedAt` (added: not after `occurred`, with 60 s of skew, an acceptance not recorded before it happened, and `acceptedAt` named the month key); `acceptedBy` in `activity-common` (kept in `$defs/unit`, its only user); one rule code carrying every conditional (the conditionals moved to the schema, one event per transition and `run.root` to `FAC-SEM-039`'s duplicate id, and `FAC-SEM-171` carries the derivation and the `acceptedAt` bound).
+- **Compatibility:** additive; an older reader stores `unit` as an unknown kind. A receiver keeps a `unit` event once per `eventId` within the organization's stream, whatever device or channel wrote it (activity's *Event id* amended). Owed: Observatory's journal and its
   capability `activity.unit.record` (OBS-378, after this decision); the adapter's kit writer (G1-b); the assessment's
   class map (G1-c); the join into the metric (G1-d).
 - **Consequences / affects:** `schemas/telemetry-event.schema.json` (`$defs/unit` and the kind), `src/activity-rules.ts`

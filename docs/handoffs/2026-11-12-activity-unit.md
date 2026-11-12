@@ -21,6 +21,13 @@ Branch `agent/ct259-activity-unit-20261112`, from main `d69dc363`. Entry point: 
 
 - `pnpm run check` exit 0 (11192 tests passed, 3 skipped; coverage floors, UX lint, docs check, privacy check).
 
+- Round 1, unit only (on `79ed9a09`): not clean. Breaks folded: the Event id rule kept one event per (`device.id`,
+  `eventId`) against AE-2's one id from every writer; a `unit` event is now kept once per `eventId` within the
+  organization's stream, and the `sourceKey` row names `unitSourceKey`'s form; DEC-0164's Alternatives name every
+  departure from the design. Risks folded: four refused branches, an evidence URL with user information and the
+  repeated write pinned in the vectors; the cost's `FAC-SEM-038` citations corrected; `acceptedAt` the month key; the
+  kit's envelope (Observatory's capability is the collector); `unitEvent`'s place and the rule row's order.
+
 ## Next task
 
-Round 1 of the blind readings (unit, seam, product) of branch `agent/ct259-activity-unit-20261112` (DEC-0164).
+Round 2 of the blind readings (unit, seam, product) of branch `agent/ct259-activity-unit-20261112` (DEC-0164).

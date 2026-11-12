@@ -66,6 +66,11 @@ function cases(): Json[] {
     { name: "an outcome on a start", event: unit("started", { outcome: "completed" }), schemaValid: false, findings: [] },
     { name: "an acceptance without who accepted", event: unit("accepted", { acceptedAt: "2026-11-12T09:58:00Z" }), schemaValid: false, findings: [] },
     { name: "a unit without a project", event: (({ project: _p, ...rest }) => rest)(unit("started")), schemaValid: false, findings: [] },
+    { name: "an end without its outcome", event: unit("ended"), schemaValid: false, findings: [] },
+    { name: "who accepted, on a start", event: unit("started", { acceptedBy: { kind: "rule", ref: "ci-green-and-reviewed" } }), schemaValid: false, findings: [] },
+    { name: "an acceptance without when", event: unit("accepted", { acceptedBy: { kind: "rule", ref: "ci-green-and-reviewed" } }), schemaValid: false, findings: [] },
+    { name: "an unclassified unit with a map", event: unit("started", { taskClass: "unclassified" }), schemaValid: false, findings: [] },
+    { name: "evidence with user information in its URL", event: unit("ended", { outcome: "completed", evidence: ["https://user:secret@ci.example/runs/88"] }), schemaValid: false, findings: [] },
     // FAC-SEM-171: the derived key.
     { name: "a sourceKey derived from another run.root", event: { ...unit("accepted", { acceptedBy: { kind: "agent", ref: "example-reviewer" }, acceptedAt: "2026-11-12T09:58:00Z" }), run: { root: RUN_2 } }, schemaValid: true, findings: ["FAC-SEM-171 /sourceKey"] },
     { name: "an acceptance recorded before it happened", event: accepted(RUN_1, 4, undefined), schemaValid: true, findings: [] }
@@ -79,7 +84,7 @@ function cases(): Json[] {
 
 export function activityUnitVectors(): Json {
   return {
-    about: "Vectors for the unit-of-work event, telemetry-event kind unit (DEC-0164), written by tools/vectors/activity-unit.ts, never by hand. Each event's sourceKey is sha256: of the settings-form canonical JSON {agent, key, run, system, transition} (unit.key, run.root, unit.system), and its eventId sha256: of the settings-form canonical JSON {key: sourceKey, source: \"unit\"}. cases: schemaValid is the event against telemetry-event.schema.json; findings are the codes and paths of evaluateSemanticRules(\"telemetry-event\", event), in order. A repeated write of one transition has the same eventId (the first two accepted events of run.root run-4b1d9e02 share one); a unit accepted again under another run.root has another.",
+    about: "Vectors for the unit-of-work event, telemetry-event kind unit (DEC-0164), written by tools/vectors/activity-unit.ts, never by hand. Each event's sourceKey is sha256: of the settings-form canonical JSON {agent, key, run, system, transition} (unit.key, run.root, unit.system), and its eventId sha256: of the settings-form canonical JSON {key: sourceKey, source: \"unit\"}. cases: schemaValid is the event against telemetry-event.schema.json; findings are the codes and paths of evaluateSemanticRules(\"telemetry-event\", event), in order. A repeated write of one transition has the same eventId, and so does a second, different acceptance of one unit under one run.root (the rule's and the person's acceptance cases share one id): the receiver keeps the first; a unit accepted again under another run.root has another id.",
     cases: cases()
   };
 }

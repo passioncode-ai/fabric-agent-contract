@@ -21,6 +21,11 @@ describe("unit events (DEC-0164)", () => {
     expect(valid(c.event)).toBe(c.schemaValid);
     if (c.schemaValid) expect(findings(c.event)).toEqual(c.findings);
   });
+  it("writes one transition twice as one event: the same id", () => {
+    const rule = vectors.cases.find((c) => c.name === "accepted by a rule") as Json;
+    const person = vectors.cases.find((c) => c.name.startsWith("accepted by a person")) as Json;
+    expect(person.event.eventId).toBe(rule.event.eventId);
+  });
   it("derives one id for one transition and run.root, and another for a reopened unit (AE-2)", () => {
     const accepted = vectors.cases.filter((c) => c.event.data.transition === "accepted" && c.schemaValid && c.findings.length === 0);
     const ids = new Set(accepted.map((c) => `${c.event.run.root} ${c.event.eventId}`));

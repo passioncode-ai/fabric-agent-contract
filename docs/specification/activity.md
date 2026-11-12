@@ -103,7 +103,7 @@ policy key names).
 | `eventId` | The idempotency key ([below](#event-id)). |
 | `kind` | `session.interval`, `usage.line`, `session.annotation`, `buffer.overflow`, `policy.violation`, `grant.usage`, `result`, `unit` (DEC-0164), an extension `x-<namespace>.<kind>`, or a kind a later revision adds. |
 | `source` | Where the collector read it. Open vocabulary; known: `claude_code.otel`, `claude_code.transcript`, `codex.otel`, `codex.rollout`, `switchboard`, `process`. |
-| `sourceKey` | Present exactly when `eventId` is derived. Either the source's own id of the record (a request id, a line uuid) or, for a key derived from a file, `hmac-sha256:` under the device's telemetry key ([below](#event-id)). Never a path: the schema refuses a slash and an encoded home-directory fragment, the dashed form at the start or after any character that is not an ASCII letter or digit (DEC-0105). |
+| `sourceKey` | Present exactly when `eventId` is derived. Either the source's own id of the record (a request id, a line uuid) or, for a key derived from a file, `hmac-sha256:` under the device's telemetry key ([below](#event-id)). Never a path: the schema refuses a slash and an encoded home-directory fragment, the dashed form at the start or after any character that is not an ASCII letter or digit (DEC-0105). A `unit` event's is `sha256:` of its own fields (`unitSourceKey`, DEC-0164), with `source` `unit`. |
 | `collector.id`, `collector.epoch`, `seq` | The stream position ([below](#streams)). |
 | `occurred` | The device's wall clock when it happened. |
 | `bootId`, `monotonicNs` | A monotonic reading ([below](#clocks)). |
@@ -228,19 +228,16 @@ its own `run.root`, so its second acceptance is a new event (AE-2, [`unitSourceK
 | `taskClass` | the assessment's class id, or `unclassified` until its class map names one |
 | `taskClassMap` | `{id, revision}` of the class map `taskClass` was read from, the revision a positive integer its owner raises; present exactly when `taskClass` is not `unclassified`, so a reader of a past month maps a renamed, split or merged class through the owner's table between revisions or counts it under its old name, visibly (AE-2a) |
 | `outcome` | on `ended` only: `completed`, `failed` or `abandoned` |
-| `evidence` | 0 to 8 references, each an http(s) URI, a URN or a `sha256:` digest (a receipt, a test run, a review mark); never content |
+| `evidence` | 0 to 8 references, each an http(s) URI without user information, a URN or a `sha256:` digest (a receipt, a test run, a review mark); never content, which the writer keeps out of a query string too |
 | `acceptedBy` | on `accepted` only: `{kind, ref}`, `kind` being `rule` (`ref` the acceptance rule's id), `agent` (`ref` an agent's id) or `person` (`ref` the person's pairwise membership subject for this reader, [membership](membership.md) OM-1; never a name or an address) |
-| `acceptedAt` | on `accepted` only: when it was accepted, not after the event's `occurred` (60 s of skew, `FAC-SEM-171`) |
-| `cost` | the agent's spend on the unit as the envelope states a cost: `{usd, basis}`, or `{usd: null}` when unknown, never 0 for unknown (`FAC-SEM-038`) |
+| `acceptedAt` | on `accepted` only: when it was accepted, not after the event's `occurred` (60 s of skew, `FAC-SEM-171`); it is the month an acceptance counts in, `occurred` being when the event was written |
+| `cost` | the agent's spend on the unit as the envelope states a cost: `{usd, basis}`, or `{usd: null}` when unknown (the cost's own form: an unknown carries no basis); never 0 for unknown is the writer's duty, with no tokens on the event to check it against |
 
 The receiver never attaches a user to a `unit` event, never puts a unit into a summary cell by person, and serves
 units only per agent, project or task class; an `acceptedBy` of kind `person` stays in the organization's own journal
 for the trust guardrail (members see what agents did on their work) and never reaches a summary, a usage report or
 another organization (AE-3). A device collector sends `unit` events in its activity batches like any kind; a kit with
-no collector records them through Project Observatory's capability `activity.unit.record` (OBS-378), bound as
-[`ops.digest.record`](ops-digest.md) is (an access binding with that scope and effect `propose` over stdio, a hub
-delegation token with that scope on the memory-http door), the event's `project.id` the transport's project and
-`data.agent` a service the registry attributes to it; the event's shape is this one either way (AE-4). A reader at an
+no collector records them through Project Observatory's capability `activity.unit.record` (OBS-378), bound as [`ops.digest.record`](ops-digest.md) is (an access binding with that scope and effect `propose` over stdio, a hub delegation token with that scope on the memory-http door), the event's `project.id` the transport's project and `data.agent` a service the registry attributes to it; there the capability is the collector and writes the envelope's `collector`, `seq`, `bootId` and `monotonicNs` itself; the event's shape is this one either way (AE-4). A reader at an
 older pin reads `unit` as an unknown kind, stores it and counts nothing (AE-5). A unit event names no organization: the
 stream's attribution does, and a project with no membership keeps it in Observatory's local journal only.
 
@@ -342,7 +339,7 @@ A collector MUST drop content and person attributes at the source. Claude Code's
 
 ### Event id
 
-`eventId` makes delivery idempotent: a receiver keeps one event per (`device.id`, `eventId`).
+`eventId` makes delivery idempotent: a receiver keeps one event per (`device.id`, `eventId`), save a `unit` event, which it keeps once per `eventId` within the organization's stream whatever device or channel wrote it, since its id derives from the unit and not from a device (DEC-0164 AE-2).
 
 - An event read from a source that can be read again — an export that is retried, a transcript that
   is re-scanned after a restart — MUST carry a **derived** id, so a second read yields the same id.
@@ -588,8 +585,8 @@ not an identity: the runtimes' own exports use other names (Claude Code: `input_
 | <a id="fac-sem-040"></a>`FAC-SEM-040` | `activity-summary` | no person dimension, content key or path; no producer kind; no published cell whose population is below `minPopulation` (at least 3) or above its sessions; one cell per agent × skill × project × day × outcome, and at most one other cell per day; every day inside `from`…`to` |
 | <a id="fac-sem-067"></a>`FAC-SEM-067` | `access-log-disclosure` | a read served to a person other than the subject shows the subject's time or presence only under a `purposeId` the subject confirmed, and the subject's usage and cost only per UTC day or billing period |
 | <a id="fac-sem-100"></a>`FAC-SEM-100` | `session-join` | every `session.interval` and `usage.line` of one `session.id` carries one `collector.id`, and the intervals of one session do not overlap; annotations are not counted (DEC-0068) |
-| <a id="fac-sem-171"></a>`FAC-SEM-171` | `activity-batch`, `telemetry-event` | a `unit` event's `source` is `unit` and its `sourceKey` is `unitSourceKey`'s for its agent, unit, transition and `run.root`; its `acceptedAt` is not after its `occurred` (60 s of skew) (DEC-0164 AE-1, AE-2) |
 | <a id="fac-sem-123"></a>`FAC-SEM-123` | `access-log-disclosure` | an entry whose reader's `role` is `partner` is a service's read (no `user`) of `activity.usage`, per UTC day or billing period, keyed by no device ([the partner channel](partner-channel.md), DEC-0090) |
+| <a id="fac-sem-171"></a>`FAC-SEM-171` | `activity-batch`, `telemetry-event` | a `unit` event's `source` is `unit` and its `sourceKey` is `unitSourceKey`'s for its agent, unit, transition and `run.root`; its `acceptedAt` is not after its `occurred` (60 s of skew) (DEC-0164 AE-1, AE-2) |
 
 `activity-ack` checks `{known?, batch, ack}`: `known` is the receiver's stream state before the
 batch (`[{collector, held, accounted, pending?}]`; `pending`, a check-in's dropped ranges, never moves
