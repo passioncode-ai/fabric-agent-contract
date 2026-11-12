@@ -228,6 +228,10 @@ describe("FAC-SEM-025: sums of rows rounded to 6 places one by one (DEC-0163, CT
     const nullRun = (i: number) => ({ taskRunId: `null-${i}`, calls: 1, unpricedCalls: 1, costUsd: null });
     const withNulls = { ...report, days: [{ ...day(2, [2]), calls: 21, byModel: [{ ...day(2, [2]).byModel[0], calls: 21, unpricedCalls: 20 }], unpricedCalls: 20 }], byProject: [{ projectId: "urn:project:p", calls: 21, unpricedCalls: 20, costUsd: 1, taskRuns: [run(0, 1.0000021), ...Array.from({ length: 20 }, (_, i) => nullRun(i))] }] };
     expect(at(withNulls, "/byProject/0/taskRuns")).toBe(true);
+    // Twenty null-cost models add nothing to a day and its one priced model.
+    const priced = day(1, [1.0000021]);
+    const nullModels = Array.from({ length: 20 }, (_, i) => ({ provider: "local", model: `null-${i}`, costBasis: "provider", calls: 1, unpricedCalls: 1, inputTokens: 0, outputTokens: 0, costUsd: null }));
+    expect(at({ ...report, byProject: undefined, days: [{ ...priced, calls: 21, unpricedCalls: 20, byModel: [...priced.byModel, ...nullModels] }] }, "/days/0/costUsd")).toBe(true);
     // A negative model cost is summed but widens nothing; Infinity is never close.
     expect(at({ ...report, byProject: undefined, days: [day(1, [1.0000024, -0.0000001])] }, "/days/0/costUsd")).toBe(true);
     expect(usageRules({ ...report, byProject: undefined, days: [day(Number.POSITIVE_INFINITY, [1])] }).map((f) => f.instancePath)).toContain("/days/0/costUsd");

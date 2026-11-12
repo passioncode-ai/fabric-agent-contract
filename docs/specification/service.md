@@ -378,7 +378,7 @@ provider.
   write each `projectId` in its normal form — and each task run one row within its project; a project holds at least its task runs' calls, all projects together no more than the days, and
   the known costs add up the same way — a project costs at least its task runs (when its own cost is known) and all
   projects together no more than the days, a `null` cost counting as none, and a project holds at least its task runs'
-  priced calls (CT-40). The sums are checked within 0.000001, plus 0.0000005 for each row with a known cost summed on either side of the comparison, plus 1e-9 of the larger sum (DEC-0163), so a service may write each row's `costUsd` rounded to 6 decimal places, or unrounded (once its readers apply DEC-0163: this repository's checker at or after it, a copy of the rule once it carries the per-row allowance; a reader that does not still refuses rounded rows); an
+  priced calls (CT-40). The sums are checked within 0.000001, plus 0.0000005 for each row with a known cost summed on either side of the comparison, plus 1e-9 of the larger sum (DEC-0163), so a service may write each row's `costUsd` unrounded, or rounded to 6 decimal places once its readers apply DEC-0163 (this repository's checker at or after it, a copy of the rule once it carries the per-row allowance; a reader that does not still refuses rounded rows); an
   unknown cost is `null` as in a day's rows (`FAC-SEM-025`). A call the service ran for no project is in no row.
 - **For a service offered to others** (a listing, [Offered to others](#offered-to-others)) the report is this same
   object, with nothing added (DEC-0061): its rows are per model and route, `byGrant` attributes spend to each grant that

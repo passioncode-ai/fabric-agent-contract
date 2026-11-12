@@ -4,8 +4,9 @@ Branch `agent/ct295-sum-tolerance-20261112`, from main `d69dc363`. Entry point: 
 
 ## Done
 
-- `src/usage-rules.ts`: `exceeds(a, b, rows)` with `ROW_ROUNDING_USD` (0.0000005 per row summed on either side), used
-  by the day check, the project against its task runs, and the projects against the days.
+- `src/usage-rules.ts`: `allowance(a, b, rows)` with `ROW_ROUNDING_USD` (0.0000005 per known-cost row summed on
+  either side); the day check's `close` (a distance within it), and `exceeds` (one-sided) for the project against its
+  task runs and the projects against the days.
 - `docs/specification/service.md`: the usage report's rounding sentence and `FAC-SEM-025`'s row.
 - `test/usage-rules.test.ts`: ten rows rounded up pass; an excess beyond rounding still fails; each count pinned at its
   boundary (mutation-checked); `fixtures/positive/service-usage-rounded-rows.json` (catalogued).
@@ -14,14 +15,17 @@ Branch `agent/ct295-sum-tolerance-20261112`, from main `d69dc363`. Entry point: 
 ## Open
 
 - Tell the adapter (board thread `14937b75`) when DEC-0163 lands: its kit's Python and Node copies of the rule and its
-  probe owe the per-row allowance and a test of ten rows rounded up (FAA-310 part 2); Fabric Dashboards' sample-service
-  fixture and every vendored kit copy (34 counted on 2026-11-12) follow at their next kit refresh.
+  probe owe the per-row allowance and a test of ten rows rounded up (FAA-310 part 2). The 45 copies outside it counted
+  on 2026-11-12 (DEC-0163 Compatibility, with the search): the 34 current-name kits follow at their next kit refresh;
+  the 5 old-name kits, 3 vendored probes, 2 probe ports and 1 vendored `usage-rules.ts` owe the change from their
+  owners. Until the kit's copies carry it, the kit (which already rounds) is refused by those readers: track it on
+  the same thread.
 - After merge, the knowledge base's mirror of service.md still says "unrounded" until `node scripts/workspace.mjs sync`
   runs from a Fabric checkout (or the scheduled sync); check the mirrored sentence.
 
 ## Checks run
 
-- `pnpm run check` exit 0 (11177 tests passed, 3 skipped), on the round-1 fold (11178 passed, 3 skipped) and on the round-2 fold (11184 passed, 3 skipped; coverage floors, UX lint, docs check, privacy check).
+- `pnpm run check` exit 0 (11177 tests passed, 3 skipped), on the round-1 fold (11178 passed, 3 skipped) on the round-2 fold (11184 passed, 3 skipped; coverage floors, UX lint, docs check, privacy check) and on the round-3 fold (11184 passed, 3 skipped).
 - Round 1 (on `65c5b76b`): unit clean (risks folded: null-cost rows no longer widen the allowance; the day's
   comparison is a distance again, so NaN is never close; the test comment matches its cases; the page states the
   relative 1e-9). Product, breaks folded: Compatibility names the copies of the rule that keep the old tolerance and
@@ -34,6 +38,12 @@ Branch `agent/ct295-sum-tolerance-20261112`, from main `d69dc363`. Entry point: 
   test fail at repin until it changes; Compatibility counts the copies (34). Product risks folded: the day bullet; the
   backlog row and this handoff; the knowledge base's mirror after merge. Declined: none.
 
+- Round 3 (on `26e19217`): unit clean (risk folded: twenty null-cost models do not widen a day's allowance, tested).
+  Product, break folded: Compatibility counts 45 copies with the search that finds them, by form, and names who owes
+  each change. Product risks folded: only the day check is a distance, the project checks stay one-sided; the
+  DEC-0021 and DEC-0065 annotations hold once readers apply DEC-0163; the page names unrounded first; this handoff's
+  Done; the kit already rounds, so the window is the kit's change plus each copy. Declined: none.
+
 ## Next task
 
-Round 3 of the blind readings (unit, seam, product) of branch `agent/ct295-sum-tolerance-20261112` (DEC-0163).
+Round 4 of the blind readings (unit, seam, product) of branch `agent/ct295-sum-tolerance-20261112` (DEC-0163).

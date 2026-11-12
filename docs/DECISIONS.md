@@ -334,7 +334,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Annotated (2026-10-12):** the usage report amended by DEC-0065 (its 31-day window checked; `byProject` attribution by project and task run, never by caller).
 - **Annotated (2026-10-11):** `budget` amended by DEC-0027 (a usage report lists every spending limit the service applies).
 - **Annotated (2026-10-23):** a host sums money over the rows not on a subscription; a `subscription` row's `costUsd` is an estimate, never money (DEC-0110).
-- **Annotated (2026-11-12):** the day's cost against its models holds within each known row's rounding, and rows may be written rounded to 6 places (DEC-0163).
+- **Annotated (2026-11-12):** the day's cost against its models holds within each known row's rounding, and rows may be written rounded to 6 places once its readers apply DEC-0163.
 - **Amends:** the `fabric-service/0.1` extension (additive, DEC-0016 extension policy)
 - **Decision:** A service MAY declare `surfaces.usage.path` in its well-known document and
   answer there, behind the service token, a `service-usage.schema.json` report. The report gives
@@ -3659,7 +3659,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   task runs when its own cost is known, and all projects together no more than the days, a `null` cost counting as
   none, within the rounding the day's cost check allows (so rows are written unrounded); and a project holds at least its
   task runs' priced calls (`src/usage-rules.ts`, test/usage-rules.test.ts).
-- **Annotated (2026-11-12):** the rounding clause above is replaced: cost sums hold within each known row's rounding, and rows may be written rounded to 6 places (DEC-0163).
+- **Annotated (2026-11-12):** the rounding clause above is replaced: cost sums hold within each known row's rounding, and rows may be written rounded to 6 places once its readers apply DEC-0163.
 - **Annotated (2026-10-13):** amended by DEC-0076: `byProject` names each project once by the normal form of `projectId`, and the finding names the second spelling (`docs/specification/identifiers.md`).
 - **Annotated (2026-10-12):** `attributionHeaders` answers a missing request as `not-openrouter` instead of throwing; vectors pin the default port, a trailing dot, the WHATWG-only forms, the other user-set headers, empty categories and the 64-character slug; adoption.md names how Project Observatory's private node is read (the owed reading of #68; packet P6-08).
 - **Amends:** DEC-0021 (the usage report: the window rule and `byProject`). Annotates DEC-0020…DEC-0029 with measured
@@ -11402,8 +11402,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   side of the comparison, plus a relative 1e-9 ([service](specification/service.md#usage-report)): a day against its
   models counts the day's row and each model's row with a known cost; a project against its task runs counts each run
   with a known cost and the project; the projects against the days count each project and each day with a known cost
-  (a `null` row carries no rounding and widens nothing; the comparison is a distance, so a cost that is not a number is
-  never close). A service may write each row's
+  (a `null` row carries no rounding and widens nothing). Only the day against its models is a distance, so a cost that
+  is not a number is never close; a project against its task runs and the projects against the days stay one-sided: an
+  excess beyond the allowance is refused and any shortfall passes, as before. A service may write each row's
   `costUsd` rounded to 6 decimal places or unrounded. Calls and tokens, which are integers, are compared exactly as
   before.
 - **Why:** the rounding of each written row is independent, so the error bound of a sum grows with the rows in it; a
@@ -11415,9 +11416,18 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Compatibility:** looser only for this repository's checker: every report that passed still passes. Read on
   2026-11-12, the copies of the rule that do not read it from here and keep the fixed tolerance: the adapter's kit in
   Python and Node (`fabric_usage.py`, `fabric-usage.mjs`) and the probe that runs it, which owe the per-row allowance
-  and a test of ten rows rounded up (FAA-310 part 2); every service that vendors the kit (34 copies counted on the operator's machine on 2026-11-12, Fabric
-  Dashboards' sample-service fixture among them), at its next kit refresh. Until each changes, a service that rounds its
-  rows is refused by that reader, so a service writes rounded rows only once its readers apply this decision; a pin alone
+  and a test of ten rows rounded up (FAA-310 part 2); and every copy outside it, which its owner changes. On the
+  operator's machine on 2026-11-12 the message `is not the sum of its models` appeared in 45 files outside this
+  repository and the adapter (test files, dependency folders, worktrees and coverage left out: `rg -l` with the globs
+  `!**/node_modules/**`, `!**/.git/**`, `!**/coverage/**`, `!**/dist/**`, `!*.test.*` and `!test_*.py`): 39 vendored kit
+  copies (34 under the current names `fabric_usage.py` and `fabric-usage.mjs`, 5 under the older single-file names
+  `fabric_service.py` and `kit.mjs`, Fabric Dashboards' sample-service fixture among them), 3 vendored probes
+  (`check_service.py`), 2 ports of the probe (`usage-probe.ts`) and 1 vendored copy of `src/usage-rules.ts`. The
+  current-name kits follow at their next kit refresh; the old-name kits, the probes and the ports owe the per-row
+  allowance from their owners. Until each changes, a service that rounds its
+  rows is refused by that reader, so a service writes rounded rows only once its readers apply this decision. The kit
+  already writes rounded rows, so the window closes only when the kit's own copies carry the allowance and each vendored
+  copy is refreshed; the handoff tracks it. A pin alone
   is not enough for a copy, so the positive fixture `service-usage-rounded-rows.json` (ten rows rounded to 6 places),
   which a copy's parity test reads with the other positive usage fixtures, fails that test at repin until the copy
   changes. No vector
