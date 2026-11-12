@@ -36,7 +36,7 @@
             "revision": 3
           },
           "cost": {
-            "usd": 0.42,
+            "usd": 0.12,
             "basis": "provider"
           }
         }
@@ -79,7 +79,7 @@
             "revision": 3
           },
           "cost": {
-            "usd": 0.42,
+            "usd": 0.3,
             "basis": "provider"
           },
           "outcome": "completed",
@@ -127,7 +127,7 @@
             "revision": 3
           },
           "cost": {
-            "usd": 0.42,
+            "usd": 0,
             "basis": "provider"
           }
         }
@@ -170,7 +170,7 @@
             "revision": 3
           },
           "cost": {
-            "usd": 0.42,
+            "usd": 0,
             "basis": "provider"
           },
           "acceptedBy": {
@@ -218,7 +218,7 @@
             "revision": 3
           },
           "cost": {
-            "usd": 0.42,
+            "usd": 0,
             "basis": "provider"
           },
           "acceptedBy": {
@@ -266,7 +266,7 @@
             "revision": 3
           },
           "cost": {
-            "usd": 0.42,
+            "usd": 0,
             "basis": "provider"
           },
           "acceptedBy": {
@@ -310,7 +310,7 @@
           "transition": "started",
           "taskClass": "unclassified",
           "cost": {
-            "usd": 0.42,
+            "usd": 0.12,
             "basis": "provider"
           }
         }
@@ -391,7 +391,7 @@
           "transition": "started",
           "taskClass": "code.change",
           "cost": {
-            "usd": 0.42,
+            "usd": 0.12,
             "basis": "provider"
           }
         }
@@ -434,7 +434,7 @@
             "revision": 3
           },
           "cost": {
-            "usd": 0.42,
+            "usd": 0.12,
             "basis": "provider"
           }
         },
@@ -480,7 +480,7 @@
             "revision": 3
           },
           "cost": {
-            "usd": 0.42,
+            "usd": 0.12,
             "basis": "provider"
           },
           "outcome": "completed"
@@ -524,7 +524,7 @@
             "revision": 3
           },
           "cost": {
-            "usd": 0.42,
+            "usd": 0,
             "basis": "provider"
           },
           "acceptedAt": "2026-11-12T09:58:00Z"
@@ -565,7 +565,7 @@
             "revision": 3
           },
           "cost": {
-            "usd": 0.42,
+            "usd": 0.12,
             "basis": "provider"
           }
         }
@@ -608,7 +608,7 @@
             "revision": 3
           },
           "cost": {
-            "usd": 0.42,
+            "usd": 0.3,
             "basis": "provider"
           }
         }
@@ -651,7 +651,7 @@
             "revision": 3
           },
           "cost": {
-            "usd": 0.42,
+            "usd": 0.12,
             "basis": "provider"
           },
           "acceptedBy": {
@@ -698,7 +698,7 @@
             "revision": 3
           },
           "cost": {
-            "usd": 0.42,
+            "usd": 0,
             "basis": "provider"
           },
           "acceptedBy": {
@@ -745,7 +745,7 @@
             "revision": 3
           },
           "cost": {
-            "usd": 0.42,
+            "usd": 0.12,
             "basis": "provider"
           }
         }
@@ -788,7 +788,7 @@
             "revision": 3
           },
           "cost": {
-            "usd": 0.42,
+            "usd": 0.3,
             "basis": "provider"
           },
           "outcome": "completed",
@@ -835,7 +835,7 @@
             "revision": 3
           },
           "cost": {
-            "usd": 0.42,
+            "usd": 0,
             "basis": "provider"
           },
           "acceptedBy": {
@@ -885,7 +885,7 @@
             "revision": 3
           },
           "cost": {
-            "usd": 0.42,
+            "usd": 0,
             "basis": "provider"
           },
           "acceptedBy": {
@@ -935,7 +935,7 @@
             "revision": 3
           },
           "cost": {
-            "usd": 0.42,
+            "usd": 0,
             "basis": "provider"
           },
           "acceptedBy": {
@@ -983,7 +983,7 @@
             "revision": 3
           },
           "cost": {
-            "usd": 0.42,
+            "usd": 0,
             "basis": "provider"
           },
           "acceptedBy": {
@@ -1033,7 +1033,7 @@
             "revision": 3
           },
           "cost": {
-            "usd": 0.42,
+            "usd": 0,
             "basis": "provider"
           },
           "acceptedBy": {
@@ -1047,6 +1047,54 @@
       "findings": [
         "FAC-SEM-171 /data/acceptedAt"
       ]
+    },
+    {
+      "name": "an acceptance 59 s after a leap second occurred",
+      "event": {
+        "protocol": "fabric-activity/0.1",
+        "eventId": "sha256:96bd9ab3be93e07049613eb26994dd806095c6238021f29645b1a37462288d2b",
+        "kind": "unit",
+        "source": "unit",
+        "sourceKey": "sha256:255bc1cb7269a627538a993dff506552bb230ea150f61f86edb82aade9491e85",
+        "collector": {
+          "id": "observatory-node",
+          "epoch": 4
+        },
+        "seq": 4,
+        "occurred": "2016-12-31T23:59:60Z",
+        "bootId": "boot-7c41e2",
+        "monotonicNs": "0",
+        "project": {
+          "id": "example-project"
+        },
+        "run": {
+          "root": "run-4b1d9e02"
+        },
+        "data": {
+          "agent": "example-writer.default",
+          "unit": {
+            "system": "github",
+            "key": "example-org:site#412"
+          },
+          "transition": "accepted",
+          "taskClass": "code.change",
+          "taskClassMap": {
+            "id": "classes-2026-11",
+            "revision": 3
+          },
+          "cost": {
+            "usd": 0,
+            "basis": "provider"
+          },
+          "acceptedBy": {
+            "kind": "rule",
+            "ref": "ci-green-and-reviewed"
+          },
+          "acceptedAt": "2017-01-01T00:00:59Z"
+        }
+      },
+      "schemaValid": true,
+      "findings": []
     }
   ]
 }

@@ -230,25 +230,29 @@ its own `run.root`, so its second acceptance is a new event (AE-2, [`unitSourceK
 | `taskClass` | the assessment's class id, or `unclassified` until its class map names one |
 | `taskClassMap` | `{id, revision}` of the class map `taskClass` was read from, the revision a positive integer its owner raises; present exactly when `taskClass` is not `unclassified`, so a reader of a past month maps a renamed, split or merged class through the owner's table between revisions or counts it under its old name, visibly (AE-2a) |
 | `outcome` | on `ended` only: `completed`, `failed` or `abandoned` |
-| `evidence` | 0 to 8 references, each an http(s) URI without user information, a URN or a `sha256:` digest (a receipt, a test run, a review mark); never content, which the writer keeps out of a query string too; a link with a home-path segment (`/Users/<name>/`) is refused as any value is (`FAC-SEM-037`) |
+| `evidence` | 0 to 8 references, each an http(s) URI without user information, a URN or a `sha256:` digest (a receipt, a test run, a review mark); never content, which the writer keeps out of a query string too; a link whose path holds a home-path segment (`/Users/<name>`, `/home/<name>`, as in a repository named `home`) is refused as any value is (`FAC-SEM-037`) |
 | `acceptedBy` | on `accepted` only: `{kind, ref}`, `kind` being `rule` (`ref` the acceptance rule's id), `agent` (`ref` an agent's id) or `person` (`ref` the person's pairwise membership subject for this reader, [membership](membership.md) OM-1; never a name or an address) |
 | `acceptedAt` | on `accepted` only: when it was accepted, not after the event's `occurred` (60 s of skew, `FAC-SEM-171`); it is the month an acceptance counts in, `occurred` being when the event was written; a reader counts a unit accepted once per month of its `acceptedAt`, the last acceptance if several |
-| `cost` | the agent's spend on the unit as the envelope states a cost: `{usd, basis}`, or `{usd: null}` when unknown (the cost's own form: an unknown carries no basis); never 0 for unknown is the writer's duty, with no tokens on the event to check it against |
+| `cost` | the agent's spend on the unit since its previous transition (a reader sums a unit's transitions; `0` on a transition that spent nothing), as the envelope states a cost: `{usd, basis}`, or `{usd: null}` when unknown (the cost's own form: an unknown carries no basis); never 0 for unknown is the writer's duty, with no tokens on the event to check it against |
 
 The receiver never attaches a user to a `unit` event, never puts a unit into a summary cell by person, and serves
-units only per agent, project or task class; an `acceptedBy` of kind `person` stays in the organization's own journal
+units only as agent, project or task-class cells of at least 3, as `result` (the device's stream is attributed to a
+user and a usage line with a `user` carries the same `run.root`, so the restraint is the receiver's); an `acceptedBy` of kind `person` stays in the organization's own journal
 for the trust guardrail (members see what agents did on their work) and never reaches a summary, a usage report or
 another organization (AE-3). A device collector sends `unit` events in its activity batches like any kind; a kit with
-no collector records them through Project Observatory's capability `activity.unit.record` (OBS-378), bound as Observatory's `ops.digest.record` is, by Observatory's own answer on the board (thread `52aa2f93`, messages `b8d911c0` and `55fa0fd7`: an access binding with that scope and effect `propose` over stdio, a hub delegation token with that scope on the memory-http door), the event's `project.id` the transport's project and `data.agent` a service the registry attributes to it; there the capability is the collector and writes the envelope's `collector`, `seq`, `bootId` and `monotonicNs` itself; the event's shape is this one either way (AE-4). A reader at an
+no collector records them through Project Observatory's capability `activity.unit.record` (OBS-378), bound as Observatory's `ops.digest.record` is, by Observatory's own answers on the board (thread `b83440d6`, message `b8d911c0`, and thread `52aa2f93`, message `55fa0fd7`: an access binding with that scope and effect `propose` over stdio, a hub delegation token with that scope on the memory-http door), the event's `project.id` the transport's project and `data.agent` a service the registry attributes to it; there the capability is the collector and writes the envelope's `collector`, `seq`, `bootId` and `monotonicNs` itself; the event's shape is this one either way (AE-4). A reader at an
 older pin reads `unit` as an unknown kind and validates its `data` as extension data: one that fits (no `evidence`,
 no string over 64 characters) it stores and counts nothing, and any other it refuses as that event's `schema`
-rejection, which is consumed (AE-5, as `grant.usage` [above](#kinds)). So a collector sends `unit` events only to a
-receiver whose latest `protocols` list names `activity-unit/1`, and keeps them until it does. A unit event names no organization: a device collector sends it to the enrollment of the organization that owns its
+rejection, which is consumed (AE-5, as `grant.usage` [above](#kinds)); Observatory's server answered that a pin
+before this decision refuses the kind by purpose. So a collector holds a unit's transitions outside its stream and
+writes each as an event (taking its `seq`) only once the receiver's latest `protocols` list names `activity-unit/1`,
+as `grant.usage` holds its day behind its gate, so a held unit never stalls the stream. A unit event names no organization: a device collector sends it to the enrollment of the organization that owns its
 `project.id` as the device's folder attribution names it, never for a personal or unattributed project, and on a
 device that cannot tell sends none ([contexts](contexts.md#routing); the route function is CT-297); a project with no
 membership keeps it in Observatory's local journal only. Two different acceptances of one unit under one `run.root`
 (a rule's, then a person's) have one `eventId`, so the receiver keeps the first; a person who accepts after a rule
-does so under a new `run.root`.
+does so under a new `run.root`, with no `started` required under it, and a reader keys a repeated acceptance by the
+unit and its `run.root`.
 
 **`session.annotation`** — what a surface reported about a session, read by the device's collector (DEC-0068): Fabric's
 `session.ended` or `terminal.opened`, Switchboard's `journal_launch`. It requires `session` and `runtime`. `data`: `by`
@@ -287,7 +291,7 @@ from the device certificate ([attribution](devices.md#attribution)), and a conte
 another organization's id. A collector sends a session's events only to the organization server of the one enrollment
 whose organization is the session's `org:<orgId>`, compared as written, and never an event of a `personal` session
 (`routeTarget`); it sends `grant.usage` by the grant's own context (`routeGrantUsage`), which the event carries
-(DEC-0086); and the device sends each
+(DEC-0086); it sends a `unit` to the organization that owns its project (DEC-0164 AE-4, CT-297); and the device sends each
 enrollment's check-ins to that enrollment's server ([devices → check-in](devices.md#check-in)). The shared vectors are
 [`fixtures/vectors/context-route.json`](../../fixtures/vectors/context-route.json) ([contexts → routing](contexts.md#routing)).
 
@@ -552,7 +556,7 @@ events as OTLP logs, mapped by the table below. The second intake changes no rul
   ([devices, transport](devices.md#transport), DEC-0056), attributed by certificate and epoch
   ([devices](devices.md#attribution));
 - each log record is mapped back to a telemetry event and checked against the same schema and the
-  same `FAC-SEM-037`…`039` rules;
+  same rules (`FAC-SEM-037`…`039`, and `FAC-SEM-171` for a `unit`, a failure of which is rejected as `schema`);
 - deduplication is the same: on (`device.id`, `eventId`), a `unit` event once per `eventId` within the organization
   ([Event id](#event-id)), and on `dedupeKey` for usage lines, across both intakes;
 - an OTLP record that does not map to a valid event is refused, as in a batch.

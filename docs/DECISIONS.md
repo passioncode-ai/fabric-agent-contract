@@ -11407,16 +11407,17 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      the unit's system and key, the transition and `run.root` (`unitSourceKey`), so every writer derives one `eventId`
      and a reopened unit accepted again under a new `run.root` is a new event (`FAC-SEM-171`, with an acceptance not
      recorded before it happened).
-  3. **AE-3.** No user is attached to a unit, no unit is served by person, and a `person` acceptance stays in the
-     organization's own journal.
+  3. **AE-3.** No user is attached to a unit, no unit is served by person (units only in agent, project or
+     task-class cells of at least 3, as `result`), and a `person` acceptance stays in the organization's own journal.
   4. **AE-4.** A device collector sends it in its batches, to the enrollment of the organization that owns its
      `project.id` by the device's folder attribution (never for a personal or unattributed project; the route
      function is CT-297); a kit without one records it through Observatory's `activity.unit.record`, bound as
-     Observatory's `ops.digest.record` is (its answer on thread `52aa2f93`, messages `b8d911c0` and `55fa0fd7`).
+     Observatory's `ops.digest.record` is (its answers: thread `b83440d6`, message `b8d911c0`; thread `52aa2f93`, message `55fa0fd7`).
      **AE-5.** An older reader validates `unit` as an unknown kind's extension data: one that fits it stores and
      counts nothing, one with `evidence` (or a string over 64 characters) it refuses as that event's `schema`
-     rejection, which is consumed; so a collector sends `unit` only to a receiver whose `protocols` name
-     `activity-unit/1`, and keeps it until then.
+     rejection, which is consumed; so a collector holds a unit's transitions outside its stream and writes each as an
+     event only once the receiver's `protocols` name `activity-unit/1`, so a held unit never stalls the stream. Its
+     `cost` is the spend since the previous transition, summed by a reader.
 - **Why:** one record per unit transition, owned by the agent and joined by `run.root`, is what the metric counts; a
   derived id makes the count idempotent across writers; keeping the person out of the event and out of every summary
   keeps it from ever being a person's score.
@@ -11424,7 +11425,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `fabric-activity/0.1`, one transport, one attribution, one person rule); `org` in the event (refused: the stream's
   attribution names the organization); `cost` as `null` (refused for the envelope's own form, `{usd: null}`, which
   `FAC-SEM-038` already reads); an id without `run.root` (refused on Observatory's answer: a second acceptance would be dropped as a repeat). Where the decision departs from the design: `evidence` any URI (narrowed to an http(s) URI without user information, a URN or a `sha256:` digest, so user information and a local path do not ride as evidence; a credential in a query string or a URN body is the writer's duty, as for any reference); `taskClassMap` "required unless unclassified" (now present exactly when classified, so an unclassified unit names no map it was not read from); no bound on `acceptedAt` (added: not after `occurred`, with 60 s of skew, an acceptance not recorded before it happened, and `acceptedAt` named the month key); `acceptedBy` in `activity-common` (kept in `$defs/unit`, its only user); one rule code carrying every conditional (the conditionals moved to the schema, one event per transition and `run.root` to `FAC-SEM-039`'s duplicate id, and `FAC-SEM-171` carries the derivation and the `acceptedAt` bound).
-- **Compatibility:** additive for a receiver that lists `activity-unit/1`; an older one stores a `unit` without `evidence` as an unknown kind and refuses one with it (AE-5), which `test/activity-unit.test.ts` pins against the unknown-kind branch. A receiver keeps a `unit` event once per `eventId` within the organization, whatever device or channel wrote it (activity's *Event id*, Batch and OTLP intake amended). Activity telemetry is restated by kind and channel (activity's opening, CONTEXT.md); DEC-0157 UD-6's description of it, on branch `agent/ct216-usage-data-v2` until it lands, is restated by whichever lands second (the handoff's landing note). Owed: the route function for a unit (CT-297); Observatory's node outbox, which mints a ULID today and must derive a unit's id and carry `run` and `project`; Observatory's journal and its
+- **Compatibility:** additive for a receiver that lists `activity-unit/1`; an older one stores a `unit` without `evidence` as an unknown kind and refuses one with it (AE-5), which `test/activity-unit.test.ts` pins against the unknown-kind branch. A receiver keeps a `unit` event once per `eventId` within the organization, whatever device or channel wrote it (activity's *Event id*, Batch and OTLP intake amended). Activity telemetry is restated by kind and channel (activity's opening, CONTEXT.md); DEC-0157 UD-6's description of it, on branch `agent/ct216-usage-data-v2` until it lands, is restated by whichever lands second (the handoff's landing note). Owed: the route function for a unit (CT-297); the adapter kits' hand-kept `PROTOCOL_REVISIONS` gain `activity-unit` ['1'] at their next repin (their feed-protocols test checks them); Observatory's node outbox, which mints a ULID today and must derive a unit's id and carry `run` and `project`; Observatory's journal and its
   capability `activity.unit.record` (OBS-378, after this decision); the adapter's kit writer (G1-b); the assessment's
   class map (G1-c); the join into the metric (G1-d).
 - **Consequences / affects:** `schemas/telemetry-event.schema.json` (`$defs/unit` and the kind), `src/activity-rules.ts`

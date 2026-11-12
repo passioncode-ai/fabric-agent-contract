@@ -30,6 +30,8 @@ const UNIT = { system: "github", key: "example-org:site#412" };
 const RUN_1 = "run-4b1d9e02";
 const RUN_2 = "run-7c3a5f18";
 const MAP = { id: "classes-2026-11", revision: 3 };
+/** The spend since each transition's previous one (AE-1): a reader sums them, so this unit cost 0.42 in all. */
+const SPEND: Record<string, number> = { started: 0.12, ended: 0.3, "handed-over": 0, accepted: 0 };
 
 /** One `unit` event, its ids derived, the envelope a device collector writes. */
 function unit(transition: string, extra: Json = {}, root = RUN_1, seq = 1, envelope: Json = {}): Json {
@@ -38,7 +40,7 @@ function unit(transition: string, extra: Json = {}, root = RUN_1, seq = 1, envel
     protocol: "fabric-activity/0.1", eventId: eventId(key), kind: "unit", source: "unit", sourceKey: key,
     collector: { id: "observatory-node", epoch: 4 }, seq, occurred: "2026-11-12T10:00:00Z", bootId: "boot-7c41e2", monotonicNs: "0",
     project: { id: "example-project" }, run: { root },
-    data: { agent: AGENT, unit: UNIT, transition, taskClass: "code.change", taskClassMap: MAP, cost: { usd: 0.42, basis: "provider" }, ...extra },
+    data: { agent: AGENT, unit: UNIT, transition, taskClass: "code.change", taskClassMap: MAP, cost: { usd: SPEND[transition] ?? 0, basis: "provider" }, ...extra },
     ...envelope
   };
 }
@@ -90,6 +92,11 @@ function cases(): Json[] {
     at("an acceptance 60.001 s after occurred", "2026-11-12T10:01:00.001Z", ["FAC-SEM-171 /data/acceptedAt"]),
     at("an acceptance at a leap second weeks after occurred", "2026-12-31T23:59:60Z", ["FAC-SEM-171 /data/acceptedAt"])
   );
+  // A leap second on `occurred` reads as its last millisecond: 59 s of the minute after it stay within the skew.
+  const leap = JSON.parse(JSON.stringify(accepted(RUN_1, 4)));
+  leap.occurred = "2016-12-31T23:59:60Z";
+  leap.data.acceptedAt = "2017-01-01T00:00:59Z";
+  list.push({ name: "an acceptance 59 s after a leap second occurred", event: leap, schemaValid: true, findings: [] });
   return list;
 }
 

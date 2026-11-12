@@ -33,10 +33,17 @@ Branch `agent/ct259-activity-unit-20261112`, from main `d69dc363`. Entry point: 
   units is logged under, and the retention of a stored `acceptedBy` person subject; and which audience's pairwise
   subject a kit writes when one unit reaches both the organization's journal and Observatory's local one.
 - CT-297: the route function for a unit and its vectors.
+- Tell Observatory with the landing notice: a unit's `cost` is the spend since its previous transition, summed by a
+  reader (its J4 sums every event, which now matches); a re-acceptance under a new `run.root` needs no `started` (its
+  J2 accepted-twice keys by unit and `run.root`); the minimum cell of 3 for units.
+- Landing with DEC-0162 and DEC-0166 (both add named protocols): `src/protocol-revisions.ts` keeps every entry and
+  every `NAMED_ONLY` item (`activity-unit/1`, `levels/1`, `standing/1`), versioning.md every item, conformance every
+  rule row (169 to 174) and the next free code from the CAS counter; `pnpm vitest run test/protocol-revisions.test.ts`
+  and `pnpm run docs:check` on the merged tree.
 
 ## Checks run
 
-- `pnpm run check` exit 0 on the first cut `79ed9a09` (11192 tests passed, 3 skipped; coverage floors, UX lint, docs check, privacy check) and on the round-2 fold (11210 passed, 3 skipped).
+- `pnpm run check` exit 0 on the first cut `79ed9a09` (11192 tests passed, 3 skipped; coverage floors, UX lint, docs check, privacy check) on the round-2 fold (11210 passed, 3 skipped) and on the round-3 fold (11212 passed, 3 skipped).
 
 - Round 1, unit only (on `79ed9a09`): not clean. Breaks folded: the Event id rule kept one event per (`device.id`,
   `eventId`) against AE-2's one id from every writer; a `unit` event is now kept once per `eventId` within the
@@ -57,6 +64,18 @@ Branch `agent/ct259-activity-unit-20261112`, from main `d69dc363`. Entry point: 
   journal, node, draft writer, measure.md and operator questions in Open. Declined: refusing `@` in evidence (a URN
   may hold one; the writer's duty stands, as for any reference).
 
+- Round 3 (on `a5edcd68`): unit clean. Seam and product, breaks folded: units are served only in cells of at least 3,
+  as `result` (AE-3, the reader row); a collector holds a unit's transitions outside its stream until the receiver
+  lists `activity-unit/1`, so nothing stalls; an OM-7 row for units; the batch receiver's row (one per `eventId`, no
+  user, list `activity-unit/1`); Observatory's answers cited by their own threads; the OTLP intake names
+  `FAC-SEM-171`, refused as `schema`; `cost` is per transition, summed (the vectors 0.12, 0.30, 0, 0, a test sums
+  0.42). Risks folded: Observatory's older server refusing by purpose named in AE-5; a re-acceptance needs no
+  `started`; CT-297 names the Project-to-organization source, the two-organization case and the id form; the evidence
+  row names a repository named `home` (no vector: the privacy check refuses a home path in a fixture); the reader row's 64 characters; the kits' register; the merge
+  markers; DOCMAP "proposed"; the canonical-forms row for `unitSourceKey`; activity's routing paragraph (four routes);
+  the CT-259 row; a leap second on `occurred` read as its last millisecond, with a vector; the distinct-id assertion.
+  Declined: none; the access-log scope and the metric's late acceptances stay operator questions in Open.
+
 ## Next task
 
-Round 3 of the blind readings (unit, seam, product) of branch `agent/ct259-activity-unit-20261112` (DEC-0164).
+Round 4 of the blind readings (unit, seam, product) of branch `agent/ct259-activity-unit-20261112` (DEC-0164).

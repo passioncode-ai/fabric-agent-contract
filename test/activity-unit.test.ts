@@ -28,6 +28,10 @@ describe("unit events (DEC-0164)", () => {
     expect(older.filter((c) => c.evidence).length).toBeGreaterThan(0);
     for (const c of older) expect([c.name, c.ok]).toEqual([c.name, !c.evidence]);
   });
+  it("sums a unit's spend over its transitions (AE-1: each carries the spend since the previous one)", () => {
+    const run1 = ["started", "ended, completed", "accepted by a rule"].map((name) => (vectors.cases.find((c) => c.name === name) as Json).event.data.cost.usd as number);
+    expect(run1.reduce((sum, usd) => sum + usd, 0)).toBeCloseTo(0.42, 10);
+  });
   it("writes one transition twice as one event: the same id", () => {
     const rule = vectors.cases.find((c) => c.name === "accepted by a rule") as Json;
     const person = vectors.cases.find((c) => c.name.startsWith("accepted by a person")) as Json;
@@ -37,6 +41,7 @@ describe("unit events (DEC-0164)", () => {
     const accepted = vectors.cases.filter((c) => c.event.data.transition === "accepted" && c.schemaValid && c.findings.length === 0);
     const ids = new Set(accepted.map((c) => `${c.event.run.root} ${c.event.eventId}`));
     expect(new Set(accepted.map((c) => c.event.run.root)).size).toBe(ids.size);
+    expect(new Set(accepted.map((c) => c.event.eventId)).size).toBe(new Set(accepted.map((c) => c.event.run.root)).size);
     for (const c of accepted) {
       const d = c.event.data;
       expect(c.event.sourceKey).toBe(unitSourceKey(d.agent, d.unit, d.transition, c.event.run.root));

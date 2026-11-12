@@ -306,8 +306,9 @@ function unitEvent(event: JsonObject, at: string): Finding[] {
     try { derived = unitSourceKey(d.agent, { system: unit.system, key: unit.key }, d.transition, run.root); } catch { flag("/sourceKey", "a unit with a lone surrogate has no canonical form, so no sourceKey derives from it"); }
     if (derived !== null && event.sourceKey !== derived) flag("/sourceKey", "a unit event's sourceKey derives from its agent, unit, transition and run.root (unitSourceKey)");
   }
-  // A leap second (`:60`), which the date-time format admits and Date.parse does not, reads as the second before it.
-  const instant = (time: string) => Date.parse(time.replace(/:60(?=(?:\.\d+)?(?:[Zz]|[+-]\d))/, ":59"));
+  // A leap second (`:60`), which the date-time format admits and Date.parse does not, reads as the last millisecond
+  // before the next minute, so the bound moves by at most a millisecond on either side.
+  const instant = (time: string) => Date.parse(time.replace(/:60(?:\.\d+)?(?=[Zz]|[+-]\d)/, ":59.999"));
   if (typeof d.acceptedAt === "string" && typeof event.occurred === "string" && instant(d.acceptedAt) > instant(event.occurred) + 60_000) {
     flag("/data/acceptedAt", "an acceptance is recorded at or after it happened: acceptedAt is not after occurred (60 s of skew)");
   }
