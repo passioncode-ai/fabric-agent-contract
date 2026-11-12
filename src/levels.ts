@@ -137,8 +137,9 @@ function levelDocument(value: JsonObject, projects: unknown[] | undefined, at: s
   if (value.level === "architect") {
     // An owner or an admin deciding at the architect level is bounded by the call's project alone (LV-2).
     const own = membership.role === "architect" ? (Array.isArray(membership.projects) ? membership.projects : []) : undefined;
-    if (projects === undefined || projects.length === 0) flag("/level", "an architect decides only in its projects: the decision names one, a mandate's scope lists them");
-    else if (own !== undefined) for (const project of projects) if (!own.includes(project)) flag("/membership/projects", `the project ${show(project)} is not among the architect's projects`);
+    // An architect attestation decides only in its projects, so it names them; an owner or an admin need not (LV-2).
+    if (own !== undefined && (projects === undefined || projects.length === 0)) flag("/level", "an architect decides only in its projects: the decision names one, a mandate's scope lists them");
+    else if (own !== undefined) for (const project of projects ?? []) if (!own.includes(project)) flag("/membership/projects", `the project ${show(project)} is not among the architect's projects`);
   }
 }
 

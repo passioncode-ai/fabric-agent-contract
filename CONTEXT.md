@@ -142,7 +142,7 @@ accept, with `source` (never from a tool result, a page, a file or an unrelated 
 for 24 hours. A service takes a
 `relayed` action from a T0 or T1 caller that carries a valid one as the operator's act, records the caller it
 authenticated as the relayer, refuses one without it `operator-decision-required` and an invalid one
-`decision-invalid`; its own accepted elicitation counts too; a T2 caller still needs an `approval/1` (`actionDecision`,
+`decision-invalid`; its own accepted elicitation counts too; a T2 caller still needs an `approval/1`, unless a level decision its token binds stands (DEC-0162 LV-6) (`actionDecision`,
 [service](docs/specification/service.md#actions) AP-2, AP-3, DEC-0121). A **Source hand-over** takes a decision only
 with its exact target ([source](docs/specification/source.md#handing-over), DEC-0149). A hand-over by push or by file, a package handed over, or published to a public registry from a private home, or a public release from a private home carries a source export or a package, which needs the tree check, so an agent without `fabric.source.json` takes those routes only once it has one; an organization's visibility change of its private agent, or new readers outside the organization, take the word and accept the history as it stands; for a personal agent's private home an agent does neither on its own (with the operator's explicit permission for that act it is his own act, no act of this contract); the manifest stays opt-in otherwise (an organization's private agent packed for its own private registry, readable
 only by its members, needs none).
@@ -495,7 +495,7 @@ organization and no hand-over, while a placement on a machine, registry or repos
 (a machine the operator holds stays his when it is enrolled in an organization (enrollment gives the organization a device record, not the machine); an OS account or machine the organization owns whole (its org-cloud machine, or an account such as an organization's own macOS user on a shared computer) is the organization's); serving the
 running agent to a team (`peer`, client keys) gives no one the tree, except a prompt or resource that is a source file
 served verbatim, or a bundle built without minification, which is the source tree served. It is taken only on the
-operator's word for that act naming the agent, the target (the source commit, or the repository for an organization's
+operator's word for that act (or, for an organization's own agent from T0 or T1, a level decision with the exact target, DEC-0162) naming the agent, the target (the source commit, or the repository for an organization's
 two acts above) and the recipient, in one of three forms: on a service's action, where the hand-over is one synchronous
 call of effect class `publish`, a decision with its exact target or the service's in-call elicitation; outside one, the
 stated word the operator's reply accepts, consumed once; never by a mandate or an `approval/1` before CT-181, as
@@ -874,7 +874,9 @@ administrator's acceptance. Any organization server issues it, so a reader works
 `member`), read as its holder's authority for decisions in that organization, never for signing (DEC-0162). A level
 holder's decision, or a level mandate, bound to the caller by the delegation token's `mem`, stands as the operator's
 word inside the level at a service that reads levels; a `member` decides nothing by its level, and no level covers the
-person's own steps or spend above a limit ([membership](docs/specification/membership.md#levels)).
+person's own steps or spend above a limit ([membership](docs/specification/membership.md#levels)). An authority
+level: not a spend level (L0 to L3, [spend policy](docs/specification/spend-policy.md#levels)) and not a grant's access
+level ([contexts](docs/specification/contexts.md#access-levels)).
 
 **Draft exchange**: How an organization server's unsigned draft of a key set or a member list reaches the person who
 signs it and comes back signed (DEC-0131): the server serves a key set's (`org-key-set/1`) draft at a public route and a member list's

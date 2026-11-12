@@ -1,5 +1,5 @@
 {
-  "description": "One organization named twice in levels (FAC-SEM-142, DEC-0162 LV-5).",
+  "description": "One organization named twice in the authority key's levels (FAC-SEM-142, DEC-0162 LV-5).",
   "kind": "service-well-known",
   "expect": [
     "FAC-SEM-142"
@@ -67,8 +67,7 @@
             "id": "approve-reply",
             "title": "Approve the reply",
             "tool": "reviews.approve",
-            "gate": "relayed",
-            "level": "admin"
+            "gate": "relayed"
           },
           {
             "id": "retry",
@@ -76,7 +75,9 @@
             "tool": "jobs.retry",
             "gate": "none"
           }
-        ],
+        ]
+      },
+      "https://fabric.passioncode.ai/agent-contract/extensions/authority/0.1": {
         "levels": [
           {
             "org": "org:example-org",

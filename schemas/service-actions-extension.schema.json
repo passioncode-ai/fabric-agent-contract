@@ -16,31 +16,6 @@
       "items": {
         "$ref": "#/$defs/action"
       }
-    },
-    "levels": {
-      "type": "array",
-      "minItems": 1,
-      "maxItems": 16,
-      "description": "DEC-0162 LV-5: the organizations whose levels this service reads, each with the audience that organization's issuer registered it by as an org-membership/2 reader; the hub fetches a level holder's attestation for that audience and binds it by mem. Absent: the service reads no levels (LV-10).",
-      "items": {
-        "type": "object",
-        "required": [
-          "org",
-          "audience"
-        ],
-        "additionalProperties": false,
-        "properties": {
-          "org": {
-            "type": "string",
-            "maxLength": 132,
-            "pattern": "^org:[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
-          },
-          "audience": {
-            "type": "string",
-            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:~-]{0,127}$"
-          }
-        }
-      }
     }
   },
   "$defs": {
@@ -87,15 +62,6 @@
             "comparison"
           ],
           "description": "Present exactly when gate is human (FAC-SEM-142): the step the tool hands the person with human-step-required."
-        },
-        "level": {
-          "enum": [
-            "operator",
-            "owner",
-            "admin",
-            "architect"
-          ],
-          "description": "DEC-0162 LV-7: the lowest level that decides this relayed action in an organization, owner for a billing act (the organization's plan, its payment method, its invoices, setting or changing L0, a project's L1 or a key's ceiling), operator for an act no level decides (issuing, rotating or revoking a client key, DEC-0159 CF-3); absent: an architect in the call's project, admin for a call in no project. Only on a relayed action (FAC-SEM-142)."
         }
       }
     }

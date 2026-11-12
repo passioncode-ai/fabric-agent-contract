@@ -984,8 +984,7 @@
           "id": "change-plan",
           "title": "Change the plan",
           "tool": "billing.plan",
-          "gate": "relayed",
-          "level": "owner"
+          "gate": "relayed"
         },
         "tier": "T2",
         "caller": "agent:claude-code",
@@ -1046,6 +1045,7 @@
             }
           }
         },
+        "actionLevel": "owner",
         "tokenMem": "sha256:614fc6f0c76021eb1a4a6de48c6a4c674992936d83d94d33630d956224d997a0"
       },
       "expected": {
@@ -1069,8 +1069,7 @@
           "id": "change-plan",
           "title": "Change the plan",
           "tool": "billing.plan",
-          "gate": "relayed",
-          "level": "owner"
+          "gate": "relayed"
         },
         "tier": "T2",
         "caller": "agent:claude-code",
@@ -1131,6 +1130,7 @@
             }
           }
         },
+        "actionLevel": "owner",
         "tokenMem": "sha256:5858c2d548aaf65bbe4f80625bb7315693cad1e36ac8b30f08e82cf978ec9ff5"
       },
       "expected": {
@@ -1149,8 +1149,7 @@
           "id": "issue-key",
           "title": "Issue a client key",
           "tool": "keys.issue",
-          "gate": "relayed",
-          "level": "operator"
+          "gate": "relayed"
         },
         "tier": "T1",
         "caller": "agent:claude-code",
@@ -1211,6 +1210,7 @@
             }
           }
         },
+        "actionLevel": "operator",
         "tokenMem": "sha256:614fc6f0c76021eb1a4a6de48c6a4c674992936d83d94d33630d956224d997a0"
       },
       "expected": {
@@ -1228,8 +1228,7 @@
           "id": "issue-key",
           "title": "Issue a client key",
           "tool": "keys.issue",
-          "gate": "relayed",
-          "level": "operator"
+          "gate": "relayed"
         },
         "tier": "T0",
         "caller": "agent:claude-code",
@@ -1267,7 +1266,8 @@
               "sig": "vufCXJ4roCUAM3MEuAikBXHXZ8mdhK7hyiZkkFzc14MuJ8fvPq6zYxOOOH8KtIuBEIUcXesvsy1NXXs9rYqIBw"
             }
           }
-        }
+        },
+        "actionLevel": "operator"
       },
       "expected": {
         "ok": true,
@@ -3847,8 +3847,7 @@
           "id": "change-plan",
           "title": "Change the plan",
           "tool": "billing.plan",
-          "gate": "relayed",
-          "level": "owner"
+          "gate": "relayed"
         },
         "tier": "T2",
         "caller": "agent:claude-code",
@@ -3935,6 +3934,7 @@
             }
           }
         },
+        "actionLevel": "owner",
         "tokenMem": "sha256:5858c2d548aaf65bbe4f80625bb7315693cad1e36ac8b30f08e82cf978ec9ff5"
       },
       "expected": {
@@ -3953,8 +3953,7 @@
           "id": "issue-key",
           "title": "Issue a client key",
           "tool": "keys.issue",
-          "gate": "relayed",
-          "level": "operator"
+          "gate": "relayed"
         },
         "tier": "T2",
         "caller": "agent:claude-code",
@@ -4041,6 +4040,7 @@
             }
           }
         },
+        "actionLevel": "operator",
         "tokenMem": "sha256:614fc6f0c76021eb1a4a6de48c6a4c674992936d83d94d33630d956224d997a0"
       },
       "expected": {

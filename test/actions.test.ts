@@ -1,7 +1,7 @@
 import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { actionDecision, actionRules, actionsExtensionRules, actionsView } from "../src/actions.js";
+import { actionDecision, actionRules, actionsExtensionRules, actionsView, authorityView } from "../src/actions.js";
 import { SCHEMA_PREFIX, projectRoot } from "../src/contract.js";
 import { EXTENSION_KEYS } from "../src/extensions.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
@@ -91,17 +91,25 @@ describe("FAC-SEM-142 on a well-known document (DEC-0121 AP-1)", () => {
     expect(actionsView(null)).toEqual({ declared: false });
     expect(actionsView({ extensions: { [EXTENSION_KEYS.actions]: value } })).toEqual({ declared: true, valid: true, actions: value.actions });
     expect(actionsView({ extensions: { [EXTENSION_KEYS.actions]: {} } })).toEqual({ declared: true, valid: false, errors: ["/ required"] });
-    const levels = [{ org: "org:example-org", audience: "example-agent.default" }];
-    expect(actionsView({ extensions: { [EXTENSION_KEYS.actions]: { ...value, levels } } })).toEqual({ declared: true, valid: true, actions: value.actions, levels });
   });
-  it("flags a level on an action that is not relayed and an organization named twice (DEC-0162 LV-5, LV-7)", () => {
-    const actions = [{ id: "retry", title: "Retry", tool: "jobs.retry", gate: "none", level: "owner" }];
-    const levels = [{ org: "org:example-org", audience: "a.default" }, { org: "org:example-org", audience: "b.default" }];
-    const found = actionsExtensionRules({ extensions: { [EXTENSION_KEYS.actions]: { actions, levels } } });
-    expect(found.map((finding) => finding.instancePath)).toEqual([
-      `/extensions/${EXTENSION_KEYS.actions.replace(/\//g, "~1")}/actions/0/level`,
-      `/extensions/${EXTENSION_KEYS.actions.replace(/\//g, "~1")}/levels/1/org`
-    ]);
+  it("authorityView reads the authority key beside the actions key, and flags it (DEC-0162 LV-5, LV-7)", () => {
+    const actions = { actions: [{ id: "approve-reply", title: "Approve", tool: "reviews.approve", gate: "relayed" }, { id: "retry", title: "Retry", tool: "jobs.retry", gate: "none" }] };
+    const levels = [{ org: "org:example-org", audience: "a.default" }];
+    const doc = (authority: unknown) => ({ extensions: { [EXTENSION_KEYS.actions]: actions, [EXTENSION_KEYS.authority]: authority } });
+    expect(authorityView({})).toEqual({ declared: false });
+    expect(authorityView(doc({ levels, actionLevels: { "approve-reply": "admin" } }))).toEqual({ declared: true, valid: true, levels, actionLevels: { "approve-reply": "admin" } });
+    expect(authorityView(doc({}))).toEqual({ declared: true, valid: false, errors: ["/ minProperties"] });
+    expect(actionsView(doc({ levels }))).toEqual({ declared: true, valid: true, actions: actions.actions });
+    const key = `/extensions/${EXTENSION_KEYS.authority.replace(/\//g, "~1")}`;
+    const paths = (authority: unknown) => actionsExtensionRules(doc(authority)).map((finding) => finding.instancePath);
+    expect(paths({})).toEqual([key]);
+    expect(paths({ levels: [...levels, { org: "org:example-org", audience: "b.default" }], actionLevels: { retry: "owner", "approve-reply": "operator", "never-declared": "admin" } }))
+      .toEqual([`${key}/levels/1/org`, `${key}/actionLevels/retry`, `${key}/actionLevels/never-declared`]);
+    expect(actionsExtensionRules({ extensions: { [EXTENSION_KEYS.authority]: { actionLevels: { "approve-reply": "admin" } } } }).map((f) => f.instancePath)).toEqual([`${key}/actionLevels/approve-reply`]);
+  });
+  it("answers the service's own fault when its level contexts are not a map (DEC-0162)", () => {
+    const action = { id: "approve-reply", title: "Approve", tool: "reviews.approve", gate: "relayed" };
+    expect(actionDecision({ action, tier: "T0", caller: "agent:x", now: "2026-10-25T11:30:00Z", levels: [{ org: "org:a", audience: "s.default" }] })).toEqual({ fault: "levels-invalid" });
   });
   it("reads surfaces that are not objects as no capability list", () => {
     const value = { actions: [{ id: "approve-reply", title: "Approve", tool: "reviews.approve", gate: "relayed" }] };
