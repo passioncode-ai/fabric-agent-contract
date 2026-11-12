@@ -72,6 +72,11 @@ contract already has.
   the person is in (OW-3, the Compatibility); and add the operator's word of 2026-11-07 that they press nothing
   (announcement `e6385b29`), set against the one press DEC-0156 keeps, a host gate's agreement (Fabric's "Allow once"
   under `floor.ask-first`, OW-2 and OW-3), so the answer says whether that press stays.
+- DEC-0158's re-cut (its round 20, 2026-11-12): that branch's OS-6 and this branch's OW-3 state opposite rules for a
+  no-person run's notice question at a refused note and for the no-note resubmission at a host's gate (DEC-0158 round
+  20, seam). DEC-0158's OS-6 and OS-7 are to be re-cut as one table of stops; whichever branch lands second makes OW-3's
+  no-person case point at that table instead of restating it. If this branch lands first, OW-3 stands as written and
+  the re-cut aligns to it or amends it in its own DEC.
 - Landing note for CT-285's decision (round 25, product and seam): binding on whichever of DEC-0156 and CT-285's DEC
   lands second: CT-285's DEC amends OW-3's no-person case and OW-3's own stop for a headless place (the operator's
   decision of 2026-11-09, fabric-workspace `knowledge/authority.md`, *Autonomy by place*), and OW-3 cites it. Checks,
