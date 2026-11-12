@@ -43,6 +43,7 @@ import { orgExchangeRules } from "./org-exchange.js";
 import { orgAdaptationRules } from "./org-adaptation.js";
 import { digestFoldersRules, opsDigestRules } from "./ops-digest.js";
 import { orgMembershipRules } from "./org-membership.js";
+import { roleSlotRules } from "./role-slot.js";
 import { shareRegistrationRules } from "./share-registration.js";
 import { nodeSummaryRules } from "./node-summary.js";
 import { agentNetworkRules, loadExtensionRules } from "./agent-network.js";
@@ -108,6 +109,8 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   if (entitlement) return entitlement;
   const membership = orgMembershipRules(kind, value);
   if (membership) return membership;
+  const slot = roleSlotRules(kind, value);
+  if (slot) return slot;
   const authority = orgAuthorityRules(kind, value);
   if (authority) return authority;
   const exchange = orgExchangeRules(kind, value);

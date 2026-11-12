@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0156` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0168` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -11384,3 +11384,62 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `peer_owner` 1.3.0 proposal (`914c0383`), sshlg-fabric-server's (`ed799cae`, `93886034`) and the adapter's (`b8053022`)
   inputs; backlog CT-261.
 
+
+### DEC-0167: the estate's manager on the wire: `scope` in bindings and contexts, and the role slot
+
+- **Date:** 2026-11-12
+- **Status:** Proposed 2026-11-12, from the design `docs/evidence/plans/2026-11-12-ct252-estate-manager.md` (CT-252),
+  the operator-question defaults taken as the design states them; accepted when the coordinator's blind readings are
+  clean on two consecutive rounds. An answer from the operator after acceptance is a new decision amending this one.
+- **Context:** Fabric's review M194 (D-MGR-01, D-MGR-02; fabric `1f4c30d6`,
+  `docs/evidence/specs/2026-11-06-fabric-manager-agent.md`) and its proposed ADR-0046 found that the estate's manager
+  cannot be expressed: `binding.schema.json` and `execution-context.schema.json` require `project`, while
+  `roles.schema.json` already scopes an assignment to the estate or a project. Board message `123d3dba` (thread
+  `77d88a2e`, 2026-11-06); board request `4a1bf8d6` (thread `8da128cf`, 2026-11-11); North Star gap G10. Fabric builds
+  no slot or field of its own until this decision lands.
+- **Decision:**
+  1. **No new role (MG-1).** The roles stay `ceo` and `product-manager`; the estate's manager is whoever holds the
+     estate's `ceo` slot.
+  2. **The scope on the wire (MG-2).** `binding.schema.json` and `execution-context.schema.json`'s context gain `scope`,
+     `{estate}` or `{project}` as a role assignment's; `project` is required unless the scope names the estate, is
+     absent with an estate scope and equals a project scope (`FAC-SEM-174`, by normal form). Without `scope` a record
+     keeps its meaning.
+  3. **The role slot (MG-3, MG-4).** The new `role-slot/1` (`role-slot.schema.json`) records `(estate, role, scope)`
+     with its holder (a binding revision), the hub-issued epoch and `since`. Only the holder at the current epoch
+     writes for the slot (`slotWrite` in `src/role-slot.ts`: `slot-epoch-stale`, `slot-epoch-unknown`,
+     `slot-not-holder`); a new holder takes a higher epoch, the same holder keeps it, an epoch never repeats; one
+     active `ceo` per estate (`FAC-SEM-005`), per context in an organization's estate.
+  4. **Who assigns, and what a slot grants (MG-5, MG-6).** A slot is assigned by the hub's relayed action of effect
+     `change-policy`, under the operator's decision or mandate, or in an organization's context an authority level
+     (DEC-0162: `owner` or `admin` for the `ceo` slot, an `architect` for its project's `product-manager` slot).
+     Holding a slot is never an approval; approval separation holds.
+  5. **Reference and vectors.** `src/role-slot.ts` (`slotWrite`, `roleSlotRules`), the kinds `binding`,
+     `execution-context`, `role-slot`, `role-slot-succession`, `role-slot-write`; `fixtures/vectors/role-slot.json`,
+     written by `tools/vectors/role-slot.ts`; `test/role-slot.test.ts`; positive, negative and semantic fixtures.
+- **Why:** the role model already scopes to the estate; carrying the same `scope` on the wire lets the manager's binding
+  and context exist without an invented project, and an epoch the hub issues fences a holder replaced while its
+  transport stays live, as the board's responder generation does.
+- **Alternatives considered:** a third role `manager` (refused with Fabric's ADR-0046: a holder of `ceo` is the
+  manager); a placeholder project for the manager's binding (refused: every reader would count it as a project); an
+  epoch the holder chooses (refused: two holders could choose the same one); the design's `FAC-SEM-006` twin for one
+  `ceo` (refused as a new rule: `FAC-SEM-005` already requires exactly one active `ceo` per roles document); the slot
+  inside the estate record (refused for question 1's default: the estate record stays unchanged and the slot lives
+  beside the bindings).
+- **Compatibility:** additive for every record without `scope`. A reader pinned before this decision refuses an
+  estate-scoped binding or context (its schema requires `project`), so it refuses rather than misreads; a host writes
+  one only once every reader of its bindings is at this decision's pin. Read on 2026-11-12: no host writes `scope` or
+  `role-slot/1` yet. Owed: Fabric (CO-522 wave D step 3, its ADR-0046: the manager session's binding, context and
+  slot), every reader of bindings and execution contexts (Fabric's registry readers, the adapter's kits where they read
+  a binding). The operator's questions take the design's defaults: (1) the slot lives in the estate's registry as
+  `role-slot/1` documents beside the bindings, the estate record unchanged; (2) one `ceo` slot per context, an
+  organization's included (DEC-0082). The operator may answer otherwise until 2026-11-21.
+- **Consequences / affects:** `schemas/binding.schema.json`, `schemas/execution-context.schema.json` (`scope`),
+  `schemas/role-slot.schema.json` (new); `src/role-slot.ts` (new), `src/semantic-kinds.ts`, `src/semantic-rules.ts`,
+  `src/protocol-revisions.ts` (`role-slot/1`); `fixtures/vectors/role-slot.json`, `tools/vectors/role-slot.ts`,
+  `tools/vectors/run.ts`, `test/role-slot.test.ts`, `test/positive-sweep.test.ts`, `test/schema-compilation.test.ts`,
+  `fixtures/catalogue.json` and the fixtures it names; `docs/specification/governance-and-roles.md` (*The estate's
+  manager*, `FAC-SEM-174`), `conformance.md` (rows, module, register), `CONTEXT.md` (Role slot). Not decided here: what
+  the manager may decide beyond routing and assignment (the operator's mandate and the levels, CT-250, CT-285); a
+  slot's handover between machines (the hub move's own rules).
+- **Source:** the design `docs/evidence/plans/2026-11-12-ct252-estate-manager.md`; Fabric's review M194 and ADR-0046;
+  board message `123d3dba` and board request `4a1bf8d6`; backlog CT-252.

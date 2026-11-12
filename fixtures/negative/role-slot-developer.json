@@ -1,0 +1,15 @@
+{
+  "type": "role-slot/1",
+  "estate": "urn:estate:one",
+  "role": "developer",
+  "scope": {
+    "estate": "urn:estate:one"
+  },
+  "epoch": 3,
+  "holder": {
+    "id": "urn:binding:estate:manager",
+    "revision": 2,
+    "contentHash": "sha256:1515151515151515151515151515151515151515151515151515151515151515"
+  },
+  "since": "2026-11-12T10:00:00Z"
+}

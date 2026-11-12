@@ -132,6 +132,7 @@ Each run leaves a handoff naming its objective, what it did, what is open and th
 | [2026-10-04 capability underscores](2026-10-04-capability-underscores.md) | DEC-0020 | `ccdbfc3` |
 | [2026-10-01 organization quality](2026-10-01-organization-quality.md) | — | — |
 | [2026-09-30 repository standard](2026-09-30-repository-standard.md) | — (the licence and repository standard) | — |
+| [2026-11-12 estate manager](https://github.com/passioncode-ai/fabric-agent-contract/blob/agent/ct252-estate-manager-20261112/docs/handoffs/2026-11-12-estate-manager.md) | DEC-0167, proposed (CT-252); round 1 next | not merged; branch `agent/ct252-estate-manager-20261112` |
 
 Decisions merged without a handoff of their own: DEC-0021 (`c220147`), DEC-0023 and DEC-0024 (merged in `b8453f4`),
 DEC-0027 (`94b1829`), DEC-0032 (PR #23 `3168503`), DEC-0037 (PR #28 `934ca60`) and DEC-0038 (PR #29 `1e7a7d6`).

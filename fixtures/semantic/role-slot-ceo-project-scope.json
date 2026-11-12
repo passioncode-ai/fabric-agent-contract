@@ -1,0 +1,22 @@
+{
+  "description": "The ceo slot scoped to a project (FAC-SEM-174, DEC-0167 MG-1).",
+  "kind": "role-slot",
+  "expect": [
+    "FAC-SEM-174"
+  ],
+  "input": {
+    "type": "role-slot/1",
+    "estate": "urn:estate:one",
+    "role": "ceo",
+    "scope": {
+      "project": "urn:project:a"
+    },
+    "epoch": 3,
+    "holder": {
+      "id": "urn:binding:estate:manager",
+      "revision": 2,
+      "contentHash": "sha256:1515151515151515151515151515151515151515151515151515151515151515"
+    },
+    "since": "2026-11-12T10:00:00Z"
+  }
+}

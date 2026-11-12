@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/role-slot.schema.json",
+  "title": "One role slot of an estate and its holder (role-slot/1, DEC-0167)",
+  "description": "The estate's ceo slot, or a project's product-manager slot, with the binding that holds it and the epoch the estate's hub issued for that holder (docs/specification/governance-and-roles.md#the-estates-manager). Only the holder at the current epoch writes for the slot; a write at an older epoch is refused slot-epoch-stale and one at an epoch the hub never issued slot-epoch-unknown (slotWrite in src/role-slot.ts). FAC-SEM-174 checks the role against the scope.",
+  "type": "object",
+  "required": [
+    "type",
+    "estate",
+    "role",
+    "scope",
+    "epoch",
+    "holder",
+    "since"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "type": {
+      "const": "role-slot/1"
+    },
+    "estate": {
+      "$ref": "common.schema.json#/$defs/uri",
+      "description": "The estate the slot belongs to; in an organization's estate, the context's (DEC-0082)."
+    },
+    "role": {
+      "enum": [
+        "ceo",
+        "product-manager"
+      ],
+      "description": "ceo: the estate's manager, scoped to the estate; product-manager: one project's (MG-1). No other role has a slot."
+    },
+    "scope": {
+      "type": "object",
+      "description": "The estate for the ceo slot, one project for a product-manager slot (FAC-SEM-174).",
+      "properties": {
+        "estate": {
+          "$ref": "common.schema.json#/$defs/uri"
+        },
+        "project": {
+          "$ref": "common.schema.json#/$defs/uri"
+        }
+      },
+      "oneOf": [
+        {
+          "properties": {
+            "estate": {}
+          },
+          "required": [
+            "estate"
+          ]
+        },
+        {
+          "properties": {
+            "project": {}
+          },
+          "required": [
+            "project"
+          ]
+        }
+      ],
+      "additionalProperties": false
+    },
+    "epoch": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 2147483647,
+      "description": "Issued by the estate's hub, rising with every new holder; a holder never chooses its own (MG-3)."
+    },
+    "holder": {
+      "$ref": "common.schema.json#/$defs/revisionRef",
+      "description": "The binding revision that holds the slot."
+    },
+    "since": {
+      "$ref": "common.schema.json#/$defs/timestamp",
+      "description": "When the hub gave the slot to this holder at this epoch."
+    }
+  }
+}

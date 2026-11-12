@@ -78,6 +78,7 @@ export const PROTOCOL_REVISIONS: ReadonlyMap<string, readonly string[]> = new Ma
   ["repair-request", ["1"]],
   ["repair-result", ["1"]],
   ["revocation-delta", ["1"]],
+  ["role-slot", ["1"]],
   ["session-handoff", ["1"]],
   ["service-load", ["1"]],
   ["share-registration", ["1"]],

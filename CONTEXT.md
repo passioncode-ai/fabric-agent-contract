@@ -24,6 +24,12 @@ different providers.
 
 **Binding**: The immutable capability-to-provider choice recorded for one run.
 
+**Role slot**: One role's place in an estate, `(estate, role, scope)`: the estate's `ceo` slot, whose holder is the
+estate's manager, or one project's `product-manager` slot (`role-slot/1`). It names the binding revision that holds
+it and the epoch the estate's hub issued for that holder, which rises with every new holder; only the holder at the
+current epoch writes for the slot (`slotWrite`, [governance and roles](docs/specification/governance-and-roles.md#the-estates-manager),
+DEC-0167). A binding or an execution context scoped to the estate (`scope: {estate}`) carries no `project`.
+
 **Profile**: A normative compatibility mode, named as the manifest schema names it:
 `mcp`, `a2a` or `local-runner`. An `mcp` capability is served by a capability
 provider, an `a2a` one by a peer agent; those are kinds of provider, not profile

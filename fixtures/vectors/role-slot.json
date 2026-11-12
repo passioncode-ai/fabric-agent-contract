@@ -1,0 +1,453 @@
+{
+  "about": "Vectors for an estate's role slots (role-slot/1, DEC-0167), written by tools/vectors/role-slot.ts, never by hand. writes: slotWrite(input.slot, input.write) answers answer (MG-3). successions: the codes and paths of evaluateSemanticRules(\"role-slot-succession\", input), in order (MG-3, MG-4).",
+  "writes": [
+    {
+      "name": "the holder at the current epoch",
+      "input": {
+        "slot": {
+          "type": "role-slot/1",
+          "estate": "urn:estate:one",
+          "role": "ceo",
+          "scope": {
+            "estate": "urn:estate:one"
+          },
+          "epoch": 3,
+          "holder": {
+            "id": "urn:binding:estate:manager",
+            "revision": 2,
+            "contentHash": "sha256:1515151515151515151515151515151515151515151515151515151515151515"
+          },
+          "since": "2026-11-12T10:00:00Z"
+        },
+        "write": {
+          "epoch": 3,
+          "holder": {
+            "id": "urn:binding:estate:manager",
+            "revision": 2,
+            "contentHash": "sha256:1515151515151515151515151515151515151515151515151515151515151515"
+          }
+        }
+      },
+      "answer": {
+        "ok": true
+      }
+    },
+    {
+      "name": "the holder's id in another spelling",
+      "input": {
+        "slot": {
+          "type": "role-slot/1",
+          "estate": "urn:estate:one",
+          "role": "ceo",
+          "scope": {
+            "estate": "urn:estate:one"
+          },
+          "epoch": 3,
+          "holder": {
+            "id": "urn:binding:estate:manager",
+            "revision": 2,
+            "contentHash": "sha256:1515151515151515151515151515151515151515151515151515151515151515"
+          },
+          "since": "2026-11-12T10:00:00Z"
+        },
+        "write": {
+          "epoch": 3,
+          "holder": {
+            "id": "URN:binding:estate:manager",
+            "revision": 2,
+            "contentHash": "sha256:1515151515151515151515151515151515151515151515151515151515151515"
+          }
+        }
+      },
+      "answer": {
+        "ok": true
+      }
+    },
+    {
+      "name": "the previous holder at its older epoch, on a live transport",
+      "input": {
+        "slot": {
+          "type": "role-slot/1",
+          "estate": "urn:estate:one",
+          "role": "ceo",
+          "scope": {
+            "estate": "urn:estate:one"
+          },
+          "epoch": 3,
+          "holder": {
+            "id": "urn:binding:estate:manager",
+            "revision": 2,
+            "contentHash": "sha256:1515151515151515151515151515151515151515151515151515151515151515"
+          },
+          "since": "2026-11-12T10:00:00Z"
+        },
+        "write": {
+          "epoch": 2,
+          "holder": {
+            "id": "urn:binding:estate:manager",
+            "revision": 2,
+            "contentHash": "sha256:1515151515151515151515151515151515151515151515151515151515151515"
+          }
+        }
+      },
+      "answer": {
+        "ok": false,
+        "refused": "slot-epoch-stale"
+      }
+    },
+    {
+      "name": "a holder naming its own higher epoch",
+      "input": {
+        "slot": {
+          "type": "role-slot/1",
+          "estate": "urn:estate:one",
+          "role": "ceo",
+          "scope": {
+            "estate": "urn:estate:one"
+          },
+          "epoch": 3,
+          "holder": {
+            "id": "urn:binding:estate:manager",
+            "revision": 2,
+            "contentHash": "sha256:1515151515151515151515151515151515151515151515151515151515151515"
+          },
+          "since": "2026-11-12T10:00:00Z"
+        },
+        "write": {
+          "epoch": 4,
+          "holder": {
+            "id": "urn:binding:estate:manager",
+            "revision": 2,
+            "contentHash": "sha256:1515151515151515151515151515151515151515151515151515151515151515"
+          }
+        }
+      },
+      "answer": {
+        "ok": false,
+        "refused": "slot-epoch-unknown"
+      }
+    },
+    {
+      "name": "an epoch that is not an integer",
+      "input": {
+        "slot": {
+          "type": "role-slot/1",
+          "estate": "urn:estate:one",
+          "role": "ceo",
+          "scope": {
+            "estate": "urn:estate:one"
+          },
+          "epoch": 3,
+          "holder": {
+            "id": "urn:binding:estate:manager",
+            "revision": 2,
+            "contentHash": "sha256:1515151515151515151515151515151515151515151515151515151515151515"
+          },
+          "since": "2026-11-12T10:00:00Z"
+        },
+        "write": {
+          "epoch": "3",
+          "holder": {
+            "id": "urn:binding:estate:manager",
+            "revision": 2,
+            "contentHash": "sha256:1515151515151515151515151515151515151515151515151515151515151515"
+          }
+        }
+      },
+      "answer": {
+        "ok": false,
+        "refused": "slot-epoch-unknown"
+      }
+    },
+    {
+      "name": "another binding at the current epoch",
+      "input": {
+        "slot": {
+          "type": "role-slot/1",
+          "estate": "urn:estate:one",
+          "role": "ceo",
+          "scope": {
+            "estate": "urn:estate:one"
+          },
+          "epoch": 3,
+          "holder": {
+            "id": "urn:binding:estate:manager",
+            "revision": 2,
+            "contentHash": "sha256:1515151515151515151515151515151515151515151515151515151515151515"
+          },
+          "since": "2026-11-12T10:00:00Z"
+        },
+        "write": {
+          "epoch": 3,
+          "holder": {
+            "id": "urn:binding:estate:manager-2",
+            "revision": 1,
+            "contentHash": "sha256:1616161616161616161616161616161616161616161616161616161616161616"
+          }
+        }
+      },
+      "answer": {
+        "ok": false,
+        "refused": "slot-not-holder"
+      }
+    },
+    {
+      "name": "the holder's next revision at the current epoch",
+      "input": {
+        "slot": {
+          "type": "role-slot/1",
+          "estate": "urn:estate:one",
+          "role": "ceo",
+          "scope": {
+            "estate": "urn:estate:one"
+          },
+          "epoch": 3,
+          "holder": {
+            "id": "urn:binding:estate:manager",
+            "revision": 2,
+            "contentHash": "sha256:1515151515151515151515151515151515151515151515151515151515151515"
+          },
+          "since": "2026-11-12T10:00:00Z"
+        },
+        "write": {
+          "epoch": 3,
+          "holder": {
+            "id": "urn:binding:estate:manager",
+            "revision": 3,
+            "contentHash": "sha256:1515151515151515151515151515151515151515151515151515151515151515"
+          }
+        }
+      },
+      "answer": {
+        "ok": false,
+        "refused": "slot-not-holder"
+      }
+    }
+  ],
+  "successions": [
+    {
+      "name": "a new holder at a higher epoch",
+      "input": {
+        "previous": {
+          "type": "role-slot/1",
+          "estate": "urn:estate:one",
+          "role": "ceo",
+          "scope": {
+            "estate": "urn:estate:one"
+          },
+          "epoch": 3,
+          "holder": {
+            "id": "urn:binding:estate:manager",
+            "revision": 2,
+            "contentHash": "sha256:1515151515151515151515151515151515151515151515151515151515151515"
+          },
+          "since": "2026-11-12T10:00:00Z"
+        },
+        "next": {
+          "type": "role-slot/1",
+          "estate": "urn:estate:one",
+          "role": "ceo",
+          "scope": {
+            "estate": "urn:estate:one"
+          },
+          "epoch": 4,
+          "holder": {
+            "id": "urn:binding:estate:manager-2",
+            "revision": 1,
+            "contentHash": "sha256:1616161616161616161616161616161616161616161616161616161616161616"
+          },
+          "since": "2026-11-12T10:00:00Z"
+        }
+      },
+      "findings": []
+    },
+    {
+      "name": "the same holder at the same epoch",
+      "input": {
+        "previous": {
+          "type": "role-slot/1",
+          "estate": "urn:estate:one",
+          "role": "ceo",
+          "scope": {
+            "estate": "urn:estate:one"
+          },
+          "epoch": 3,
+          "holder": {
+            "id": "urn:binding:estate:manager",
+            "revision": 2,
+            "contentHash": "sha256:1515151515151515151515151515151515151515151515151515151515151515"
+          },
+          "since": "2026-11-12T10:00:00Z"
+        },
+        "next": {
+          "type": "role-slot/1",
+          "estate": "urn:estate:one",
+          "role": "ceo",
+          "scope": {
+            "estate": "urn:estate:one"
+          },
+          "epoch": 3,
+          "holder": {
+            "id": "urn:binding:estate:manager",
+            "revision": 2,
+            "contentHash": "sha256:1515151515151515151515151515151515151515151515151515151515151515"
+          },
+          "since": "2026-11-12T11:00:00Z"
+        }
+      },
+      "findings": []
+    },
+    {
+      "name": "a new holder at a repeated epoch",
+      "input": {
+        "previous": {
+          "type": "role-slot/1",
+          "estate": "urn:estate:one",
+          "role": "ceo",
+          "scope": {
+            "estate": "urn:estate:one"
+          },
+          "epoch": 3,
+          "holder": {
+            "id": "urn:binding:estate:manager",
+            "revision": 2,
+            "contentHash": "sha256:1515151515151515151515151515151515151515151515151515151515151515"
+          },
+          "since": "2026-11-12T10:00:00Z"
+        },
+        "next": {
+          "type": "role-slot/1",
+          "estate": "urn:estate:one",
+          "role": "ceo",
+          "scope": {
+            "estate": "urn:estate:one"
+          },
+          "epoch": 3,
+          "holder": {
+            "id": "urn:binding:estate:manager-2",
+            "revision": 1,
+            "contentHash": "sha256:1616161616161616161616161616161616161616161616161616161616161616"
+          },
+          "since": "2026-11-12T10:00:00Z"
+        }
+      },
+      "findings": [
+        "FAC-SEM-174 /next/epoch"
+      ]
+    },
+    {
+      "name": "the same holder at a new epoch",
+      "input": {
+        "previous": {
+          "type": "role-slot/1",
+          "estate": "urn:estate:one",
+          "role": "ceo",
+          "scope": {
+            "estate": "urn:estate:one"
+          },
+          "epoch": 3,
+          "holder": {
+            "id": "urn:binding:estate:manager",
+            "revision": 2,
+            "contentHash": "sha256:1515151515151515151515151515151515151515151515151515151515151515"
+          },
+          "since": "2026-11-12T10:00:00Z"
+        },
+        "next": {
+          "type": "role-slot/1",
+          "estate": "urn:estate:one",
+          "role": "ceo",
+          "scope": {
+            "estate": "urn:estate:one"
+          },
+          "epoch": 4,
+          "holder": {
+            "id": "urn:binding:estate:manager",
+            "revision": 2,
+            "contentHash": "sha256:1515151515151515151515151515151515151515151515151515151515151515"
+          },
+          "since": "2026-11-12T10:00:00Z"
+        }
+      },
+      "findings": [
+        "FAC-SEM-174 /next/epoch"
+      ]
+    },
+    {
+      "name": "an epoch that goes back",
+      "input": {
+        "previous": {
+          "type": "role-slot/1",
+          "estate": "urn:estate:one",
+          "role": "ceo",
+          "scope": {
+            "estate": "urn:estate:one"
+          },
+          "epoch": 3,
+          "holder": {
+            "id": "urn:binding:estate:manager",
+            "revision": 2,
+            "contentHash": "sha256:1515151515151515151515151515151515151515151515151515151515151515"
+          },
+          "since": "2026-11-12T10:00:00Z"
+        },
+        "next": {
+          "type": "role-slot/1",
+          "estate": "urn:estate:one",
+          "role": "ceo",
+          "scope": {
+            "estate": "urn:estate:one"
+          },
+          "epoch": 2,
+          "holder": {
+            "id": "urn:binding:estate:manager-2",
+            "revision": 1,
+            "contentHash": "sha256:1616161616161616161616161616161616161616161616161616161616161616"
+          },
+          "since": "2026-11-12T10:00:00Z"
+        }
+      },
+      "findings": [
+        "FAC-SEM-174 /next/epoch"
+      ]
+    },
+    {
+      "name": "another estate's slot",
+      "input": {
+        "previous": {
+          "type": "role-slot/1",
+          "estate": "urn:estate:one",
+          "role": "ceo",
+          "scope": {
+            "estate": "urn:estate:one"
+          },
+          "epoch": 3,
+          "holder": {
+            "id": "urn:binding:estate:manager",
+            "revision": 2,
+            "contentHash": "sha256:1515151515151515151515151515151515151515151515151515151515151515"
+          },
+          "since": "2026-11-12T10:00:00Z"
+        },
+        "next": {
+          "type": "role-slot/1",
+          "estate": "urn:estate:two",
+          "role": "ceo",
+          "scope": {
+            "estate": "urn:estate:two"
+          },
+          "epoch": 4,
+          "holder": {
+            "id": "urn:binding:estate:manager-2",
+            "revision": 1,
+            "contentHash": "sha256:1616161616161616161616161616161616161616161616161616161616161616"
+          },
+          "since": "2026-11-12T10:00:00Z"
+        }
+      },
+      "findings": [
+        "FAC-SEM-174 /next/scope"
+      ]
+    }
+  ]
+}

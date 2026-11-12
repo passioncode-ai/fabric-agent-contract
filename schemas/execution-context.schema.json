@@ -9,11 +9,12 @@
   "$defs": {
     "context": {
       "type": "object",
-      "required": ["kind", "meta", "project", "provider", "workingDirectory", "environment", "accountPool", "limits", "cleanup"],
+      "required": ["kind", "meta", "provider", "workingDirectory", "environment", "accountPool", "limits", "cleanup"],
       "properties": {
         "kind": { "const": "execution-context" },
         "meta": { "$ref": "common.schema.json#/$defs/revisionMeta" },
         "project": { "$ref": "common.schema.json#/$defs/uri" },
+        "scope": { "type": "object", "description": "DEC-0167 MG-2: what the record is scoped to, as roles.schema.json's assignments: the estate (the estate's manager, the ceo slot's holder) or one project. Absent: the project the record names. With a project scope, project is required and equals it (FAC-SEM-174); with an estate scope, project is absent.", "properties": { "estate": { "$ref": "common.schema.json#/$defs/uri" }, "project": { "$ref": "common.schema.json#/$defs/uri" } }, "oneOf": [{ "properties": { "estate": {} }, "required": ["estate"] }, { "properties": { "project": {} }, "required": ["project"] }], "additionalProperties": false },
         "agent": { "$ref": "common.schema.json#/$defs/uri" },
         "provider": { "$ref": "common.schema.json#/$defs/revisionRef" },
         "workingDirectory": { "type": "object", "required": ["repository", "mode"], "properties": { "repository": { "$ref": "common.schema.json#/$defs/uri" }, "mode": { "enum": ["project-root", "worktree", "temporary"] } }, "additionalProperties": false },
@@ -47,6 +48,9 @@
         "limits": { "type": "object", "required": ["wallSeconds", "concurrency"], "properties": { "wallSeconds": { "type": "integer", "minimum": 1 }, "costMicrounits": { "type": "integer", "minimum": 0 }, "concurrency": { "type": "integer", "minimum": 1 } }, "additionalProperties": false },
         "cleanup": { "type": "object", "required": ["revokeSecrets", "stopChildren", "preserveResidueUntilReconciled"], "properties": { "revokeSecrets": { "const": true }, "stopChildren": { "const": true }, "preserveResidueUntilReconciled": { "const": true } }, "additionalProperties": false }
       },
+      "allOf": [
+        { "if": { "required": ["scope"], "properties": { "scope": { "type": "object", "required": ["estate"], "properties": { "estate": true } } } }, "then": { "not": { "required": ["project"], "properties": { "project": true } } }, "else": { "required": ["project"], "properties": { "project": true } } }
+      ],
       "additionalProperties": false
     },
     "pool": {

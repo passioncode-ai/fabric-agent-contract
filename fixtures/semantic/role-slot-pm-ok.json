@@ -1,0 +1,20 @@
+{
+  "description": "A product-manager slot of one project (DEC-0167 MG-1).",
+  "kind": "role-slot",
+  "expect": [],
+  "input": {
+    "type": "role-slot/1",
+    "estate": "urn:estate:one",
+    "role": "product-manager",
+    "scope": {
+      "project": "urn:project:a"
+    },
+    "epoch": 3,
+    "holder": {
+      "id": "urn:binding:estate:manager",
+      "revision": 2,
+      "contentHash": "sha256:1515151515151515151515151515151515151515151515151515151515151515"
+    },
+    "since": "2026-11-12T10:00:00Z"
+  }
+}

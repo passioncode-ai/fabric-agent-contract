@@ -26,7 +26,6 @@ export const NOT_SWEPT: readonly string[] = [
   "admission.schema.json",
   "agent-call-message.schema.json",
   "agent-call-sealed.schema.json",
-  "binding.schema.json",
   "comms-cancel.schema.json",
   "comms-claim.schema.json",
   "comms-complete.schema.json",
@@ -64,7 +63,6 @@ export const NOT_SWEPT: readonly string[] = [
   "device-key-set.schema.json",
   "device-organization-closed.schema.json",
   "device-policy.schema.json",
-  "execution-context.schema.json",
   "fabric-link.schema.json",
   "folder-attribution.schema.json",
   "grant-check-request.schema.json",
@@ -134,7 +132,7 @@ describe("every positive fixture passes the semantic rules", () => {
   });
 
   it("names only kinds a rule reads and schemas that exist, and sweeps a fixture of each", () => {
-    const sources = ["semantic-rules", "job-limits", "registry-rules", "interop-rules", "route-rules", "activity-rules", "device-rules", "delegation-rules", "session-handoff", "profile-rules", "package-rules", "estate-record-rules", "enroll-token", "relay-rules", "revocation-delta-rules", "window-lease", "entitlement", "share-registration", "openrouter-attribution", "core-rules", "protocol-revisions", "feed-data", "proposal-rules", "node-summary", "agent-network", "credentials", "mandate", "org-membership", "org-authority", "org-exchange", "org-adaptation", "ops-digest", "machine-report", "source-rules"]
+    const sources = ["semantic-rules", "job-limits", "registry-rules", "interop-rules", "route-rules", "activity-rules", "device-rules", "delegation-rules", "session-handoff", "profile-rules", "package-rules", "estate-record-rules", "enroll-token", "relay-rules", "revocation-delta-rules", "window-lease", "entitlement", "share-registration", "openrouter-attribution", "core-rules", "protocol-revisions", "feed-data", "proposal-rules", "node-summary", "agent-network", "credentials", "mandate", "org-membership", "org-authority", "org-exchange", "org-adaptation", "ops-digest", "machine-report", "source-rules", "role-slot"]
       .map((name) => readFileSync(path.join(root, "src", `${name}.ts`), "utf8"))
       .join("\n");
     for (const [schema, kind] of Object.entries(KIND_OF_SCHEMA)) {
