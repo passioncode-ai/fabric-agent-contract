@@ -421,7 +421,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
   - Given a project with no policy, when a run would first spend money, then the launcher offers options computed from the agents' presets, the recent spend and the kind of work, names those inputs, and preselects one.
   - Given I choose "no project limit", then it is recorded as my choice and only the estate total (L0) stops spending.
   - Given a policy is recorded, then the launcher never asks again for that project.
-  - Given an organization's project, when a run would first spend money, then the choice is the organization's owner's (DEC-0162 LV-7): the launcher stops before any spend, the starter sees the run waiting for the owner, and the owner's choice is recorded as theirs.
+  - Given an organization's project, when a run would first spend money, then the choice is the organization's owner's (DEC-0162 LV-7): the launcher stops before any spend, the starter sees the run waiting for the owner, and the owner's choice is recorded as theirs (testable once the route to the owner is decided, PC-162; until then the run waits).
 - **Priority:** must
 - **Status:** draft
 - **Product:** unobserved

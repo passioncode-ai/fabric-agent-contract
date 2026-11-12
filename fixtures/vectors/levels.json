@@ -4176,6 +4176,117 @@
       }
     },
     {
+      "name": "an unbound level decision beside an operator's mandate, from T0",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T0",
+        "caller": "agent:claude-code",
+        "now": "2026-10-25T11:30:00Z",
+        "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
+        "self": "example-reviewer",
+        "callerAgent": "example-developer",
+        "effect": "reply",
+        "project": "alpha",
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "operator",
+          "task": "answer the reviews of the week",
+          "instruction": "answer this week's reviews in project alpha",
+          "at": "2026-10-25T11:20:00Z",
+          "expiresAt": "2026-10-26T11:20:00Z",
+          "scope": {
+            "capabilities": [
+              "reviews.approve"
+            ],
+            "effects": [
+              "reply"
+            ],
+            "projects": [
+              "alpha"
+            ]
+          },
+          "chain": [
+            {
+              "agent": "example-developer",
+              "at": "2026-10-25T11:20:00Z"
+            },
+            {
+              "agent": "example-reviewer",
+              "at": "2026-10-25T11:25:00Z"
+            }
+          ]
+        },
+        "levels": {
+          "org:org-a": {
+            "audience": "reviews-service-a1",
+            "keySet": {
+              "type": "org-key-set/1",
+              "issuer": "https://orgs.example",
+              "org": "org:org-a",
+              "revision": 1,
+              "issuedAt": "2026-10-15T00:00:00Z",
+              "keys": [
+                {
+                  "kid": "mem-2026-10",
+                  "alg": "EdDSA",
+                  "x": "YxEDJVK86TVti3mnfdU9cSSlKdjXDJM9A3eKVqIxr7U",
+                  "notBefore": "2026-10-15T00:00:00Z",
+                  "notAfter": "2027-01-01T00:00:00Z"
+                }
+              ],
+              "revoked": [],
+              "administrators": [],
+              "alg": "EdDSA",
+              "kid": "root-org-a-1",
+              "sig": "vufCXJ4roCUAM3MEuAikBXHXZ8mdhK7hyiZkkFzc14MuJ8fvPq6zYxOOOH8KtIuBEIUcXesvsy1NXXs9rYqIBw"
+            }
+          }
+        },
+        "decision": {
+          "by": "level",
+          "via": "level-command",
+          "level": "admin",
+          "org": "org:org-a",
+          "action": "approve-reply",
+          "instruction": "approve the reply to the review from Anna",
+          "at": "2026-10-25T11:20:00Z",
+          "membership": {
+            "type": "org-membership/2",
+            "issuer": "https://orgs.example",
+            "org": "org:org-a",
+            "audience": "reviews-service-a1",
+            "subject": "m-admin-02",
+            "role": "admin",
+            "projects": [],
+            "external": false,
+            "status": "active",
+            "revision": 3,
+            "membershipEndsAt": null,
+            "issuedAt": "2026-10-25T11:00:00Z",
+            "notBefore": "2026-10-25T11:00:00Z",
+            "expiresAt": "2026-10-25T12:00:00Z",
+            "extensions": {},
+            "alg": "EdDSA",
+            "kid": "mem-2026-10",
+            "sig": "Rg3hZAm3Hgabq5LB3LPvOjkbms6W_jKJaGFFOHyPFOIabVXhP2gvzpb_wXkR30Xxu3UQK-ZW_eTAF9aF6qwQDA"
+          },
+          "project": "alpha"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "decision-invalid",
+        "data": {
+          "detail": "level-unbound"
+        }
+      }
+    },
+    {
       "name": "an operator's mandate from T2 still changes nothing (MD-5)",
       "input": {
         "action": {

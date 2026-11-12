@@ -258,7 +258,7 @@ flowchart TD
   F[First paid run, no policy] --> O{An organization's project?}
   O -->|no| P[Screen: Spend policy choice]
   O -->|yes| WO[Screen: the run waits for the organization's owner; nothing spent (DEC-0162 LV-7)]
-  WO -->|the owner records the choice| R
+  WO -->|the owner records the choice, once its route is decided: PC-162| R
   P --> R[Policy recorded with its inputs]
   R --> C{Grant check}
   C -->|within the levels| A[Allowed, reserved]
