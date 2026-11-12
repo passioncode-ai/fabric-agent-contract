@@ -11453,12 +11453,14 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      session the person is in and that nobody submits the request to the board again, the person's session that
      performs the act recording that in the request's thread and the requester submitting nothing; one whose asked
      act was done, with only a side act left open, settled `completed` with the open act named in its result), every
-     other step that waits in such a session named the same way, one of OW-3's three waits also asked as the
-     operator's decision of 2026-11-12 for a run with no person says (Fabric's on-demand spec §3.10, `9420da79`):
-     settled first by the recorded decisions, the goal and the safest reversible option, then once per task to the
-     project offering `people.ask` (the organization's PM agent) or through the host's question surface, the answer
-     starting the asking project's next run, which takes the step (the operator's word only from the operator's own
-     surface or as an accepted relay), a request settled `failed_known` there submitted
+     other step that waits in such a session left open and named, one of OW-3's three waits named with where its question went and asked as the operator's word of 2026-11-12 says
+     (questions to the people who decide through the organization's PM agent, as Fabric's `QUESTIONS_RULE` carries it
+     with its fallback to the host's question surface, `9420da79`): settled first by the recorded decisions, the goal
+     and the safest reversible option, then once per task to the project offering `people.ask` or through
+     `fabric_question_ask`; a `people.ask` reply starts the asking project's next run, which takes the step only on the
+     operator's word (their own surface or an accepted relay) and otherwise leaves a step only that word decides open
+     and asks the operator once, while an answer through `fabric_question_ask` starts no run and is a decision naming
+     the step, on which the request is submitted again; a request settled `failed_known` there submitted
      again only where what the person does lets a session with no person take the step and no such next run has
      taken it (a decision or a relay naming the step, a grant, a human step cleared), by the operator's session in the requesting Project (its agent,
      on their word) when they own the requesting Project and by the requester otherwise, a relay or a mandate that names the
@@ -11517,9 +11519,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (agents run without permission prompts; questions and the task's bounds settled when the task is set, after that
   only delegation and execution, the same page) bears on the host's gate OW-3 keeps and on OW-3's own stop and its
   question for a step that waits; it is put to question `46167c9f` beside `add1df7c`, and until they are answered OW-3
-  holds as written. The operator's decision of 2026-11-12 for a run with no person (Fabric's on-demand spec §3.10,
-  `QUESTIONS_RULE`, `9420da79`: decide first, then ask a person through the organization's PM agent or the host's
-  question surface, the answer starting the next run) is how OW-3's no-person case asks for its three waits.
+  holds as written. The operator's word of 2026-11-12 (questions to the people who decide through the organization's
+  PM agent), as Fabric's `QUESTIONS_RULE` carries it with its fallback to the host's question surface (on-demand spec
+  §3.10, `9420da79`), is how OW-3's no-person case asks for its three waits; only the PM agent's reply starts a next
+  run, so while no project offers `people.ask` the answer is a decision on which the request is submitted again.
 - **Alternatives considered:** leave it to each product's prompt (the products diverged: some shipped it, some did
   not, so the operator repeated the word); make it a host setting the operator switches on (the operator's word was a
   rule for every agent, not a mode); stop at every risk until the operator answers (the operator's word says to

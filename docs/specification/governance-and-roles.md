@@ -125,7 +125,9 @@ words AP-2 and OA-1 already name; the rules hold for any owner.
   still meets the word, and says so in its report. A step outside the mandate waits as MD-4 says; a human step, spend
   above a limit included, goes to OW-4. Where a decision recorded as the operator's own holds the work until a
   question is answered that the words do not answer, that decision governs (Fabric's `intake.spec-first`, the
-  operator's word of 2026-10-23 in its ADR-0176: the missing parts of a specification).
+  operator's word of 2026-10-23 in its ADR-0176: the missing parts of a specification); with no person in the
+  session's chat, a part the filing agent can answer goes to it on the request's thread (`com.submit` kind `message`,
+  no `replyTo`, as that decision says), and a part that needs a person goes by the route the end of this rule names.
   A host's gate that holds an act until a person agrees to it (Fabric's `floor.ask-first`, the operator's instruction
   of 2026-10-15 in its ADR-0160; the operator's later decisions of 2026-10-26, no second approval, and of 2026-11-06,
   a level holder's command runs without a host's prompt, and of 2026-11-07, agents run without permission prompts, questions
@@ -191,20 +193,32 @@ words AP-2 and OA-1 already name; the rules hold for any owner.
   In a session with no person in its chat, every step that waits under this rule (one of the three waits above, an act
   a host's gate holds, or the FA-09 case) is left open and named, in its board reply and its report, and the board
   request is settled as the FA-09 case does, save for two things. First, for one of the three waits above the agent
-  asks as the operator's decision of 2026-11-12 for a run with no person (Fabric's on-demand spec §3.10, the `QUESTIONS_RULE` both packets of a board-started run carry, `9420da79`) says: it first settles what it can by the project's recorded
-  decisions, its goal and the safest reversible option (the corrected way above), records why, and takes a question
-  that still needs a person once per task, with its options and their consequences, to the project offering
-  `people.ask` in `com.directory` (the organization's PM agent), or through the host's question surface
-  (`fabric_question_ask`) where no project offers it, doing the independent parts meanwhile; its board reply names the
-  open step and where the question went. The answer, a message in the asking project's thread, starts that project's
-  next run (Fabric's on-demand spec §3.8), which takes the step under it and records it in the request's thread, as a
-  session the person is in does: the answer is the operator's word only when it comes from the operator's own question
-  surface or as a relay OA-2 and OA-3 accept, and another person's answer through the PM agent is that person's word,
-  the operator's only where CT-266 or CT-250's decision says so. An act a host's gate holds, and the FA-09 case, ask
+  asks as the operator's word of 2026-11-12 (questions to the people who decide go through the organization's PM
+  agent) says, as Fabric's `QUESTIONS_RULE` carries it in both packets of a board-started run, with its fallback to the
+  host's question surface (Fabric's on-demand spec §3.10, `9420da79`): it first settles what it can by the project's
+  recorded decisions, its goal and the safest reversible option (the corrected way above), records why, and takes a
+  question that still needs a person once per task, with its options and their consequences and saying that the step
+  needs the operator's word (relayed as OA-2 and OA-3 accept), to the project offering `people.ask` in `com.directory`
+  (the organization's PM agent), or through the host's question surface (`fabric_question_ask`) where no project offers
+  it, doing the independent parts meanwhile; a wait that arises after the task's question has gone is named with it in
+  the report and the board reply, never a second question. Its `com.reply` names the open step and where the question
+  went, in place of a session the person is in. The two routes end differently. On `people.ask` the PM agent's reply, a
+  board message to the asking project, starts that project's next run (Fabric's on-demand spec §3.8), which takes the
+  step only where the answer is the operator's word (from the operator's own question surface, or as a relay OA-2 and
+  OA-3 accept; another person's answer through the PM agent is that person's word, the operator's only where CT-266 or
+  CT-250's decision says so) and records it in the request's thread; an answer that is not the operator's word leaves a
+  step only the operator's word decides (a relayed act under AP-2, a source hand-over under DEC-0149, this rule's own
+  stop under AP-3) open and named in the request's thread, and that run asks the operator once through the host's
+  question surface. Through `fabric_question_ask` the answer is recorded as the project's decision and starts no run
+  (Fabric's `answer_question` wakes nobody, and an ended session's continuation reads `needs_restart`), so the step
+  stays open and the answer is a decision naming the step, on which the request is submitted again as below; Fabric's
+  waking of the asking project on an answered question is owed (the handoff's `add1df7c` step). While no project
+  offers `people.ask` (Fabric CO-569), every such question takes the second route. An act a host's gate holds, and the FA-09 case, ask
   nothing from that session (a host's gate still asks as it does), since only a session the person is in gives the
   agreement they hold. Second, who submits it again: a request settled `failed_known` this way is submitted to the
   board again only where what the person does lets a session with no person take the step and no next run of the
-  asking project has taken it (a decision or a relay naming the step, a grant, a human step cleared); then the
+  asking project has taken it (a decision or a relay naming the step, an answered question among them, a grant, a
+  human step cleared); then the
   operator's session in the requesting Project (its agent, on their word) submits it again when they own the requesting Project, and the requester otherwise, and the `com.reply`
   names which. An act that only a session the person is in can take (the FA-09 case) is never submitted again, as
   that case says. On a place the operator's decision of 2026-11-09 makes headless (fabric-workspace
