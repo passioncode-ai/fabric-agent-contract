@@ -40,9 +40,10 @@ organization slice of 2026-11-21: a place's profile as a standing `mandate/1` it
   carries the place's standing mandate), DEC-0159 CF-3 and CF-4 (a client key carries no profile), and DEC-0157 UD-4
   (a profile is not a person's word for a usage switch that person turned off; the standing conformance row gains that
   bar once UD-4 lands).
+- Restatement owed with DEC-0165 (`agent/ct292-task-context-20261112`), by whichever lands second: a place can hold a personal and an organization's profile (DEC-0082), and the stated mandate names only the place, so the hub states a standing mandate per (place, context) and it is a TC-2 place claim for the assignment's context; check on the merged tree: `grep -c 'DEC-0166' docs/specification/contexts.md` prints at least 1.
 - The rule register lists `FAC-SEM-173` while 171 and 172 belong to DEC-0164 and DEC-0165 on their branches; the
   last lander writes the next free code from the CAS counter.
-- Tell Fabric (CO-547) and the adapter (FAA-249) when DEC-0166 lands. Fabric's row gains the board-block refusal of `standing` in `boardMandate.ts`, separate from the forward schema it shares with `hubAuthority.ts`, and the forward to a callee declaring `standing` (both owed at any repin past this decision); question 4's organization default (nothing until a profile is recorded), the exclusion of `change-policy` and MD-6's list, and `standing.setLevel` with the setter's level, since CO-547 on Fabric's main still promises an organization's space or VM "all permissions". The adapter's FAA-249 row on its main names neither DEC-0166 nor `profile.json`: amend it at landing (`standing` in the authority extension, `standing` ['1'] in both `PROTOCOL_REVISIONS` twins, `profile.json` in the vendored vectors, `levelShortOf`'s bound). Check: `git -C fabric-agent-adapter grep -c 'DEC-0166' origin/main -- docs/backlog.md` prints at least 1.
+- Tell Fabric (CO-547) and the adapter (FAA-249) when DEC-0166 lands. Fabric's row gains the board-block refusal of `standing` in `boardMandate.ts`, separate from the forward schema it shares with `hubAuthority.ts`, and the forward to a callee declaring `standing` (both owed at any repin past this decision); question 4's organization default (nothing until a profile is recorded), the exclusion of `change-policy` and MD-6's list, and `standing.setLevel` with the setter's level, since CO-547 on Fabric's main still promises an organization's space or VM "all permissions". The adapter's FAA-249 row on its main names neither DEC-0166 nor `profile.json`: amend it at landing (`standing` in the authority extension, `standing` ['1'] in both `PROTOCOL_REVISIONS` twins, `profile.json` in the vendored vectors, `levelShortOf`'s bound, `actionGate` handing on the mandate for `via: "profile"` as for `"mandate"` and passing `standing` and `tokenProf` to `actionDecision`, AU-5's refusal of `autonomy.profile.set` under every mandate, a task's included, which its `mandateCovers` and the ten vendored kit copies lack, and the two semantic fixtures, renamed `standing-action-call*.json` so the `action-call-*` sweep and its count of 18 stay as they are until the port reads standing). Check: `git -C fabric-agent-adapter grep -c 'DEC-0166' origin/main -- docs/backlog.md` prints at least 1.
 
 ## Checks run
 
@@ -113,7 +114,21 @@ organization slice of 2026-11-21: a place's profile as a standing `mandate/1` it
   AU-4 comment. Declined: a prof-typing case in a vector file the kits vendor (the delegation vectors are DEC-0162's
   and earlier decisions'; FAA-249's amendment at landing names it).
 
+- Round 5 (on `98e0b6bd`): unit failed, seam failed, product failed. Unit, break folded: the refusal of a call in a
+  project under an architect's projectless profile reads the stated profile's scope, never a hand-over's (two
+  vectors, T1 and T2). Seam, breaks folded: the two semantic fixtures renamed `standing-action-call*.json`, out of the
+  ports' `action-call-*` glob; the guide line says a profile set below an act's level never covers it, an owner's
+  covering a billing act. Product, breaks folded: the Context states how the rules behave in each context; the
+  credential issuer declares no `standing` (AU-4, conformance, guide); question 1's clause is to be posted, the Status
+  names its widening. Risks folded: `ProfileRecord` declares `setLevel`; the mistyped-level vector renamed to what it
+  shows; the FAA-249 amendment names `actionGate`, AU-5 and the fixtures; a DEC-0165 restatement pair; SCN-061 and
+  AU-7 say a stated mandate stands until its `expiresAt`; AU-4 names the personal default's operator acts. Declined:
+  `levelStanding` calling `levelShortOf` (DEC-0162's code on its own branch; folded when DEC-0166 lands on it, as one
+  change); the task-mandate AU-5 case in `mandate.json` (the kits vendor it and would fail before they port AU-5; the
+  FAA-249 amendment names it); keeping the 2026-11-05 gates out of the headless default (the operator's newer record
+  of 2026-11-09 says a headless place finishes everything; question 1 asks).
+
 ## Next task
 
-Post question 1's round-4 clause on thread `8da128cf`, then round 5 of the blind readings (unit, seam, product) of
+Post question 1's round-4 clause on thread `8da128cf`, then round 6 of the blind readings (unit, seam, product) of
 branch `agent/ct285-autonomy-profile-20261112` (DEC-0166).

@@ -1353,7 +1353,7 @@
       }
     },
     {
-      "name": "an administrator's profile at an action whose declared level is mistyped, as the strictest",
+      "name": "a service's mistyped declared level is its own fault, never a caller's answer",
       "input": {
         "action": {
           "id": "deploy-site",
@@ -1405,6 +1405,148 @@
       },
       "expected": {
         "fault": "action-level-invalid"
+      }
+    },
+    {
+      "name": "an architect's projectless profile with a hand-over adding projects, at a call in one, from T1",
+      "input": {
+        "action": {
+          "id": "deploy-site",
+          "title": "Deploy the site",
+          "tool": "site.deploy",
+          "gate": "relayed"
+        },
+        "tier": "T1",
+        "caller": "agent:example-runner",
+        "callerAgent": "example-runner",
+        "self": "example-deployer",
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "operator",
+          "standing": {
+            "place": "studio-space-1",
+            "placeKind": "headless",
+            "revision": 3,
+            "setLevel": "architect"
+          },
+          "task": "assignment:alpha-0412",
+          "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
+          "at": "2026-11-12T09:00:00Z",
+          "expiresAt": "2026-11-13T08:00:00Z",
+          "scope": {
+            "capabilities": [
+              "site.deploy"
+            ],
+            "effects": [
+              "deploy"
+            ]
+          },
+          "chain": [
+            {
+              "agent": "example-runner",
+              "at": "2026-11-12T09:00:05Z"
+            },
+            {
+              "agent": "example-deployer",
+              "at": "2026-11-12T09:30:00Z",
+              "scope": {
+                "capabilities": [
+                  "site.deploy"
+                ],
+                "effects": [
+                  "deploy"
+                ],
+                "projects": [
+                  "beta"
+                ]
+              }
+            }
+          ]
+        },
+        "effect": "deploy",
+        "now": "2026-11-12T10:00:00Z",
+        "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
+        "standing": true,
+        "project": "beta"
+      },
+      "expected": {
+        "ok": false,
+        "code": "operator-decision-required",
+        "data": {
+          "detail": "outside-mandate: project"
+        }
+      }
+    },
+    {
+      "name": "the same from T2 under the stated profile's prof",
+      "input": {
+        "action": {
+          "id": "deploy-site",
+          "title": "Deploy the site",
+          "tool": "site.deploy",
+          "gate": "relayed"
+        },
+        "tier": "T2",
+        "caller": "agent:example-runner",
+        "callerAgent": "example-runner",
+        "self": "example-deployer",
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "operator",
+          "standing": {
+            "place": "studio-space-1",
+            "placeKind": "headless",
+            "revision": 3,
+            "setLevel": "architect"
+          },
+          "task": "assignment:alpha-0412",
+          "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
+          "at": "2026-11-12T09:00:00Z",
+          "expiresAt": "2026-11-13T08:00:00Z",
+          "scope": {
+            "capabilities": [
+              "site.deploy"
+            ],
+            "effects": [
+              "deploy"
+            ]
+          },
+          "chain": [
+            {
+              "agent": "example-runner",
+              "at": "2026-11-12T09:00:05Z"
+            },
+            {
+              "agent": "example-deployer",
+              "at": "2026-11-12T09:30:00Z",
+              "scope": {
+                "capabilities": [
+                  "site.deploy"
+                ],
+                "effects": [
+                  "deploy"
+                ],
+                "projects": [
+                  "beta"
+                ]
+              }
+            }
+          ]
+        },
+        "effect": "deploy",
+        "now": "2026-11-12T10:00:00Z",
+        "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
+        "standing": true,
+        "project": "beta",
+        "tokenProf": "sha256:e003cd72e7be448daf785566cfbb3a7c1bbe77236b4322f6131619463dc66e27"
+      },
+      "expected": {
+        "ok": false,
+        "code": "operator-decision-required",
+        "data": {
+          "detail": "outside-mandate: project",
+          "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a"
+        }
       }
     },
     {

@@ -88,8 +88,9 @@ export interface MandateCall {
 
 export type OutsideDetail = "outside-mandate: capability" | "outside-mandate: action" | "outside-mandate: effect" | "outside-mandate: spend" | "outside-mandate: project";
 export type InvalidDetail = "mandate-malformed" | "mandate-widened" | "mandate-expired" | "mandate-early" | "mandate-not-for-this-call" | "profile-unbound" | LevelDetail;
-/** The profile a call was taken under (DEC-0166 AU-6): the place, the revision and the standing mandate's digest. */
-export interface ProfileRecord { place: string; revision: number; digest: string }
+/** The profile a call was taken under (DEC-0166 AU-6): the place, the revision, the standing mandate's digest and, in an
+ * organization's context, the setter's level. */
+export interface ProfileRecord { place: string; revision: number; digest: string; setLevel?: "owner" | "admin" | "architect" }
 export type MandateAnswer =
   | { ok: true; recordAs: { by: "operator"; via: "mandate" | "profile"; task: string; chain: string[]; source?: OperatorSource; profile?: ProfileRecord } }
   | { ok: true; recordAs: LevelRecord & { via: "mandate" | "profile"; task: string; chain: string[]; profile?: ProfileRecord } }
@@ -246,8 +247,9 @@ export function mandateCovers(input: {
   if (call.project !== undefined && scope.projects !== undefined && !scope.projects.includes(call.project)) return outside("outside-mandate: project");
   // AU-2: a profile an organization's level holder set covers no action its service declares above that level (LV-7).
   const setLevel = standing ? (read.standing as Standing).setLevel : undefined;
-  // An architect's level stands only in its projects: a profile it set that names none covers no call in a project.
-  if (setLevel === "architect" && scope.projects === undefined && call.project !== undefined) return outside("outside-mandate: project");
+  // An architect's level stands only in its projects: a profile it set that names none covers no call in a project. The
+  // stated profile's own scope decides (what `prof` binds), never a hand-over step's, which may add `projects` (MD-2).
+  if (setLevel === "architect" && read.scope.projects === undefined && call.project !== undefined) return outside("outside-mandate: project");
   const short = setLevel === undefined ? undefined : levelShortOf(setLevel, call.minLevel, call.project !== undefined);
   if (short !== undefined) return { ok: false, code: OUTSIDE_MANDATE, data: { detail: short } };
   // AU-6: a call under a profile is recorded `via: profile` with the place, the revision and the digest.

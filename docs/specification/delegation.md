@@ -728,7 +728,7 @@ decision of 2026-11-09, fabric-workspace `knowledge/authority.md`, *Autonomy by 
   `operator-source/1`, OA-7); in an organization's context it states nothing
   until the organization's `owner` or an `admin` records a profile (an `architect`'s, for its own projects only, ends
   the wait for those) (question 4's default in DEC-0166, until the
-  operator answers otherwise). A profile decides no credential request: that stays as
+  operator answers otherwise). The organization's credential issuer (credentials, DEC-0111) declares no `standing`, so a profile reaches no credential request's decision. In the personal context the operator's own default, carrying no `setLevel`, is the operator's word and covers an act a service declares `operator` (a client key, a board hold, a rule proposal's approval) like any other act its scope names, save `change-policy` and MD-6's list. A profile decides no credential request: that stays as
   [credentials](credentials.md) has it (the administrator or the auto-approval policy, DEC-0111; question 5); a key
   the place's own estate issues through its own doors (Observatory's) is that estate's relayed act, which the profile
   covers as any other. `person`: nothing beyond what the session's own person decides,
@@ -750,7 +750,8 @@ decision of 2026-11-09, fabric-workspace `knowledge/authority.md`, *Autonomy by 
   `mandate-expired` and the others); from T2 every refusal carries `data.actionDigest` (DL-18). A mandate stated
   `by: "level"` with `standing` is malformed (`FAC-SEM-144`), yet a service that reads no levels answers it as if
   absent before it reads its schema, as LV-10 says of every level form. The hub's own states (a
-  stale revision, an unwatched place) never reach a callee: the hub states no mandate in them.
+  stale revision, an unwatched place) never reach a callee as a refusal: the hub states no new mandate in them, and a
+  mandate stated before them stands until its `expiresAt` (AU-3).
 
 ### One approval binds all the operator's agents
 

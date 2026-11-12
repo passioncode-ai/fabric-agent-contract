@@ -1072,7 +1072,7 @@ independent agent author and P-02 project operator.
 - **Alt paths:** the assignment calls `autonomy.profile.set` -> `outside-mandate: capability`; no assignment raises its own autonomy. A payment -> `human-step-required` with its link. A token without `prof` from T2 -> the profile changes nothing (`approval-required`). A token bound to an older revision -> `profile-unbound`. The watcher stops answering -> the next assignment runs as on a person's computer. The operator narrows the profile -> new assignments get the new revision; inside the boundary a running one keeps its stated mandate until its `expiresAt`, at most 24 hours, and from T2 a token of the new revision refuses the older mandate `profile-unbound`, so the agent asks its hub, which restates the current one. A service that does not declare `standing` -> answered as if no mandate came.
 - **UI elements:** none on the page; the hub's profile setting and the service's audit row (via profile, place, revision).
 - **States covered:** success, error
-- **Errors & recovery:** a fractional per-call ceiling is digested (RFC 8785) and bound like any other; a stale revision or an unwatched place never reaches a callee, since the hub states no mandate in them.
+- **Errors & recovery:** a fractional per-call ceiling is digested (RFC 8785) and bound like any other; a stale revision or an unwatched place never reaches a callee as a refusal, since the hub states no new mandate in them; a mandate stated before them stands until its `expiresAt` (AU-3).
 - **Status:** draft
 - **Coverage:** DEC-0166 AU-1 to AU-7, `mandateCovers` and `profileDigest` in `src/mandate.ts`, `actionDecision` in `src/actions.ts`, `fixtures/vectors/profile.json`, `test/profile.test.ts`
 - **Product:** unobserved

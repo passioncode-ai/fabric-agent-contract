@@ -11481,7 +11481,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-11-12
 - **Status:** Proposed 2026-11-12, from the design `docs/evidence/plans/2026-11-12-ct285-autonomy-profile.md` (CT-285),
-  the operator-question defaults taken as the design states them, with questions 4 and 5 added here; accepted when the
+  the operator-question defaults taken as the design states them, with questions 4 and 5 added here and question 1 widened in round 4; accepted when the
   coordinator's blind readings are clean on two consecutive rounds. It reads DEC-0162's levels and lands after it: the
   branch `agent/ct285-autonomy-profile-20261112` is stacked on DEC-0162's. An answer from the operator after
   acceptance is a new decision amending this one.
@@ -11493,8 +11493,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   architect sets it within their level; only the body's gates stay everywhere. North Star gap G19. The contract had a
   per-task mandate (DEC-0125) and the operator's decision per action (AP-2, DEC-0121), and AP-3 refuses a standing rule
   in a file, so a headless assignment had nobody to ask. This decision is narrower than the operator's "only the body's
-  gates": the headless default keeps `change-policy`, MD-6's list (a source hand-over, AP-5's approvals) and acts LV-7
-  keeps for the operator or the owner with a person, and question 1 asks about the 2026-11-05 gates.
+  gates" in two ways: every profile keeps `change-policy` and MD-6's list (a source hand-over, AP-5's approvals) with a
+  person, and in an organization's context a profile set below an act's declared level never covers it (no level's
+  profile covers an act declared `operator`; only an owner's covers a billing act). In the personal context the
+  operator's own default is the operator's word and covers the acts a service declares `operator` like any other;
+  question 1 asks about the 2026-11-05 gates.
 - **Decision:**
   1. **The profile is a standing mandate (AU-1).** `mandate.schema.json` gains the optional member `standing`
      (`place`, `placeKind` `headless` or `person`, `revision`). The place's hub states the profile, for each assignment
@@ -11555,7 +11558,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   questions take the design's defaults: (1) the headless default covers a production deploy of a surface with outside
   users, a send or publish to people outside the estate and a force-push within the repository's own rules (each a
   gate of the operator's rule of 2026-11-05), and a project that wants a gate narrows its own profile (the send and
-  force-push clause added in round 4 and posted as its follow-up); (2) an organization administrator sets a profile
+  force-push clause added in round 4, to be posted as a reply to `bd18b1fa`: not posted at round 4, the board's MCP being unreachable); (2) an organization administrator sets a profile
   on a member's computer only inside the organization's context there; (3) watched means a monitoring agent declared in
   the place's record and answering its probe; (4, added) a headless place of an organization with no recorded profile
   takes the default only once its owner or an administrator records it (an architect for its own projects), and states nothing until then (written into
@@ -11572,7 +11575,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `FAC-SEM-144`, `FAC-SEM-173`), `service.md` (the `actionDecision` table), `interop.md` (C3.5), `versioning.md`,
   `conformance.md` (rows, module, register), `CONTEXT.md` (Autonomy profile, Mandate), `service.md` (AP-2's inputs,
   AP-3's routes), `schemas/interop-agent-call.schema.json` and `interop-request-meta.schema.json` (the hub forwards a
-  standing mandate), `src/semantic-kinds.ts` and `fixtures/semantic/action-call-profile*.json`, `docs/ux/foundation.md` (ST-043),
+  standing mandate), `src/semantic-kinds.ts` and `fixtures/semantic/standing-action-call*.json` (a prefix no port's `action-call-*` glob reaches, so a port pinned past this decision that reads no standing keeps its sweep and its count), `docs/ux/foundation.md` (ST-043),
   `docs/ux/scenarios.md` (SCN-061), `docs/ux/flows.md` (FLW-31), `docs/ux/screens.md` (SCR-30). Not decided here: the monitoring agent's
   own contract (the North Star's monitoring role, G27); rollback at the process level (each product's checks and
   receipts); a coding harness's own refusal (the safety classifier G19 measured), which a profile does not change: this
