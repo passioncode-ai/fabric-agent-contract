@@ -161,7 +161,13 @@ function actionCases(): Json[] {
     ["a level decision against a human step", { action: human, tier: "T0", caller: CALLER, decision: decided("owner", OWNER), tokenMem: digest(OWNER), now: NOW, humanStepUrl: URL, levels: LEVELS }, { ok: false, code: "human-step-required", data: { humanStep: "payment", url: URL } }],
     // LV-10: a service that reads no levels answers as if the call carried no decision.
     ["a service reading no levels, from T0", (({ levels: _l, ...rest }) => rest)(call("T0", decided("admin", ADMIN), { tokenMem: digest(ADMIN) })), { ok: false, code: "operator-decision-required" }],
-    ["a service reading no levels, from T2", (({ levels: _l, ...rest }) => rest)(call("T2", decided("admin", ADMIN), { tokenMem: digest(ADMIN) })), { ok: false, code: "approval-required", data: { actionDigest: DIGEST } }]
+    ["a service reading no levels, from T2", (({ levels: _l, ...rest }) => rest)(call("T2", decided("admin", ADMIN), { tokenMem: digest(ADMIN) })), { ok: false, code: "approval-required", data: { actionDigest: DIGEST } }],
+    // LV-10: a malformed entry of the service's own level contexts, or a mistyped action level, is the service's fault
+    // (levels-invalid, action-level-invalid), never the caller's level-membership: context-invalid.
+    ["a level context whose audience is not an opaque id", call("T2", decided("admin", ADMIN), { tokenMem: digest(ADMIN), levels: { [ORG]: { audience: "reviews service", keySet: KEY_SET } } }), { fault: "levels-invalid" }],
+    ["a level context whose key set names another organization", call("T2", decided("admin", ADMIN), { tokenMem: digest(ADMIN), levels: { [ORG]: { audience: SERVICE, keySet: { ...KEY_SET, org: "org:org-b" } } } }), { fault: "levels-invalid" }],
+    ["a held attestation filed under another subject", call("T2", decided("admin", ADMIN), { tokenMem: digest(ADMIN), levels: { [ORG]: { audience: SERVICE, keySet: KEY_SET, held: { "m-other-01": { subject: ADMIN.subject, revision: ADMIN.revision, digest: digest(ADMIN) } } } } }), { fault: "levels-invalid" }],
+    ["an action whose declared level is mistyped", call("T2", decided("admin", ADMIN), { tokenMem: digest(ADMIN), actionLevel: "Owner" }), { fault: "action-level-invalid" }]
   ];
   return list.map(([name, input, expected]) => ({ name, input, expected: withDigest(input, expected) }));
 }
@@ -197,6 +203,8 @@ function mandateCases(): Json[] {
     // DL-17: from T2 an operator decision counts for nothing, so a bound level mandate beside one is read.
     ["a bound level mandate beside an operator decision, from T2", mandateCall("T2", levelMandate(ADMIN, "admin", ALPHA), { tokenMem: digest(ADMIN), decision: { by: "operator", via: "relayed-instruction", action: "approve-reply", instruction: "approve it", at: "2026-10-25T11:29:00Z" } }), byLevelMandate(ADMIN, "admin")],
     ["an architect's level mandate from T2 on a project outside its own", mandateCall("T2", levelMandate(ARCHITECT, "architect", { ...ALPHA, projects: ["alpha", "gamma"] }), { tokenMem: digest(ARCHITECT), project: "gamma" }), insufficient],
+    // LV-10: a level mandate where no levels are read is as if absent (mandateCovers answers it ignored, levels-not-read).
+    ["a level mandate where no levels are read, from T1", (({ levels: _l, ...rest }) => rest)(mandateCall("T1", levelMandate(ADMIN, "admin", ALPHA), { tokenMem: digest(ADMIN) })), { ok: false, code: "operator-decision-required" }],
     ["a level mandate outside its scope's projects", mandateCall("T2", levelMandate(ADMIN, "admin", ALPHA), { tokenMem: digest(ADMIN), project: "beta" }), { ok: false, code: "operator-decision-required", data: { detail: "outside-mandate: project" } }],
     ["a level mandate without the token's mem", mandateCall("T2", levelMandate(ADMIN, "admin", ALPHA)), { ok: false, code: "decision-invalid", data: { detail: "level-unbound" } }],
     ["a level mandate of an ended membership", mandateCall("T2", levelMandate(ENDED, "admin", ALPHA), { tokenMem: digest(ENDED) }), { ok: false, code: "decision-invalid", data: { detail: "level-membership: ended" } }],
