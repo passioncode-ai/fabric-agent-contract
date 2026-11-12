@@ -80,10 +80,12 @@ contract already has.
   operator's word of 2026-11-12, which Fabric carries as `QUESTIONS_RULE` (`9420da79`): OW-3 now asks its three
   waits that way in a session with no person, and the question is whether a floored act's agreement may come the same
   way (round 29, seam), and that §3.10's sentence "the answer lands in the asking project's thread ... which starts
-  its next run" holds for the `people.ask` route only (Fabric owes the correction or the wake), and that a run on
+  its next run" holds for the `people.ask` route only (Fabric is asked for the correction or the wake), and that a run on
   another machine posts only an answered result, so a blocked one's open step is lost (round 31, product and seam). Add that Fabric's `answer_question` wakes nobody and an ended session's continuation reads
   `needs_restart`, so an answer through `fabric_question_ask` from a board-started run starts no run; OW-3 has the
-  request submitted again on it, and asks Fabric to start the asking project's next run on an answered question
+  request submitted again on it only on the operator's word relayed to the requester (or by the owner's own session), that a run on another machine writes `answered` with
+  the open step because a `blocked` result posts nothing and is run again up to three times (round 32, seam), and that
+  the next run after a PM agent's non-operator answer asks the operator directly, not again through `people.ask`, and asks Fabric to start the asking project's next run on an answered question
   (round 30, seam and product), and that no project offers `people.ask` yet (CO-569).
 - DEC-0158's re-cut (its round 20, 2026-11-12): that branch's OS-6 and this branch's OW-3 state opposite rules for a
   no-person run's notice question at a refused note and for the no-note resubmission at a host's gate (DEC-0158 round
@@ -94,7 +96,10 @@ contract already has.
   then makes OW-3's no-person case cite the table, keeping the settlement and the resubmitter split the DEC-0158 note
   below names. The note's OW-3-range and OS-6-range greps apply while OS-6 is a bullet; once the table lands, its checks
   are: the OW-3 range with `grep -c OS-6` prints at least 1, the table's host's-gate and production-stop rows name
-  `failed_known` with `observed: false` and the resubmitter split, and DEC-0158's DEC amends OW-3 to cite the table.
+  `failed_known` with `observed: false` and the resubmitter split, the table's rows for a decision outside the mandate
+  and a source hand-over name OW-3's question route (the DEC-0158 note's table-form checks), and DEC-0158's DEC amends
+  OW-3 to cite the table, saying which of OW-3's text stays (the settlement, the resubmitter split, the question route)
+  and which moves; every bullet-form grep of the DEC-0158 note has a table-form counterpart (judgement, round 32, seam).
 - Landing note for CT-285's decision (round 25, product and seam): binding on whichever of DEC-0156 and CT-285's DEC
   lands second: CT-285's DEC amends OW-3's no-person case and OW-3's own stop for a headless place (the operator's
   decision of 2026-11-09, fabric-workspace `knowledge/authority.md`, *Autonomy by place*), and OW-3 cites it, with the three places that restate OW-3's no-person case: the OW conformance row
@@ -110,7 +115,10 @@ contract already has.
   `grep "^| an agent that takes its operator" docs/specification/conformance.md | grep -c CT-285` and
   `awk '/^### FLW-29/,/^### FLW-30/' docs/ux/flows.md | grep -c CT-285` each print at least 1, as do
   `awk '/^- \*\*OW-2/,/^- \*\*OW-3/' docs/specification/governance-and-roles.md | grep -c CT-285` and
-  `awk '/^- \*\*OA-4/,/^- \*\*OA-5/' docs/specification/delegation.md | grep -c CT-285` (round 31, seam); until that DEC lands,
+  `awk '/^- \*\*OA-4/,/^- \*\*OA-5/' docs/specification/delegation.md | grep -c CT-285` (round 31, seam), and
+  `awk '/^\*\*Relayed approval\*\*/,/^$/' CONTEXT.md | grep -c CT-285`, `awk '/^### SCN-046/,/^### SCN-047/'
+  docs/ux/scenarios.md | grep -c CT-285` and `grep '^| an agent receiving a relay' docs/specification/conformance.md |
+  grep -c CT-285` (round 32, seam); until that DEC lands,
   `grep '^| CT-285' docs/backlog.md | grep -c 'OW-3'` prints 1 (main's CT-285 row carries it since 2026-11-12).
 - Landing note for CT-292's decision (rounds 28 and 29, seam and product): binding on whichever of DEC-0156 and
   CT-292's DEC lands second. TC-3 calls an unsettled task context a step that waits (OW-3), and TC-4 has a session with
@@ -131,7 +139,9 @@ contract already has.
   "an effect outside a grant" gates) and OW-5's kept "effect outside a grant" to except that narrow grant, while a wider
   grant still waits, and OW-1's "within the grants ... that already apply" cites it. Checks, on the merged tree:
   `grep '^| CT-293' docs/backlog.md | grep -c 'OW-5'` prints 1 (main's row carries it since 2026-11-12); after that DEC,
-  `awk '/^- \*\*OW-5/,/^- \*\*OW-6/' docs/specification/governance-and-roles.md | grep -c 'CT-293'` prints at least 1.
+  `awk '/^- \*\*OW-5/,/^- \*\*OW-6/' docs/specification/governance-and-roles.md | grep -c 'CT-293'` prints at least 1,
+  as do the OW-3 and OW-1 ranges with `grep -c 'CT-293'` (`awk '/^- \*\*OW-3/,/^- \*\*OW-4/'` and
+  `awk '/^- \*\*OW-1/,/^- \*\*OW-2/'`, round 32, seam).
 - Landing note for CT-250's decision (round 26, seam and product): binding on whichever of DEC-0156 and CT-250's DEC
   lands second: CT-250's DEC states how a level holder's words read under OW-1 and OW-6 (the operator's decision of
   2026-11-06, fabric-workspace `knowledge/authority.md`, *Access levels*: an administrator's command binds every agent),
@@ -141,7 +151,10 @@ contract already has.
   grep -c CT-250` prints 1; after that DEC (each prints 0 today, round 30, seam): `awk '/^- \*\*OW-6/,/^## Semantic
   rules/' docs/specification/governance-and-roles.md | grep -c CT-250` and `awk '/^- \*\*OA-4/,/^- \*\*OA-5/'
   docs/specification/delegation.md | grep -c CT-250` each print at least 1, as does `awk '/^- \*\*OW-2/,/^- \*\*OW-3/'
-  docs/specification/governance-and-roles.md | grep -c CT-250` (round 31, seam).
+  docs/specification/governance-and-roles.md | grep -c CT-250` (round 31, seam); and, since OW-3 already cites CT-250
+  as pending, `awk '/^- \*\*OW-3/,/^- \*\*OW-4/' docs/specification/governance-and-roles.md | grep -c "until CT-250's
+  decision and Fabric"` prints 0 after that DEC, and `awk '/^- \*\*OW-5/,/^- \*\*OW-6/'
+  docs/specification/governance-and-roles.md | grep -c CT-250` prints at least 1 (round 32, seam).
 - Landing notes for the sibling decisions. Each states what the merged text must say once both branches are on `main`
   and a check run on the merged tree at landing; none states what a sibling branch says now, since the siblings move
   every round. Whichever of the two branches lands second makes the merged text say it. The branches: DEC-0157 on
@@ -162,9 +175,15 @@ contract already has.
   - DEC-0158 (OS-6, no person in a dispatched run): OS-6's notice question that "the run never reads" meets Fabric's
     `9420da79` (the operator's word of 2026-11-12 as Fabric's `QUESTIONS_RULE` carries it: a run's question goes to the
     organization's PM agent, whose reply starts the next run, or through `fabric_question_ask`, whose answer starts no run
-    and is a decision the request is submitted again on, rounds 30 and 31); check on the merged tree:
-    `awk '/^- \*\*OS-6/,/^- \*\*OS-8/' docs/specification/project-comms.md | grep -c 'starts no run'` prints at least 1; the re-cut table of stops takes OW-3's no-person route
-    for its waits (round 29, seam; relayed to that branch's handoff). Also: this requirement is written here and binds whichever of DEC-0156
+    and is a decision the request is submitted again on only on the operator's word relayed to the requester (or by the owner's own session), rounds 30 to 32). At the
+    stop for a decision outside the mandate and at the source hand-over stop, which are OW-3's first two waits, a
+    dispatched run asks once per task by OW-3's route, its notice question at a human step and after a refused note
+    unchanged (round 32, seam: OS-6 at `cb7009d7` asks nothing at those two stops). Checks on the merged tree: in bullet
+    form, `awk '/^- \*\*OS-6/,/^- \*\*OS-7/' docs/specification/project-comms.md | grep -c 'people.ask'` prints at least 1;
+    in table form, `grep -c 'people.ask' docs/specification/project-comms.md` and `grep -c 'starts no run'
+    docs/specification/project-comms.md` each print at least 1, and (judgement) the table's rows for those two stops
+    name the question. The re-cut table of stops takes OW-3's no-person route for its waits (round 29, seam; relayed
+    to DEC-0158's handoff in round 32, not there at `cb7009d7`). Also: this requirement is written here and binds whichever of DEC-0156
     and DEC-0158 lands second, whether or not the other branch's handoff repeats it (the coordinator relays it to that
     branch's owner). `docs/specification/conformance.md` keeps the board-client row in DEC-0158's form (with "a
     dispatched run follows its own row below (OS-4, OS-7)"), then the OW row, then DEC-0158's rows; OW-3 and OS-6 cite
@@ -321,8 +340,8 @@ contract already has.
   2026-11-12 as Fabric's `QUESTIONS_RULE` carries it (`9420da79`), which rounds 13 and 19 had dropped because a yes
   reached no live session: on `people.ask` the PM agent's reply is a board message that starts the asking project's
   next run (§3.8), which takes the step only on the operator's word; through `fabric_question_ask` the answer still
-  starts no run, so it is a decision on which the request is submitted again, the reason of rounds 13 and 19 kept for
-  that route. A host's gate and the FA-09 case still ask nothing from that session.
+  starts no run, so it is a decision on which the request is submitted again only on the operator's word relayed to the requester (or by the owner's own session), the
+  reason of rounds 13 and 19 kept for that route. A host's gate and the FA-09 case still ask nothing from that session.
 - OW-5 names the separation the operator keeps between unrelated businesses as recorded in the operator's own
   instructions, outside this contract: the contract has no specification of it (contexts, DEC-0082, are personal and
   organization contexts, not businesses).
@@ -944,6 +963,7 @@ counter, and the board told what each consumer owes (DEC-0156's Compatibility).
 - On the round-28 fold (`04707957`): `pnpm run check` exit 0 (11175 tests) before round 29 was read.
 - On the round-29 fold (`14659956`): `pnpm run check` exit 0 (11175 tests) before round 30 was read.
 - On the round-30 fold (`455296c3`, then main `e9bb7ac7` merged as `1f6929db`): `pnpm run check` exit 0 (11175 tests).
+- On the round-31 fold (`c6bfe82e`, then `5c72505e`): `pnpm run check` exit 0 (11175 tests).
 
 - Round 28 (on `9b35a554`, main `2b0bcd55` merged): product clean; unit and seam not clean. Breaks folded: the handoffs
   index called round 26's seam clean, which the round record says was not (unit); main's CT-292 (TC-4, a no-person
@@ -995,6 +1015,18 @@ counter, and the board told what each consumer owes (DEC-0156's Compatibility).
   checks added to the CT-292, CT-285 and CT-250 notes (unit, product, seam). Kept open: the 2026-11-07 decision's
   reach under `46167c9f` and `add1df7c` (product, risk). Declined: none.
 
+- Round 32 (on `5c72505e`): product clean; unit and seam not clean. Breaks folded: round 31's reply rule kept only
+  "the operator's word relayed to it" in four restatements, against the same sentences' owner case; DEC-0156 item 3,
+  the OW row, FLW-29 Q1 and SCN-057 now add "or by the operator's own session when they own the requesting Project"
+  (unit); the DEC-0158 note's only question-route check passed with OS-6's contradiction in place (OS-6 at `cb7009d7`
+  asks nothing at OW-3's first two waits); it now states the question at those two stops, ends its range at OS-7, and
+  checks both the bullet and the table form, and the relay is made to DEC-0158's handoff (seam). Risks folded: the
+  `add1df7c` step says "asked", not "owes"; four summaries carry the relayed-word condition; the next run after a PM
+  agent's non-operator answer asks directly, names the request and posts the reply's notice in its thread; a run on
+  another machine writes `answered` with the open step (a `blocked` result posts nothing and runs again three times);
+  the CT-285, CT-250 and CT-293 notes check every place they name; the table-form checks cover each bullet-form one;
+  CT-220's range reads 25 to 32; the round-31 fold's checks recorded (unit, product, seam). Declined: none.
+
 ## Next task
 
-Round 32 blind readings of branch `agent/ct220-operators-word-v2` (DEC-0156), all three tiers.
+Round 33 blind readings of branch `agent/ct220-operators-word-v2` (DEC-0156), all three tiers.

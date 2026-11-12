@@ -211,7 +211,9 @@ words AP-2 and OA-1 already name; the rules hold for any owner.
   CT-250's decision says so) and records it in the request's thread; an answer that is not the operator's word leaves a
   step only the operator's word decides (a relayed act under AP-2, a source hand-over under DEC-0149, this rule's own
   stop under AP-3) open and named in the request's thread, and that run asks the operator once through the host's
-  question surface. Through `fabric_question_ask` the answer is recorded as the project's decision and starts no run
+  question surface, directly and not again through `people.ask` as `QUESTIONS_RULE` would send it, naming the request,
+  its thread, the step and who submits it again, and posts in the request's thread (a participant `com.reply`) what
+  the second route's reply says below. Through `fabric_question_ask` the answer is recorded as the project's decision and starts no run
   (Fabric's `answer_question` wakes nobody, and an ended session's continuation reads `needs_restart`), so the step
   stays open: an answer agreeing to the step is a decision naming it, on which the request is submitted again as
   below, and a refusal leaves it open as a bare refusal does. Nobody is woken by that answer, and `fabric_question_check`
@@ -221,8 +223,11 @@ words AP-2 and OA-1 already name; the rules hold for any owner.
   (asked of Fabric, the handoff's `add1df7c` step), such an answer can sit unacted on, a risk the reply and the report
   name. While no project offers `people.ask` (Fabric CO-569), every such question takes the second route. A session
   without the board's tools (Fabric's run on another machine, which writes its answer as the run's result) writes each
-  open step and its question into that result, which reaches the request's thread only as the host posts it (Fabric
-  posts an answered result only today, its on-demand spec §3.10 at `92da0efc`). An act a host's gate holds, and the FA-09 case, ask
+  open step and its question into that result, which reaches the request's thread only as the host posts it: Fabric
+  today posts an `answered` result only, as a reply from the target that settles the request `answered`, so such a run
+  writes `answered` with the open step and its question in the text, since a `blocked` result posts nothing and is run
+  again up to three times before it reaches the operator without its text (its on-demand spec §3.10 at `92da0efc`,
+  `boardDispatch.ts`'s `EMPTY_RUNS_TO_OPERATOR`; posting a blocked result's body is asked of Fabric). An act a host's gate holds, and the FA-09 case, ask
   nothing from that session (a host's gate still asks as it does), since only a session the person is in gives the
   agreement they hold. Second, who submits it again: a request settled `failed_known` this way is submitted to the
   board again only where what the person does lets a session with no person take the step and no next run of the

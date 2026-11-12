@@ -11459,8 +11459,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      and the safest reversible option, then once per task to the project offering `people.ask` or through
      `fabric_question_ask`; a `people.ask` reply starts the asking project's next run, which takes the step only on the
      operator's word (their own surface or an accepted relay) and otherwise leaves a step only that word decides open
-     and asks the operator once, while an answer through `fabric_question_ask` starts no run and wakes nobody, so the
-     reply tells the requester that the request is submitted again only on the operator's word relayed to it, the
+     and asks the operator once, naming the request and posting in its thread what the second route's reply says,
+     while an answer through `fabric_question_ask` starts no run and wakes nobody, so the
+     reply tells the requester that the request is submitted again only on the operator's word relayed to it, or by the operator's own session when they own the requesting Project, the
      answer able to sit unacted on until Fabric wakes the asking project (asked under `add1df7c`); a request settled `failed_known` there submitted
      again only where what the person does lets a session with no person take the step and no such next run has
      taken it (a decision or a relay naming the step, a grant, a human step cleared), by the operator's session in the requesting Project (its agent,
@@ -11523,7 +11524,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   holds as written. The operator's word of 2026-11-12 (questions to the people who decide through the organization's
   PM agent), as Fabric's `QUESTIONS_RULE` carries it with its fallback to the host's question surface (on-demand spec
   §3.10, `9420da79`), is how OW-3's no-person case asks for its three waits; only the PM agent's reply starts a next
-  run, so while no project offers `people.ask` the answer is a decision on which the request is submitted again.
+  run, so while no project offers `people.ask` the answer is a decision on which the request is submitted again
+  only on the operator's word relayed to the requester (or by the owner's own session).
 - **Alternatives considered:** leave it to each product's prompt (the products diverged: some shipped it, some did
   not, so the operator repeated the word); make it a host setting the operator switches on (the operator's word was a
   rule for every agent, not a mode); stop at every risk until the operator answers (the operator's word says to
