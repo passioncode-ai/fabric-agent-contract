@@ -516,7 +516,7 @@ known-good earlier payload; it does not reactivate or edit history
 - [ ] Every button the dashboard shows has a tool, declared in `extensions/actions/0.1`, and a `relayed` action takes
   the operator's relayed decision (DEC-0121).
 - [ ] A service that reads authority levels declares them in `extensions/authority/0.1`, and there in `actionLevels`
-  `owner` for every billing act, `operator` for a rule proposal's approval (type `rule`), and `admin` for a client key's relayed twins in an organization's context (issuing a member's key stays CF-3's human step), an access grant, a spend limit (a project's L1, a key's ceiling, an organization-wide total), a board hold's set and lift, a slot move, a Project's
+  `owner` for every billing act, `operator` for a rule proposal's approval (type `rule`), and `admin` for a client key's revoking twin in an organization's context (issuing or rotating a member's key stays CF-3's human step on the owner's or an administrator's decision), an access grant, a spend limit (a project's L1, a key's ceiling, an organization-wide total), a board hold's set and lift, a slot move, a Project's
   listing and unlisting, any other proposal type's approval and a credential request's decision (an action whose effect is `change-policy` is read as `admin` at least, whatever it declares) (DEC-0162 LV-7; an owner's settlement is no relayed action): an action left out is decided by an architect in the call's project, or by `admin` for a
   call in no project.
 

@@ -488,8 +488,9 @@ of two forms, and in no other:
 
 - a valid decision (DEC-0121 AP-2) whose `target` is the one exact string below, or, for an organization's own agent
   only, a level decision ([membership](membership.md#levels) LV-3 to LV-5, DEC-0162) with that exact `target`, by
-  `owner` or `admin`, or by an `architect` when the agent's project is among its `projects`; never for a personal
-  agent; or
+  `owner` or `admin`, or by an `architect` when the agent's project is among its `projects` and the hand-over neither
+  changes the repository's visibility nor adds a reader outside the organization (access, the owner's or an
+  administrator's, DEC-0162); never for a personal agent; or
 - the service's own elicitation in the call's form: an MCP `elicitation/create` sent within the hand-over's `tools/call`,
   in form mode, under [C3.3](interop.md#c33-awaiting-a-choice)'s form constraints (`FAC-SEM-018`), never
   `input_required` on a Task or a job, answered by a person and accepted, whose message names the agent, the target
