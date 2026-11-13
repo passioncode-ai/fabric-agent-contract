@@ -23,7 +23,7 @@ close the board requests.
 
 ## Open
 
-- CT-289 closes after night two (the scheduled run of 2026-11-13).
+- CT-289 closed 2026-11-13: night two green, scheduled run `43345669320` (2026-11-13 01:32 UTC), all four jobs `success`.
 - The DECs for CT-250, CT-285, CT-252 and CT-259 by the organization slice of 2026-11-21, CT-250 first (the
   organization product and PLAT-146 wait on it). Reserve the DEC and FAC-SEM ids with `agent_sync.py reserve` when
   drafting. Each design's operator questions take their defaults unless answered before 2026-11-21.

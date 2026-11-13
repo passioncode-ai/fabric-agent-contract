@@ -3,7 +3,7 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { projectRoot } from "../src/contract.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
-import { usageRules, usageSpend, utcDate } from "../src/usage-rules.js";
+import { allowance, exceeds, ROW_ROUNDING_USD, usageRules, usageSpend, utcDate } from "../src/usage-rules.js";
 
 // DEC-0065: FAC-SEM-025 reads the usage report's 31-day window (F-A-024) and its project attribution (CON-OE-13).
 type Json = Record<string, any>;
@@ -178,5 +178,92 @@ describe("usageSpend: money apart from a subscription's estimate (DEC-0110)", ()
   it("adds in a fixed order, so the same rows give the same sum in any order", () => {
     const rows = [row("key", 1, 0.1), row("key", 1, 0.2), row("key", 1, 1e-7), row("key", 1, 3)];
     expect(usageSpend([...rows].reverse())?.moneyUsd).toBe(usageSpend(rows)?.moneyUsd);
+  });
+});
+
+describe("FAC-SEM-025: sums of rows rounded to 6 places one by one (DEC-0163, CT-295)", () => {
+  // Runs and models written rounded to 6 places one by one: ten runs of 0.2926 against a project of 2.925996, models of
+  // 0.100001 against a day of their exact total, and an excess beyond the rounding refused on each comparison.
+  const run = (i: number, costUsd: number) => ({ taskRunId: `run-${i}`, calls: 1, unpricedCalls: 0, costUsd });
+  const day = (costUsd: number, models: number[]) => ({
+    date: "2026-10-04", calls: models.length, unpricedCalls: 0, inputTokens: 0, outputTokens: 0, costUsd,
+    byModel: models.map((c, i) => ({ provider: "local", model: `m-${i}`, costBasis: "provider", calls: 1, unpricedCalls: 0, inputTokens: 0, outputTokens: 0, costUsd: c }))
+  });
+  const tenRuns = (runCost: number, projectCost: number, dayCost: number) => ({
+    ...report,
+    days: [day(dayCost, Array.from({ length: 10 }, () => dayCost / 10))],
+    byProject: [{ projectId: "urn:project:film", calls: 10, unpricedCalls: 0, costUsd: projectCost, taskRuns: Array.from({ length: 10 }, (_, i) => run(i, runCost)) }]
+  });
+  it("passes ten runs each rounded up by 4e-7, which the fixed 0.000001 refused", () => {
+    // Exact runs 0.2925996 each round to 0.2926; the project's exact 2.925996 rounds to 2.925996.
+    expect(paths(tenRuns(0.2926, 2.925996, 2.926))).toEqual([]);
+  });
+  it("still refuses runs that cost more than rounding allows", () => {
+    // Eleven rows on the two sides allow 0.0000055 + 0.000001; 0.00001 over is beyond it.
+    expect(paths(tenRuns(0.2926, 2.92599, 2.926))).toEqual(["FAC-SEM-025 /byProject/0/taskRuns"]);
+  });
+  it("passes a day whose ten models are each rounded up, and refuses one off by more", () => {
+    const models = Array.from({ length: 10 }, () => 0.100001);
+    expect(paths({ ...report, byProject: undefined, days: [day(1.000005, models)] })).toEqual([]);
+    expect(paths({ ...report, byProject: undefined, days: [day(1.00002, models)] })).toEqual(["FAC-SEM-025 /days/0/costUsd"]);
+  });
+  it("passes projects summed against days within a row's rounding each", () => {
+    const projects = Array.from({ length: 10 }, (_, i) => ({ projectId: `urn:project:p${i}`, calls: 1, unpricedCalls: 0, costUsd: 0.100001, taskRuns: [] }));
+    expect(paths({ ...report, days: [day(1.000005, Array.from({ length: 10 }, () => 0.1000005))], byProject: projects })).toEqual([]);
+  });
+  it("pins each count at its boundary: the project, the day and the days each add a row", () => {
+    const at = (value: unknown, path: string) => paths(value).includes(`FAC-SEM-025 ${path}`);
+    const one = (projectCost: number, runCost: number) => ({ ...report, days: [day(2, [2])], byProject: [{ projectId: "urn:project:p", calls: 1, unpricedCalls: 0, costUsd: projectCost, taskRuns: [run(0, runCost)] }] });
+    // A project and its one run: two rows, 0.000002.
+    expect(at(one(1, 1.0000019), "/byProject/0/taskRuns")).toBe(false);
+    expect(at(one(1, 1.0000021), "/byProject/0/taskRuns")).toBe(true);
+    // A day and its one model: two rows.
+    expect(at({ ...report, byProject: undefined, days: [day(1, [1.0000019])] }, "/days/0/costUsd")).toBe(false);
+    expect(at({ ...report, byProject: undefined, days: [day(1, [1.0000021])] }, "/days/0/costUsd")).toBe(true);
+    // One project against one day: two rows, the day's among them.
+    const projectDay = (projectCost: number) => ({ ...report, days: [day(1, [1])], byProject: [{ projectId: "urn:project:p", calls: 1, unpricedCalls: 0, costUsd: projectCost, taskRuns: [] }] });
+    expect(at(projectDay(1.0000019), "/byProject")).toBe(false);
+    expect(at(projectDay(1.0000021), "/byProject")).toBe(true);
+    // Twenty null-cost runs add nothing to a project and its one priced run.
+    const nullRun = (i: number) => ({ taskRunId: `null-${i}`, calls: 1, unpricedCalls: 1, costUsd: null });
+    const withNulls = { ...report, days: [{ ...day(2, [2]), calls: 21, byModel: [{ ...day(2, [2]).byModel[0], calls: 21, unpricedCalls: 20 }], unpricedCalls: 20 }], byProject: [{ projectId: "urn:project:p", calls: 21, unpricedCalls: 20, costUsd: 1, taskRuns: [run(0, 1.0000021), ...Array.from({ length: 20 }, (_, i) => nullRun(i))] }] };
+    expect(at(withNulls, "/byProject/0/taskRuns")).toBe(true);
+    // Twenty null-cost models add nothing to a day and its one priced model.
+    const priced = day(1, [1.0000021]);
+    const nullModels = Array.from({ length: 20 }, (_, i) => ({ provider: "local", model: `null-${i}`, costBasis: "provider", calls: 1, unpricedCalls: 1, inputTokens: 0, outputTokens: 0, costUsd: null }));
+    expect(at({ ...report, byProject: undefined, days: [{ ...priced, calls: 21, unpricedCalls: 20, byModel: [...priced.byModel, ...nullModels] }] }, "/days/0/costUsd")).toBe(true);
+    // A negative model cost is summed but widens nothing; Infinity is never close.
+    expect(at({ ...report, byProject: undefined, days: [day(1, [1.0000024, -0.0000001])] }, "/days/0/costUsd")).toBe(true);
+    expect(usageRules({ ...report, byProject: undefined, days: [day(Number.POSITIVE_INFINITY, [1])] }).map((f) => f.instancePath)).toContain("/days/0/costUsd");
+    expect(usageRules({ ...report, byProject: undefined, days: [day(1, [Number.POSITIVE_INFINITY])] }).map((f) => f.instancePath)).toContain("/days/0/costUsd");
+  });
+  it("allows 0.000001, half a millionth per row and 1e-9 of the larger side, and an overflowing sum exceeds a finite one", () => {
+    expect(ROW_ROUNDING_USD).toBe(0.0000005);
+    expect(allowance(0, 0, 0)).toBe(0.000001);
+    expect(allowance(1, 0, 1)).toBeCloseTo(0.000001 + 0.0000005 + 1e-9, 15);
+    expect(allowance(0, 2, 10)).toBeCloseTo(0.000006 + 2e-9, 15);
+    expect(exceeds(1.0000016, 1, 1)).toBe(true);
+    expect(exceeds(1.0000014, 1, 1)).toBe(false);
+    expect(exceeds(Number.POSITIVE_INFINITY, 1, 0)).toBe(true);
+    expect(exceeds(Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY, 0)).toBe(false);
+    expect(exceeds(1, Number.POSITIVE_INFINITY, 0)).toBe(false);
+    // Two projects of 1e308 overflow their sum; the days are finite, so the projects exceed them.
+    const projects = [0, 1].map((i) => ({ projectId: `urn:project:big${i}`, calls: 0, unpricedCalls: 0, costUsd: 1e308, taskRuns: [] }));
+    expect(paths({ ...report, byProject: projects })).toContain("FAC-SEM-025 /byProject");
+    // A finite cost too large to scale reads as itself, never as Infinity.
+    const big = { ...report, byProject: [{ projectId: "urn:project:big", calls: 2, unpricedCalls: 0, costUsd: 1e308, taskRuns: [run(0, 1e308), run(1, 1e308)] }] };
+    expect(usageRules(big).find((f) => f.instancePath === "/byProject/0/taskRuns")?.message).toMatch(/> 1e\+308\)$/);
+  });
+  it("passes the rounded-rows fixture, which the fixed tolerance refused", () => {
+    expect(paths(JSON.parse(readFileSync(path.join(projectRoot(), "fixtures/positive/service-usage-rounded-rows.json"), "utf8")))).toEqual([]);
+  });
+  it("counts only rows with a known cost, and never finds NaN close (DEC-0163)", () => {
+    const project = (i: number, costUsd: number | null) => ({ projectId: `urn:project:p${i}`, calls: 1, unpricedCalls: costUsd === null ? 1 : 0, costUsd, taskRuns: [] });
+    const nulls = Array.from({ length: 20 }, (_, i) => project(i + 1, null));
+    // One known project and one known day allow 0.000002; twenty null-cost projects add nothing to it.
+    const costMessages = (value: unknown) => evaluateSemanticRules("service-usage", value).map((f) => f.message).filter((m) => m.includes("cost more than the days"));
+    expect(costMessages({ ...report, days: [day(1, [1])], byProject: [project(0, 1.0000025), ...nulls] })).toHaveLength(1);
+    expect(costMessages({ ...report, days: [day(1, [1])], byProject: [project(0, 1.0000015), ...nulls] })).toHaveLength(0);
+    expect(usageRules({ ...report, byProject: undefined, days: [day(Number.NaN, [1])] }).map((f) => f.instancePath)).toContain("/days/0/costUsd");
   });
 });
