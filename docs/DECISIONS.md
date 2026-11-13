@@ -11481,7 +11481,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-11-12
 - **Status:** Proposed 2026-11-12, from the design `docs/evidence/plans/2026-11-12-ct285-autonomy-profile.md` (CT-285),
-  with questions 4 and 5 added here and question 1 widened in round 4, all five answered by the operator on 2026-11-13 in this repository's session `7c9eb2c2` (asked in its chat; a relayed «Принять все дефолты», fabric-workspace session `fd5dfcf0`, board message `36b1981b`, is superseded: asked about the conflict, the operator answered «Мои ответы здесь»): questions 1, 2, 3 and 5 as their defaults, question 4 otherwise (only the owner and the administrators record an organization's profile, an architect none: «Владелец и администраторы»); and, asked after round 12 the same day, a provider key issued through the estate's own doors is covered at its door's default ceiling only (a rotation keeping its predecessor's ceiling included), any other ceiling being a spend limit (`change-policy`): for a key an organization holds the owner's or an administrator's, for a key in a member's own estate that estate operator's (L0), in the personal context the operator's (the option chosen reading «Ключ с потолком хозяйства по умолчанию агент выпускает сам по профилю; любой другой потолок (выше или ниже) решают владелец или администратор»; asked once more the same day: a rotation keeping a raised ceiling is covered («Покрыта») and a key in a member's own estate is that member's («Сам участник»); and a send to people outside the estate stays a person's, narrowing question 1 («Да, человек»), AU-2); accepted when the
+  with questions 4 and 5 added here and question 1 widened in round 4, all five answered by the operator on 2026-11-13 in this repository's session `7c9eb2c2` (asked in its chat; a relayed «Принять все дефолты», fabric-workspace session `fd5dfcf0`, board message `36b1981b`, is superseded: asked about the conflict, the operator answered «Мои ответы здесь»): questions 1, 2, 3 and 5 as their defaults, question 4 otherwise (only the owner and the administrators record an organization's profile, an architect none: «Владелец и администраторы»); and, asked after round 12 the same day, a provider key issued through the estate's own doors is covered at its door's default ceiling only (a rotation keeping its predecessor's ceiling included), any other ceiling being a spend limit (`change-policy`): for a key an organization holds the owner's or an administrator's, for a key in a member's own estate that estate operator's (L0), in the personal context the operator's (the option chosen reading «Ключ с потолком хозяйства по умолчанию агент выпускает сам по профилю; любой другой потолок (выше или ниже) решают владелец или администратор»; asked once more the same day: a rotation keeping a raised ceiling is covered («Покрыта») and a key in a member's own estate is that member's («Сам участник»), AU-2). A send to people outside the estate stays a person's, narrowing question 1 («Да, человек», the option reading «Отправка людям вне хозяйства остаётся решением человека; профиль её не покрывает»); the question had stated, wrongly, that question 1's default already excluded the send, while it covered it, and the option's own words decide, as the operator's standing rule of the same day keeps such a send with a person; accepted when the
   coordinator's blind readings are clean on two consecutive rounds. It reads DEC-0162's levels and lands after it: the
   branch `agent/ct285-autonomy-profile-20261112` is stacked on DEC-0162's. An answer from the operator after
   acceptance is a new decision amending this one.
@@ -11493,7 +11493,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   architect sets it within their level (narrowed by the operator's answer to question 4 on 2026-11-13: the owner and the administrators set a profile, an architect does not); only the body's gates stay everywhere. North Star gap G19. The contract had a
   per-task mandate (DEC-0125) and the operator's decision per action (AP-2, DEC-0121), and AP-3 refuses a standing rule
   in a file, so a headless assignment had nobody to ask. This decision is narrower than the operator's "only the body's
-  gates" in two ways: every profile keeps `change-policy` and MD-6's list (a source hand-over, AP-5's approvals) with a
+  gates" in three ways (the third, a send to people outside the estate kept with a person, the operator's answer of 2026-11-13): every profile keeps `change-policy` and MD-6's list (a source hand-over, AP-5's approvals) with a
   person, and in an organization's context a profile set below an act's declared level never covers it (no level's
   profile covers an act declared `operator`; only an owner's covers a billing act). In the personal context the
   operator's own default is the operator's word and covers the acts a service declares `operator` like any other, save
@@ -11515,7 +11515,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      declares `actionLevels` refuses an action declared above it `level-insufficient` (LV-7, LV-10; `levelShortOf`
      in `src/levels.ts`), so a profile never covers more than its setter's level does. No profile reaches the board's
      gates, which declare no `standing`, and none covers a policy change, a spend limit, a client key or an access grant
-     (`change-policy`, AU-5).
+     (`change-policy`, AU-5), nor a send to people outside the estate.
   3. **Binding (AU-3).** A callee reads standing mandates only when its authority extension declares `standing`; an agent
      sends one, and the hub forwards one, only to such a callee, and the protocol name `standing/1` gates the form
      toward a hub. From T0 or T1 it is taken as MD-3 says; from T2 only when the call's delegation token carries the new
@@ -11523,7 +11523,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      `chain` and `source`), which the hub writes for the assignment's token; a `prof` that is not the mandate's is `decision-invalid`
      `profile-unbound` at any tier; an onward token keeps the parent's `prof` or none (`FAC-SEM-050`).
   4. **Defaults, bounds, watching, refusals (AU-4 to AU-7).** A headless place with no recorded profile covers every
-     effect class but `change-policy` for every capability of the services registered in the place's estate, which
+     effect class but `change-policy`, and no a send to people outside the estate, for every capability of the services registered in the place's estate, which
      the hub states as `standing.estateCapabilities` (inside the boundary only); a person's computer nothing beyond its person's own decisions until a profile is
      recorded from the hub's presets; in an organization's context a headless place with no recorded profile states
      nothing until its owner or an administrator records one (question 4). A profile decides no credential request

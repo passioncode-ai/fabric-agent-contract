@@ -203,7 +203,7 @@ export function mandateCovers(input: {
   levels?: LevelContexts;
   /** The `mem` claim of the call's delegation token (LV-5). */
   tokenMem?: unknown;
-  /** True when this callee declares `standing` (DEC-0166 AU-3); absent, it reads no standing mandate. */
+  /** True when this callee declares `standing` (DEC-0166 AU-3); absent, it reads no standing mandate. A service leaves it out for a send to people outside the estate, which no profile covers (AU-2). */
   standing?: boolean;
   /** The `prof` claim of the call's delegation token (AU-3), absent when it presented none. */
   tokenProf?: unknown;

@@ -81,7 +81,7 @@ export interface ActionDecisionInput {
    * architect in the call's project, admin for a call in no project; an action whose effect is `change-policy` is read
    * as `admin` at least whatever this says. */
   actionLevel?: unknown;
-  /** True when this service declares `standing` in its authority extension (DEC-0166 AU-3): it reads standing mandates. */
+  /** True when this service declares `standing` in its authority extension (DEC-0166 AU-3): it reads standing mandates. Never passed for a send to people outside the estate, which no profile covers (AU-2). */
   standing?: unknown;
   /** The `prof` claim of the call's verified delegation token, absent when it presented none (DEC-0166 AU-3). */
   tokenProf?: unknown;

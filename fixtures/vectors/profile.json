@@ -551,6 +551,59 @@
       }
     },
     {
+      "name": "a send to people outside the estate, answered as absent, from T1",
+      "input": {
+        "action": {
+          "id": "deploy-site",
+          "title": "Deploy the site",
+          "tool": "site.deploy",
+          "gate": "relayed"
+        },
+        "tier": "T1",
+        "caller": "agent:example-runner",
+        "callerAgent": "example-runner",
+        "self": "example-deployer",
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "operator",
+          "standing": {
+            "place": "studio-space-1",
+            "placeKind": "headless",
+            "revision": 3
+          },
+          "task": "assignment:alpha-0412",
+          "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
+          "at": "2026-11-12T09:00:00Z",
+          "expiresAt": "2026-11-13T08:00:00Z",
+          "scope": {
+            "capabilities": [
+              "site.deploy"
+            ],
+            "effects": [
+              "deploy"
+            ]
+          },
+          "chain": [
+            {
+              "agent": "example-runner",
+              "at": "2026-11-12T09:00:05Z"
+            },
+            {
+              "agent": "example-deployer",
+              "at": "2026-11-12T09:30:00Z"
+            }
+          ]
+        },
+        "effect": "send",
+        "now": "2026-11-12T10:00:00Z",
+        "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a"
+      },
+      "expected": {
+        "ok": false,
+        "code": "operator-decision-required"
+      }
+    },
+    {
       "name": "a profile setting its own place's profile",
       "input": {
         "action": {

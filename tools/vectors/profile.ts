@@ -81,6 +81,8 @@ function actionCases(): Json[] {
     // AU-3: a service that does not declare standing answers as if the call carried no mandate.
     ["a service that reads no standing mandates, from T1", call("T1", p, { standing: undefined }), { ok: false, code: "operator-decision-required" }],
     ["a service that reads no standing mandates, from T2", call("T2", p, { standing: undefined, tokenProf: prof(p) }), { ok: false, code: "approval-required", data: { actionDigest: DIGEST } }],
+    // AU-2: a send to people outside the estate, which the service answers as absent by passing no standing for it.
+    ["a send to people outside the estate, answered as absent, from T1", call("T1", p, { standing: undefined, effect: "send" }), { ok: false, code: "operator-decision-required" }],
     // AU-5: no profile sets a profile, and none covers a body gate.
     ["a profile setting its own place's profile", call("T1", profile({}, { capabilities: ["autonomy.profile.set", "site.deploy"], effects: ["deploy"] }), { action: setProfile, effect: "deploy" }), { ok: false, code: "operator-decision-required", data: { detail: "outside-mandate: capability" } }],
     ["a payment under a headless profile", { ...call("T1", p), action: payment, humanStepUrl: URL }, { ok: false, code: "human-step-required", data: { humanStep: "payment", url: URL } }],

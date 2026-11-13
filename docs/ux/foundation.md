@@ -785,12 +785,13 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 
 ### ST-043: My headless places finish the work, within the profile I set for each
 
-- **Story:** As P-02, I want each place my agents work on (the always-on machine, an organization's space or cloud, my own computer) to carry an autonomy profile I set once, so that an assignment on a headless place deploys, merges and sends without asking me, while my own computer brings back what I chose, and no assignment ever raises its own autonomy.
+- **Story:** As P-02, I want each place my agents work on (the always-on machine, an organization's space or cloud, my own computer) to carry an autonomy profile I set once, so that an assignment on a headless place deploys, merges and sends within the estate without asking me, while my own computer brings back what I chose, and no assignment ever raises its own autonomy.
 - **Traces:** JTBD-07, JRN-06/#3
 - **Acceptance criteria:**
   - Given a headless place whose watcher answers, when its hub starts an assignment, then the hub states the place's profile as a standing mandate (DEC-0166 AU-1), and a service that declares `standing` takes a covered deploy as my decision, recorded `via: profile` with the place, the revision and the digest (AU-6).
   - Given a call from T2, when its token carries no `prof` or another profile's, then the profile changes nothing or is refused `profile-unbound` (AU-3).
   - Given a payment, spend above a limit, `change-policy` or `autonomy.profile.set`, when an assignment reaches it, then the profile covers none of them (AU-5).
+  - Given a send to people outside the estate, when a headless assignment reaches it, then the service answers the profile as absent and a person decides (AU-2).
   - Given a place whose watcher stops answering, when the hub starts the next assignment, then it treats the place as `person` (AU-6).
   - Given an organization's administrator who sets a place's profile, when an assignment under it reaches an act a service declares `owner` or `operator`, then the service refuses it `level-insufficient` and the agent asks a holder of that level (AU-2).
   - Given an organization's headless place with no recorded profile, when its hub starts an assignment, then the hub states no profile until the owner or an admin records one, never an architect (AU-4).

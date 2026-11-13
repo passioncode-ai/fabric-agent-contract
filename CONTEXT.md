@@ -163,7 +163,7 @@ constant. Not a **Profile** (a compatibility mode), a **Machine profile**, a **M
 an audit's `via: profile` and the token's `prof` name this one. The place's hub holds it at a rising revision and states it, for each assignment it starts there, as a
 **standing mandate** (`mandate/1` with `standing`: the place, `headless` or `person`, the revision), at most a day
 long; a callee that declares `standing` takes it as a task's mandate inside the boundary and, from T2, only when the
-assignment token's `prof` binds it. No profile covers a human step, spend above a limit, a policy change (`change-policy`: a spend limit, access), the board's gates, a source hand-over or
+assignment token's `prof` binds it. No profile covers a human step, spend above a limit, a policy change (`change-policy`: a spend limit, access), the board's gates, a send to people outside the estate, a source hand-over or
 setting a profile (`autonomy.profile.set`) ([delegation](docs/specification/delegation.md#a-places-standing-mandate-dec-0166),
 DEC-0166 AU-1 to AU-7). Not a spend level (L0 to L3) and not an authority level.
 
