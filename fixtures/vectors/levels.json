@@ -1741,7 +1741,7 @@
       }
     },
     {
-      "name": "the owner on an act no level decides",
+      "name": "the owner issues a client key, declared admin",
       "input": {
         "action": {
           "id": "issue-key",
@@ -1757,6 +1757,263 @@
           "level": "owner",
           "org": "org:org-a",
           "action": "issue-key",
+          "instruction": "approve the reply to the review from Anna",
+          "at": "2026-10-25T11:20:00Z",
+          "membership": {
+            "type": "org-membership/2",
+            "issuer": "https://orgs.example",
+            "org": "org:org-a",
+            "audience": "reviews-service-a1",
+            "subject": "m-owner-01",
+            "role": "owner",
+            "projects": [],
+            "external": false,
+            "status": "active",
+            "revision": 3,
+            "membershipEndsAt": null,
+            "issuedAt": "2026-10-25T11:00:00Z",
+            "notBefore": "2026-10-25T11:00:00Z",
+            "expiresAt": "2026-10-25T12:00:00Z",
+            "extensions": {},
+            "alg": "EdDSA",
+            "kid": "mem-2026-10",
+            "sig": "DWXhTb1wl4-GuoOEi148WMcPzY-rWvxeCnECywHvCNsQLsSO3n0TlMlsybW3anYPQ8fdK_VD4DauMmC42sxXBw"
+          }
+        },
+        "effect": "change-policy",
+        "now": "2026-10-25T11:30:00Z",
+        "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
+        "levels": {
+          "org:org-a": {
+            "audience": "reviews-service-a1",
+            "keySet": {
+              "type": "org-key-set/1",
+              "issuer": "https://orgs.example",
+              "org": "org:org-a",
+              "revision": 1,
+              "issuedAt": "2026-10-15T00:00:00Z",
+              "keys": [
+                {
+                  "kid": "mem-2026-10",
+                  "alg": "EdDSA",
+                  "x": "YxEDJVK86TVti3mnfdU9cSSlKdjXDJM9A3eKVqIxr7U",
+                  "notBefore": "2026-10-15T00:00:00Z",
+                  "notAfter": "2027-01-01T00:00:00Z"
+                }
+              ],
+              "revoked": [],
+              "administrators": [],
+              "alg": "EdDSA",
+              "kid": "root-org-a-1",
+              "sig": "vufCXJ4roCUAM3MEuAikBXHXZ8mdhK7hyiZkkFzc14MuJ8fvPq6zYxOOOH8KtIuBEIUcXesvsy1NXXs9rYqIBw"
+            }
+          }
+        },
+        "actionLevel": "admin",
+        "tokenMem": "sha256:614fc6f0c76021eb1a4a6de48c6a4c674992936d83d94d33630d956224d997a0"
+      },
+      "expected": {
+        "ok": true,
+        "recordAs": {
+          "by": "level",
+          "via": "level-command",
+          "level": "owner",
+          "org": "org:org-a",
+          "approver": "m-owner-01",
+          "membershipDigest": "sha256:614fc6f0c76021eb1a4a6de48c6a4c674992936d83d94d33630d956224d997a0",
+          "revision": 3,
+          "caller": "agent:claude-code"
+        }
+      }
+    },
+    {
+      "name": "an administrator issues a client key, declared admin",
+      "input": {
+        "action": {
+          "id": "issue-key",
+          "title": "Issue a client key",
+          "tool": "keys.issue",
+          "gate": "relayed"
+        },
+        "tier": "T2",
+        "caller": "agent:claude-code",
+        "decision": {
+          "by": "level",
+          "via": "level-command",
+          "level": "admin",
+          "org": "org:org-a",
+          "action": "issue-key",
+          "instruction": "approve the reply to the review from Anna",
+          "at": "2026-10-25T11:20:00Z",
+          "membership": {
+            "type": "org-membership/2",
+            "issuer": "https://orgs.example",
+            "org": "org:org-a",
+            "audience": "reviews-service-a1",
+            "subject": "m-admin-02",
+            "role": "admin",
+            "projects": [],
+            "external": false,
+            "status": "active",
+            "revision": 3,
+            "membershipEndsAt": null,
+            "issuedAt": "2026-10-25T11:00:00Z",
+            "notBefore": "2026-10-25T11:00:00Z",
+            "expiresAt": "2026-10-25T12:00:00Z",
+            "extensions": {},
+            "alg": "EdDSA",
+            "kid": "mem-2026-10",
+            "sig": "Rg3hZAm3Hgabq5LB3LPvOjkbms6W_jKJaGFFOHyPFOIabVXhP2gvzpb_wXkR30Xxu3UQK-ZW_eTAF9aF6qwQDA"
+          }
+        },
+        "effect": "change-policy",
+        "now": "2026-10-25T11:30:00Z",
+        "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
+        "levels": {
+          "org:org-a": {
+            "audience": "reviews-service-a1",
+            "keySet": {
+              "type": "org-key-set/1",
+              "issuer": "https://orgs.example",
+              "org": "org:org-a",
+              "revision": 1,
+              "issuedAt": "2026-10-15T00:00:00Z",
+              "keys": [
+                {
+                  "kid": "mem-2026-10",
+                  "alg": "EdDSA",
+                  "x": "YxEDJVK86TVti3mnfdU9cSSlKdjXDJM9A3eKVqIxr7U",
+                  "notBefore": "2026-10-15T00:00:00Z",
+                  "notAfter": "2027-01-01T00:00:00Z"
+                }
+              ],
+              "revoked": [],
+              "administrators": [],
+              "alg": "EdDSA",
+              "kid": "root-org-a-1",
+              "sig": "vufCXJ4roCUAM3MEuAikBXHXZ8mdhK7hyiZkkFzc14MuJ8fvPq6zYxOOOH8KtIuBEIUcXesvsy1NXXs9rYqIBw"
+            }
+          }
+        },
+        "actionLevel": "admin",
+        "tokenMem": "sha256:5858c2d548aaf65bbe4f80625bb7315693cad1e36ac8b30f08e82cf978ec9ff5"
+      },
+      "expected": {
+        "ok": true,
+        "recordAs": {
+          "by": "level",
+          "via": "level-command",
+          "level": "admin",
+          "org": "org:org-a",
+          "approver": "m-admin-02",
+          "membershipDigest": "sha256:5858c2d548aaf65bbe4f80625bb7315693cad1e36ac8b30f08e82cf978ec9ff5",
+          "revision": 3,
+          "caller": "agent:claude-code"
+        }
+      }
+    },
+    {
+      "name": "an architect issues a client key in its project, declared admin",
+      "input": {
+        "action": {
+          "id": "issue-key",
+          "title": "Issue a client key",
+          "tool": "keys.issue",
+          "gate": "relayed"
+        },
+        "tier": "T1",
+        "caller": "agent:claude-code",
+        "decision": {
+          "by": "level",
+          "via": "level-command",
+          "level": "architect",
+          "org": "org:org-a",
+          "action": "issue-key",
+          "instruction": "approve the reply to the review from Anna",
+          "at": "2026-10-25T11:20:00Z",
+          "membership": {
+            "type": "org-membership/2",
+            "issuer": "https://orgs.example",
+            "org": "org:org-a",
+            "audience": "reviews-service-a1",
+            "subject": "m-arch-03",
+            "role": "architect",
+            "projects": [
+              "alpha",
+              "beta"
+            ],
+            "external": false,
+            "status": "active",
+            "revision": 3,
+            "membershipEndsAt": null,
+            "issuedAt": "2026-10-25T11:00:00Z",
+            "notBefore": "2026-10-25T11:00:00Z",
+            "expiresAt": "2026-10-25T12:00:00Z",
+            "extensions": {},
+            "alg": "EdDSA",
+            "kid": "mem-2026-10",
+            "sig": "RrABkwV8ubdv_gWsjle26Lj5uG4Q4FeAc2qFy7ENRhxw3m8ioGjcxYd3QIiUM-lGgV4jUatmUi2BtWBFGdO-Aw"
+          },
+          "project": "alpha"
+        },
+        "effect": "change-policy",
+        "now": "2026-10-25T11:30:00Z",
+        "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
+        "levels": {
+          "org:org-a": {
+            "audience": "reviews-service-a1",
+            "keySet": {
+              "type": "org-key-set/1",
+              "issuer": "https://orgs.example",
+              "org": "org:org-a",
+              "revision": 1,
+              "issuedAt": "2026-10-15T00:00:00Z",
+              "keys": [
+                {
+                  "kid": "mem-2026-10",
+                  "alg": "EdDSA",
+                  "x": "YxEDJVK86TVti3mnfdU9cSSlKdjXDJM9A3eKVqIxr7U",
+                  "notBefore": "2026-10-15T00:00:00Z",
+                  "notAfter": "2027-01-01T00:00:00Z"
+                }
+              ],
+              "revoked": [],
+              "administrators": [],
+              "alg": "EdDSA",
+              "kid": "root-org-a-1",
+              "sig": "vufCXJ4roCUAM3MEuAikBXHXZ8mdhK7hyiZkkFzc14MuJ8fvPq6zYxOOOH8KtIuBEIUcXesvsy1NXXs9rYqIBw"
+            }
+          }
+        },
+        "actionLevel": "admin",
+        "tokenMem": "sha256:3fd5ef20ba24c7a1382e32a720bf915827c2b2f93741802eaf8720157e9f9d8d",
+        "project": "alpha"
+      },
+      "expected": {
+        "ok": false,
+        "code": "operator-decision-required",
+        "data": {
+          "detail": "level-insufficient: admin"
+        }
+      }
+    },
+    {
+      "name": "the owner on an act no level decides",
+      "input": {
+        "action": {
+          "id": "approve-rule",
+          "title": "Approve a rule proposal",
+          "tool": "proposals.approve",
+          "gate": "relayed"
+        },
+        "tier": "T1",
+        "caller": "agent:claude-code",
+        "decision": {
+          "by": "level",
+          "via": "level-command",
+          "level": "owner",
+          "org": "org:org-a",
+          "action": "approve-rule",
           "instruction": "approve the reply to the review from Anna",
           "at": "2026-10-25T11:20:00Z",
           "membership": {
@@ -1824,9 +2081,9 @@
       "name": "the operator's own decision on an act no level decides, from T0",
       "input": {
         "action": {
-          "id": "issue-key",
-          "title": "Issue a client key",
-          "tool": "keys.issue",
+          "id": "approve-rule",
+          "title": "Approve a rule proposal",
+          "tool": "proposals.approve",
           "gate": "relayed"
         },
         "tier": "T0",
@@ -1834,8 +2091,8 @@
         "decision": {
           "by": "operator",
           "via": "relayed-instruction",
-          "action": "issue-key",
-          "instruction": "Issue the key for the support bot",
+          "action": "approve-rule",
+          "instruction": "Approve the rule for the support bot",
           "at": "2026-10-25T11:29:00Z"
         },
         "effect": "reply",
@@ -5150,9 +5407,9 @@
       "name": "the owner's level mandate on an act no level decides",
       "input": {
         "action": {
-          "id": "issue-key",
-          "title": "Issue a client key",
-          "tool": "keys.issue",
+          "id": "approve-rule",
+          "title": "Approve a rule proposal",
+          "tool": "proposals.approve",
           "gate": "relayed"
         },
         "tier": "T2",
@@ -5194,7 +5451,7 @@
           "expiresAt": "2026-10-26T11:20:00Z",
           "scope": {
             "capabilities": [
-              "keys.issue"
+              "proposals.approve"
             ],
             "effects": [
               "reply"

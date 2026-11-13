@@ -98,6 +98,9 @@ const relayed = { id: "approve-reply", title: "Approve the reply", tool: "review
 const billing = { id: "change-plan", title: "Change the plan", tool: "billing.plan", gate: "relayed" };
 /** A policy change (effect change-policy), left out of the service's action levels: an owner's or an admin's (LV-7). */
 const policy = { id: "set-policy", title: "Change the project's policy", tool: "policy.set", gate: "relayed" };
+/** A rule proposal's approval (type rule): the act LV-7 keeps for the operator alone (FAC-SEM-104). */
+const ruleApproval = { id: "approve-rule", title: "Approve a rule proposal", tool: "proposals.approve", gate: "relayed" };
+/** A client key of an instance the organization deploys: an owner's or an admin's in its context (LV-7, 2026-11-13). */
 const clientKey = { id: "issue-key", title: "Issue a client key", tool: "keys.issue", gate: "relayed" };
 const human = { id: "connect-store", title: "Do it yourself", tool: "accounts.connect", gate: "human", humanStep: "payment" };
 const CALLER = "agent:claude-code";
@@ -143,9 +146,13 @@ function actionCases(): Json[] {
     // LV-7: an act declared admin (a spend limit, a board hold, a slot move, a listing) is an owner's or an admin's.
     ["an architect in its project on an act declared admin", call("T1", decided("architect", ARCHITECT, { project: "alpha" }), { actionLevel: "admin", tokenMem: digest(ARCHITECT), project: "alpha" }), insufficient],
     ["an administrator on an act declared admin", call("T2", decided("admin", ADMIN), { actionLevel: "admin", tokenMem: digest(ADMIN) }), level("admin", ADMIN)],
-    // LV-7: an act the service keeps for the operator alone (a client key, DEC-0159 CF-3) is decided by no level.
-    ["the owner on an act no level decides", call("T1", { ...decided("owner", OWNER), action: "issue-key" }, { action: clientKey, actionLevel: "operator", tokenMem: digest(OWNER) }), { ok: false, code: "operator-decision-required", data: { detail: "level-insufficient: operator" } }],
-    ["the operator's own decision on an act no level decides, from T0", call("T0", { by: "operator", via: "relayed-instruction", action: "issue-key", instruction: "Issue the key for the support bot", at: "2026-10-25T11:29:00Z" }, { action: clientKey, actionLevel: "operator" }), { ok: true, recordAs: { by: "operator", via: "relayed-instruction", caller: CALLER } }],
+    // LV-7: a client key in an organization's context is an owner's or an admin's, declared admin (the operator, 2026-11-13).
+    ["the owner issues a client key, declared admin", call("T1", { ...decided("owner", OWNER), action: "issue-key" }, { action: clientKey, actionLevel: "admin", effect: "change-policy", tokenMem: digest(OWNER) }), level("owner", OWNER)],
+    ["an administrator issues a client key, declared admin", call("T2", { ...decided("admin", ADMIN), action: "issue-key" }, { action: clientKey, actionLevel: "admin", effect: "change-policy", tokenMem: digest(ADMIN) }), level("admin", ADMIN)],
+    ["an architect issues a client key in its project, declared admin", call("T1", { ...decided("architect", ARCHITECT, { project: "alpha" }), action: "issue-key" }, { action: clientKey, actionLevel: "admin", effect: "change-policy", tokenMem: digest(ARCHITECT), project: "alpha" }), insufficient],
+    // LV-7: an act the service keeps for the operator alone (a rule proposal's approval, FAC-SEM-104) is decided by no level.
+    ["the owner on an act no level decides", call("T1", { ...decided("owner", OWNER), action: "approve-rule" }, { action: ruleApproval, actionLevel: "operator", tokenMem: digest(OWNER) }), { ok: false, code: "operator-decision-required", data: { detail: "level-insufficient: operator" } }],
+    ["the operator's own decision on an act no level decides, from T0", call("T0", { by: "operator", via: "relayed-instruction", action: "approve-rule", instruction: "Approve the rule for the support bot", at: "2026-10-25T11:29:00Z" }, { action: ruleApproval, actionLevel: "operator" }), { ok: true, recordAs: { by: "operator", via: "relayed-instruction", caller: CALLER } }],
     // LV-4: the service's own accepted elicitation is the operator's word, read before a level form.
     ["an accepted elicitation beside an unbound level decision, from T0", call("T0", decided("admin", ADMIN), { elicited: true }), { ok: true, recordAs: { by: "operator", via: "elicitation", caller: CALLER } }],
     // OM-4, LV-11: an older active revision after the issuer stated the end at a higher one.
@@ -227,7 +234,7 @@ function mandateCases(): Json[] {
     // LV-6: a level mandate stands only at the service its attestation is for; handed on to another, it does not.
     ["a level mandate handed on to a service its attestation is not for", mandateCall("T2", levelMandate(ADMIN, "admin", ALPHA), { tokenMem: digest(ADMIN), levels: { [ORG]: { audience: "crawler-service-c3", keySet: KEY_SET } } }), { ok: false, code: "decision-invalid", data: { detail: "level-audience" } }],
     ["an administrator's level mandate on a billing act", mandateCall("T2", levelMandate(ADMIN, "admin", { capabilities: ["billing.plan"], effects: ["reply"], projects: ["alpha"] }), { action: billing, actionLevel: "owner", tokenMem: digest(ADMIN) }), { ok: false, code: "operator-decision-required", data: { detail: "level-insufficient: owner" } }],
-    ["the owner's level mandate on an act no level decides", mandateCall("T2", levelMandate(OWNER, "owner", { capabilities: ["keys.issue"], effects: ["reply"], projects: ["alpha"] }), { action: clientKey, actionLevel: "operator", tokenMem: digest(OWNER) }), { ok: false, code: "operator-decision-required", data: { detail: "level-insufficient: operator" } }],
+    ["the owner's level mandate on an act no level decides", mandateCall("T2", levelMandate(OWNER, "owner", { capabilities: ["proposals.approve"], effects: ["reply"], projects: ["alpha"] }), { action: ruleApproval, actionLevel: "operator", tokenMem: digest(OWNER) }), { ok: false, code: "operator-decision-required", data: { detail: "level-insufficient: operator" } }],
     // A level decision outranks a mandate, as an operator decision does: one that fails is refused, the mandate unread.
     ["an unbound level decision beside an operator's mandate, from T0", mandateCall("T0", { ...(({ level: _a, org: _b, membership: _c, ...rest }) => rest)(levelMandate(ADMIN, "admin", ALPHA)), by: "operator" }, { decision: decided("admin", ADMIN, { project: "alpha" }) }), { ok: false, code: "decision-invalid", data: { detail: "level-unbound" } }],
     // LV-10: where no levels are read, a level decision is as if absent, so the operator's mandate beside it decides.
