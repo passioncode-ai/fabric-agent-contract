@@ -249,7 +249,7 @@ flowchart TD
 - **Goal:** a project spends within a limit the operator chose once, and a spend above the threshold waits for one answer
 - **Entry points:** the first run of a project that would spend money; a grant check above `autoApproveUsd`
 - **Success exit:** the policy recorded with its inputs; the request answered and the spend allowed or not
-- **Task analysis:** the launcher computes options → the operator picks one (one is preselected; in an organization's project its owner or an administrator, while the run waits, DEC-0162 LV-7) → the meter checks each spend against the levels → above the threshold it denies with one filed request → the operator confirms the amount in the operator channel → the agent asks again and is allowed.
+- **Task analysis:** the launcher computes options → the operator picks one (one is preselected; in an organization's project its owner or an administrator, while the run waits, DEC-0162 LV-7) → the meter checks each spend against the levels → above the threshold it denies with one filed request → the operator confirms the amount in the operator channel (in an organization's project the owner or an administrator, never the member's own confirm, while nothing is spent, DEC-0162 LV-7) → the agent asks again and is allowed.
 - **Rejected shape:** a fixed list of budgets, or an approval in a chat message — rejected because the options must come from the project (spend policy) and a chat message is never the approval (spend policy rule 3).
 - **Flow:**
 
@@ -263,7 +263,10 @@ flowchart TD
   R --> C{Grant check}
   C -->|within the levels| A[Allowed, reserved]
   C -->|above the threshold| Q[Denied with one filed request]
-  Q --> M[Screen: Chat with the agent's bot]
+  Q --> QO{An organization's project?}
+  QO -->|no| M[Screen: Chat with the agent's bot]
+  QO -->|yes| QW[The request waits for the organization's owner or an administrator; nothing spent (DEC-0162 LV-7, route PC-162)]
+  QW -->|the owner or an administrator confirms the amount| A
   M -->|confirmed with the amount| A
   M -->|no answer| W[Nothing spent; other work goes on]
 ```

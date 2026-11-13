@@ -446,7 +446,7 @@ independent agent author and P-02 project operator.
   2. The request reaches the operator in the chat -> the confirmation shows 4.20 USD first.
   3. Operator confirms -> the agent asks the meter again and is allowed, with a receipt.
 - **Expected result:** money above the threshold moves only after one answer that showed the amount; the agent was never blocked.
-- **Alt paths:** a callee relays the denial to its own caller -> `limit-reached` with the window and level unchanged (DL-21 step 6).
+- **Alt paths:** an organization's project (DEC-0162 LV-7) -> the request goes to the organization's owner or an administrator, never the member's own confirm; nothing is spent until one of them answers (route PC-162). A callee relays the denial to its own caller -> `limit-reached` with the window and level unchanged (DL-21 step 6).
 - **UI elements:** amount, confirm button, expiry.
 - **States covered:** success, error
 - **Errors & recovery:** the confirm button expired -> nothing is spent; the request stays filed and the operator answers it again.

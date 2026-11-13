@@ -120,7 +120,7 @@ export function levelStanding(input: {
   if (rank > (RANK.get(verdict.role) as number)) return { ok: false, invalid: "level-role" };
   // A verified `/2` always carries `projects` (empty but for an architect, LV-1).
   const projects = verdict.projects as string[];
-  // LV-7: an act the service keeps for the operator alone is decided by no level (a client key, DEC-0159 CF-3). A level
+  // LV-7: an act the service keeps for the operator alone is decided by no level (a rule proposal's approval, FAC-SEM-104). A level
   // that is not one of ACTION_LEVELS is read as the strictest, so a mistyped declaration never opens an act.
   if (input.minLevel === "operator" || (input.minLevel !== undefined && !(ACTION_LEVELS as readonly string[]).includes(input.minLevel))) return { ok: false, insufficient: "level-insufficient: operator" };
   // LV-7: a billing act is the owner's; LV-4: a call in no project is decided at owner or admin.
