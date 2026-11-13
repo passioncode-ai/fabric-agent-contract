@@ -115,6 +115,13 @@ A request on this project's board is answered by this project (`com.reply`) with
 questions left for a person are the human gates: a sign-in, a one-time code, a consent screen, a typed secret, a
 payment, spend above the limit, a send to people outside the estate, or access wider than the act needs.
 
+The Fabric coordinator's rule of 2026-11-13 (board announcement `35556d27`, the operator in Fabric session
+`a6d4264e`) adds two things. An operator's decision relayed on the board with his words verbatim, the date, where they
+were said and the scope is his approval: act on it and cite the relay, never ask him to repeat it here. A question that
+is still a person's is never left in a chat's text, where he will not find it: it goes to `fabric_question_ask` (one
+queue on Fabric's home) or as a request to the Fabric coordinator on the board. A run whose board link dropped
+(`fabric-mcp` disconnected) says so in its final report.
+
 ## Organisation
 
 This repository is one of the `passioncode-ai` repositories. The organization's rules
