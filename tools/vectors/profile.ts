@@ -152,7 +152,7 @@ function documentCases(): Json[] {
 
 export function profileVectors(): Json {
   return {
-    about: "Vectors for a place's autonomy profile, a standing mandate (mandate/1 with standing, DEC-0166), written by tools/vectors/profile.ts, never by hand. actions: actionDecision's answer for each input (a service declaring standing passes standing: true; tokenProf is the prof claim of the call's verified delegation token, the sha256 of the RFC 8785 canonical JSON of the mandate without its chain). documents: the codes and paths of evaluateSemanticRules(\"mandate\", mandate), in order.",
+    about: "Vectors for a place's autonomy profile, a standing mandate (mandate/1 with standing, DEC-0166), written by tools/vectors/profile.ts, never by hand. actions: actionDecision's answer for each input (a service declaring standing passes standing: true; tokenProf is the prof claim of the call's verified delegation token, the sha256 of the RFC 8785 canonical JSON of the mandate without its chain and its source). documents: the codes and paths of evaluateSemanticRules(\"mandate\", mandate), in order.",
     actions: actionCases(),
     documents: documentCases()
   };

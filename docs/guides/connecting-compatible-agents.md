@@ -516,13 +516,13 @@ known-good earlier payload; it does not reactivate or edit history
 - [ ] Every button the dashboard shows has a tool, declared in `extensions/actions/0.1`, and a `relayed` action takes
   the operator's relayed decision (DEC-0121).
 - [ ] A service that reads authority levels declares them in `extensions/authority/0.1`, and there in `actionLevels`
-  `owner` for every billing act, `operator` for client keys and a rule proposal's approval (type `rule`), and `admin` for a spend limit (a project's L1, a key's ceiling, an organization-wide total), a board hold's set and lift, a slot move, a Project's
+  `owner` for every billing act, `operator` for a rule proposal's approval (type `rule`), and `admin` for client keys in an organization's context, an access grant, a spend limit (a project's L1, a key's ceiling, an organization-wide total), a board hold's set and lift, a slot move, a Project's
   listing and unlisting, any other proposal type's approval and a credential request's decision (an action whose effect is `change-policy` is read as `admin` at least, whatever it declares) (DEC-0162 LV-7; an owner's settlement is no relayed action): an action left out is decided by an architect in the call's project, or by `admin` for a
   call in no project.
 - [ ] A service that takes a place's standing mandate declares `standing` in `extensions/authority/0.1` and, when it
   offers a billing act or an act LV-7 keeps for the operator, that act's level in `actionLevels`, so a profile set
   below that act's level never covers it (no level holder's profile covers an act declared `operator`; only an owner's
-  covers a billing act), and `admin` for any proposal type's approval other than a rule's; the organization's credential issuer and the service offering a rule proposal's approval declare no `standing`; it runs `fixtures/vectors/profile.json` (DEC-0166 AU-2, AU-3).
+  covers a billing act), and offers a key or an access grant with the effect `change-policy`; the organization's credential issuer and the board's gates (holds, slot moves, listings, proposal approvals) declare no `standing`; it runs `fixtures/vectors/profile.json` (DEC-0166 AU-2, AU-3).
 
 ## Operator checklist
 

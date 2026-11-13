@@ -130,7 +130,7 @@ describe("FAC-SEM-142 on a well-known document (DEC-0121 AP-1)", () => {
 
 describe("kind action-call (FAC-SEM-142)", () => {
   const dir = path.join(projectRoot(), "fixtures/semantic");
-  const fixtures = readdirSync(dir).filter((name) => /^(standing-action-call|action-call|service-well-known-actions|service-well-known-authority)-/.test(name)).map((name) => ({ name, ...(JSON.parse(readFileSync(path.join(dir, name), "utf8")) as { kind: string; expect: string[]; input: Json }) }));
+  const fixtures = readdirSync(dir).filter((name) => /^(standing-action-call|action-call|service-well-known-actions|service-well-known-authority)[-.]/.test(name)).map((name) => ({ name, ...(JSON.parse(readFileSync(path.join(dir, name), "utf8")) as { kind: string; expect: string[]; input: Json }) }));
   it("has fixtures for both kinds, and each finds what it expects", () => {
     expect(fixtures.filter((f) => f.kind === "action-call").length).toBeGreaterThan(5);
     expect(fixtures.filter((f) => f.kind === "service-well-known").length).toBeGreaterThan(5);

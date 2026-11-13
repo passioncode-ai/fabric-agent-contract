@@ -737,7 +737,7 @@ scope with `held` and never refuses a call that settles, reports on or keeps ali
 A hold never refuses the current responder's calls on started work; if that responder's session ends under a slot or
 Project hold, enrollment and replacement wait for the lift, and its accepted work is kept as C4 says.
 
-- **Who sets it.** Only the operator decides a hold (in an organization's context, the member who owns the Project, or an owner or an administrator by a level decision; a host declares `admin` for its set and lift actions in its authority extension, DEC-0162 LV-7 and the operator's answer to its question 9): in the host, or through their agent, which relays the decision to
+- **Who sets it.** The operator decides a hold (in an organization's context, the member who owns the Project, or an owner or an administrator by a level decision; a host declares `admin` for its set and lift actions in its authority extension, DEC-0162 LV-7 and the operator's answer to its question 9): in the host, or through their agent, which relays the decision to
   the host's set, lift and list actions (`gate: relayed`, [service](service.md#actions) AP-1 and AP-2, DEC-0121; the
   host's tools are CT-125). An agent never holds or releases work on its own account. A hold is not a grant change and not an authority revision: it never
   answers `authority_changed`, and it resets no cursor.

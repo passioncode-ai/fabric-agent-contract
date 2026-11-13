@@ -101,8 +101,9 @@ export function levelStanding(input: {
   contexts: LevelContexts;
   /** The `mem` claim of the call's delegation token, absent when the call presented none. */
   tokenMem?: unknown;
-  /** The lowest level that decides this action, as the service declares it (`owner` for a billing act, `operator` for
-   * an act no level decides); absent: the project rule alone. */
+  /** The lowest level that decides this action: the service's declaration (`owner` for a billing act, `operator` for
+   * an act no level decides), raised to `admin` for a `change-policy` action by `actionDecision`; absent: the project
+   * rule alone. */
   minLevel?: string;
   now: number;
 }): LevelStanding {
