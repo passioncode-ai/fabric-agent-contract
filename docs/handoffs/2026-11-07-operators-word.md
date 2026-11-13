@@ -1053,7 +1053,8 @@ counter, and the board told what each consumer owes (DEC-0156's Compatibility).
   its row's correction, the DEC-0159 note checks SCN-044's update question, Coverage and SCN-059's OW-4, the DEC-0158
   note requires rows for OW-3's third wait and own stop and a no-board-tools run, and checks "starts no run" in
   bullet form (seam). Declined: none.
+- Round 34 (on `2a32d73b`, main merged in at `24178ea0`, read 2026-11-14 under the finish-line rule: a tier fails only on a blocking finding, a normative contradiction, code or vectors against the text, a false citation, a security or privacy defect, or an operator's answer contradicted; the rest are risks): clean on all three tiers. Kept as risks: the status schema's `off` and `proposal` descriptions lag OC-11 (CT-282 names both); the `off`-awaiting-token fixture proves the shape only; DEC-0035's annotation not listed in Consequences; the handoff's Done omits the read at status build; FLW-29's F1 less complete; CT-220's request text; `reason.detail` lengths near 300; OW-3's host-gate sentence in a no-person session; OA-4 and CONTEXT without the FA-09 branch; the spend hand-over's two forms (CT-291); three question routes without precedence; PR-2's MD-6 entry owed by CT-181; SCN-012's code location; the kept press under `floor.ask-first` (Fabric `add1df7c`); other scenarios' recoveries (CT-271).
 
 ## Next task
 
-Round 34 blind readings of branch `agent/ct220-operators-word-v2` (DEC-0156), all three tiers.
+Round 35 of the blind readings (unit, seam, product) of branch `agent/ct220-operators-word-v2` (DEC-0156) under the finish-line rule; round 34 was clean, so at a clean round 35 land it (gate, then merge to main, Status accepted, the handoff index row on main).
