@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/telemetry-event.schema.json",
   "title": "Telemetry event (fabric-activity/0.1, DEC-0030)",
-  "description": "One record of what happened in agent work: when a session worked or waited, what one model call used, and (kind unit, DEC-0164) a transition of a unit of work, without content. A session or usage record carries a person only as an opaque user.id; a unit carries none but the pairwise subject of a person who accepted it (acceptedBy) and a tracker key that may name a tracker account. A reader ignores a kind it does not know.",
+  "description": "One record of what happened in agent work: when a session worked or waited, what one model call used, and (kind unit, DEC-0164) a transition of a unit of work, without content. A session or usage record carries a person only as an opaque user.id; a unit carries none but the pairwise subject of a person who accepted it (acceptedBy) and a tracker key, and in the raw event an evidence link, that may name a tracker account. A reader ignores a kind it does not know.",
   "type": "object",
   "required": [
     "protocol",
