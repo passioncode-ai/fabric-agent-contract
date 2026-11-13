@@ -167,6 +167,7 @@ function actionCases(): Json[] {
     ["a level context whose audience is not an opaque id", call("T2", decided("admin", ADMIN), { tokenMem: digest(ADMIN), levels: { [ORG]: { audience: "reviews service", keySet: KEY_SET } } }), { fault: "levels-invalid" }],
     ["a level context whose key set names another organization", call("T2", decided("admin", ADMIN), { tokenMem: digest(ADMIN), levels: { [ORG]: { audience: SERVICE, keySet: { ...KEY_SET, org: "org:org-b" } } } }), { fault: "levels-invalid" }],
     ["a held attestation filed under another subject", call("T2", decided("admin", ADMIN), { tokenMem: digest(ADMIN), levels: { [ORG]: { audience: SERVICE, keySet: KEY_SET, held: { "m-other-01": { subject: ADMIN.subject, revision: ADMIN.revision, digest: digest(ADMIN) } } } } }), { fault: "levels-invalid" }],
+    ["a level context listing a key of another algorithm", call("T2", decided("admin", ADMIN), { tokenMem: digest(ADMIN), levels: { [ORG]: { audience: SERVICE, keySet: { ...KEY_SET, keys: ((KEY_SET as Json).keys as Json[]).map((k) => ({ ...k, alg: "ES256" })) } } } }), { fault: "levels-invalid" }],
     ["an action whose declared level is mistyped", call("T2", decided("admin", ADMIN), { tokenMem: digest(ADMIN), actionLevel: "Owner" }), { fault: "action-level-invalid" }]
   ];
   return list.map(([name, input, expected]) => ({ name, input, expected: withDigest(input, expected) }));

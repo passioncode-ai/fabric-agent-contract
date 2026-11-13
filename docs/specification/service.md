@@ -1376,7 +1376,9 @@ estimate and the `project`, and for a job's input request the job's capability `
 | `relayed` | T0 or T1, a decision invalid against the schema, for another action, naming a `target` the call does not act on, whose `at` is not read by `strictTime` (RFC 3339 with `T` and an offset, a day that exists, no leap second), lies more than 60 s (`CLOCK_SKEW_SECONDS`) after the service's clock or more than 24 h (`DECISION_LIFETIME_SECONDS`) before it | `{ok: false, code: "decision-invalid"}` |
 | `relayed` | T0 or T1, a valid decision | `{ok: true, recordAs: {by: "operator", via: "relayed-instruction", caller, source?}}`: the operator's act, `source` when the decision carries it (DEC-0126) |
 
-An input the service owes and does not have (a declaration that is not valid, no authenticated caller, no readable
+An input the service owes and does not have (a declaration that is not valid, level contexts that are not a map of
+well-formed entries (`levels-invalid`), an action's declared level not among `operator`, `owner`, `admin`, `architect`
+(`action-level-invalid`), both read before an accepted approval (DEC-0162 LV-10), no authenticated caller, no readable
 clock, no digest for a T2 refusal, no link for a human step, and under a mandate no `effect` or no `self`, or, for a job's input request under a mandate and no decision, no usable `mandateCapability` (absent, empty, blank, not a capability name, or
 `fabric.job.get` itself), MJ-1) is its own fault (`{fault}`), never an answer to the
 caller (the job-step one is answered to the caller as `operator-decision-required`, the job staying `input_required`,

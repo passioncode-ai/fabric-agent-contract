@@ -24,7 +24,7 @@ The most specific level that exists decides. A level that does not exist is skip
 
 ## The spend policy
 
-A project's policy is chosen **once**, at the first run that would spend money. In an organization's context the choice is the organization's owner's (DEC-0162 LV-7, until the operator answers its question 4 otherwise; a policy recorded before then stands until the owner changes it): a launcher that reads levels stops before any spend until the owner records it; one pinned before DEC-0162 still asks the person. It is never a fixed list:
+A project's policy is chosen **once**, at the first run that would spend money. In an organization's context the choice is the organization's owner's (DEC-0162 LV-7, until the operator answers its question 4 otherwise; a policy already recorded when the launcher starts reading levels stands until the owner changes it): a launcher that reads levels stops before any spend until the owner records it; one pinned before DEC-0162 still asks the person. It is never a fixed list:
 the launcher computes the options for that project from:
 
 - the presets its agents declare;
