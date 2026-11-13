@@ -759,10 +759,11 @@ flowchart TD
   T -->|any tier, a bound level decision| L[Taken as the level holder's; audited with level, organization and approver]
   T -->|any tier, a level below the action's| N[operator-decision-required with level-insufficient; the agent files one request to a holder of that level through the product's own approval surface]
   T -->|any tier, a level form that fails| V{its detail}
+  T -->|a service that reads no levels, or a hub without levels/1| PS
   V -->|level-unbound, level-audience, level-expired| VF[The agent asks its hub for a fresh, bound attestation]
-  V -->|level-membership: any problem, ended, context-invalid and stale-revision among them| O
+  V -->|level-membership: any problem, ended, context-invalid and stale-revision among them| PS[The product's own approval surface, the level holder as approver (DEC-0162 question 10)]
   VF --> C
-  V -->|level-role, or the form itself| VC[The agent relays the level its holder holds, or the operator's path]
+  V -->|level-role, or the form itself| VC[The agent relays the level its holder holds, or takes the product's own approval surface]
   VC --> C
   N -->|owner or admin| HL[The holder of that level's own agent decides under its own level decision]
   N -->|operator| O

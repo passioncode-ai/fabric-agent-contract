@@ -5,6 +5,7 @@ import { EXTENSION_KEYS } from "./extensions.js";
 import { type Finding, type JsonObject, isObject } from "./findings.js";
 import { CLOCK_SKEW_SECONDS, strictTime } from "./rfc3339.js";
 import { type LevelContexts, type LevelRecord, levelContextsWellFormed, levelStanding, ACTION_LEVELS } from "./levels.js";
+import { EFFECT_CLASSES } from "./delegation.js";
 import { type OperatorSource, mandateCovers } from "./mandate.js";
 import { createValidatorSync } from "./validator.js";
 
@@ -60,7 +61,8 @@ export interface ActionDecisionInput {
   /** The caller's agent id, when the service authenticated one (a per-agent credential, a delegation token's outermost
    * actor, the hub's attested origin); a mandate's chain must then name it before `self`. */
   callerAgent?: unknown;
-  /** The action's effect class, the service's own knowledge, required to read a mandate. */
+  /** The action's effect class, the service's own knowledge, required to read a mandate or a level decision (DEC-0162
+   * LV-7: a `change-policy` action is read as declared `admin` at least). */
   effect?: unknown;
   /** For a job's input request (an action whose `tool` is `fabric.job.get`), the capability of the job it belongs to:
    * the tool its start call named, never `fabric.job.get`. A mandate reads the step under it, as at the start
@@ -76,7 +78,8 @@ export interface ActionDecisionInput {
   /** The `mem` claim of the call's verified delegation token, absent when it presented none (DEC-0162 LV-5). */
   tokenMem?: unknown;
   /** The level the service's authority extension declares for this action (`actionLevels`, DEC-0162 LV-7); absent: an
-   * architect in the call's project, admin for a call in no project. */
+   * architect in the call's project, admin for a call in no project; an action whose effect is `change-policy` is read
+   * as `admin` at least whatever this says. */
   actionLevel?: unknown;
 }
 
@@ -160,6 +163,8 @@ export function actionDecision(input: ActionDecisionInput): ActionDecisionAnswer
   if (isObject(input.levels) && (levelDecision || levelMandate)) {
     const clock = strictTime(now);
     if (Number.isNaN(clock)) return { fault: "now-unreadable" };
+    // LV-7: a level decision needs the action's effect, so a `change-policy` action is never read below `admin`.
+    if (levelDecision && !(EFFECT_CLASSES as readonly unknown[]).includes(input.effect)) return { fault: "effect-missing" };
     // At T2 every refusal on this branch keeps DL-18's route open, so the service owes the action's digest here too.
     if (!inside && (typeof actionDigest !== "string" || !SHA256.test(actionDigest))) return { fault: "digest-missing" };
     // A level mandate at a service given `levels` is never ignored: mandateCovers reads it at every tier.
@@ -193,7 +198,6 @@ export function actionDecision(input: ActionDecisionInput): ActionDecisionAnswer
   return { ok: true, recordAs: { by: "operator", via: "relayed-instruction", caller, ...(read.source ? { source: { ...read.source } } : {}) } };
 }
 
-/** The level the service declares the action needs (LV-7); `actionDecision` refused any other value as its own fault. */
 /**
  * The lowest level that decides the action: the service's declaration, raised to `admin` for an action whose effect is
  * `change-policy`, which an `owner` or an `admin` decides and never an `architect` (DEC-0162 LV-7, the operator's

@@ -109,7 +109,7 @@ const decided = (level: string, held: Json, extra: Json = {}): Json => ({
   by: "level", via: "level-command", level, org: ORG, action: "approve-reply",
   instruction: "approve the reply to the review from Anna", at: AT, membership: held, ...extra
 });
-const call = (tier: string, decision: unknown, extra: Json = {}) => ({ action: relayed, tier, caller: CALLER, decision, now: NOW, actionDigest: DIGEST, levels: LEVELS, ...extra });
+const call = (tier: string, decision: unknown, extra: Json = {}) => ({ action: relayed, tier, caller: CALLER, decision, effect: "reply", now: NOW, actionDigest: DIGEST, levels: LEVELS, ...extra });
 const level = (name: string, held: Json, project?: string) => ({
   ok: true,
   recordAs: { by: "level", via: "level-command", level: name, org: ORG, ...(project ? { project } : {}), approver: held.subject, membershipDigest: digest(held), revision: held.revision, caller: CALLER }
@@ -137,6 +137,9 @@ function actionCases(): Json[] {
     ["an architect's policy change in its project, left undeclared", call("T1", { ...decided("architect", ARCHITECT, { project: "alpha" }), action: "set-policy" }, { action: policy, effect: "change-policy", tokenMem: digest(ARCHITECT), project: "alpha" }), insufficient],
     ["an architect's policy change in its project, declared architect", call("T1", { ...decided("architect", ARCHITECT, { project: "alpha" }), action: "set-policy" }, { action: policy, effect: "change-policy", actionLevel: "architect", tokenMem: digest(ARCHITECT), project: "alpha" }), insufficient],
     ["an administrator's policy change in a project", call("T2", { ...decided("admin", ADMIN, { project: "alpha" }), action: "set-policy" }, { action: policy, effect: "change-policy", tokenMem: digest(ADMIN), project: "alpha" }), level("admin", ADMIN, "alpha")],
+    // LV-7: a level decision needs the action's effect, so a policy change is never read below admin (round 15).
+    ["an architect's level decision with no effect", call("T1", { ...decided("architect", ARCHITECT, { project: "alpha" }), action: "set-policy" }, { action: policy, effect: undefined, tokenMem: digest(ARCHITECT), project: "alpha" }), { fault: "effect-missing" }],
+    ["an architect's level decision with an effect of another case", call("T1", { ...decided("architect", ARCHITECT, { project: "alpha" }), action: "set-policy" }, { action: policy, effect: "Change-Policy", tokenMem: digest(ARCHITECT), project: "alpha" }), { fault: "effect-missing" }],
     // LV-7: an act declared admin (a spend limit, a board hold, a slot move, a listing) is an owner's or an admin's.
     ["an architect in its project on an act declared admin", call("T1", decided("architect", ARCHITECT, { project: "alpha" }), { actionLevel: "admin", tokenMem: digest(ARCHITECT), project: "alpha" }), insufficient],
     ["an administrator on an act declared admin", call("T2", decided("admin", ADMIN), { actionLevel: "admin", tokenMem: digest(ADMIN) }), level("admin", ADMIN)],

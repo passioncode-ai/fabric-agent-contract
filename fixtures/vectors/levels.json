@@ -248,6 +248,7 @@
             "sig": "DWXhTb1wl4-GuoOEi148WMcPzY-rWvxeCnECywHvCNsQLsSO3n0TlMlsybW3anYPQ8fdK_VD4DauMmC42sxXBw"
           }
         },
+        "effect": "reply",
         "now": "2026-10-25T11:30:00Z",
         "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
         "levels": {
@@ -332,6 +333,7 @@
             "sig": "Rg3hZAm3Hgabq5LB3LPvOjkbms6W_jKJaGFFOHyPFOIabVXhP2gvzpb_wXkR30Xxu3UQK-ZW_eTAF9aF6qwQDA"
           }
         },
+        "effect": "reply",
         "now": "2026-10-25T11:30:00Z",
         "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
         "levels": {
@@ -420,6 +422,7 @@
           },
           "project": "alpha"
         },
+        "effect": "reply",
         "now": "2026-10-25T11:30:00Z",
         "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
         "levels": {
@@ -506,6 +509,7 @@
             "sig": "DWXhTb1wl4-GuoOEi148WMcPzY-rWvxeCnECywHvCNsQLsSO3n0TlMlsybW3anYPQ8fdK_VD4DauMmC42sxXBw"
           }
         },
+        "effect": "reply",
         "now": "2026-10-25T11:30:00Z",
         "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
         "levels": {
@@ -591,6 +595,7 @@
           },
           "project": "gamma"
         },
+        "effect": "reply",
         "now": "2026-10-25T11:30:00Z",
         "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
         "levels": {
@@ -681,6 +686,7 @@
           },
           "project": "gamma"
         },
+        "effect": "reply",
         "now": "2026-10-25T11:30:00Z",
         "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
         "levels": {
@@ -765,6 +771,7 @@
           },
           "project": "alpha"
         },
+        "effect": "reply",
         "now": "2026-10-25T11:30:00Z",
         "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
         "levels": {
@@ -844,6 +851,7 @@
           },
           "project": "gamma"
         },
+        "effect": "reply",
         "now": "2026-10-25T11:30:00Z",
         "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
         "levels": {
@@ -931,6 +939,7 @@
           },
           "project": "alpha"
         },
+        "effect": "reply",
         "now": "2026-10-25T11:30:00Z",
         "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
         "levels": {
@@ -1017,6 +1026,7 @@
             "sig": "DWXhTb1wl4-GuoOEi148WMcPzY-rWvxeCnECywHvCNsQLsSO3n0TlMlsybW3anYPQ8fdK_VD4DauMmC42sxXBw"
           }
         },
+        "effect": "reply",
         "now": "2026-10-25T11:30:00Z",
         "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
         "levels": {
@@ -1102,6 +1112,7 @@
             "sig": "Rg3hZAm3Hgabq5LB3LPvOjkbms6W_jKJaGFFOHyPFOIabVXhP2gvzpb_wXkR30Xxu3UQK-ZW_eTAF9aF6qwQDA"
           }
         },
+        "effect": "reply",
         "now": "2026-10-25T11:30:00Z",
         "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
         "levels": {
@@ -1186,6 +1197,7 @@
           },
           "project": "alpha"
         },
+        "effect": "change-policy",
         "now": "2026-10-25T11:30:00Z",
         "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
         "levels": {
@@ -1214,7 +1226,6 @@
             }
           }
         },
-        "effect": "change-policy",
         "tokenMem": "sha256:3fd5ef20ba24c7a1382e32a720bf915827c2b2f93741802eaf8720157e9f9d8d",
         "project": "alpha"
       },
@@ -1270,6 +1281,7 @@
           },
           "project": "alpha"
         },
+        "effect": "change-policy",
         "now": "2026-10-25T11:30:00Z",
         "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
         "levels": {
@@ -1298,7 +1310,6 @@
             }
           }
         },
-        "effect": "change-policy",
         "actionLevel": "architect",
         "tokenMem": "sha256:3fd5ef20ba24c7a1382e32a720bf915827c2b2f93741802eaf8720157e9f9d8d",
         "project": "alpha"
@@ -1352,6 +1363,7 @@
           },
           "project": "alpha"
         },
+        "effect": "change-policy",
         "now": "2026-10-25T11:30:00Z",
         "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
         "levels": {
@@ -1380,7 +1392,6 @@
             }
           }
         },
-        "effect": "change-policy",
         "tokenMem": "sha256:5858c2d548aaf65bbe4f80625bb7315693cad1e36ac8b30f08e82cf978ec9ff5",
         "project": "alpha"
       },
@@ -1397,6 +1408,165 @@
           "revision": 3,
           "caller": "agent:claude-code"
         }
+      }
+    },
+    {
+      "name": "an architect's level decision with no effect",
+      "input": {
+        "action": {
+          "id": "set-policy",
+          "title": "Change the project's policy",
+          "tool": "policy.set",
+          "gate": "relayed"
+        },
+        "tier": "T1",
+        "caller": "agent:claude-code",
+        "decision": {
+          "by": "level",
+          "via": "level-command",
+          "level": "architect",
+          "org": "org:org-a",
+          "action": "set-policy",
+          "instruction": "approve the reply to the review from Anna",
+          "at": "2026-10-25T11:20:00Z",
+          "membership": {
+            "type": "org-membership/2",
+            "issuer": "https://orgs.example",
+            "org": "org:org-a",
+            "audience": "reviews-service-a1",
+            "subject": "m-arch-03",
+            "role": "architect",
+            "projects": [
+              "alpha",
+              "beta"
+            ],
+            "external": false,
+            "status": "active",
+            "revision": 3,
+            "membershipEndsAt": null,
+            "issuedAt": "2026-10-25T11:00:00Z",
+            "notBefore": "2026-10-25T11:00:00Z",
+            "expiresAt": "2026-10-25T12:00:00Z",
+            "extensions": {},
+            "alg": "EdDSA",
+            "kid": "mem-2026-10",
+            "sig": "RrABkwV8ubdv_gWsjle26Lj5uG4Q4FeAc2qFy7ENRhxw3m8ioGjcxYd3QIiUM-lGgV4jUatmUi2BtWBFGdO-Aw"
+          },
+          "project": "alpha"
+        },
+        "now": "2026-10-25T11:30:00Z",
+        "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
+        "levels": {
+          "org:org-a": {
+            "audience": "reviews-service-a1",
+            "keySet": {
+              "type": "org-key-set/1",
+              "issuer": "https://orgs.example",
+              "org": "org:org-a",
+              "revision": 1,
+              "issuedAt": "2026-10-15T00:00:00Z",
+              "keys": [
+                {
+                  "kid": "mem-2026-10",
+                  "alg": "EdDSA",
+                  "x": "YxEDJVK86TVti3mnfdU9cSSlKdjXDJM9A3eKVqIxr7U",
+                  "notBefore": "2026-10-15T00:00:00Z",
+                  "notAfter": "2027-01-01T00:00:00Z"
+                }
+              ],
+              "revoked": [],
+              "administrators": [],
+              "alg": "EdDSA",
+              "kid": "root-org-a-1",
+              "sig": "vufCXJ4roCUAM3MEuAikBXHXZ8mdhK7hyiZkkFzc14MuJ8fvPq6zYxOOOH8KtIuBEIUcXesvsy1NXXs9rYqIBw"
+            }
+          }
+        },
+        "tokenMem": "sha256:3fd5ef20ba24c7a1382e32a720bf915827c2b2f93741802eaf8720157e9f9d8d",
+        "project": "alpha"
+      },
+      "expected": {
+        "fault": "effect-missing"
+      }
+    },
+    {
+      "name": "an architect's level decision with an effect of another case",
+      "input": {
+        "action": {
+          "id": "set-policy",
+          "title": "Change the project's policy",
+          "tool": "policy.set",
+          "gate": "relayed"
+        },
+        "tier": "T1",
+        "caller": "agent:claude-code",
+        "decision": {
+          "by": "level",
+          "via": "level-command",
+          "level": "architect",
+          "org": "org:org-a",
+          "action": "set-policy",
+          "instruction": "approve the reply to the review from Anna",
+          "at": "2026-10-25T11:20:00Z",
+          "membership": {
+            "type": "org-membership/2",
+            "issuer": "https://orgs.example",
+            "org": "org:org-a",
+            "audience": "reviews-service-a1",
+            "subject": "m-arch-03",
+            "role": "architect",
+            "projects": [
+              "alpha",
+              "beta"
+            ],
+            "external": false,
+            "status": "active",
+            "revision": 3,
+            "membershipEndsAt": null,
+            "issuedAt": "2026-10-25T11:00:00Z",
+            "notBefore": "2026-10-25T11:00:00Z",
+            "expiresAt": "2026-10-25T12:00:00Z",
+            "extensions": {},
+            "alg": "EdDSA",
+            "kid": "mem-2026-10",
+            "sig": "RrABkwV8ubdv_gWsjle26Lj5uG4Q4FeAc2qFy7ENRhxw3m8ioGjcxYd3QIiUM-lGgV4jUatmUi2BtWBFGdO-Aw"
+          },
+          "project": "alpha"
+        },
+        "effect": "Change-Policy",
+        "now": "2026-10-25T11:30:00Z",
+        "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
+        "levels": {
+          "org:org-a": {
+            "audience": "reviews-service-a1",
+            "keySet": {
+              "type": "org-key-set/1",
+              "issuer": "https://orgs.example",
+              "org": "org:org-a",
+              "revision": 1,
+              "issuedAt": "2026-10-15T00:00:00Z",
+              "keys": [
+                {
+                  "kid": "mem-2026-10",
+                  "alg": "EdDSA",
+                  "x": "YxEDJVK86TVti3mnfdU9cSSlKdjXDJM9A3eKVqIxr7U",
+                  "notBefore": "2026-10-15T00:00:00Z",
+                  "notAfter": "2027-01-01T00:00:00Z"
+                }
+              ],
+              "revoked": [],
+              "administrators": [],
+              "alg": "EdDSA",
+              "kid": "root-org-a-1",
+              "sig": "vufCXJ4roCUAM3MEuAikBXHXZ8mdhK7hyiZkkFzc14MuJ8fvPq6zYxOOOH8KtIuBEIUcXesvsy1NXXs9rYqIBw"
+            }
+          }
+        },
+        "tokenMem": "sha256:3fd5ef20ba24c7a1382e32a720bf915827c2b2f93741802eaf8720157e9f9d8d",
+        "project": "alpha"
+      },
+      "expected": {
+        "fault": "effect-missing"
       }
     },
     {
@@ -1443,6 +1613,7 @@
           },
           "project": "alpha"
         },
+        "effect": "reply",
         "now": "2026-10-25T11:30:00Z",
         "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
         "levels": {
@@ -1523,6 +1694,7 @@
             "sig": "Rg3hZAm3Hgabq5LB3LPvOjkbms6W_jKJaGFFOHyPFOIabVXhP2gvzpb_wXkR30Xxu3UQK-ZW_eTAF9aF6qwQDA"
           }
         },
+        "effect": "reply",
         "now": "2026-10-25T11:30:00Z",
         "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
         "levels": {
@@ -1608,6 +1780,7 @@
             "sig": "DWXhTb1wl4-GuoOEi148WMcPzY-rWvxeCnECywHvCNsQLsSO3n0TlMlsybW3anYPQ8fdK_VD4DauMmC42sxXBw"
           }
         },
+        "effect": "reply",
         "now": "2026-10-25T11:30:00Z",
         "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
         "levels": {
@@ -1665,6 +1838,7 @@
           "instruction": "Issue the key for the support bot",
           "at": "2026-10-25T11:29:00Z"
         },
+        "effect": "reply",
         "now": "2026-10-25T11:30:00Z",
         "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
         "levels": {
@@ -1744,6 +1918,7 @@
             "sig": "Rg3hZAm3Hgabq5LB3LPvOjkbms6W_jKJaGFFOHyPFOIabVXhP2gvzpb_wXkR30Xxu3UQK-ZW_eTAF9aF6qwQDA"
           }
         },
+        "effect": "reply",
         "now": "2026-10-25T11:30:00Z",
         "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
         "levels": {
@@ -1823,6 +1998,7 @@
             "sig": "Rg3hZAm3Hgabq5LB3LPvOjkbms6W_jKJaGFFOHyPFOIabVXhP2gvzpb_wXkR30Xxu3UQK-ZW_eTAF9aF6qwQDA"
           }
         },
+        "effect": "reply",
         "now": "2026-10-25T11:30:00Z",
         "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
         "levels": {
@@ -1913,6 +2089,7 @@
           },
           "project": "alpha"
         },
+        "effect": "reply",
         "now": "2026-10-25T11:30:00Z",
         "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
         "levels": {
@@ -1992,6 +2169,7 @@
             "sig": "Rg3hZAm3Hgabq5LB3LPvOjkbms6W_jKJaGFFOHyPFOIabVXhP2gvzpb_wXkR30Xxu3UQK-ZW_eTAF9aF6qwQDA"
           }
         },
+        "effect": "reply",
         "now": "2026-10-25T11:30:00Z",
         "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
         "levels": {
@@ -2069,6 +2247,7 @@
             "sig": "Rg3hZAm3Hgabq5LB3LPvOjkbms6W_jKJaGFFOHyPFOIabVXhP2gvzpb_wXkR30Xxu3UQK-ZW_eTAF9aF6qwQDA"
           }
         },
+        "effect": "reply",
         "now": "2026-10-25T11:30:00Z",
         "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
         "levels": {
@@ -2148,6 +2327,7 @@
             "sig": "ykZrd4dMkHKfilkESUS2pJvCY86rLnqNvtA3nSruoZx91e0qFmLb2bdQk3nX6MR60f6bO67A5LUaTQf9z7JnDA"
           }
         },
+        "effect": "reply",
         "now": "2026-10-25T11:30:00Z",
         "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
         "levels": {
@@ -2227,6 +2407,7 @@
             "sig": "Ar-udwEysZng5QtqxS1dN74kRq_VTGZjH2BMvTjruh5wd7qHrHiB5jusgPnj3tjGfAGOM9S1iv7spfCkDwyYAg"
           }
         },
+        "effect": "reply",
         "now": "2026-10-25T11:30:00Z",
         "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
         "levels": {
@@ -2306,6 +2487,7 @@
             "sig": "a23MMtoOA4ETmx3OY6faRRPWo9hjIQJ18sPz5n5F7l0ODFn4_P3JsTqtrq9uW45NBTWsmdSL9SaZ0EZfxeyTDQ"
           }
         },
+        "effect": "reply",
         "now": "2026-10-25T11:30:00Z",
         "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
         "levels": {
@@ -2388,6 +2570,7 @@
             "sig": "RrABkwV8ubdv_gWsjle26Lj5uG4Q4FeAc2qFy7ENRhxw3m8ioGjcxYd3QIiUM-lGgV4jUatmUi2BtWBFGdO-Aw"
           }
         },
+        "effect": "reply",
         "now": "2026-10-25T11:30:00Z",
         "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
         "levels": {
@@ -2468,6 +2651,7 @@
           },
           "project": "alpha"
         },
+        "effect": "reply",
         "now": "2026-10-25T11:30:00Z",
         "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
         "levels": {
@@ -2548,6 +2732,7 @@
             "sig": "Rg3hZAm3Hgabq5LB3LPvOjkbms6W_jKJaGFFOHyPFOIabVXhP2gvzpb_wXkR30Xxu3UQK-ZW_eTAF9aF6qwQDA"
           }
         },
+        "effect": "reply",
         "now": "2026-10-25T11:30:00Z",
         "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
         "levels": {
@@ -2627,6 +2812,7 @@
             "sig": "Rg3hZAm3Hgabq5LB3LPvOjkbms6W_jKJaGFFOHyPFOIabVXhP2gvzpb_wXkR30Xxu3UQK-ZW_eTAF9aF6qwQDA"
           }
         },
+        "effect": "reply",
         "now": "2026-10-25T11:30:00Z",
         "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
         "levels": {
@@ -2705,6 +2891,7 @@
             "sig": "o3l6db0OnVoe5DNAWoghFGrU1UyLx75Ai1XU-tSYUPDJ2Ro_kRzyOCaJaH2E4uTZGUHUSXffoYs5tteKpoHHBg"
           }
         },
+        "effect": "reply",
         "now": "2026-10-25T11:30:00Z",
         "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
         "levels": {
@@ -2784,6 +2971,7 @@
             "sig": "Rg3hZAm3Hgabq5LB3LPvOjkbms6W_jKJaGFFOHyPFOIabVXhP2gvzpb_wXkR30Xxu3UQK-ZW_eTAF9aF6qwQDA"
           }
         },
+        "effect": "reply",
         "now": "2026-10-25T11:30:00Z",
         "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
         "levels": {
@@ -2862,6 +3050,7 @@
             "sig": "Rg3hZAm3Hgabq5LB3LPvOjkbms6W_jKJaGFFOHyPFOIabVXhP2gvzpb_wXkR30Xxu3UQK-ZW_eTAF9aF6qwQDA"
           }
         },
+        "effect": "reply",
         "now": "2026-10-25T11:30:00Z",
         "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
         "levels": {
@@ -2943,6 +3132,7 @@
             "sig": "RrABkwV8ubdv_gWsjle26Lj5uG4Q4FeAc2qFy7ENRhxw3m8ioGjcxYd3QIiUM-lGgV4jUatmUi2BtWBFGdO-Aw"
           }
         },
+        "effect": "reply",
         "now": "2026-10-25T11:30:00Z",
         "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
         "levels": {
@@ -3022,6 +3212,7 @@
             "sig": "Rg3hZAm3Hgabq5LB3LPvOjkbms6W_jKJaGFFOHyPFOIabVXhP2gvzpb_wXkR30Xxu3UQK-ZW_eTAF9aF6qwQDA"
           }
         },
+        "effect": "reply",
         "now": "2026-10-25T11:30:00Z",
         "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
         "levels": {
@@ -3180,6 +3371,7 @@
             "sig": "Rg3hZAm3Hgabq5LB3LPvOjkbms6W_jKJaGFFOHyPFOIabVXhP2gvzpb_wXkR30Xxu3UQK-ZW_eTAF9aF6qwQDA"
           }
         },
+        "effect": "reply",
         "now": "2026-10-25T11:30:00Z",
         "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
         "tokenMem": "sha256:5858c2d548aaf65bbe4f80625bb7315693cad1e36ac8b30f08e82cf978ec9ff5"
@@ -3229,6 +3421,7 @@
             "sig": "Rg3hZAm3Hgabq5LB3LPvOjkbms6W_jKJaGFFOHyPFOIabVXhP2gvzpb_wXkR30Xxu3UQK-ZW_eTAF9aF6qwQDA"
           }
         },
+        "effect": "reply",
         "now": "2026-10-25T11:30:00Z",
         "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
         "tokenMem": "sha256:5858c2d548aaf65bbe4f80625bb7315693cad1e36ac8b30f08e82cf978ec9ff5"
@@ -3281,6 +3474,7 @@
             "sig": "Rg3hZAm3Hgabq5LB3LPvOjkbms6W_jKJaGFFOHyPFOIabVXhP2gvzpb_wXkR30Xxu3UQK-ZW_eTAF9aF6qwQDA"
           }
         },
+        "effect": "reply",
         "now": "2026-10-25T11:30:00Z",
         "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
         "levels": {
@@ -3355,6 +3549,7 @@
             "sig": "Rg3hZAm3Hgabq5LB3LPvOjkbms6W_jKJaGFFOHyPFOIabVXhP2gvzpb_wXkR30Xxu3UQK-ZW_eTAF9aF6qwQDA"
           }
         },
+        "effect": "reply",
         "now": "2026-10-25T11:30:00Z",
         "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
         "levels": {
@@ -3429,6 +3624,7 @@
             "sig": "Rg3hZAm3Hgabq5LB3LPvOjkbms6W_jKJaGFFOHyPFOIabVXhP2gvzpb_wXkR30Xxu3UQK-ZW_eTAF9aF6qwQDA"
           }
         },
+        "effect": "reply",
         "now": "2026-10-25T11:30:00Z",
         "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
         "levels": {
@@ -3510,6 +3706,7 @@
             "sig": "Rg3hZAm3Hgabq5LB3LPvOjkbms6W_jKJaGFFOHyPFOIabVXhP2gvzpb_wXkR30Xxu3UQK-ZW_eTAF9aF6qwQDA"
           }
         },
+        "effect": "reply",
         "now": "2026-10-25T11:30:00Z",
         "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
         "levels": {
@@ -3584,6 +3781,7 @@
             "sig": "Rg3hZAm3Hgabq5LB3LPvOjkbms6W_jKJaGFFOHyPFOIabVXhP2gvzpb_wXkR30Xxu3UQK-ZW_eTAF9aF6qwQDA"
           }
         },
+        "effect": "reply",
         "now": "2026-10-25T11:30:00Z",
         "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
         "levels": {
