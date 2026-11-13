@@ -308,13 +308,13 @@ function unitEvent(event: JsonObject, at: string): Finding[] {
   }
   // AE-2: the key forms the page fixes, so two writers of one unit derive one id: a github key is lower-cased
   // `<owner>:<repo>#<number>` (a managed user's owner holds `_`; the number as GitHub returns it, no leading zero), a jira
-  // key the issue key with no system prefix, each over the key's 64 characters the first 40 hex digits of its SHA-256;
+  // key the issue key with no system prefix, each over the key's 64 characters the first 40 lower-case hex digits of the SHA-256 of its UTF-8 bytes;
   // a mail key is that digest of the Message-ID.
   const DIGEST_KEY = /^[0-9a-f]{40}$/;
   const FORMS: Record<string, RegExp> = { github: /^[a-z0-9_-]+:[a-z0-9._-]+#[1-9][0-9]*$/, jira: /^[A-Z][A-Z0-9_]*-[1-9][0-9]*$/, mail: /^(?!)/ };
   const form = typeof unit.system === "string" && Object.hasOwn(FORMS, unit.system) ? FORMS[unit.system] : undefined;
   if (typeof unit.key === "string" && form !== undefined && !form.test(unit.key) && !DIGEST_KEY.test(unit.key)) {
-    const named: Record<string, string> = { github: "lower-case <owner>:<repo>#<number>, no leading zero", jira: "the bare issue key, upper case, no prefix", mail: "the first 40 hex digits of the Message-ID's SHA-256" };
+    const named: Record<string, string> = { github: "lower-case <owner>:<repo>#<number>, no leading zero", jira: "the bare issue key, upper case, no prefix", mail: "the first 40 lower-case hex digits of the SHA-256 of the Message-ID's UTF-8 bytes" };
     flag("/data/unit/key", `a ${unit.system} unit's key is ${named[unit.system as string]} or, when that form does not fit the key's pattern, its 40-hex digest, so every writer derives one id`);
   }
   // A leap second (`:60`), which the date-time format admits and Date.parse does not, reads as the last millisecond

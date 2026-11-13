@@ -11409,7 +11409,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      the unit's system and key, the transition and `run.root` (`unitSourceKey`), so every writer derives one `eventId`
      and a reopened unit accepted again under a new `run.root` is a new event; the unit's key takes one form per
      system ([activity](specification/activity.md#kinds): `github` lower-case `<owner>:<repo>#<number>`, `jira` the bare
-     issue key, `mail` a 40-hex digest, a form that does not fit the key's pattern its digest) (`FAC-SEM-171`, with
+     issue key, `mail` a 40-hex digest, a form that does not fit the key's pattern its digest; a digest is the first 40 lower-case hex digits of the SHA-256 of the UTF-8 bytes) (`FAC-SEM-171`, with
      an acceptance not recorded before it happened and the github, jira and mail key forms).
   3. **AE-3.** No user is attached to a unit, no unit is served by person (units only in agent, project or
      task-class cells and the organization's total, of an organization whose signed member list names at least 3

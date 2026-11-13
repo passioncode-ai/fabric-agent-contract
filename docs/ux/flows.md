@@ -159,7 +159,7 @@ flowchart TD
 - **Entry points:** the organization's member page; a link in the notice
 - **Success exit:** the access log lists reads of raw events and of devices bound to the member, a read of a unit
   the member accepted (DEC-0164), and a partner organization's reads of usage sums that include the member (DEC-0090)
-- **Task analysis:** sign in → the receiver resolves the member's `user.id`, bound devices and the pairwise subjects the organization issued them (a unit's `acceptedBy`) → list `access-log/1` entries newest first.
+- **Task analysis:** sign in → the receiver resolves the member's `user.id`, bound devices (a unit their device sent included) and the pairwise subjects the organization issued them (a unit's `acceptedBy`) → list `access-log/1` entries newest first.
 - **Rejected shape:** log only reads keyed by `user.id` — rejected because device health and check-ins reveal a person's device state too.
 - **Flow:**
 
