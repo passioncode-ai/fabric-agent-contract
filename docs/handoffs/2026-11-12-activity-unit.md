@@ -160,6 +160,7 @@ Branch `agent/ct259-activity-unit-20261112`, from main `d69dc363`. Entry point: 
   J3's retention, draft-shape records and the jira prefix; the renumbering clause dropped; Consequences completed;
   SCN-010's preconditions. Declined: none.
 
+- Round 10 (on `f7bf2441`): unit clean (three risks: a garbled code comment, fixed; the valid jira-digest vector; the vector built by mutation), seam and product failed. Folded: the `purpose` carve-out narrowed to a `unit` whose `acceptedBy` is a person (a unit refused for the device's own person holds as any kind), in activity.md, conformance's node row and `activity-batch-ack.schema.json`'s description, which DEC-0164's Consequences now list; the batch receiver's row keeps a unit's sending device beside the event for the access log; FAC-SEM-171's row says lower-case. Risks kept: one device's person logged when two devices send one unit (the copy is not kept); `run.root` shared across writers; mail Message-ID folding; `sourceKey` hex case stated only by its pattern; DEC-0100 and DEC-0102 not annotated; the round-9 risks.
 - Round 9 (on `df3fdf1c`): unit clean, seam clean (three risks: the adapter's `PROTOCOL_REVISIONS` twins, now in the adapter notice; FAC-SEM-171's inputs only in the vectors file, named by the conformance rows; GitHub's `/users/<name>/projects` evidence URL refused as a home path, a writer surprise), product failed. Folded: a `purpose` answer to a `unit` is consumed and holds nothing at the collector (activity.md batch and acknowledgement, the unit section, conformance's node row), since the refused person is the acceptor, not the device's; a raw read of a unit a person's device sent is logged in that person's access log, the receiver keeping the sending device beside the event (access log, the unit section, the reader row, SCN-010, FLW-06); the digest fallback is the first 40 lower-case hex digits of the SHA-256 of the UTF-8 bytes (AE-2, the unit row, FAC-SEM-171's message, the schema), with a vector refusing an upper-case mail digest. Kept as risks: a cell from two members (OQ-0015 covers one; the operator's), the valid jira-digest vector, fabric-workspace `measure.md` still in the draft shape until landing, the notice's purpose id, the two member counts.
 - Round 8 (on `ecf8bff1`): unit passed with three risks, product failed, seam cut off by the session limit (resume it
   or rerun it in round 9). Product, break folded: counts and single records separated (the 3-member gate for counts; a
@@ -174,5 +175,5 @@ Branch `agent/ct259-activity-unit-20261112`, from main `d69dc363`. Entry point: 
 
 ## Next task
 
-Round 10 of the blind readings (unit, seam, product) of branch `agent/ct259-activity-unit-20261112` (DEC-0164), once
+Round 11 of the blind readings (unit, seam, product) of branch `agent/ct259-activity-unit-20261112` (DEC-0164), once
 the subagent session limit resets (03:20 Europe/Warsaw).

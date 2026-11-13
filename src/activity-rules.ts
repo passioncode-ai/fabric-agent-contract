@@ -308,7 +308,7 @@ function unitEvent(event: JsonObject, at: string): Finding[] {
   }
   // AE-2: the key forms the page fixes, so two writers of one unit derive one id: a github key is lower-cased
   // `<owner>:<repo>#<number>` (a managed user's owner holds `_`; the number as GitHub returns it, no leading zero), a jira
-  // key the issue key with no system prefix, each over the key's 64 characters the first 40 lower-case hex digits of the SHA-256 of its UTF-8 bytes;
+  // key the issue key with no system prefix, and a key over 64 characters replaced by the first 40 lower-case hex digits of the SHA-256 of its UTF-8 bytes;
   // a mail key is that digest of the Message-ID.
   const DIGEST_KEY = /^[0-9a-f]{40}$/;
   const FORMS: Record<string, RegExp> = { github: /^[a-z0-9_-]+:[a-z0-9._-]+#[1-9][0-9]*$/, jira: /^[A-Z][A-Z0-9_]*-[1-9][0-9]*$/, mail: /^(?!)/ };
