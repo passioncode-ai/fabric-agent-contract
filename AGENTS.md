@@ -19,6 +19,14 @@
    repository's state against one of them, write fabric-workspace a board message naming the section and the evidence
    in the same run. This repository is a contract, not an agent: the architect's per-release audit (G30) reads agents
    and uses this repository's conformance checker, so it has no audit of its own.
+1c. **Step 0, the workstation, before every change** ([rules §0, step 0](https://github.com/passioncode-ai/fabric-workspace/blob/main/knowledge/rules.md#0-the-course-check-the-plan-and-the-north-star-before-every-change),
+   the operator's rule of 2026-11-13, board announcement `3390f915`): no change starts on a machine without the skill
+   families (`npx --yes sshlg-skills@latest update`), the launcher's `npx @passioncode-ai/passioncode doctor` without a
+   `fail`, an updated coding harness, the board (`fabric-mcp`), Fabric Dashboards, Switchboard where sessions run, and
+   Observatory. Every change goes through `task-pipeline` inside an Observatory workflow (checkpoints after each step);
+   a changed schema, profile or vector set is a new revision beside the old one (`docs/specification/versioning.md`),
+   never an edit in place. This repository holds no keys of its own; a key a run needs is used by name from the
+   Observatory vault (`use_secret.py run --vault-only`).
 2. The PassionCode.ai knowledge base, `fabric-workspace/knowledge/` in your clone (org-index
    `scripts/clone_all.sh` makes it) or https://wiki.passioncode.ai/knowledge: at least its
    [README](https://github.com/passioncode-ai/fabric-workspace/blob/main/knowledge/README.md),
