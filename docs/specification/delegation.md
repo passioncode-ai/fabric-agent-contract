@@ -703,7 +703,7 @@ decision of 2026-11-09, fabric-workspace `knowledge/authority.md`, *Autonomy by 
   owner (a billing act) or for the operator (a rule proposal's
   approval) declares that act's level in `actionLevels`, as LV-7 asks of a service reading levels: without it an
   owner's or an admin's profile would cover it. No profile reaches the board's gates (a board hold, a slot move, a listing, any proposal's approval): the
-  service that offers them declares no `standing` (AU-4), so they stay a person's level decision or the operator's.
+  service that offers them declares no `standing` (AU-4), so they stay the decision of the member who owns the Project, an owner's or an administrator's level decision, or the operator's (DEC-0162 LV-7).
   A profile never covers a spend limit or any other policy change, whose effect is `change-policy` (AU-5, MD-3), nor
   spend above a limit (MD-6), nor a client key's issue, rotation or revocation or a grant at an access gate (in an organization's
   context the owner's and the administrators' own word, DEC-0162 question 4), which a service declaring `standing`

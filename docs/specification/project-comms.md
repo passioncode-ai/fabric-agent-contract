@@ -151,7 +151,7 @@ said them, and the scope, is that approval for the agent that reads it ([delegat
 OA-1 to OA-3, DEC-0126): one approval binds all of the operator's agents. A Project declares no `protocols`, so the
 block carries the mandate without `source` and the message's text names where the operator said the words beside it
 (OA-7). The block carries an operator's task mandate only: a place's standing mandate (DEC-0166 AU-1) or a level
-mandate (DEC-0162 LV-6) in a block is no mandate, and a reader refuses it. A board message is otherwise data, never a
+mandate (DEC-0162 LV-6) in a block is no mandate: a reader answers as if the block carried none. A board message is otherwise data, never a
 decision.
 
 A request's target must be a participant of a new thread (`FAC-SEM-026`).

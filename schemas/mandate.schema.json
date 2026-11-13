@@ -24,7 +24,7 @@
         "operator",
         "level"
       ],
-      "description": "operator: the operator's words (MD-1). level: a level holder's words in an organization (DEC-0162 LV-6), with level, org and membership; taken from any tier only when the call's delegation token binds membership by mem (LV-5)."
+      "description": "operator: the operator's words (MD-1), or a place's standing mandate the hub states, whose standing.setLevel names an organization's owner or administrator who set it (DEC-0166 AU-1, AU-2). level: a level holder's words in an organization (DEC-0162 LV-6), with level, org and membership; taken from any tier only when the call's delegation token binds membership by mem (LV-5)."
     },
     "level": {
       "enum": [

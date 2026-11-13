@@ -11499,7 +11499,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   operator's own default is the operator's word and covers the acts a service declares `operator` like any other, save
   the board's gates (a hold, a slot move, a listing, any proposal's approval, a rule proposal's among them, `FAC-SEM-104`),
   which no profile reaches (the board's gates declare no `standing`), and a client key or an access grant, offered as
-  `change-policy` (DEC-0162's answers of 2026-11-13); a provider key the estate issues through its own doors stays covered;
+  `change-policy` (DEC-0162's answers of 2026-11-13 for an organization's context; in the personal context DEC-0166's own narrowing, so no profile revokes a client key either); a provider key the estate issues through its own doors stays covered;
   question 1 asks about the 2026-11-05 gates.
 - **Decision:**
   1. **The profile is a standing mandate (AU-1).** `mandate.schema.json` gains the optional member `standing`
