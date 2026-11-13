@@ -76,6 +76,24 @@ shows a share confirmed this way as confirmed by the operator's agent, with the 
 **OM-6, the estate route first.** When the two machines are in one estate, its own route (DEC-0111) moves the
 credential and no peer share is needed; OM-1 serves two estates of one person.
 
+## The engine's build (2026-11-13)
+
+Project Observatory built OBS-531 against OM-1 to OM-6 on branch `feat/obs-531-own-share` (`e0c1ad51`), reported on
+the board (thread `c37a8f29`, message `29dfede8`): `share.accept-own`, `share.read-code` and `share.confirm-own` beside
+the unchanged human `share.accept` (`consent`) and `share.confirm` (`comparison`); a gate (`own_share.gate`) taking
+a node in no organization, a local caller and a decision whose `action` and `target` name the share; the digits on
+standard input compared by the node's constant-time check, a mismatch burning the link with no second submission;
+the journal `node/shares/own-decisions.jsonl` without the digits. Its tests (`OwnMachines` in
+`tests/test_share_cli.py`) cover the full path, a mismatch and two calls outside OM-1. The engine's pull request opens
+after its current one merges; that is the adoption evidence the DEC cites.
+
+**The one point it raised, resolved for the DEC.** OM-1.3's `instruction` (naming this share or a finishing task, and
+the recipient machine as the operator's own) is not checked mechanically: the engine binds `action` and `target`, and
+the journal keeps the words. The DEC keeps it so: natural language is not a machine check, AP-3 already makes the
+instruction the operator's words verbatim, and the binding that stops a decision from being reused on another share is
+`target`, which the engine checks. The instruction is a review-time check over the OM-5 journal; the DEC states this
+as the rule's limit, beside the residual risk in the section above.
+
 ## Owed by the decision
 
 - `peer-share.md` PS-6 (the exception and its conditions), PS-4 (the pin in OM-1), the reference table; `service.md`
