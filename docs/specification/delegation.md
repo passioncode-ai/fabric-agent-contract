@@ -696,7 +696,7 @@ decision of 2026-11-09, fabric-workspace `knowledge/authority.md`, *Autonomy by 
   (`owner` or `admin`, inside the digest, so `prof` binds it), and a callee that
   declares `actionLevels` refuses an action declared above it as LV-7 and LV-10 say: `operator-decision-required`
   with `level-insufficient: operator` for an act no level decides, `owner` for a billing act below the owner,
-  `admin` for an act declared `admin` (any proposal type's approval other than a rule's, LV-7) below an admin. Every callee that reads standing mandates, whether or not it
+  `admin` for an act declared `admin` below an admin. Every callee that reads standing mandates, whether or not it
   declares `actionLevels`, refuses a call in no project under a profile set below `admin` (`level-insufficient:
   admin`, which no profile meets while `setLevel` is `owner` or `admin`, kept for a level a later decision adds);
   `actionLevels` adds the per-action bound. So a service that declares `standing` and offers an act LV-7 keeps for the
@@ -705,9 +705,11 @@ decision of 2026-11-09, fabric-workspace `knowledge/authority.md`, *Autonomy by 
   owner's or an admin's profile would cover it. No profile reaches the board's gates (a board hold, a slot move, a listing, any proposal's approval): the
   service that offers them declares no `standing` (AU-4), so they stay a person's level decision or the operator's.
   A profile never covers a spend limit or any other policy change, whose effect is `change-policy` (AU-5, MD-3), nor
-  spend above a limit (MD-6), nor access (a client key's issue, rotation or revocation, a grant at an access gate:
-  access is the owner's and the administrators' own word, DEC-0162 question 4), which a service declaring `standing`
-  offers with the effect `change-policy`. An owner's or an admin's profile covers, within its scope and effects, the
+  spend above a limit (MD-6), nor a client key's issue, rotation or revocation or a grant at an access gate (in an organization's
+  context the owner's and the administrators' own word, DEC-0162 question 4), which a service declaring `standing`
+  offers with the effect `change-policy`, in either context. A provider key the place's own estate issues through its
+  own doors (Observatory's) is not a client key: it is that estate's relayed act, which a profile covers as any other
+  (AU-4, question 5). An owner's or an admin's profile covers, within its scope and effects, the
   other acts its setter could decide. The operator's own profile carries no `setLevel` and is the
   operator's word.
 - **AU-3, how it binds.** A callee reads standing mandates only when its authority extension declares `standing`
@@ -738,7 +740,7 @@ decision of 2026-11-09, fabric-workspace `knowledge/authority.md`, *Autonomy by 
   (`{project: "fabric-workspace", session: "a616cbcb"}`, kept in the hub's record unless the target lists
   `operator-source/1`, OA-7); in an organization's context it states nothing
   until the organization's `owner` or an `admin` records a profile, no architect ending the wait (the operator's answer
-  to DEC-0166 question 4, 2026-11-13). The organization's credential issuer (credentials, DEC-0111) declares no `standing`, so a profile reaches no credential request's decision. In the personal context the operator's own default, carrying no `setLevel`, is the operator's word and covers an act a service declares `operator` (a client key) like any other act its scope names, save `change-policy` and MD-6's list. A rule proposal's approval is the operator's alone and never a policy's ([proposals](proposals.md), `FAC-SEM-104`), so the service that offers it (the board's gate) declares no `standing`, as the credential issuer does, and no profile reaches it. A profile decides no credential request: that stays as
+  to DEC-0166 question 4, 2026-11-13). The organization's credential issuer (credentials, DEC-0111) declares no `standing`, so a profile reaches no credential request's decision. In the personal context the operator's own default, carrying no `setLevel`, is the operator's word and covers an act a service declares `operator` like any other act its scope names, save `change-policy` and MD-6's list. A rule proposal's approval is the operator's alone and never a policy's ([proposals](proposals.md), `FAC-SEM-104`), so the service that offers it (the board's gate) declares no `standing`, as the credential issuer does, and no profile reaches it. A profile decides no credential request: that stays as
   [credentials](credentials.md) has it (the administrator or the auto-approval policy, DEC-0111; question 5); a key
   the place's own estate issues through its own doors (Observatory's) is that estate's relayed act, which the profile
   covers as any other. `person`: nothing beyond what the session's own person decides,

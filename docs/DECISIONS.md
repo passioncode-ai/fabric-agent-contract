@@ -11497,7 +11497,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   person, and in an organization's context a profile set below an act's declared level never covers it (no level's
   profile covers an act declared `operator`; only an owner's covers a billing act). In the personal context the
   operator's own default is the operator's word and covers the acts a service declares `operator` like any other, save
-  a rule proposal's approval, which no profile reaches (the board's gate declares no `standing`, `FAC-SEM-104`);
+  the board's gates (a hold, a slot move, a listing, any proposal's approval, a rule proposal's among them, `FAC-SEM-104`),
+  which no profile reaches (the board's gates declare no `standing`), and a client key or an access grant, offered as
+  `change-policy` (DEC-0162's answers of 2026-11-13); a provider key the estate issues through its own doors stays covered;
   question 1 asks about the 2026-11-05 gates.
 - **Decision:**
   1. **The profile is a standing mandate (AU-1).** `mandate.schema.json` gains the optional member `standing`
@@ -11511,7 +11513,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      place, never an `architect`, question 4). The hub states the setter's level as
      `standing.setLevel` (`owner` or `admin`, inside the digest), and a callee that
      declares `actionLevels` refuses an action declared above it `level-insufficient` (LV-7, LV-10; `levelShortOf`
-     in `src/levels.ts`), so a profile never covers more than its setter's level does.
+     in `src/levels.ts`), so a profile never covers more than its setter's level does. No profile reaches the board's
+     gates, which declare no `standing`, and none covers a policy change, a spend limit, a client key or an access grant
+     (`change-policy`, AU-5).
   3. **Binding (AU-3).** A callee reads standing mandates only when its authority extension declares `standing`; an agent
      sends one, and the hub forwards one, only to such a callee, and the protocol name `standing/1` gates the form
      toward a hub. From T0 or T1 it is taken as MD-3 says; from T2 only when the call's delegation token carries the new

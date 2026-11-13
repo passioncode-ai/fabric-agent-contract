@@ -522,7 +522,7 @@ known-good earlier payload; it does not reactivate or edit history
 - [ ] A service that takes a place's standing mandate declares `standing` in `extensions/authority/0.1` and, when it
   offers a billing act or an act LV-7 keeps for the operator, that act's level in `actionLevels`, so a profile set
   below that act's level never covers it (no level holder's profile covers an act declared `operator`; only an owner's
-  covers a billing act), and offers a key or an access grant with the effect `change-policy`; the organization's credential issuer and the board's gates (holds, slot moves, listings, proposal approvals) declare no `standing`; it runs `fixtures/vectors/profile.json` (DEC-0166 AU-2, AU-3).
+  covers a billing act), and offers a client key's issue, rotation or revocation or an access grant with the effect `change-policy` (a provider key the estate issues through its own doors is an ordinary relayed act); the organization's credential issuer and the board's gates (holds, slot moves, listings, proposal approvals) declare no `standing`; it runs `fixtures/vectors/profile.json` (DEC-0166 AU-2, AU-3).
 
 ## Operator checklist
 
