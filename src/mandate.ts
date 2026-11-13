@@ -82,6 +82,9 @@ export interface MandateCall {
   spendUsd?: number;
   /** The project the call acts in, when it acts in one. */
   project?: string;
+  /** The context the call acts in, `org:<orgId>` or `personal` (DEC-0082); required to read a level mandate, which
+   * stands only in its own organization (DEC-0162 LV-4). */
+  context?: string;
   /** The lowest level that decides the call's action, as the callee declares it (DEC-0162 LV-7); read by a level mandate. */
   minLevel?: string;
 }
@@ -102,7 +105,7 @@ export type MandateAnswer =
    * every tier (LV-10, AU-3). */
   | { ignored: "mandate-at-t2" | "levels-not-read" | "standing-not-read" }
   /** The callee's own fault, never sent: its clock does not read. */
-  | { fault: "now-unreadable" | "levels-invalid" };
+  | { fault: "now-unreadable" | "levels-invalid" | "context-missing" };
 
 let shape: ValidateFunction | undefined;
 const mandateShape = () => (shape ??= createValidatorSync().getSchema(`${SCHEMA_PREFIX}schemas/mandate.schema.json`) as ValidateFunction);
@@ -218,6 +221,8 @@ export function mandateCovers(input: {
   const standing = isObject(mandate) && isObject(mandate.standing);
   if (standing && input.standing !== true) return { ignored: "standing-not-read" };
   if (byLevel && !isObject(input.levels)) return { ignored: "levels-not-read" };
+  // LV-4: a level mandate stands only in the organization the call acts in, so the callee owes that context.
+  if (byLevel && typeof call.context !== "string") return { fault: "context-missing" };
   const inside = tier === "T0" || tier === "T1";
   // A standing mandate from T2 needs the token's `prof` (AU-3), whoever stated it; without one it changes nothing, as
   // MD-5 says. A task's operator mandate from T2 changes nothing either.
@@ -266,7 +271,7 @@ export function mandateCovers(input: {
     const levelAnswer = levelStanding({
       membership: read.membership, org: read.org as string, level: read.level as string, at: read.at,
       ...(call.project === undefined ? {} : { project: call.project }), ...(call.minLevel === undefined ? {} : { minLevel: call.minLevel }),
-      contexts: input.levels as LevelContexts, tokenMem: input.tokenMem, now: clock
+      context: call.context as string, contexts: input.levels as LevelContexts, tokenMem: input.tokenMem, now: clock
     });
     if (!levelAnswer.ok) {
       return "invalid" in levelAnswer

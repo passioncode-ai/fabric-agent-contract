@@ -1377,7 +1377,7 @@ estimate and the `project`; for a level decision or mandate (DEC-0162) also `lev
 | `relayed` | T0 or T1, a valid decision | `{ok: true, recordAs: {by: "operator", via: "relayed-instruction", caller, source?}}`: the operator's act, `source` when the decision carries it (DEC-0126) |
 
 An input the service owes and does not have (a declaration that is not valid, level contexts that are not a map of
-well-formed entries (`levels-invalid`), an action's declared level not among `operator`, `owner`, `admin`, `architect`
+well-formed entries (`levels-invalid`), on a level decision or a level mandate no context the call acts in (`context-missing`, `org:<orgId>` or `personal`, DEC-0162 LV-4), an action's declared level not among `operator`, `owner`, `admin`, `architect`
 (`action-level-invalid`), both read before an accepted approval (DEC-0162 LV-10), no authenticated caller, no readable
 clock, no digest for a T2 refusal, no link for a human step, under a mandate no `effect` or no `self`, and on a level decision an `effect` that is not an effect class, or, for a job's input request under a mandate and no decision, no usable `mandateCapability` (absent, empty, blank, not a capability name, or
 `fabric.job.get` itself), MJ-1) is its own fault (`{fault}`), never an answer to the

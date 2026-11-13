@@ -66,7 +66,12 @@ describe("levelStanding and FAC-SEM-170 at their edges (DEC-0162)", async () => 
   const now = Date.parse("2026-10-25T11:30:00Z");
   const contexts = { "org:org-a": { audience: "reviews-service-a1", keySet: vectors.keySet } };
   const admin = vectors.memberships.admin as Json;
-  const base = { membership: admin, org: "org:org-a", level: "admin", at: "2026-10-25T11:20:00Z", contexts, tokenMem: vectors.digests.admin, now };
+  const base = { membership: admin, org: "org:org-a", level: "admin", at: "2026-10-25T11:20:00Z", context: "org:org-a", contexts, tokenMem: vectors.digests.admin, now };
+  it("stands only in the organization the call acts in (LV-4)", () => {
+    expect(levelStanding(base)).toMatchObject({ ok: true, level: "admin" });
+    expect(levelStanding({ ...base, context: "org:org-b" })).toEqual({ ok: false, invalid: "level-membership: context-invalid" });
+    expect(levelStanding({ ...base, context: "personal" })).toEqual({ ok: false, invalid: "level-membership: context-invalid" });
+  });
   it("stands, with a held record in the context", () => {
     const held = { subject: admin.subject, revision: admin.revision, digest: vectors.digests.admin };
     expect(levelStanding({ ...base, contexts: { "org:org-a": { ...contexts["org:org-a"], held: { [admin.subject as string]: held } } } })).toMatchObject({ ok: true, level: "admin" });
@@ -128,7 +133,7 @@ describe("levelStanding and FAC-SEM-170 at their edges (DEC-0162)", async () => 
 describe("levelStanding on inputs a service builds itself (DEC-0162 LV-4)", () => {
   const admin = vectors.memberships.admin as Json;
   const contexts = { "org:org-a": { audience: admin.audience, keySet: vectors.keySet } };
-  const base = { org: "org:org-a", at: "2026-10-25T11:00:00Z", contexts, now: Date.parse("2026-10-25T11:00:30Z") };
+  const base = { org: "org:org-a", at: "2026-10-25T11:00:00Z", context: "org:org-a", contexts, now: Date.parse("2026-10-25T11:00:30Z") };
   it("refuses an attestation without a subject as malformed, and a level that decides nothing as above the role", () => {
     expect(levelStanding({ ...base, membership: { ...admin, subject: undefined }, level: "admin", tokenMem: vectors.digests.admin })).toEqual({ ok: false, invalid: "level-membership: malformed" });
     expect(levelStanding({ ...base, membership: admin, level: "member", tokenMem: vectors.digests.admin })).toEqual({ ok: false, invalid: "level-role" });
