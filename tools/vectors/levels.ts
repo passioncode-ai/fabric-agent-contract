@@ -143,7 +143,7 @@ function actionCases(): Json[] {
     // LV-7: a level decision needs the action's effect, so a policy change is never read below admin (round 15).
     ["an architect's level decision with no effect", call("T1", { ...decided("architect", ARCHITECT, { project: "alpha" }), action: "set-policy" }, { action: policy, effect: undefined, tokenMem: digest(ARCHITECT), project: "alpha" }), { fault: "effect-missing" }],
     ["an architect's level decision with an effect of another case", call("T1", { ...decided("architect", ARCHITECT, { project: "alpha" }), action: "set-policy" }, { action: policy, effect: "Change-Policy", tokenMem: digest(ARCHITECT), project: "alpha" }), { fault: "effect-missing" }],
-    // LV-7: an act declared admin (a spend limit, a board hold, a slot move, a listing) is an owner's or an admin's.
+    // LV-7: an act declared admin (a spend limit, a board hold, a slot move, a listing, a source hand-over of an organization's own agent, LV-6) is an owner's or an admin's.
     ["an architect in its project on an act declared admin", call("T1", decided("architect", ARCHITECT, { project: "alpha" }), { actionLevel: "admin", tokenMem: digest(ARCHITECT), project: "alpha" }), insufficient],
     ["an administrator on an act declared admin", call("T2", decided("admin", ADMIN), { actionLevel: "admin", tokenMem: digest(ADMIN) }), level("admin", ADMIN)],
     // LV-7: a client key in an organization's context is an owner's or an admin's, declared admin (the operator, 2026-11-13).
