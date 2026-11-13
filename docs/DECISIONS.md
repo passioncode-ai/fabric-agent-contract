@@ -11481,7 +11481,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-11-12
 - **Status:** Proposed 2026-11-12, from the design `docs/evidence/plans/2026-11-12-ct285-autonomy-profile.md` (CT-285),
-  with questions 4 and 5 added here and question 1 widened in round 4, all five answered by the operator on 2026-11-13 in this repository's session `7c9eb2c2` (asked in its chat; a relayed «Принять все дефолты», fabric-workspace session `fd5dfcf0`, board message `36b1981b`, is superseded: asked about the conflict, the operator answered «Мои ответы здесь»): questions 1, 2, 3 and 5 as their defaults, question 4 otherwise (only the owner and the administrators record an organization's profile, an architect none: «Владелец и администраторы»); and, asked after round 12 the same day, a provider key issued through the estate's own doors is covered at its door's default ceiling only, any other ceiling being a spend limit (`change-policy`): for a key an organization holds the owner's or an administrator's, for a key in a member's own estate that estate operator's (L0), in the personal context the operator's («Потолок по умолчанию покрыт», AU-2); accepted when the
+  with questions 4 and 5 added here and question 1 widened in round 4, all five answered by the operator on 2026-11-13 in this repository's session `7c9eb2c2` (asked in its chat; a relayed «Принять все дефолты», fabric-workspace session `fd5dfcf0`, board message `36b1981b`, is superseded: asked about the conflict, the operator answered «Мои ответы здесь»): questions 1, 2, 3 and 5 as their defaults, question 4 otherwise (only the owner and the administrators record an organization's profile, an architect none: «Владелец и администраторы»); and, asked after round 12 the same day, a provider key issued through the estate's own doors is covered at its door's default ceiling only (a rotation keeping its predecessor's ceiling included), any other ceiling being a spend limit (`change-policy`): for a key an organization holds the owner's or an administrator's, for a key in a member's own estate that estate operator's (L0), in the personal context the operator's («Потолок по умолчанию покрыт», AU-2); accepted when the
   coordinator's blind readings are clean on two consecutive rounds. It reads DEC-0162's levels and lands after it: the
   branch `agent/ct285-autonomy-profile-20261112` is stacked on DEC-0162's. An answer from the operator after
   acceptance is a new decision amending this one.
@@ -11499,7 +11499,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   operator's own default is the operator's word and covers the acts a service declares `operator` like any other, save
   the board's gates (a hold, a slot move, a listing, any proposal's approval, a rule proposal's among them, `FAC-SEM-104`),
   which no profile reaches (the board's gates declare no `standing`), and a client key or an access grant, offered as
-  `change-policy` (DEC-0162's answers of 2026-11-13 for an organization's context; in the personal context DEC-0166's own narrowing, so no profile revokes a client key either); a provider key the estate issues through its own doors stays covered at its door's default ceiling, any other ceiling being `change-policy` (the answer recorded in the Status);
+  `change-policy` (DEC-0162's answers of 2026-11-13 for an organization's context; in the personal context DEC-0166's own narrowing, so no profile revokes a client key either); a provider key the estate issues through its own doors stays covered at its door's default ceiling (a rotation keeping its predecessor's ceiling included), any other ceiling being `change-policy` (the answer recorded in the Status);
   question 1 asks about the 2026-11-05 gates.
 - **Decision:**
   1. **The profile is a standing mandate (AU-1).** `mandate.schema.json` gains the optional member `standing`
@@ -11570,7 +11570,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   AU-4); (5, added in round 1) a profile decides no credential request, which stays the administrator's or the
   auto-approval policy's (credentials, DEC-0111), although the operator's record lists key issuance through
   Observatory's doors among a headless place's acts: a key a place's own estate issues through its own doors is that
-  estate's relayed act, which the profile covers as any other, at its door's default ceiling only (narrowed by the later answer in the Status). The questions were posted on thread `8da128cf` as
+  estate's relayed act, which the profile covers as any other, at its door's default ceiling only (a rotation keeping its predecessor's ceiling included) (narrowed by the later answer in the Status). The questions were posted on thread `8da128cf` as
   message `bd18b1fa` on 2026-11-12 once the board answered again; the operator answered them on 2026-11-13 in this repository's chat (questions 1, 2, 3 and 5 as the defaults, question 4 as above).
 - **Consequences / affects:** `schemas/mandate.schema.json` (`standing`), `schemas/delegation-token.schema.json`
   (`prof`), `schemas/service-authority-extension.schema.json` (`standing`); `src/mandate.ts`, `src/actions.ts`,
