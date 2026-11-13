@@ -249,16 +249,16 @@ flowchart TD
 - **Goal:** a project spends within a limit the operator chose once, and a spend above the threshold waits for one answer
 - **Entry points:** the first run of a project that would spend money; a grant check above `autoApproveUsd`
 - **Success exit:** the policy recorded with its inputs; the request answered and the spend allowed or not
-- **Task analysis:** the launcher computes options → the operator picks one (one is preselected; in an organization's project its owner, while the run waits, DEC-0162 LV-7) → the meter checks each spend against the levels → above the threshold it denies with one filed request → the operator confirms the amount in the operator channel → the agent asks again and is allowed.
+- **Task analysis:** the launcher computes options → the operator picks one (one is preselected; in an organization's project its owner or an administrator, while the run waits, DEC-0162 LV-7) → the meter checks each spend against the levels → above the threshold it denies with one filed request → the operator confirms the amount in the operator channel → the agent asks again and is allowed.
 - **Rejected shape:** a fixed list of budgets, or an approval in a chat message — rejected because the options must come from the project (spend policy) and a chat message is never the approval (spend policy rule 3).
 - **Flow:**
 
 ```mermaid
 flowchart TD
-  F[First paid run, no policy] --> O{An organization's project, started by someone other than its owner?}
+  F[First paid run, no policy] --> O{An organization's project, started by someone other than its owner or an administrator?}
   O -->|no| P[Screen: Spend policy choice]
-  O -->|yes| WO[Screen: the run waits for the organization's owner; nothing spent (DEC-0162 LV-7)]
-  WO -->|the owner records the choice, once its route is decided: PC-162| R
+  O -->|yes| WO[Screen: the run waits for the organization's owner or an administrator; nothing spent (DEC-0162 LV-7)]
+  WO -->|the owner or an administrator records the choice, once its route is decided: PC-162| R
   P --> R[Policy recorded with its inputs]
   R --> C{Grant check}
   C -->|within the levels| A[Allowed, reserved]
