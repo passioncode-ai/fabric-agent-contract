@@ -90,6 +90,23 @@ LicenseRef-PassionCode-Commercial` in `package.json`; `LICENSE`, `COMMERCIAL-LIC
 exception was the operator's question CO-KB-02 in the knowledge base; it closed on 2026-10-19 and the
 schemas stay under this repository's licence.
 
+### Questions and access levels
+
+The operator's standing rule of 2026-11-13 ([`knowledge/authority.md`](https://github.com/passioncode-ai/fabric-workspace/blob/main/knowledge/authority.md),
+«Agents close questions themselves, by access level») applies here: an agent decides an open question itself by the
+recorded decisions (`docs/DECISIONS.md`), this repository's goal and then the safest reversible option, writes the
+decision and its reason where the work lives (the backlog row, the design, the DEC), and continues. Trust comes from
+the gate (`pnpm run check`), the review rounds a DEC records and the conformance vectors, not from a person. Levels:
+
+- this repository, its backlog, decisions, vectors and releases (PassionCode): the operator and the partner equally; an
+  agent acts for them, a release by its checks (`release-signing/products.json`);
+- a consumer's code: its own project's agent, asked on the board (`com.submit`), never edited from here;
+- a level not written: the narrowest access that lets the act happen, recorded as an open point on the row.
+
+A request on this project's board is answered by this project (`com.reply`) without waiting for a responder. The only
+questions left for a person are the human gates: a sign-in, a one-time code, a consent screen, a typed secret, a
+payment, spend above the limit, a send to people outside the estate, or access wider than the act needs.
+
 ## Organisation
 
 This repository is one of the `passioncode-ai` repositories. The organization's rules
