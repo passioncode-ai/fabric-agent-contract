@@ -762,7 +762,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 ### DEC-0030 — Activity telemetry: events, batches, a receiver-built summary without a person dimension, and an access log (`fabric-activity/0.1`)
 
 - **Date:** 2026-10-08
-- **Status:** Accepted source change (on merge of its pull request); consumer adoption pending.
+- **Status:** Accepted source change (on merge of its pull request); consumer adoption pending. Narrowed for one kind by DEC-0164 AE-3: past raw retention the organization's journal keeps, for `unit` events, person-free monthly counts and, until each month's count closes, `(unit, month)` keyed digests with only their person-free cell; nothing else outlives raw retention.
   Revised before merge by the contract owner's review of PR #22 (head `0994981`) and re-review
   (head `19e2b58`).
 - **Annotated (2026-10-12):** item 10 (presence) is **narrowed by OD-1 for owner and administrator views** by DEC-0052 item 4: the schema keeps the per-person estimates; what a receiver serves another person of them needs a purpose the subject confirmed. DEC-0052 also amends items 1, 4 (an ack never moves over check-in drops), 6 and 7.
@@ -11390,7 +11390,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Status:** Proposed 2026-11-12 from the design `docs/evidence/plans/2026-11-12-ct259-activity-unit.md` (CT-259), whose
   shape Project Observatory confirmed on the board (thread `b83440d6`, message `b8d911c0`; thread `52aa2f93`, message
   `55fa0fd7`); accepted when the coordinator's blind readings are clean on two consecutive rounds. A new core kind
-  inside `fabric-activity/0.1` and one rule code (`FAC-SEM-171`); nothing existing changes meaning.
+  inside `fabric-activity/0.1` and one rule code (`FAC-SEM-171`). It narrows three things for the new kind only: DEC-0030's retention (past raw retention the journal keeps person-free monthly counts and, until each month's count closes, `(unit, month)` keyed digests with their person-free cell), DEC-0100's purpose hold (a `unit` whose `acceptedBy` is a person) and activity's *Event id* (a unit's derived `sourceKey`); no other kind changes meaning.
 - **Context:** the North Star metric counts accepted units of work per task class (fabric-workspace
   `knowledge/system/measure.md`, *The activity event*; North Star gap G1-a). The activity protocol had no agent id, no
   unit and no acceptance: `result` says whether a run met a signal, not which unit was delivered and accepted.

@@ -1,6 +1,6 @@
 # Design 2026-11-12: the activity event of a unit of work (CT-259)
 
-**Status:** the design CT-259 owes by 2026-11-13, drafted for Project Observatory to confirm the shape against its
+**Status:** decided as DEC-0164, proposed (docs/DECISIONS.md); where this design and the decision differ (no `org` in the event, a known cost, the AE-* rules), the decision wins. Before that: the design CT-259 owes by 2026-11-13, drafted for Project Observatory to confirm the shape against its
 OBS-378 (the activity journal's event schema); the decision follows once Observatory confirms. Rules are proposals
 numbered `AE-*`.
 

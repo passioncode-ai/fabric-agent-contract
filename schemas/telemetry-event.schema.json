@@ -847,7 +847,7 @@
               "$ref": "activity-common.schema.json#/$defs/opaqueId"
             }
           },
-          "description": "On accepted only: an acceptance rule's id, an agent's id, or a person's pairwise membership subject for this reader (never a name or an address); a person's stays in the organization's own journal (AE-3)."
+          "description": "On accepted only: an acceptance rule's id, an agent's id, or a person's pairwise membership subject for OQ-0017's audience, by default the organization's own journal (never a name or an address); a person's stays in the organization's own journal (AE-3)."
         },
         "acceptedAt": {
           "$ref": "common.schema.json#/$defs/timestamp",
