@@ -11423,7 +11423,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      sent is logged in the log of the person bound to the event's epoch, under a purpose that person confirmed; past raw
      retention the journal keeps each unit's `(unit, month)` key only as an `hmac-sha256` digest of `{key, month, system}` under a
      key it never exports, dropped once that month's count closes (its end plus the server layer's `retention.raw_days` in force then, 30 days where it sets none, plus 60 s), beside each only its person-free cell, since a tracker key can name a person; a collector drops
-     held transitions (kept no longer than the smaller of the server layer's `retention.raw_days` and the device's own) when its device is enrolled again with a binding to a different
+     held transitions (kept no longer than the smaller of the server layer's `retention.raw_days` (30 days where it sets none) and the device's effective value) when its device is enrolled again with a binding to a different
      person, or from a person to none; an acceptance for a month whose count is closed is a late gap, never added to it.
   4. **AE-4.** A device collector sends it in its batches, to the enrollment of the organization that owns its
      `project.id` by the device's folder attribution (never for a personal or unattributed project; the route

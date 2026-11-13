@@ -95,7 +95,7 @@ Each one comes from the `method` the event names, with the `idleThresholdSeconds
 
 A `unit` whose `acceptedBy` is of kind `person` is personal data whatever channel wrote it (a kit with no device included,
 DEC-0164 AE-3). Its retention is the organization's `retention.raw_days`, the server layer of the device policy where
-no device carries one ([devices](devices.md#policy)); past it the journal keeps only its person-free monthly counts and, until its month's count closes, a
+no device carries one, 30 days where the server layer sets none ([devices](devices.md#policy)); past it the journal keeps only its person-free monthly counts and, until its month's count closes, a
 unit's `(unit, month)` key as a keyed digest with only its person-free cell ([kinds](#kinds)), beside the summaries.
 
 ## Telemetry event
