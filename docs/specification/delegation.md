@@ -709,9 +709,11 @@ decision of 2026-11-09, fabric-workspace `knowledge/authority.md`, *Autonomy by 
   context the owner's and the administrators' own word, DEC-0162 question 4 for an access grant and question 8's follow-up for a client key), which a service declaring `standing`
   offers with the effect `change-policy`, in either context. A provider key the place's own estate issues through its
   own doors (Observatory's) is not a client key: it is that estate's relayed act, which a profile covers as any other
-  (AU-4, question 5), at the ceiling its door gives a new key by default; a key issued at any other ceiling, or a
-  ceiling changed, is a spend limit (`change-policy`, DEC-0162 LV-7), the owner's or an administrator's (the operator,
-  2026-11-13: «Потолок по умолчанию покрыт»). An owner's or an admin's profile covers, within its scope and effects, the
+  (AU-4, question 5), at the ceiling its door gives a new key by default (a rotation keeping its predecessor's ceiling
+  included); a key issued at any other ceiling, or a ceiling changed, is a spend limit (`change-policy`, DEC-0162 LV-7)
+  that no profile covers, decided for a key an organization holds by the owner or an administrator, for a key in a
+  member's own estate by that estate's operator ([spend policy](spend-policy.md#levels) L0), and in the personal
+  context by the operator (the operator, 2026-11-13: «Потолок по умолчанию покрыт»). An owner's or an admin's profile covers, within its scope and effects, the
   other acts its setter could decide. The operator's own profile carries no `setLevel` and is the
   operator's word.
 - **AU-3, how it binds.** A callee reads standing mandates only when its authority extension declares `standing`
