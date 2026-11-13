@@ -67,7 +67,6 @@ function actionCases(): Json[] {
   const estateDefault = profile({ standing: { ...STANDING, estateCapabilities: true } }, { effects: ["draft", "publish", "send", "reply", "charge", "delete", "merge", "deploy"] });
   const byAdmin = profile({ standing: { ...STANDING, setLevel: "admin" } });
   const byOwner = profile({ standing: { ...STANDING, setLevel: "owner" } });
-  const byArchitect = profile({ standing: { ...STANDING, setLevel: "architect" } }, { capabilities: ["site.deploy"], effects: ["deploy"], projects: ["alpha"] });
   return [
     // AU-1, AU-3: inside the boundary the standing mandate is read like a task's (MD-3); recorded via profile (AU-6).
     ["a headless profile covers a deploy, from T1", call("T1", p), taken(p)],
@@ -98,14 +97,10 @@ function actionCases(): Json[] {
     ["an administrator's profile at an action declared operator, from T1", call("T1", byAdmin, { actionLevel: "operator" }), { ok: false, code: "operator-decision-required", data: { detail: "level-insufficient: operator" } }],
     ["an administrator's profile at an action declared owner, from T2", call("T2", byAdmin, { actionLevel: "owner", tokenProf: prof(byAdmin) }), { ok: false, code: "operator-decision-required", data: { detail: "level-insufficient: owner", actionDigest: DIGEST } }],
     ["an owner's profile at an action declared owner, from T1", call("T1", byOwner, { actionLevel: "owner" }), taken(byOwner)],
-    ["an architect's profile at a call in one of its projects, from T1", call("T1", byArchitect, { actionLevel: "admin", project: "alpha" }), { ok: false, code: "operator-decision-required", data: { detail: "level-insufficient: admin" } }],
-    ["an architect's profile without its projects, at a call in a project, from T1", call("T1", profile({ standing: { ...STANDING, setLevel: "architect" } }), { project: "beta" }), { ok: false, code: "operator-decision-required", data: { detail: "outside-mandate: project" } }],
     ["a service's mistyped declared level is its own fault, never a caller's answer", call("T1", byAdmin, { actionLevel: "Owner" }), { fault: "action-level-invalid" }],
-    ["an architect's projectless profile with a hand-over adding projects, at a call in one, from T1", call("T1", profile({ standing: { ...STANDING, setLevel: "architect" }, chain: [{ agent: RUNNER, at: "2026-11-12T09:00:05Z" }, { agent: SELF, at: "2026-11-12T09:30:00Z", scope: { capabilities: ["site.deploy"], effects: ["deploy"], projects: ["beta"] } }] }), { project: "beta" }), { ok: false, code: "operator-decision-required", data: { detail: "outside-mandate: project" } }],
-    ["the same from T2 under the stated profile's prof", call("T2", profile({ standing: { ...STANDING, setLevel: "architect" }, chain: [{ agent: RUNNER, at: "2026-11-12T09:00:05Z" }, { agent: SELF, at: "2026-11-12T09:30:00Z", scope: { capabilities: ["site.deploy"], effects: ["deploy"], projects: ["beta"] } }] }), { project: "beta", tokenProf: prof(profile({ standing: { ...STANDING, setLevel: "architect" } })) }), { ok: false, code: "operator-decision-required", data: { detail: "outside-mandate: project", actionDigest: DIGEST } }],
-    ["an architect's profile at a call in no project, from T1", call("T1", byArchitect), { ok: false, code: "operator-decision-required", data: { detail: "level-insufficient: admin" } }],
-    ["an architect's profile at a call in one of its projects, no level declared, from T1", call("T1", byArchitect, { project: "alpha" }), taken(byArchitect)],
     ["the operator's own profile at an action declared operator, from T1", call("T1", p, { actionLevel: "operator" }), taken(p)],
+    // AU-2: an architect records no profile (the operator's answer to question 4, 2026-11-13), so the schema refuses its level.
+    ["a profile an architect set, from T1", call("T1", profile({ standing: { ...STANDING, setLevel: "architect" } }), { project: "alpha" }), { ok: false, code: "decision-invalid", data: { detail: "mandate-malformed" } }],
     // A non-object standing is no standing mandate: refused as malformed even where standing is not read.
     ["a mandate whose standing is null, at a callee that reads no standing mandate, from T1", call("T1", { ...task({ capabilities: ["site.deploy"], effects: ["deploy"] }), standing: null }, { standing: undefined }), { ok: false, code: "decision-invalid", data: { detail: "mandate-malformed" } }],
     // AU-3: OA-7 strips source toward a target not listing operator-source/1; the digest leaves it out, so the token binds.
@@ -144,7 +139,6 @@ function documentCases(): Json[] {
     ["a profile living longer than a day", profile({ expiresAt: "2026-11-13T10:00:00Z" }), ["FAC-SEM-144 "]],
     ["a profile whose instruction holds a lone surrogate", profile({ instruction: "x\ud800y" }), ["FAC-SEM-144 "]],
     // AU-1: the hub states a profile by the operator of the place's estate; the setter's level is checked at the set.
-    ["an architect's profile without its projects", profile({ standing: { ...STANDING, setLevel: "architect" } }), ["FAC-SEM-173 /scope"]],
     ["an administrator's profile", profile({ standing: { ...STANDING, setLevel: "admin" } }), []],
     ["a profile naming the estate's capabilities and listing some as well", profile({ standing: { ...STANDING, estateCapabilities: true } }), ["FAC-SEM-144 "]],
     ["a place recorded by an estate machine id holding a tilde", profile({ standing: { ...STANDING, place: "mac~studio-1" } }), []],

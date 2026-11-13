@@ -17,14 +17,13 @@ The most specific level that exists decides. A level that does not exist is skip
 
 | Level | What it limits | Who sets it, and when |
 |---|---|---|
-| **L0 estate** | the limits no grant can raise: everything the estate spends across all provider keys in a month, **and** each provider key's own ceiling (DEC-0039); the hard stop | the estate's operator, once, and each key's ceiling where the key is issued; the registry alerts at 80%; in an organization's context, an organization-wide total is not yet specified (who meters it is open); each member's own estate L0 holds and stays that estate's operator's, no level changing it, and setting an organization-wide total once one is specified is the owner's billing act (DEC-0162 LV-7) |
-| **L1 project** | every agent working on one project: the monthly limit, the auto-approve threshold per task, the model classes and the credential sources ([spend policy](#the-spend-policy)) | the person, at the project's first paid run, from options computed for that project; in an organization's context, the organization's `owner` sets and changes it (DEC-0162 LV-7, until the operator answers its question 4 otherwise); what `decidedBy` names for an owner's level decision (the level record's `approver` is a pairwise subject) is not decided here, so a product records it as its own approval surface names the owner |
+| **L1 project** | every agent working on one project: the monthly limit, the auto-approve threshold per task, the model classes and the credential sources ([spend policy](#the-spend-policy)) | the person, at the project's first paid run, from options computed for that project; in an organization's context, the organization's `owner` or an `admin` sets and changes it, never an `architect` (DEC-0162 LV-7, the operator's answer to its question 4 of 2026-11-13); what `decidedBy` names for a level decision (the level record's `approver` is a pairwise subject) is not decided here, so a product records it as its own approval surface names the owner or administrator |
 | **L2 task** | one run of a task whose cost varies, through the presets its agent declares (`costPresets`) | the person at launch, the agent itself within L1's threshold, or the operator's mandate for the task (or a level mandate, DEC-0162 LV-6, or a place's autonomy profile, DEC-0166 AU-1) within L1's threshold and its own `perCallMaxUsd` ([delegation](delegation.md#the-operators-mandate), DEC-0125) |
 | **L3 call** | one call (`perCallMaxUsd`; a callee's own per-call limit); exceeding it is `limit-reached` with window `call` | derived from L2 |
 
 ## The spend policy
 
-A project's policy is chosen **once**, at the first run that would spend money. In an organization's context the choice is the organization's owner's (DEC-0162 LV-7, until the operator answers its question 4 otherwise; a policy already recorded when the launcher starts reading levels stands until the owner changes it): a launcher that reads levels stops before any spend until the owner records it; one pinned before DEC-0162 still asks the person. It is never a fixed list:
+A project's policy is chosen **once**, at the first run that would spend money. In an organization's context the choice is the organization's owner's or an administrator's (DEC-0162 LV-7, the operator's answer to its question 4 of 2026-11-13; a policy already recorded when the launcher starts reading levels stands until the owner or an administrator changes it): a launcher that reads levels stops before any spend until one of them records it; one pinned before DEC-0162 still asks the person. It is never a fixed list:
 the launcher computes the options for that project from:
 
 - the presets its agents declare;
@@ -97,7 +96,7 @@ Three rules apply to every grant and every reader:
    approval request (`approvalRequest` in the check's answer). The person answers it through the
    [operator channel](operator-channel.md)'s confirm token, which shows the amount (OC-6). Meanwhile the agent
    goes on with other work. A chat or cross-session message is never the approval. In an organization's project with
-   no policy yet the request is the organization's owner's, as [The spend policy](#the-spend-policy) says (DEC-0162
+   no policy yet the request is the organization's owner's or an administrator's, as [The spend policy](#the-spend-policy) says (DEC-0162
    LV-7); who answers one above the threshold there is not decided ([membership](membership.md#not-decided-here)).
 
 A **share grant** (`principalKind: external`) lets a person or organization outside the estate call one of

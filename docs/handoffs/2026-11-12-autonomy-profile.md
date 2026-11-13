@@ -32,7 +32,7 @@ organization slice of 2026-11-21: a place's profile as a standing `mandate/1` it
 ## Open
 
 - Merge DEC-0162's head after each of its folds (round 9 merged at `a220c1ed`, round 10's `ac23deaf` at `10f57f16`, round 11's `618dce9a` at `98e0b6bd`, round 12's `09bed3c2` after the round-5 fold, round 13's `1d88115c` after the round-6 fold; round 14's next), never a rebase; land after DEC-0162. At that merge `schemas/mandate.schema.json`'s description keeps both clauses: `grep -c 'neither a level mandate nor a standing mandate travels over the board' schemas/mandate.schema.json` prints 1 and `grep -c 'standing mandate its token binds by prof' schemas/mandate.schema.json` prints 1; `src/levels.ts` keeps both DEC-0162's `levelContextsWellFormed` (round 10's) and this branch's `levelShortOf`.
-- Question 1's round-4 clause (a send or publish outside the estate and a force-push, the 2026-11-05 gates) is to be posted on thread `8da128cf` as a reply to `bd18b1fa`; the board's MCP was disconnected at the round-4 fold.
+- The operator answered DEC-0166's five questions and DEC-0162's twelve on 2026-11-13 in this repository's session `7c9eb2c2` (asked in its chat): DEC-0166 questions 1, 2, 3 and 5 as their defaults, question 4 otherwise (only the owner and the administrators record an organization's profile; `standing.setLevel` is `owner` or `admin`, the hub declares `admin` for `autonomy.profile.set`, the architect branch of `mandateCovers` and of `FAC-SEM-173` removed, vectors: a profile an architect set is `mandate-malformed`). DEC-0162's answers came in with its head `0472fa01` (merged here). Relay both sets on thread `8da128cf` as a reply to `bd18b1fa` when the board MCP is back, for the record (no question is open).
 - The operator's five questions: posted with their defaults and 2026-11-21 as board message `bd18b1fa` on thread `8da128cf` (beside DEC-0162's), 2026-11-12 21:00 UTC. Acceptance waits for no answer; an answer before 2026-11-21 changes DEC-0166, one after it is a new decision.
 - The knowledge base, at landing: fabric-workspace `knowledge/authority.md` *Autonomy by place* and `north-star.md` G19 give an organization's space, VM or cloud the finish-everything default; restate them with question 4 (an organization's headless place states nothing until its owner, an admin or, for its projects, an architect records a profile), question 5 (no credential request) and AU-2's level bound, then the workspace sync. Check: `git -C fabric-workspace grep -c 'DEC-0166' origin/main -- knowledge/authority.md knowledge/north-star.md` prints at least 1 for each.
 - Restatements owed by whichever lands second (the CT-285 row names them): DEC-0156 OW-3 (a profile is a standing
@@ -147,5 +147,5 @@ organization slice of 2026-11-21: a place's profile as a standing `mandate/1` it
 
 ## Next task
 
-Post question 1's round-4 clause on thread `8da128cf`, then round 7 of the blind readings (unit, seam, product) of
+Relay the operator's answers of 2026-11-13 on thread `8da128cf` when the board MCP is back; round 7 of the blind readings (unit, seam, product) of
 branch `agent/ct285-autonomy-profile-20261112` (DEC-0166).

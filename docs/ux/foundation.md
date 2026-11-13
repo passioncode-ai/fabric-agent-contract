@@ -421,7 +421,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
   - Given a project with no policy, when a run would first spend money, then the launcher offers options computed from the agents' presets, the recent spend and the kind of work, names those inputs, and preselects one.
   - Given I choose "no project limit", then it is recorded as my choice and only the estate total (L0) stops spending.
   - Given a policy is recorded, then the launcher never asks again for that project.
-  - Given an organization's project, when a run would first spend money, then the choice is the organization's owner's (DEC-0162 LV-7), unless the starter is the owner, who sees the usual choice: otherwise the launcher stops before any spend, the starter sees the run waiting for the owner, and the owner's choice is recorded as theirs (testable once the route to the owner is decided, PC-162; until then the run waits).
+  - Given an organization's project, when a run would first spend money, then the choice is the organization's owner's or an administrator's (DEC-0162 LV-7), unless the starter is the owner or an administrator, who sees the usual choice: otherwise the launcher stops before any spend, the starter sees the run waiting for them, and their choice is recorded as theirs (testable once the route to them is decided, PC-162; until then the run waits).
 - **Priority:** must
 - **Status:** draft
 - **Product:** unobserved
@@ -792,7 +792,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
   - Given a payment, spend above a limit, `change-policy` or `autonomy.profile.set`, when an assignment reaches it, then the profile covers none of them (AU-5).
   - Given a place whose watcher stops answering, when the hub starts the next assignment, then it treats the place as `person` (AU-6).
   - Given an organization's administrator who sets a place's profile, when an assignment under it reaches an act a service declares `owner` or `operator`, then the service refuses it `level-insufficient` and the agent asks a holder of that level (AU-2).
-  - Given an organization's headless place with no recorded profile, when its hub starts an assignment, then the hub states no profile until the owner, an admin or, for its projects, an architect records one (AU-4).
+  - Given an organization's headless place with no recorded profile, when its hub starts an assignment, then the hub states no profile until the owner or an admin records one, never an architect (AU-4).
   - Given a person's own computer, when no profile is recorded, then nothing goes beyond the person's own decisions until a preset is chosen (AU-4).
 - **Priority:** must
 - **Status:** draft
