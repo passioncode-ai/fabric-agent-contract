@@ -33,6 +33,12 @@ Branch `agent/ct259-activity-unit-20261112`, from main `d69dc363`. Entry point: 
   roster as the denominator; G1-e's per-role dashboards as views over the served cells, OQ-0018 asking only about a cell counting units by the members' own role; held transitions dropped by design), then the
   workspace sync. Check: `git -C fabric-workspace grep -c 'accepted_by\|cost_usd' origin/main -- knowledge/system/measure.md` prints 0 and `git -C fabric-workspace grep -c 'DEC-0164' origin/main -- knowledge/system/measure.md` at least 1.
 - Landing notices for Observatory and the assessment also carry: J3 deletes a person acceptance at the organization's `retention.raw_days` and keeps person-free monthly counts and `(unit, month)` keys (its design keeps every event 400 days); draft-shape records already written (`activity-event/0-draft`) are not counted toward M, or are re-derived to DEC-0164's id before the first monthly number; a jira key carries no `jira:` or `tracker:` prefix (`FAC-SEM-171` refuses one).
+- Landing notices, round 8: the organization product's server owes the member count (conformance's new row; it keeps
+  no member list yet, so no unit cell is served until it does), a dependency of measure.md's G1-d; Switchboard SB-295
+  (shape, key forms, spend as usage lines, no person), Fabric Dashboards FD-170 and the organization product's role
+  dashboards (views over served cells only, the OQ-0015 and OQ-0018 defaults); the workspace rewrite also covers
+  north-star.md's G1 row (the schema is the contract's, DEC-0164) and templates.md A12 (the event as DEC-0164 defines
+  it). Check after the sync: `git -C fabric-workspace grep -c 'DEC-0164' origin/main -- knowledge/north-star.md knowledge/system/templates.md` prints at least 1 for each.
 - Landing notices beyond Observatory and the assessment: the PM agent's owner (its digest reads a colleague's person
   acceptance only under a purpose that colleague confirmed, without cost, logged per recipient); Fabric Dashboards
   (FD-165: it writes no unit without `run.root` and the key form, names no organization in the event, and sends spend
@@ -154,6 +160,18 @@ Branch `agent/ct259-activity-unit-20261112`, from main `d69dc363`. Entry point: 
   J3's retention, draft-shape records and the jira prefix; the renumbering clause dropped; Consequences completed;
   SCN-010's preconditions. Declined: none.
 
+- Round 8 (on `ecf8bff1`): unit passed with three risks, product failed, seam cut off by the session limit (resume it
+  or rerun it in round 9). Product, break folded: counts and single records separated (the 3-member gate for counts; a
+  single unit read raw only by a member under `activity.raw`, a person acceptance under its member's confirmed purpose,
+  without cost, logged), in the page, AE-3 and the reader row. Product risks folded: the organization server's
+  member-count duty as a conformance row, with the landing notice; a cell drawn from one member's work known only by
+  registered project members or the agent's registration; OQ-0018 names the role source and the product's cell of five;
+  a person acceptance by a member whose notice lacks the purpose is not kept (`purpose`); a person's acceptance in a
+  project with no membership is not recorded; landing notices for SB-295, FD-170, the role dashboards, north-star G1
+  and templates A12; the em dashes on the lines this change rewrote. Unit risks folded: the key finding names each system's
+  form; three jira vectors (lower case, a leading zero, a digest); the schema's key description matches the unit row.
+
 ## Next task
 
-Round 8 of the blind readings (unit, seam, product) of branch `agent/ct259-activity-unit-20261112` (DEC-0164).
+Round 9 of the blind readings (unit, seam, product) of branch `agent/ct259-activity-unit-20261112` (DEC-0164), once
+the subagent session limit resets (03:20 Europe/Warsaw).

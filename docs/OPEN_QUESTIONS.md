@@ -216,5 +216,5 @@ ruling; DEC-0017 states what holds now.
 
 - **Status:** Open
 - **Raised:** 2026-11-12, DEC-0164 (CT-259) blind readings
-- **Question:** DEC-0164 serves units only by agent, project, task class and the organization's total. May a cell count units by the role of the members whose work they are (owner, administrator, architect, member), and with what minimum? This is not the North Star's G26, whose role cut is a dashboard per viewer role built from the cells already served (the owner's view is the organization's total).
+- **Question:** DEC-0164 serves units only by agent, project, task class and the organization's total. May a cell count units by the role of the members whose work they are, read from the signed member list (owner, admin, member; an architect only once DEC-0162's `org-membership/2` is read), and with what minimum? The product's existing answer for aggregates of people is a cell of at least five (fabric-workspace `knowledge/north-star.md`, section 9). This is not the North Star's G26, whose role cut is a dashboard per viewer role built from the cells already served (the owner's view is the organization's total).
 - **Meanwhile:** no cell counts units by the members' role; G1-e's per-role dashboards are views over the served cells and wait on nothing here.

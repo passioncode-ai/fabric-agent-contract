@@ -775,7 +775,7 @@
         },
         "unit": {
           "$ref": "activity-common.schema.json#/$defs/taskRef",
-          "description": "The tracker or surface that owns the unit (an open vocabulary: github, jira, store, mail, board) and its stable key there, as task.ref. The key takes one form every writer derives, so every writer of one unit derives one eventId (AE-2): github <owner>:<repo>#<number> with owner and repo lower-cased, jira the issue key as Jira returns it, mail the first 40 hex digits of the SHA-256 of the Message-ID without its angle brackets, any other system its own id when it fits this pattern, else the first 40 hex digits of that id's SHA-256 (activity.md, the unit row); the event carries no envelope task, data.unit being its task."
+          "description": "The tracker or surface that owns the unit (an open vocabulary: github, jira, store, mail, board) and its stable key there, as task.ref. The key takes one form every writer derives, so every writer of one unit derives one eventId (AE-2): github <owner>:<repo>#<number> lower-cased (an owner may hold _), the number with no leading zero; jira the bare issue key with no system prefix; mail the first 40 hex digits of the SHA-256 of the Message-ID without its angle brackets; any other system its own id; any form, github and jira included, that does not fit this pattern is replaced by the first 40 hex digits of its SHA-256 (activity.md, the unit row; FAC-SEM-171 checks github, jira and mail); the event carries no envelope task, data.unit being its task."
         },
         "transition": {
           "enum": [

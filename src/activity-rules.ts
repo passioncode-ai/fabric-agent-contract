@@ -314,7 +314,8 @@ function unitEvent(event: JsonObject, at: string): Finding[] {
   const FORMS: Record<string, RegExp> = { github: /^[a-z0-9_-]+:[a-z0-9._-]+#[1-9][0-9]*$/, jira: /^[A-Z][A-Z0-9_]*-[1-9][0-9]*$/, mail: /^(?!)/ };
   const form = typeof unit.system === "string" && Object.hasOwn(FORMS, unit.system) ? FORMS[unit.system] : undefined;
   if (typeof unit.key === "string" && form !== undefined && !form.test(unit.key) && !DIGEST_KEY.test(unit.key)) {
-    flag("/data/unit/key", `a ${unit.system} unit's key takes the form the activity page fixes for it (lower case), so every writer derives one id`);
+    const named: Record<string, string> = { github: "lower-case <owner>:<repo>#<number>, no leading zero", jira: "the bare issue key, upper case, no prefix", mail: "the first 40 hex digits of the Message-ID's SHA-256" };
+    flag("/data/unit/key", `a ${unit.system} unit's key is ${named[unit.system as string]} or, when that form does not fit the key's pattern, its 40-hex digest, so every writer derives one id`);
   }
   // A leap second (`:60`), which the date-time format admits and Date.parse does not, reads as the last millisecond
   // before the next minute, so the bound moves by at most a millisecond on either side.

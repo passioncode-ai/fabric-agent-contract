@@ -585,6 +585,139 @@
       "findings": []
     },
     {
+      "name": "a jira key in lower case",
+      "event": {
+        "protocol": "fabric-activity/0.1",
+        "eventId": "sha256:daf8079ae4d51be8debf377c8938be7d32b31dd3a652e24a3efaa125ca2ec6b9",
+        "kind": "unit",
+        "source": "unit",
+        "sourceKey": "sha256:5270cf06d6992751781424a4442016a007b6ade65aaa8c7ea906a6f6fd4340d2",
+        "collector": {
+          "id": "observatory-node",
+          "epoch": 4
+        },
+        "seq": 1,
+        "occurred": "2026-11-12T10:00:00Z",
+        "bootId": "boot-7c41e2",
+        "monotonicNs": "0",
+        "project": {
+          "id": "example-project"
+        },
+        "run": {
+          "root": "run-4b1d9e02"
+        },
+        "data": {
+          "agent": "example-writer.default",
+          "unit": {
+            "system": "jira",
+            "key": "proj-412"
+          },
+          "transition": "started",
+          "taskClass": "code.change",
+          "taskClassMap": {
+            "id": "classes-2026-11",
+            "revision": 3
+          },
+          "cost": {
+            "usd": 0.12,
+            "basis": "provider"
+          }
+        }
+      },
+      "schemaValid": true,
+      "findings": [
+        "FAC-SEM-171 /data/unit/key"
+      ]
+    },
+    {
+      "name": "a jira number with a leading zero",
+      "event": {
+        "protocol": "fabric-activity/0.1",
+        "eventId": "sha256:be895c430f2ffb1cc388b3cf39e567f96207620954c29a4989a6e166970e4940",
+        "kind": "unit",
+        "source": "unit",
+        "sourceKey": "sha256:e9c1d23c3c7049c4edd24cbf1efda7d01150c25b43162d99cca369963d260c9c",
+        "collector": {
+          "id": "observatory-node",
+          "epoch": 4
+        },
+        "seq": 1,
+        "occurred": "2026-11-12T10:00:00Z",
+        "bootId": "boot-7c41e2",
+        "monotonicNs": "0",
+        "project": {
+          "id": "example-project"
+        },
+        "run": {
+          "root": "run-4b1d9e02"
+        },
+        "data": {
+          "agent": "example-writer.default",
+          "unit": {
+            "system": "jira",
+            "key": "PROJ-0412"
+          },
+          "transition": "started",
+          "taskClass": "code.change",
+          "taskClassMap": {
+            "id": "classes-2026-11",
+            "revision": 3
+          },
+          "cost": {
+            "usd": 0.12,
+            "basis": "provider"
+          }
+        }
+      },
+      "schemaValid": true,
+      "findings": [
+        "FAC-SEM-171 /data/unit/key"
+      ]
+    },
+    {
+      "name": "a jira unit keyed by its digest",
+      "event": {
+        "protocol": "fabric-activity/0.1",
+        "eventId": "sha256:27ec75b042564725fc6fd119613cf0228f60b449055ef1870eb1ef26e94f252a",
+        "kind": "unit",
+        "source": "unit",
+        "sourceKey": "sha256:78a6694260b56f92df16031761eeebe6b9d55d4cb13206164dcd880f5b4f9005",
+        "collector": {
+          "id": "observatory-node",
+          "epoch": 4
+        },
+        "seq": 1,
+        "occurred": "2026-11-12T10:00:00Z",
+        "bootId": "boot-7c41e2",
+        "monotonicNs": "0",
+        "project": {
+          "id": "example-project"
+        },
+        "run": {
+          "root": "run-4b1d9e02"
+        },
+        "data": {
+          "agent": "example-writer.default",
+          "unit": {
+            "system": "jira",
+            "key": "ef4987f212127482b820c6ddaa433b724cf29774"
+          },
+          "transition": "started",
+          "taskClass": "code.change",
+          "taskClassMap": {
+            "id": "classes-2026-11",
+            "revision": 3
+          },
+          "cost": {
+            "usd": 0.12,
+            "basis": "provider"
+          }
+        }
+      },
+      "schemaValid": true,
+      "findings": []
+    },
+    {
       "name": "a jira key carrying a system prefix",
       "event": {
         "protocol": "fabric-activity/0.1",

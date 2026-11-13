@@ -707,9 +707,9 @@ device in batches, and the units of work an agent did (`unit`, DEC-0164), sent b
 a kit through Project Observatory's capability. It carries no content and no person attribute; a person appears only
 as an opaque `user.id`, or as a unit acceptance's pairwise subject.
 
-**Telemetry event**: One record of activity telemetry (`telemetry-event.schema.json`) — a
+**Telemetry event**: One record of activity telemetry (`telemetry-event.schema.json`): a
 `session.interval`, a `usage.line`, a `buffer.overflow`, a `policy.violation` (by UTC day), a `result`, a `unit`
-(DEC-0164), or a kind the reader does not know — positioned in a stream by `(device.id, collector.id, collector.epoch, seq)`. It
+(DEC-0164), or a kind the reader does not know, positioned in a stream by `(device.id, collector.id, collector.epoch, seq)`. It
 may name its `account.class` and its root `run` (DEC-0052).
 
 **Account class**: The class of the account a session ran on — `organization` (one of the policy's tenants),
@@ -725,9 +725,9 @@ stream rather than rewinding the old one.
 **Activity summary**: An `activity-summary/1` document a receiver builds from many devices' events:
 cells of agent × skill × project × UTC day × outcome, with no person dimension.
 
-**Access log**: An `access-log/1` document: who read which scope of one subject's data — keyed by
+**Access log**: An `access-log/1` document: who read which scope of one subject's data (keyed by
 their user id or by a device bound to them, and a unit of work they accepted, by the pairwise subject resolved to
-their user id (DEC-0164) — when and why, readable by that subject.
+their user id, DEC-0164), when and why, readable by that subject.
 
 **Device**: One counted OS account of a computer, or a virtual machine, enrolled with an organization server under
 `fabric-device/0.1` (DEC-0031; DEC-0154; what an estate machine is on such a computer is CT-231):

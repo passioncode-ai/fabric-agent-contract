@@ -67,6 +67,9 @@ function cases(): Json[] {
     valid("a github unit owned by a managed user, whose owner holds an underscore", unit("started", { unit: { system: "github", key: "mona-cat_octo:site#4" } })),
     { name: "a github number with a leading zero", event: unit("started", { unit: { system: "github", key: "example-org:site#0412" } }), schemaValid: true, findings: ["FAC-SEM-171 /data/unit/key"] },
     valid("a jira unit keyed by its issue key", unit("started", { unit: { system: "jira", key: "PROJ-412" } })),
+    { name: "a jira key in lower case", event: unit("started", { unit: { system: "jira", key: "proj-412" } }), schemaValid: true, findings: ["FAC-SEM-171 /data/unit/key"] },
+    { name: "a jira number with a leading zero", event: unit("started", { unit: { system: "jira", key: "PROJ-0412" } }), schemaValid: true, findings: ["FAC-SEM-171 /data/unit/key"] },
+    valid("a jira unit keyed by its digest", unit("started", { unit: { system: "jira", key: hex("PROJ-412").slice(0, 40) } })),
     { name: "a jira key carrying a system prefix", event: unit("started", { unit: { system: "jira", key: "jira:PROJ-412" } }), schemaValid: true, findings: ["FAC-SEM-171 /data/unit/key"] },
     { name: "a mail key that is the Message-ID itself", event: unit("started", { unit: { system: "mail", key: "CAF8x2.mail.example.com" } }), schemaValid: true, findings: ["FAC-SEM-171 /data/unit/key"] },
     // AE-1: the class and its map; an unknown cost.
