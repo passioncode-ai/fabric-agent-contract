@@ -97,6 +97,8 @@ function actionCases(): Json[] {
     ["an administrator's profile at an action declared operator, from T1", call("T1", byAdmin, { actionLevel: "operator" }), { ok: false, code: "operator-decision-required", data: { detail: "level-insufficient: operator" } }],
     ["an administrator's profile at an action declared owner, from T2", call("T2", byAdmin, { actionLevel: "owner", tokenProf: prof(byAdmin) }), { ok: false, code: "operator-decision-required", data: { detail: "level-insufficient: owner", actionDigest: DIGEST } }],
     ["an owner's profile at an action declared owner, from T1", call("T1", byOwner, { actionLevel: "owner" }), taken(byOwner)],
+    ["an administrator's profile at an action declared admin, from T1", call("T1", byAdmin, { actionLevel: "admin" }), taken(byAdmin)],
+    ["an owner's profile at an action declared operator, from T1", call("T1", byOwner, { actionLevel: "operator" }), { ok: false, code: "operator-decision-required", data: { detail: "level-insufficient: operator" } }],
     ["a service's mistyped declared level is its own fault, never a caller's answer", call("T1", byAdmin, { actionLevel: "Owner" }), { fault: "action-level-invalid" }],
     ["the operator's own profile at an action declared operator, from T1", call("T1", p, { actionLevel: "operator" }), taken(p)],
     // AU-2: an architect records no profile (the operator's answer to question 4, 2026-11-13), so the schema refuses its level.

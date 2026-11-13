@@ -208,7 +208,15 @@ export function actionDecision(input: ActionDecisionInput): ActionDecisionAnswer
 }
 
 /** The level the service declares the action needs (LV-7); `actionDecision` refused any other value as its own fault. */
-const minLevelOf = (input: ActionDecisionInput): string | undefined => input.actionLevel as string | undefined;
+/**
+ * The lowest level that decides the action: the service's declaration, raised to `admin` for an action whose effect is
+ * `change-policy`, which an `owner` or an `admin` decides and never an `architect` (DEC-0162 LV-7, the operator's
+ * answer to its question 4), so a declaration left out or `architect` cannot open it to an architect.
+ */
+const minLevelOf = (input: ActionDecisionInput): string | undefined => {
+  const declared = input.actionLevel as string | undefined;
+  return input.effect === "change-policy" && (declared === undefined || declared === "architect") ? "admin" : declared;
+};
 
 /** The tool of a job's input request (C3.3, AP-2): the call that answers it is `fabric.job.get`. */
 export const JOB_STEP_TOOL = "fabric.job.get" as const;

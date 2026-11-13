@@ -1231,6 +1231,136 @@
       }
     },
     {
+      "name": "an administrator's profile at an action declared admin, from T1",
+      "input": {
+        "action": {
+          "id": "deploy-site",
+          "title": "Deploy the site",
+          "tool": "site.deploy",
+          "gate": "relayed"
+        },
+        "tier": "T1",
+        "caller": "agent:example-runner",
+        "callerAgent": "example-runner",
+        "self": "example-deployer",
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "operator",
+          "standing": {
+            "place": "studio-space-1",
+            "placeKind": "headless",
+            "revision": 3,
+            "setLevel": "admin"
+          },
+          "task": "assignment:alpha-0412",
+          "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
+          "at": "2026-11-12T09:00:00Z",
+          "expiresAt": "2026-11-13T08:00:00Z",
+          "scope": {
+            "capabilities": [
+              "site.deploy"
+            ],
+            "effects": [
+              "deploy"
+            ]
+          },
+          "chain": [
+            {
+              "agent": "example-runner",
+              "at": "2026-11-12T09:00:05Z"
+            },
+            {
+              "agent": "example-deployer",
+              "at": "2026-11-12T09:30:00Z"
+            }
+          ]
+        },
+        "effect": "deploy",
+        "now": "2026-11-12T10:00:00Z",
+        "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
+        "standing": true,
+        "actionLevel": "admin"
+      },
+      "expected": {
+        "ok": true,
+        "recordAs": {
+          "by": "operator",
+          "via": "profile",
+          "task": "assignment:alpha-0412",
+          "chain": [
+            "example-runner",
+            "example-deployer"
+          ],
+          "profile": {
+            "place": "studio-space-1",
+            "revision": 3,
+            "digest": "sha256:77853ed33c951fb1ba858679bbe976d7e4461e0ba309ec746316e0e899fbc8bc",
+            "setLevel": "admin"
+          },
+          "caller": "agent:example-runner"
+        }
+      }
+    },
+    {
+      "name": "an owner's profile at an action declared operator, from T1",
+      "input": {
+        "action": {
+          "id": "deploy-site",
+          "title": "Deploy the site",
+          "tool": "site.deploy",
+          "gate": "relayed"
+        },
+        "tier": "T1",
+        "caller": "agent:example-runner",
+        "callerAgent": "example-runner",
+        "self": "example-deployer",
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "operator",
+          "standing": {
+            "place": "studio-space-1",
+            "placeKind": "headless",
+            "revision": 3,
+            "setLevel": "owner"
+          },
+          "task": "assignment:alpha-0412",
+          "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
+          "at": "2026-11-12T09:00:00Z",
+          "expiresAt": "2026-11-13T08:00:00Z",
+          "scope": {
+            "capabilities": [
+              "site.deploy"
+            ],
+            "effects": [
+              "deploy"
+            ]
+          },
+          "chain": [
+            {
+              "agent": "example-runner",
+              "at": "2026-11-12T09:00:05Z"
+            },
+            {
+              "agent": "example-deployer",
+              "at": "2026-11-12T09:30:00Z"
+            }
+          ]
+        },
+        "effect": "deploy",
+        "now": "2026-11-12T10:00:00Z",
+        "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
+        "standing": true,
+        "actionLevel": "operator"
+      },
+      "expected": {
+        "ok": false,
+        "code": "operator-decision-required",
+        "data": {
+          "detail": "level-insufficient: operator"
+        }
+      }
+    },
+    {
       "name": "a service's mistyped declared level is its own fault, never a caller's answer",
       "input": {
         "action": {

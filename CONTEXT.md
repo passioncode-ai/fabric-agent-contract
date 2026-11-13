@@ -158,7 +158,7 @@ delegation token carries the authority. A job's step is read under the job's cap
 A mandate never covers a **Source hand-over** ([source](docs/specification/source.md#handing-over), DEC-0149).
 
 **Autonomy profile**: Which acts an agent finishes end to end without a person at one place (a machine, an OS space,
-a VM, a cloud), set per place by the operator or, in an organization, a level holder within its level, never a
+a VM, a cloud), set per place by the operator or, in an organization, its owner or an administrator (never an architect, DEC-0166 AU-2), never a
 constant. Not a **Profile** (a compatibility mode), a **Machine profile**, a **Model profile** or a **Runner profile**;
 an audit's `via: profile` and the token's `prof` name this one. The place's hub holds it at a rising revision and states it, for each assignment it starts there, as a
 **standing mandate** (`mandate/1` with `standing`: the place, `headless` or `person`, the revision), at most a day

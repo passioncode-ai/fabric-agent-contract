@@ -701,8 +701,12 @@ decision of 2026-11-09, fabric-workspace `knowledge/authority.md`, *Autonomy by 
   admin`, which no profile meets while `setLevel` is `owner` or `admin`, kept for a level a later decision adds);
   `actionLevels` adds the per-action bound. So a service that declares `standing` and offers an act LV-7 keeps for the
   owner (a billing act) or for the operator (client keys, a rule proposal's
-  approval) and the acts LV-7 declares `admin` (a spend limit, a board hold, a slot move, a listing, any other proposal type's approval) declares that act's level in `actionLevels`, as LV-7 asks of a service reading levels: without it an
-  owner's or an admin's profile would cover it. The operator's own profile carries no `setLevel` and is the
+  approval) declares that act's level in `actionLevels`, as LV-7 asks of a service reading levels: without it an
+  owner's or an admin's profile would cover it. An owner's or an admin's profile covers, within its scope and effects, the
+  acts LV-7 declares `admin` that are not policy changes (a board hold's set and lift, a slot move, a listing, a
+  proposal's approval other than a rule's), since the setter could decide them itself; it never covers a spend limit or
+  any other policy change, whose effect is `change-policy` (AU-5, MD-3), nor spend above a limit (MD-6). Declaring
+  `admin` for them still matters for a level a later decision may add below `admin`. The operator's own profile carries no `setLevel` and is the
   operator's word.
 - **AU-3, how it binds.** A callee reads standing mandates only when its authority extension declares `standing`
   (`extensions/authority/0.1`, `service-authority-extension.schema.json`); an agent sends one, and the hub forwards one, only to such a callee, and
@@ -736,7 +740,7 @@ decision of 2026-11-09, fabric-workspace `knowledge/authority.md`, *Autonomy by 
   [credentials](credentials.md) has it (the administrator or the auto-approval policy, DEC-0111; question 5); a key
   the place's own estate issues through its own doors (Observatory's) is that estate's relayed act, which the profile
   covers as any other. `person`: nothing beyond what the session's own person decides,
-  until the person, or in an organization's context on that computer its administrator, records a profile, chosen from
+  until the person, or in an organization's context on that computer its owner or an administrator, records a profile, chosen from
   the hub's presets (none, drafts only, finish everything) or set in full.
 - **AU-5, the bounds.** No mandate of any kind, a task's included, covers `autonomy.profile.set`, the hub's tool name and the action's id alike, and no profile covers what MD-6 lists (a human step of AP-4, spend above a limit, a source hand-over,
   approving one's own promotion, grant, checker rule or policy change), nor `autonomy.profile.set`, so no assignment
