@@ -4,7 +4,7 @@ import { SCHEMA_PREFIX } from "./contract.js";
 import { EXTENSION_KEYS } from "./extensions.js";
 import { type Finding, type JsonObject, isObject } from "./findings.js";
 import { CLOCK_SKEW_SECONDS, strictTime } from "./rfc3339.js";
-import { type LevelContexts, type LevelRecord, levelContextsWellFormed, levelStanding, ACTION_LEVELS } from "./levels.js";
+import { type LevelContexts, type LevelRecord, levelContextsWellFormed, levelStanding, ACTION_LEVELS, CALL_CONTEXT } from "./levels.js";
 import { EFFECT_CLASSES } from "./delegation.js";
 import { type OperatorSource, mandateCovers } from "./mandate.js";
 import { createValidatorSync } from "./validator.js";
@@ -213,9 +213,6 @@ const minLevelOf = (input: ActionDecisionInput): string | undefined => {
   const declared = input.actionLevel as string | undefined;
   return input.effect === "change-policy" && (declared === undefined || declared === "architect") ? "admin" : declared;
 };
-
-/** `common.schema.json#/$defs/contextId` (DEC-0082): `personal`, or `org:` and an organization id. */
-const CALL_CONTEXT = /^(?:personal|org:[A-Za-z0-9][A-Za-z0-9_-]{0,127})$/;
 
 /** The tool of a job's input request (C3.3, AP-2): the call that answers it is `fabric.job.get`. */
 export const JOB_STEP_TOOL = "fabric.job.get" as const;

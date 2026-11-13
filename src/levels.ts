@@ -2,6 +2,9 @@ import { type Finding, type JsonObject, isObject, show } from "./findings.js";
 import { type HeldMembership, ORG_MEMBERSHIP_2_TYPE, levelContextOk, verifyOrgMembership } from "./org-membership.js";
 import { strictTime } from "./rfc3339.js";
 
+/** `common.schema.json#/$defs/contextId` (DEC-0082): the context a call acts in, `personal` or `org:` and an id. */
+export const CALL_CONTEXT = /^(?:personal|org:[A-Za-z0-9][A-Za-z0-9_-]{0,127})$/;
+
 /** The levels a service may declare an action needs (DEC-0162 LV-7), in its authority extension's `actionLevels`. */
 export const ACTION_LEVELS = ["operator", "owner", "admin", "architect"] as const;
 
