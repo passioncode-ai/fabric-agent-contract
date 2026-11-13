@@ -112,7 +112,7 @@ const decided = (level: string, held: Json, extra: Json = {}): Json => ({
   by: "level", via: "level-command", level, org: ORG, action: "approve-reply",
   instruction: "approve the reply to the review from Anna", at: AT, membership: held, ...extra
 });
-const call = (tier: string, decision: unknown, extra: Json = {}) => ({ action: relayed, tier, caller: CALLER, decision, effect: "reply", now: NOW, actionDigest: DIGEST, levels: LEVELS, ...extra });
+const call = (tier: string, decision: unknown, extra: Json = {}) => ({ action: relayed, tier, caller: CALLER, decision, effect: "reply", now: NOW, actionDigest: DIGEST, levels: LEVELS, context: ORG, ...extra });
 const level = (name: string, held: Json, project?: string) => ({
   ok: true,
   recordAs: { by: "level", via: "level-command", level: name, org: ORG, ...(project ? { project } : {}), approver: held.subject, membershipDigest: digest(held), revision: held.revision, caller: CALLER }
@@ -169,6 +169,11 @@ function actionCases(): Json[] {
     ["a member's request carries no level", call("T2", decided("architect", MEMBER, { project: "alpha" }), { tokenMem: digest(MEMBER), project: "alpha" }), invalid("level-role")],
     ["a forged signature", call("T2", decided("admin", { ...ADMIN, role: "owner" }), { tokenMem: digest({ ...ADMIN, role: "owner" }) }), invalid("level-membership: bad-signature")],
     ["an organization the service reads no levels in", call("T2", decided("admin", ADMIN), { tokenMem: digest(ADMIN), levels: { "org:org-b": { audience: SERVICE, keySet: { ...KEY_SET, org: "org:org-b" } } } }), invalid("level-membership: context-invalid")],
+    // LV-4: a level of one organization decides nothing in another, or in a personal context, where the call acts.
+    ["a level decision on a call in another organization", call("T2", decided("admin", ADMIN), { tokenMem: digest(ADMIN), context: "org:org-b" }), invalid("level-membership: context-invalid")],
+    ["an architect's level decision on a call in another organization's project of the same id", call("T1", decided("architect", ARCHITECT, { project: "alpha" }), { tokenMem: digest(ARCHITECT), project: "alpha", context: "org:org-b" }), invalid("level-membership: context-invalid")],
+    ["a level decision on a call in a personal context", call("T0", decided("owner", OWNER), { tokenMem: digest(OWNER), context: "personal" }), invalid("level-membership: context-invalid")],
+    ["a service reading levels that does not say the call's context", (({ context: _c, ...rest }) => rest)(call("T2", decided("admin", ADMIN), { tokenMem: digest(ADMIN) })), { fault: "context-missing" }],
     // LV-1: a /1 attestation is not a level decision's.
     ["a /1 attestation in a level decision", call("T2", decided("admin", V1_MEMBER), { tokenMem: digest(V1_MEMBER) }), invalid("level-membership: malformed")],
     // AP-2's checks on the decision itself.
@@ -208,7 +213,7 @@ const levelMandate = (held: Json, lvl: string, scope: Json) => ({
 const ALPHA = { capabilities: ["reviews.approve"], effects: ["reply"], projects: ["alpha"] };
 const mandateCall = (tier: string, mandate: Json, extra: Json = {}) => ({
   action: relayed, tier, caller: CALLER, now: NOW, actionDigest: DIGEST, self: "example-reviewer", callerAgent: "example-developer",
-  effect: "reply", project: "alpha", mandate, levels: LEVELS, ...extra
+  effect: "reply", project: "alpha", context: ORG, mandate, levels: LEVELS, ...extra
 });
 const byLevelMandate = (held: Json, lvl: string) => ({
   ok: true,
@@ -225,6 +230,9 @@ function mandateCases(): Json[] {
     ["an architect's level mandate from T2 on a project outside its own", mandateCall("T2", levelMandate(ARCHITECT, "architect", { ...ALPHA, projects: ["alpha", "gamma"] }), { tokenMem: digest(ARCHITECT), project: "gamma" }), insufficient],
     // LV-10: a level mandate where no levels are read is as if absent (mandateCovers answers it ignored, levels-not-read).
     ["a level mandate where no levels are read, from T1", (({ levels: _l, ...rest }) => rest)(mandateCall("T1", levelMandate(ADMIN, "admin", ALPHA), { tokenMem: digest(ADMIN) })), { ok: false, code: "operator-decision-required" }],
+    ["a level mandate on a call in another organization", mandateCall("T2", levelMandate(ADMIN, "admin", ALPHA), { tokenMem: digest(ADMIN), context: "org:org-b" }), { ok: false, code: "decision-invalid", data: { detail: "level-membership: context-invalid" } }],
+    ["a level mandate on a call in a personal context", mandateCall("T1", levelMandate(ADMIN, "admin", ALPHA), { tokenMem: digest(ADMIN), context: "personal" }), { ok: false, code: "decision-invalid", data: { detail: "level-membership: context-invalid" } }],
+    ["a level mandate at a service that does not say the call's context", (({ context: _c, ...rest }) => rest)(mandateCall("T2", levelMandate(ADMIN, "admin", ALPHA), { tokenMem: digest(ADMIN) })), { fault: "context-missing" }],
     ["a level mandate outside its scope's projects", mandateCall("T2", levelMandate(ADMIN, "admin", ALPHA), { tokenMem: digest(ADMIN), project: "beta" }), { ok: false, code: "operator-decision-required", data: { detail: "outside-mandate: project" } }],
     ["a level mandate without the token's mem", mandateCall("T2", levelMandate(ADMIN, "admin", ALPHA)), { ok: false, code: "decision-invalid", data: { detail: "level-unbound" } }],
     ["a level mandate of an ended membership", mandateCall("T2", levelMandate(ENDED, "admin", ALPHA), { tokenMem: digest(ENDED) }), { ok: false, code: "decision-invalid", data: { detail: "level-membership: ended" } }],

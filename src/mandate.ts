@@ -67,6 +67,9 @@ export interface MandateCall {
   spendUsd?: number;
   /** The project the call acts in, when it acts in one. */
   project?: string;
+  /** The context the call acts in, `org:<orgId>` or `personal` (DEC-0082); required to read a level mandate, which
+   * stands only in its own organization (DEC-0162 LV-4). */
+  context?: string;
   /** The lowest level that decides the call's action, as the callee declares it (DEC-0162 LV-7); read by a level mandate. */
   minLevel?: string;
 }
@@ -82,7 +85,7 @@ export type MandateAnswer =
    * A level mandate at a callee that reads no levels is ignored the same way, at every tier (LV-10). */
   | { ignored: "mandate-at-t2" | "levels-not-read" }
   /** The callee's own fault, never sent: its clock does not read. */
-  | { fault: "now-unreadable" | "levels-invalid" };
+  | { fault: "now-unreadable" | "levels-invalid" | "context-missing" };
 
 let shape: ValidateFunction | undefined;
 const mandateShape = () => (shape ??= createValidatorSync().getSchema(`${SCHEMA_PREFIX}schemas/mandate.schema.json`) as ValidateFunction);
@@ -173,6 +176,8 @@ export function mandateCovers(input: {
   // Level contexts given but malformed are the callee's own fault, never "reads no levels" (actionDecision's levels-invalid).
   if (input.levels !== undefined && !levelContextsWellFormed(input.levels)) return { fault: "levels-invalid" };
   if (byLevel && !isObject(input.levels)) return { ignored: "levels-not-read" };
+  // LV-4: a level mandate stands only in the organization the call acts in, so the callee owes that context.
+  if (byLevel && typeof call.context !== "string") return { fault: "context-missing" };
   if (!byLevel && tier !== "T0" && tier !== "T1") return { ignored: "mandate-at-t2" };
   const problem = mandateProblem(mandate);
   if (problem) return { ok: false, code: MANDATE_INVALID, data: { detail: problem } };
@@ -201,7 +206,7 @@ export function mandateCovers(input: {
     const standing = levelStanding({
       membership: read.membership, org: read.org as string, level: read.level as string, at: read.at,
       ...(call.project === undefined ? {} : { project: call.project }), ...(call.minLevel === undefined ? {} : { minLevel: call.minLevel }),
-      contexts: input.levels as LevelContexts, tokenMem: input.tokenMem, now: clock
+      context: call.context as string, contexts: input.levels as LevelContexts, tokenMem: input.tokenMem, now: clock
     });
     if (!standing.ok) {
       return "invalid" in standing

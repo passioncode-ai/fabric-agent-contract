@@ -11414,7 +11414,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   3. **The level decision (LV-3, LV-4).** `decision.schema.json` is the operator's form or `{by: "level", via:
      "level-command", level, org, project?, action, target?, instruction, at, membership}`, `project` required for an
      architect. A service that reads levels takes it, at every tier, when the decision is for the called action and
-     target, within AP-2's window, naming the call's project when it names one; the attestation verifies for this
+     target, within AP-2's window, naming the call's project when it names one; its `org` is the context the call acts
+     in, the service's own knowledge as the project is (another organization or a personal context: `level-membership:
+     context-invalid`; a service that does not say the context: its fault `context-missing`, round 23); the attestation verifies for this
      service's audience under the organization's applied key set, is active, covers the level and, for an architect,
      the call's project; the decision was made before the attestation's `expiresAt`; and the token binds it (item 4). The level covers the call when it is at least the level the service declares on the action (`level`, `owner` for a billing act), at least `admin` for a call in no project, and, for an `architect` attestation, the call's project is among its `projects`; an owner or an admin deciding at the architect level is bounded by the call's project alone. The service's own accepted elicitation at T0 or T1 is read first, as the operator's word.
   4. **Binding (LV-5).** `delegation-token.schema.json` gains the optional claim `mem`, an attestation's digest the hub

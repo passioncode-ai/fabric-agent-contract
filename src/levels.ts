@@ -67,7 +67,8 @@ export interface LevelRecord {
 }
 
 /**
- * Whether a level stands for one call (DEC-0162 LV-4, LV-5, LV-11), in this order: the attestation verifies under the
+ * Whether a level stands for one call (DEC-0162 LV-4, LV-5, LV-11), in this order: the level's organization is the
+ * context the call acts in (never another organization, never a personal context); the attestation verifies under the
  * service's key set for that organization with this service as its audience (a reader of `/2`), and is `active`; the
  * call's delegation token binds it (`mem` is its digest); the decision was made before it expires; the level is at
  * most the attestation's role. Then the level covers the call: at least `minLevel` when the service's action declares
@@ -84,6 +85,9 @@ export function levelStanding(input: {
   at: string;
   /** The project the call acts in, the service's own knowledge; absent for a call in no project. */
   project?: string;
+  /** The context the call acts in, the service's own knowledge as the project is: `org:<orgId>`, or `personal`
+   * (DEC-0082). A level of one organization decides nothing in another or in a personal context (LV-4). */
+  context: string;
   contexts: LevelContexts;
   /** The `mem` claim of the call's delegation token, absent when the call presented none. */
   tokenMem?: unknown;
@@ -94,6 +98,8 @@ export function levelStanding(input: {
   now: number;
 }): LevelStanding {
   const { membership, org, level, at, project, contexts, tokenMem, now } = input;
+  // LV-4: the level's organization is the call's; a personal context has no levels (LV-10).
+  if (input.context !== org) return { ok: false, invalid: "level-membership: context-invalid" };
   const context = isObject(contexts) && Object.hasOwn(contexts, org) ? contexts[org] : undefined;
   const subject = isObject(membership) && typeof membership.subject === "string" ? membership.subject : undefined;
   const heldBySubject = isObject(context) && isObject(context.held) && subject !== undefined && Object.hasOwn(context.held, subject) ? (context.held as Record<string, HeldMembership>)[subject] : undefined;

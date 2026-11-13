@@ -72,6 +72,10 @@ export interface ActionDecisionInput {
   spendUsd?: unknown;
   /** The project the call acts in, to read a mandate's projects and an architect's level (DEC-0162 LV-4). */
   project?: unknown;
+  /** The context the call acts in, the service's own knowledge as the project is: `org:<orgId>` or `personal`
+   * (DEC-0082); required to read a level decision or a level mandate, which stands only in its own organization
+   * (DEC-0162 LV-4). */
+  context?: unknown;
   /** The organizations this service reads levels in, by `org:<orgId>` (DEC-0162); absent, it reads none, and a level
    * decision or mandate is answered as if the call carried none (LV-10). */
   levels?: unknown;
@@ -99,7 +103,7 @@ export type ActionDecisionAnswer =
   | { ok: false; code: typeof APPROVAL_REQUIRED; data: { actionDigest: string } }
   | { ok: false; code: typeof OPERATOR_DECISION_REQUIRED | typeof DECISION_INVALID; data?: { detail?: string; estimateUsd?: number; perCallMaxUsd?: number; actionDigest?: string } }
   /** The service's own fault, never sent to a caller: an input it owes is missing or unreadable. */
-  | { fault: "action-invalid" | "caller-missing" | "levels-invalid" | "action-level-invalid" | "now-unreadable" | "digest-missing" | "url-missing" | "effect-missing" | "self-missing" | "mandate-capability-missing" };
+  | { fault: "action-invalid" | "caller-missing" | "levels-invalid" | "action-level-invalid" | "now-unreadable" | "digest-missing" | "url-missing" | "effect-missing" | "self-missing" | "mandate-capability-missing" | "context-missing" };
 
 /** How long after the operator decided a relayed decision still stands: approval/1's lifetime (DL-17, FAC-SEM-051). */
 export const DECISION_LIFETIME_SECONDS = 24 * 60 * 60;
@@ -163,6 +167,8 @@ export function actionDecision(input: ActionDecisionInput): ActionDecisionAnswer
   if (isObject(input.levels) && (levelDecision || levelMandate)) {
     const clock = strictTime(now);
     if (Number.isNaN(clock)) return { fault: "now-unreadable" };
+    // LV-4: a level stands only in the organization the call acts in, so the service owes that context.
+    if (typeof input.context !== "string" || !CALL_CONTEXT.test(input.context)) return { fault: "context-missing" };
     // LV-7: a level decision needs the action's effect, so a `change-policy` action is never read below `admin`.
     if (levelDecision && !(EFFECT_CLASSES as readonly unknown[]).includes(input.effect)) return { fault: "effect-missing" };
     // At T2 every refusal on this branch keeps DL-18's route open, so the service owes the action's digest here too.
@@ -208,6 +214,9 @@ const minLevelOf = (input: ActionDecisionInput): string | undefined => {
   return input.effect === "change-policy" && (declared === undefined || declared === "architect") ? "admin" : declared;
 };
 
+/** `common.schema.json#/$defs/contextId` (DEC-0082): `personal`, or `org:` and an organization id. */
+const CALL_CONTEXT = /^(?:personal|org:[A-Za-z0-9][A-Za-z0-9_-]{0,127})$/;
+
 /** The tool of a job's input request (C3.3, AP-2): the call that answers it is `fabric.job.get`. */
 export const JOB_STEP_TOOL = "fabric.job.get" as const;
 /** `common.schema.json#/$defs/capabilityName`: the form a job's capability must have to be read (MJ-1). */
@@ -230,7 +239,7 @@ function byMandate(input: ActionDecisionInput, action: DeclaredAction, caller: s
     mandate: input.mandate, tier: input.tier, now: input.now, self: input.self,
     ...(input.callerAgent === undefined ? {} : { callerAgent: input.callerAgent }),
     ...(isObject(input.levels) ? { levels: input.levels as LevelContexts, tokenMem: input.tokenMem } : {}),
-    call: { capability, action: action.id, effect, ...(typeof spendUsd === "number" ? { spendUsd } : {}), ...(typeof project === "string" ? { project } : {}), ...(minLevelOf(input) === undefined ? {} : { minLevel: minLevelOf(input) as string }) }
+    call: { capability, action: action.id, effect, ...(typeof spendUsd === "number" ? { spendUsd } : {}), ...(typeof project === "string" ? { project } : {}), ...(typeof input.context === "string" ? { context: input.context } : {}), ...(minLevelOf(input) === undefined ? {} : { minLevel: minLevelOf(input) as string }) }
   });
   if ("recordAs" in answer) return { ok: true, recordAs: { ...answer.recordAs, caller } };
   // `ignored`: a T2 operator mandate (MD-5), or a level mandate at a service that reads no levels (LV-10); the caller
@@ -258,7 +267,7 @@ function byLevel(input: ActionDecisionInput, action: DeclaredAction, caller: str
   const standing = levelStanding({
     membership: read.membership, org: read.org, level: read.level, at: read.at,
     ...(project === undefined ? {} : { project }), ...(minLevelOf(input) === undefined ? {} : { minLevel: minLevelOf(input) as string }),
-    contexts: input.levels as LevelContexts, tokenMem: input.tokenMem, now: clock
+    context: input.context as string, contexts: input.levels as LevelContexts, tokenMem: input.tokenMem, now: clock
   });
   if (!standing.ok) {
     return "invalid" in standing
