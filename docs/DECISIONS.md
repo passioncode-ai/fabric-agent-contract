@@ -11417,7 +11417,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      into the organization's total until OQ-0015 is answered), and a `person` acceptance stays in the organization's own journal; the 3-member gate holds for counts, and a single unit event is read raw only
      by a member of the organization under `activity.raw`, a person acceptance under its member's confirmed purpose, a read of it logged
      in that person's access log under a purpose the person confirmed (OQ-0016; the subject's audience OQ-0017); a unit with a person acceptance is personal data
-     whatever channel wrote it.
+     whatever channel wrote it. The receiver answers `purpose` for a person acceptance when the accepting member's purpose
+     is not collected (that answer holds nothing at the collector, any other unit's holds as any kind, DEC-0100 narrowed for
+     this kind); it keeps a unit's sending device beside the event, never in it, and a raw read of a unit a person's device
+     sent is logged in the log of the person bound to the event's epoch, under a purpose that person confirmed; past raw
+     retention the journal keeps each unit's `(unit, month)` key only as a digest of `{key, month, system}`, since a tracker
+     key can name a person.
   4. **AE-4.** A device collector sends it in its batches, to the enrollment of the organization that owns its
      `project.id` by the device's folder attribution (never for a personal or unattributed project; the route
      function is CT-297); a kit without one records it through Observatory's `activity.unit.record`, bound as

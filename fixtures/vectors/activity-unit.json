@@ -675,7 +675,7 @@
       ]
     },
     {
-      "name": "a jira unit keyed by its digest",
+      "name": "a jira digest of a fitting key: read as valid, though no writer may produce it (a fitting key is written as itself)",
       "event": {
         "protocol": "fabric-activity/0.1",
         "eventId": "sha256:27ec75b042564725fc6fd119613cf0228f60b449055ef1870eb1ef26e94f252a",
