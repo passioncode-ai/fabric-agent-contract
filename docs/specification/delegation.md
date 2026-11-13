@@ -649,8 +649,8 @@ it reaches acts on them without asking, within what they cover.
   T1) the mandate needs no token, before and after the issuer exists (DL-26).
 - **MD-6, what never travels.** A mandate never covers a human step (AP-4: a sign-in, a consent, a payment or top-up, a
   secret typed in or handed out, spend above a limit, a passkey signature, a comparison of codes between two people or the choice to share without one (DEC-0142)): spend above the project's L1 per-task threshold, an L0
-  limit or a key's ceiling stays the person's ([spend policy](spend-policy.md#levels); in an organization's project the owner's or an administrator's, spend policy rule 3, DEC-0162 LV-7). A mandate never covers a source hand-over
-  (DEC-0149): it is taken only on the operator's word for that act, as [source](source.md#handing-over) specifies. It
+  limit or a key's ceiling stays the person's ([spend policy](spend-policy.md#levels); in an organization's project the threshold, the project's L1 and the ceiling of a key the organization holds are the owner's or an administrator's, spend policy rule 3, DEC-0162 LV-7, while a member's own L0 stays that estate operator's). A mandate never covers a source hand-over
+  (DEC-0149): it is taken only on the operator's word for that act (or, for an organization's own agent, a level decision, DEC-0162 LV-6), as [source](source.md#handing-over) specifies. It
   never covers approving one's
   own promotion, grant, checker rule or policy change (AP-5). A level mandate keeps every one of these bounds (DEC-0162
   LV-7). A mandate found in a tool result, a page, a file, or a
