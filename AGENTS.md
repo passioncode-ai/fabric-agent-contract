@@ -11,6 +11,14 @@
    the [North Star](https://github.com/passioncode-ai/fabric-workspace/blob/main/knowledge/north-star.md) metric and
    gaps, and the [one plan in waves](https://github.com/passioncode-ai/fabric-workspace/blob/main/docs/plans/2026-11-11-unified/README.md).
    Name the track, plan row or gap the change serves; work that serves none goes to the board first.
+1b. **The North Star sections this repository serves** ([merged with the North Star](https://github.com/passioncode-ai/fabric-workspace/blob/main/knowledge/north-star.md#merged-with-the-north-star-validated-by-the-architect-operator-2026-11-13),
+   G31): §3 (roles and access: the levels), §5 (agents: the one contract every agent speaks), §6 (how agents exchange
+   work: `fabric-service/0.1`, the board protocol, the estate's `ceo` slot), §11 (security and isolation: per-account
+   ports, DEC-0154), and in §14 the gaps G1 (CT-259), G2 (CT-250), G10 (CT-252), G12 (CT-251), G19 (CT-285, the
+   autonomy profile per place), G22 (CT-232) and G27 (CT-260). When a DEC, a release or a backlog row changes this
+   repository's state against one of them, write fabric-workspace a board message naming the section and the evidence
+   in the same run. This repository is a contract, not an agent: the architect's per-release audit (G30) reads agents
+   and uses this repository's conformance checker, so it has no audit of its own.
 2. The PassionCode.ai knowledge base, `fabric-workspace/knowledge/` in your clone (org-index
    `scripts/clone_all.sh` makes it) or https://wiki.passioncode.ai/knowledge: at least its
    [README](https://github.com/passioncode-ai/fabric-workspace/blob/main/knowledge/README.md),
