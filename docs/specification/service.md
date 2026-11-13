@@ -328,7 +328,7 @@ provider.
   there was activity today. A day without calls MAY be omitted. There is no paging and no query. Every date exists,
   is not after the UTC date of `generatedAt` and is at most 30 days before it (`FAC-SEM-025`, DEC-0065).
 - Each day carries totals and `byModel` rows (`provider`, `model`); the totals are the sums of
-  the rows, and a day without rows has no calls, tokens or cost (`FAC-SEM-025`). Tokens follow the interop `usage` block
+  the rows (a day's cost within the rounding of DEC-0163, below), and a day without rows has no calls, tokens or cost (`FAC-SEM-025`). Tokens follow the interop `usage` block
   ([interop C3.2](interop.md#c32-jobs), `common.schema.json#/$defs/usage`): the same call reported in a job
   result and here is counted with the same measured numbers. A count a job result reported as `null` (DEC-0087)
   adds the lower bound the service measured, so the day's token totals are a lower bound. `unmeasuredCalls` (optional
@@ -378,7 +378,7 @@ provider.
   write each `projectId` in its normal form — and each task run one row within its project; a project holds at least its task runs' calls, all projects together no more than the days, and
   the known costs add up the same way — a project costs at least its task runs (when its own cost is known) and all
   projects together no more than the days, a `null` cost counting as none, and a project holds at least its task runs'
-  priced calls (CT-40). The sums are checked within 0.000001, so a service writes each row's `costUsd` unrounded; an
+  priced calls (CT-40). The sums are checked within 0.000001, plus 0.0000005 for each row with a known cost summed on either side of the comparison, plus 1e-9 of the larger sum (DEC-0163), so a service may write each row's `costUsd` unrounded, or rounded to 6 decimal places once its readers apply DEC-0163 (this repository's checker at or after it, a copy of the rule once it carries the per-row allowance; a reader that does not still refuses rounded rows); an
   unknown cost is `null` as in a day's rows (`FAC-SEM-025`). A call the service ran for no project is in no row.
 - **For a service offered to others** (a listing, [Offered to others](#offered-to-others)) the report is this same
   object, with nothing added (DEC-0061): its rows are per model and route, `byGrant` attributes spend to each grant that
@@ -1714,7 +1714,7 @@ specifies (DEC-0159): the reference cannot tell such a caller, so kind `action-c
 | <a id="fac-sem-011"></a>`FAC-SEM-011` | `service-well-known` | `ready` carries no degraded source |
 | <a id="fac-sem-012"></a>`FAC-SEM-012` | `service-descriptor` | every command starts with an absolute or home-relative executable path in `localPath`'s grammar: `/…` or `~/…`, and on Windows `C:\…`, `C:/…` or `~\…` (DEC-0032); never a network share |
 | <a id="fac-sem-024"></a>`FAC-SEM-024` | `service-descriptor` | a remote placement lives on a public DNS name and carries no local supervisor field (`label`, `plist`, `unit`, `task`) |
-| <a id="fac-sem-025"></a>`FAC-SEM-025` | `service-usage` | a day's totals are the sums of its models; a row has no more unpriced or unmeasured calls than calls (DEC-0091); an all-unpriced row costs `null`, a priced row a number; days run forward without a repeat; every date exists and lies in the 31 UTC days ending with `generatedAt`'s date; `byProject` names each project once (by the normal form of `projectId`, DEC-0076) and each task run once within it, a project holds at least its task runs' calls and priced calls and, when its own cost is known, at least their known costs; all projects no more than the days' calls and known costs, a `null` cost counting as none, with the same unknown-cost rule (DEC-0065, CT-40; `src/usage-rules.ts`) |
+| <a id="fac-sem-025"></a>`FAC-SEM-025` | `service-usage` | a day's totals are the sums of its models, and every cost sum holds within 0.000001, plus 0.0000005 for each row with a known cost summed on either side, plus 1e-9 of the larger sum (DEC-0163); a row has no more unpriced or unmeasured calls than calls (DEC-0091); an all-unpriced row costs `null`, a priced row a number; days run forward without a repeat; every date exists and lies in the 31 UTC days ending with `generatedAt`'s date; `byProject` names each project once (by the normal form of `projectId`, DEC-0076) and each task run once within it, a project holds at least its task runs' calls and priced calls and, when its own cost is known, at least their known costs; all projects no more than the days' calls and known costs, a `null` cost counting as none, with the same unknown-cost rule (DEC-0065, CT-40; `src/usage-rules.ts`) |
 | <a id="fac-sem-031"></a>`FAC-SEM-031` | `service-usage` | limit ids are unique; a subject exactly for project and pool scope; one window that agrees with the kind; per-order limits have no window and no spend; only a relative limit leaves `limitUsd` null; a tripped limit is enforced; `budget` repeats one enforced machine `budgets` entry |
 | <a id="fac-sem-020"></a>`FAC-SEM-020` | `service-manifest` | a descriptor's `fabricManifest` and that manifest's service key name each other |
 | <a id="fac-sem-035"></a>`FAC-SEM-035` | `settings-backup` | the checksum is the digest of the canonical tables; counts and row widths agree; every value has a canonical form |
