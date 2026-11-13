@@ -432,8 +432,10 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
       expect(Math.max(...found.map((f) => f.instancePath.split("/").length))).toBeLessThanOrEqual(CHANNEL_AGENT_PATHS["well-known"].split("/").length + PATH_DEPTH);
       // A 4x step in size costs about 4x in time: never the quadratic 16x. Both chains run out of the budget at both
       // sizes, so this pair times the checks that walk the whole value (oversize, widths, schema) with the reading
-      // stopped at the budget, not the reading itself.
-      expect(growth(() => rules(smallChain), () => rules(largeChain)), build.name).toBeLessThan(6);
+      // stopped at the budget, not the reading itself. Held under 8, the geometric middle the other growth checks use
+      // (CT-227): under 6 a loaded ubuntu runner measured 6.27 and 6.73 on deep chains (nightly runs of 2026-11-09 and
+      // 2026-11-10, CT-289), while the quadratic 16x still breaks 8 twice over.
+      expect(growth(() => rules(smallChain), () => rules(largeChain)), build.name).toBeLessThan(8);
     }
     // A chain cheap enough to stay under the budget at both sizes (about 36 a level: the name `a`, its visit, its runs
     // and the object entered), so the walk and the reading themselves are timed.
@@ -717,7 +719,9 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
       const doc = of(40_000);
       const quarter = of(10_000);
       for (const d of [doc, quarter]) expect(channelAgentRules(d, "well-known").some((f) => f.message.includes("UTF-16 units of reading")), text).toBe(true);
-      expect(growth(() => channelAgentRules(quarter, "well-known"), () => channelAgentRules(doc, "well-known")), text).toBeLessThan(2);
+      // The budget stops both, so the time stays about level (1x); a read the budget did not stop grows about 4x. Under 3
+      // keeps that gap: under 2 a loaded ubuntu runner measured 2.13 (nightly run of 2026-11-10, CT-289).
+      expect(growth(() => channelAgentRules(quarter, "well-known"), () => channelAgentRules(doc, "well-known")), text).toBeLessThan(3);
     }
     // A schema-valid declaration: 12 projects of 32 channels, each texts map 64 languages of `ws:`.
     const languages = Array.from({ length: 64 }, (_, i) => `${"abc"[Math.floor(i / 26)]}${String.fromCharCode(97 + (i % 26))}`);
@@ -840,7 +844,17 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     const special = ["http:", "http:/", "http:\\\\", "https:/\t/", "HTTP:", "ws:"].map((scheme) => `${scheme}${wide}`);
     const escaped = `http://a.${Array.from({ length: 453 }, (_, i) => encodeURIComponent(String.fromCodePoint(0x4e00 + i))).join("")}`;
     for (const text of [...special, escaped]) expect(readAsUrl(text), text.slice(0, 9)).toBe(false);
-    for (const text of [host, "x", ...special, escaped]) expect(time(text), text.slice(0, 12)).toBeLessThan(2 * baseline + 20);
+    for (const text of [host, "x", ...special, escaped]) {
+      let spent = time(text);
+      let bound = 2 * baseline + 20;
+      // One fresh pair when a load spike lands between the baseline and this read: a loaded ubuntu runner measured
+      // 369.9 against 331.9 (nightly run of 2026-11-08, CT-289). A read that is slow on its own stays over the bound.
+      if (spent >= bound) {
+        bound = 2 * time(PROSE) + 20;
+        spent = time(text);
+      }
+      expect(spent, text.slice(0, 12)).toBeLessThan(bound);
+    }
   });
   it("answers no key as connectionsView does: not declared and not reported", () => {
     expect(channelAgentView({ extensions: {} }, "well-known")).toEqual({ declared: false, reported: false, errors: [] });
