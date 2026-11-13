@@ -434,7 +434,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
   - Given a check above the auto-approve threshold, then the meter denies it with the request it filed, and the agent files no second one.
   - Given the request in the operator channel, when I confirm, then the confirmation shows the amount first (OC-6).
   - Given I do not answer, then nothing is spent on that request and the agent's other work continues.
-  - Given an organization's project, then the request is the organization's owner's or an administrator's, never the starting member's own confirm, and nothing is spent until one of them answers (DEC-0162 LV-7; testable once the route is decided, PC-162).
+  - Given an organization's project started by someone other than its owner or an administrator, then the request is the organization's owner's or an administrator's, never the starting member's own confirm, and nothing is spent until one of them answers (DEC-0162 LV-7; testable once the route is decided, PC-162).
 - **Priority:** must
 - **Status:** draft
 - **Product:** unobserved

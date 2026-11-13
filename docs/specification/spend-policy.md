@@ -98,7 +98,7 @@ Three rules apply to every grant and every reader:
    [operator channel](operator-channel.md)'s confirm token, which shows the amount (OC-6). Meanwhile the agent
    goes on with other work. A chat or cross-session message is never the approval. In an organization's project with
    no policy yet the request is the organization's owner's or an administrator's, as [The spend policy](#the-spend-policy) says (DEC-0162
-   LV-7); one above the threshold there is the owner's or an administrator's too ([membership](membership.md#levels) LV-7, the operator's answer of 2026-11-13): the member's own confirm token is not the approval there, and nothing is spent until the owner or an administrator answers, by a route the launcher and the organization product decide (PC-162; [membership](membership.md#not-decided-here)).
+   LV-7); one above the threshold there is the owner's or an administrator's too ([membership](membership.md#levels) LV-7, the operator's answer of 2026-11-13): unless the starter is the owner or an administrator, whose own confirm is the approval, the member's own confirm token is not the approval there, and nothing is spent until the owner or an administrator answers, by a route the launcher and the organization product decide (PC-162; [membership](membership.md#not-decided-here)).
 
 A **share grant** (`principalKind: external`) lets a person or organization outside the estate call one of
 the owner's agents for a project. It carries a limit, an expiry and a payer, and it can be revoked. Usage

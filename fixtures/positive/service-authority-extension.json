@@ -7,6 +7,7 @@
   ],
   "actionLevels": {
     "change-plan": "owner",
-    "issue-key": "operator"
+    "revoke-key": "admin",
+    "approve-rule": "operator"
   }
 }
