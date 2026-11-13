@@ -788,8 +788,7 @@ constraint (`comms-refusal.schema.json`).
 
 ## The operator moves a slot
 
-**PR-2 (DEC-0140).** The operator who owns the Project (in an organization, that member only, as in [owner
-settlement](#owner-settlement), or an owner or an administrator by a level decision, the host declaring `admin` for its twin in its authority extension, DEC-0162 LV-7 and the operator's answer to its question 9) may move an occupied (Project, capability) responder slot (one `com.status` shows `active` or `stale`) from its
+**PR-2 (DEC-0140).** The operator who owns the Project (in an organization, that member, or an owner or an administrator by a level decision, the host declaring `admin` for its twin in its authority extension, DEC-0162 LV-7 and the operator's answer to its question 9) may move an occupied (Project, capability) responder slot (one `com.status` shows `active` or `stale`) from its
 holder to another live
 session of that Project, in the host's operator controls. Until that host ships the move's agent twin, an agent does not move a slot, on its
 own account or as a relay: the move's agent twin ([service](service.md#actions) AP-1) is owed: its contract half is CT-181, then the host's with the board's other operator controls
@@ -809,7 +808,8 @@ arguments name no session.
   carries a checkpoint its caller writes, and the operator writes none.
 - **Who may receive it.** A live session of that Project already authorized to respond for that capability, as for
   `com.enroll`, other than the slot's holder; the host refuses any other `not_authorized`, and a move grants nothing.
-  The host refuses a mover that is not the owning operator `not_authorized`, and a move of an `absent` slot
+  The host refuses a mover that is neither the owning operator nor, through the twin, an owner or an administrator whose
+  level decision stands (DEC-0162 LV-4) `not_authorized`, and a move of an `absent` slot
   `invalid_transition` (there is no holder to move from; retrying changes nothing until a session enrolls). The host checks in this order and answers the first that applies: `not_authorized` (the mover); a stored result for
   the same key (a replay) or `idempotency_conflict` for another move under it, with the epoch's `capacity_exceeded` and
   `idempotency_window_expired`; `not_authorized` (the receiving session; when it is already the slot's holder, a host shows the move as already

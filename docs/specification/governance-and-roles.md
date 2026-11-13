@@ -86,7 +86,7 @@ promotion, grant, checker rule or policy change on its own account; a proposal's
 proposal's is declared `admin`, so an `owner` or an `admin` decides it, recorded as `approvedBy: {role:
 "administrator"}`, and an `architect` never approves one. A level grants no governance role: assigning the `product-manager` or `ceo` role is an act like any
 other, decided at the level the service declares for it in `actionLevels` ([membership](membership.md#levels) LV-7). `change-policy` is decided by
-the organization's `owner` or an `admin`, never by an `architect` (DEC-0162 question 4, answered 2026-11-13), a
+the organization's `owner` or an `admin`, never by an `architect` (DEC-0162 question 4, answered 2026-11-13; a service reads such an action as declared `admin` at least), a
 billing act being the owner's; no mandate
 covers it, a level mandate included ([membership](membership.md#levels) LV-7).
 
