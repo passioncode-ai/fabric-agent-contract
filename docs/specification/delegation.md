@@ -689,8 +689,8 @@ decision of 2026-11-09, fabric-workspace `knowledge/authority.md`, *Autonomy by 
 - **AU-2, who sets it.** Setting or changing a profile is the hub's relayed action `autonomy.profile.set`, effect
   `change-policy`: in the personal context by the operator's decision (AP-2); in an organization's context by a level
   decision (DEC-0162 LV-3), `owner` or `admin` for any place of the organization, never an `architect`: the operator
-  answered on 2026-11-13 that the owner and the administrators record a place's profile (DEC-0166 question 4; finances and
-  access are theirs, an architect engineers). The hub declares `admin` for `autonomy.profile.set` in its authority extension's `actionLevels`, so an architect's
+  answered on 2026-11-13 that the owner and the administrators record a place's profile (DEC-0166 question 4, «Владелец и администраторы»,
+  as with DEC-0162's question 4: finances and access are theirs, an architect engineers). The hub declares `admin` for `autonomy.profile.set` in its authority extension's `actionLevels`, so an architect's
   level decision is refused `level-insufficient: admin`. A profile never covers more than its setter's level
   does, and the hub records the setter's level and approver (LV-9). The hub states that level as `standing.setLevel`
   (`owner` or `admin`, inside the digest, so `prof` binds it), and a callee that
@@ -700,7 +700,7 @@ decision of 2026-11-09, fabric-workspace `knowledge/authority.md`, *Autonomy by 
   declares `actionLevels`, refuses a call in no project under a profile set below `admin` (`level-insufficient:
   admin`, which no profile meets while `setLevel` is `owner` or `admin`, kept for a level a later decision adds);
   `actionLevels` adds the per-action bound. So a service that declares `standing` and offers an act LV-7 keeps for the
-  owner (a billing act) or for the operator (client keys, a rule proposal's
+  owner (a billing act) or for the operator (a rule proposal's
   approval) declares that act's level in `actionLevels`, as LV-7 asks of a service reading levels: without it an
   owner's or an admin's profile would cover it. No profile reaches the board's gates (a board hold, a slot move, a listing, any proposal's approval): the
   service that offers them declares no `standing` (AU-4), so they stay a person's level decision or the operator's.

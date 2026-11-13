@@ -11559,7 +11559,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   Fabric (CO-547, whose hub mirror `hubAuthority.ts` and its parity cases gain a standing case at its repin: the dispatcher and headless assignments read the profile, its hub writes `prof`, its floor treats a
   covered effect as decided; its board-mandate reader `boardMandate.ts` refuses `standing` in a board block (AU-1) and its hub forward path `hubCall.ts`/`hubTools.ts` forwards a standing mandate only to a callee declaring `standing` (AU-3), both owed at any repin past this decision, CO-523's levels repin included; ADR-0168's machine permission choice stays the runner's prompt mode), the organization
   product (who may change a profile, shown per place), the PM agent, the host's admin agent (records a place's kind and
-  watcher), every service with `relayed` actions an assignment calls (the adapter's kits FAA-249, whose `mandateCovers` ports run `profile.json` before a kit service may declare `standing`). The operator's
+  watcher), every service with `relayed` actions an assignment calls (the adapter's kits FAA-249, whose `mandateCovers` ports run `profile.json` before a kit service may declare `standing`, and whose board reader (FAA-135's `readMandate`) answers a standing mandate in a board block as no mandate). The operator's
   answers of 2026-11-13: (1) the headless default covers a production deploy of a surface with outside
   users, a send or publish to people outside the estate and a force-push within the repository's own rules (each a
   gate of the operator's rule of 2026-11-05), and a project that wants a gate narrows its own profile (the send and
