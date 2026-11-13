@@ -21,7 +21,7 @@ builds summaries.
 The contract names every field it defines and closes every object it defines. A collector MUST NOT
 add content or person attributes: no prompt, response, command line, window title or diff, and no
 name, address, team or rank. A person appears only as an opaque `user.id`, in raw events only, or as a unit acceptance's pairwise subject
-(`acceptedBy`, kept in the organization's own journal, DEC-0164 AE-3); summaries have no person dimension. `FAC-SEM-037` is a **best-effort key filter** (a deny-list of
+(`acceptedBy`, kept in the organization's own journal, DEC-0164 AE-3); a unit's tracker key may also name a tracker account (a GitHub owner that is a user), which the contract cannot resolve to a member ([kinds](#kinds)); summaries have no person dimension. `FAC-SEM-037` is a **best-effort key filter** (a deny-list of
 names checked in every spelling, plus a refusal of home paths in values), not a proof that no
 content passes. The schema's bounds on extension data (two levels, short tokens without whitespace)
 are the stronger guard.
@@ -54,7 +54,7 @@ Telemetry events and check-ins that carry a `user.id`, or come from a device bou
   let the person read it.
 - MUST **delete** raw events when `retention.raw_days` expires. Only summaries already built from
   them remain, and a summary has no person dimension; for `unit` events the journal's person-free monthly counts and
-  each unit's `(unit, month)` key as a digest remain as well ([kinds](#kinds), DEC-0164). Raw events are not kept under any other scope
+  each unit's `(unit, month)` key as a keyed digest remain as well, until that month's count is closed ([kinds](#kinds), DEC-0164). Raw events are not kept under any other scope
   past their retention (operator decision 2026-10-08, DEC-0030).
 
 The operator confirmed this shape on 2026-10-08 (DEC-0030): per-person presence estimates, labelled
@@ -96,7 +96,7 @@ Each one comes from the `method` the event names, with the `idleThresholdSeconds
 A `unit` whose `acceptedBy` is of kind `person` is personal data whatever channel wrote it (a kit with no device included,
 DEC-0164 AE-3). Its retention is the organization's `retention.raw_days`, the server layer of the device policy where
 no device carries one ([devices](devices.md#policy)); past it the journal keeps only its person-free monthly counts and a
-unit's `(unit, month)` key as a digest, beside the summaries.
+unit's `(unit, month)` key as a keyed digest until its month's count is closed ([kinds](#kinds)), beside the summaries.
 
 ## Telemetry event
 
@@ -252,7 +252,7 @@ no string over 64 characters) it stores and counts nothing, and any other it ref
 rejection, which is consumed (AE-5, as `grant.usage` [above](#kinds)); Observatory's server answered that a pin
 before this decision refuses the kind by purpose. So a collector holds a unit's transitions outside its stream and
 writes each as an event (taking its `seq`) only once the receiver's latest `protocols` list names `activity-unit/1`,
-as `grant.usage` holds its day behind its gate, so a held unit never stalls the stream. It holds a transition no longer than the organization's `retention.raw_days`, dropping older ones, and on 410 `organization-closed` drops its held transitions with every event it holds. Such a drop is not reported: the loss is accepted, so an organization whose server lists `activity-unit/1` late undercounts its first months, which the journal states as a gap of its own; past raw retention the journal keeps the `(unit, month)` key kept as a digest (the first 40 lower-case hex digits of the SHA-256 of the settings-form canonical JSON `{key, month, system}`), since a tracker key can name a person (a GitHub owner that is a user account), so a unit still counts once a month and no key names anyone; the sending device kept beside a raw event goes with it. A unit event names no organization: a device collector sends it to the enrollment of the organization that owns its
+as `grant.usage` holds its day behind its gate, so a held unit never stalls the stream. It holds a transition no longer than the organization's `retention.raw_days`, dropping older ones, and on 410 `organization-closed` drops its held transitions with every event it holds; it also drops the held transitions recorded under an epoch's binding when the device is enrolled again to another person or to none, so a held unit never joins another person's epoch ([devices](devices.md#check-in)). Such a drop is not reported: the loss is accepted, so an organization whose server lists `activity-unit/1` late undercounts its first months, which the journal states as a gap of its own; past raw retention the journal keeps a unit's `(unit, month)` key only as a keyed digest (`hmac-sha256` under a key the journal generates and never exports, over the settings-form canonical JSON `{key, month, system}`, the month `YYYY-MM` in UTC of the acceptance), dropped once that month can take no more acceptances (its end plus `retention.raw_days`, which bounds a held transition, plus the 60 s skew), since a tracker key can name a person (a GitHub owner that is a user account): a unit still counts once a month, the journal alone can compare its digests, and none outlives its month's count; the sending device kept beside a raw event goes with it. A unit whose key names a tracker account is read raw only as above (a member under `activity.raw`, deleted at `retention.raw_days`); no access log is owed to an account the contract cannot resolve to a member. A unit event names no organization: a device collector sends it to the enrollment of the organization that owns its
 `project.id` as the device's folder attribution names it, never for a personal or unattributed project, and on a
 device that cannot tell sends none ([contexts](contexts.md#routing); the route function is CT-297); a project with no
 membership keeps it in Observatory's local journal only, its writer recording `acceptedBy` of kind `rule` or `agent` only (no organization issues a person's subject there; an acceptance by a person there is not recorded), for the local journal's own retention. Two different acceptances of one unit under one `run.root`

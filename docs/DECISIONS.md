@@ -6223,7 +6223,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 ### DEC-0100: A `purpose` rejection, a share registration sent again after the notice, and renewal within 30 days of expiry
 
 - **Date:** 2026-10-22
-- **Status:** Accepted source change (on merge of PR #143). Consumer adoption: board row CT-88.
+- **Status:** Accepted source change (on merge of PR #143). Consumer adoption: board row CT-88. Narrowed for one kind by DEC-0164 AE-3: a `purpose` answer to a `unit` whose `acceptedBy` is a person holds nothing at the collector.
   Annotated (2026-10-22): corrected by DEC-0102, items 6 (the renewal clock), 7 (SR-5a lets a withdrawal pass), 8 (resuming after `purpose`) and 11 (compatibility wording).
 - **Annotated (2026-11-02):** DEC-0148: a renewal by the key on record repeated while the certificate it was
   issued is unpresented and not ended is answered with that certificate, or refused, never another (`FAC-SEM-155`).
@@ -11421,8 +11421,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      is not collected (that answer holds nothing at the collector, any other unit's holds as any kind, DEC-0100 narrowed for
      this kind); it keeps a unit's sending device beside the event, never in it, and a raw read of a unit a person's device
      sent is logged in the log of the person bound to the event's epoch, under a purpose that person confirmed; past raw
-     retention the journal keeps each unit's `(unit, month)` key only as a digest of `{key, month, system}`, since a tracker
-     key can name a person.
+     retention the journal keeps each unit's `(unit, month)` key only as an `hmac-sha256` digest of `{key, month, system}` under a
+     key it never exports, dropped once that month's count is closed, since a tracker key can name a person; a collector drops
+     held transitions when its device is enrolled again to another person or to none.
   4. **AE-4.** A device collector sends it in its batches, to the enrollment of the organization that owns its
      `project.id` by the device's folder attribution (never for a personal or unattributed project; the route
      function is CT-297); a kit without one records it through Observatory's `activity.unit.record`, bound as
