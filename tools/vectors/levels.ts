@@ -101,7 +101,7 @@ const policy = { id: "set-policy", title: "Change the project's policy", tool: "
 /** A rule proposal's approval (type rule): the act LV-7 keeps for the operator alone (FAC-SEM-104). */
 const ruleApproval = { id: "approve-rule", title: "Approve a rule proposal", tool: "proposals.approve", gate: "relayed" };
 /** A client key of an instance the organization deploys: an owner's or an admin's in its context (LV-7, 2026-11-13). */
-const clientKey = { id: "issue-key", title: "Issue a client key", tool: "keys.issue", gate: "relayed" };
+const clientKey = { id: "revoke-key", title: "Revoke a client key", tool: "keys.revoke", gate: "relayed" };
 const human = { id: "connect-store", title: "Do it yourself", tool: "accounts.connect", gate: "human", humanStep: "payment" };
 const CALLER = "agent:claude-code";
 const DIGEST = `sha256:${"ab".repeat(32)}`;
@@ -147,9 +147,9 @@ function actionCases(): Json[] {
     ["an architect in its project on an act declared admin", call("T1", decided("architect", ARCHITECT, { project: "alpha" }), { actionLevel: "admin", tokenMem: digest(ARCHITECT), project: "alpha" }), insufficient],
     ["an administrator on an act declared admin", call("T2", decided("admin", ADMIN), { actionLevel: "admin", tokenMem: digest(ADMIN) }), level("admin", ADMIN)],
     // LV-7: a client key in an organization's context is an owner's or an admin's, declared admin (the operator, 2026-11-13).
-    ["the owner issues a client key, declared admin", call("T1", { ...decided("owner", OWNER), action: "issue-key" }, { action: clientKey, actionLevel: "admin", effect: "change-policy", tokenMem: digest(OWNER) }), level("owner", OWNER)],
-    ["an administrator issues a client key, declared admin", call("T2", { ...decided("admin", ADMIN), action: "issue-key" }, { action: clientKey, actionLevel: "admin", effect: "change-policy", tokenMem: digest(ADMIN) }), level("admin", ADMIN)],
-    ["an architect issues a client key in its project, declared admin", call("T1", { ...decided("architect", ARCHITECT, { project: "alpha" }), action: "issue-key" }, { action: clientKey, actionLevel: "admin", effect: "change-policy", tokenMem: digest(ARCHITECT), project: "alpha" }), insufficient],
+    ["the owner revokes a client key, declared admin", call("T1", { ...decided("owner", OWNER), action: "revoke-key" }, { action: clientKey, actionLevel: "admin", tokenMem: digest(OWNER) }), level("owner", OWNER)],
+    ["an administrator revokes a client key, declared admin", call("T2", { ...decided("admin", ADMIN), action: "revoke-key" }, { action: clientKey, actionLevel: "admin", tokenMem: digest(ADMIN) }), level("admin", ADMIN)],
+    ["an architect revokes a client key in its project, declared admin", call("T1", { ...decided("architect", ARCHITECT, { project: "alpha" }), action: "revoke-key" }, { action: clientKey, actionLevel: "admin", tokenMem: digest(ARCHITECT), project: "alpha" }), insufficient],
     // LV-7: an act the service keeps for the operator alone (a rule proposal's approval, FAC-SEM-104) is decided by no level.
     ["the owner on an act no level decides", call("T1", { ...decided("owner", OWNER), action: "approve-rule" }, { action: ruleApproval, actionLevel: "operator", tokenMem: digest(OWNER) }), { ok: false, code: "operator-decision-required", data: { detail: "level-insufficient: operator" } }],
     ["the operator's own decision on an act no level decides, from T0", call("T0", { by: "operator", via: "relayed-instruction", action: "approve-rule", instruction: "Approve the rule for the support bot", at: "2026-10-25T11:29:00Z" }, { action: ruleApproval, actionLevel: "operator" }), { ok: true, recordAs: { by: "operator", via: "relayed-instruction", caller: CALLER } }],

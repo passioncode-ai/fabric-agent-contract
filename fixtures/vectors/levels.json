@@ -1741,12 +1741,12 @@
       }
     },
     {
-      "name": "the owner issues a client key, declared admin",
+      "name": "the owner revokes a client key, declared admin",
       "input": {
         "action": {
-          "id": "issue-key",
-          "title": "Issue a client key",
-          "tool": "keys.issue",
+          "id": "revoke-key",
+          "title": "Revoke a client key",
+          "tool": "keys.revoke",
           "gate": "relayed"
         },
         "tier": "T1",
@@ -1756,7 +1756,7 @@
           "via": "level-command",
           "level": "owner",
           "org": "org:org-a",
-          "action": "issue-key",
+          "action": "revoke-key",
           "instruction": "approve the reply to the review from Anna",
           "at": "2026-10-25T11:20:00Z",
           "membership": {
@@ -1780,7 +1780,7 @@
             "sig": "DWXhTb1wl4-GuoOEi148WMcPzY-rWvxeCnECywHvCNsQLsSO3n0TlMlsybW3anYPQ8fdK_VD4DauMmC42sxXBw"
           }
         },
-        "effect": "change-policy",
+        "effect": "reply",
         "now": "2026-10-25T11:30:00Z",
         "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
         "levels": {
@@ -1827,12 +1827,12 @@
       }
     },
     {
-      "name": "an administrator issues a client key, declared admin",
+      "name": "an administrator revokes a client key, declared admin",
       "input": {
         "action": {
-          "id": "issue-key",
-          "title": "Issue a client key",
-          "tool": "keys.issue",
+          "id": "revoke-key",
+          "title": "Revoke a client key",
+          "tool": "keys.revoke",
           "gate": "relayed"
         },
         "tier": "T2",
@@ -1842,7 +1842,7 @@
           "via": "level-command",
           "level": "admin",
           "org": "org:org-a",
-          "action": "issue-key",
+          "action": "revoke-key",
           "instruction": "approve the reply to the review from Anna",
           "at": "2026-10-25T11:20:00Z",
           "membership": {
@@ -1866,7 +1866,7 @@
             "sig": "Rg3hZAm3Hgabq5LB3LPvOjkbms6W_jKJaGFFOHyPFOIabVXhP2gvzpb_wXkR30Xxu3UQK-ZW_eTAF9aF6qwQDA"
           }
         },
-        "effect": "change-policy",
+        "effect": "reply",
         "now": "2026-10-25T11:30:00Z",
         "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
         "levels": {
@@ -1913,12 +1913,12 @@
       }
     },
     {
-      "name": "an architect issues a client key in its project, declared admin",
+      "name": "an architect revokes a client key in its project, declared admin",
       "input": {
         "action": {
-          "id": "issue-key",
-          "title": "Issue a client key",
-          "tool": "keys.issue",
+          "id": "revoke-key",
+          "title": "Revoke a client key",
+          "tool": "keys.revoke",
           "gate": "relayed"
         },
         "tier": "T1",
@@ -1928,7 +1928,7 @@
           "via": "level-command",
           "level": "architect",
           "org": "org:org-a",
-          "action": "issue-key",
+          "action": "revoke-key",
           "instruction": "approve the reply to the review from Anna",
           "at": "2026-10-25T11:20:00Z",
           "membership": {
@@ -1956,7 +1956,7 @@
           },
           "project": "alpha"
         },
-        "effect": "change-policy",
+        "effect": "reply",
         "now": "2026-10-25T11:30:00Z",
         "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
         "levels": {
