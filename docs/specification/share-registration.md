@@ -312,7 +312,8 @@ signs.
 ## Not decided here
 
 - The access level shown to the organization.
-- Refusing an `agentRef` absent from the entitlement's `agents` (DEC-0085): the receiver's policy.
+- Refusing an `agentRef` absent from the entitlement's `agents` (DEC-0085): the receiver's policy, except that under an
+  `entitlement/2` with `allowances: "unlimited"` it does not refuse one as unpaid (DEC-0168 EU-2).
 - Private-agent marks on sharing.
 - A local-channel method for Fabric to read registration state.
 - How long a node keeps unsent sums.

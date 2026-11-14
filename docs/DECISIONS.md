@@ -12057,7 +12057,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   1. **EU-1, a new type.** `entitlement/2` has every member of `entitlement/1`, with the same rules, and `allowances`,
      always present: `limited` or `unlimited`. A changed field list is a new type (DEC-0063): its own schema
      (`entitlement-2.schema.json`), its register statement (`entitlement/2`), the rule kind `entitlement-2`
-     (`FAC-SEM-115` and `FAC-SEM-175`), and `entitlement` `["1", "2"]` in the protocol register. The signature,
+     (`FAC-SEM-115` with its kinds widened to `entitlement-2`, and `FAC-SEM-175`), and `entitlement` `["1", "2"]` in the protocol register. The signature,
      windows, `held` record, key sets and refusals are `entitlement/1`'s.
   2. **EU-2, what `unlimited` lifts.** Only the order's own allowances: the verifier does not refuse a member past
      `licence.members`, switches on an agent the organization adds beyond `agents` without refusing it as unpaid,
@@ -12070,8 +12070,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   4. **EU-4, the issuer.** It marks an order `unlimited` only as its owner-level billing scope recorded it (billing is
      the `owner`'s, DEC-0162 LV-7); a `personal` entitlement is `limited` (`FAC-SEM-175`, EN-2); it sends
      `entitlement/2` only to a verifier whose owner confirmed on the board that it re-vendored at or after DEC-0168,
-     `entitlement/1` to every other; a change of `allowances` or of type is a new revision of the same order, and
-     the same revision under the other type is `revision-conflict`.
+     `entitlement/1` to every other (a subject with a verifier that has not confirmed stays on `entitlement/1`); a
+     change of `allowances` or of type is a new revision of the same order, and the same revision under the other
+     type is `revision-conflict`.
   5. **EU-5, the verifier's answer.** `verifyEntitlement` reads both types; an `entitlement/2` verdict adds `type` and
      `allowances`, an `entitlement/1` verdict keeps its shape and reads as `limited`.
 - **Why:** the operator asked the platform for an "unlimited" tier («Всё без лимитов», platform session `fbc88a8a`,

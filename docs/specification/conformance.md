@@ -520,7 +520,7 @@ were reserved by DEC-0150's run (receipts SEM-0162 to SEM-0165).
 | `FAC-SEM-112` | `profile-resolution` | [runners](runners.md#semantic-rules) | SEM-0112 |
 | `FAC-SEM-113` | `enroll-token` | [ceremonies](ceremonies.md#semantic-rules) | SEM-0113 |
 | `FAC-SEM-114` | `estate-record-revision` | [ceremonies](ceremonies.md#semantic-rules) | SEM-0114 |
-| `FAC-SEM-115` | `entitlement` | [entitlement](entitlement.md#semantic-rules) | SEM-0115 |
+| `FAC-SEM-115` | `entitlement`, `entitlement-2` | [entitlement](entitlement.md#semantic-rules) | SEM-0115 |
 | `FAC-SEM-116` | `entitlement-key-set` | [entitlement](entitlement.md#semantic-rules) | SEM-0116 |
 | `FAC-SEM-117` | `grant`, `org-share-grants` | [share registration](share-registration.md#semantic-rules) | SEM-0117 |
 | `FAC-SEM-118` | `share-registration`, `share-registration-derive`, `share-registration-intake`, `grant-usage-join` | [share registration](share-registration.md#semantic-rules) | SEM-0118 |

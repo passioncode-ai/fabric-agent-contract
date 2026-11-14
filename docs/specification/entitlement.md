@@ -31,7 +31,7 @@ list for good (DEC-0063: a changed list is a new type). The schema refuses any m
 
 | Field | Rule |
 |---|---|
-| `type` | `entitlement/1` |
+| `type` | `entitlement/1`, or `entitlement/2` with `allowances` ([Allowances](#allowances-dec-0168)) |
 | `issuer` | the issuer's `https://` origin in lower case: a host of two labels or more, no port, no path, no trailing slash; compared as written |
 | `subject` | a context id (`common#/$defs/contextId`, DEC-0082): `org:<orgId>` or `personal`, never a person's id |
 | `estate` | for `personal`, the person's estate id, which binds the entitlement to one person's network without a cross-organization person id; `null` for `org:<orgId>` |
@@ -41,6 +41,7 @@ list for good (DEC-0063: a changed list is a new type). The schema refuses any m
 | `hosting` | `{product, size}`: `product` `org-cloud` or `enterprise-cloud` (only for `org:`; DEC-0088) or `personal-cloud` (only for `personal`), `size` an opaque id; or `null` |
 | `support` | `{tier}`: `observe`, `assist` or `managed`, what the organization's admin agents may do; or `null`; always `null` for `personal` |
 | `agents` | 0 to 256 `{agentRef}`, one per paid agent, each `agentRef` once (`fabric-package#/$defs/agentRef`) |
+| `allowances` | `entitlement/2` only: `limited` or `unlimited`; always `limited` for `personal` (DEC-0168) |
 | `alg`, `kid`, `sig` | `EdDSA`, the signing key's `kid`, and the signature ([the signature](#the-signature)) |
 
 The support tier is in the signed record because an admin agent must read what it may do from a record it verified,
@@ -142,7 +143,7 @@ own subject.
 `verifyEntitlement(entitlement, {now, subject, estate, keySet, held})` checks, with no network, in this order, and
 answers without throwing. `keySet` is the key set the verifier applied, which `verifyEntitlementKeySet` accepted under
 its pinned root; `estate` is required for the subject `personal` and absent for an organization. It answers
-`{ok: true, state, refreshDue, unchanged, digest, held}` or one problem:
+`{ok: true, state, refreshDue, unchanged, digest, held}` (an `entitlement/2` verdict adds `type` and `allowances`, DEC-0168 EU-5) or one problem:
 
 | Row | Problem | When |
 |---|---|---|
@@ -187,8 +188,8 @@ output.
 
 | Code | Kind | Rule |
 |---|---|---|
-| <a id="fac-sem-115"></a>`FAC-SEM-115` | `entitlement` | the subject's lines agree (`personal`: an estate, no licence, no support, at most a `personal-cloud`; `org:<orgId>`: no estate, at most an `org-cloud` or an `enterprise-cloud`), the subject is a context id, the times are strict RFC 3339 with `issuedAt` ≤ `notBefore` < `expiresAt`, the times have at most three fraction digits, the life is at most 38 days, and each agent is listed once by `agentRef` |
-| <a id="fac-sem-175"></a>`FAC-SEM-175` | `entitlement-2` | `FAC-SEM-115`'s rules, and a `personal` entitlement is `limited`: an estate has no order allowances to lift (DEC-0168) |
+| <a id="fac-sem-115"></a>`FAC-SEM-115` | `entitlement`, `entitlement-2` | the subject's lines agree (`personal`: an estate, no licence, no support, at most a `personal-cloud`; `org:<orgId>`: no estate, at most an `org-cloud` or an `enterprise-cloud`), the subject is a context id, the times are strict RFC 3339 with `issuedAt` ≤ `notBefore` < `expiresAt`, the times have at most three fraction digits, the life is at most 38 days, and each agent is listed once by `agentRef` |
+| <a id="fac-sem-175"></a>`FAC-SEM-175` | `entitlement-2` | a `personal` `entitlement/2` is `limited`: an estate has no order allowances to lift (DEC-0168) |
 | <a id="fac-sem-116"></a>`FAC-SEM-116` | `entitlement-key-set` | each kid once, the root's kid (the set's own `kid`) not among the keys, every key window strict RFC 3339 with `notBefore` < `notAfter`, no revoked kid among the keys, no key of small order, and at least one key valid at the set's `issuedAt` |
 
 ## Enterprise cloud (DEC-0088)
@@ -235,7 +236,12 @@ subject](#one-entitlement-per-subject) says, and the same revision under the oth
 **What the verifier answers.** `verifyEntitlement` reads both types. An `entitlement/2` verdict adds `type` and
 `allowances` beside the lines; an `entitlement/1` verdict keeps its shape, and a product reads an absent `allowances`
 as `limited`. A verifier pinned before DEC-0168 refuses `entitlement/2` as `malformed` (another type), which is why
-the issuer sends it only to verifiers that confirmed they read it.
+the issuer sends it only to verifiers that confirmed they read it. While any verifier of a subject has not confirmed,
+the issuer keeps that subject on `entitlement/1` (one order revision is never signed twice with other bytes), and the
+order's lines are its limits there.
+
+`allowances: "unlimited"` is about the order's allowances only; it is not a grant's `spend` `mode: unlimited`
+([spend policy](spend-policy.md#grants)), which bounds money and stays under L0.
 
 ## Who adopts it
 
@@ -266,5 +272,6 @@ cross-organization person id (the platform's program packet §2).
 - How the platform stores orders, and how the platform keeps its root offline.
 - The transport of entitlements and key sets, and their delivery order (a key set before the entitlements signed under
   a key it adds): the issuer's.
+- How a product shows `unlimited` to an administrator, and what it bills for it (DEC-0168).
 - Which functions a lapse disables: the verifying product's (the platform's packet keeps ingest, security, fleet and
   setup through the grace).
