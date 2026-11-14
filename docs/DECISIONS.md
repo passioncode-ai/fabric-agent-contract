@@ -11400,7 +11400,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 ### DEC-0156: the operator's word is carried out the first time, by the agent itself
 
 - **Date:** 2026-11-07
-- **Status:** Proposed: accepted at merge after two clean rounds of the coordinator's blind readings. A rule of every
+- **Status:** Accepted 2026-11-14, merged to main: rounds 36 (at `c0625532`) and 37 (at `a3d59238`, main `28c4de4c`
+  merged in) of the blind readings clean on all three tiers, read under the finish-line rule (a tier fails only on a
+  blocking finding); rounds 1 to 33 and 35 folded, 34 clean; their risks are CT-306. Fabric's questions `add1df7c`
+  and `46167c9f` stay open (OW-2's kept press, CT-220). A rule of every
   agent's conduct, stated in [governance and roles](specification/governance-and-roles.md#the-operators-word-carried-out-the-first-time)
   as OW-1 to OW-6; no schema, field or rule code changes.
 - **Context:** the operator, 2026-11-04, in one product's session, relayed on the board (thread `b91254c4`, then
