@@ -5,7 +5,9 @@ import { afterAll, describe, expect, it } from "vitest";
 import { rfc8785 } from "../src/canonical.js";
 import { SCHEMA_PREFIX, projectRoot } from "../src/contract.js";
 import {
+  ALLOWANCES,
   CLOCK_SKEW_SECONDS,
+  ENTITLEMENT_2_TYPE,
   ENTITLEMENT_ALGORITHMS,
   ENTITLEMENT_KEY_SET_TYPE,
   ENTITLEMENT_TYPE,
@@ -30,7 +32,7 @@ import { isObject } from "../src/findings.js";
 import { strictTime } from "../src/rfc3339.js";
 import { schemaClosure } from "../src/schema-closure.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
-import { ENTITLEMENT_FIELDS, ENTITLEMENT_KEY_SET_FIELDS } from "../src/signing-challenges.js";
+import { ENTITLEMENT_2_FIELDS, ENTITLEMENT_FIELDS, ENTITLEMENT_KEY_SET_FIELDS } from "../src/signing-challenges.js";
 import { createValidator, validateDocument } from "../src/validator.js";
 import { VECTOR_FILE, buildEntitlementVectors } from "../tools/vectors/entitlement.js";
 
@@ -95,6 +97,19 @@ describe("the documents (DEC-0085)", () => {
     expect(keySetSchema.properties.keys.items.additionalProperties).toBe(false);
   });
 
+  it("lists entitlement/2's members as the register and its schema do, the vector and the positive fixture agreeing (DEC-0168)", () => {
+    const schema2 = read("schemas/entitlement-2.schema.json");
+    expect([...ENTITLEMENT_2_FIELDS, "type", "sig"].sort()).toEqual([...schema2.required].sort());
+    expect(schema2.properties.type.const).toBe(ENTITLEMENT_2_TYPE);
+    expect(schema2.properties.allowances.enum).toEqual([...ALLOWANCES]);
+    expect(schema2.additionalProperties).toBe(false);
+    const document = vectors.signingInput.entitlement2.document;
+    expect(load("positive/entitlement-2.json")).toEqual(document);
+    expect(entitlementSigningInput(document)?.toString("utf8")).toBe(vectors.signingInput.entitlement2.input);
+    expect(valid(document, "entitlement-2")).toBe(true);
+    expect(verifyEntitlement(document, ORG_TRUST)).toMatchObject({ ok: true, type: ENTITLEMENT_2_TYPE, allowances: "unlimited" });
+  });
+
   it("reuses the contract's context id, opaque id and agentRef, and names its constants as the schema does", () => {
     expect(schema.properties.subject.$ref).toBe("common.schema.json#/$defs/contextId");
     expect(schema.properties.estate.anyOf[0].$ref).toBe("activity-common.schema.json#/$defs/opaqueId");
@@ -149,7 +164,10 @@ describe("the signature (DEC-0085, the register's entitlement/1 and entitlement-
   });
 
   it("has no signing input for another type, a missing or extra member, or a value RFC 8785 has no form for", () => {
+    expect(entitlementSigningInput({ ...BASE, type: "entitlement/3", allowances: "limited" })).toBeUndefined();
+    // entitlement/2 without its allowances, and entitlement/1 with them: the register's field lists differ (DEC-0168).
     expect(entitlementSigningInput({ ...BASE, type: "entitlement/2" })).toBeUndefined();
+    expect(entitlementSigningInput({ ...BASE, allowances: "limited" })).toBeUndefined();
     expect(entitlementSigningInput({ ...BASE, amount: "1" })).toBeUndefined();
     const { estate: _estate, ...noEstate } = BASE;
     expect(entitlementSigningInput(noEstate)).toBeUndefined();

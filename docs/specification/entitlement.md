@@ -234,11 +234,12 @@ platform's `customers:tier`, PLAT-154; billing is the `owner`'s, DEC-0162 LV-7).
 subject](#one-entitlement-per-subject) says, and the same revision under the other type is `revision-conflict`.
 
 **What the verifier answers.** `verifyEntitlement` reads both types. An `entitlement/2` verdict adds `type` and
-`allowances` beside the lines; an `entitlement/1` verdict keeps its shape, and a product reads an absent `allowances`
+`allowances` to its fields; an `entitlement/1` verdict keeps its shape, and a product reads an absent `allowances`
 as `limited`. A verifier pinned before DEC-0168 refuses `entitlement/2` as `malformed` (another type), which is why
 the issuer sends it only to verifiers that confirmed they read it. While any verifier of a subject has not confirmed,
 the issuer keeps that subject on `entitlement/1` (one order revision is never signed twice with other bytes), and the
-order's lines are its limits there.
+order's lines are its limits there. For entitlements this board confirmation decides which type a verifier gets, not a
+`protocols` list ([versioning](versioning.md)): the transport of entitlements is the issuer's (*Not decided here*).
 
 `allowances: "unlimited"` is about the order's allowances only; it is not a grant's `spend` `mode: unlimited`
 ([spend policy](spend-policy.md#grants)), which bounds money and stays under L0.
