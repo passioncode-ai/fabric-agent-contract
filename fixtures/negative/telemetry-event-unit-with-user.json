@@ -1,0 +1,41 @@
+{
+  "protocol": "fabric-activity/0.1",
+  "eventId": "sha256:a59ff2860d3a98f68f1534b46ba4b15eaa3a49d50ce02b409364bf12ba5341f2",
+  "kind": "unit",
+  "source": "unit",
+  "sourceKey": "sha256:f4b4bf03987475b75aa1cc661df21ba46fd718fc20b2a919e76b94ff2431252a",
+  "collector": {
+    "id": "observatory-node",
+    "epoch": 4
+  },
+  "seq": 1,
+  "occurred": "2026-11-12T10:00:00Z",
+  "bootId": "boot-7c41e2",
+  "monotonicNs": "0",
+  "project": {
+    "id": "example-project"
+  },
+  "run": {
+    "root": "run-4b1d9e02"
+  },
+  "data": {
+    "agent": "example-writer.default",
+    "unit": {
+      "system": "github",
+      "key": "example-org:site#412"
+    },
+    "transition": "started",
+    "taskClass": "code.change",
+    "taskClassMap": {
+      "id": "classes-2026-11",
+      "revision": 3
+    },
+    "cost": {
+      "usd": 0.42,
+      "basis": "provider"
+    }
+  },
+  "user": {
+    "id": "m-7f3a91c2"
+  }
+}

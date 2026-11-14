@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/telemetry-event.schema.json",
   "title": "Telemetry event (fabric-activity/0.1, DEC-0030)",
-  "description": "One record of when an agent session worked or waited and what one model call used, without content and without any person attribute. A reader ignores a kind it does not know.",
+  "description": "One record of what happened in agent work: when a session worked or waited, what one model call used, and (kind unit, DEC-0164) a transition of a unit of work, without content. A session or usage record carries a person only as an opaque user.id; a unit carries none but the pairwise subject of a person who accepted it (acceptedBy) and a tracker key, and in the raw event an evidence link, that may name a tracker account. A reader ignores a kind it does not know.",
   "type": "object",
   "required": [
     "protocol",
@@ -410,6 +410,48 @@
         "type": "object",
         "properties": {
           "kind": {
+            "const": "unit"
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "run": {
+            "type": "object",
+            "properties": {
+              "root": true
+            },
+            "required": [
+              "root"
+            ]
+          },
+          "user": false,
+          "session": false,
+          "task": false,
+          "data": {
+            "$ref": "#/$defs/unit"
+          },
+          "project": true,
+          "source": {
+            "const": "unit"
+          }
+        },
+        "required": [
+          "run",
+          "project",
+          "sourceKey"
+        ]
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "kind": {
             "enum": [
               "session.interval",
               "usage.line",
@@ -417,6 +459,7 @@
               "policy.violation",
               "grant.usage",
               "result",
+              "unit",
               "session.annotation"
             ]
           }
@@ -712,6 +755,223 @@
       },
       "additionalProperties": false,
       "description": "DEC-0068 (CON-OE-08): a surface's event about a session, read by the device's collector. It carries no start, end, tokens or cost, so it is never counted: session.interval and usage.line are the collector's alone."
+    },
+    "unit": {
+      "type": "object",
+      "description": "One transition of one unit of work an agent did (DEC-0164 AE-1): the agent's, never a person's. Its event's source is unit and its sourceKey unitSourceKey's (FAC-SEM-171).",
+      "required": [
+        "agent",
+        "unit",
+        "transition",
+        "taskClass",
+        "cost"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "agent": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{1,62}\\.[a-z][a-z0-9-]{0,31}$",
+          "description": "The agent that did the work, as its descriptor names it (id.instance); never a person."
+        },
+        "unit": {
+          "$ref": "activity-common.schema.json#/$defs/taskRef",
+          "description": "The tracker or surface that owns the unit (an open vocabulary: github, jira, store, mail, board) and its stable key there, as task.ref. The key takes one form every writer derives, so every writer of one unit derives one eventId (AE-2): github <owner>:<repo>#<number> lower-cased (an owner may hold _), the number with no leading zero; jira the bare issue key with no system prefix; mail the first 40 lower-case hex digits of the SHA-256 of the Message-ID's UTF-8 bytes without its angle brackets; any other system its own id; any form, github and jira included, that does not fit this pattern is replaced by the first 40 lower-case hex digits of the SHA-256 of its UTF-8 bytes (activity.md, the unit row; FAC-SEM-171 checks github, jira and mail); the event carries no envelope task, data.unit being its task."
+        },
+        "transition": {
+          "enum": [
+            "started",
+            "ended",
+            "handed-over",
+            "accepted"
+          ]
+        },
+        "taskClass": {
+          "type": "string",
+          "pattern": "^(unclassified|[a-z][a-z0-9._-]{0,63})$",
+          "description": "The assessment's class id, or unclassified until its map names one."
+        },
+        "taskClassMap": {
+          "type": "object",
+          "required": [
+            "id",
+            "revision"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "$ref": "activity-common.schema.json#/$defs/opaqueId"
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            }
+          },
+          "description": "The class map taskClass was read from and its revision (AE-2a); present exactly when taskClass is not unclassified."
+        },
+        "outcome": {
+          "enum": [
+            "completed",
+            "failed",
+            "abandoned"
+          ],
+          "description": "On ended only."
+        },
+        "evidence": {
+          "type": "array",
+          "maxItems": 8,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "maxLength": 2048,
+            "pattern": "^(sha256:[a-f0-9]{64}|https?://[^\\s/?#@]+(?:[/?#][^\\s]*)?|urn:[A-Za-z0-9][A-Za-z0-9-]{0,31}:[^\\s]+)$"
+          },
+          "description": "References only (a receipt, a test run, a review mark), each an http(s) URI without user information, a URN or a sha256: digest; never content."
+        },
+        "acceptedBy": {
+          "type": "object",
+          "required": [
+            "kind",
+            "ref"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "enum": [
+                "rule",
+                "agent",
+                "person"
+              ]
+            },
+            "ref": {
+              "$ref": "activity-common.schema.json#/$defs/opaqueId"
+            }
+          },
+          "description": "On accepted only: an acceptance rule's id, an agent's id, or a person's pairwise membership subject for OQ-0017's audience, by default the organization's own journal (never a name or an address); a person's stays in the organization's own journal (AE-3)."
+        },
+        "acceptedAt": {
+          "$ref": "common.schema.json#/$defs/timestamp",
+          "description": "On accepted only: when it was accepted."
+        },
+        "cost": {
+          "$ref": "activity-common.schema.json#/$defs/cost",
+          "description": "The agent's spend on the unit since its previous transition (a reader sums a unit's transitions; an attribution of spend its usage lines already carry, never added to them): usd with its basis, or usd null when unknown; never 0 for unknown is the writer's duty."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "transition": {
+                "const": "ended"
+              }
+            },
+            "required": [
+              "transition"
+            ]
+          },
+          "then": {
+            "required": [
+              "outcome"
+            ],
+            "properties": {
+              "outcome": true
+            }
+          },
+          "else": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "outcome"
+                  ],
+                  "properties": {
+                    "outcome": true
+                  }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "transition": {
+                "const": "accepted"
+              }
+            },
+            "required": [
+              "transition"
+            ]
+          },
+          "then": {
+            "required": [
+              "acceptedBy",
+              "acceptedAt"
+            ],
+            "properties": {
+              "acceptedBy": true,
+              "acceptedAt": true
+            }
+          },
+          "else": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "acceptedBy"
+                  ],
+                  "properties": {
+                    "acceptedBy": true
+                  }
+                },
+                {
+                  "required": [
+                    "acceptedAt"
+                  ],
+                  "properties": {
+                    "acceptedAt": true
+                  }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "taskClass": {
+                "const": "unclassified"
+              }
+            },
+            "required": [
+              "taskClass"
+            ]
+          },
+          "then": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "taskClassMap"
+                  ],
+                  "properties": {
+                    "taskClassMap": true
+                  }
+                }
+              ]
+            }
+          },
+          "else": {
+            "required": [
+              "taskClassMap"
+            ],
+            "properties": {
+              "taskClassMap": true
+            }
+          }
+        }
+      ]
     }
   }
 }
