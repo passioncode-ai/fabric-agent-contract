@@ -57,7 +57,7 @@ refuse: AP-2's table, LV-7 and AU-2 decide exactly as today.
 | `human` | with `human` only: `{addressees, questionId?}` (`addressees` empty, and no `questionId`, for advice that asks no one), or `{addressees, humanStep, url?}` for an AP-4 step (a link only with a human step, and only once the callee's refusal gave it) |
 
 Grades, in the contract's own terms and by what the reference takes from this caller at its tier: `verified`, a
-form the callee verifies itself (an `approval/1` `verifyApproval` accepts, a level decision or mandate bound by `mem`, a
+form the callee verifies itself (an `approval/1` whose signature and claims the verifier inspects as `verifyApproval` does, without consuming its `jti`, which only the callee consumes (DL-17), a level decision or mandate bound by `mem`, a
 standing mandate bound by `prof`); `taken`, a form `actionDecision` or `mandateCovers` takes from this caller without a
 signature to verify: the operator's words in the caller's own session, through a subagent its session started or the
 operator channel (AP-3), a task mandate MD-3 takes (its chain ending at the callee, MD-2), a place's standing mandate
@@ -66,15 +66,17 @@ verifier reads beside authority (`grant`, `budget`, `check`) carry no grade, the
 grade: they can make an act `human`, never ground its `allow`, and a `budget` ground reads "read, not reserved". A verifier never answers `allow` where the reference refuses (DV-3). It answers `human` where the reference
 refuses for want of a person, and beyond that only for a reason it names: evidence it cannot read (`evidence-unknown`,
 `evidence-stale`), its own checks (`vetoed`, `loop`), or a `kept` act. Where the caller holds a form the reference takes (the operator's word, a mandate in force, a relay
-OA-3 accepts, a bound profile or level form), none of these reasons puts a question to a person: such a `human` carries no
+OA-3 accepts, a bound profile or level form, an accepted `approval/1`), none of these reasons puts a question to a person: such a `human` carries no
 addressee and no `questionId`, and the caller goes on as OW-3 says, with one message that names the concern (OW-1, OA-1,
-OW-4's closed list: the operator is not asked again for an act his word or a mandate already decides); `kept` applies
+OW-4's closed list: the operator is not asked again for an act his word or a mandate already decides); a policy row's `deny` never stands
+against such a form either: the verdict is then `human` without an addressee, and an origin under DV-8 dispatches as
+C3.5 says; `kept` applies
 at all only where no operator's word and no mandate in force names the act. A `human` verdict is advice to the caller
 that asked: the hub still forwards a form the reference takes unless the origin opted in under DV-8. A `person-denied`
 verdict ends when the operator's later word names the act (OW-1). The door's
 own bookkeeping (a verdict's state and version in its journal, the question's identity, each restriction's outcome,
 the veto check) is Fabric's store, not the wire. No field carries the operator's `instruction` or `source`; they stay
-in the forms and the host's journal (OA-7). A verdict is read by the caller it answers, the host and the operator's
+in the forms and the host's journal: this design's own privacy choice, kept in OA-7's spirit, not a rule OA-7 makes. A verdict is read by the caller it answers, the host and the operator's
 sessions only (in an organization's context also its owner and administrators); `human.addressees` names principals by their host id, never a person's
 address. Text fields are bounded and redacted like a decision's.
 
@@ -118,7 +120,10 @@ verifier's single use stays at the enforcement points Fabric owns.
 **DV-7, money stays read-only until a reservation lands (the verifier's OQ-8).** The verifier reads the task's spend,
 L1 with its `autoApproveUsd`, L0 and each key's ceiling, and the call's own estimate (the one `mandateCovers` checks
 against `perCallMaxUsd`); an estimate that would cross a limit is `human`, the limits staying the person's (MD-6,
-OA-4, [spend policy](../../specification/spend-policy.md) L0 to L2 and its step 3). A covered money act under every limit
+OA-4, [spend policy](../../specification/spend-policy.md) L0 to L2 and its step 3), and goes out the way the contract
+already sends it, never as a second question: above L0, L1 or a key's ceiling as AP-4's human step `spend-above-limit`
+with its link and amount and no `questionId`; above `autoApproveUsd` within L1 as step 3's one durable approval
+request. Neither is the reference's refusal for want of a person, so this is the named reason the `human` above admits. A covered money act under every limit
 answers `allow` with `machineForm` as any other, the reservation itself staying the callee's grant check. Nothing in this decision reserves. A hub-side
 reservation the callee's grant check adopts is CT-312; until it lands a verifier enforces no money act.
 
@@ -140,13 +145,14 @@ forwards as C3.5 says. A callee never sees it (DV-1); an origin sends it only to
 The door `decision.verify`, the policy table, the journal's store and retention, the question's presentation and the
 veto check are Fabric's; the pattern, the gold cases and the consumer client are the agents database's. The
 verifier's OQ-4 (a runner's hook reading an `allow` receipt) is Fabric's with each runner's owner; OQ-5 (kept acts
-beyond the contract) is the operator's; OQ-7 (a recommended option) is the agents database's.
+beyond the contract) is decided from the operator's recorded rules (the agents database's intake), not asked of him; OQ-7 (a recommended option) is the agents database's.
 
 ## Open points for the decision
 
 1. The decision is additive: a new record, its rule, the authority extension's new optional members and a new revision
-   of `interop-agent-call` gated by `decision-verdict/1`; it amends only C3.5's closed list of `agent.call` fields for
-   that revision. Single use at the callee (CT-313) and the money reservation (CT-312) are their own decisions.
+   of `interop-agent-call` gated by `decision-verdict/1`; it amends C3.5's closed list of `agent.call` fields for
+   that revision, the sealed call whose `call` refers to it, DL-19's "Refused by" for `decision-invalid` (the hub too),
+   and FLW-29's branch for `verdict-mismatch` (back to the door, never to the operator). Single use at the callee (CT-313) and the money reservation (CT-312) are their own decisions.
 2. The rule code is the next free one at landing (`FAC-SEM-175` by the SEM counter on 2026-11-14), reserved by the
    CAS counter.
 
@@ -161,6 +167,6 @@ database and Fabric listing where this design departs from the source's accepted
 `verified`, `taken`, `forwarded`; `forwarded` in either context where `actionDecision` takes it; `caller-approval` for
 `hub-approval`, no `runner-receipt`; the source's `options[]`, `restrictions[]`, `veto`, `state`, `version` and
 `commandId` in Fabric's store, not on the wire; the `id` without the operation; `kept` bounded by OW-1; local acts
-outside this revision) and telling studio-agent that the receipt carries no operator's words (OA-7) and that this
+outside this revision) and telling studio-agent that the receipt carries no operator's words (this design's privacy choice) and that this
 revision serves neither local acts nor another session's journal as a ground. Fabric's spec of 2026-11-17 cites this
 design's field names.
