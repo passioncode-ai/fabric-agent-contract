@@ -19,7 +19,7 @@ Sections cite the repository at `980f9013` (main on 2026-11-14).
 | [entitlement](../../specification/entitlement.md) *Fields* | every member is always present, a missing line is `null`, and "the schema refuses any member it does not list" (DEC-0063: a changed list is a new type) | no member can say "no limits", and adding one to `entitlement/1` breaks every verifier pinned to it |
 | entitlement *Fields*, `licence` | `{members}` from 1 to 1 000 000, the member allowance; "the billable count is the organization server's own metering, never this field" | an allowance with no ceiling has no number to carry |
 | [spend policy](../../specification/spend-policy.md) *Levels* | L0 (the estate's total and each key's own ceiling, the hard stop) and a project's L1 bind whatever the order; `mode: no-project-limit` is a project's recorded choice, never a missing value; spend above a limit is the person's ([delegation](../../specification/delegation.md) AP-4, MD-6) | "no limits" must not reach these: they protect the operator's money, not the order's allowances |
-| DEC-0162 LV-7 | finances and access in an organization are the owner's and the administrators' | who may grant "unlimited" is a billing act |
+| DEC-0162 LV-7 | an organization's billing act (its plan and payment method) is its own `owner`'s | it chooses no allowance: "unlimited" is set by PassionCode's owner at the issuer (`customers:tier`), never by the organization it is for |
 
 ## The design
 
@@ -48,7 +48,7 @@ administrator where LV-7 says), DEC-0166's profiles, and AP-4's human steps (a p
 "Unlimited" is a commercial statement about the order, never an authority over spending or acts.
 
 **EU-4, the issuer's rule.** The platform signs `/2` with `allowances: "unlimited"` only for an order its owner-level
-scope (`customers:tier`, PLAT-154) marked so; the contract states the rule, the scope is the platform's. It issues `/2`
+scope (`customers:tier`, PLAT-154, PassionCode's owner, never the organization's own) marked so; the contract states the rule, the scope is the platform's. It issues `/2`
 only to a verifier re-vendored at or after the DEC, as that verifier's owner confirms on the project board (the rule
 DEC-0088 set for `enterprise-cloud`), and `/1` to every other verifier; one subject gets one type at a time, and a
 change of type is a new revision of the same order (entitlement *One entitlement per subject*). Turning "unlimited" off

@@ -12067,8 +12067,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      `unlimited` order never records `mode: no-project-limit`), a grant's `perCallMaxUsd` and `autoApproveUsd`,
      a mandate's bounds (MD-6), a product's emergency stops, DEC-0162's levels, DEC-0166's profiles and AP-4's human
      steps.
-  4. **EU-4, the issuer.** It marks an order `unlimited` only as its owner-level billing scope recorded it (billing is
-     the `owner`'s, DEC-0162 LV-7); a `personal` entitlement is `limited` (`FAC-SEM-175`, EN-2); it sends
+  4. **EU-4, the issuer.** It marks an order `unlimited` only as its own owner-level scope recorded it (the platform's
+     `customers:tier`): PassionCode's owner at the issuer, never the subject organization's owner or administrators,
+     whose billing act (DEC-0162 LV-7) chooses no allowance; a `personal` entitlement is `limited` (`FAC-SEM-175`, EN-2); it sends
      `entitlement/2` only to a verifier whose owner confirmed on the board that it re-vendored at or after DEC-0168,
      `entitlement/1` to every other (a subject with a verifier that has not confirmed stays on `entitlement/1`); a
      change of `allowances` or of type is a new revision of the same order, and the same revision under the other

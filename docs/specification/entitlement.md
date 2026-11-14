@@ -13,7 +13,7 @@ product, a support tier and the paid agents) and nothing about money. The issuer
 a verifier, the first organization server or a personal cloud, checks it offline against the issuer's keys, keeps the
 last one it accepted for its subject, and checks that one again after every key set it applies and at least once a day
 ([the verifier's duties](#the-verifiers-duties)). What a verified entitlement switches on, and what a lapsed one switches off,
-is the verifying product's; this document states the record, its signature, its windows and its states.
+is the verifying product's, save what DEC-0168's allowances say; this document states the record, its signature, its windows and its states.
 
 Sources: the platform's request PLAT-020 on the project board (2026-10-17), which named the claims and left the
 signature, the grace and the refresh to the contract; the platform's organization offer (its ADR-0005, accepted
@@ -210,8 +210,7 @@ it only to verifiers re-vendored at or after DEC-0088; until then an Enterprise 
 ## Allowances (DEC-0168)
 
 `entitlement/2` is `entitlement/1` with one more member, `allowances`, always present. The field list changed, so the
-type did (DEC-0063); `entitlement/1` stays as it is and verifies as before. The two share the signature (over the
-register's `entitlement/2` statement), the windows, the `held` record, the key sets and every refusal above; the
+type did (DEC-0063); `entitlement/1` stays as it is and verifies as before. The two share the signing input, each over its own register statement, the windows, the `held` record, the key sets and every refusal above; the
 schema is [`entitlement-2`](../../schemas/entitlement-2.schema.json), the rule kind `entitlement-2` runs `FAC-SEM-115`
 and `FAC-SEM-175`.
 
@@ -227,8 +226,9 @@ order never records `mode: no-project-limit` for a project, which stays the proj
 stops, the levels of DEC-0162 and the profiles of DEC-0166, and the human steps of AP-4 (a payment or top-up stays the
 person's). "Unlimited" is a statement about the order, never an authority over spending or acts.
 
-**Who sets it.** The issuer marks an order `unlimited` only as its owner-level billing scope recorded it (the
-platform's `customers:tier`, PLAT-154; billing is the `owner`'s, DEC-0162 LV-7). A `personal` entitlement is `limited`
+**Who sets it.** The issuer marks an order `unlimited` only as its own owner-level scope recorded it (the platform's
+`customers:tier`, PLAT-154): PassionCode's owner at the issuer, never the subject organization's owner or
+administrators. An organization's own billing act (DEC-0162 LV-7: its plan and payment method) chooses no allowance. A `personal` entitlement is `limited`
 (`FAC-SEM-175`, EN-2's `malformed`). Turning it on or off is a new revision of the same order, and so is a change from
 `entitlement/1` to `entitlement/2`: the verifier keeps the newer revision as [one entitlement per
 subject](#one-entitlement-per-subject) says, and the same revision under the other type is `revision-conflict`.
