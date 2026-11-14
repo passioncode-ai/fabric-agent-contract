@@ -181,8 +181,6 @@ export function actionDecision(input: ActionDecisionInput): ActionDecisionAnswer
     if (Number.isNaN(clock)) return { fault: "now-unreadable" };
     // LV-4: a level stands only in the organization the call acts in, so the service owes that context.
     if (typeof input.context !== "string" || !CALL_CONTEXT.test(input.context)) return { fault: "context-missing" };
-    // LV-7: a level decision needs the action's effect, so a `change-policy` action is never read below `admin`.
-    if (levelDecision && !(EFFECT_CLASSES as readonly unknown[]).includes(input.effect)) return { fault: "effect-missing" };
     // At T2 every refusal on this branch keeps DL-18's route open, so the service owes the action's digest here too.
     if (!inside && (typeof actionDigest !== "string" || !SHA256.test(actionDigest))) return { fault: "digest-missing" };
     // A level mandate at a service given `levels` is never ignored: mandateCovers reads it at every tier.
