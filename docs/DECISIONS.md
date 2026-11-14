@@ -5304,6 +5304,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   PassionCode platform issues (its PLAT-020), the first organization server and a personal cloud verify.
 - **Annotated (2026-10-19):** item 3 amended by DEC-0088 (`enterprise-cloud`, a third hosting product for an
   organization).
+- **Annotated (2026-11-14):** extended by DEC-0168: `entitlement/2`, this record with `allowances` (`limited` or
+  `unlimited`), beside `entitlement/1`, which stays as it is.
 - **Amends:** nothing. It answers the platform's request PLAT-020 on the project board (2026-10-17), which left the
   signature, the grace and the refresh to the contract, and serves the platform's organization offer (its ADR-0005,
   accepted 2026-10-16, D-2 and D-4).
@@ -12044,3 +12046,62 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Source:** the design `docs/evidence/plans/2026-11-12-ct285-autonomy-profile.md`; the operator's decision of
   2026-11-09 as recorded in fabric-workspace `knowledge/authority.md`; board requests `921edc61` (thread `a3a97cef`)
   and `4a1bf8d6` (thread `8da128cf`); backlog CT-285.
+
+### DEC-0168: `entitlement/2`, an order with no limits on its own allowances (extends DEC-0085)
+
+- **Date:** 2026-11-14
+- **Status:** Accepted source change (on merge of its pull request). Extends DEC-0085; `entitlement/1` stays as it
+  is. Consumer adoption: board row CT-299: the PassionCode platform issues (its PLAT-154), the first organization
+  server verifies and confirms on the board.
+- **Decision:** in [entitlement → allowances](specification/entitlement.md#allowances-dec-0168):
+  1. **EU-1, a new type.** `entitlement/2` has every member of `entitlement/1`, with the same rules, and `allowances`,
+     always present: `limited` or `unlimited`. A changed field list is a new type (DEC-0063): its own schema
+     (`entitlement-2.schema.json`), its register statement (`entitlement/2`), the rule kind `entitlement-2`
+     (`FAC-SEM-115` and `FAC-SEM-175`), and `entitlement` `["1", "2"]` in the protocol register. The signature,
+     windows, `held` record, key sets and refusals are `entitlement/1`'s.
+  2. **EU-2, what `unlimited` lifts.** Only the order's own allowances: the verifier does not refuse a member past
+     `licence.members`, switches on an agent the organization adds beyond `agents` without refusing it as unpaid,
+     and the product may grow `hosting.size` without a new order; `licence`, `agents` and `hosting` still carry what
+     the order was priced on, and metering stays the server's own.
+  3. **EU-3, what it never lifts.** The estate's L0 (its total and each key's own ceiling), a project's L1 (an
+     `unlimited` order never records `mode: no-project-limit`), a grant's `perCallMaxUsd` and `autoApproveUsd`,
+     a mandate's bounds (MD-6), a product's emergency stops, DEC-0162's levels, DEC-0166's profiles and AP-4's human
+     steps.
+  4. **EU-4, the issuer.** It marks an order `unlimited` only as its owner-level billing scope recorded it (billing is
+     the `owner`'s, DEC-0162 LV-7); a `personal` entitlement is `limited` (`FAC-SEM-175`, EN-2); it sends
+     `entitlement/2` only to a verifier whose owner confirmed on the board that it re-vendored at or after DEC-0168,
+     `entitlement/1` to every other; a change of `allowances` or of type is a new revision of the same order, and
+     the same revision under the other type is `revision-conflict`.
+  5. **EU-5, the verifier's answer.** `verifyEntitlement` reads both types; an `entitlement/2` verdict adds `type` and
+     `allowances`, an `entitlement/1` verdict keeps its shape and reads as `limited`.
+- **Why:** the operator asked the platform for an "unlimited" tier («Всё без лимитов», platform session `fbc88a8a`,
+  2026-11-13), the platform built it in 0.17.0 (`customers.tier`, scope `customers:tier`, PLAT-154), and a verifier
+  could not tell from a closed `entitlement/1` that an organization has no limits.
+- **Alternatives refused:** a member added to `entitlement/1` (its schema is closed: every pinned verifier would
+  refuse every entitlement); a boolean (a later order kind, a trial or a capped plan, would need a third type);
+  `unlimited` as an absent `licence` (a `null` line already means the order has no such line); letting `unlimited`
+  set a project's or the estate's spend limits (they protect the operator's money and stay the person's, AP-4).
+- **Compatibility:** additive. Every DEC-0085 and DEC-0088 document keeps its verdict and its verdict's shape; a
+  verifier pinned before DEC-0168 refuses `entitlement/2` as `malformed` (another type), so the issuer sends it only
+  to verifiers that confirmed. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:**
+  - spec: `docs/specification/entitlement.md` (the header, EN-2, the issuer's duties, *Allowances*, the semantic rules,
+    *Who adopts it*), `docs/specification/conformance.md` (the module row, the verifier and issuer rows, the signing
+    register, the rule register and its next free code);
+  - schemas: `schemas/entitlement-2.schema.json`;
+  - code: `src/entitlement.ts` (`ENTITLEMENT_2_TYPE`, `ENTITLEMENT_TYPES`, `ALLOWANCES`, the verdict's `type` and
+    `allowances`, `FAC-SEM-175`), `src/signing-challenges.ts` (`ENTITLEMENT_2_FIELDS`, the register row),
+    `src/protocol-revisions.ts`, `src/semantic-kinds.ts`; `tools/vectors/entitlement.ts`;
+  - fixtures: `fixtures/vectors/entitlement.json` (the `allowances:` cases and `signingInput.entitlement2`),
+    `fixtures/positive/entitlement-2.json`, `fixtures/negative/entitlement-2-no-allowances.json`,
+    `fixtures/semantic/entitlement-2-*.json`, `fixtures/catalogue.json`;
+  - tests: `test/entitlement.test.ts`, `test/signing-challenges.test.ts`, `test/protocol-revisions.test.ts`,
+    `test/schema-compilation.test.ts`;
+  - docs: `CONTEXT.md`, `docs/DOCMAP.md`, `docs/backlog.md` (CT-299), the design
+    `docs/evidence/plans/2026-11-14-ct299-unlimited-entitlement.md`.
+- **Not decided here:** how a product shows `unlimited` to an administrator, what it bills, which functions a lapse
+  switches off (the verifying product's); whether an organization's spend limits default otherwise under
+  `unlimited` (not asked).
+- **Source:** passioncode-platform's board message `caab9b65` (thread `16093ded`, relayed by fabric-workspace); the
+  design above; DEC-0085, DEC-0088, DEC-0063, DEC-0162. DEC-0168 and `FAC-SEM-175` were reserved by git CAS
+  (`agent_sync.py reserve`, keys `ct299-entitlement-2` and `ct299-entitlement-2-sem`).

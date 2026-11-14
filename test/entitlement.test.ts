@@ -42,6 +42,8 @@ const read = (relative: string) => JSON.parse(readFileSync(path.join(root, relat
 const load = (relative: string) => read(`fixtures/${relative}`);
 const validator = await createValidator();
 const valid = (value: unknown, schema = "entitlement") => validateDocument(validator, `${SCHEMA_PREFIX}schemas/${schema}.schema.json`, value).valid;
+/** The schema and rule kind of an entitlement document: `entitlement-2` for an `entitlement/2` (DEC-0168). */
+const ownKind = (doc: Json) => (doc.type === "entitlement/2" ? "entitlement-2" : "entitlement");
 const codes = (kind: string, value: unknown) => [...new Set(evaluateSemanticRules(kind, value).map((finding) => finding.code))];
 const vectors = read(VECTOR_FILE);
 const schema = read("schemas/entitlement.schema.json");
@@ -208,8 +210,8 @@ describe("the vectors (DEC-0085)", () => {
     const accepted = (vectors.verify as Json[]).filter((entry) => entry.expected.ok);
     expect(accepted.length).toBeGreaterThan(15);
     for (const entry of accepted) {
-      expect(valid(entry.entitlement), entry.name).toBe(true);
-      expect(codes("entitlement", entry.entitlement), entry.name).toEqual([]);
+      expect(valid(entry.entitlement, ownKind(entry.entitlement)), entry.name).toBe(true);
+      expect(codes(ownKind(entry.entitlement), entry.entitlement), entry.name).toEqual([]);
       expect(valid(SETS[entry.trust.keySet], "entitlement-key-set"), entry.name).toBe(true);
     }
     for (const entry of (vectors.keySetCases as Json[]).filter((c) => c.expected.ok)) {
@@ -222,7 +224,8 @@ describe("the vectors (DEC-0085)", () => {
 
 /** Changes to a valid document; each result is re-signed, so only its shape can refuse it. */
 const ENTITLEMENT_MUTATIONS: Array<[string, (doc: Json) => unknown]> = [
-  ["another type", (d) => ({ ...d, type: "entitlement/2" })],
+  ["another type", (d) => ({ ...d, type: "entitlement/3" })],
+  ["entitlement/2's type without its allowances", (d) => ({ ...d, type: "entitlement/2" })],
   ["an extra member", (d) => ({ ...d, amount: "120" })],
   ["a currency", (d) => ({ ...d, currency: "USD" })],
   ["no estate member", ({ estate: _e, ...d }) => d],
@@ -409,7 +412,7 @@ describe("the hand-copied patterns agree with the schemas (DEC-0085)", () => {
   it("passes every schema-valid positive fixture and every accepted vector document through the shape checks", () => {
     const entitlements = [BASE, PERSONAL, ...(vectors.verify as Json[]).filter((entry) => entry.expected.ok).map((entry) => entry.entitlement)];
     for (const document of entitlements) {
-      expect(valid(document)).toBe(true);
+      expect(valid(document, ownKind(document))).toBe(true);
       expect(entitlementWellFormed(document)).toBe(true);
     }
     const sets = [KEY_SET, ...(Object.values(vectors.keySets) as Json[]), ...(vectors.keySetCases as Json[]).filter((entry) => entry.expected.ok).map((entry) => setOf(entry.keySet))];
@@ -512,12 +515,12 @@ describe("the verifiers' contexts and edges (DEC-0085)", () => {
   });
 });
 
-describe("entitlement semantic fixtures (FAC-SEM-115, FAC-SEM-116)", () => {
+describe("entitlement semantic fixtures (FAC-SEM-115, FAC-SEM-116, FAC-SEM-175)", () => {
   const files = readdirSync(path.join(root, "fixtures/semantic")).filter((name) => name.startsWith("entitlement-"));
 
   it("has a passing and a failing input for each rule", () => {
     const fixtures = files.map((name) => load(`semantic/${name}`));
-    for (const [kind, code] of [["entitlement", "FAC-SEM-115"], ["entitlement-key-set", "FAC-SEM-116"]]) {
+    for (const [kind, code] of [["entitlement", "FAC-SEM-115"], ["entitlement-key-set", "FAC-SEM-116"], ["entitlement-2", "FAC-SEM-175"]]) {
       const own = fixtures.filter((fixture) => fixture.kind === kind);
       expect(own.some((fixture) => fixture.expect.length === 0), kind).toBe(true);
       expect(own.some((fixture) => fixture.expect.includes(code)), kind).toBe(true);

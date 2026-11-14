@@ -837,6 +837,8 @@
   {"name": "entitlement-enterprise-cloud", "schema": "entitlement.schema.json", "path": "positive/entitlement-enterprise-cloud.json", "valid": true},
   {"name": "entitlement-personal", "schema": "entitlement.schema.json", "path": "positive/entitlement-personal.json", "valid": true},
   {"name": "entitlement-key-set", "schema": "entitlement-key-set.schema.json", "path": "positive/entitlement-key-set.json", "valid": true},
+  {"name": "entitlement-2", "schema": "entitlement-2.schema.json", "path": "positive/entitlement-2.json", "valid": true},
+  {"name": "entitlement-2-no-allowances", "schema": "entitlement-2.schema.json", "path": "negative/entitlement-2-no-allowances.json", "valid": false, "keyword": "required"},
   {"name": "entitlement-unknown-hosting-product", "schema": "entitlement.schema.json", "path": "negative/entitlement-unknown-hosting-product.json", "valid": false, "keyword": "enum"},
   {"name": "entitlement-amount", "schema": "entitlement.schema.json", "path": "negative/entitlement-amount.json", "valid": false, "keyword": "additionalProperties"},
   {"name": "entitlement-person-subject", "schema": "entitlement.schema.json", "path": "negative/entitlement-person-subject.json", "valid": false, "keyword": "pattern"},

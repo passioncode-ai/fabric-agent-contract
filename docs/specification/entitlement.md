@@ -1,7 +1,7 @@
-# Entitlements: `entitlement/1` and `entitlement-key-set/1`
+# Entitlements: `entitlement/1`, `entitlement/2` and `entitlement-key-set/1`
 
-DEC-0085 · rule codes `FAC-SEM-115`, `FAC-SEM-116` · schemas
-[`entitlement`](../../schemas/entitlement.schema.json) and
+DEC-0085, DEC-0088, DEC-0168 · rule codes `FAC-SEM-115`, `FAC-SEM-116`, `FAC-SEM-175` · schemas
+[`entitlement`](../../schemas/entitlement.schema.json), [`entitlement-2`](../../schemas/entitlement-2.schema.json) and
 [`entitlement-key-set`](../../schemas/entitlement-key-set.schema.json) · code
 [`src/entitlement.ts`](../../src/entitlement.ts) · vectors
 [`fixtures/vectors/entitlement.json`](../../fixtures/vectors/entitlement.json), written by
@@ -126,6 +126,9 @@ own subject.
 - It delivers a key set before any entitlement signed under a key that set adds.
 - It issues `enterprise-cloud` (DEC-0088) only to a verifier re-vendored at or after DEC-0088, as that verifier's owner
   confirms on the project board (thread `c7d8f53d`), and an Enterprise order on `org-cloud` until then.
+- It issues `entitlement/2` (DEC-0168) only to a verifier re-vendored at or after DEC-0168, as that verifier's owner
+  confirms on the project board, and `entitlement/1` to every other verifier; it marks an order `unlimited` only as its
+  owner-level billing scope recorded it ([Allowances](#allowances-dec-0168)).
 
 ## The verifier's duties
 
@@ -144,7 +147,7 @@ its pinned root; `estate` is required for the subject `personal` and absent for 
 | Row | Problem | When |
 |---|---|---|
 | EN-1 | `context-invalid`, `no-clock` | the context is not an object (first), then `now` is not a readable time (before any comparison, and so `no-clock` even when the rest of the context is invalid too), then `subject` is not a context id, `estate` is not an opaque id for `personal` or is present for an organization, `keySet` is not a well-formed key set under `EdDSA` (one with no key valid at its `issuedAt` among them), or `held` is not `{orderId, revision, issuedAt, digest}` |
-| EN-2 | `malformed` | not an object, another `type`, a member missing or one the schema does not list, an issuer that is not a lower-case https origin, a value outside its field's rule, the subject's lines in disagreement (`personal` with a licence, a support tier, no estate or an organization's product; an organization with an estate or a `personal-cloud`), an agent listed twice, a time that is not strict RFC 3339 (`T` or `t`, an offset, a day that exists) or has more than three fraction digits, or `sig` not the canonical base64url of 64 bytes |
+| EN-2 | `malformed` | not an object, another `type`, a member missing or one the schema does not list, an issuer that is not a lower-case https origin, a value outside its field's rule, the subject's lines in disagreement (`personal` with a licence, a support tier, no estate or an organization's product; an organization with an estate or a `personal-cloud`), an `entitlement/2` without `allowances`, with another value, or `personal` with `unlimited` (DEC-0168), an agent listed twice, a time that is not strict RFC 3339 (`T` or `t`, an offset, a day that exists) or has more than three fraction digits, or `sig` not the canonical base64url of 64 bytes |
 | EN-3 | `wrong-issuer` | `issuer` is not the key set's |
 | EN-4 | `unknown-algorithm` | `alg` is not `EdDSA` |
 | EN-5 | `unknown-key`, `key-revoked` | `kid` is neither listed nor revoked; `kid` is revoked |
@@ -185,6 +188,7 @@ output.
 | Code | Kind | Rule |
 |---|---|---|
 | <a id="fac-sem-115"></a>`FAC-SEM-115` | `entitlement` | the subject's lines agree (`personal`: an estate, no licence, no support, at most a `personal-cloud`; `org:<orgId>`: no estate, at most an `org-cloud` or an `enterprise-cloud`), the subject is a context id, the times are strict RFC 3339 with `issuedAt` ≤ `notBefore` < `expiresAt`, the times have at most three fraction digits, the life is at most 38 days, and each agent is listed once by `agentRef` |
+| <a id="fac-sem-175"></a>`FAC-SEM-175` | `entitlement-2` | `FAC-SEM-115`'s rules, and a `personal` entitlement is `limited`: an estate has no order allowances to lift (DEC-0168) |
 | <a id="fac-sem-116"></a>`FAC-SEM-116` | `entitlement-key-set` | each kid once, the root's kid (the set's own `kid`) not among the keys, every key window strict RFC 3339 with `notBefore` < `notAfter`, no revoked kid among the keys, no key of small order, and at least one key valid at the set's `issuedAt` |
 
 ## Enterprise cloud (DEC-0088)
@@ -202,6 +206,37 @@ products. Nothing else is added:
 A verifier pinned before DEC-0088 refuses `enterprise-cloud` as `malformed` (the schema's `enum`), so the issuer sends
 it only to verifiers re-vendored at or after DEC-0088; until then an Enterprise order is issued on `org-cloud`.
 
+## Allowances (DEC-0168)
+
+`entitlement/2` is `entitlement/1` with one more member, `allowances`, always present. The field list changed, so the
+type did (DEC-0063); `entitlement/1` stays as it is and verifies as before. The two share the signature (over the
+register's `entitlement/2` statement), the windows, the `held` record, the key sets and every refusal above; the
+schema is [`entitlement-2`](../../schemas/entitlement-2.schema.json), the rule kind `entitlement-2` runs `FAC-SEM-115`
+and `FAC-SEM-175`.
+
+| `allowances` | What it means |
+|---|---|
+| `limited` | the order's lines are its limits, exactly as `entitlement/1` reads them |
+| `unlimited` | the order sets no ceiling on its own allowances: the verifier does not refuse a member past `licence.members`, switches on an agent the organization adds beyond `agents` without refusing it as unpaid, and the product may grow `hosting.size` without a new order; `licence`, `agents` and `hosting` still carry what the order was priced on, and metering stays the server's own |
+
+**What it never lifts.** No line of an entitlement, either type, reaches the rules other documents own: the estate's
+L0 (its total and each key's own ceiling) and a project's L1 ([spend policy](spend-policy.md#levels); an `unlimited`
+order never records `mode: no-project-limit` for a project, which stays the project's own choice), a grant's
+`perCallMaxUsd` and `autoApproveUsd`, a mandate's bounds ([delegation](delegation.md) MD-6), a product's own emergency
+stops, the levels of DEC-0162 and the profiles of DEC-0166, and the human steps of AP-4 (a payment or top-up stays the
+person's). "Unlimited" is a statement about the order, never an authority over spending or acts.
+
+**Who sets it.** The issuer marks an order `unlimited` only as its owner-level billing scope recorded it (the
+platform's `customers:tier`, PLAT-154; billing is the `owner`'s, DEC-0162 LV-7). A `personal` entitlement is `limited`
+(`FAC-SEM-175`, EN-2's `malformed`). Turning it on or off is a new revision of the same order, and so is a change from
+`entitlement/1` to `entitlement/2`: the verifier keeps the newer revision as [one entitlement per
+subject](#one-entitlement-per-subject) says, and the same revision under the other type is `revision-conflict`.
+
+**What the verifier answers.** `verifyEntitlement` reads both types. An `entitlement/2` verdict adds `type` and
+`allowances` beside the lines; an `entitlement/1` verdict keeps its shape, and a product reads an absent `allowances`
+as `limited`. A verifier pinned before DEC-0168 refuses `entitlement/2` as `malformed` (another type), which is why
+the issuer sends it only to verifiers that confirmed they read it.
+
 ## Who adopts it
 
 - **The PassionCode platform** issues entitlements: the root key offline, signing key sets only; signing keys online,
@@ -212,7 +247,8 @@ it only to verifiers re-vendored at or after DEC-0088; until then an Enterprise 
   keeps the applied revision and digest, verifies each entitlement with `verifyEntitlement` for its subject
   `org:<orgId>`, stores the `held` record and the document per subject, re-verifies them as [the verifier's
   duties](#the-verifiers-duties) state, surfaces `refreshDue` and the `grace` state to its administrator, and runs
-  `fixtures/vectors/entitlement.json`.
+  `fixtures/vectors/entitlement.json`; at or after DEC-0168 it reads `entitlement/2`, enforces the order's allowances
+  only while `allowances` is `limited`, and confirms on the board that it reads it.
 - **A personal cloud** verifies the same way with the subject `personal` and its own estate.
 
 ## Privacy

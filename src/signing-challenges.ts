@@ -56,6 +56,11 @@ export const ENTITLEMENT_FIELDS = [
   "issuer", "subject", "estate", "order", "issuedAt", "notBefore", "expiresAt", "licence", "hosting", "support", "agents", "alg", "kid"
 ] as const;
 
+/** `entitlement/2`'s members beside `type`: `/1`'s and `allowances` (DEC-0168 EU-1). */
+export const ENTITLEMENT_2_FIELDS = [
+  "issuer", "subject", "estate", "order", "issuedAt", "notBefore", "expiresAt", "licence", "hosting", "support", "agents", "allowances", "alg", "kid"
+] as const;
+
 /** The entitlement key set's members beside `type`: the set without `sig` (DEC-0085). */
 export const ENTITLEMENT_KEY_SET_FIELDS = ["issuer", "revision", "issuedAt", "keys", "revoked", "alg", "kid"] as const;
 
@@ -115,6 +120,7 @@ export const SIGNING_STATEMENTS: ReadonlyMap<string, StatementSpec> = new Map<st
   ["relay-auth/1", { signer: "key", fields: ["alg", "relay", "nonce", "estate", "kid", "iat"], decision: "DEC-0047" }],
   ["relay-blob/1", { signer: "key", fields: ["alg", "relay", "method", "digest", "recipients", "iat"], decision: "DEC-0047" }],
   ["entitlement/1", { signer: "key", fields: ENTITLEMENT_FIELDS, decision: "DEC-0085" }],
+  ["entitlement/2", { signer: "key", fields: ENTITLEMENT_2_FIELDS, decision: "DEC-0168" }],
   ["entitlement-key-set/1", { signer: "key", fields: ENTITLEMENT_KEY_SET_FIELDS, decision: "DEC-0085" }],
   ["org-membership/1", { signer: "key", fields: ORG_MEMBERSHIP_FIELDS, decision: "DEC-0127" }],
   ["org-membership/2", { signer: "key", fields: ORG_MEMBERSHIP_2_FIELDS, decision: "DEC-0162" }],

@@ -13,6 +13,15 @@ import { ENTITLEMENT_KEY_SET_FIELDS, signingStatement } from "./signing-challeng
  * applied and, per subject, the entitlement it accepted last. No amount, price, currency or person appears anywhere.
  */
 export const ENTITLEMENT_TYPE = "entitlement/1";
+/**
+ * `entitlement/2` (DEC-0168 EU-1): `/1`'s members and rules, and `allowances`: `limited` (the order's lines are its
+ * limits) or `unlimited` (the order sets no ceiling on its member allowance, paid agents or hosting size, EU-2). It
+ * never reaches a spend limit, a key's ceiling, an emergency stop, a level or a human step (EU-3).
+ */
+export const ENTITLEMENT_2_TYPE = "entitlement/2";
+/** The entitlement types this verifier reads, oldest first. */
+export const ENTITLEMENT_TYPES: readonly string[] = [ENTITLEMENT_TYPE, ENTITLEMENT_2_TYPE];
+export const ALLOWANCES: readonly string[] = ["limited", "unlimited"];
 export const ENTITLEMENT_KEY_SET_TYPE = "entitlement-key-set/1";
 /** Ed25519 only (DEC-0085 item 2); ES256 may join additively by a later decision, as for leases and hub keys. */
 export const ENTITLEMENT_ALGORITHMS: readonly string[] = ["EdDSA"];
@@ -71,13 +80,13 @@ const rawKey = (x: string) => Buffer.from(x, "base64url");
 // ---- The documents -----------------------------------------------------------------------------------------------
 
 /**
- * The bytes the issuer signs: the register's `entitlement/1` statement (DEC-0063): the UTF-8 RFC 8785 form of the
+ * The bytes the issuer signs: the register's `entitlement/1` or `entitlement/2` statement (DEC-0063, DEC-0168): the UTF-8 RFC 8785 form of the
  * document without `sig`. `undefined` when it does not carry exactly the registered members or has no RFC 8785 form.
  */
 export function entitlementSigningInput(entitlement: unknown): Buffer | undefined {
-  if (!isObject(entitlement) || entitlement.type !== ENTITLEMENT_TYPE) return undefined;
-  const { type: _type, sig: _sig, ...fields } = entitlement;
-  return signingStatement(ENTITLEMENT_TYPE, fields);
+  if (!isObject(entitlement) || !ENTITLEMENT_TYPES.includes(entitlement.type as string)) return undefined;
+  const { type, sig: _sig, ...fields } = entitlement;
+  return signingStatement(type as string, fields);
 }
 
 /** The bytes the root signs: the register's `entitlement-key-set/1` statement, the set without `sig`. */
@@ -94,11 +103,14 @@ const line = (value: unknown, names: readonly string[], check: (value: JsonObjec
 
 /**
  * Whether the subject's lines agree (DEC-0085 item 3): `personal` carries an estate, no licence, no support and at most
- * a `personal-cloud`; `org:<orgId>` carries no estate and at most an `org-cloud` or an `enterprise-cloud` (DEC-0088).
+ * a `personal-cloud`; `org:<orgId>` carries no estate and at most an `org-cloud` or an `enterprise-cloud` (DEC-0088). An
+ * `entitlement/2` for `personal` is `limited`: an estate has no order allowances to lift (DEC-0168, FAC-SEM-175).
  */
 function consistent(doc: JsonObject): boolean {
   const product = isObject(doc.hosting) ? doc.hosting.product : undefined;
-  if (doc.subject === "personal") return isString(doc.estate) && doc.licence === null && doc.support === null && (doc.hosting === null || product === "personal-cloud");
+  if (doc.subject === "personal") {
+    return isString(doc.estate) && doc.licence === null && doc.support === null && (doc.hosting === null || product === "personal-cloud") && doc.allowances !== "unlimited";
+  }
   return doc.estate === null && (doc.hosting === null || ORG_HOSTING_PRODUCTS.includes(product as string));
 }
 
@@ -124,6 +136,7 @@ export function entitlementWellFormed(doc: JsonObject): boolean {
     Array.isArray(agents) && agents.length <= MAX_AGENTS &&
     agents.every((agent) => isObject(agent) && exactly(agent, ["agentRef"]) && isString(agent.agentRef) && agent.agentRef.length <= 146 && AGENT_REF.test(agent.agentRef)) &&
     new Set(refs).size === refs.length &&
+    (doc.type !== ENTITLEMENT_2_TYPE || ALLOWANCES.includes(doc.allowances as string)) &&
     consistent(doc) &&
     isString(doc.alg) && opaque(doc.kid) && matches(SIG, doc.sig)
   );
@@ -251,7 +264,20 @@ export type EntitlementProblem =
   | "revision-conflict";
 
 export type EntitlementVerdict =
-  | { ok: true; state: "active" | "grace"; refreshDue: boolean; unchanged: boolean; digest: string; held: HeldEntitlement }
+  | {
+    ok: true;
+    state: "active" | "grace";
+    refreshDue: boolean;
+    unchanged: boolean;
+    digest: string;
+    held: HeldEntitlement;
+    /**
+     * Present for an `entitlement/2` only (DEC-0168 EU-5), so an `entitlement/1` verdict keeps its shape: the type and
+     * its allowances. A product reads an absent `allowances` as `limited`.
+     */
+    type?: string;
+    allowances?: "limited" | "unlimited";
+  }
   | { ok: false; problem: EntitlementProblem };
 
 export interface EntitlementTrust {
@@ -334,7 +360,8 @@ export function verifyEntitlement(value: unknown, trust: EntitlementTrust): Enti
     refreshDue: now >= expiresAt - REFRESH_SECONDS * 1000,
     unchanged,
     digest,
-    held: { orderId: order.id as string, revision: order.revision as number, issuedAt: entitlement.issuedAt as string, digest }
+    held: { orderId: order.id as string, revision: order.revision as number, issuedAt: entitlement.issuedAt as string, digest },
+    ...(entitlement.type === ENTITLEMENT_2_TYPE ? { type: ENTITLEMENT_2_TYPE, allowances: entitlement.allowances as "limited" | "unlimited" } : {})
   };
 }
 
@@ -400,8 +427,12 @@ function keySetDocument(value: JsonObject, flag: Flag): void {
 
 export function entitlementRules(kind: string, value: JsonObject): Finding[] | undefined {
   const findings: Finding[] = [];
-  if (kind === "entitlement") {
+  if (kind === "entitlement" || kind === "entitlement-2") {
     entitlementDocument(value, (instancePath, message) => findings.push({ code: "FAC-SEM-115", instancePath, message }));
+    // FAC-SEM-175 (DEC-0168): an estate has no order allowances to lift, so a personal entitlement/2 is limited.
+    if (kind === "entitlement-2" && value.subject === "personal" && value.allowances === "unlimited") {
+      findings.push({ code: "FAC-SEM-175", instancePath: "/allowances", message: "a personal entitlement is limited: an estate has no order allowances to lift" });
+    }
     return findings;
   }
   if (kind === "entitlement-key-set") {

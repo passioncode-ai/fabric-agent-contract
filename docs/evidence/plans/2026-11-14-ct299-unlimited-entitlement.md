@@ -54,8 +54,9 @@ DEC-0088 set for `enterprise-cloud`), and `/1` to every other verifier; one subj
 change of type is a new revision of the same order (entitlement *One entitlement per subject*). Turning "unlimited" off
 is a new revision with `"limited"`; the verifier keeps the newer revision as today.
 
-**EU-5, the verifier's answer.** `verifyEntitlement` reads `/2` and returns `allowances` in its verdict beside the
-lines; a verifier that reads `/1` answers `allowances: "limited"` for it, so a product reads one field for both types.
+**EU-5, the verifier's answer.** `verifyEntitlement` reads both types. For `/2` its verdict carries `type` and
+`allowances` beside the lines; a `/1` verdict keeps its shape (the precedent of `org-membership/2`, DEC-0162), and a
+product reads an absent `allowances` as `limited`.
 
 ## What it does not decide
 
