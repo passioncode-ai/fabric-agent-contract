@@ -539,7 +539,7 @@ token needs none ([DL-26](delegation.md#trust-tiers)).
   way (`handover-needs-operator`) and not asked again within that call, and a decision with the exact target may follow
   in the same task. A person who declines gives the operator's no, refused `operator-decision-required` with its own
   detail, `handover-declined`: the caller does not ask again within this task and reports to the coordinator. A T2 caller gets `operator-decision-required` with the detail `handover-needs-estate-route` whatever it carries, a level decision included (a level stands for a hand-over only where the holder's agent is T0 or T1 to that service, DEC-0162), and is not asked: its decision is no decision (AP-2), and its remedy is that the operator acts through a T0
-  or T1 route. A T2 caller that reaches the action has passed DL-13 with a delegation token (a caller no rule places is
+  or T1 route (for an organization's own agent an owner or an administrator, through their own agent's T0 or T1 route, DEC-0162). A T2 caller that reaches the action has passed DL-13 with a delegation token (a caller no rule places is
   T2 by default, and one the relay cannot place is refused before the action, [DL-28](delegation.md#trust-tiers),
   [machine calls](machine-calls.md#the-t1-binding-over-the-relay)), so the T2 case has this one code for the word; the
   idempotency lookup still runs first, and its in-flight and conflict answers stand. The action checks these refusals before `mandateCovers`, so a mandate gets this rule's detail rather than
