@@ -7366,6 +7366,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `interop-agent-call`; `src/actions.ts`, `src/delegation.ts`; the vector file `fixtures/vectors/actions.json`;
   backlog CT-124 to CT-127.
 - **Source:** the operator's instruction of 2026-10-24; two rounds of seam and product readings, 2026-10-24.
+- **Annotated (2026-11-14):** AP-2 amended by DEC-0162: at a service that reads levels, a level holder's decision or level mandate bound to the call's delegation token decides a relayed action at its level from any tier (LV-6); in an organization's context an act declared `owner` or `admin` takes no operator decision, operator mandate, elicitation or `approval/1` (LV-7); a service that reads no levels reads the level form as absent (LV-10).
 
 ### DEC-0122: a service names its A2A Agent Card in `surfaces.a2a`; `ai-catalog.json` stays out of `fabric-service/0.1`
 
@@ -7649,6 +7650,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   spend unenforceable and the operator's literal example refused, the hub and job routes missing and T1 contradicted;
   a second seam reading, which found no authenticated agent id on the operator's own routes, an actions-only scope
   covering every external call and the reference's table stale.
+- **Annotated (2026-11-14):** MD-3 and MD-5 amended by DEC-0162: a level mandate (`by: "level"`) is read at every tier by a service that reads levels and stands within the holder's level (LV-6); no mandate covers `change-policy`, a level mandate included.
 
 ### DEC-0126: one approval binds all the operator's agents
 
@@ -7813,6 +7815,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   decision), CT-37 (narrowed to `org-authority/1`'s member list, with CT-122).
 - **Source:** CT-137; the organization train's TP-00, N-1, step 1.1 and X-6; MD-9; R1-D12; board request `8e2d5099`
   (thread `8d115bed`); DEC-0031, DEC-0045, DEC-0063, DEC-0082, DEC-0085, DEC-0103.
+- **Annotated (2026-11-14):** OL-6 amended by DEC-0162: `org-membership/2` carries a role that decides as a level (`owner`, `admin`, `architect` with its projects), bound to the call by the delegation token's `mem` (LV-1 to LV-5); `/1` is unchanged and grants nothing.
 
 ### DEC-0128: unlinkable memberships, an identity per enrollment and a key and issuer per context
 
@@ -8162,6 +8165,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `test/org-exchange.test.ts`, `test/schema-compilation.test.ts`, `test/positive-sweep.test.ts`;
   `docs/specification/README.md`; backlog CT-37, CT-158, CT-159, CT-160; `docs/handoffs/README.md`.
 - **Source:** CT-158; Fabric ADR-0180 (fabric `1d49ed3b`; thread `115ef7fb`); DEC-0129, DEC-0131.
+- **Annotated (2026-11-14):** "A role is no authority" amended by DEC-0162 for `org-membership/2` under `levels/1`: an attested role decides at its level where a service reads levels (LV-1); `/1` still grants nothing.
 
 ### DEC-0134: the organization's relay, its handshake on the signed member list
 
@@ -8549,6 +8553,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (SCN-051, the move), `docs/ux/screens.md` (SCR-32), `docs/ux/flows.md` (FLW-16, FLW-29's rejected shape), `docs/ux/foundation.md` (JRN-08 stage 5, an ST-020 criterion), DEC-0020, DEC-0022, DEC-0079, DEC-0081 and DEC-0121 (annotations); backlog CT-125 (the move's agent twin), CT-174, CT-175, CT-176, CT-179, CT-181, CT-182 and CT-183 (filed); fabric-workspace `knowledge/agents-first.md` (its parity paragraph, at the merge); the handoff
   `docs/handoffs/2026-10-26-simple-fabric-decisions.md` and its row in `docs/handoffs/README.md`.
 - **Source:** CT-174; Fabric's request `23ba0e97` (thread `6a8d2f9c`).
+- **Annotated (2026-11-14):** Holds, slot moves and a Project's listing amended by DEC-0162: in an organization's context the member who owns the Project, or an owner or an administrator by a level decision, decides them (question 9); the owning member's agent route is CT-307.
 
 ### DEC-0141: a job's step under a mandate is read under the job's capability
 
@@ -9854,6 +9859,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   item DS; rounds 81 and 82 at `d03ae791` clean on all three tiers),
   cited by round number (their heads were on the review branch, not kept at landing),
   decided by the coordinator.
+- **Annotated (2026-11-14):** A source hand-over of an organization's own agent amended by DEC-0162: only an owner's or an administrator's level decision with the exact target hands it over, in any context; an architect moves source within the organization's members-only places with no word (LV-6).
 
 ### DEC-0150: an agent that answers people on a channel declares `extensions/channel-agent/0.1`
 
@@ -11708,7 +11714,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 ### DEC-0162: authority levels: `org-membership/2`, the level decision and the level mandate
 
 - **Date:** 2026-11-12
-- **Status:** Proposed 2026-11-12, from the design `docs/evidence/plans/2026-11-12-ct250-authority-levels.md` (CT-250),
+- **Status:** Accepted 2026-11-14, merged with this change: rounds 33 and 34 of the coordinator's blind readings (at `65dca9b4` and `58172849`) were clean on all three tiers, their risks filed as CT-308. Proposed 2026-11-12, from the design `docs/evidence/plans/2026-11-12-ct250-authority-levels.md` (CT-250),
   the design's operator-question defaults taken until the operator answered them on 2026-11-13 (below); accepted when the coordinator's blind readings are
   clean on two consecutive rounds; rounds 1 to 22 (2026-11-12 and 13) and 23 and 25 to 32 (2026-11-14, read under the finish-line rule) were not clean and are folded, 24 clean (the unit tier was clean in rounds 3 to 13 and 18 to 22, risks aside, the seam in rounds 7 to 13 save round 10). Questions 1 to 9 were posted on board thread `8da128cf` as messages `b719b08e`, `9faffa1d` and `25f3ca27`; question 10, question 9's listing and settlement clauses (round 6) and question 8 widened to the architect (round 8) were posted as `bd18b1fa` once the board answered again on 2026-11-12, and questions 11 and 12 and question 8's round-12 clause were never posted, the board's MCP having been disconnected after `bd18b1fa`. A relayed «Принять все дефолты» (fabric-workspace session `fd5dfcf0`, board thread `16093ded`, message `36b1981b`, 2026-11-13) is superseded: asked about the conflict in this repository's chat the same morning, the operator answered «Мои ответы здесь», so the per-question answers below stand. The operator answered all twelve questions on 2026-11-13 in this repository's session `7c9eb2c2`, asked in its chat: questions 1, 3, 5 to 7, 11 and 12 as their defaults; question 8 first as its default, then replaced the same morning (a client key in an organization's context the owner's or an administrator's wherever the instance runs, «Владелец и администратор везде»); two further answers, not among the twelve: spend above the auto-approve threshold in an organization's project is the owner's or an administrator's, and an action a service leaves out of `actionLevels` stays an architect's in its project; two answered later the same day: a source hand-over that changes the repository's visibility or adds a reader outside the organization is the owner's or an administrator's, never an architect's, refining question 1 (a route to the organization's own members-only place being no hand-over, every hand-over left is theirs, the action declaring `admin`, and for an organization's own agent the operator's decision, the stated word and an elicitation are never taken, in any context, the service eliciting nothing; asked once more, a member's own repository or a file sent to a member is not inside the organization: «Только места организации») («Архитектор передаёт исходники внутри организации без смены видимости; всё, что открывает доступ наружу или меняет видимость, решают владелец или администратор»), and a member's key for an instance the organization deploys is issued and rotated only by the owner or an administrator, decided and taken in person, a member's own machine included, never by the member («Ключи экземпляров организации выдают только они, даже на машине участника»); question 4 otherwise (a project's L1 and every spend limit the owner's or an administrator's, never an architect's: «владелец и администратор … архитектор инженерит но по финансам и доступам это админ и овнер»), which also answers question 2 (an architect changes no policy); question 9 otherwise (an administrator decides a board hold, a slot move and a Project's listing too); question 10 otherwise (an administrator's command does not wait for the level route). The answers are folded below; an answer after acceptance is a new decision amending this one. It adds a membership type, a decision form, a mandate form, a token claim, a new extension key beside the actions extension, `extensions/authority/0.1` (`levels`, `actionLevels`, which no reader of the actions extension sees) and two rule codes (`FAC-SEM-169`, `FAC-SEM-170`); what it amends: OL-6 (a role decides as a level), MD-5 (a level mandate from T2), the setter of an organization project's L1 (spend policy), and holds, slot moves and Project listing decided by an owner or an administrator in an organization's context. The operator's questions and answers are below.
 - **Context:** the operator decided four access levels on 2026-11-06 (fabric-workspace session `74a9440a`, relayed on
