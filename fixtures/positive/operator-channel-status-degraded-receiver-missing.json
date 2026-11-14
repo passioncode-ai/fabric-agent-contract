@@ -6,7 +6,7 @@
   "state": "degraded",
   "reason": {
     "code": "receiver-missing",
-    "detail": "Nobody has received this bot's updates since 08:52 and 14 updates are waiting; restart the agent's channel receiver."
+    "detail": "Nobody has received this bot's updates since 08:52, 14 waiting; if a supervisor does not restart the receiver, ask the agent to; answer decisions, a spend approval excepted, on its dashboard or by telling the agent, not in the bot's chat, which may lose them after 24 hours."
   },
   "credential": { "name": "EXAMPLE_AGENT_TELEGRAM_BOT_TOKEN", "present": true },
   "receiver": { "mode": "long-polling", "lease": "none" },

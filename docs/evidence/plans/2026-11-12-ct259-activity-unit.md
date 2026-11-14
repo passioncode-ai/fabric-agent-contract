@@ -1,6 +1,6 @@
 # Design 2026-11-12: the activity event of a unit of work (CT-259)
 
-**Status:** the design CT-259 owes by 2026-11-13, drafted for Project Observatory to confirm the shape against its
+**Status:** decided as DEC-0164, proposed (docs/DECISIONS.md); where this design and the decision differ (no `org` in the event, a known cost, the AE-* rules), the decision wins. Before that: the design CT-259 owes by 2026-11-13, drafted for Project Observatory to confirm the shape against its
 OBS-378 (the activity journal's event schema); the decision follows once Observatory confirms. Rules are proposals
 numbered `AE-*`.
 
@@ -13,6 +13,9 @@ gap G1-a): the North Star metric counts accepted units of work per task class, s
 agent that did the work through its kit and read by Observatory, must carry the organization, project and agent, the
 task class (`unclassified` until the assessment's map names it), a stable unit id, the evidence, who or what accepted
 it and when, and the agent's spend on it, `null` when unknown and never 0. It is never a person's score.
+
+Line numbers in this design cite the repository at `a054fdc6` (main on 2026-11-12, when it was written); a
+later change may move them, so read each citation by its rule id or section first.
 
 ## What the contract has today
 

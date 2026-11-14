@@ -1,6 +1,6 @@
 # Design 2026-11-12: an autonomy profile per place (CT-285)
 
-**Status:** the design CT-285 owes by 2026-11-13; the decision (one DEC, designed with CT-250's) follows by the
+**Status:** proposed as DEC-0166 (docs/DECISIONS.md), not yet accepted; where this design and the decision differ (refusals, the defaults, the questions), the decision wins. Before that: the design CT-285 owes by 2026-11-13; the decision (one DEC, designed with CT-250's) follows by the
 organization slice of 2026-11-21. Rules are proposals numbered `AU-*`. It reads the levels of
 [the authority levels design](2026-11-12-ct250-authority-levels.md) (`LV-*`).
 
@@ -13,6 +13,9 @@ to end without a person is a setting per place. A headless place (the always-on 
 VM, its cloud) finishes everything by default, watched by agents and by each process's own checks; a person's own
 computer follows the scenario the person or their administrator chooses. The owner, an organization administrator or
 a project architect sets it within their level; the only gates left everywhere are the body's. North Star gap G19.
+
+Line numbers in this design cite the repository at `a054fdc6` (main on 2026-11-12, when it was written); a
+later change may move them, so read each citation by its rule id or section first.
 
 ## What the contract says today
 

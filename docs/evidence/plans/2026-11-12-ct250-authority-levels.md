@@ -18,6 +18,9 @@ and from the agents acting for them, is approved at once and recorded with the a
 the approvals the product provides; only the person's physical steps stay. North Star gap G2
 (fabric-workspace `knowledge/north-star.md` at `73171ed0`, section 14).
 
+Line numbers in this design cite the repository at `a054fdc6` (main on 2026-11-12, when it was written); a
+later change may move them, so read each citation by its rule id or section first.
+
 ## What the contract says today
 
 | Where | What it says | Why it blocks the levels |

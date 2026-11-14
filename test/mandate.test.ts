@@ -140,4 +140,8 @@ describe("MD-2a, no hand-over covers a call the scope in force does not (DEC-013
     expect(calls.some((call) => covered({ capabilities: ["x.a"], effects: ["charge"] }, call))).toBe(true);
     expect(calls.some((call) => covered({ capabilities: ["x.a"], actions: ["a"], effects: ["charge"] }, call))).toBe(true);
   });
+  it("answers the callee's own fault when its level contexts are not a map (DEC-0162)", () => {
+    const mandate = { kind: "mandate/1", by: "operator", task: "t", instruction: "i", at: "2026-10-25T11:00:00Z", expiresAt: "2026-10-26T11:00:00Z", scope: { effects: ["draft"] }, chain: [{ agent: "a", at: "2026-10-25T11:00:00Z" }, { agent: "b", at: "2026-10-25T11:00:00Z" }] };
+    expect(mandateCovers({ mandate, tier: "T0", now: "2026-10-25T11:30:00Z", self: "b", call: { capability: "x.y", effect: "draft" }, levels: [] as never })).toEqual({ fault: "levels-invalid" });
+  });
 });
