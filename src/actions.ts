@@ -162,8 +162,15 @@ export function actionDecision(input: ActionDecisionInput): ActionDecisionAnswer
   const inside = tier === "T0" || tier === "T1";
   // From T2 an operator decision counts for nothing (DL-17), so a level mandate beside one is still read (LV-6).
   const levelMandate = (decision === undefined || (!inside && !levelDecision)) && isObject(input.mandate) && input.mandate.by === "level";
+  // LV-7, the operator's answer to question 8: in an organization's context, at a service that reads levels, an act
+  // declared `owner` or `admin` is decided only at that level, never by the instance operator's word (its descriptor's
+  // holder, a member on a member's machine): no elicitation, operator decision or operator mandate is taken for it.
+  const min = minLevelOf(input);
+  const levelAct = isObject(input.levels) && (min === "owner" || min === "admin");
+  if (levelAct && (typeof input.context !== "string" || !CALL_CONTEXT.test(input.context))) return { fault: "context-missing" };
+  const levelOnly = levelAct && (input.context as string).startsWith("org:");
   // The service's own accepted elicitation is the operator's word at T0 or T1 and is read before a level form (LV-4).
-  if (inside && elicited === true) return { ok: true, recordAs: { by: "operator", via: "elicitation", caller } };
+  if (inside && elicited === true && !levelOnly) return { ok: true, recordAs: { by: "operator", via: "elicitation", caller } };
   if (isObject(input.levels) && (levelDecision || levelMandate)) {
     const clock = strictTime(now);
     if (Number.isNaN(clock)) return { fault: "now-unreadable" };
@@ -186,6 +193,7 @@ export function actionDecision(input: ActionDecisionInput): ActionDecisionAnswer
   }
   const clock = strictTime(now);
   if (Number.isNaN(clock)) return { fault: "now-unreadable" };
+  if (levelOnly) return { ok: false, code: OPERATOR_DECISION_REQUIRED, data: { detail: `level-insufficient: ${min as "owner" | "admin"}` } };
   // A level decision at a service that reads no levels is as if absent (LV-10), so a mandate the call carries is read.
   if ((decision === undefined || levelDecision) && input.mandate !== undefined) {
     const answer = byMandate(input, action, caller);

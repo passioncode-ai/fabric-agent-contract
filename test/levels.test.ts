@@ -67,6 +67,16 @@ describe("levelStanding and FAC-SEM-170 at their edges (DEC-0162)", async () => 
   const contexts = { "org:org-a": { audience: "reviews-service-a1", keySet: vectors.keySet } };
   const admin = vectors.memberships.admin as Json;
   const base = { membership: admin, org: "org:org-a", level: "admin", at: "2026-10-25T11:20:00Z", context: "org:org-a", contexts, tokenMem: vectors.digests.admin, now };
+  it("mandateCovers faults context-missing for a level mandate whose call names no context of a known form (LV-4)", async () => {
+    const { mandateCovers } = await import("../src/mandate.js");
+    const vector = (vectors.mandates as Json[]).find((c) => c.name === "an administrator's level mandate from T1, covered") as Json;
+    const input = vector.input as Json;
+    const base = { mandate: input.mandate, tier: input.tier, now: input.now, self: input.self, callerAgent: input.callerAgent, levels: input.levels, tokenMem: input.tokenMem };
+    const call = { capability: "reviews.approve", action: "approve-reply", effect: "reply", project: "alpha" };
+    expect(mandateCovers({ ...base, call })).toEqual({ fault: "context-missing" });
+    expect(mandateCovers({ ...base, call: { ...call, context: "Org:Org-A" } })).toEqual({ fault: "context-missing" });
+    expect(mandateCovers({ ...base, call: { ...call, context: "org:org-a" } })).toMatchObject({ ok: true });
+  });
   it("stands only in the organization the call acts in (LV-4)", () => {
     expect(levelStanding(base)).toMatchObject({ ok: true, level: "admin" });
     expect(levelStanding({ ...base, context: "org:org-b" })).toEqual({ ok: false, invalid: "level-membership: context-invalid" });
