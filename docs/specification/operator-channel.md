@@ -141,7 +141,9 @@ stop while the channel is off. The proposal lists its four steps, three of them 
 1. the operator creates a bot with @BotFather (an act in their own messenger account);
 2. the operator puts its token into the secret store under the name the agent states (a typed secret, which the agent
    hands over as [service](service.md#actions) AP-4's `secret` step with its link, or as the host's secret prompt, SCN-053,
-   never as a command, OW-2);
+   never as a command the agent could run itself, OW-2; where the node answers `no-client` (no desktop session, Linux), the
+   person's step is the vault's own command in their own shell, [local channel](local-channel.md) SP-2 and SP-3, the one
+   command a typed secret leaves to the person, since no route of the agent's types a secret);
 3. once the operator has answered `accepted` and the token is in the store under that name, the agent enables the
    channel on that answer (the operator's decision relayed as [service](service.md#actions) AP-2 says, its words in
    AP-3's form, OC-1), runs its own link command and shows the code to the person on the dashboard OC-3 names, handed

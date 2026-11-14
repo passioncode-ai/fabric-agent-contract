@@ -11659,7 +11659,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   approval binds all" items 1 and 5 say the same, as Fabric's current behaviour pending CT-250's decision and Fabric's answer to question `add1df7c` (the operator's decisions of 2026-10-26, 2026-11-06 and 2026-11-07), and Fabric's session obligation `operator.told-one-is-told-all`
   ("do not ask the operator again (DEC-0126)") names the floor's one ask (OW-3). `contractVersion` stays `0.1.0`.
 - **Consequences / affects:** `docs/specification/governance-and-roles.md` (the section *The operator's word, carried
-  out the first time*), `docs/specification/conformance.md` (one row for every agent that takes the operator's words),
+  out the first time*; OW-4's hand-over of a typed secret where the node answers `no-client` is the vault's own command
+  in the person's shell, local channel SP-2 and SP-3, read and kept, round 35), `docs/specification/conformance.md` (one row for every agent that takes the operator's words),
   `docs/ux/scenarios.md` (SCN-057 and its index row; SCN-044's alt path, the host app's update asked once and done by
   the agent through the host app's own update route, or its supervisor where it publishes a descriptor, and its Coverage; SCN-012's step 1, its alt paths (one for an `accepted` given before the token is stored) and its recovery, and SCN-014's recovery: the link command the agent's, a stopped receiver
   restarted by OC-17's supervisor and, if the status stays, by the agent on the operator's word, given to it or the

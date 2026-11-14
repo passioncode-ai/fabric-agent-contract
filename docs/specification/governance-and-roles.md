@@ -259,7 +259,7 @@ words AP-2 and OA-1 already name; the rules hold for any owner.
   Spend above a project's `autoApproveUsd`, or with no project policy yet, is the person's too: the approval, or a first
   paid run's level, is the person's choice, asked as
   [spend policy](spend-policy.md) rule 3's approval request, never through chat. The agent hands each over with
-  the reason and the exact step: AP-4's link for a human step (rule 3's approval request for metered spend), the page's
+  the reason and the exact step: AP-4's link for a human step (rule 3's approval request for metered spend; for a typed secret where the node answers `no-client`, the vault's own command in the person's own shell, [local channel](local-channel.md) SP-2 and SP-3), the page's
   link for a control, the command, the refusal and the setting (or the host tool's yes) for a refusal, the decision's own question quoted with its
   record for a recorded decision, DEC-0149's statement of the agent, the target and the recipient for a source hand-over,
   and the binding's own step (OC-3's code, the bot to create) for a binding; and it goes on with the rest of the task meanwhile. A control with no twin,
