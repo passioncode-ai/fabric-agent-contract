@@ -266,7 +266,8 @@ placement requires the token here too ([Remote placement](#remote-placement)).
   requires the service token ([operator channel](operator-channel.md) OC-9, DEC-0034). The
   channel's state never changes the service's `status` or `degraded` list.
 - `surfaces.a2a` SHOULD name, for a service that serves an A2A Agent Card, where it is: the card's `path` on the
-  service origin and the A2A `protocolVersion`, `1.0` ([A2A Agent Card](#a2a-agent-card), DEC-0122).
+  service origin and the A2A `protocolVersion`, `1.0` ([A2A Agent Card](#a2a-agent-card), DEC-0122); a service with a
+  `surfaces.dashboard` and no `surfaces.mcp` MUST (RP-3, DEC-0169).
 - `configuration` MAY name what the operator can configure for this agent (`slots`: `runner`, `model`) and the
   profiles that apply now (`resolved`), read-only: a change is made in Fabric and reaches the agent through its
   binding ([runners](runners.md#what-an-agent-declares), DEC-0046).
@@ -1370,9 +1371,11 @@ answer the operator's words of 2026-11-14, relayed by fabric-agent-adapter (boar
   operator sees, and a value the person sees only as a human step stays one: a secret shown once (AP-4), and a code a
   person reads on the page to link or confirm (the operator channel's link code, OC-3, which the page shows, or an agent without a dashboard shows in its own reply
   (OC-11), and no read tool returns). A documented API serves RP-1's reading; RP-3 still asks for an agent surface beside a dashboard.
-- **RP-2, the design order.** Every function of a service is a capability of its agent surface first; a dashboard, an
-  app, a bot, a CLI or a report is a view over those capabilities, never the only home of a function (DEC-0169). A new
-  page, button or report ships with its tool in the same release, or is not shipped. AP-1's one exception stands here
+- **RP-2, the design order.** Every function of a service is built for an agent first: what a person does there is a
+  capability of its agent surface, and what a person reads there is readable by RP-1's route (a tool, or the documented
+  API the page calls); a dashboard, an app, a bot, a CLI or a report is a view over them, never the only home of a
+  function (DEC-0169). A new page, button or report ships with its agent route in the same release (a button its
+  twin, AP-1; what it only shows, the tool or the documented API RP-1 names), or is not shipped. AP-1's one exception stands here
   too: the operator's move of a board slot stays a host control until the host ships its twin
   ([project communication](project-comms.md#the-operator-moves-a-slot) PR-2, DEC-0140).
 - **RP-3, the check.** A well-known document that serves `surfaces.dashboard` serves an agent surface beside it

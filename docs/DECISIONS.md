@@ -12062,8 +12062,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      with the same data, filters and paging, as structured values. A view only a person can read is nonconformant.
      Parity widens no access: an agent reads within its caller's grant, level and context, and a value a person sees
      only as a human step stays one (AP-4's secret shown once, the operator channel's link code OC-3).
-  2. **RP-2, the design order.** Every function is a capability of the agent surface first; a dashboard, app, bot, CLI
-     or report is a view over those capabilities. A page, button or report ships with its tool in the same release.
+  2. **RP-2, the design order.** Every function is built for an agent first: what a person does is a capability of the
+     agent surface, what a person reads is readable by RP-1's route; a dashboard, app, bot, CLI or report is a view
+     over them. A page, button or report ships with its agent route in the same release (a button its twin; what it
+     only shows, the tool or the documented API RP-1 names).
      AP-1's one exception stands: the operator's move of a board slot stays a host control until the host ships its
      twin (DEC-0140 PR-2).
   3. **RP-3, the check.** A well-known document that serves `surfaces.dashboard` serves `surfaces.mcp` or
