@@ -71,6 +71,7 @@ Branch `agent/ct259-activity-unit-20261112`, from main `d69dc363`. Entry point: 
 
 - `pnpm run check` exit 0 on the first cut `79ed9a09` (11192 tests passed, 3 skipped; coverage floors, UX lint, docs check, privacy check) on the round-2 fold (11210 passed, 3 skipped) and on the round-3 fold (11212 passed, 3 skipped).
 
+- Round 19 (on `8af9cf21`, main `72910d29` merged in; gate `pnpm run check` exit 0, 118 files, 11239 passed, 3 skipped; vectors exit 0): clean on all three tiers. With round 18 (on `b92de352`, clean on all three tiers, read 2026-11-14 under the finish-line rule: a tier fails only on a blocking finding) two in a row: accepted. Risks filed as CT-305; DEC-0030's Status names the `unit` deduplication and attribution narrowings (round 19 seam risk 1); activity-common's `eventId` and `sourceKey` descriptions name the unit's derived form (round 18 seam risk 1).
 - Round 1, unit only (on `79ed9a09`): not clean. Breaks folded: the Event id rule kept one event per (`device.id`,
   `eventId`) against AE-2's one id from every writer; a `unit` event is now kept once per `eventId` within the
   organization's stream, and the `sourceKey` row names `unitSourceKey`'s form; DEC-0164's Alternatives name every
@@ -182,5 +183,6 @@ Branch `agent/ct259-activity-unit-20261112`, from main `d69dc363`. Entry point: 
 
 ## Next task
 
-Round 18 of the blind readings (unit, seam, product) of branch `agent/ct259-activity-unit-20261112` (DEC-0164) on its
-head; DEC-0164 is accepted after two consecutive clean rounds (round 14 was clean, 15 to 17 were not).
+DEC-0164 is accepted and merged (2026-11-14). Tell the readers its Open names (Observatory on thread `52aa2f93` that
+the DEC and `taskClassMap` are on main; the adapter for `activity-unit` in its `PROTOCOL_REVISIONS` twins;
+fabric-workspace for `knowledge/system/measure.md` and North Star G1), then CT-297 (the unit's route) and CT-305.
