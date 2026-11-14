@@ -7,6 +7,26 @@
    every major feature and release across PassionCode.ai as `RM-*` tracks with owner, phase and
    state. It is the entry point: a task here that serves a track names it, and the track's status
    is edited only in the roadmap.
+1a. **The course check, before every change** ([rules §0](https://github.com/passioncode-ai/fabric-workspace/blob/main/knowledge/rules.md#0-the-course-check-the-plan-and-the-north-star-before-every-change)):
+   the [North Star](https://github.com/passioncode-ai/fabric-workspace/blob/main/knowledge/north-star.md) metric and
+   gaps, and the [one plan in waves](https://github.com/passioncode-ai/fabric-workspace/blob/main/docs/plans/2026-11-11-unified/README.md).
+   Name the track, plan row or gap the change serves; work that serves none goes to the board first.
+1b. **The North Star sections this repository serves** ([merged with the North Star](https://github.com/passioncode-ai/fabric-workspace/blob/main/knowledge/north-star.md#merged-with-the-north-star-validated-by-the-architect-operator-2026-11-13),
+   G31): §3 (roles and access: the levels), §5 (agents: the one contract every agent speaks), §6 (how agents exchange
+   work: `fabric-service/0.1`, the board protocol, the estate's `ceo` slot), §11 (security and isolation: per-account
+   ports, DEC-0154), and in §14 the gaps G1 (CT-259), G2 (CT-250), G10 (CT-252), G12 (CT-251), G19 (CT-285, the
+   autonomy profile per place), G22 (CT-232) and G27 (CT-260). When a DEC, a release or a backlog row changes this
+   repository's state against one of them, write fabric-workspace a board message naming the section and the evidence
+   in the same run. This repository is a contract, not an agent: the architect's per-release audit (G30) reads agents
+   and uses this repository's conformance checker, so it has no audit of its own.
+1c. **Step 0, the workstation, before every change** ([rules §0, step 0](https://github.com/passioncode-ai/fabric-workspace/blob/main/knowledge/rules.md#0-the-course-check-the-plan-and-the-north-star-before-every-change),
+   the operator's rule of 2026-11-13, board announcement `3390f915`): no change starts on a machine without the skill
+   families (`npx --yes sshlg-skills@latest update`), the launcher's `npx @passioncode-ai/passioncode doctor` without a
+   `fail`, an updated coding harness, the board (`fabric-mcp`), Fabric Dashboards, Switchboard where sessions run, and
+   Observatory. Every change goes through `task-pipeline` inside an Observatory workflow (checkpoints after each step);
+   a changed schema, profile or vector set is a new revision beside the old one (`docs/specification/versioning.md`),
+   never an edit in place. This repository holds no keys of its own; a key a run needs is used by name from the
+   Observatory vault (`use_secret.py run --vault-only`).
 2. The PassionCode.ai knowledge base, `fabric-workspace/knowledge/` in your clone (org-index
    `scripts/clone_all.sh` makes it) or https://wiki.passioncode.ai/knowledge: at least its
    [README](https://github.com/passioncode-ai/fabric-workspace/blob/main/knowledge/README.md),
@@ -77,6 +97,30 @@ LicenseRef-PassionCode-Commercial` in `package.json`; `LICENSE`, `COMMERCIAL-LIC
 `CLA.md` byte for byte the knowledge base templates. Whether the schemas need a permissive
 exception was the operator's question CO-KB-02 in the knowledge base; it closed on 2026-10-19 and the
 schemas stay under this repository's licence.
+
+### Questions and access levels
+
+The operator's standing rule of 2026-11-13 ([`knowledge/authority.md`](https://github.com/passioncode-ai/fabric-workspace/blob/main/knowledge/authority.md),
+«Agents close questions themselves, by access level») applies here: an agent decides an open question itself by the
+recorded decisions (`docs/DECISIONS.md`), this repository's goal and then the safest reversible option, writes the
+decision and its reason where the work lives (the backlog row, the design, the DEC), and continues. Trust comes from
+the gate (`pnpm run check`), the review rounds a DEC records and the conformance vectors, not from a person. Levels:
+
+- this repository, its backlog, decisions, vectors and releases (PassionCode): the operator and the partner equally; an
+  agent acts for them, a release by its checks (`release-signing/products.json`);
+- a consumer's code: its own project's agent, asked on the board (`com.submit`), never edited from here;
+- a level not written: the narrowest access that lets the act happen, recorded as an open point on the row.
+
+A request on this project's board is answered by this project (`com.reply`) without waiting for a responder. The only
+questions left for a person are the human gates: a sign-in, a one-time code, a consent screen, a typed secret, a
+payment, spend above the limit, a send to people outside the estate, or access wider than the act needs.
+
+The Fabric coordinator's rule of 2026-11-13 (board announcement `35556d27`, the operator in Fabric session
+`a6d4264e`) adds two things. An operator's decision relayed on the board with his words verbatim, the date, where they
+were said and the scope is his approval: act on it and cite the relay, never ask him to repeat it here. A question that
+is still a person's is never left in a chat's text, where he will not find it: it goes to `fabric_question_ask` (one
+queue on Fabric's home) or as a request to the Fabric coordinator on the board. A run whose board link dropped
+(`fabric-mcp` disconnected) says so in its final report.
 
 ## Organisation
 

@@ -436,7 +436,8 @@ operator's; a message marked offline or scheduled is never the operator's; and, 
 that channel stays a DEC-0121 AP-3 source.
 
 CA-8 is bounded by section 4.10 and by section 10's `account` row and does not override them; the identification bound
-(who counts as the operator in a chat) is sent to the standard's owner. CT-220, when drafted, is to keep this bound.
+(who counts as the operator in a chat) is sent to the standard's owner. CT-220's DEC-0156 keeps this bound
+([governance and roles](governance-and-roles.md#the-operators-word-carried-out-the-first-time) OW-6).
 
 The declaration has no member for it. It is not a property an agent may or may not declare, and a member whose `false`
 were valid would declare something false. A member such as `untrusted_input` makes the declaration not declared

@@ -1,0 +1,73 @@
+{
+  "description": "A place's standing mandate bound by the token's prof, taken from T2 as the profile's (DEC-0166 AU-3, AU-6): FAC-SEM-142 reports nothing.",
+  "kind": "action-call",
+  "expect": [],
+  "input": {
+    "action": {
+      "id": "deploy-site",
+      "title": "Deploy the site",
+      "tool": "site.deploy",
+      "gate": "relayed"
+    },
+    "tier": "T2",
+    "caller": "agent:example-runner",
+    "callerAgent": "example-runner",
+    "self": "example-deployer",
+    "mandate": {
+      "kind": "mandate/1",
+      "by": "operator",
+      "standing": {
+        "place": "studio-space-1",
+        "placeKind": "headless",
+        "revision": 3,
+        "context": "personal"
+      },
+      "task": "assignment:alpha-0412",
+      "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
+      "at": "2026-11-12T09:00:00Z",
+      "expiresAt": "2026-11-13T08:00:00Z",
+      "scope": {
+        "capabilities": [
+          "site.deploy"
+        ],
+        "effects": [
+          "deploy"
+        ]
+      },
+      "chain": [
+        {
+          "agent": "example-runner",
+          "at": "2026-11-12T09:00:05Z"
+        },
+        {
+          "agent": "example-deployer",
+          "at": "2026-11-12T09:30:00Z"
+        }
+      ]
+    },
+    "effect": "deploy",
+    "context": "personal",
+    "now": "2026-11-12T10:00:00Z",
+    "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
+    "standing": true,
+    "tokenProf": "sha256:c81ee1d484706f5f6ac3f536c17323ad0591228231732c9bce68b581d74bb5f3",
+    "answer": {
+      "ok": true,
+      "recordAs": {
+        "by": "operator",
+        "via": "profile",
+        "task": "assignment:alpha-0412",
+        "chain": [
+          "example-runner",
+          "example-deployer"
+        ],
+        "profile": {
+          "place": "studio-space-1",
+          "revision": 3,
+          "digest": "sha256:c81ee1d484706f5f6ac3f536c17323ad0591228231732c9bce68b581d74bb5f3"
+        },
+        "caller": "agent:example-runner"
+      }
+    }
+  }
+}

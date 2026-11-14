@@ -1,0 +1,62 @@
+{
+  "description": "An architect's level mandate whose scope lists a project outside its attestation's (FAC-SEM-170, DEC-0162 LV-6).",
+  "kind": "mandate",
+  "expect": [
+    "FAC-SEM-170"
+  ],
+  "input": {
+    "kind": "mandate/1",
+    "by": "level",
+    "level": "architect",
+    "org": "org:org-a",
+    "membership": {
+      "type": "org-membership/2",
+      "issuer": "https://orgs.example",
+      "org": "org:org-a",
+      "audience": "reviews-service-a1",
+      "subject": "m-arch-03",
+      "role": "architect",
+      "projects": [
+        "alpha",
+        "beta"
+      ],
+      "external": false,
+      "status": "active",
+      "revision": 3,
+      "membershipEndsAt": null,
+      "issuedAt": "2026-10-25T11:00:00Z",
+      "notBefore": "2026-10-25T11:00:00Z",
+      "expiresAt": "2026-10-25T12:00:00Z",
+      "extensions": {},
+      "alg": "EdDSA",
+      "kid": "mem-2026-10",
+      "sig": "RrABkwV8ubdv_gWsjle26Lj5uG4Q4FeAc2qFy7ENRhxw3m8ioGjcxYd3QIiUM-lGgV4jUatmUi2BtWBFGdO-Aw"
+    },
+    "task": "answer the reviews of the week",
+    "instruction": "answer this week's reviews in project alpha",
+    "at": "2026-10-25T11:20:00Z",
+    "expiresAt": "2026-10-26T11:20:00Z",
+    "scope": {
+      "capabilities": [
+        "reviews.approve"
+      ],
+      "effects": [
+        "reply"
+      ],
+      "projects": [
+        "alpha",
+        "gamma"
+      ]
+    },
+    "chain": [
+      {
+        "agent": "example-developer",
+        "at": "2026-10-25T11:20:00Z"
+      },
+      {
+        "agent": "example-reviewer",
+        "at": "2026-10-25T11:25:00Z"
+      }
+    ]
+  }
+}
