@@ -1,0 +1,141 @@
+/**
+ * The generator of the unit-of-work vectors (DEC-0164): `fixtures/vectors/activity-unit.json`, shared by every writer of
+ * a `unit` event (an agent's kit, a device collector) and every reader (Project Observatory's journal).
+ *
+ *   tsx tools/vectors/activity-unit.ts --check   compare the committed file with what this writes (exit 1 on a difference)
+ *   tsx tools/vectors/activity-unit.ts --write   write it
+ *
+ * Every vector change is made here and written by `--write`, never by hand; `test/activity-unit.test.ts` runs the
+ * check. The `sourceKey` and `eventId` are derived here from DEC-0164 AE-2 and activity's *Event id* with the settings
+ * canonical form, not by importing `src/activity-rules.ts`, so the gate checks that the reference agrees. Each case's
+ * expected schema answer and rule codes are written by hand.
+ */
+import { createHash } from "node:crypto";
+import { readFileSync, writeFileSync } from "node:fs";
+import path from "node:path";
+import { pathToFileURL } from "node:url";
+import { settingsCanonicalJson } from "../../src/canonical.js";
+import { projectRoot } from "../../src/contract.js";
+
+type Json = Record<string, any>;
+export const VECTOR_FILE = "fixtures/vectors/activity-unit.json";
+
+const hex = (text: string) => createHash("sha256").update(text, "utf8").digest("hex");
+const sourceKey = (agent: string, unit: Json, transition: string, root: string) =>
+  `sha256:${hex(settingsCanonicalJson({ agent, key: unit.key, run: root, system: unit.system, transition }))}`;
+const eventId = (key: string) => `sha256:${hex(settingsCanonicalJson({ key, source: "unit" }))}`;
+
+const AGENT = "example-writer.default";
+const UNIT = { system: "github", key: "example-org:site#412" };
+const RUN_1 = "run-4b1d9e02";
+const RUN_2 = "run-7c3a5f18";
+const MAP = { id: "classes-2026-11", revision: 3 };
+/** The spend since each transition's previous one (AE-1): a reader sums them, so this unit cost 0.42 in all. */
+const SPEND: Record<string, number> = { started: 0.12, ended: 0.3, "handed-over": 0, accepted: 0 };
+
+/** One `unit` event, its ids derived, the envelope a device collector writes. */
+function unit(transition: string, extra: Json = {}, root = RUN_1, seq = 1, envelope: Json = {}): Json {
+  const key = sourceKey(AGENT, extra.unit ?? UNIT, transition, root);
+  return {
+    protocol: "fabric-activity/0.1", eventId: eventId(key), kind: "unit", source: "unit", sourceKey: key,
+    collector: { id: "observatory-node", epoch: 4 }, seq, occurred: "2026-11-12T10:00:00Z", bootId: "boot-7c41e2", monotonicNs: "0",
+    project: { id: "example-project" }, run: { root },
+    data: { agent: AGENT, unit: UNIT, transition, taskClass: "code.change", taskClassMap: MAP, cost: { usd: SPEND[transition] ?? 0, basis: "provider" }, ...extra },
+    ...envelope
+  };
+}
+
+const accepted = (root: string, seq: number, by: Json = { kind: "rule", ref: "ci-green-and-reviewed" }) =>
+  unit("accepted", { acceptedBy: by, acceptedAt: "2026-11-12T09:58:00Z" }, root, seq);
+
+function cases(): Json[] {
+  const valid = (name: string, event: Json): Json => ({ name, event, schemaValid: true, findings: [] });
+  const list: Json[] = [
+    // AE-1: each transition.
+    valid("started", unit("started")),
+    valid("ended, completed", unit("ended", { outcome: "completed", evidence: ["https://ci.example/runs/88", `sha256:${"ab".repeat(32)}`] })),
+    valid("handed over", unit("handed-over")),
+    valid("accepted by a rule", accepted(RUN_1, 4)),
+    valid("accepted by a person's pairwise subject, kept in the organization's journal (AE-3)", accepted(RUN_1, 4, { kind: "person", ref: "m-7f3a91c2" })),
+    // AE-2: a reopened unit accepted again under a new run.root is a new event.
+    valid("accepted again after a reopening, under a new run.root", accepted(RUN_2, 9)),
+    // AE-2: one key form per system, so every writer derives one id: a mail unit by its Message-ID's digest.
+    valid("a mail unit, keyed by the first 40 hex digits of its Message-ID's SHA-256", unit("started", { unit: { system: "mail", key: hex("CAF8x2@mail.example.com").slice(0, 40) } })),
+    valid("a board unit whose own id holds an underscore, kept as it is", unit("started", { unit: { system: "board", key: "req_7f3a-12" } })),
+    valid("a github unit whose key would pass 64 characters, keyed by its digest", unit("started", { unit: { system: "github", key: hex(`example-org:${"a".repeat(60)}#412`).slice(0, 40) } })),
+    { name: "a github key in mixed case", event: unit("started", { unit: { system: "github", key: "Example-Org:Site#412" } }), schemaValid: true, findings: ["FAC-SEM-171 /data/unit/key"] },
+    valid("a github unit owned by a managed user, whose owner holds an underscore", unit("started", { unit: { system: "github", key: "mona-cat_octo:site#4" } })),
+    { name: "a github number with a leading zero", event: unit("started", { unit: { system: "github", key: "example-org:site#0412" } }), schemaValid: true, findings: ["FAC-SEM-171 /data/unit/key"] },
+    valid("a jira unit keyed by its issue key", unit("started", { unit: { system: "jira", key: "PROJ-412" } })),
+    { name: "a jira key in lower case", event: unit("started", { unit: { system: "jira", key: "proj-412" } }), schemaValid: true, findings: ["FAC-SEM-171 /data/unit/key"] },
+    { name: "a jira number with a leading zero", event: unit("started", { unit: { system: "jira", key: "PROJ-0412" } }), schemaValid: true, findings: ["FAC-SEM-171 /data/unit/key"] },
+    valid("a jira digest of a fitting key: read as valid, though no writer may produce it (a fitting key is written as itself)", unit("started", { unit: { system: "jira", key: hex("PROJ-412").slice(0, 40) } })),
+    { name: "a jira key carrying a system prefix", event: unit("started", { unit: { system: "jira", key: "jira:PROJ-412" } }), schemaValid: true, findings: ["FAC-SEM-171 /data/unit/key"] },
+    { name: "a mail key whose digest is in upper case", event: unit("started", { unit: { system: "mail", key: hex("CAF8x2@mail.example.com").slice(0, 40).toUpperCase() } }), schemaValid: true, findings: ["FAC-SEM-171 /data/unit/key"] },
+    { name: "a mail key that is the Message-ID itself", event: unit("started", { unit: { system: "mail", key: "CAF8x2.mail.example.com" } }), schemaValid: true, findings: ["FAC-SEM-171 /data/unit/key"] },
+    // AE-1: the class and its map; an unknown cost.
+    valid("unclassified, with no map", unit("started", { taskClass: "unclassified", taskClassMap: undefined })),
+    valid("an unknown cost is null", unit("started", { cost: { usd: null } })),
+    // Refused by the schema.
+    { name: "a classified unit without its map", event: unit("started", { taskClassMap: undefined }), schemaValid: false, findings: [] },
+    { name: "a unit with a user", event: unit("started", {}, RUN_1, 1, { user: { id: "m-7f3a91c2" } }), schemaValid: false, findings: [] },
+    { name: "an outcome on a start", event: unit("started", { outcome: "completed" }), schemaValid: false, findings: [] },
+    { name: "an acceptance without who accepted", event: unit("accepted", { acceptedAt: "2026-11-12T09:58:00Z" }), schemaValid: false, findings: [] },
+    { name: "a unit with an envelope task beside its own unit", event: unit("started", {}, RUN_1, 1, { task: { ref: { system: "jira", key: "OTHER-1" } } }), schemaValid: false, findings: [] },
+    { name: "a unit without a project", event: (({ project: _p, ...rest }) => rest)(unit("started")), schemaValid: false, findings: [] },
+    { name: "an end without its outcome", event: unit("ended"), schemaValid: false, findings: [] },
+    { name: "who accepted, on a start", event: unit("started", { acceptedBy: { kind: "rule", ref: "ci-green-and-reviewed" } }), schemaValid: false, findings: [] },
+    { name: "an acceptance without when", event: unit("accepted", { acceptedBy: { kind: "rule", ref: "ci-green-and-reviewed" } }), schemaValid: false, findings: [] },
+    { name: "an unclassified unit with a map", event: unit("started", { taskClass: "unclassified" }), schemaValid: false, findings: [] },
+    { name: "evidence with user information in its URL", event: unit("ended", { outcome: "completed", evidence: ["https://user:secret@ci.example/runs/88"] }), schemaValid: false, findings: [] },
+    // FAC-SEM-171: the derived key.
+    { name: "a sourceKey derived from another run.root", event: { ...unit("accepted", { acceptedBy: { kind: "agent", ref: "example-reviewer" }, acceptedAt: "2026-11-12T09:58:00Z" }), run: { root: RUN_2 } }, schemaValid: true, findings: ["FAC-SEM-171 /sourceKey"] },
+    { name: "an acceptance recorded before it happened", event: accepted(RUN_1, 4, undefined), schemaValid: true, findings: [] }
+  ].map((c) => ({ ...c, event: JSON.parse(JSON.stringify(c.event)) }));
+  const late = list[list.length - 1] as Json;
+  late.name = "an acceptance recorded before it happened";
+  late.event.data.acceptedAt = "2026-11-12T10:05:00Z";
+  late.findings = ["FAC-SEM-171 /data/acceptedAt"];
+  // The 60 s of skew, at its boundary, and a leap second the date-time format admits.
+  const at = (name: string, acceptedAt: string, findings: string[]): Json => {
+    const event = JSON.parse(JSON.stringify(accepted(RUN_1, 4)));
+    event.data.acceptedAt = acceptedAt;
+    return { name, event, schemaValid: true, findings };
+  };
+  list.push(
+    at("an acceptance 60 s after occurred, within the skew", "2026-11-12T10:01:00Z", []),
+    at("an acceptance 60.001 s after occurred", "2026-11-12T10:01:00.001Z", ["FAC-SEM-171 /data/acceptedAt"]),
+    at("an acceptance at a leap second weeks after occurred", "2026-12-31T23:59:60Z", ["FAC-SEM-171 /data/acceptedAt"])
+  );
+  // A leap second on `occurred` reads as its last millisecond: 59 s of the minute after it stay within the skew.
+  const leap = JSON.parse(JSON.stringify(accepted(RUN_1, 4)));
+  leap.occurred = "2016-12-31T23:59:60Z";
+  leap.data.acceptedAt = "2017-01-01T00:00:59Z";
+  list.push({ name: "an acceptance 59 s after a leap second occurred", event: leap, schemaValid: true, findings: [] });
+  return list;
+}
+
+export function activityUnitVectors(): Json {
+  return {
+    about: "Vectors for the unit-of-work event, telemetry-event kind unit (DEC-0164), written by tools/vectors/activity-unit.ts, never by hand. Each event's sourceKey is sha256: of the settings-form canonical JSON {agent, key, run, system, transition} (unit.key, run.root, unit.system), and its eventId sha256: of the settings-form canonical JSON {key: sourceKey, source: \"unit\"}. cases: schemaValid is the event against telemetry-event.schema.json; findings are the codes and paths of evaluateSemanticRules(\"telemetry-event\", event), in order. A repeated write of one transition has the same eventId, and so does a second, different acceptance of one unit under one run.root (the rule's and the person's acceptance cases share one id): the receiver keeps the first; a unit accepted again under another run.root has another id.",
+    cases: cases()
+  };
+}
+
+export function buildActivityUnitVectors(): string {
+  return `${JSON.stringify(activityUnitVectors(), null, 2)}\n`;
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  const target = path.join(projectRoot(), VECTOR_FILE);
+  const built = buildActivityUnitVectors();
+  if (process.argv.includes("--write")) {
+    writeFileSync(target, built);
+    console.log(`wrote ${VECTOR_FILE}`);
+  } else if (readFileSync(target, "utf8") !== built) {
+    console.error(`stale vector file (run with --write): ${VECTOR_FILE}`);
+    process.exitCode = 1;
+  } else {
+    console.log("vector file matches the generator");
+  }
+}

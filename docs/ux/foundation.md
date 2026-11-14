@@ -189,7 +189,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 | # | Stage | User action | Touchpoint | Emotion (1-5) | Pain | Opportunity |
 |---|---|---|---|---|---|---|
 | 1 | Hear of it | reads the agent's one-time proposal | agent creation or first stop | 3 | unclear what the agent will do with a bot | four named steps, recorded answer (priority 9) |
-| 2 | Link | creates a bot, stores its token by name, types the code | messenger and the agent's link command | 3 | a token pasted into a chat or a config | the token only in the secret store; a short-lived code (priority 9) |
+| 2 | Link | creates a bot, stores its token by name, types the code | messenger; the agent runs its link command | 3 | a token pasted into a chat or a config | the token only in the secret store; a short-lived code (priority 9) |
 | 3 | Decide | presses a button on a stop | messenger | 4 | a second press or a stale button doubles an action | idempotent tokens, "already decided" (priority 9) |
 | 4 | Spend | confirms a paid action | messenger | 2 | money leaves on one tap | a second press showing the amount (priority 9) |
 
@@ -421,6 +421,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
   - Given a project with no policy, when a run would first spend money, then the launcher offers options computed from the agents' presets, the recent spend and the kind of work, names those inputs, and preselects one.
   - Given I choose "no project limit", then it is recorded as my choice and only the estate total (L0) stops spending.
   - Given a policy is recorded, then the launcher never asks again for that project.
+  - Given an organization's project, when a run would first spend money, then the choice is the organization's owner's or an administrator's (DEC-0162 LV-7), unless the starter is the owner or an administrator, who sees the usual choice: otherwise the launcher stops before any spend, the starter sees the run waiting for them, and their choice is recorded as theirs (testable once the route to them is decided, PC-162; until then the run waits).
 - **Priority:** must
 - **Status:** draft
 - **Product:** unobserved
@@ -433,6 +434,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
   - Given a check above the auto-approve threshold, then the meter denies it with the request it filed, and the agent files no second one.
   - Given the request in the operator channel, when I confirm, then the confirmation shows the amount first (OC-6).
   - Given I do not answer, then nothing is spent on that request and the agent's other work continues.
+  - Given an organization's project started by someone other than its owner or an administrator, then the request is the organization's owner's or an administrator's, never the starting member's own confirm, and nothing is spent until one of them answers (DEC-0162 LV-7; testable once the route is decided, PC-162).
 - **Priority:** must
 - **Status:** draft
 - **Product:** unobserved
@@ -700,14 +702,16 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Status:** draft
 - **Product:** unobserved
 
-### ST-035: Operator tells their agent to take a step the dashboard offers
+### ST-035: Operator tells their agent to take a step the dashboard offers, or to do a whole task
 
-- **Story:** As P-02, I want to tell my own agent "approve that" and have the service take it as my decision, so that I never have to open a dashboard for a step my agent can take for me.
-- **Traces:** JTBD-07, JRN-06/#3
+- **Story:** As P-02, I want to tell my own agent "approve that", or give it a whole task, and have it done as my decision on that word, so that I never have to open a dashboard or run a command for a step my agent can take for me.
+- **Traces:** JTBD-07, JRN-06/#3, JRN-06/#4 (its standing-grant part)
 - **Acceptance criteria:**
   - Given a service that declares an action `relayed`, when my agent calls its tool from my machine with my decision naming the action and quoting me, then the service takes it as my decision and its audit names the agent it authenticated (`actionDecision`, DEC-0121).
   - Given my agent calls without my decision, when the service answers `operator-decision-required`, then the agent asks me and calls again with my answer quoted.
   - Given a step only I can take (a sign-in, a consent, a payment, a secret, a passkey signature, spend above a limit, a comparison of codes with another person or the choice to share without one), when my agent calls it, then the service answers `human-step-required` with the link to that step.
+  - Given I am an owner, administrator or architect of an organization and a service declares `levels` for it in its authority extension, when my agent calls a relayed action with my level decision bound to its delegation token, then the service takes it as my level's decision at every tier (a source hand-over only from T0 or T1, as source says) and audits the level, the organization and me as approver; and when the action needs a level I do not hold, it answers `operator-decision-required` with `level-insufficient` and my agent files one request to a holder of that level, or, for `level-insufficient: operator`, takes it to the operator (DEC-0162).
+  - Given I tell my agent to do a task, when its steps need commands, builds or acts my words name, then it takes them itself without handing me a command; a risk my words did not name gets one short message with the corrected way (a question where that step must wait) while the rest goes on, and an act a host's gate holds gets that gate's ask, quoting my words (DEC-0156 OW-3); only a step that needs me comes back to me, with its reason and the exact step OW-4 names for it (a link, the command and the setting, the decision's question, the hand-over statement, the binding's step) (DEC-0156 OW-1 to OW-4, SCN-057).
 - **Priority:** must
 - **Status:** draft
 - **Product:** unobserved
@@ -776,6 +780,24 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
   - Given a client that declares `secret.ui`, when the node has not verified it as its product's signed app by the operating system, then its hello is `forbidden` (`channelStep`).
   - Given an agent's request, when the node prompts, then one admitted client shows the agent the node's binding names, the project, the slot and the agent's reason quoted, and no value travels on the channel (`secret.prompt`).
   - Given the person stores the value, when the node confirmed the slot was written after the prompt, then the agent is told `stored`; otherwise `unconfirmed`, `declined` or `no-answer` (`secretOutcome`), or, before it prompts, `no-client` when no signed app is admitted (SP-3), `no-answer` for a request the agent withdrew, or `declined` for the operator's decline through an agent (SP-4, SP-5, DEC-0147).
+- **Priority:** must
+- **Status:** draft
+- **Product:** unobserved
+
+### ST-043: My headless places finish the work, within the profile I set for each
+
+- **Story:** As P-02, I want each place my agents work on (the always-on machine, an organization's space or cloud, my own computer) to carry an autonomy profile I set once, so that an assignment on a headless place deploys, merges and sends within the estate without asking me, while my own computer brings back what I chose, and no assignment ever raises its own autonomy.
+- **Traces:** JTBD-07, JRN-06/#3
+- **Acceptance criteria:**
+  - Given a headless place whose watcher answers, when its hub starts an assignment, then the hub states the place's profile as a standing mandate (DEC-0166 AU-1), and a service that declares `standing` takes a covered deploy as my decision, recorded `via: profile` with the place, the revision and the digest (AU-6).
+  - Given a call from T2, when its token carries no `prof` or another profile's, then the profile changes nothing or is refused `profile-unbound` (AU-3).
+  - Given a payment, spend above a limit, `change-policy` or `autonomy.profile.set`, when an assignment reaches it, then the profile covers none of them (AU-5).
+  - Given a send to people outside the estate, when a headless assignment reaches it, then the service answers the profile as absent and a person decides (AU-2).
+  - Given a place whose watcher stops answering, when the hub starts the next assignment, then it treats the place as `person` (AU-6).
+  - Given an organization's administrator who sets a place's profile, when an assignment under it reaches an act a service declares `owner` or `operator`, then the service refuses it `level-insufficient` and the agent asks a holder of that level (AU-2).
+  - Given the owner's or an administrator's profile, when an assignment under it reaches an act a service that reads levels declares `owner` or `admin`, in an organization's context, then the service refuses it `level-insufficient` and the agent files one request to a holder of that level (DEC-0162 LV-7, DEC-0166 AU-2).
+  - Given an organization's headless place with no recorded profile, when its hub starts an assignment, then the hub states no profile until the owner or an admin records one, never an architect (AU-4).
+  - Given a person's own computer, when no profile is recorded, then nothing goes beyond the person's own decisions until a preset is chosen (AU-4).
 - **Priority:** must
 - **Status:** draft
 - **Product:** unobserved

@@ -20,7 +20,7 @@ derived) and the operator's rulings of DEC-0017 (each marked as ruled).
 path shape as the contract's `service/0.1` key; the Dashboards docs' other spelling is
 fixed in AR-1).
 
-The contract defines nine extension keys, the constants in [`src/extensions.ts`](../../src/extensions.ts):
+The contract defines ten extension keys, the constants in [`src/extensions.ts`](../../src/extensions.ts):
 
 | Key | Page |
 |---|---|
@@ -31,6 +31,7 @@ The contract defines nine extension keys, the constants in [`src/extensions.ts`]
 | `https://fabric.passioncode.ai/agent-contract/extensions/connections/0.1` | [connections](connections.md) |
 | `https://fabric.passioncode.ai/agent-contract/extensions/load/0.1` | [agent network](agent-network.md#load) (DEC-0104) |
 | `https://fabric.passioncode.ai/agent-contract/extensions/actions/0.1` | [service](service.md#actions) (DEC-0121) |
+| `https://fabric.passioncode.ai/agent-contract/extensions/authority/0.1` | [membership](membership.md#levels): the organizations whose levels a service reads and the level each relayed action needs, beside the actions key, which it never changes (DEC-0162) |
 | `https://fabric.passioncode.ai/agent-contract/extensions/channel-agent/0.1` | [channel agent](channel-agent.md) (DEC-0150) |
 | `https://fabric.passioncode.ai/agent-contract/extensions/ops-digest/0.1` | [operations digests](ops-digest.md#where-a-collector-reads-the-daily-digests) (DEC-0153) |
 
@@ -313,7 +314,8 @@ person pressed (`instruction`: the request's `message`, then `Choice:` and the c
 
 DEC-0121 (`fabric-actions/0.1`) · rule code `FAC-SEM-142` · [service](service.md#actions)
 
-A request's `_meta` MAY carry `decision`, the operator's decision on an action the service declares `relayed`
+A request's `_meta` MAY carry `decision`, the operator's decision on an action the service declares `relayed` (in an organization, a level
+holder's in the level form `{by: "level", ...}`, [membership](membership.md#levels) LV-3, DEC-0162)
 ([`decision.schema.json`](../../schemas/decision.schema.json), a member of
 [`interop-request-meta.schema.json`](../../schemas/interop-request-meta.schema.json)): `{by: "operator", via:
 "relayed-instruction", action, target?, instruction, at, source?}` (DEC-0121 AP-2; `source`, DEC-0126 OA-7, only to a
@@ -322,19 +324,18 @@ unknown `_meta` member. An agent sets it only for words the operator gave it abo
 input request is answered as [C3.3](#c33-awaiting-a-choice) says. A request's `_meta` MAY carry `mandate` too, the
 operator's mandate for the task the call serves ([`mandate.schema.json`](../../schemas/mandate.schema.json),
 [delegation](delegation.md#the-operators-mandate), DEC-0125), and the hub's `agent.call` carries it as `call.mandate`,
-forwarded from a T0 or T1 origin and dropped from a T2 one, as a decision is.
+forwarded from a T0 or T1 origin and dropped from a T2 one, as an operator's decision is, save a level mandate (`by: "level"`), which the hub forwards from any origin with the origin's delegation token ([membership](membership.md#levels) LV-6, DEC-0162), and a place's standing mandate, forwarded from any origin with the origin's token, whose `prof` binds it, only to a callee that declares `standing` ([delegation](delegation.md#a-places-standing-mandate-dec-0166) AU-3, DEC-0166).
 
 DEC-0121 adds three codes to DL-19's one set of authorisation refusals ([delegation](delegation.md#refusal-codes)),
 each in the `structuredContent` of an `isError` tool result:
 
 | Code | Meaning | Who answers | What the caller does |
 |---|---|---|---|
-| `operator-decision-required` | a `relayed` action from a T0 or T1 caller came without a decision, or the caller's mandate does not cover the call (`data.detail` `outside-mandate: <part>`, DEC-0125); a source hand-over answers as [source](source.md#handing-over) specifies (DEC-0149) | the service | hands on again within its own mandate when that covers the call; otherwise asks the operator for that part and calls again with their answer in `_meta.decision` or a mandate that covers it; for a source hand-over, as [source](source.md#handing-over) specifies |
-| `decision-invalid` | the decision is not valid against its schema, names another action or another object, its `at` is not read strictly, is more than 60 s after the service's clock or more than 24 h before it; or the mandate is not valid (`data.detail` `mandate-*`, DEC-0125); a source hand-over answers as [source](source.md#handing-over) specifies (DEC-0149) | the service | corrects the decision it relays; an agent not sure the operator decided asks them (AP-3); for a source hand-over, as [source](source.md#handing-over) specifies |
+| `operator-decision-required` | a `relayed` action from a T0 or T1 caller came without a decision, or the caller's mandate does not cover the call (`data.detail` `outside-mandate: <part>`, DEC-0125), or, from any tier, a level is below the action's (`data.detail` `level-insufficient: owner`, `admin` or `operator`, DEC-0162 LV-10: one request to a holder of that level, or `operator` to the operator); a source hand-over answers as [source](source.md#handing-over) specifies (DEC-0149) | the service | hands on again within its own mandate when that covers the call; on `level-insufficient`, files one request to a holder of that level (`operator`: asks the operator), LV-10; otherwise asks the operator for that part and calls again with their answer in `_meta.decision` or a mandate that covers it; for a source hand-over, as [source](source.md#handing-over) specifies |
+| `decision-invalid` | the decision is not valid against its schema, names another action or another object, its `at` is not read strictly, is more than 60 s after the service's clock or more than 24 h before it; or the mandate is not valid (`data.detail` `mandate-*`, DEC-0125), or a level form is not (`level-membership: <problem>`, `level-unbound`, `level-audience`, `level-expired`, `level-role` (DEC-0162 LV-10)), or a place's standing mandate is not bound by the token's `prof` (`profile-unbound`, DEC-0166 AU-3); a source hand-over answers as [source](source.md#handing-over) specifies (DEC-0149) | the service | corrects the decision it relays; an agent not sure the operator decided asks them (AP-3); for a source hand-over, as [source](source.md#handing-over) specifies |
 | `human-step-required` | the action is a step only the person takes (`gate: human`): sign-in, consent, payment, secret, spend above a limit, a passkey signature, a comparison of codes between two people or the choice to share without one | the service, with `error.data.humanStep` and `error.data.url`, the direct link to the step | hands the person that link |
 
-A `relayed` action from a T2 caller keeps [delegation](delegation.md#refusal-codes)'s `approval-required` (DL-17); its
-`_meta.decision` changes nothing; a source hand-over answers as [source](source.md#handing-over) specifies (DEC-0149).
+A `relayed` action from a T2 caller keeps [delegation](delegation.md#refusal-codes)'s `approval-required` (DL-17) unless a level decision or level mandate its delegation token binds stands at a service that reads levels ([membership](membership.md#levels) LV-6, DEC-0162), or a place's standing mandate its token binds by `prof` stands at a service that declares `standing` ([delegation](delegation.md#a-places-standing-mandate-dec-0166) AU-3, DEC-0166); a level form that does not stand is refused as LV-10 says, with the digest; in an organization's context, at a service that reads levels, an act declared `owner` or `admin` (a `change-policy` action included) is refused `level-insufficient` with the digest instead of `approval-required`, since no approval decides it (LV-7); an operator's `_meta.decision` from it changes nothing; a source hand-over answers as [source](source.md#handing-over) specifies (DEC-0149).
 `actionDecision` in [`src/actions.ts`](../../src/actions.ts) is the reference, with
 the vectors [`actions.json`](../../fixtures/vectors/actions.json) (DEC-0121).
 
@@ -377,22 +378,20 @@ one estate the same arguments travel over the relay inside a sealed `fabric-agen
 `agentId` is a registry id — a provider id, or a service `id` optionally followed by
 `.instance`. The schema admits no field beyond these, `decision` and `mandate`, so a credential cannot ride in
 the arguments. `decision` is the operator's decision on a `relayed` action ([service](service.md#actions) AP-2): the hub
-forwards a T0 or T1 origin's to the callee as the hop's `_meta.decision`, unchanged, and drops a T2 origin's, which
-would change nothing there; it passes the callee's DL-19 refusals (`operator-decision-required`, `decision-invalid`,
+forwards a T0 or T1 origin's to the callee as the hop's `_meta.decision`, unchanged, and drops a T2 origin's operator decision, which would change nothing there, while it forwards a level decision (`by: "level"`) from any origin unchanged with the origin's delegation token, whose `mem` binds it (DEC-0162 LV-5, LV-6); it passes the callee's DL-19 refusals (`operator-decision-required`, `decision-invalid`,
 `human-step-required` with their `data`) back unchanged, never as a product error, and never answers a resend that
 carries a decision from what it remembered of the same call without one; the callee records the hub and the origin its
 delegation token names as the relaying caller (DEC-0121). The hub's own `fabric.job.get` forwards a T0 or T1 origin's
 `_meta.decision` to the callee the same way (DEC-0121). `mandate` is the operator's mandate for the task
 ([delegation](delegation.md#the-operators-mandate), DEC-0125), and the hub treats it as it treats `decision`: it
-forwards a T0 or T1 origin's to the callee as `_meta.mandate` (on `agent.call` and on its own `fabric.job.get`), drops
-a T2 origin's, passes the callee's refusals back unchanged and never answers a resend that carries a mandate from what
+forwards a T0 or T1 origin's to the callee as `_meta.mandate` (on `agent.call` and on its own `fabric.job.get`), drops a T2 origin's operator mandate and forwards a level mandate and a place's standing mandate from any origin with the origin's delegation token (DEC-0162; DEC-0166 AU-3, whose `prof` binds it), a level decision or level mandate only to a callee whose authority extension (`extensions/authority/0.1`) declares `levels` for its organization, a place's standing mandate (DEC-0166 AU-3) only to a callee whose authority extension declares `standing`, passes the callee's refusals back unchanged and never answers a resend that carries a mandate from what
 it remembered of the same call without one. The hub is not an agent of the chain: the origin appends the callee before
 it calls, and the callee compares the origin the hub's delegation token names, when one is present, with the agent
 before it; the hub's own id is never the caller's agent id for this check, and without a token the chain's end alone
 binds the mandate. An origin sends `mandate` only to a hub whose `protocols` list `mandate/1`, since a hub pinned before
 DEC-0125 refuses the member, and a decision or mandate carrying `source` only when the hub and the callee both list
 `operator-source/1`, which the origin cannot read of a callee today (the directory carries no `protocols`), so until
-then it keeps `source` in its own record (DEC-0126 OA-7).
+then it keeps `source` in its own record (DEC-0126 OA-7). An origin sends a level decision or a level mandate only to a hub whose `protocols` list `levels/1`, since a reader pinned before DEC-0162 refuses the form (DEC-0162 LV-5), and a standing mandate only to a hub whose `protocols` list `standing/1`, since a hub pinned before DEC-0166 refuses the member (DEC-0166 AU-3).
 
 **Amendment (DEC-0039).** The hub is the only **issuer** between agents, not the only
 **route**. It signs a [delegation token](delegation.md) naming the person the work is for,
