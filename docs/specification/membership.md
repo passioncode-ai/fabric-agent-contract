@@ -728,8 +728,7 @@ its relay (OX-6).
 - Levels (DEC-0162): how a member's request for a project's L1 reaches the organization's owner or an administrator and how
   their choice returns to the member's launcher, and what the spend policy's `decidedBy` names for a level decision
   (the launcher's PC-162 and the organization product); until then the run waits with nothing spent (SCN-016).
-- Levels (DEC-0162): how a hub confirms that the `levels` audience a service declares is the one the organization's issuer registered for that service, so that a service cannot obtain another reader's attestation (CO-523 and the organization product); until then the hub reads the declaration only at the service's own origin. The autonomy profile per place the owner or an administrator sets (CT-285, DEC-0166 on branch `agent/ct285-autonomy-profile-20261112` until it lands) and the estate-scoped manager's
-  role slot (CT-252), each its own decision reading LV-2's levels; calls only within an organization (CT-251), which
+- Levels (DEC-0162): how a hub confirms that the `levels` audience a service declares is the one the organization's issuer registered for that service, so that a service cannot obtain another reader's attestation (CO-523 and the organization product); until then the hub reads the declaration only at the service's own origin. The estate-scoped manager's role slot (CT-252), its own decision reading LV-2's levels (the autonomy profile per place the owner or an administrator sets is decided: [delegation](delegation.md) AU-1 to AU-7, DEC-0166); calls only within an organization (CT-251), which
   bounds where a level can be presented.
 - What each role may do in a reader beyond OL-6 (display and routing, never authority, save a level for decisions, LV-2): the reader's. An administrator's signature to release a project from an
   organization (MC-13) is not an attestation, and never a signature inside the member's estate. Fabric ADR-0180
