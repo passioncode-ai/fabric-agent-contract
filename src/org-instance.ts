@@ -169,7 +169,7 @@ export function verifyOrgInstance(value: unknown, trust: OrgInstanceTrust): OrgI
   };
 }
 
-/** FAC-SEM-177 on one statement (IS-5): the times strict and in order, and the life at most 7 days. */
+/** FAC-SEM-177 on one statement (IS-1): the times strict and in order, and the life at most 7 days. */
 export function orgInstanceRules(kind: string, value: JsonObject): Finding[] | undefined {
   return kind === "org-instance" ? instanceDocument(value) : undefined;
 }

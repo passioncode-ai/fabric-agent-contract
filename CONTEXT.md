@@ -877,7 +877,9 @@ to its hub over the relay, or on the hub's own machine through the node's `machi
 `org:<orgId>`, or one person's estate, `personal`) for at most 38 days: a member allowance, a hosting product, a
 support tier and the paid agents, never an amount (`entitlement/1`, DEC-0085). Signed by a key the issuer's
 **Entitlement key set** lists, which a root key the verifier pins signs; it verifies in `grace` for 14 days after it
-expires ([entitlement](docs/specification/entitlement.md)).
+expires ([entitlement](docs/specification/entitlement.md)). `entitlement/2` (DEC-0168) adds `allowances`: `limited`,
+or `unlimited` when the order sets no ceiling on its own allowances; it never lifts a spend limit, a level or a human
+step ([allowances](docs/specification/entitlement.md#allowances-dec-0168)).
 
 **Entitlement key set**: The issuer's signing keys for entitlements under a rising revision, each with a window, and the
 kids it revokes (`entitlement-key-set/1`, DEC-0085), signed by the issuer's root key, which a verifier pins at

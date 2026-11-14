@@ -71,8 +71,7 @@ for `entitlement/1` and `org-membership`).
 ## What it does not decide
 
 The public readers list `GET /fabric/membership/v1/{org}/readers` the server's project proposes for the hub's check of a
-service's declared `levels` audience: membership's *Not decided here* item, waiting for Fabric's word, and a separate
-row. How an instance is created and billed: the platform's and the product's.
+service's declared `levels` audience: not specified anywhere yet, Fabric's word, and a separate row. How an instance is created and billed: the platform's and the product's.
 
 ## Open points for the decision
 

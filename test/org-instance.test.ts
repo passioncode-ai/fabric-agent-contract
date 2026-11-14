@@ -67,7 +67,7 @@ describe("verifyOrgInstance (DEC-0170 IS-2)", () => {
   });
 });
 
-describe("FAC-SEM-177 (DEC-0170 IS-5)", () => {
+describe("FAC-SEM-177 (DEC-0170 IS-1)", () => {
   const files = readdirSync(path.join(root, "fixtures/semantic")).filter((name) => name.startsWith("org-instance-"));
   it("has a passing and a failing fixture", () => {
     const all = files.map((name) => read(`fixtures/semantic/${name}`));

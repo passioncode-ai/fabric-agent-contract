@@ -1,4 +1,4 @@
-# Membership: `org-membership/1` and `/2`, `org-key-set/1` and `org-authority/1`
+# Membership: `org-membership/1` and `/2`, `org-key-set/1`, `org-authority/1` and `org-instance/1`
 
 DEC-0127, DEC-0129, DEC-0131, DEC-0133, DEC-0138, DEC-0162, DEC-0170 · rule codes `FAC-SEM-145`, `FAC-SEM-146`, `FAC-SEM-147`, `FAC-SEM-150`, `FAC-SEM-151`, `FAC-SEM-153`, `FAC-SEM-169`, `FAC-SEM-170`, `FAC-SEM-177` · schemas
 [`org-membership`](../../schemas/org-membership.schema.json), [`org-membership-2`](../../schemas/org-membership-2.schema.json), [`org-key-set`](../../schemas/org-key-set.schema.json),
@@ -639,7 +639,7 @@ reader that never trusted the server's word can check it offline: the platform w
 | `instanceId` | the instance's opaque id, as the platform's record and the instance's product name it, compared as written (the issuer issues it in lower case) |
 | `product` | the product the instance runs, the platform's opaque product key |
 | `origin` | the instance's `https://` origin in lower case, of two DNS labels or more, with no port, path or trailing slash (the form of entitlement's `issuer`), compared as written; an instance reachable only at a port, or only at `http://127.0.0.1` on a member's machine, is not stated (*Not decided here*) |
-| `placement` | where the instance runs: `org-cloud` (a cloud the organization's hosting runs, the `org-cloud` or `enterprise-cloud` hosting product of DEC-0088), `machine` (any machine, a member's or one the organization runs; whose machine it is is not stated) or `service` (a PassionCode service); a place, not LV-7's device reading of who holds the descriptor |
+| `placement` | where the instance runs: `org-cloud` (a cloud the organization's hosting runs, the `org-cloud` or `enterprise-cloud` hosting product of DEC-0088), `machine` (any machine, a member's or one the organization runs; whose machine it is is not stated) or `service` (a PassionCode service); a place, not the device role `org-cloud` ([devices](devices.md), DEC-0099) nor LV-7's reading of who holds the descriptor |
 | `status` | `active`, or `retired`: a retirement is stated at a higher revision, never by silence |
 | `revision` | a positive integer that rises with every statement for this (organization, instance) |
 | `issuedAt`, `notBefore`, `expiresAt` | strict RFC 3339 instants with at most three fraction digits, `issuedAt` ≤ `notBefore` < `expiresAt`, and `expiresAt` at most 7 days after `issuedAt` |
@@ -664,7 +664,7 @@ record's `subject`; the window: `notBefore` within the clock skew, and no grace 
 `digest` and `revision`.
 
 **IS-4, the issuer's duties.** The organization server issues a statement only on a record an owner or an
-administrator made (`org.instance_added`; a level decision where it reads levels, DEC-0162 LV-7), re-issues each active
+administrator made (`org.instance_added`; a level decision where it reads levels, DEC-0162 LV-3 and LV-4), re-issues each active
 one at least a day before `expiresAt`, issues `status: "retired"` at a higher revision on `org.instance_retired` and
 none after it, and never signs one revision with other bytes. It keeps a signing key listed until every instance
 statement that key signed is past `expiresAt`, and re-issues those statements under a listed key before it revokes
@@ -756,9 +756,8 @@ changes. The member list and its draft name every member and are served only to 
 its relay (OX-6).
 
 An instance statement (DEC-0170) names no person, but it gives the platform and the instance's product a signed
-`origin` with its `placement`: two organizations' statements that name one origin (one machine hosting an instance for
-each) let the platform, and each organization server that signs that origin, link the two organizations to that
-machine.
+`origin` with its `placement`: two organizations' statements that name one origin (one host serving an instance for
+each) let the platform, and an organization server that signs for both, link the two organizations to that host.
 
 ## Not decided here
 
