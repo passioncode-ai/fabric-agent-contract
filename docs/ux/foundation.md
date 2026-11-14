@@ -795,6 +795,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
   - Given a send to people outside the estate, when a headless assignment reaches it, then the service answers the profile as absent and a person decides (AU-2).
   - Given a place whose watcher stops answering, when the hub starts the next assignment, then it treats the place as `person` (AU-6).
   - Given an organization's administrator who sets a place's profile, when an assignment under it reaches an act a service declares `owner` or `operator`, then the service refuses it `level-insufficient` and the agent asks a holder of that level (AU-2).
+  - Given the owner's or an administrator's profile, when an assignment under it reaches an act a service that reads levels declares `owner` or `admin`, in an organization's context, then the service refuses it `level-insufficient` and the agent files one request to a holder of that level (DEC-0162 LV-7, DEC-0166 AU-2).
   - Given an organization's headless place with no recorded profile, when its hub starts an assignment, then the hub states no profile until the owner or an admin records one, never an architect (AU-4).
   - Given a person's own computer, when no profile is recorded, then nothing goes beyond the person's own decisions until a preset is chosen (AU-4).
 - **Priority:** must

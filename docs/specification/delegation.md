@@ -743,7 +743,7 @@ decision of 2026-11-09, fabric-workspace `knowledge/authority.md`, *Autonomy by 
   for every capability of the services registered in the place's estate, which the hub states as
   `standing.estateCapabilities: true` with no `capabilities` in the scope (an estate's services declare more than the
   scope's 64 names; the flag names a call only from T0 or T1, inside the estate, where a callee requires no token,
-  DL-26, and from T2 a call under it is `outside-mandate: capability`), in the personal context, its
+  DL-26, and from T2 a call under it is `outside-mandate: capability`; a hand-over under it narrows by effects, projects and the ceiling only, since MD-2a refuses a step that adds a `capabilities` list or actions where the scope has none, so a step listing capabilities is `mandate-widened`), in the personal context, its
   `instruction` the operator's recorded words of 2026-11-09 and its `source` the session where they were said
   (`{project: "fabric-workspace", session: "a616cbcb"}`, kept in the hub's record unless the target lists
   `operator-source/1`, OA-7); in an organization's context it states nothing

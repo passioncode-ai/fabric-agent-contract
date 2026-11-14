@@ -217,8 +217,9 @@ export function mandateCovers(input: {
   const byLevel = typeof mandate === "object" && mandate !== null && (mandate as { by?: unknown }).by === "level";
   // Level contexts given but malformed are the callee's own fault, never "reads no levels" (actionDecision's levels-invalid).
   if (input.levels !== undefined && !levelContextsWellFormed(input.levels)) return { fault: "levels-invalid" };
-  // A non-object `standing` is no standing mandate: the schema refuses it (mandate-malformed) wherever it arrives.
-  const standing = isObject(mandate) && isObject(mandate.standing);
+  // A non-object `standing` is no standing mandate: the schema refuses it (mandate-malformed) wherever it arrives. A
+  // level mandate carrying one is no standing mandate either: at a levels reader it reaches mandateProblem (AU-7).
+  const standing = !byLevel && isObject(mandate) && isObject(mandate.standing);
   if (standing && input.standing !== true) return { ignored: "standing-not-read" };
   if (byLevel && !isObject(input.levels)) return { ignored: "levels-not-read" };
   // LV-4: a level mandate stands only in the organization the call acts in, so the callee owes that context.

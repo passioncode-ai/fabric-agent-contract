@@ -120,6 +120,8 @@ function actionCases(): Json[] {
     // AU-2: an architect records no profile (the operator's answer to question 4, 2026-11-13), so the schema refuses its level.
     // AU-2 and DEC-0162 LV-7: at a service that reads levels, in an organization's context, an act declared owner or admin
     // takes only a level form; a profile's setLevel is the hub's statement, so it is refused like an operator form.
+    // AU-7, DEC-0162: a level mandate carrying `standing` is malformed at a service that reads levels, never ignored.
+    ["a level mandate carrying standing, at a service reading levels, from T2", call("T2", profile({ by: "level", level: "admin", org: "org:org-a", membership: { kind: "an attestation" } }), { levels: LEVELS, actionLevel: "admin", context: "org:org-a" }), { ok: false, code: "decision-invalid", data: { detail: "mandate-malformed", actionDigest: DIGEST } }],
     ["an owner's profile on an act declared owner, at a service reading levels, from T1", call("T1", byOwner, { levels: LEVELS, actionLevel: "owner" }), { ok: false, code: "operator-decision-required", data: { detail: "level-insufficient: owner" } }],
     ["an administrator's profile on an act declared admin, at a service reading levels, from T2 with prof", call("T2", byAdmin, { levels: LEVELS, actionLevel: "admin", tokenProf: prof(byAdmin) }), { ok: false, code: "operator-decision-required", data: { detail: "level-insufficient: admin", actionDigest: DIGEST } }],
     ["an administrator's profile on an act left undeclared, at a service reading levels, from T1", call("T1", byAdmin, { levels: LEVELS }), taken(byAdmin)],

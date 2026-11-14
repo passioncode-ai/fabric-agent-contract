@@ -245,8 +245,7 @@ words AP-2 and OA-1 already name; the rules hold for any owner.
   operator's session in the requesting Project (its agent, on their word) submits it again when they own the requesting Project, and the requester otherwise, and the `com.reply`
   names which. An act that only a session the person is in can take (the FA-09 case) is never submitted again, as
   that case says. On a place the operator's decision of 2026-11-09 makes headless (fabric-workspace
-  `knowledge/authority.md`, *Autonomy by place*), where no person's session comes, CT-285's decision states what this
-  case and OW-3's own stop become; until it lands they hold as written.
+  `knowledge/authority.md`, *Autonomy by place*), where no person's session comes, DEC-0166 (CT-285) decides both: a place's standing mandate is a mandate in force, so a relayed act it covers is no OW-3 stop and the run takes it; what it does not cover, a host's gate (the FA-09 case, a floor that asks first) included, which no profile changes, stays this case as written (DEC-0166 AU-2, AU-4).
 - **OW-4, only what needs the person.** Of the task's steps, the agent hands the person only those that technically
   need a person: a binding that only the person's own act proves (a bot created in their own messenger account, the
   code typed in their own chat, OC-3 and OC-11); a human step of AP-4 and OA-5 (a sign-in with its one-time code, a consent, a payment or top-up, a
