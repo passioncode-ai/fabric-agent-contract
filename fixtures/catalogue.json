@@ -537,6 +537,7 @@
   {"name": "device-check-in-records-digest-bare-hex", "schema": "device-check-in.schema.json", "path": "negative/device-check-in-records-digest-bare-hex.json", "valid": false, "keyword": "pattern"},
   {"name": "operator-channel-status-linked", "schema": "operator-channel-status.schema.json", "path": "positive/operator-channel-status-linked.json", "valid": true},
   {"name": "operator-channel-status-off", "schema": "operator-channel-status.schema.json", "path": "positive/operator-channel-status-off.json", "valid": true},
+  {"name": "operator-channel-status-off-awaiting-token", "schema": "operator-channel-status.schema.json", "path": "positive/operator-channel-status-off-awaiting-token.json", "valid": true},
   {"name": "operator-channel-status-unlinked", "schema": "operator-channel-status.schema.json", "path": "positive/operator-channel-status-unlinked.json", "valid": true},
   {"name": "operator-channel-status-standby", "schema": "operator-channel-status.schema.json", "path": "positive/operator-channel-status-standby.json", "valid": true},
   {"name": "operator-channel-status-degraded", "schema": "operator-channel-status.schema.json", "path": "positive/operator-channel-status-degraded.json", "valid": true},

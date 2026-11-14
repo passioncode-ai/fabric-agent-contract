@@ -134,6 +134,19 @@ agent surface with the same effect, checks and audit record, declared in its wel
 nonconformant (except the operator's move of a board slot, a host control until a host ships its twin, DEC-0140 PR-2). `FAC-SEM-142` checks the declared actions (a button whose tool the MCP surface does not serve); a host
 reports a dashboard that declares none (CT-126) ([service](docs/specification/service.md#actions) AP-1, DEC-0121).
 
+**Operator's word, carried out the first time**: The rule that an agent carries out its operator's words about a task
+itself, on that word: every step inside the task is the agent's to take within the grants, mandates and limits that
+apply; it hands the operator no command it could run itself (a typed secret where the node answers `no-client` leaves the person the vault's own command, OW-4); a risk the words did not name gets one short message with the corrected way (a
+question where the step must wait) while the rest goes on; the agent adds no question of its own about an act a
+host's gate already asks about, a risk on it travelling as that gate's one ask (where Fabric refuses the act for a
+session whose runner gate is removed, one question in the chat stands in for that ask, and a session with no person in
+its chat leaves the act open for a session the person is in; a refused card Fabric still shows for it is no question
+the agent asks), while the asks other rules require for the same act stay and are named (spend policy rule 3's approval
+request for spend above a project's `autoApproveUsd`, DEC-0149's word for a source hand-over); only what technically
+needs a person goes to the
+person, with its reason and the exact step; no limit widens. Its rules are OW-1 to OW-6 in governance and roles (DEC-0156). Whom "the operator" names for an organization's
+agent is CT-266.
+
 **Relayed decision**: The operator's decision on one action an agent carries in a call's `_meta.decision`
 (`decision.schema.json`): the action's id (and the object, when the operator named one) and the operator's sentence
 naming it, or the agent's question and the operator's answer, quoted from what the operator told the agent or passed
@@ -161,7 +174,7 @@ A mandate never covers a **Source hand-over** ([source](docs/specification/sourc
 relay: the words verbatim, when and where they were said (`source`: the project, and the session or the board thread)
 and the approved scope. Accepted only from one of the operator's own Projects on their board or a session on their own
 machine; the receiver acts without asking again, runs its own checks, and asks once only about what the operator did
-not see. Its machine form is a mandate or a decision with `source`
+not see; a host's gate on a floored act still asks once, quoting the relayed words as its reason (DEC-0156 OW-3). Its machine form is a mandate or a decision with `source`
 ([delegation](docs/specification/delegation.md#one-approval-binds-all-the-operators-agents), DEC-0126).
 
 **Operator session**: The signed-in session of a service's dashboard. It ends 12 hours after its last use and
