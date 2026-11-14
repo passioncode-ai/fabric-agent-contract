@@ -74,10 +74,10 @@ export interface ActionDecisionInput {
   project?: unknown;
   /** The context the call acts in, the service's own knowledge as the project is: `org:<orgId>` or `personal`
    * (DEC-0082); required to read a level decision or a level mandate, which stands only in its own organization
-   * (DEC-0162 LV-4). */
+   * (DEC-0162 LV-4), and, at a service given `levels`, an act declared `owner` or `admin` (LV-7). */
   context?: unknown;
   /** The organizations this service reads levels in, by `org:<orgId>` (DEC-0162); absent, it reads none, and a level
-   * decision or mandate is answered as if the call carried none (LV-10). */
+   * decision or mandate is read as absent and any other form the call carries answers as AP-2 says (LV-10). */
   levels?: unknown;
   /** The `mem` claim of the call's verified delegation token, absent when it presented none (DEC-0162 LV-5). */
   tokenMem?: unknown;
@@ -156,7 +156,7 @@ export function actionDecision(input: ActionDecisionInput): ActionDecisionAnswer
   // A level the service declares for the action that is not one of ACTION_LEVELS is its fault, never "none declared".
   if (input.actionLevel !== undefined && !(ACTION_LEVELS as readonly unknown[]).includes(input.actionLevel)) return { fault: "action-level-invalid" };
   // DEC-0162: a level decision, or a level mandate on a call without a decision, is read at every tier by a service
-  // that reads levels (LV-6); one that reads none answers as if the call carried neither (LV-10).
+  // that reads levels (LV-6); one that reads none reads the level form as absent and answers the rest (LV-10).
   const levelDecision = isObject(decision) && decision.by === "level";
   const inside = tier === "T0" || tier === "T1";
   // LV-7, the operator's answers to questions 4 and 8: in an organization's context, at a service that reads levels, an

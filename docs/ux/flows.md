@@ -246,7 +246,7 @@ flowchart TD
 ### FLW-10: Operator sets a spend limit and answers what exceeds it
 
 - **Traces:** ST-012, ST-013 (JTBD-07, JRN-06/#1, JRN-06/#2)
-- **Goal:** a project spends within a limit the operator chose once, and a spend above the threshold waits for one answer
+- **Goal:** a project spends within a limit the operator chose once (in an organization, its owner or an administrator, DEC-0162), and a spend above the threshold waits for one answer
 - **Entry points:** the first run of a project that would spend money; a grant check above `autoApproveUsd`
 - **Success exit:** the policy recorded with its inputs; the request answered and the spend allowed or not
 - **Task analysis:** the launcher computes options → the operator picks one (one is preselected; in an organization's project its owner or an administrator, while the run waits, DEC-0162 LV-7) → the meter checks each spend against the levels → above the threshold it denies with one filed request → the operator confirms the amount in the operator channel (in an organization's project started by someone other than its owner or an administrator, the owner or an administrator, never the member's own confirm, while nothing is spent, DEC-0162 LV-7) → the agent asks again and is allowed.
@@ -765,7 +765,7 @@ flowchart TD
   T -->|any tier, a level form that fails| V{its detail}
   T -->|a service that reads no levels, or a hub without levels/1| PS
   V -->|level-unbound, level-audience, level-expired| VF[The agent asks its hub for a fresh, bound attestation]
-  V -->|level-membership: any problem, ended, context-invalid and stale-revision among them| PS[The product's own approval surface, the level holder as approver (DEC-0162 question 10)]
+  V -->|level-membership: any problem, ended, context-invalid and stale-revision among them| PS[The product's own approval surface, the level holder as approver (DEC-0162 question 10), or in a personal context the operator's decision under AP-2]
   VF --> C
   V -->|level-role, or the form itself| VC[The agent relays the level its holder holds, or takes the product's own approval surface]
   VC --> C
