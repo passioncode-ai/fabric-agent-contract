@@ -193,7 +193,9 @@ Read next: [services](../specification/service.md) (the token, the events feed, 
 [profiles](../specification/profiles.md), [interop](../specification/interop.md) when a capability runs as a job,
 and [embedded dashboard](../specification/embedded-dashboard.md) when the dashboard opens inside a host. Every
 button the dashboard shows needs a tool on the MCP surface, declared in [actions](../specification/service.md#actions)
-(DEC-0121), so the operator's agent can take the same step on their word. The Fabric Agent Adapter's Python, Node and
+(DEC-0121), so the operator's agent can take the same step on their word; everything the dashboard shows is readable by
+an agent too, and a dashboard is served beside an MCP or A2A surface, never alone
+([read parity](../specification/service.md#read-parity-and-the-design-order-dec-0169), DEC-0169). The Fabric Agent Adapter's Python, Node and
 dashboard kits serve these documents for you.
 
 ## An agent that is not a service
