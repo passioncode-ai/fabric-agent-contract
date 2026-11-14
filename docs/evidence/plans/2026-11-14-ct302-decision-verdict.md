@@ -47,7 +47,7 @@ refuse: AP-2's table, LV-7 and AU-2 decide exactly as today.
 | `askedDigest` | sha256 of `asked`'s canonical JSON |
 | `caller`, `session` | the principal and session the host authenticated |
 | `verdict` | `allow`, `human` or `deny` |
-| `rule` | the contract rule that decided, by its id (`AP-2`, `AP-4`, `AP-5`, `LV-4`, `LV-7`, `AU-1`, `AU-2`, `MD-3`, `MD-6`, `DL-17`, `OA-3`, `OW-4`, and `spend-step-3` for the spend policy's step 3), a policy row (`row:<id>`), or the person's answer (`answer:<questionId>`) for `person-denied` and `rejected` |
+| `rule` | the contract rule that decided, by its id (`AP-2`, `AP-4`, `AP-5`, `LV-4`, `LV-7`, `AU-1`, `AU-2`, `MD-3`, `MD-6`, `DL-17`, `OA-3`, `OW-4`, and `spend-rule-3` for the spend policy's rule 3), a policy row (`row:<id>`), or the person's answer (`answer:<questionId>`) for `person-denied` and `rejected` |
 | `reason` | a closed code: `covered` (allow); `body-gate`, `kept`, `level-insufficient`, `not-covered`, `outside-window`, `evidence-unknown`, `evidence-stale`, `ground-invalid`, `vetoed`, `loop`, `voided`, `spend-limit` (DV-7), `row-advised` (a policy row's `deny` against a form the reference takes) (human); `forbidden`, `other-context`, `self-approval`, `person-denied`, `rejected` (deny; `self-approval` only for an approval on the caller agent's own account that no relayed operator's approval carries, AP-5) |
 | `level` | `{required, satisfiedBy}`: `operator`, `instance-operator`, `owner`, `admin`, `architect` or `own-act` |
 | `route` | `operator`, `level`, `profile`, `mandate`, `approval`, `own-act` or `forwarded`, with `allow` only |
@@ -72,7 +72,7 @@ addressee and no `questionId`, and the caller goes on as OW-3 says, with one mes
 OW-4's closed list: the operator is not asked again for an act his word or a mandate already decides); a policy row's `deny` never stands
 against such a form either: the verdict is then `human` (`row-advised`) without an addressee, and an origin under DV-8 dispatches as
 C3.5 says. `spend-limit` goes to the person as DV-7 says even under the operator's word or a mandate: spend above a
-limit is the person's and no word in chat approves it (OW-4, OW-5, OA-4, spend policy step 3). `kept` applies
+limit is the person's and no word in chat approves it (OW-4, OW-5, OA-4, spend policy rule 3). `kept` applies
 at all only where no operator's word and no mandate in force names the act, and a place's standing mandate yields to
 `kept` only within AU-2's bounds (an act AU-2 leaves to a person stays one). A `human` verdict is advice to the caller
 that asked: the hub still forwards a form the reference takes unless the origin opted in under DV-8. A `person-denied`
@@ -123,14 +123,18 @@ verifier's single use stays at the enforcement points Fabric owns.
 **DV-7, money stays read-only until a reservation lands (the verifier's OQ-8).** The verifier reads the task's spend,
 L1 with its `autoApproveUsd`, L0 and each key's ceiling, and the call's own estimate (the one `mandateCovers` checks
 against `perCallMaxUsd`); an estimate that would cross a limit is `human`, the limits staying the person's (MD-6,
-OA-4, [spend policy](../../specification/spend-policy.md) L0 to L2 and its step 3), and goes out the way the contract
+OA-4, [spend policy](../../specification/spend-policy.md) L0 to L2 and its rule 3), and goes out the way the contract
 already sends it, never as a second question: above L0, L1 or a key's ceiling as AP-4's human step `spend-above-limit`
-with its amount and its link once one is known (the callee's refusal's `url`, DV-2; in an organization's context the
-limit change is the owner's or an admin's relayed `change-policy` act, LV-7), and no `questionId`; above
-`autoApproveUsd` within L1 as step 3's one durable approval request (a chat word is never that approval, step 3), in an
+with its amount and its link once one is known (the callee's `human-step-required` refusal's `url`, DV-2; `limit-reached` carries
+`approvalRequest` and no link, DL-21), and no `questionId`; in an organization's context a change of the project's L1
+or of the ceiling of a key the organization holds is the owner's or an admin's relayed `change-policy` act (LV-7),
+while a member's own L0 and the keys in a member's own estate stay that estate operator's (spend policy L0, MD-6); above
+`autoApproveUsd` within L1, or with no policy yet, as rule 3's one durable approval request (a chat word is never that
+approval, rule 3), in an
 organization's context addressed to its owner and administrators (LV-7, `level.required` `admin`), in a personal context to the operator (OC-6's confirmation where the operator channel
-carries it). Neither is the reference's refusal for want of a person, so this is the named reason the `human` above
-admits, and the one that asks a person whatever form the caller holds. A covered money act under every limit
+carries it). Neither is the reference's refusal for want of a person for a `relayed` action (an action declared `human` and a
+mandate over `perCallMaxUsd`, `outside-mandate: spend`, are the reference's own refusals and answered as such), so this
+is the named reason the `human` above admits, and the one that asks a person whatever form the caller holds. A covered money act under every limit
 answers `allow` with `machineForm` as any other, the reservation itself staying the callee's grant check. Nothing in this decision reserves. A hub-side
 reservation the callee's grant check adopts is CT-312; until it lands a verifier enforces no money act.
 
