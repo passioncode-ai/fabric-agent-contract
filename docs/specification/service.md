@@ -243,7 +243,8 @@ placement requires the token here too ([Remote placement](#remote-placement)).
 - `summary` carries at most six tiles for a host card; a tile with `attention: true`
   asks for the operator.
 - `update.available` is a newer version the service knows about, or `null`.
-- `surfaces.mcp.capabilities` MAY list the capability names the MCP surface serves, so
+- `surfaces.mcp.capabilities` MAY list the capability names the MCP surface serves (a present list names at least one,
+  `FAC-SEM-176`), so
   a host can show them without the token; the manifest remains the authority
   ([interop C3.6](interop.md#c36-discovery-surface)).
 - `surfaces.usage` MAY name the path of the service's usage report
@@ -1367,8 +1368,8 @@ answer the operator's words of 2026-11-14, relayed by fabric-agent-adapter (boar
   (DEC-0169). A view only a person can read is nonconformant, as an action only a person can take is (AP-1). Parity
   widens no access: an agent reads what its caller's grant, level and context allow, which may be less than the
   operator sees, and a value the person sees only as a human step stays one: a secret shown once (AP-4), and a code a
-  person reads on the page to link or confirm (the operator channel's link code, OC-3, which the page shows and no tool
-  returns). A documented API serves RP-1's reading; RP-3 still asks for an agent surface beside a dashboard.
+  person reads on the page to link or confirm (the operator channel's link code, OC-3, which the page shows, or an agent without a dashboard shows in its own reply
+  (OC-11), and no read tool returns). A documented API serves RP-1's reading; RP-3 still asks for an agent surface beside a dashboard.
 - **RP-2, the design order.** Every function of a service is a capability of its agent surface first; a dashboard, an
   app, a bot, a CLI or a report is a view over those capabilities, never the only home of a function (DEC-0169). A new
   page, button or report ships with its tool in the same release, or is not shipped. AP-1's one exception stands here
