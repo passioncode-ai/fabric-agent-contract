@@ -134,7 +134,8 @@ agent surface with the same effect, checks and audit record, declared in its wel
 nonconformant (except the operator's move of a board slot, a host control until a host ships its twin, DEC-0140 PR-2). `FAC-SEM-142` checks the declared actions (a button whose tool the MCP surface does not serve); a host
 reports a dashboard that declares none (CT-126) ([service](docs/specification/service.md#actions) AP-1, DEC-0121).
 **Read parity** extends it to reading: everything a person reads there an agent reads, structured, within its own
-access, and each function is a capability of the agent surface first; a dashboard with no agent surface is
+access (a human step, such as a secret shown once, stays one), and each function is a capability of the agent surface
+first (the slot move AP-1 excepts included); a dashboard with no agent surface is
 nonconformant (`FAC-SEM-176`, [service](docs/specification/service.md#read-parity-and-the-design-order-dec-0169)
 RP-1 to RP-3, DEC-0169).
 

@@ -370,7 +370,7 @@ export function authorityExtensionRules(wellKnown: JsonObject): Finding[] {
 
 /**
  * FAC-SEM-176 on a well-known document (kind `service-well-known`, DEC-0169 RP-3): a service that serves a dashboard
- * serves an agent surface beside it (`surfaces.mcp`, or `surfaces.a2a` for a remote one), and an MCP surface that lists
+ * serves an agent surface beside it (`surfaces.mcp` or `surfaces.a2a`), and an MCP surface that lists
  * its capabilities lists at least one. A page with no agent surface is a function only a person reaches (RP-1, RP-2).
  */
 export function agentSurfaceRules(wellKnown: JsonObject): Finding[] {

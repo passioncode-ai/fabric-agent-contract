@@ -72,7 +72,7 @@ describe("FAC-SEM-176: a dashboard has an agent surface beside it (DEC-0169 RP-3
   it("passes a dashboard beside an MCP or an A2A surface, and a service with no dashboard", () => {
     expect(at({ dashboard, mcp })).toEqual([]);
     expect(at({ dashboard, mcp: { ...mcp, capabilities: ["x.read"] } })).toEqual([]);
-    expect(at({ dashboard, a2a: { path: "/a2a", protocolVersion: "0.3.0" } })).toEqual([]);
+    expect(at({ dashboard, a2a: { path: "/a2a", protocolVersion: "1.0" } })).toEqual([]);
     expect(at({ events: { path: "/events" } })).toEqual([]);
     expect(at(undefined)).toEqual([]);
   });

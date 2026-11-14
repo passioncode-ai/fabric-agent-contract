@@ -12059,10 +12059,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      list, a record, a status, a number, a chart's series, a log, a history, a setting, an export, a preview with its
      diff and hash) is readable by an agent through a tool on the agent surface or the documented API the page calls,
      with the same data, filters and paging, as structured values. A view only a person can read is nonconformant.
-     Parity widens no access: an agent reads within its caller's grant, level and context, and AP-4's human steps
-     stay.
+     Parity widens no access: an agent reads within its caller's grant, level and context, and a value a person sees
+     only as a human step stays one (AP-4's secret shown once, the operator channel's link code OC-3).
   2. **RP-2, the design order.** Every function is a capability of the agent surface first; a dashboard, app, bot, CLI
      or report is a view over those capabilities. A page, button or report ships with its tool in the same release.
+     AP-1's one exception stands: the operator's move of a board slot stays a host control until the host ships its
+     twin (DEC-0140 PR-2).
   3. **RP-3, the check.** A well-known document that serves `surfaces.dashboard` serves `surfaces.mcp` or
      `surfaces.a2a` beside it, and a present `surfaces.mcp.capabilities` is not empty (`FAC-SEM-176`, kind
      `service-well-known`, `agentSurfaceRules`). The rule reads the declaration; whether each view has its tool is
@@ -12076,7 +12078,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   screen reading (an agent needs structured values, the same filters and paging); widening an agent's access to what
   the operator sees (parity is of functions, not of access).
 - **Compatibility:** a tightening that binds a service at its next pin, as DEC-0121's behaviour rules did. A well-known
-  document with a dashboard and no agent surface was schema-valid and stays so; `FAC-SEM-176` reports it. Every
+  document with a dashboard and no agent surface was schema-valid and stays so; `FAC-SEM-176` reports it, and also a
+  present but empty `surfaces.mcp.capabilities`, with or without a dashboard. RP-3 counts `surfaces.a2a` at any
+  placement (A2A may sit on a local origin), wider than the request and the adapter's probe, which count it for a
+  remote service only and pass an empty list it has not read: a tell to the adapter. Every
   positive fixture in the repository already serves `surfaces.mcp`. `contractVersion` stays `0.1.0`.
 - **Consequences / affects:**
   - spec: `docs/specification/service.md` (*Read parity and the design order*, the rule register),
@@ -12086,7 +12091,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   - tests: `test/actions.test.ts`;
   - docs: `CONTEXT.md` (*Read parity*), `docs/backlog.md` (CT-311).
 - **Not decided here:** a declaration of each view and its tool in the well-known document (a later rule, if hosts need
-  to check views one by one); how a host shows a nonconformant service (Fabric Dashboards' audit already lists it).
+  to check views one by one); a check for a bot or channel agent's views (RP-1 binds them, RP-3 reads dashboards only);
+  how a remote agent whose MCP sits behind a gateway outside its origin declares it (until then it declares its A2A
+  card, or `FAC-SEM-176` reports it); how a host shows a nonconformant service (the adapter's probe `dashboard.agent-surface`
+  finds it, FAA-332).
 - **Source:** fabric-agent-adapter's board request `6f1f3ec9` (thread `b2eef40c`) and its 0.88.0 (FAA-332, probe
   `dashboard.agent-surface`); DEC-0121 AP-1. DEC-0169 and `FAC-SEM-176` were reserved by git CAS (`agent_sync.py
   reserve`, keys `ct311-read-parity` and `ct311-read-parity-sem`).

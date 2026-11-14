@@ -1366,10 +1366,14 @@ answer the operator's words of 2026-11-14, relayed by fabric-agent-adapter (boar
   page itself calls, with the same data, the same filters and paging, as structured values rather than rendered text
   (DEC-0169). A view only a person can read is nonconformant, as an action only a person can take is (AP-1). Parity
   widens no access: an agent reads what its caller's grant, level and context allow, which may be less than the
-  operator sees, and a value the person sees only as a human step (a secret shown once, AP-4) stays a human step.
+  operator sees, and a value the person sees only as a human step stays one: a secret shown once (AP-4), and a code a
+  person reads on the page to link or confirm (the operator channel's link code, OC-3, which the page shows and no tool
+  returns). A documented API serves RP-1's reading; RP-3 still asks for an agent surface beside a dashboard.
 - **RP-2, the design order.** Every function of a service is a capability of its agent surface first; a dashboard, an
   app, a bot, a CLI or a report is a view over those capabilities, never the only home of a function (DEC-0169). A new
-  page, button or report ships with its tool in the same release, or is not shipped.
+  page, button or report ships with its tool in the same release, or is not shipped. AP-1's one exception stands here
+  too: the operator's move of a board slot stays a host control until the host ships its twin
+  ([project communication](project-comms.md#the-operator-moves-a-slot) PR-2, DEC-0140).
 - **RP-3, the check.** A well-known document that serves `surfaces.dashboard` serves an agent surface beside it
   (`surfaces.mcp`, or `surfaces.a2a`), and an MCP surface that lists its `capabilities` lists at least one; otherwise
   it is nonconformant (`FAC-SEM-176`, kind `service-well-known`, `agentSurfaceRules` in
@@ -1437,5 +1441,5 @@ behaviour rules (AP-1, AP-2 and AP-4) bind a service at its next pin, and from t
 | <a id="fac-sem-088"></a>`FAC-SEM-088` | `service-peer-request` | a host sends another's request only to a service that declares `peer`, and only at or below its `maxDataClass` (`peerRefusal`) |
 | <a id="fac-sem-101"></a>`FAC-SEM-101` | `service-events-page` | no string in an event's `data.value`, at either level, sits under a credential's name or has a credential's shape; a finding names the place, never the value (DEC-0070) |
 | <a id="fac-sem-143"></a>`FAC-SEM-143` | `page-link`, `interop-input-requests` | a link handed to a person is not a raw `http` or `https` address whose host is a local one as PL's [check](#links-to-a-services-pages) lists it (`127.0.0.0/8`, `[::1]`, the IPv4-mapped `[::ffff:127.x.y.z]`, `localhost` and names under it, and the unspecified `0.0.0.0` and `[::]` a wildcard bind reports), and a `fabric-dashboards:` link follows `fabric-dashboards://service/<id>.<instance>[?path=<path>]` with no other parameter, a path on the service origin and no credential (DEC-0123 PL-1) |
-| <a id="fac-sem-176"></a>`FAC-SEM-176` | `service-well-known` | a service that serves `surfaces.dashboard` serves `surfaces.mcp` or `surfaces.a2a` beside it, and a present `surfaces.mcp.capabilities` is not empty (DEC-0169 RP-3) |
 | <a id="fac-sem-142"></a>`FAC-SEM-142` | `service-well-known`, `action-call` | an actions declaration is its schema's, names each `id` once, carries `humanStep` exactly when `gate` is `human` and names only tools a present `surfaces.mcp.capabilities` lists; a service answers an action call as `actionDecision` does (DEC-0121), except a source hand-over ([source](source.md#handing-over)), out of this rule until a service pins a contract revision carrying CT-181: `--kind action-call` cannot tell a hand-over and is not run on a hand-over's calls until then; and in the authority key, `extensions/authority/0.1` (`authorityExtensionRules`, DEC-0162 LV-5, LV-7), a value its schema refuses, an organization named twice in `levels`, and a level in `actionLevels` for an id that is not a relayed action of the actions declaration |
+| <a id="fac-sem-176"></a>`FAC-SEM-176` | `service-well-known` | a service that serves `surfaces.dashboard` serves `surfaces.mcp` or `surfaces.a2a` beside it, and a present `surfaces.mcp.capabilities` is not empty (DEC-0169 RP-3) |
