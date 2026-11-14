@@ -319,7 +319,7 @@ spent when the meter refuses, and stays usable until its `exp`. A source hand-ov
 [source](source.md#handing-over) specifies (DEC-0149). In an organization's context a level decision whose holder's
 attestation the call's token binds by `mem` stands in place of an approval for a relayed action at a service that
 reads levels, so such a T2 caller is not refused `approval-required` ([membership](membership.md#levels) LV-6,
-DEC-0162); outside its level, and for a human step, the callee answers as this rule and AP-4 say.
+DEC-0162); a level form that does not stand is refused as LV-10 says (`operator-decision-required` or `decision-invalid`, with `data.actionDigest`, so this rule's route stays open), and a human step as AP-4 says.
 `actionDigest(action)` computes the digest; `jcs` (`rfc8785` in `src/canonical.ts`) is the canonical form —
 RFC 8785, not the settings form a device policy is signed over ([canonical forms](conformance.md#canonical-forms),
 DEC-0043). Products keep their own gates for
@@ -676,8 +676,12 @@ decision of 2026-11-09, fabric-workspace `knowledge/authority.md`, *Autonomy by 
   the profile's `scope`, and a chain starting at the assigned agent. A standing mandate is never stated `by: "level"`
   (the schema): the setter's level is checked once, at the set, and recorded there, so the stated mandate carries no
   attestation, its digest does not change with one, and it stands at every service its token reaches within the stating estate's own
-  context (a personal profile at the operator's own services, an organization's at that organization's, reached by that
-  context's routing, DL-27, and its issuer's token), never in another context, as LV-7 says of a level; in an
+  context (a personal profile at the operator's own services, an organization's at that organization's), never in
+  another context, as LV-4 and LV-7 say of a level: the hub states the context in `standing.context` (`personal` or
+  `org:<orgId>`, `org:` whenever `setLevel` is present, inside the digest), and a callee takes the standing mandate only
+  for a call in that same context, which it knows as it knows the call's project, and refuses another
+  `decision-invalid` with `profile-context` (routing alone does not keep a T0 or T1 call without a token in its context,
+  DL-27); a callee that declares `standing` and does not say the call's context is at fault, `context-missing`; in an
   organization's context `standing.setLevel` names that level (AU-2). A project-board
   request carries no standing mandate: only the place's hub states one, for an assignment it starts (as LV-6 keeps a
   level mandate off the board). It

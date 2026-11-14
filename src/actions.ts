@@ -4,7 +4,7 @@ import { SCHEMA_PREFIX } from "./contract.js";
 import { EXTENSION_KEYS } from "./extensions.js";
 import { type Finding, type JsonObject, isObject } from "./findings.js";
 import { CLOCK_SKEW_SECONDS, strictTime } from "./rfc3339.js";
-import { type LevelContexts, type LevelRecord, levelContextsWellFormed, levelStanding, ACTION_LEVELS } from "./levels.js";
+import { type LevelContexts, type LevelRecord, levelContextsWellFormed, levelStanding, ACTION_LEVELS, CALL_CONTEXT } from "./levels.js";
 import { EFFECT_CLASSES } from "./delegation.js";
 import { type OperatorSource, type ProfileRecord, mandateCovers } from "./mandate.js";
 import { createValidatorSync } from "./validator.js";
@@ -169,8 +169,15 @@ export function actionDecision(input: ActionDecisionInput): ActionDecisionAnswer
   const inside = tier === "T0" || tier === "T1";
   // From T2 an operator decision counts for nothing (DL-17), so a level mandate beside one is still read (LV-6).
   const levelMandate = (decision === undefined || (!inside && !levelDecision)) && isObject(input.mandate) && input.mandate.by === "level";
+  // LV-7, the operator's answer to question 8: in an organization's context, at a service that reads levels, an act
+  // declared `owner` or `admin` is decided only at that level, never by the instance operator's word (its descriptor's
+  // holder, a member on a member's machine): no elicitation, operator decision or operator mandate is taken for it.
+  const min = minLevelOf(input);
+  const levelAct = isObject(input.levels) && (min === "owner" || min === "admin");
+  if (levelAct && (typeof input.context !== "string" || !CALL_CONTEXT.test(input.context))) return { fault: "context-missing" };
+  const levelOnly = levelAct && (input.context as string).startsWith("org:");
   // The service's own accepted elicitation is the operator's word at T0 or T1 and is read before a level form (LV-4).
-  if (inside && elicited === true) return { ok: true, recordAs: { by: "operator", via: "elicitation", caller } };
+  if (inside && elicited === true && !levelOnly) return { ok: true, recordAs: { by: "operator", via: "elicitation", caller } };
   // DEC-0166 AU-3: a standing mandate (a place's autonomy profile) is read at every tier by a service that declares
   // `standing`; from T2 it stands only when the call's token binds it by `prof`.
   // As a level mandate: from T2 an operator decision, or a level decision where no levels are read, counts for nothing.
@@ -180,7 +187,7 @@ export function actionDecision(input: ActionDecisionInput): ActionDecisionAnswer
     const clock = strictTime(now);
     if (Number.isNaN(clock)) return { fault: "now-unreadable" };
     // LV-4: a level stands only in the organization the call acts in, so the service owes that context.
-    if (isObject(input.levels) && (levelDecision || levelMandate) && (typeof input.context !== "string" || !CALL_CONTEXT.test(input.context))) return { fault: "context-missing" };
+    if (((isObject(input.levels) && (levelDecision || levelMandate)) || standingMandate) && (typeof input.context !== "string" || !CALL_CONTEXT.test(input.context))) return { fault: "context-missing" };
     // LV-7: a level decision needs the action's effect, so a `change-policy` action is never read below `admin`.
     if (levelRead && !(EFFECT_CLASSES as readonly unknown[]).includes(input.effect)) return { fault: "effect-missing" };
     // At T2 every refusal on this branch keeps DL-18's route open, so the service owes the action's digest here too.
@@ -200,6 +207,7 @@ export function actionDecision(input: ActionDecisionInput): ActionDecisionAnswer
   }
   const clock = strictTime(now);
   if (Number.isNaN(clock)) return { fault: "now-unreadable" };
+  if (levelOnly) return { ok: false, code: OPERATOR_DECISION_REQUIRED, data: { detail: `level-insufficient: ${min as "owner" | "admin"}` } };
   // A level decision at a service that reads no levels is as if absent (LV-10), so a mandate the call carries is read.
   if ((decision === undefined || levelDecision) && input.mandate !== undefined) {
     const answer = byMandate(input, action, caller);
@@ -227,9 +235,6 @@ const minLevelOf = (input: ActionDecisionInput): string | undefined => {
   const declared = input.actionLevel as string | undefined;
   return input.effect === "change-policy" && (declared === undefined || declared === "architect") ? "admin" : declared;
 };
-
-/** `common.schema.json#/$defs/contextId` (DEC-0082): `personal`, or `org:` and an organization id. */
-const CALL_CONTEXT = /^(?:personal|org:[A-Za-z0-9][A-Za-z0-9_-]{0,127})$/;
 
 /** The tool of a job's input request (C3.3, AP-2): the call that answers it is `fabric.job.get`. */
 export const JOB_STEP_TOOL = "fabric.job.get" as const;

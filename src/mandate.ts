@@ -4,7 +4,7 @@ import { rfc8785 } from "./canonical.js";
 import { SCHEMA_PREFIX } from "./contract.js";
 import { effectClosure } from "./delegation.js";
 import { type Finding, type JsonObject, isObject } from "./findings.js";
-import { type InsufficientDetail, type LevelContexts, type LevelDetail, type LevelRecord, levelContextsWellFormed, levelRules, levelShortOf, levelStanding } from "./levels.js";
+import { type InsufficientDetail, type LevelContexts, type LevelDetail, type LevelRecord, levelContextsWellFormed, levelRules, levelShortOf, levelStanding, CALL_CONTEXT } from "./levels.js";
 import { CLOCK_SKEW_SECONDS, strictTime } from "./rfc3339.js";
 import { createValidatorSync } from "./validator.js";
 
@@ -52,7 +52,7 @@ export interface OperatorSource {
  * A place's standing mandate (DEC-0166 AU-1): the place, its kind and the profile's revision; in an organization's
  * context the level of the holder who set it (AU-2), which bounds what it covers at a service that declares levels.
  */
-export interface Standing { place: string; placeKind: "headless" | "person"; revision: number; setLevel?: "owner" | "admin"; estateCapabilities?: true }
+export interface Standing { place: string; placeKind: "headless" | "person"; revision: number; context: string; setLevel?: "owner" | "admin"; estateCapabilities?: true }
 export interface Mandate {
   kind: "mandate/1";
   standing?: Standing;
@@ -90,7 +90,7 @@ export interface MandateCall {
 }
 
 export type OutsideDetail = "outside-mandate: capability" | "outside-mandate: action" | "outside-mandate: effect" | "outside-mandate: spend" | "outside-mandate: project";
-export type InvalidDetail = "mandate-malformed" | "mandate-widened" | "mandate-expired" | "mandate-early" | "mandate-not-for-this-call" | "profile-unbound" | LevelDetail;
+export type InvalidDetail = "mandate-malformed" | "mandate-widened" | "mandate-expired" | "mandate-early" | "mandate-not-for-this-call" | "profile-unbound" | "profile-context" | LevelDetail;
 /** The profile a call was taken under (DEC-0166 AU-6): the place, the revision, the standing mandate's digest and, in an
  * organization's context, the setter's level. */
 export interface ProfileRecord { place: string; revision: number; digest: string; setLevel?: "owner" | "admin" }
@@ -222,17 +222,21 @@ export function mandateCovers(input: {
   if (standing && input.standing !== true) return { ignored: "standing-not-read" };
   if (byLevel && !isObject(input.levels)) return { ignored: "levels-not-read" };
   // LV-4: a level mandate stands only in the organization the call acts in, so the callee owes that context.
-  if (byLevel && typeof call.context !== "string") return { fault: "context-missing" };
+  if (byLevel && (typeof call.context !== "string" || !CALL_CONTEXT.test(call.context))) return { fault: "context-missing" };
   const inside = tier === "T0" || tier === "T1";
   // A standing mandate from T2 needs the token's `prof` (AU-3), whoever stated it; without one it changes nothing, as
   // MD-5 says. A task's operator mandate from T2 changes nothing either.
   if (!inside && (standing ? input.tokenProf === undefined : !byLevel)) return { ignored: "mandate-at-t2" };
+  // AU-1: a standing mandate stands only in its own context, so a callee that reads one owes the call's context.
+  if (standing && (typeof call.context !== "string" || !CALL_CONTEXT.test(call.context))) return { fault: "context-missing" };
   const problem = mandateProblem(mandate);
   if (problem) return { ok: false, code: MANDATE_INVALID, data: { detail: problem } };
   const read = mandate as Mandate;
   // mandateProblem refused a profile with no canonical form, so its digest is defined here.
   const digest = standing ? profileDigest(read) : undefined;
   if (standing && input.tokenProf !== undefined && input.tokenProf !== digest) return { ok: false, code: MANDATE_INVALID, data: { detail: "profile-unbound" } };
+  // AU-1: a profile stands only in the context it was stated for (as DEC-0162 LV-4 reads a level's).
+  if (standing && (read.standing as Standing).context !== call.context) return { ok: false, code: MANDATE_INVALID, data: { detail: "profile-context" } };
   const holders = read.chain.map((step) => step.agent);
   if (holders.length < 2 || holders[holders.length - 1] !== self || (callerAgent !== undefined && holders[holders.length - 2] !== callerAgent)) {
     return { ok: false, code: MANDATE_INVALID, data: { detail: "mandate-not-for-this-call" } };

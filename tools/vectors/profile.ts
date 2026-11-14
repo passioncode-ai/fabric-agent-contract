@@ -29,7 +29,9 @@ const setProfile = { id: "set-profile", title: "Set the place's profile", tool: 
 const settingsAction = { id: "autonomy.profile.set", title: "Set the place's profile", tool: "hub.settings", gate: "relayed" };
 const payment = { id: "top-up", title: "Top up", tool: "billing.topup", gate: "human", humanStep: "payment" };
 const URL = "https://example-deployer.example/billing/top-up";
-const STANDING = { place: "studio-space-1", placeKind: "headless", revision: 3 };
+const STANDING = { place: "studio-space-1", placeKind: "headless", revision: 3, context: "personal" };
+/** An organization's profile: stated for that organization's context, with the level of the holder who set it. */
+const ORG_STANDING = { ...STANDING, context: "org:org-a" };
 
 /** A place's standing mandate as its hub states it for one assignment (AU-1, AU-3), handed to the runner, then to us;
  * its instruction is the operator's recorded sentence of 2026-11-09 (AU-4's default for a headless place). */
@@ -49,6 +51,8 @@ const prof = (mandate: Json) => {
 };
 const call = (tier: string, mandate: Json, extra: Json = {}): Json => ({
   action: deploy, tier, caller: CALLER, callerAgent: RUNNER, self: SELF, mandate, effect: "deploy", now: NOW,
+  // The context the call acts in, the service's own knowledge: the profile's own unless a case says otherwise (AU-1).
+  context: mandate?.standing?.context ?? "personal",
   actionDigest: DIGEST, standing: true, ...extra
 });
 const taken = (mandate: Json, digest = prof(mandate)) => ({
@@ -65,8 +69,8 @@ function actionCases(): Json[] {
   const narrowed = profile({ chain: [{ agent: RUNNER, at: "2026-11-12T09:00:05Z" }, { agent: SELF, at: "2026-11-12T09:30:00Z", scope: { capabilities: ["site.deploy"], effects: ["draft"] } }] });
   const otherProf = `sha256:${"cd".repeat(32)}`;
   const estateDefault = profile({ standing: { ...STANDING, estateCapabilities: true } }, { effects: ["draft", "publish", "send", "reply", "charge", "delete", "merge", "deploy"] });
-  const byAdmin = profile({ standing: { ...STANDING, setLevel: "admin" } });
-  const byOwner = profile({ standing: { ...STANDING, setLevel: "owner" } });
+  const byAdmin = profile({ standing: { ...ORG_STANDING, setLevel: "admin" } });
+  const byOwner = profile({ standing: { ...ORG_STANDING, setLevel: "owner" } });
   return [
     // AU-1, AU-3: inside the boundary the standing mandate is read like a task's (MD-3); recorded via profile (AU-6).
     ["a headless profile covers a deploy, from T1", call("T1", p), taken(p)],
@@ -102,6 +106,12 @@ function actionCases(): Json[] {
     ["an administrator's profile at an action declared admin, from T1", call("T1", byAdmin, { actionLevel: "admin" }), taken(byAdmin)],
     ["an owner's profile at an action declared operator, from T1", call("T1", byOwner, { actionLevel: "operator" }), { ok: false, code: "operator-decision-required", data: { detail: "level-insufficient: operator" } }],
     ["a service's mistyped declared level is its own fault, never a caller's answer", call("T1", byAdmin, { actionLevel: "Owner" }), { fault: "action-level-invalid" }],
+    // AU-1: a profile stands only in the context it was stated for, as a level does (DEC-0162 LV-4).
+    ["an administrator's profile on a call in a personal context, from T0", call("T0", byAdmin, { context: "personal" }), { ok: false, code: "decision-invalid", data: { detail: "profile-context" } }],
+    ["an administrator's profile on a call in another organization, from T1", call("T1", byAdmin, { actionLevel: "admin", context: "org:org-b" }), { ok: false, code: "decision-invalid", data: { detail: "profile-context" } }],
+    ["the operator's personal profile on a call in an organization's context, from T1", call("T1", p, { context: "org:org-a", actionLevel: "owner" }), { ok: false, code: "decision-invalid", data: { detail: "profile-context" } }],
+    ["a service reading profiles that does not say the call's context", (({ context: _c, ...rest }) => rest)(call("T1", p)), { fault: "context-missing" }],
+    ["a profile with a setter's level stated for the personal context", call("T1", profile({ standing: { ...STANDING, setLevel: "admin" } })), { ok: false, code: "decision-invalid", data: { detail: "mandate-malformed" } }],
     ["the operator's own profile at an action declared operator, from T1", call("T1", p, { actionLevel: "operator" }), taken(p)],
     // AU-2: an architect records no profile (the operator's answer to question 4, 2026-11-13), so the schema refuses its level.
     ["a profile an architect set, from T1", call("T1", profile({ standing: { ...STANDING, setLevel: "architect" } }), { project: "alpha" }), { ok: false, code: "decision-invalid", data: { detail: "mandate-malformed" } }],
@@ -143,7 +153,7 @@ function documentCases(): Json[] {
     ["a profile living longer than a day", profile({ expiresAt: "2026-11-13T10:00:00Z" }), ["FAC-SEM-144 "]],
     ["a profile whose instruction holds a lone surrogate", profile({ instruction: "x\ud800y" }), ["FAC-SEM-144 "]],
     // AU-1: the hub states a profile by the operator of the place's estate; the setter's level is checked at the set.
-    ["an administrator's profile", profile({ standing: { ...STANDING, setLevel: "admin" } }), []],
+    ["an administrator's profile", profile({ standing: { ...ORG_STANDING, setLevel: "admin" } }), []],
     ["a profile naming the estate's capabilities and listing some as well", profile({ standing: { ...STANDING, estateCapabilities: true } }), ["FAC-SEM-144 "]],
     ["a place recorded by an estate machine id holding a tilde", profile({ standing: { ...STANDING, place: "mac~studio-1" } }), []],
     ["a profile stated by a level", profile({ by: "level", level: "admin", org: "org:org-a", membership: { kind: "an attestation" } }), ["FAC-SEM-144 "]],

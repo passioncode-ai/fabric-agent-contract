@@ -20,7 +20,8 @@
           "standing": {
             "place": "studio-space-1",
             "placeKind": "headless",
-            "revision": 3
+            "revision": 3,
+            "context": "personal"
           },
           "task": "assignment:alpha-0412",
           "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
@@ -47,6 +48,7 @@
         },
         "effect": "deploy",
         "now": "2026-11-12T10:00:00Z",
+        "context": "personal",
         "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
         "standing": true
       },
@@ -63,7 +65,7 @@
           "profile": {
             "place": "studio-space-1",
             "revision": 3,
-            "digest": "sha256:bd69d0805efcf0d4447c5329fcab479bbdd9d1af30fab1465cb86dcb6764beb6"
+            "digest": "sha256:c81ee1d484706f5f6ac3f536c17323ad0591228231732c9bce68b581d74bb5f3"
           },
           "caller": "agent:example-runner"
         }
@@ -88,7 +90,8 @@
           "standing": {
             "place": "studio-space-1",
             "placeKind": "headless",
-            "revision": 3
+            "revision": 3,
+            "context": "personal"
           },
           "task": "assignment:alpha-0412",
           "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
@@ -115,9 +118,10 @@
         },
         "effect": "deploy",
         "now": "2026-11-12T10:00:00Z",
+        "context": "personal",
         "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
         "standing": true,
-        "tokenProf": "sha256:bd69d0805efcf0d4447c5329fcab479bbdd9d1af30fab1465cb86dcb6764beb6"
+        "tokenProf": "sha256:c81ee1d484706f5f6ac3f536c17323ad0591228231732c9bce68b581d74bb5f3"
       },
       "expected": {
         "ok": true,
@@ -132,7 +136,7 @@
           "profile": {
             "place": "studio-space-1",
             "revision": 3,
-            "digest": "sha256:bd69d0805efcf0d4447c5329fcab479bbdd9d1af30fab1465cb86dcb6764beb6"
+            "digest": "sha256:c81ee1d484706f5f6ac3f536c17323ad0591228231732c9bce68b581d74bb5f3"
           },
           "caller": "agent:example-runner"
         }
@@ -157,7 +161,8 @@
           "standing": {
             "place": "studio-space-1",
             "placeKind": "headless",
-            "revision": 3
+            "revision": 3,
+            "context": "personal"
           },
           "task": "assignment:alpha-0412",
           "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
@@ -184,9 +189,10 @@
         },
         "effect": "deploy",
         "now": "2026-11-12T10:00:00Z",
+        "context": "personal",
         "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
         "standing": true,
-        "tokenProf": "sha256:bd69d0805efcf0d4447c5329fcab479bbdd9d1af30fab1465cb86dcb6764beb6"
+        "tokenProf": "sha256:c81ee1d484706f5f6ac3f536c17323ad0591228231732c9bce68b581d74bb5f3"
       },
       "expected": {
         "ok": true,
@@ -201,7 +207,7 @@
           "profile": {
             "place": "studio-space-1",
             "revision": 3,
-            "digest": "sha256:bd69d0805efcf0d4447c5329fcab479bbdd9d1af30fab1465cb86dcb6764beb6"
+            "digest": "sha256:c81ee1d484706f5f6ac3f536c17323ad0591228231732c9bce68b581d74bb5f3"
           },
           "caller": "agent:example-runner"
         }
@@ -226,7 +232,8 @@
           "standing": {
             "place": "studio-space-1",
             "placeKind": "headless",
-            "revision": 3
+            "revision": 3,
+            "context": "personal"
           },
           "task": "assignment:alpha-0412",
           "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
@@ -253,6 +260,7 @@
         },
         "effect": "deploy",
         "now": "2026-11-12T10:00:00Z",
+        "context": "personal",
         "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
         "standing": true
       },
@@ -283,7 +291,8 @@
           "standing": {
             "place": "studio-space-1",
             "placeKind": "headless",
-            "revision": 3
+            "revision": 3,
+            "context": "personal"
           },
           "task": "assignment:alpha-0412",
           "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
@@ -310,6 +319,7 @@
         },
         "effect": "deploy",
         "now": "2026-11-12T10:00:00Z",
+        "context": "personal",
         "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
         "standing": true,
         "tokenProf": "sha256:cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd"
@@ -342,7 +352,8 @@
           "standing": {
             "place": "studio-space-1",
             "placeKind": "headless",
-            "revision": 3
+            "revision": 3,
+            "context": "personal"
           },
           "task": "assignment:alpha-0412",
           "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
@@ -369,6 +380,7 @@
         },
         "effect": "deploy",
         "now": "2026-11-12T10:00:00Z",
+        "context": "personal",
         "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
         "standing": true,
         "tokenProf": "sha256:cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd"
@@ -400,7 +412,8 @@
           "standing": {
             "place": "studio-space-1",
             "placeKind": "headless",
-            "revision": 3
+            "revision": 3,
+            "context": "personal"
           },
           "task": "assignment:alpha-0412",
           "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
@@ -427,6 +440,7 @@
         },
         "effect": "deploy",
         "now": "2026-11-12T10:00:00Z",
+        "context": "personal",
         "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
         "standing": true,
         "tokenProf": "sha256:b73f8d1e0e52d4d042219c7df031b92707df449b5816853e7005996226f7b4ca"
@@ -459,7 +473,8 @@
           "standing": {
             "place": "studio-space-1",
             "placeKind": "headless",
-            "revision": 3
+            "revision": 3,
+            "context": "personal"
           },
           "task": "assignment:alpha-0412",
           "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
@@ -486,6 +501,7 @@
         },
         "effect": "deploy",
         "now": "2026-11-12T10:00:00Z",
+        "context": "personal",
         "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a"
       },
       "expected": {
@@ -512,7 +528,8 @@
           "standing": {
             "place": "studio-space-1",
             "placeKind": "headless",
-            "revision": 3
+            "revision": 3,
+            "context": "personal"
           },
           "task": "assignment:alpha-0412",
           "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
@@ -539,8 +556,9 @@
         },
         "effect": "deploy",
         "now": "2026-11-12T10:00:00Z",
+        "context": "personal",
         "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
-        "tokenProf": "sha256:bd69d0805efcf0d4447c5329fcab479bbdd9d1af30fab1465cb86dcb6764beb6"
+        "tokenProf": "sha256:c81ee1d484706f5f6ac3f536c17323ad0591228231732c9bce68b581d74bb5f3"
       },
       "expected": {
         "ok": false,
@@ -569,7 +587,8 @@
           "standing": {
             "place": "studio-space-1",
             "placeKind": "headless",
-            "revision": 3
+            "revision": 3,
+            "context": "personal"
           },
           "task": "assignment:alpha-0412",
           "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
@@ -596,6 +615,7 @@
         },
         "effect": "send",
         "now": "2026-11-12T10:00:00Z",
+        "context": "personal",
         "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a"
       },
       "expected": {
@@ -622,7 +642,8 @@
           "standing": {
             "place": "studio-space-1",
             "placeKind": "headless",
-            "revision": 3
+            "revision": 3,
+            "context": "personal"
           },
           "task": "assignment:alpha-0412",
           "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
@@ -650,6 +671,7 @@
         },
         "effect": "deploy",
         "now": "2026-11-12T10:00:00Z",
+        "context": "personal",
         "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
         "standing": true
       },
@@ -681,7 +703,8 @@
           "standing": {
             "place": "studio-space-1",
             "placeKind": "headless",
-            "revision": 3
+            "revision": 3,
+            "context": "personal"
           },
           "task": "assignment:alpha-0412",
           "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
@@ -708,6 +731,7 @@
         },
         "effect": "deploy",
         "now": "2026-11-12T10:00:00Z",
+        "context": "personal",
         "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
         "standing": true,
         "humanStepUrl": "https://example-deployer.example/billing/top-up"
@@ -740,7 +764,8 @@
           "standing": {
             "place": "studio-space-1",
             "placeKind": "headless",
-            "revision": 3
+            "revision": 3,
+            "context": "personal"
           },
           "task": "assignment:alpha-0412",
           "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
@@ -767,6 +792,7 @@
         },
         "effect": "merge",
         "now": "2026-11-12T10:00:00Z",
+        "context": "personal",
         "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
         "standing": true
       },
@@ -797,7 +823,8 @@
           "standing": {
             "place": "studio-space-1",
             "placeKind": "headless",
-            "revision": 3
+            "revision": 3,
+            "context": "personal"
           },
           "task": "assignment:alpha-0412",
           "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
@@ -824,6 +851,7 @@
         },
         "effect": "deploy",
         "now": "2026-11-12T10:00:00Z",
+        "context": "personal",
         "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
         "standing": true
       },
@@ -854,7 +882,8 @@
           "standing": {
             "place": "studio-space-1",
             "placeKind": "headless",
-            "revision": 3
+            "revision": 3,
+            "context": "personal"
           },
           "task": "assignment:alpha-0412",
           "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
@@ -881,6 +910,7 @@
         },
         "effect": "deploy",
         "now": "2026-11-13T08:00:00Z",
+        "context": "personal",
         "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
         "standing": true
       },
@@ -911,7 +941,8 @@
           "standing": {
             "place": "studio-space-1",
             "placeKind": "headless",
-            "revision": 3
+            "revision": 3,
+            "context": "personal"
           },
           "task": "assignment:alpha-0412",
           "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
@@ -943,6 +974,7 @@
         },
         "effect": "deploy",
         "now": "2026-11-12T10:00:00Z",
+        "context": "personal",
         "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
         "standing": true
       },
@@ -970,7 +1002,8 @@
           "standing": {
             "place": "studio-space-1",
             "placeKind": "headless",
-            "revision": 3
+            "revision": 3,
+            "context": "personal"
           },
           "task": "assignment:alpha-0412",
           "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
@@ -998,6 +1031,7 @@
         },
         "effect": "deploy",
         "now": "2026-11-12T10:00:00Z",
+        "context": "personal",
         "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
         "standing": true,
         "spendUsd": 0.1
@@ -1015,7 +1049,7 @@
           "profile": {
             "place": "studio-space-1",
             "revision": 3,
-            "digest": "sha256:3f7a58796c15a6b2a887bbb89bcbeb892dee9ce3bae3961fb8a76944d013462e"
+            "digest": "sha256:25670fdf647367eb2d03c0c4eac1a828a2d9e83d13cdde798121023f03dc0c22"
           },
           "caller": "agent:example-runner"
         }
@@ -1040,7 +1074,8 @@
           "standing": {
             "place": "studio-space-1",
             "placeKind": "headless",
-            "revision": 3
+            "revision": 3,
+            "context": "personal"
           },
           "task": "assignment:alpha-0412",
           "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
@@ -1068,9 +1103,10 @@
         },
         "effect": "deploy",
         "now": "2026-11-12T10:00:00Z",
+        "context": "personal",
         "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
         "standing": true,
-        "tokenProf": "sha256:3f7a58796c15a6b2a887bbb89bcbeb892dee9ce3bae3961fb8a76944d013462e",
+        "tokenProf": "sha256:25670fdf647367eb2d03c0c4eac1a828a2d9e83d13cdde798121023f03dc0c22",
         "spendUsd": 0.1
       },
       "expected": {
@@ -1086,7 +1122,7 @@
           "profile": {
             "place": "studio-space-1",
             "revision": 3,
-            "digest": "sha256:3f7a58796c15a6b2a887bbb89bcbeb892dee9ce3bae3961fb8a76944d013462e"
+            "digest": "sha256:25670fdf647367eb2d03c0c4eac1a828a2d9e83d13cdde798121023f03dc0c22"
           },
           "caller": "agent:example-runner"
         }
@@ -1112,6 +1148,7 @@
             "place": "studio-space-1",
             "placeKind": "headless",
             "revision": 3,
+            "context": "org:org-a",
             "setLevel": "admin"
           },
           "task": "assignment:alpha-0412",
@@ -1139,6 +1176,7 @@
         },
         "effect": "deploy",
         "now": "2026-11-12T10:00:00Z",
+        "context": "org:org-a",
         "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
         "standing": true,
         "actionLevel": "operator"
@@ -1171,6 +1209,7 @@
             "place": "studio-space-1",
             "placeKind": "headless",
             "revision": 3,
+            "context": "org:org-a",
             "setLevel": "admin"
           },
           "task": "assignment:alpha-0412",
@@ -1198,10 +1237,11 @@
         },
         "effect": "deploy",
         "now": "2026-11-12T10:00:00Z",
+        "context": "org:org-a",
         "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
         "standing": true,
         "actionLevel": "owner",
-        "tokenProf": "sha256:77853ed33c951fb1ba858679bbe976d7e4461e0ba309ec746316e0e899fbc8bc"
+        "tokenProf": "sha256:f16e5f0491c4f03b35ba8e9f0c7f1797c366dd6985ea0c01388bf0e1ef0b501c"
       },
       "expected": {
         "ok": false,
@@ -1232,6 +1272,7 @@
             "place": "studio-space-1",
             "placeKind": "headless",
             "revision": 3,
+            "context": "org:org-a",
             "setLevel": "owner"
           },
           "task": "assignment:alpha-0412",
@@ -1259,6 +1300,7 @@
         },
         "effect": "deploy",
         "now": "2026-11-12T10:00:00Z",
+        "context": "org:org-a",
         "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
         "standing": true,
         "actionLevel": "owner"
@@ -1276,7 +1318,7 @@
           "profile": {
             "place": "studio-space-1",
             "revision": 3,
-            "digest": "sha256:c3b840e1caa3bf2a270811d06136d65854eb35ea393f02cb5cf9d31cc50dc940",
+            "digest": "sha256:e0effa2769da1a59ed2d2c52b7b0fc36a5213f280d121956b7e5d8096c48a16b",
             "setLevel": "owner"
           },
           "caller": "agent:example-runner"
@@ -1303,6 +1345,7 @@
             "place": "studio-space-1",
             "placeKind": "headless",
             "revision": 3,
+            "context": "org:org-a",
             "setLevel": "admin"
           },
           "task": "assignment:alpha-0412",
@@ -1330,6 +1373,7 @@
         },
         "effect": "deploy",
         "now": "2026-11-12T10:00:00Z",
+        "context": "org:org-a",
         "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
         "standing": true,
         "actionLevel": "admin"
@@ -1347,7 +1391,7 @@
           "profile": {
             "place": "studio-space-1",
             "revision": 3,
-            "digest": "sha256:77853ed33c951fb1ba858679bbe976d7e4461e0ba309ec746316e0e899fbc8bc",
+            "digest": "sha256:f16e5f0491c4f03b35ba8e9f0c7f1797c366dd6985ea0c01388bf0e1ef0b501c",
             "setLevel": "admin"
           },
           "caller": "agent:example-runner"
@@ -1374,6 +1418,7 @@
             "place": "studio-space-1",
             "placeKind": "headless",
             "revision": 3,
+            "context": "org:org-a",
             "setLevel": "owner"
           },
           "task": "assignment:alpha-0412",
@@ -1401,6 +1446,7 @@
         },
         "effect": "deploy",
         "now": "2026-11-12T10:00:00Z",
+        "context": "org:org-a",
         "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
         "standing": true,
         "actionLevel": "operator"
@@ -1433,6 +1479,7 @@
             "place": "studio-space-1",
             "placeKind": "headless",
             "revision": 3,
+            "context": "org:org-a",
             "setLevel": "admin"
           },
           "task": "assignment:alpha-0412",
@@ -1460,6 +1507,7 @@
         },
         "effect": "deploy",
         "now": "2026-11-12T10:00:00Z",
+        "context": "org:org-a",
         "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
         "standing": true,
         "actionLevel": "Owner"
@@ -1469,7 +1517,67 @@
       }
     },
     {
-      "name": "the operator's own profile at an action declared operator, from T1",
+      "name": "an administrator's profile on a call in a personal context, from T0",
+      "input": {
+        "action": {
+          "id": "deploy-site",
+          "title": "Deploy the site",
+          "tool": "site.deploy",
+          "gate": "relayed"
+        },
+        "tier": "T0",
+        "caller": "agent:example-runner",
+        "callerAgent": "example-runner",
+        "self": "example-deployer",
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "operator",
+          "standing": {
+            "place": "studio-space-1",
+            "placeKind": "headless",
+            "revision": 3,
+            "context": "org:org-a",
+            "setLevel": "admin"
+          },
+          "task": "assignment:alpha-0412",
+          "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
+          "at": "2026-11-12T09:00:00Z",
+          "expiresAt": "2026-11-13T08:00:00Z",
+          "scope": {
+            "capabilities": [
+              "site.deploy"
+            ],
+            "effects": [
+              "deploy"
+            ]
+          },
+          "chain": [
+            {
+              "agent": "example-runner",
+              "at": "2026-11-12T09:00:05Z"
+            },
+            {
+              "agent": "example-deployer",
+              "at": "2026-11-12T09:30:00Z"
+            }
+          ]
+        },
+        "effect": "deploy",
+        "now": "2026-11-12T10:00:00Z",
+        "context": "personal",
+        "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
+        "standing": true
+      },
+      "expected": {
+        "ok": false,
+        "code": "decision-invalid",
+        "data": {
+          "detail": "profile-context"
+        }
+      }
+    },
+    {
+      "name": "an administrator's profile on a call in another organization, from T1",
       "input": {
         "action": {
           "id": "deploy-site",
@@ -1487,7 +1595,129 @@
           "standing": {
             "place": "studio-space-1",
             "placeKind": "headless",
-            "revision": 3
+            "revision": 3,
+            "context": "org:org-a",
+            "setLevel": "admin"
+          },
+          "task": "assignment:alpha-0412",
+          "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
+          "at": "2026-11-12T09:00:00Z",
+          "expiresAt": "2026-11-13T08:00:00Z",
+          "scope": {
+            "capabilities": [
+              "site.deploy"
+            ],
+            "effects": [
+              "deploy"
+            ]
+          },
+          "chain": [
+            {
+              "agent": "example-runner",
+              "at": "2026-11-12T09:00:05Z"
+            },
+            {
+              "agent": "example-deployer",
+              "at": "2026-11-12T09:30:00Z"
+            }
+          ]
+        },
+        "effect": "deploy",
+        "now": "2026-11-12T10:00:00Z",
+        "context": "org:org-b",
+        "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
+        "standing": true,
+        "actionLevel": "admin"
+      },
+      "expected": {
+        "ok": false,
+        "code": "decision-invalid",
+        "data": {
+          "detail": "profile-context"
+        }
+      }
+    },
+    {
+      "name": "the operator's personal profile on a call in an organization's context, from T1",
+      "input": {
+        "action": {
+          "id": "deploy-site",
+          "title": "Deploy the site",
+          "tool": "site.deploy",
+          "gate": "relayed"
+        },
+        "tier": "T1",
+        "caller": "agent:example-runner",
+        "callerAgent": "example-runner",
+        "self": "example-deployer",
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "operator",
+          "standing": {
+            "place": "studio-space-1",
+            "placeKind": "headless",
+            "revision": 3,
+            "context": "personal"
+          },
+          "task": "assignment:alpha-0412",
+          "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
+          "at": "2026-11-12T09:00:00Z",
+          "expiresAt": "2026-11-13T08:00:00Z",
+          "scope": {
+            "capabilities": [
+              "site.deploy"
+            ],
+            "effects": [
+              "deploy"
+            ]
+          },
+          "chain": [
+            {
+              "agent": "example-runner",
+              "at": "2026-11-12T09:00:05Z"
+            },
+            {
+              "agent": "example-deployer",
+              "at": "2026-11-12T09:30:00Z"
+            }
+          ]
+        },
+        "effect": "deploy",
+        "now": "2026-11-12T10:00:00Z",
+        "context": "org:org-a",
+        "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
+        "standing": true,
+        "actionLevel": "owner"
+      },
+      "expected": {
+        "ok": false,
+        "code": "decision-invalid",
+        "data": {
+          "detail": "profile-context"
+        }
+      }
+    },
+    {
+      "name": "a service reading profiles that does not say the call's context",
+      "input": {
+        "action": {
+          "id": "deploy-site",
+          "title": "Deploy the site",
+          "tool": "site.deploy",
+          "gate": "relayed"
+        },
+        "tier": "T1",
+        "caller": "agent:example-runner",
+        "callerAgent": "example-runner",
+        "self": "example-deployer",
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "operator",
+          "standing": {
+            "place": "studio-space-1",
+            "placeKind": "headless",
+            "revision": 3,
+            "context": "personal"
           },
           "task": "assignment:alpha-0412",
           "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
@@ -1515,6 +1745,121 @@
         "effect": "deploy",
         "now": "2026-11-12T10:00:00Z",
         "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
+        "standing": true
+      },
+      "expected": {
+        "fault": "context-missing"
+      }
+    },
+    {
+      "name": "a profile with a setter's level stated for the personal context",
+      "input": {
+        "action": {
+          "id": "deploy-site",
+          "title": "Deploy the site",
+          "tool": "site.deploy",
+          "gate": "relayed"
+        },
+        "tier": "T1",
+        "caller": "agent:example-runner",
+        "callerAgent": "example-runner",
+        "self": "example-deployer",
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "operator",
+          "standing": {
+            "place": "studio-space-1",
+            "placeKind": "headless",
+            "revision": 3,
+            "context": "personal",
+            "setLevel": "admin"
+          },
+          "task": "assignment:alpha-0412",
+          "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
+          "at": "2026-11-12T09:00:00Z",
+          "expiresAt": "2026-11-13T08:00:00Z",
+          "scope": {
+            "capabilities": [
+              "site.deploy"
+            ],
+            "effects": [
+              "deploy"
+            ]
+          },
+          "chain": [
+            {
+              "agent": "example-runner",
+              "at": "2026-11-12T09:00:05Z"
+            },
+            {
+              "agent": "example-deployer",
+              "at": "2026-11-12T09:30:00Z"
+            }
+          ]
+        },
+        "effect": "deploy",
+        "now": "2026-11-12T10:00:00Z",
+        "context": "personal",
+        "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
+        "standing": true
+      },
+      "expected": {
+        "ok": false,
+        "code": "decision-invalid",
+        "data": {
+          "detail": "mandate-malformed"
+        }
+      }
+    },
+    {
+      "name": "the operator's own profile at an action declared operator, from T1",
+      "input": {
+        "action": {
+          "id": "deploy-site",
+          "title": "Deploy the site",
+          "tool": "site.deploy",
+          "gate": "relayed"
+        },
+        "tier": "T1",
+        "caller": "agent:example-runner",
+        "callerAgent": "example-runner",
+        "self": "example-deployer",
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "operator",
+          "standing": {
+            "place": "studio-space-1",
+            "placeKind": "headless",
+            "revision": 3,
+            "context": "personal"
+          },
+          "task": "assignment:alpha-0412",
+          "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
+          "at": "2026-11-12T09:00:00Z",
+          "expiresAt": "2026-11-13T08:00:00Z",
+          "scope": {
+            "capabilities": [
+              "site.deploy"
+            ],
+            "effects": [
+              "deploy"
+            ]
+          },
+          "chain": [
+            {
+              "agent": "example-runner",
+              "at": "2026-11-12T09:00:05Z"
+            },
+            {
+              "agent": "example-deployer",
+              "at": "2026-11-12T09:30:00Z"
+            }
+          ]
+        },
+        "effect": "deploy",
+        "now": "2026-11-12T10:00:00Z",
+        "context": "personal",
+        "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
         "standing": true,
         "actionLevel": "operator"
       },
@@ -1531,7 +1876,7 @@
           "profile": {
             "place": "studio-space-1",
             "revision": 3,
-            "digest": "sha256:bd69d0805efcf0d4447c5329fcab479bbdd9d1af30fab1465cb86dcb6764beb6"
+            "digest": "sha256:c81ee1d484706f5f6ac3f536c17323ad0591228231732c9bce68b581d74bb5f3"
           },
           "caller": "agent:example-runner"
         }
@@ -1557,6 +1902,7 @@
             "place": "studio-space-1",
             "placeKind": "headless",
             "revision": 3,
+            "context": "personal",
             "setLevel": "architect"
           },
           "task": "assignment:alpha-0412",
@@ -1584,6 +1930,7 @@
         },
         "effect": "deploy",
         "now": "2026-11-12T10:00:00Z",
+        "context": "personal",
         "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
         "standing": true,
         "project": "alpha"
@@ -1638,6 +1985,7 @@
         },
         "effect": "deploy",
         "now": "2026-11-12T10:00:00Z",
+        "context": "personal",
         "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a"
       },
       "expected": {
@@ -1667,7 +2015,8 @@
           "standing": {
             "place": "studio-space-1",
             "placeKind": "headless",
-            "revision": 3
+            "revision": 3,
+            "context": "personal"
           },
           "task": "assignment:alpha-0412",
           "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
@@ -1694,9 +2043,10 @@
         },
         "effect": "deploy",
         "now": "2026-11-12T10:00:00Z",
+        "context": "personal",
         "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
         "standing": true,
-        "tokenProf": "sha256:bd69d0805efcf0d4447c5329fcab479bbdd9d1af30fab1465cb86dcb6764beb6"
+        "tokenProf": "sha256:c81ee1d484706f5f6ac3f536c17323ad0591228231732c9bce68b581d74bb5f3"
       },
       "expected": {
         "ok": true,
@@ -1711,7 +2061,7 @@
           "profile": {
             "place": "studio-space-1",
             "revision": 3,
-            "digest": "sha256:bd69d0805efcf0d4447c5329fcab479bbdd9d1af30fab1465cb86dcb6764beb6"
+            "digest": "sha256:c81ee1d484706f5f6ac3f536c17323ad0591228231732c9bce68b581d74bb5f3"
           },
           "caller": "agent:example-runner"
         }
@@ -1737,6 +2087,7 @@
             "place": "studio-space-1",
             "placeKind": "headless",
             "revision": 3,
+            "context": "personal",
             "estateCapabilities": true
           },
           "task": "assignment:alpha-0412",
@@ -1768,6 +2119,7 @@
         },
         "effect": "deploy",
         "now": "2026-11-12T10:00:00Z",
+        "context": "personal",
         "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
         "standing": true
       },
@@ -1784,7 +2136,7 @@
           "profile": {
             "place": "studio-space-1",
             "revision": 3,
-            "digest": "sha256:cd12754504efcd212ebc66193355e5e593b6e5976bf101af99243849b7833671"
+            "digest": "sha256:2476b44befe0e4ccc662485cccba593633a979e0ebce9ac694b0c756e12d62bf"
           },
           "caller": "agent:example-runner"
         }
@@ -1810,6 +2162,7 @@
             "place": "studio-space-1",
             "placeKind": "headless",
             "revision": 3,
+            "context": "personal",
             "estateCapabilities": true
           },
           "task": "assignment:alpha-0412",
@@ -1841,9 +2194,10 @@
         },
         "effect": "deploy",
         "now": "2026-11-12T10:00:00Z",
+        "context": "personal",
         "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
         "standing": true,
-        "tokenProf": "sha256:cd12754504efcd212ebc66193355e5e593b6e5976bf101af99243849b7833671"
+        "tokenProf": "sha256:2476b44befe0e4ccc662485cccba593633a979e0ebce9ac694b0c756e12d62bf"
       },
       "expected": {
         "ok": false,
@@ -1872,7 +2226,8 @@
           "standing": {
             "place": "studio-space-1",
             "placeKind": "headless",
-            "revision": 3
+            "revision": 3,
+            "context": "personal"
           },
           "task": "assignment:alpha-0412",
           "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
@@ -1899,9 +2254,10 @@
         },
         "effect": "deploy",
         "now": "2026-11-12T10:00:00Z",
+        "context": "personal",
         "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
         "standing": true,
-        "tokenProf": "sha256:bd69d0805efcf0d4447c5329fcab479bbdd9d1af30fab1465cb86dcb6764beb6"
+        "tokenProf": "sha256:c81ee1d484706f5f6ac3f536c17323ad0591228231732c9bce68b581d74bb5f3"
       },
       "expected": {
         "ok": true,
@@ -1916,7 +2272,7 @@
           "profile": {
             "place": "studio-space-1",
             "revision": 3,
-            "digest": "sha256:bd69d0805efcf0d4447c5329fcab479bbdd9d1af30fab1465cb86dcb6764beb6"
+            "digest": "sha256:c81ee1d484706f5f6ac3f536c17323ad0591228231732c9bce68b581d74bb5f3"
           },
           "caller": "agent:example-runner"
         }
@@ -1941,7 +2297,8 @@
           "standing": {
             "place": "studio-space-1",
             "placeKind": "headless",
-            "revision": 3
+            "revision": 3,
+            "context": "personal"
           },
           "task": "assignment:alpha-0412",
           "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
@@ -1968,9 +2325,10 @@
         },
         "effect": "deploy",
         "now": "2026-11-12T10:00:00Z",
+        "context": "personal",
         "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
         "standing": true,
-        "tokenProf": "sha256:bd69d0805efcf0d4447c5329fcab479bbdd9d1af30fab1465cb86dcb6764beb6",
+        "tokenProf": "sha256:c81ee1d484706f5f6ac3f536c17323ad0591228231732c9bce68b581d74bb5f3",
         "decision": {
           "by": "operator",
           "via": "relayed-instruction",
@@ -1992,7 +2350,7 @@
           "profile": {
             "place": "studio-space-1",
             "revision": 3,
-            "digest": "sha256:bd69d0805efcf0d4447c5329fcab479bbdd9d1af30fab1465cb86dcb6764beb6"
+            "digest": "sha256:c81ee1d484706f5f6ac3f536c17323ad0591228231732c9bce68b581d74bb5f3"
           },
           "caller": "agent:example-runner"
         }
@@ -2039,6 +2397,7 @@
         },
         "effect": "deploy",
         "now": "2026-11-12T10:00:00Z",
+        "context": "personal",
         "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a"
       },
       "expected": {
@@ -2068,7 +2427,8 @@
           "standing": {
             "place": "studio-space-1",
             "placeKind": "headless",
-            "revision": 3
+            "revision": 3,
+            "context": "personal"
           },
           "task": "assignment:alpha-0412",
           "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
@@ -2098,6 +2458,7 @@
         },
         "effect": "deploy",
         "now": "2026-11-12T10:00:00Z",
+        "context": "personal",
         "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
         "standing": true
       },
@@ -2128,7 +2489,8 @@
           "standing": {
             "place": "studio-space-1",
             "placeKind": "headless",
-            "revision": 3
+            "revision": 3,
+            "context": "personal"
           },
           "task": "assignment:alpha-0412",
           "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
@@ -2162,6 +2524,7 @@
         },
         "effect": "deploy",
         "now": "2026-11-12T10:00:00Z",
+        "context": "personal",
         "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
         "standing": true
       },
@@ -2178,7 +2541,7 @@
           "profile": {
             "place": "studio-space-1",
             "revision": 3,
-            "digest": "sha256:932ec0c775c80f63124a42963168c323a644fe15baabe9c2b038442f2fe63e4a"
+            "digest": "sha256:383672b3c6ea554a47b1507065328ec7b1118b46ea7b7d558682458689242640"
           },
           "caller": "agent:example-runner"
         }
@@ -2203,7 +2566,8 @@
           "standing": {
             "place": "studio-space-1",
             "placeKind": "headless",
-            "revision": 3
+            "revision": 3,
+            "context": "personal"
           },
           "task": "assignment:alpha-0412",
           "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
@@ -2238,9 +2602,10 @@
         },
         "effect": "deploy",
         "now": "2026-11-12T10:00:00Z",
+        "context": "personal",
         "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
         "standing": true,
-        "tokenProf": "sha256:bd69d0805efcf0d4447c5329fcab479bbdd9d1af30fab1465cb86dcb6764beb6"
+        "tokenProf": "sha256:c81ee1d484706f5f6ac3f536c17323ad0591228231732c9bce68b581d74bb5f3"
       },
       "expected": {
         "ok": false,
@@ -2270,7 +2635,8 @@
           "standing": {
             "place": "studio-space-1",
             "placeKind": "headless",
-            "revision": 3
+            "revision": 3,
+            "context": "personal"
           },
           "task": "assignment:alpha-0412",
           "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
@@ -2297,9 +2663,10 @@
         },
         "effect": "deploy",
         "now": "2026-11-12T10:00:00Z",
+        "context": "personal",
         "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
         "standing": true,
-        "tokenProf": "sha256:bd69d0805efcf0d4447c5329fcab479bbdd9d1af30fab1465cb86dcb6764beb6"
+        "tokenProf": "sha256:c81ee1d484706f5f6ac3f536c17323ad0591228231732c9bce68b581d74bb5f3"
       },
       "expected": {
         "ok": true,
@@ -2314,7 +2681,7 @@
           "profile": {
             "place": "studio-space-1",
             "revision": 3,
-            "digest": "sha256:bd69d0805efcf0d4447c5329fcab479bbdd9d1af30fab1465cb86dcb6764beb6"
+            "digest": "sha256:c81ee1d484706f5f6ac3f536c17323ad0591228231732c9bce68b581d74bb5f3"
           },
           "caller": "agent:example-runner"
         }
@@ -2339,7 +2706,8 @@
           "standing": {
             "place": "studio-space-1",
             "placeKind": "headless",
-            "revision": 3
+            "revision": 3,
+            "context": "personal"
           },
           "task": "assignment:alpha-0412",
           "instruction": "x\ud800y",
@@ -2366,6 +2734,7 @@
         },
         "effect": "deploy",
         "now": "2026-11-12T10:00:00Z",
+        "context": "personal",
         "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
         "standing": true
       },
@@ -2418,9 +2787,10 @@
         },
         "effect": "deploy",
         "now": "2026-11-12T10:00:00Z",
+        "context": "personal",
         "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
         "standing": true,
-        "tokenProf": "sha256:bd69d0805efcf0d4447c5329fcab479bbdd9d1af30fab1465cb86dcb6764beb6"
+        "tokenProf": "sha256:c81ee1d484706f5f6ac3f536c17323ad0591228231732c9bce68b581d74bb5f3"
       },
       "expected": {
         "ok": false,
@@ -2440,7 +2810,8 @@
         "standing": {
           "place": "studio-space-1",
           "placeKind": "headless",
-          "revision": 3
+          "revision": 3,
+          "context": "personal"
         },
         "task": "assignment:alpha-0412",
         "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
@@ -2475,7 +2846,8 @@
         "standing": {
           "place": "studio-space-1",
           "placeKind": "headless",
-          "revision": 3
+          "revision": 3,
+          "context": "personal"
         },
         "task": "assignment:alpha-0412",
         "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
@@ -2512,7 +2884,8 @@
         "standing": {
           "place": "studio-space-1",
           "placeKind": "headless",
-          "revision": 3
+          "revision": 3,
+          "context": "personal"
         },
         "task": "assignment:alpha-0412",
         "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
@@ -2550,7 +2923,8 @@
         "standing": {
           "place": "studio-space-1",
           "placeKind": "headless",
-          "revision": 3
+          "revision": 3,
+          "context": "personal"
         },
         "task": "assignment:alpha-0412",
         "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
@@ -2598,7 +2972,8 @@
         "standing": {
           "place": "studio-space-1",
           "placeKind": "headless",
-          "revision": 3
+          "revision": 3,
+          "context": "personal"
         },
         "task": "assignment:alpha-0412",
         "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
@@ -2635,7 +3010,8 @@
         "standing": {
           "place": "studio-space-1",
           "placeKind": "headless",
-          "revision": 3
+          "revision": 3,
+          "context": "personal"
         },
         "task": "assignment:alpha-0412",
         "instruction": "x\ud800y",
@@ -2673,6 +3049,7 @@
           "place": "studio-space-1",
           "placeKind": "headless",
           "revision": 3,
+          "context": "org:org-a",
           "setLevel": "admin"
         },
         "task": "assignment:alpha-0412",
@@ -2709,6 +3086,7 @@
           "place": "studio-space-1",
           "placeKind": "headless",
           "revision": 3,
+          "context": "personal",
           "estateCapabilities": true
         },
         "task": "assignment:alpha-0412",
@@ -2746,7 +3124,8 @@
         "standing": {
           "place": "mac~studio-1",
           "placeKind": "headless",
-          "revision": 3
+          "revision": 3,
+          "context": "personal"
         },
         "task": "assignment:alpha-0412",
         "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
@@ -2781,7 +3160,8 @@
         "standing": {
           "place": "studio-space-1",
           "placeKind": "headless",
-          "revision": 3
+          "revision": 3,
+          "context": "personal"
         },
         "task": "assignment:alpha-0412",
         "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
@@ -2823,7 +3203,8 @@
         "standing": {
           "place": "studio-space-1",
           "placeKind": "headless",
-          "revision": 3
+          "revision": 3,
+          "context": "personal"
         },
         "task": "assignment:alpha-0412",
         "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",

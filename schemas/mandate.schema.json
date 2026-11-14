@@ -49,7 +49,8 @@
       "required": [
         "place",
         "placeKind",
-        "revision"
+        "revision",
+        "context"
       ],
       "additionalProperties": false,
       "description": "DEC-0166 AU-1: present on a place's standing mandate, its autonomy profile, which the place's hub states from the profile at its revision for each assignment it starts there and restates at least once every 24 hours, a standing mandate living at most a day (FAC-SEM-144); task then names the assignment. A callee takes it only when its authority extension (extensions/authority/0.1) declares standing (AU-3) and, from T2, only when the call's delegation token binds it by prof (profileDigest); its scope never names autonomy.profile.set (FAC-SEM-173).",
@@ -74,6 +75,11 @@
           "maximum": 2147483647,
           "description": "The profile's revision the hub stated it at; a profile the hub replaced takes effect at the next mandate and token it states."
         },
+        "context": {
+          "type": "string",
+          "pattern": "^(?:personal|org:[A-Za-z0-9][A-Za-z0-9_-]{0,127})$",
+          "description": "DEC-0166 AU-1: the context the profile is for, as common.schema.json contextId: personal, or org:<orgId> (org: whenever setLevel is present). A callee takes the standing mandate only for a call in that same context (another organization or the other context: decision-invalid profile-context), the call's context being the service's own knowledge, as DEC-0162 LV-4 reads a level's. Inside the digest, as the rest of standing."
+        },
         "estateCapabilities": {
           "const": true,
           "description": "DEC-0166 AU-4: a headless place's default names every capability of the services registered in the place's estate instead of listing them in scope.capabilities, which the scope then leaves out; it names a call only from T0 or T1, inside the boundary. Inside the digest, as the rest of standing."
@@ -85,7 +91,9 @@
           ],
           "description": "DEC-0166 AU-2: in an organization's context, the level of the holder who set the profile, the owner or an administrator (an architect records no profile, the operator's answer to DEC-0166 question 4); absent on the operator's own profile. Inside the digest, so a token's prof binds it. A callee that declares actionLevels (extensions/authority/0.1) refuses an action declared above it operator-decision-required with level-insufficient, as LV-7 and LV-10 say."
         }
-      }
+      },
+      "if": { "properties": { "setLevel": true }, "required": ["setLevel"] },
+      "then": { "properties": { "context": { "type": "string", "pattern": "^org:" } } }
     },
     "task": {
       "type": "string",
