@@ -115,7 +115,7 @@ receiver nothing it does not know ([share registration](share-registration.md#th
 `node-summary/1` record carries its enrollment's own `org:<org.id>` the same way: the receiver compares it with the
 certificate's `org.id` as written and refuses it when they differ (DEC-0102, [node summary](node-summary.md)), and so
 do its `credentialRequests` and `callRecords` (DEC-0111, compared as attribution by `FAC-SEM-045`, DEC-0114). What a device
-sends, and to which organization server, is decided three ways:
+sends, and to which organization server, is decided four ways:
 
 - **Check-ins** are the device's, not a session's. A device enrolled in several organizations holds one enrollment per
   organization and sends each enrollment's check-ins to that enrollment's own server, on that enrollment's interval,
@@ -125,6 +125,9 @@ sends, and to which organization server, is decided three ways:
   record of the session, never a field of the event.
 - **A grant's usage** (`grant.usage`, [below](#usage-per-grant)) goes where `routeGrantUsage(grantContext, enrollments)`
   answers: by the grant's own `context`, not by any session.
+- **A unit of work** (`unit`, DEC-0164, [activity](activity.md#kinds)) carries no session: it goes to the enrollment of
+  the organization that owns its `project.id` as the device's folder attribution names it, never for a personal or
+  unattributed project, and a device that cannot tell sends none. The route function and its vectors are CT-297.
 
 `routeTarget` answers:
 

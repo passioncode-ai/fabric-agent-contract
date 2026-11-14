@@ -716,12 +716,13 @@ login, only in its vendor's runner and unmetered; `key` is an issued key whose m
 
 **Activity telemetry**: The `fabric-activity/0.1` protocol (DEC-0030): records of when an
 agent session worked, waited or idled and what each model call used, sent by a collector on a
-device in batches. It carries no content and no person attribute; a person appears only as an
-opaque `user.id`.
+device in batches, and the units of work an agent did (`unit`, DEC-0164), sent by a device's collector or recorded by
+a kit through Project Observatory's capability. It carries no content and no person attribute; a person appears only
+as an opaque `user.id`, or as a unit acceptance's pairwise subject; a unit's tracker key, or an evidence link in its raw event, may also name a tracker account (a GitHub owner that is a user), which the contract does not resolve to a member (DEC-0164).
 
-**Telemetry event**: One record of activity telemetry (`telemetry-event.schema.json`) — a
-`session.interval`, a `usage.line`, a `buffer.overflow`, a `policy.violation` (by UTC day), a `result`, or a
-kind the reader does not know — positioned in a stream by `(device.id, collector.id, collector.epoch, seq)`. It
+**Telemetry event**: One record of activity telemetry (`telemetry-event.schema.json`): a
+`session.interval`, a `usage.line`, a `buffer.overflow`, a `policy.violation` (by UTC day), a `result`, a `unit`
+(DEC-0164), or a kind the reader does not know, positioned in a stream by `(device.id, collector.id, collector.epoch, seq)`. It
 may name its `account.class` and its root `run` (DEC-0052).
 
 **Account class**: The class of the account a session ran on — `organization` (one of the policy's tenants),
@@ -737,8 +738,9 @@ stream rather than rewinding the old one.
 **Activity summary**: An `activity-summary/1` document a receiver builds from many devices' events:
 cells of agent × skill × project × UTC day × outcome, with no person dimension.
 
-**Access log**: An `access-log/1` document: who read which scope of one subject's data — keyed by
-their user id or by a device bound to them — when and why, readable by that subject.
+**Access log**: An `access-log/1` document: who read which scope of one subject's data (keyed by
+their user id or by a device bound to them, and a unit of work they accepted, by the pairwise subject resolved to
+their user id, DEC-0164), when and why, readable by that subject.
 
 **Device**: One counted OS account of a computer, or a virtual machine, enrolled with an organization server under
 `fabric-device/0.1` (DEC-0031; DEC-0154; what an estate machine is on such a computer is CT-231):

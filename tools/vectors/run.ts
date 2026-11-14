@@ -14,6 +14,7 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { projectRoot } from "../../src/contract.js";
 import * as actions from "./actions.js";
+import * as activityUnit from "./activity-unit.js";
 import * as agentNetwork from "./agent-network.js";
 import * as channelAgent from "./channel-agent.js";
 import * as commsHold from "./comms-hold.js";
@@ -50,6 +51,7 @@ const one = (file: string, build: () => string) => () => ({ [file]: build() });
 
 export const GENERATORS: readonly Generator[] = [
   { source: "actions.ts", build: one(actions.VECTOR_FILE, actions.buildActionsVectors) },
+  { source: "activity-unit.ts", build: one(activityUnit.VECTOR_FILE, activityUnit.buildActivityUnitVectors) },
   { source: "agent-network.ts", build: one(agentNetwork.VECTOR_FILE, agentNetwork.buildAgentNetworkVectors) },
   { source: "channel-agent.ts", build: one(channelAgent.VECTOR_FILE, channelAgent.buildChannelAgentVectors) },
   { source: "comms-hold.ts", build: one(commsHold.VECTOR_FILE, commsHold.buildCommsHoldVectors) },
