@@ -38,6 +38,9 @@ sequenceDiagram
   Node->>Node: checkCredentialEnvelope, then opens into the org instance's vault slot
 ```
 
+The issuer declares no `standing` in its authority extension, so no place's autonomy profile decides a request
+([delegation](delegation.md#a-places-standing-mandate-dec-0166) AU-4, DEC-0166).
+
 The contract defines what crosses the machine's check-in in both directions and what the node verifies. How the issuer
 reads the server's queue, which presets an organization offers and how an administrator decides are the organization
 server's and the issuer's (the first organization server, Project Observatory OBS-191).

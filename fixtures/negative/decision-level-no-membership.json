@@ -1,0 +1,10 @@
+{
+  "by": "level",
+  "via": "level-command",
+  "level": "architect",
+  "org": "org:org-a",
+  "action": "approve-reply",
+  "instruction": "approve the reply to the review from Anna",
+  "at": "2026-10-25T11:20:00Z",
+  "project": "alpha"
+}

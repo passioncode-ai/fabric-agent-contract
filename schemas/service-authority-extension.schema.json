@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/service-authority-extension.schema.json",
+  "title": "extensions/authority/0.1: the organizations whose authority levels a service reads, the level each relayed action needs (DEC-0162) and whether it reads standing mandates (DEC-0166)",
+  "description": "The value of the authority extension key https://fabric.passioncode.ai/agent-contract/extensions/authority/0.1 in a service's well-known document, beside the actions extension (DEC-0121 AP-1), which it never changes: a reader of the actions extension pinned before DEC-0162 ignores this key. A service that reads levels declares levels; the level an action needs is keyed by the action's id in the actions extension. A reader ignores a member it does not define (a later decision adds members to this key, as DEC-0166 adds standing), so the root is open; the members it defines are closed. A checker reports an invalid value, an organization named twice and a level for an id that is not a relayed action of the actions extension as FAC-SEM-142. docs/specification/membership.md#levels.",
+  "type": "object",
+  "minProperties": 1,
+  "additionalProperties": true,
+  "properties": {
+    "standing": {
+      "const": true,
+      "description": "DEC-0166 AU-3: this service reads standing mandates (a place's autonomy profile, mandate/1 with standing); the hub forwards one, and an agent sends one directly, only to a service that declares it. Absent: the service reads none and answers a call carrying one as if it carried no mandate."
+    },
+    "levels": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 16,
+      "description": "DEC-0162 LV-5: the organizations whose levels this service reads, each with the audience that organization's issuer registered it by as an org-membership/2 reader; the hub fetches a level holder's attestation for that audience and binds it by mem. Absent: the service reads no levels (LV-10).",
+      "items": {
+        "type": "object",
+        "required": [
+          "org",
+          "audience"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "org": {
+            "type": "string",
+            "maxLength": 132,
+            "pattern": "^org:[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+          },
+          "audience": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:~-]{0,127}$"
+          }
+        }
+      }
+    },
+    "actionLevels": {
+      "type": "object",
+      "minProperties": 1,
+      "maxProperties": 128,
+      "description": "DEC-0162 LV-7: the lowest level that decides this relayed action in an organization: owner for a billing act (the organization's plan, its payment method, its invoices); operator for an act no level decides (a rule proposal's approval, type rule, proposals FAC-SEM-104; an owner's settlement is no relayed action); admin for a client key's relayed twin of an instance the organization deploys (DEC-0159 CF-3: the revoking twin; issuing or rotating a member's key stays CF-3's human step, decided and taken in person by the owner or an administrator, a member's own machine included (until the member-key door's proof is named (membership, Not decided), an instance the organization deploys on a member's machine offers no member-key issue or rotation)), an access grant at a gate, a spend limit (setting or changing a project's L1, a key's ceiling or an organization-wide total once one is specified), a board hold's set and lift, the move of a responder slot and a Project's listing and unlisting (project-comms), any other proposal type's approval and a credential request's decision offered as a relayed action (the operator's answers to questions 4 and 9, 2026-11-13). A source hand-over of an organization's own agent is declared admin: a route to a place the organization holds and only its members read is no hand-over, so no hand-over is an architect's (source, LV-6, the operator's answer of 2026-11-13). An action this map leaves out is decided by an architect in the call's project, by admin for a call in no project; an action whose effect is change-policy is read as admin at least, whatever this map says (the operator's answer to question 4).",
+      "propertyNames": {
+        "$ref": "interop-common.schema.json#/$defs/requestKey"
+      },
+      "additionalProperties": {
+        "enum": [
+          "operator",
+          "owner",
+          "admin",
+          "architect"
+        ]
+      }
+    }
+  }
+}

@@ -57,6 +57,7 @@ export const PROTOCOL_REVISIONS: ReadonlyMap<string, readonly string[]> = new Ma
   ["fabric-source", ["1"]],
   ["heartbeat", ["1"]],
   ["learning-note", ["1"]],
+  ["levels", ["1"]],
   ["machine-report", ["1"]],
   ["mandate", ["1"]],
   ["memory", ["0.1"]],
@@ -68,7 +69,7 @@ export const PROTOCOL_REVISIONS: ReadonlyMap<string, readonly string[]> = new Ma
   ["org-authority-draft", ["1"]],
   ["org-key-set", ["1"]],
   ["org-key-set-draft", ["1"]],
-  ["org-membership", ["1"]],
+  ["org-membership", ["1", "2"]],
   ["org-root-registration", ["1"]],
   ["pairing-message", ["1"]],
   ["peer-share-deletion", ["1"]],
@@ -79,7 +80,9 @@ export const PROTOCOL_REVISIONS: ReadonlyMap<string, readonly string[]> = new Ma
   ["repair-result", ["1"]],
   ["revocation-delta", ["1"]],
   ["session-handoff", ["1"]],
+  ["standing", ["1"]],
   ["service-load", ["1"]],
+  ["activity-unit", ["1"]],
   ["share-registration", ["1"]],
   ["share-registration-receipt", ["1"]],
   ["support-quality-daily", ["1"]],
@@ -87,7 +90,7 @@ export const PROTOCOL_REVISIONS: ReadonlyMap<string, readonly string[]> = new Ma
 ]);
 
 /** Protocols the contract names in a specification's title but no schema pins with `const` (DEC-0067). */
-export const NAMED_ONLY: readonly string[] = ["approval/1", "fabric-actions/0.1", "fabric-connections/0.1", "fabric-dashboard/0.1", "fabric-delegation/0.1", "fabric-interop/0.1", "fabric-interop/0.2", "fabric-load/0.1", "fabric-local-channel/0.1", "fabric-ops-digest/0.1", "fabric-peer-share/1", "operator-source/1", "pipeline/0.1"];
+export const NAMED_ONLY: readonly string[] = ["activity-unit/1", "approval/1", "fabric-actions/0.1", "fabric-connections/0.1", "fabric-dashboard/0.1", "fabric-delegation/0.1", "fabric-interop/0.1", "fabric-interop/0.2", "fabric-load/0.1", "fabric-local-channel/0.1", "fabric-ops-digest/0.1", "fabric-peer-share/1", "levels/1", "operator-source/1", "pipeline/0.1", "standing/1"];
 
 /** At most this many revisions of one protocol are accepted at once: N and N−1. */
 export const MAX_REVISIONS_PER_PROTOCOL = 2;

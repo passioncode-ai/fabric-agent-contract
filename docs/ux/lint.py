@@ -7,7 +7,7 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[2]
 UX = ROOT / "docs" / "ux"
-files = {name: (UX / name).read_text() for name in ("foundation.md", "flows.md", "screens.md", "scenarios.md")}
+files = {name: (UX / name).read_text(encoding="utf-8") for name in ("foundation.md", "flows.md", "screens.md", "scenarios.md")}
 findings: list[str] = []
 
 
