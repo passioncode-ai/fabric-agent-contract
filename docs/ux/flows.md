@@ -759,7 +759,8 @@ flowchart TD
   C --> G{gate}
   G -->|human| H[human-step-required with the link; the agent hands it over]
   G -->|relayed| T{tier}
-  T -->|T2 without approval and without a bound level decision| A[approval-required with the digest]
+  T -->|T2 without approval and without a bound level decision, save the organization's acts below| A[approval-required with the digest]
+  T -->|any tier, in an organization's context at a service reading levels, an act declared owner or admin with no level form| N
   T -->|any tier, a bound level decision| L[Taken as the level holder's; audited with level, organization and approver]
   T -->|any tier, a level below the action's| N[operator-decision-required with level-insufficient; the agent files one request to a holder of that level through the product's own approval surface]
   T -->|any tier, a level form that fails| V{its detail}
@@ -775,7 +776,7 @@ flowchart TD
   D -->|none| Q[operator-decision-required; the agent asks the operator]
   Q --> O
   D -->|invalid| I[decision-invalid; the agent asks again]
-  D -->|valid| R[Taken as the operator's; audited with the agent]
+  D -->|valid, save an organization's act declared owner or admin, LV-7| R[Taken as the operator's; audited with the agent]
   O -->|a whole task| K1[The agent takes each step itself: commands, builds, the acts the words name, OW-1 and OW-2]
   K1 -->|at a step with a risk| R1{a risk the words did not name}
   R1 -->|corrected way undoes cleanly and meets the word, no gate| T1[One message with the corrected way; taken and reported; the rest goes on]
