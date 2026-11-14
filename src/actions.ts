@@ -74,7 +74,8 @@ export interface ActionDecisionInput {
   project?: unknown;
   /** The context the call acts in, the service's own knowledge as the project is: `org:<orgId>` or `personal`
    * (DEC-0082); required to read a level decision or a level mandate, which stands only in its own organization
-   * (DEC-0162 LV-4), and, at a service given `levels`, an act declared `owner` or `admin` (LV-7). */
+   * (DEC-0162 LV-4), at a service given `levels` an act declared `owner` or `admin` (LV-7), and a place's standing
+   * mandate, which stands only in its own context (DEC-0166 AU-1). */
   context?: unknown;
   /** The organizations this service reads levels in, by `org:<orgId>` (DEC-0162); absent, it reads none, and a level
    * decision or mandate is read as absent and any other form the call carries answers as AP-2 says (LV-10). */

@@ -647,7 +647,7 @@ it reaches acts on them without asking, within what they cover.
   machine or another organization's agents the operator's authority travels only as a delegation token under a grant
   (DL-4, DEC-0039), which the hub mints for the mandate's scope once Fabric's issuer serves it. Inside the estate (T0,
   T1) the mandate needs no token, before and after the issuer exists (DL-26).
-- **MD-6, what never travels.** A mandate never covers a human step (AP-4: a sign-in, a consent, a payment or top-up, a
+- **MD-6, what never travels.** No mandate, a task's included, covers `autonomy.profile.set` (DEC-0166 AU-5, `outside-mandate: capability`). A mandate never covers a human step (AP-4: a sign-in, a consent, a payment or top-up, a
   secret typed in or handed out, spend above a limit, a passkey signature, a comparison of codes between two people or the choice to share without one (DEC-0142)): spend above the project's L1 per-task threshold, an L0
   limit or a key's ceiling stays the person's ([spend policy](spend-policy.md#levels); in an organization's project the threshold, the project's L1 and the ceiling of a key the organization holds are the owner's or an administrator's, spend policy rule 3, DEC-0162 LV-7, while a member's own L0 stays that estate operator's). A mandate never covers a source hand-over
   (DEC-0149): it is taken only on the operator's word for that act (for an organization's own agent, instead, only an owner's or an administrator's level decision, DEC-0162 LV-6), as [source](source.md#handing-over) specifies. It

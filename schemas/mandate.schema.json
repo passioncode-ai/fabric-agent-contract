@@ -119,7 +119,7 @@
     },
     "expiresAt": {
       "$ref": "common.schema.json#/$defs/timestamp",
-      "description": "When the mandate ends: after at and at most 7 days after it (FAC-SEM-144)."
+      "description": "When the mandate ends: after at and at most 7 days after it, a standing mandate at most 24 hours (FAC-SEM-144, DEC-0166 AU-1)."
     },
     "scope": {
       "$ref": "#/$defs/scope",
