@@ -50,7 +50,7 @@ not from configuration an administrator can edit. No member carries an amount, a
 ## The signature
 
 The signature covers the UTF-8 RFC 8785 form of the entitlement without `sig` (`entitlementSigningInput`), the
-register's `entitlement/1` statement ([signing challenges](conformance.md#signing-challenges), DEC-0063). The type is
+register's `entitlement/1` or `entitlement/2` statement ([signing challenges](conformance.md#signing-challenges), DEC-0063). The type is
 inside the signed bytes, so no other statement the same key signs is an entitlement. It is one JSON document with its
 signature inside, not a JWT: every signed record of the contract uses this one canonical form (DEC-0043, DEC-0062), and
 a verifier needs no JOSE parser.
@@ -254,8 +254,8 @@ order's lines are its limits there. For entitlements this board confirmation dec
   keeps the applied revision and digest, verifies each entitlement with `verifyEntitlement` for its subject
   `org:<orgId>`, stores the `held` record and the document per subject, re-verifies them as [the verifier's
   duties](#the-verifiers-duties) state, surfaces `refreshDue` and the `grace` state to its administrator, and runs
-  `fixtures/vectors/entitlement.json`; at or after DEC-0168 it reads `entitlement/2`, enforces the order's allowances
-  only while `allowances` is `limited`, and confirms on the board that it reads it.
+  `fixtures/vectors/entitlement.json`; at or after DEC-0168 it reads `entitlement/2`, never enforces the order's allowances while `allowances` is `unlimited` (under
+  `limited` it reads them as `/1`), and confirms on the board that it reads it.
 - **A personal cloud** verifies the same way with the subject `personal` and its own estate.
 
 ## Privacy
