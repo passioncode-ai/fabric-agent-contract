@@ -238,7 +238,7 @@
               "items": {
                 "$ref": "common.schema.json#/$defs/capabilityName"
               },
-              "description": "The capability names the surface serves, so a host shows them without the token; the manifest remains the authority (docs/specification/service.md#well-known-document)."
+              "description": "The capability names the surface serves, so a host shows them without the token; the manifest remains the authority (docs/specification/service.md#well-known-document). A present list names at least one (FAC-SEM-176, DEC-0169)."
             },
             "auth": {
               "description": "DEC-0024, DEC-0039. descriptor (default): the MCP surface takes the descriptor's token in its header. own: it authenticates its callers with credentials of its own (a token per agent, a gateway's caller identity); the descriptor's token is the host's and is not an MCP credential. delegation: it takes only the estate's delegation tokens (auth.delegation), and the descriptor's token is not an MCP credential.",

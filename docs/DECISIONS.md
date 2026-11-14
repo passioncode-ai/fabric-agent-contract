@@ -12053,7 +12053,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-11-14
 - **Status:** Accepted source change (on merge of its pull request). Extends DEC-0121 AP-1. A behaviour rule a service
   adopts at its next pin; `FAC-SEM-176` reads its well-known document from then. Consumer adoption: board row CT-311:
-  the adapter's kits and probe (FAA-332, 0.88.0, already shipped), every service with a view.
+  the adapter's kits and probe (FAA-332, 0.88.0: the probe counts `surfaces.a2a` only for a remote service and reads
+  emptiness from `tools/list`, a tell owed to it), every service with a view.
 - **Decision:** in [service → read parity and the design order](specification/service.md#read-parity-and-the-design-order-dec-0169):
   1. **RP-1, read parity.** Everything a service shows a person on a dashboard, an app, a page, a bot or a report (a
      list, a record, a status, a number, a chart's series, a log, a history, a setting, an export, a preview with its

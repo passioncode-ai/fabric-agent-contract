@@ -1192,7 +1192,7 @@ token, it never presents a service's own descriptor token to call that service's
 
 A service that answers A2A peers ([A2A peer profile](profiles.md#a2a-peer-profile), DEC-0002) serves an Agent Card
 as A2A `1.0` defines it. It SHOULD name the card in its well-known document, so a host finds it beside the other
-surfaces; a peer finds it at A2A's own well-known path (A2A 1.0 §8.2):
+surfaces (a service with a dashboard and no `surfaces.mcp` MUST name it there, RP-3); a peer finds it at A2A's own well-known path (A2A 1.0 §8.2):
 
 ```json
 "surfaces": {
@@ -1380,7 +1380,9 @@ answer the operator's words of 2026-11-14, relayed by fabric-agent-adapter (boar
   it is nonconformant (`FAC-SEM-176`, kind `service-well-known`, `agentSurfaceRules` in
   [`src/actions.ts`](../../src/actions.ts)). The rule reads the declaration only: whether each view has its tool is
   RP-1's and AP-1's, checked by the service's own tests and a host's probe (the adapter's `dashboard.agent-surface`,
-  FAA-332).
+  FAA-332). A remote agent whose MCP sits behind a gateway off its origin cannot name it in `surfaces.mcp` (an
+  `originPath`), so beside a dashboard it names its A2A card, or `FAC-SEM-176` reports it (DEC-0169, not decided
+  further).
 
 `actionDecision` in [`src/actions.ts`](../../src/actions.ts) is the reference a service's tool runs before it acts,
 after DL-13 and DL-21 and after `verifyApproval` when the call presented an approval (DEC-0121). Its inputs are the
