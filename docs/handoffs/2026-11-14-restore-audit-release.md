@@ -33,14 +33,19 @@ North Star.
 
 ## Open
 
-- DEC-0162 round 28 at `35f11bca`; two clean rounds in a row land it, then annotate DEC-0121, DEC-0125, DEC-0127,
-  DEC-0133, DEC-0140 and DEC-0149 (its handoff's Next task).
-- DEC-0166 round 19 after merging DEC-0162's head into `agent/ct285-autonomy-profile-20261112` (head `b5b538b7`).
+- Landed later the same day: DEC-0162 (#305, rounds 33 and 34 clean; CT-308 filed) and DEC-0166 (#306, rounds 25 and
+  26 clean; CT-309 and CT-310 filed), released as `v0.1.0+2026-11-14.2` on `ced7b292`; the nightly `Contract` run's
+  Windows failure (`docs/ux/lint.py` read UTF-8 as cp1252) fixed in #307, run 43617702224 green on all four jobs;
+  CT-311 (read parity, the adapter's request `6f1f3ec9` relaying the operator's words) filed in #308.
 - DEC-0157 (CT-216) round 31 at `813c6345`, DEC-0159 (CT-218) round 23 at `b18bd13e`, DEC-0161 (CT-284) round 2 at
-  `49414c5d`: main merged in, not read since.
-- DEC-0158 (CT-215): OS-6 and OS-7 re-cut against DEC-0166 first. DEC-0160 (CT-228): main not merged (60 behind).
-  DEC-0165 (CT-292) and DEC-0167 (CT-252): first readings after DEC-0166 and DEC-0162.
-- A release `v0.1.0+2026-11-14.2` once DEC-0162 and DEC-0166 land.
+  `49414c5d`: main merged in before DEC-0162 landed, not read since; each merges main first.
+- DEC-0158 (CT-215): OS-6 and OS-7 re-cut against DEC-0166. DEC-0160 (CT-228): main not merged.
+  DEC-0165 (CT-292) and DEC-0167 (CT-252): first readings, now that DEC-0162 and DEC-0166 are on main.
+- Promised on the board: CT-302's design by 2026-11-18 (the decision verifier's `decision-verdict/1`, thread
+  `e2b29f77`, with the design's questions OQ-3, OQ-4, OQ-6, OQ-8, OQ-9); CT-299 (`unlimited` in the entitlement) next
+  for the platform (thread `16093ded`); CT-311 a DEC after them (thread `b2eef40c`).
+- The review rules and helper scripts live in `~/DATA/_worktrees/_rounds/` on this machine (the temporary folder was
+  emptied mid-session): `common.md` is the finish-line rule every blind reading gets.
 
 ## Decisions
 
@@ -58,5 +63,6 @@ North Star.
 
 ## Next task
 
-Fold DEC-0162 round 28's findings or, if clean, run round 29; land DEC-0162, then DEC-0166 (round 19 onward), then
-release `v0.1.0+2026-11-14.2`. After them: DEC-0159 round 23, DEC-0157 round 31, DEC-0161 round 2.
+CT-302's design (the decision verifier's `decision-verdict/1`, due 2026-11-18, promised on thread `e2b29f77`), then
+CT-299 for the platform, then CT-311; between them, the paused DECs in the Open list, each by merging main and running
+its next round under `~/DATA/_worktrees/_rounds/common.md`.
