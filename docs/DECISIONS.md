@@ -12087,11 +12087,13 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   verifier pinned before DEC-0168 refuses `entitlement/2` as `malformed` (another type), so the issuer sends it only
   to verifiers that confirmed. A port that repins past DEC-0168 adds the rule kind `entitlement-2` where it sweeps
   `fixtures/semantic/entitlement-*` (the new `entitlement-2-*` fixtures match that glob), the register's
-  `entitlement/2` row with `entitlement.ts`, and `entitlement` `["1", "2"]` to its own copy of `PROTOCOL_REVISIONS`
-  where it keeps one (the adapter's kits). `contractVersion` stays `0.1.0`.
+  `entitlement/2` row with `entitlement.ts`, `entitlement` `["1", "2"]` to its own copy of `PROTOCOL_REVISIONS` where
+  it keeps one (the adapter's kits), and, at the issuer, a signer that builds the `entitlement/2` statement (the
+  platform's signer branches on `entitlement/1` today). `contractVersion` stays `0.1.0`.
 - **Consequences / affects:**
   - spec: `docs/specification/versioning.md` (the `protocols` paragraph: for an entitlement the board confirmation
-    decides), `docs/specification/entitlement.md` (the header, EN-2, the issuer's duties, *Allowances*, the semantic rules,
+    decides), `docs/specification/share-registration.md` (the receiver's policy under `unlimited`),
+    `docs/specification/README.md` (the index row), `docs/specification/entitlement.md` (the header, EN-2, the issuer's duties, *Allowances*, the semantic rules,
     *Who adopts it*), `docs/specification/conformance.md` (the module row, the verifier and issuer rows, the signing
     register, the rule register and its next free code);
   - schemas: `schemas/entitlement-2.schema.json`;

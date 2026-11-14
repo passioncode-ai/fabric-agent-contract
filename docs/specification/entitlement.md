@@ -129,7 +129,7 @@ own subject.
   confirms on the project board (thread `c7d8f53d`), and an Enterprise order on `org-cloud` until then.
 - It issues `entitlement/2` (DEC-0168) only to a verifier re-vendored at or after DEC-0168, as that verifier's owner
   confirms on the project board, and `entitlement/1` to every other verifier; it marks an order `unlimited` only as its
-  owner-level billing scope recorded it ([Allowances](#allowances-dec-0168)).
+  owner-level scope recorded it (the platform's `customers:tier`, PassionCode's owner) ([Allowances](#allowances-dec-0168)).
 
 ## The verifier's duties
 
