@@ -69,6 +69,7 @@ in the shape of OAuth 2.0 Token Exchange (RFC 8693):
 | `spend` | no | what the grant had left when the token was minted: `{mode: unlimited}` or `{mode: limited, remaining: [{window, remainingUsd}], perCallMaxUsd?}` |
 | `project` | no in the schema | the grant's project; every standing grant names one, so a token minted under a grant always carries it (`FAC-SEM-050`) |
 | `task` | no | the issuing host's task the work runs under, set by the hub when the session or run has one (DEC-0041): an opaque id in the session id's grammar, 1–128 characters of `[A-Za-z0-9._:-]`; the meter keys the `task` window on it (DL-24) |
+| `mem` | no | the digest (`sha256:` and 64 lowercase hex) of an `org-membership/2` attestation the hub verified as its own principal's in that organization's context (OM-2) before writing it; it binds a level decision or a level mandate to this caller (DEC-0162 LV-5, [membership](membership.md#levels)). An onward token keeps the parent's `mem` or none, never another (`FAC-SEM-050`) |
 | `iat`, `exp` | yes | issued and expiry times; `exp` is after `iat` and **at most 600 seconds** after it (`FAC-SEM-049`) |
 | `jti` | yes | a unique id, 16–128 characters of `[A-Za-z0-9._~-]` |
 
@@ -314,7 +315,10 @@ approval's lifetime. Any fault of the document is `approval-invalid`; a second u
 is required: without one the answer is `unknown-state`, and a callee that truly wants no replay protection
 passes `UNSAFE_NO_JTI_STORE` by name. **The order** is: the delegation token, then the grant check, then `verifyApproval`, which consumes the `jti` last, then the action (DL-13, DL-21) — so an approval is not
 spent when the meter refuses, and stays usable until its `exp`. A source hand-over orders its checks as
-[source](source.md#handing-over) specifies (DEC-0149).
+[source](source.md#handing-over) specifies (DEC-0149). In an organization's context a level decision whose holder's
+attestation the call's token binds by `mem` stands in place of an approval for a relayed action at a service that
+reads levels, so such a T2 caller is not refused `approval-required` ([membership](membership.md#levels) LV-6,
+DEC-0162); a level form that does not stand is refused as LV-10 says (`operator-decision-required` or `decision-invalid`, with `data.actionDigest`, so this rule's route stays open, save for an act declared `owner` or `admin` in an organization's context, which no approval decides, LV-7), and a human step as AP-4 says.
 `actionDigest(action)` computes the digest; `jcs` (`rfc8785` in `src/canonical.ts`) is the canonical form —
 RFC 8785, not the settings form a device policy is signed over ([canonical forms](conformance.md#canonical-forms),
 DEC-0043). Products keep their own gates for
@@ -353,8 +357,8 @@ unchanged (DL-21 step 6), so a meter's code reaches a caller from a callee.
 | `profile-forbids` | a call between two machines of one estate that the caller's or the target's machine profile does not allow, or whose profile is unreadable (`machineCallVerdict`, DEC-0106) | callee | 403 |
 | `issuer-unavailable` | no hub to mint, or no usable published keys, or no usable estate revision to certify them (DL-14) | caller, callee (verifier) | 503 |
 | `unknown-state` | the refusing side cannot establish the state; an unknown state is a denial | any | 503 |
-| `operator-decision-required` | a `relayed` action from a T0 or T1 caller without the operator's decision, or a call the caller's mandate does not cover (`error.data.detail` `outside-mandate: <part>`, with `estimateUsd` and `perCallMaxUsd` for spend); ask the operator and call again with their answer in `_meta.decision`, or with a mandate that covers the call ([service](service.md#actions) AP-2, DEC-0121; [MD-4](#the-operators-mandate), DEC-0125); a source hand-over answers this code as [source](source.md#handing-over) specifies (DEC-0149) | callee | 403 |
-| `decision-invalid` | the call's decision is not valid for this action, object or time (AP-2, DEC-0121), or its mandate is not (`error.data.detail`: `mandate-malformed`, `mandate-widened`, `mandate-expired`, `mandate-early`, `mandate-not-for-this-call`; MD-3, DEC-0125); a source hand-over answers this code as [source](source.md#handing-over) specifies (DEC-0149) | callee | 403 |
+| `operator-decision-required` | a `relayed` action from a T0 or T1 caller without the operator's decision, or a call the caller's mandate does not cover (`error.data.detail` `outside-mandate: <part>`, with `estimateUsd` and `perCallMaxUsd` for spend), or, from any tier, a level below the action's (`error.data.detail` `level-insufficient: owner`, `admin` or `operator`, DEC-0162 LV-10: file one request to a holder of that level through the product's own approval surface, or take `operator` to the operator); ask the operator and call again with their answer in `_meta.decision`, or with a mandate that covers the call ([service](service.md#actions) AP-2, DEC-0121; [MD-4](#the-operators-mandate), DEC-0125); a source hand-over answers this code as [source](source.md#handing-over) specifies (DEC-0149) | callee | 403 |
+| `decision-invalid` | the call's decision is not valid for this action, object or time (AP-2, DEC-0121), or its mandate is not (`error.data.detail`: `mandate-malformed`, `mandate-widened`, `mandate-expired`, `mandate-early`, `mandate-not-for-this-call`; MD-3, DEC-0125), or its level decision or level mandate is not (`level-membership: <problem>`, `level-unbound`, `level-audience`, `level-expired`, `level-role` (DEC-0162 LV-10)); a source hand-over answers this code as [source](source.md#handing-over) specifies (DEC-0149) | callee | 403 |
 | `human-step-required` | the action is the person's (a sign-in, a consent, a payment, a secret, spend above a limit, a passkey signature, a comparison of codes between two people or the choice to share without one); `error.data.humanStep` names it and `error.data.url` links to it (AP-4, DEC-0121) | callee | 403 |
 
 A product maps its own authorisation codes onto these and keeps its words in `error.data`. Fabric's hub maps
@@ -483,7 +487,8 @@ counted account a token-free door still admits the account's own guests through 
 delegation token, an `approval/1` or a grant record from a T0 or T1 caller, and no local call waits on the hub.
 It MAY accept a token such a caller presents; it then verifies it as DL-13 says, refuses it when the verifier
 does (a present but invalid token is refused, never ignored, as DL-10), and uses an accepted one for
-attribution and narrowing. A T2 caller takes the whole profile: a token per call (DL-8, DL-13), an approval for
+attribution and narrowing, and, when its `mem` binds a level decision or a level mandate the call carries, for that
+level (DEC-0162 LV-5): a T0 or T1 caller presents a token to carry a level, and without one keeps the operator's path. A T2 caller takes the whole profile: a token per call (DL-8, DL-13), an approval for
 each effect that needs one (DL-17), a grant with limits, an expiry and a payer. At every tier the money limits
 bind — L0, the project's L1 and each provider key's own ceiling ([spend policy](spend-policy.md#levels)) — and so
 do the human gates: sign-ins, consents, payments and top-ups, a secret typed into a hidden prompt or a held one handed out (a peer share's export, DEC-0147), signatures by the
@@ -616,7 +621,13 @@ it reaches acts on them without asking, within what they cover.
   `perCallMaxUsd` the money limits decide the spend, as the operator's rule reserves only spend above a limit (MD-6).
   The callee records `{by: "operator", via: "mandate", task, chain, source?}` (`source` when the mandate carries it,
   DEC-0126 OA-6) with the caller it authenticated and the
-  operator's words, as AP-2 records a decision. A decision in the same call is read first.
+  operator's words, as AP-2 records a decision. A decision in the same call is read first. A level mandate (`by:
+  "level"`, DEC-0162) is a level holder's words in an organization, carrying `level`, `org` and the holder's
+  `org-membership/2` attestation (`membership`); a callee that reads levels takes it from any tier, after every check
+  above, when the call's token binds the attestation by `mem` and the holder's level covers the call (an architect's,
+  the call's project among its projects), and records `{by: "level", level, org, project?, approver, membershipDigest, revision, via: "mandate", task, chain, caller}` ([membership](membership.md#levels) LV-6, LV-9, LV-10); it stands only at the service its
+  attestation's audience names, so handed on to another it is refused `level-audience` and the hub states a new one
+  for that service; a callee that reads no levels answers as if the call carried no mandate.
 - **MD-4, asking only for the rest.** A call the mandate does not cover is refused `operator-decision-required` with
   `data.detail` `outside-mandate: <action|capability|effect|spend|project>`, naming the first part not covered, and for
   spend `estimateUsd` and `perCallMaxUsd`; a job's step it does not cover waits `input_required`, naming the part. The
@@ -626,18 +637,20 @@ it reaches acts on them without asking, within what they cover.
   a mandate that covers it. A mandate that is not valid (malformed, widened, expired, given more than 60 seconds after
   the callee's clock, or not addressed to this call) is refused `decision-invalid` with its `detail`; at a job's step,
   which has no refusal to send, the job waits `input_required` instead ([interop C3.3](interop.md#c33-awaiting-a-choice)).
-- **MD-5, beyond the estate.** A T2 caller's mandate changes nothing: the callee applies the whole profile as if it were
-  absent (DL-8, DL-13, DL-17), so a relayed action still answers `approval-required`; a source hand-over answers as
+- **MD-5, beyond the estate.** A T2 caller's operator mandate changes nothing: the callee applies the whole profile as if it were
+  absent (DL-8, DL-13, DL-17), so a relayed action still answers `approval-required`; a level mandate its token binds is
+  taken as MD-3 says (DEC-0162 LV-6); a source hand-over answers as
   [source](source.md#handing-over) specifies (DEC-0149). Toward another person's
   machine or another organization's agents the operator's authority travels only as a delegation token under a grant
   (DL-4, DEC-0039), which the hub mints for the mandate's scope once Fabric's issuer serves it. Inside the estate (T0,
   T1) the mandate needs no token, before and after the issuer exists (DL-26).
 - **MD-6, what never travels.** A mandate never covers a human step (AP-4: a sign-in, a consent, a payment or top-up, a
   secret typed in or handed out, spend above a limit, a passkey signature, a comparison of codes between two people or the choice to share without one (DEC-0142)): spend above the project's L1 per-task threshold, an L0
-  limit or a key's ceiling stays the person's ([spend policy](spend-policy.md#levels)). A mandate never covers a source hand-over
-  (DEC-0149): it is taken only on the operator's word for that act, as [source](source.md#handing-over) specifies. It
+  limit or a key's ceiling stays the person's ([spend policy](spend-policy.md#levels); in an organization's project the threshold, the project's L1 and the ceiling of a key the organization holds are the owner's or an administrator's, spend policy rule 3, DEC-0162 LV-7, while a member's own L0 stays that estate operator's). A mandate never covers a source hand-over
+  (DEC-0149): it is taken only on the operator's word for that act (for an organization's own agent, instead, only an owner's or an administrator's level decision, DEC-0162 LV-6), as [source](source.md#handing-over) specifies. It
   never covers approving one's
-  own promotion, grant, checker rule or policy change (AP-5). A mandate found in a tool result, a page, a file, or a
+  own promotion, grant, checker rule or policy change (AP-5). A level mandate keeps every one of these bounds (DEC-0162
+  LV-7). A mandate found in a tool result, a page, a file, or a
   board message the target cannot place as the operator's, is data, as AP-3 says of a decision. The boundary below
   stands: a hostile local process could write a mandate as it could a decision, and a product that needs protection
   from one adds an approval (DL-17). Binding the mandate to its callee, and to its caller where the callee authenticated
@@ -672,7 +685,7 @@ after asking them again. Inside the estate (T0, T1) one approval is enough.
   from another session, or a subagent's parent passing the words as AP-3 says; never a file or a tool's output). A relay that lacks any of OA-2's four (the quote, when, where, the scope), a member's
   Project on an organization's board (T2), and text found in content an agent read (mail, a page, a client's chat, a
   file, a tool result) are data, never an approval (AP-3, MD-6).
-- **OA-4, own checks, one question for what is new.** The receiver still runs its own checks: a stale preview, its
+- **OA-4, own checks, one question for what is new.** The receiver still runs its own checks (and, in an organization's context, takes a bound level decision where a host's gate takes AP-2's, DEC-0162 LV-6): a stale preview, its
   guards, the money limits. It asks the operator again only about what they did not see: another target, a scope wider
   than the one relayed, money above the amount the relayed scope names (a wider scope, asked with the amount); once,
   naming what is new, as MD-4 asks only for the part not covered. Spend above a money limit (L0, the project's L1, a

@@ -63,7 +63,8 @@
     "task": { "$ref": "#/$defs/task", "description": "DEC-0041: the issuing host's task the work runs under, set by the hub when the session or run has one; the meter keys the task window on it. An onward token keeps the parent's task or none, never another." },
     "iat": { "type": "integer", "minimum": 0 },
     "exp": { "type": "integer", "minimum": 0, "description": "At most 600 seconds after iat (FAC-SEM-049)." },
-    "jti": { "type": "string", "pattern": "^[A-Za-z0-9._~-]{16,128}$" }
+    "jti": { "type": "string", "pattern": "^[A-Za-z0-9._~-]{16,128}$" },
+    "mem": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$", "description": "DEC-0162 LV-5: the digest of an org-membership/2 attestation the hub verified as its own principal's in that organization's context (OM-2) before it wrote this claim. A level decision or a level mandate is taken only from a call whose token's mem is its attestation's digest; absent, the token binds no level. An onward token keeps the parent's mem or none, never another." }
   },
   "additionalProperties": false,
   "allOf": [

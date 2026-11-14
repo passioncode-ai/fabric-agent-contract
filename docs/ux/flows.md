@@ -246,26 +246,33 @@ flowchart TD
 ### FLW-10: Operator sets a spend limit and answers what exceeds it
 
 - **Traces:** ST-012, ST-013 (JTBD-07, JRN-06/#1, JRN-06/#2)
-- **Goal:** a project spends within a limit the operator chose once, and a spend above the threshold waits for one answer
+- **Goal:** a project spends within a limit the operator chose once (in an organization, its owner or an administrator, DEC-0162), and a spend above the threshold waits for one answer
 - **Entry points:** the first run of a project that would spend money; a grant check above `autoApproveUsd`
 - **Success exit:** the policy recorded with its inputs; the request answered and the spend allowed or not
-- **Task analysis:** the launcher computes options → the operator picks one (one is preselected) → the meter checks each spend against the levels → above the threshold it denies with one filed request → the operator confirms the amount in the operator channel → the agent asks again and is allowed.
+- **Task analysis:** the launcher computes options → the operator picks one (one is preselected; in an organization's project its owner or an administrator, while the run waits, DEC-0162 LV-7) → the meter checks each spend against the levels → above the threshold it denies with one filed request → the operator confirms the amount in the operator channel (in an organization's project started by someone other than its owner or an administrator, the owner or an administrator, never the member's own confirm, while nothing is spent, DEC-0162 LV-7) → the agent asks again and is allowed.
 - **Rejected shape:** a fixed list of budgets, or an approval in a chat message — rejected because the options must come from the project (spend policy) and a chat message is never the approval (spend policy rule 3).
 - **Flow:**
 
 ```mermaid
 flowchart TD
-  F[First paid run, no policy] --> P[Screen: Spend policy choice]
+  F[First paid run, no policy] --> O{An organization's project, started by someone other than its owner or an administrator?}
+  O -->|no| P[Screen: Spend policy choice]
+  O -->|yes| WO[Screen: the run waits for the organization's owner or an administrator; nothing spent (DEC-0162 LV-7)]
+  WO -->|the owner or an administrator records the choice, once its route is decided: PC-162| R
   P --> R[Policy recorded with its inputs]
   R --> C{Grant check}
   C -->|within the levels| A[Allowed, reserved]
   C -->|above the threshold| Q[Denied with one filed request]
-  Q --> M[Screen: Chat with the agent's bot]
+  Q --> QO{An organization's project, started by someone other than its owner or an administrator?}
+  QO -->|no| M[Screen: Chat with the agent's bot]
+  QO -->|yes| QW[The request waits for the organization's owner or an administrator; nothing spent (DEC-0162 LV-7, route PC-162)]
+  QW -->|the owner or an administrator confirms the amount| A
+  QW -->|no answer| W
   M -->|confirmed with the amount| A
   M -->|no answer| W[Nothing spent; other work goes on]
 ```
 
-- **Screens traversed:** SCR-13 success; SCR-13 empty; SCR-13 unknown; SCR-11 success; SCR-11 error.
+- **Screens traversed:** SCR-13 success; SCR-13 empty; SCR-13 unknown; SCR-13 waiting; SCR-11 success; SCR-11 error.
 
 ### FLW-11: Operator approves one action for an outside caller
 
@@ -740,10 +747,10 @@ flowchart TD
 
 - **Traces:** ST-035 (JTBD-07, JRN-06/#3, JRN-06/#4); SCN-057, DEC-0156
 - **Goal:** a whole task the operator gives is done on their first word (DEC-0156), and a step the operator would take on a dashboard happens when they tell their agent, recorded as their decision
-- **Entry points:** the operator's chat with their agent, a single step or a whole task (DEC-0156); a service's `operator-decision-required`; a job waiting for a choice; a word the operator gives in a customer chat a channel agent answers (DEC-0150 CA-8)
-- **Success exit:** the service took the action as the operator's decision, and its audit names the agent that relayed it; for a whole task, the task done on the first word, each step that waits named in the report, nothing handed over but OW-4's steps
-- **Task analysis:** the operator tells the agent → the agent calls the action's tool with `_meta.decision` (the action, the object when the operator named one, the quoted sentence, the time) → the service runs `actionDecision` → it acts as its page would and records the decision; for a whole task, the operator gives the task → the agent takes each step itself, the acts the words name through the service's gate with the words as AP-2's decision → one message on a risk the words did not name → the waits named → the report
-- **Rejected shape:** the agent approving without the operator's words, or a service sending the operator to its page for a step its agent was told to take: rejected, because the decision is the operator's and parity is the rule (DEC-0121); the one page-only step is the operator's move of a board slot until its twin ships (DEC-0140, SCN-051). A word the operator gives in a customer chat a channel agent answers, reaching a service action: rejected, because a word given in a customer chat reaches no service action (DEC-0150 CA-8, SCN-043). For a whole task: a command handed to the operator to run, or a stop at a risk that a clean corrected way covers: rejected (DEC-0156 OW-2, OW-3).
+- **Entry points:** the operator's chat with their agent, a single step or a whole task (DEC-0156); a level holder's chat with their own agent (DEC-0162); a service's `operator-decision-required`; a job waiting for a choice; a word the operator gives in a customer chat a channel agent answers (DEC-0150 CA-8)
+- **Success exit:** the service took the action as the operator's decision (or a level holder's, DEC-0162), and its audit names the agent that relayed it; for a whole task, the task done on the first word, each step that waits named in the report, nothing handed over but OW-4's steps
+- **Task analysis:** the operator tells the agent → the agent calls the action's tool with `_meta.decision` (the action, the object when the operator named one, the quoted sentence, the time) → the service runs `actionDecision` → it acts as its page would and records the decision; for a whole task, the operator gives the task → the agent takes each step itself, the acts the words name through the service's gate with the words as AP-2's decision → one message on a risk the words did not name → the waits named → the report. A level holder's path is the same with a level decision bound by the token's `mem` (DEC-0162), recorded with the level, the organization and the approver.
+- **Rejected shape:** the agent approving without the operator's words, or a service sending the operator to its page for a step its agent was told to take: rejected, because the decision is the operator's and parity is the rule (DEC-0121); the page-only steps are the operator's move of a board slot until its twin ships (DEC-0140, SCN-051) and, in an organization's context, the hold and the listing a member who owns the Project decides in the host's own controls until their agent twin ships (DEC-0162 LV-7, CT-307). A word the operator gives in a customer chat a channel agent answers, reaching a service action: rejected, because a word given in a customer chat reaches no service action (DEC-0150 CA-8, SCN-043). For a whole task: a command handed to the operator to run, or a stop at a risk that a clean corrected way covers: rejected (DEC-0156 OW-2, OW-3).
 - **Flow:**
 
 ```mermaid
@@ -752,12 +759,24 @@ flowchart TD
   C --> G{gate}
   G -->|human| H[human-step-required with the link; the agent hands it over]
   G -->|relayed| T{tier}
-  T -->|T2 without approval| A[approval-required with the digest]
+  T -->|T2 without approval and without a bound level decision, save the organization's acts below| A[approval-required with the digest]
+  T -->|any tier, in an organization's context at a service reading levels, an act declared owner or admin with no level form| N
+  T -->|any tier, a bound level decision| L[Taken as the level holder's; audited with level, organization and approver]
+  T -->|any tier, a level below the action's| N[operator-decision-required with level-insufficient; the agent files one request to a holder of that level through the product's own approval surface]
+  T -->|any tier, a level form that fails| V{its detail}
+  T -->|a service that reads no levels, or a hub without levels/1| PS
+  V -->|level-unbound, level-audience, level-expired| VF[The agent asks its hub for a fresh, bound attestation]
+  V -->|level-membership: any problem, ended, context-invalid and stale-revision among them| PS[The product's own approval surface, the level holder as approver (DEC-0162 question 10), or in a personal context the operator's decision under AP-2]
+  VF --> C
+  V -->|level-role, or the form itself| VC[The agent relays the level its holder holds, or takes the product's own approval surface]
+  VC --> C
+  N -->|owner or admin| HL[The holder of that level's own agent decides under its own level decision]
+  N -->|operator| O
   T -->|T0 or T1| D{decision}
   D -->|none| Q[operator-decision-required; the agent asks the operator]
   Q --> O
   D -->|invalid| I[decision-invalid; the agent asks again]
-  D -->|valid| R[Taken as the operator's; audited with the agent]
+  D -->|valid, save an organization's act declared owner or admin, LV-7| R[Taken as the operator's; audited with the agent]
   O -->|a whole task| K1[The agent takes each step itself: commands, builds, the acts the words name, OW-1 and OW-2]
   K1 -->|at a step with a risk| R1{a risk the words did not name}
   R1 -->|corrected way undoes cleanly and meets the word, no gate| T1[One message with the corrected way; taken and reported; the rest goes on]
@@ -826,7 +845,7 @@ flowchart TD
 - **Success exit:** the callee took the call as the operator's decision, recorded `via: mandate` with the task and the chain, or, for an approval relayed for one action, `via: relayed-instruction`; a relayed approval also records `source`, where the operator said it (DEC-0126)
 - **Task analysis:** the operator tells the leading agent → it states the mandate from their words → it calls the next agent with the mandate, narrowed to what it hands on → the callee runs `mandateCovers` and acts, or refuses the part not covered → the leading agent asks the operator for that part alone. An approval the operator gave another of their agents reaches the agent that acts by a relay from one of their own Projects or sessions → that agent states the decision or its own mandate from the relayed words with `source` and acts (DEC-0126 OA-2).
 - **Rejected shape:** the callee asking the operator for a step their words already cover, or an agent passing another agent's paraphrase as the operator's decision: rejected, because the first asks twice and the second removes the prompt-injection boundary (DEC-0125).
-- **Exception:** a source hand-over is never covered by the task's mandate; it asks the operator per act (`handover-needs-operator`), as [source](../specification/source.md#handing-over) specifies (DEC-0149).
+- **Exception:** a source hand-over is never covered by the task's mandate; it asks the operator per act (`handover-needs-operator`), as [source](../specification/source.md#handing-over) specifies (DEC-0149). For an organization's own agent nobody at the machine is asked: the service refuses `level-insufficient: admin` and the agent files one request to an owner or an administrator (DEC-0162 LV-6).
 - **Flow:**
 
 ```mermaid

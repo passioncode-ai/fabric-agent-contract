@@ -334,7 +334,8 @@ one that came while it was claimed (above), and nothing else does.
 ### Owner settlement
 
 A request in `outcome_unknown` waits for an observed reconciliation by the current responder. When no responder holds
-its slot any more, because the agent was retired or never re-enrolled, the estate owner may settle it (DEC-0081). The
+its slot any more, because the agent was retired or never re-enrolled, the estate owner may settle it (DEC-0081); no
+authority level decides it: it is the owning principal's own `com.reconcile`, not a relayed action (DEC-0162 LV-7). The
 owner attests what it observed, and the board never fakes knowledge.
 
 A request reaches `outcome_unknown` by three paths only, and the owner settles it after any of them:
@@ -682,9 +683,9 @@ The boundary:
   names who set it. Every object in the schema is closed, so a reader
   refuses an answer that carries more.
 - **Not the caller itself.** The caller's own Project is not listed; `com.status` describes it.
-- **Opt-out.** A Project can be unlisted. Its operator decides it, in the host (in Fabric per Project) or through their
+- **Opt-out.** A Project can be unlisted. Its operator decides it (in an organization, the member who owns the Project, or an owner or an administrator by a level decision, the host declaring `admin` for its list and unlist actions, DEC-0162 LV-7 and the operator's answer to its question 9), in the host (in Fabric per Project) or through their
   agent, which relays the decision to the host's list and unlist actions (`gate: relayed`, [service](service.md#actions)
-  AP-2, DEC-0121; the host's tools are CT-125); an agent never lists or unlists a Project on its own account. An unlisted Project is absent from every page and every
+  AP-2, DEC-0121; the host's tools are CT-125; in an organization's context the member who owns the Project decides it as their own act in the host's controls (the host knows the Project's owner), and in an organization's context their agent has no relayed route for it, since the host declares the action `admin` and LV-7 takes no operator form there (the owning member's agent twin, a route the host checks before `actionDecision`, is CT-307); an owner's or an administrator's agent relays a level decision); an agent never lists or unlists a Project on its own account. An unlisted Project is absent from every page and every
   capability filter.
 - **Unlisting is discovery only.** It does not hide the Project from a sender that already knows its id: that sender
   can still address it, because a listing is discovery, not authority. Unlisting refuses no message; whether a
@@ -735,9 +736,9 @@ scope with `held` and never refuses a call that settles, reports on or keeps ali
 A hold never refuses the current responder's calls on started work; if that responder's session ends under a slot or
 Project hold, enrollment and replacement wait for the lift, and its accepted work is kept as C4 says.
 
-- **Who sets it.** Only the operator decides a hold: in the host, or through their agent, which relays the decision to
+- **Who sets it.** The operator decides a hold (in an organization's context, the member who owns the Project, or an owner or an administrator by a level decision; a host declares `admin` for its set and lift actions in its authority extension, DEC-0162 LV-7 and the operator's answer to its question 9): in the host, or through their agent, which relays the decision to
   the host's set, lift and list actions (`gate: relayed`, [service](service.md#actions) AP-1 and AP-2, DEC-0121; the
-  host's tools are CT-125). An agent never holds or releases work on its own account. A hold is not a grant change and not an authority revision: it never
+  host's tools are CT-125; in an organization's context the member who owns the Project decides it as their own act in the host's controls (the host knows the Project's owner), and in an organization's context their agent has no relayed route for it, since the host declares the action `admin` and LV-7 takes no operator form there (the owning member's agent twin, a route the host checks before `actionDecision`, is CT-307); an owner's or an administrator's agent relays a level decision). An agent never holds or releases work on its own account. A hold is not a grant change and not an authority revision: it never
   answers `authority_changed`, and it resets no cursor.
 - **Held work** is a request whose thread is held, whose target Project is held, or whose target (Project, capability)
   slot is held. The thread is the one the request was submitted in; the target is the request's `target`.
@@ -787,8 +788,7 @@ constraint (`comms-refusal.schema.json`).
 
 ## The operator moves a slot
 
-**PR-2 (DEC-0140).** The operator who owns the Project (in an organization, that member only, as in [owner
-settlement](#owner-settlement)) may move an occupied (Project, capability) responder slot (one `com.status` shows `active` or `stale`) from its
+**PR-2 (DEC-0140).** The operator who owns the Project (in an organization, that member, or an owner or an administrator by a level decision, the host declaring `admin` for its twin in its authority extension, DEC-0162 LV-7 and the operator's answer to its question 9) may move an occupied (Project, capability) responder slot (one `com.status` shows `active` or `stale`) from its
 holder to another live
 session of that Project, in the host's operator controls. Until that host ships the move's agent twin, an agent does not move a slot, on its
 own account or as a relay: the move's agent twin ([service](service.md#actions) AP-1) is owed: its contract half is CT-181, then the host's with the board's other operator controls
@@ -808,7 +808,8 @@ arguments name no session.
   carries a checkpoint its caller writes, and the operator writes none.
 - **Who may receive it.** A live session of that Project already authorized to respond for that capability, as for
   `com.enroll`, other than the slot's holder; the host refuses any other `not_authorized`, and a move grants nothing.
-  The host refuses a mover that is not the owning operator `not_authorized`, and a move of an `absent` slot
+  The host refuses a mover that is neither the owning operator nor, through the twin, an owner or an administrator whose
+  level decision stands (DEC-0162 LV-4) `not_authorized`, and a move of an `absent` slot
   `invalid_transition` (there is no holder to move from; retrying changes nothing until a session enrolls). The host checks in this order and answers the first that applies: `not_authorized` (the mover); a stored result for
   the same key (a replay) or `idempotency_conflict` for another move under it, with the epoch's `capacity_exceeded` and
   `idempotency_window_expired`; `not_authorized` (the receiving session; when it is already the slot's holder, a host shows the move as already

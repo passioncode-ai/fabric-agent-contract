@@ -421,6 +421,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
   - Given a project with no policy, when a run would first spend money, then the launcher offers options computed from the agents' presets, the recent spend and the kind of work, names those inputs, and preselects one.
   - Given I choose "no project limit", then it is recorded as my choice and only the estate total (L0) stops spending.
   - Given a policy is recorded, then the launcher never asks again for that project.
+  - Given an organization's project, when a run would first spend money, then the choice is the organization's owner's or an administrator's (DEC-0162 LV-7), unless the starter is the owner or an administrator, who sees the usual choice: otherwise the launcher stops before any spend, the starter sees the run waiting for them, and their choice is recorded as theirs (testable once the route to them is decided, PC-162; until then the run waits).
 - **Priority:** must
 - **Status:** draft
 - **Product:** unobserved
@@ -433,6 +434,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
   - Given a check above the auto-approve threshold, then the meter denies it with the request it filed, and the agent files no second one.
   - Given the request in the operator channel, when I confirm, then the confirmation shows the amount first (OC-6).
   - Given I do not answer, then nothing is spent on that request and the agent's other work continues.
+  - Given an organization's project started by someone other than its owner or an administrator, then the request is the organization's owner's or an administrator's, never the starting member's own confirm, and nothing is spent until one of them answers (DEC-0162 LV-7; testable once the route is decided, PC-162).
 - **Priority:** must
 - **Status:** draft
 - **Product:** unobserved
@@ -708,6 +710,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
   - Given a service that declares an action `relayed`, when my agent calls its tool from my machine with my decision naming the action and quoting me, then the service takes it as my decision and its audit names the agent it authenticated (`actionDecision`, DEC-0121).
   - Given my agent calls without my decision, when the service answers `operator-decision-required`, then the agent asks me and calls again with my answer quoted.
   - Given a step only I can take (a sign-in, a consent, a payment, a secret, a passkey signature, spend above a limit, a comparison of codes with another person or the choice to share without one), when my agent calls it, then the service answers `human-step-required` with the link to that step.
+  - Given I am an owner, administrator or architect of an organization and a service declares `levels` for it in its authority extension, when my agent calls a relayed action with my level decision bound to its delegation token, then the service takes it as my level's decision at every tier (a source hand-over only from T0 or T1, as source says) and audits the level, the organization and me as approver; and when the action needs a level I do not hold, it answers `operator-decision-required` with `level-insufficient` and my agent files one request to a holder of that level, or, for `level-insufficient: operator`, takes it to the operator (DEC-0162).
   - Given I tell my agent to do a task, when its steps need commands, builds or acts my words name, then it takes them itself without handing me a command; a risk my words did not name gets one short message with the corrected way (a question where that step must wait) while the rest goes on, and an act a host's gate holds gets that gate's ask, quoting my words (DEC-0156 OW-3); only a step that needs me comes back to me, with its reason and the exact step OW-4 names for it (a link, the command and the setting, the decision's question, the hand-over statement, the binding's step) (DEC-0156 OW-1 to OW-4, SCN-057).
 - **Priority:** must
 - **Status:** draft

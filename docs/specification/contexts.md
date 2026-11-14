@@ -61,7 +61,7 @@ grant's principal uses it. A share grant into an organization carries that organ
 
 ## Access levels
 
-There is no access-level field. A grant's access level is its own `capabilities`, `effectCeiling`, `dataClasses`,
+A grant's access level is neither a spend level (L0 to L3) nor an authority level ([membership](membership.md#levels), DEC-0162). There is no access-level field. A grant's access level is its own `capabilities`, `effectCeiling`, `dataClasses`,
 `spend` (its windows, `payer: owner`) and `expiresAt` (DEC-0037, DEC-0038, DEC-0039). Two share grants into two
 organizations with different values of those fields are two access levels. A named level ("read only", "full") is a
 host's preset in its interface that fills those fields. An `accessLevel` field would be a second source of truth: it
