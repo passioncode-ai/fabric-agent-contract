@@ -69,6 +69,7 @@ export const PROTOCOL_REVISIONS: ReadonlyMap<string, readonly string[]> = new Ma
   ["org-authority-draft", ["1"]],
   ["org-key-set", ["1"]],
   ["org-key-set-draft", ["1"]],
+  ["org-instance", ["1"]],
   ["org-membership", ["1", "2"]],
   ["org-root-registration", ["1"]],
   ["pairing-message", ["1"]],

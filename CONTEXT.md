@@ -888,6 +888,11 @@ enrollments or its estate: its own `device.id`, keys, kids, telemetry key, colle
 in its check-ins and no estate document in their answers, and in its organization's context a hub key and token issuer
 of its own (DEC-0128, [devices](docs/specification/devices.md#unlinkable-enrollments)).
 
+**Instance statement**: The organization server's signed statement that one instance runs for one organization: its
+id, product, origin, placement and `active` or `retired` status, for at most 7 days (`org-instance/1`, DEC-0170),
+signed by a key of the organization's key set and verified offline by the platform and the instance's product
+([membership](docs/specification/membership.md#instances-dec-0170)).
+
 **Membership attestation**: What an organization server states about one person's membership of one organization,
 for one reader, for at most a day: the organization, a subject pairwise to that reader, a role (`owner`, `admin`,
 `member`), `active` or `ended`, and a revision (`org-membership/1`, DEC-0127; or `/2`, for a reader of levels, with

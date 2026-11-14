@@ -1045,6 +1045,8 @@
   {"name": "mandate-source-unplaced", "schema": "mandate.schema.json", "path": "negative/mandate-source-unplaced.json", "valid": false, "keyword": "anyOf"},
   {"name": "org-membership", "schema": "org-membership.schema.json", "path": "positive/org-membership.json", "valid": true},
   {"name": "org-membership-2", "schema": "org-membership-2.schema.json", "path": "positive/org-membership-2.json", "valid": true},
+  {"name": "org-instance", "schema": "org-instance.schema.json", "path": "positive/org-instance.json", "valid": true},
+  {"name": "org-instance-unknown-placement", "schema": "org-instance.schema.json", "path": "negative/org-instance-unknown-placement.json", "valid": false, "keyword": "enum"},
   {"name": "org-membership-2-unknown-role", "schema": "org-membership-2.schema.json", "path": "negative/org-membership-2-unknown-role.json", "valid": false, "keyword": "enum"},
   {"name": "org-membership-unknown-role", "schema": "org-membership.schema.json", "path": "negative/org-membership-unknown-role.json", "valid": false, "keyword": "enum"},
   {"name": "org-membership-email", "schema": "org-membership.schema.json", "path": "negative/org-membership-email.json", "valid": false, "keyword": "additionalProperties"},

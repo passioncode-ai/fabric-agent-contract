@@ -12044,3 +12044,49 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Source:** the design `docs/evidence/plans/2026-11-12-ct285-autonomy-profile.md`; the operator's decision of
   2026-11-09 as recorded in fabric-workspace `knowledge/authority.md`; board requests `921edc61` (thread `a3a97cef`)
   and `4a1bf8d6` (thread `8da128cf`); backlog CT-285.
+
+### DEC-0170: `org-instance/1`, a signed statement that an instance runs for an organization
+
+- **Date:** 2026-11-14
+- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: board row CT-314: the first
+  organization server issues; the platform (PLAT-146, `instance_put`) and an instance's product verify.
+- **Decision:** in [membership → instances](specification/membership.md#instances-dec-0170):
+  1. **IS-1, the statement.** `org-instance/1`, every member always present: `issuer`, `org`, `instanceId`, `product`,
+     `origin`, `placement` (`org-cloud`, `machine` or `service`), `status` (`active` or `retired`), `revision`,
+     `issuedAt`, `notBefore`, `expiresAt` (at most 7 days after `issuedAt`), `alg` (`EdDSA`), `kid`, `sig`; signed by a
+     signing key of the organization's `org-key-set/1` (OM-3) over the RFC 8785 form without `sig` (the register's
+     `org-instance/1`). No person; no address but the instance's origin.
+  2. **IS-2, the verifier.** `verifyOrgInstance(statement, {now, org, instanceId, keySet, held})`, in
+     `verifyOrgMembership`'s order, with `wrong-instance` beside `wrong-org`, no grace after `expiresAt`, and a
+     `retired` statement that verifies and reads `retired`; `refreshDue` from 24 hours before `expiresAt`.
+  3. **IS-3, the platform's checks** on `instance_put` are IS-2 with its context; it stores `digest` and `revision`.
+  4. **IS-4, the issuer.** Only on a record an owner or an administrator made; re-issue a day before expiry; a
+     retirement at a higher revision and nothing after it; one revision, one set of bytes.
+  5. **Rule.** `FAC-SEM-177` (kind `org-instance`): the times strict and in order, and the 7-day life.
+- **Why:** the first organization server's request (board `270b130b`, thread `fb41cd09`) for the issuance statement
+  its own row and the platform's PLAT-146 cite, which DEC-0162 did not give; its proposal (`983f0303`) and the
+  platform's reading (`f126b49d`: a `kid`, vectors a port reproduces, the four checks), accepted on the board
+  (`3bb1d765`). Needed by 2026-11-28.
+- **Alternatives refused:** an `org-membership` extension (a membership names a person's role, not an instance); a
+  statement signed by the organization's root (the root signs key sets only, OM-3); a 24-hour life (an instance changes
+  far less often than a membership, and the platform reads it at `instance_put`); `placement` as `entitlement/1`'s
+  hosting products (a member's machine and a PassionCode service host instances no hosting product names).
+- **Compatibility:** additive: a new type, a new rule code; nothing existing changes. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:**
+  - spec: `docs/specification/membership.md` (*Instances*, the rule register), `docs/specification/conformance.md`
+    (the module row, the issuer and reader rows, the signing register, the rule register and its next free code);
+  - schemas: `schemas/org-instance.schema.json`;
+  - code: `src/org-instance.ts`, `src/signing-challenges.ts` (`ORG_INSTANCE_FIELDS`, the register row),
+    `src/protocol-revisions.ts`, `src/semantic-kinds.ts`, `src/semantic-rules.ts`; `tools/vectors/org-instance.ts`,
+    `tools/vectors/run.ts`;
+  - fixtures: `fixtures/vectors/org-instance.json`, `fixtures/positive/org-instance.json`,
+    `fixtures/negative/org-instance-unknown-placement.json`, `fixtures/semantic/org-instance-*.json`,
+    `fixtures/catalogue.json`;
+  - tests: `test/org-instance.test.ts`, `test/signing-challenges.test.ts`, `test/schema-compilation.test.ts`,
+    `test/positive-sweep.test.ts`;
+  - docs: `CONTEXT.md`, `docs/DOCMAP.md`, the design `docs/evidence/plans/2026-11-14-ct314-instance-statement.md`.
+- **Not decided here:** the public readers list `GET /fabric/membership/v1/{org}/readers` (membership's *Not decided
+  here*, waiting for Fabric); how an instance is created and billed (the platform's and the product's).
+- **Source:** the design above; the first organization server's board messages `270b130b` and `983f0303`; the
+  platform's `f126b49d`; DEC-0127, DEC-0129, DEC-0162. DEC-0170 and `FAC-SEM-177` were reserved by git CAS
+  (`agent_sync.py reserve`, keys `ct314-org-instance` and `ct314-org-instance-sem`).

@@ -61,8 +61,8 @@ made (`org.instance_added`; a level decision where the server reads levels, DEC-
 at least a day before `expiresAt`, issues `status: "retired"` at a higher revision on `org.instance_retired` and none
 after it, and never signs one revision with other bytes.
 
-**IS-5, rules.** One rule code (kind `org-instance`): the times in order and the 7-day life, a lower-case https origin,
-and `status` and `placement` from their lists; the next free code at landing.
+**IS-5, rules.** One rule code (kind `org-instance`, `FAC-SEM-177`): the times strict and in order and the 7-day life;
+the origin's form and the lists of `status` and `placement` are the schema's.
 
 **IS-6, vectors.** `fixtures/vectors/org-instance.json`, written by `tools/vectors/org-instance.ts` with deterministic
 test keys (each seed the SHA-256 of a published label), so a port reproduces every `sig` (the platform's request, as

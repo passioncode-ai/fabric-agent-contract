@@ -1,0 +1,1486 @@
+{
+  "about": "Vectors for org-instance/1 (DEC-0170), written by tools/vectors/org-instance.ts, never by hand. keys: Ed25519 test keys, each seed the SHA-256 of a published label (anyone can derive them; nothing trusts them); Ed25519 is deterministic, so a port's signer reproduces every sig. keySets: r2 is organization A's org-key-set/1 its root signed (OM-3); the others are built by hand to reach the statement verifier's key checks, never root-signed. verify cases: verifyOrgInstance(instance, trust), trust.now an RFC 3339 string a port parses strictly (an unparseable one is an unreadable clock), trust.keySet the name of a key set in keySets, trust.held the record held for the instance. expected is exactly what the reference returns; digest is sha256: of the signed bytes.",
+  "keys": {
+    "root": {
+      "seed": "72b49b522509661c21f617ee98ccb06d366f4db95fc69dcbf3756face0341c17",
+      "kid": "root-org-a-1",
+      "x": "wWqCfeQsmx_3XrICvBUrvnWGaMH3pJ4jBHZpFaz_AII"
+    },
+    "k0": {
+      "seed": "4439da89cfe5ba62ff78dc88d0852c661717f15a6d13e97ad2a89d37742b7313",
+      "kid": "ins-2026-08",
+      "x": "gHzNFeTy-rMAtupYyf1X8lTQJS7DZnXrw6rHsvZGaB4"
+    },
+    "k1": {
+      "seed": "20a58b4111bb58d574e6f6ea456675a3fa63ea71eb33635bee7b1e4c2efc8b90",
+      "kid": "ins-2026-09",
+      "x": "lR-vGldVpSLjIcyBV9UrcbRhZMqZ9_q0_AxN1INIM3w"
+    },
+    "k2": {
+      "seed": "6a51d219b1a655dea47917b53a2c08d3d631cfc7798b9c77f1c6164e3c2d6339",
+      "kid": "ins-2026-10",
+      "x": "b5LlTBFtN9HFIkg34citJttaQAu1KvGafQKuIhwyNdQ"
+    },
+    "rogue": {
+      "seed": "b2a2681d98500b07ad6a0e20c0522d0b689398e3767cc27beb98be051954c586",
+      "kid": "ins-rogue",
+      "x": "GF1l0vpPQ4hHH4x4SFnYfwMg1FN2W5ADurrevFKiKZA"
+    }
+  },
+  "signingInput": {
+    "document": {
+      "type": "org-instance/1",
+      "issuer": "https://orgs.example",
+      "org": "org:org-a",
+      "instanceId": "inst-7f3a",
+      "product": "notes",
+      "origin": "https://notes.org-a.example",
+      "placement": "org-cloud",
+      "status": "active",
+      "revision": 3,
+      "issuedAt": "2026-10-20T00:00:00Z",
+      "notBefore": "2026-10-20T00:00:00Z",
+      "expiresAt": "2026-10-27T00:00:00Z",
+      "alg": "EdDSA",
+      "kid": "ins-2026-10",
+      "sig": "4zcQbQq9qrKriDYfytaLavAoMkOTSSB8QF4ItT9cv6VMSjRjFJiMVa3ETv_RAbHNDTNazx81peQ4VSV0xHAoBQ"
+    },
+    "input": "{\"alg\":\"EdDSA\",\"expiresAt\":\"2026-10-27T00:00:00Z\",\"instanceId\":\"inst-7f3a\",\"issuedAt\":\"2026-10-20T00:00:00Z\",\"issuer\":\"https://orgs.example\",\"kid\":\"ins-2026-10\",\"notBefore\":\"2026-10-20T00:00:00Z\",\"org\":\"org:org-a\",\"origin\":\"https://notes.org-a.example\",\"placement\":\"org-cloud\",\"product\":\"notes\",\"revision\":3,\"status\":\"active\",\"type\":\"org-instance/1\"}"
+  },
+  "keySets": {
+    "r2": {
+      "type": "org-key-set/1",
+      "issuer": "https://orgs.example",
+      "org": "org:org-a",
+      "revision": 2,
+      "issuedAt": "2026-10-15T00:00:00Z",
+      "keys": [
+        {
+          "kid": "ins-2026-09",
+          "alg": "EdDSA",
+          "x": "lR-vGldVpSLjIcyBV9UrcbRhZMqZ9_q0_AxN1INIM3w",
+          "notBefore": "2026-09-01T00:00:00Z",
+          "notAfter": "2026-11-01T00:00:00Z"
+        },
+        {
+          "kid": "ins-2026-10",
+          "alg": "EdDSA",
+          "x": "b5LlTBFtN9HFIkg34citJttaQAu1KvGafQKuIhwyNdQ",
+          "notBefore": "2026-10-15T00:00:00Z",
+          "notAfter": "2027-01-01T00:00:00Z"
+        }
+      ],
+      "revoked": [
+        "ins-2026-08"
+      ],
+      "administrators": [
+        {
+          "credentialId": "CHa3PzdslIHXF7kNUC_7ZQ",
+          "alg": "EdDSA",
+          "publicKey": {
+            "kty": "OKP",
+            "crv": "Ed25519",
+            "x": "XUFmktKcvJVbYYNUXo3Lna1TRHzqDzpS7EuQsjbILPc"
+          },
+          "rpId": "sign.orgs.example",
+          "origins": [
+            "https://sign.orgs.example"
+          ]
+        }
+      ],
+      "alg": "EdDSA",
+      "kid": "root-org-a-1",
+      "sig": "5wZYh0f5ts4aQmpnkAVF2mysaakgszM2TdO3MziOBMXNVu1IclXHOuNTg0hAd6lKVL5ZpIF6HyuOxVT2qtDXBQ"
+    },
+    "algMismatch": {
+      "type": "org-key-set/1",
+      "issuer": "https://orgs.example",
+      "org": "org:org-a",
+      "revision": 2,
+      "issuedAt": "2026-10-15T00:00:00Z",
+      "keys": [
+        {
+          "kid": "ins-2026-09",
+          "alg": "EdDSA",
+          "x": "lR-vGldVpSLjIcyBV9UrcbRhZMqZ9_q0_AxN1INIM3w",
+          "notBefore": "2026-09-01T00:00:00Z",
+          "notAfter": "2026-11-01T00:00:00Z"
+        },
+        {
+          "kid": "ins-2026-10",
+          "alg": "ES256",
+          "x": "b5LlTBFtN9HFIkg34citJttaQAu1KvGafQKuIhwyNdQ",
+          "notBefore": "2026-10-15T00:00:00Z",
+          "notAfter": "2027-01-01T00:00:00Z"
+        }
+      ],
+      "revoked": [
+        "ins-2026-08"
+      ],
+      "administrators": [
+        {
+          "credentialId": "CHa3PzdslIHXF7kNUC_7ZQ",
+          "alg": "EdDSA",
+          "publicKey": {
+            "kty": "OKP",
+            "crv": "Ed25519",
+            "x": "XUFmktKcvJVbYYNUXo3Lna1TRHzqDzpS7EuQsjbILPc"
+          },
+          "rpId": "sign.orgs.example",
+          "origins": [
+            "https://sign.orgs.example"
+          ]
+        }
+      ],
+      "alg": "EdDSA",
+      "kid": "root-org-a-1",
+      "sig": "5wZYh0f5ts4aQmpnkAVF2mysaakgszM2TdO3MziOBMXNVu1IclXHOuNTg0hAd6lKVL5ZpIF6HyuOxVT2qtDXBQ"
+    },
+    "smallOrder": {
+      "type": "org-key-set/1",
+      "issuer": "https://orgs.example",
+      "org": "org:org-a",
+      "revision": 2,
+      "issuedAt": "2026-10-15T00:00:00Z",
+      "keys": [
+        {
+          "kid": "ins-2026-09",
+          "alg": "EdDSA",
+          "x": "lR-vGldVpSLjIcyBV9UrcbRhZMqZ9_q0_AxN1INIM3w",
+          "notBefore": "2026-09-01T00:00:00Z",
+          "notAfter": "2026-11-01T00:00:00Z"
+        },
+        {
+          "kid": "ins-2026-10",
+          "alg": "EdDSA",
+          "x": "b5LlTBFtN9HFIkg34citJttaQAu1KvGafQKuIhwyNdQ",
+          "notBefore": "2026-10-15T00:00:00Z",
+          "notAfter": "2027-01-01T00:00:00Z"
+        },
+        {
+          "kid": "ins-zero",
+          "alg": "EdDSA",
+          "x": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+          "notBefore": "2026-10-01T00:00:00Z",
+          "notAfter": "2027-01-01T00:00:00Z"
+        }
+      ],
+      "revoked": [
+        "ins-2026-08"
+      ],
+      "administrators": [
+        {
+          "credentialId": "CHa3PzdslIHXF7kNUC_7ZQ",
+          "alg": "EdDSA",
+          "publicKey": {
+            "kty": "OKP",
+            "crv": "Ed25519",
+            "x": "XUFmktKcvJVbYYNUXo3Lna1TRHzqDzpS7EuQsjbILPc"
+          },
+          "rpId": "sign.orgs.example",
+          "origins": [
+            "https://sign.orgs.example"
+          ]
+        }
+      ],
+      "alg": "EdDSA",
+      "kid": "root-org-a-1",
+      "sig": "5wZYh0f5ts4aQmpnkAVF2mysaakgszM2TdO3MziOBMXNVu1IclXHOuNTg0hAd6lKVL5ZpIF6HyuOxVT2qtDXBQ"
+    },
+    "otherOrg": {
+      "type": "org-key-set/1",
+      "issuer": "https://orgs.example",
+      "org": "org:org-b",
+      "revision": 2,
+      "issuedAt": "2026-10-15T00:00:00Z",
+      "keys": [
+        {
+          "kid": "ins-2026-09",
+          "alg": "EdDSA",
+          "x": "lR-vGldVpSLjIcyBV9UrcbRhZMqZ9_q0_AxN1INIM3w",
+          "notBefore": "2026-09-01T00:00:00Z",
+          "notAfter": "2026-11-01T00:00:00Z"
+        },
+        {
+          "kid": "ins-2026-10",
+          "alg": "EdDSA",
+          "x": "b5LlTBFtN9HFIkg34citJttaQAu1KvGafQKuIhwyNdQ",
+          "notBefore": "2026-10-15T00:00:00Z",
+          "notAfter": "2027-01-01T00:00:00Z"
+        }
+      ],
+      "revoked": [
+        "ins-2026-08"
+      ],
+      "administrators": [
+        {
+          "credentialId": "CHa3PzdslIHXF7kNUC_7ZQ",
+          "alg": "EdDSA",
+          "publicKey": {
+            "kty": "OKP",
+            "crv": "Ed25519",
+            "x": "XUFmktKcvJVbYYNUXo3Lna1TRHzqDzpS7EuQsjbILPc"
+          },
+          "rpId": "sign.orgs.example",
+          "origins": [
+            "https://sign.orgs.example"
+          ]
+        }
+      ],
+      "alg": "EdDSA",
+      "kid": "root-org-a-1",
+      "sig": "5wZYh0f5ts4aQmpnkAVF2mysaakgszM2TdO3MziOBMXNVu1IclXHOuNTg0hAd6lKVL5ZpIF6HyuOxVT2qtDXBQ"
+    }
+  },
+  "verify": [
+    {
+      "name": "valid: an active instance on the organization's cloud",
+      "instance": {
+        "type": "org-instance/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "product": "notes",
+        "origin": "https://notes.org-a.example",
+        "placement": "org-cloud",
+        "status": "active",
+        "revision": 3,
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-10-27T00:00:00Z",
+        "alg": "EdDSA",
+        "kid": "ins-2026-10",
+        "sig": "4zcQbQq9qrKriDYfytaLavAoMkOTSSB8QF4ItT9cv6VMSjRjFJiMVa3ETv_RAbHNDTNazx81peQ4VSV0xHAoBQ"
+      },
+      "trust": {
+        "now": "2026-10-22T12:00:00Z",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": true,
+        "status": "active",
+        "product": "notes",
+        "origin": "https://notes.org-a.example",
+        "placement": "org-cloud",
+        "refreshDue": false,
+        "unchanged": false,
+        "digest": "sha256:a4b7ac48aed13864f1b95c84bb14487acfb877f68886d703dd7165addc35e53d",
+        "held": {
+          "revision": 3,
+          "digest": "sha256:a4b7ac48aed13864f1b95c84bb14487acfb877f68886d703dd7165addc35e53d"
+        }
+      }
+    },
+    {
+      "name": "valid: an instance on a member's machine",
+      "instance": {
+        "type": "org-instance/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "product": "notes",
+        "origin": "https://notes.member.example",
+        "placement": "machine",
+        "status": "active",
+        "revision": 3,
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-10-27T00:00:00Z",
+        "alg": "EdDSA",
+        "kid": "ins-2026-10",
+        "sig": "IjRjFiqJVWDcVhExrUMW-ymW3EhEHMcLpTjqWsJmr1n6Q4xHzwX4D16mYk2cFvm7hgv7jvDCA9R7A2UnkyERAg"
+      },
+      "trust": {
+        "now": "2026-10-22T12:00:00Z",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": true,
+        "status": "active",
+        "product": "notes",
+        "origin": "https://notes.member.example",
+        "placement": "machine",
+        "refreshDue": false,
+        "unchanged": false,
+        "digest": "sha256:a7bc8fb2a5d10bb7a707aa18e770fcbb1e9fbe765672748046a61e1fe457fed2",
+        "held": {
+          "revision": 3,
+          "digest": "sha256:a7bc8fb2a5d10bb7a707aa18e770fcbb1e9fbe765672748046a61e1fe457fed2"
+        }
+      }
+    },
+    {
+      "name": "valid: an instance on a PassionCode service",
+      "instance": {
+        "type": "org-instance/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "product": "notes",
+        "origin": "https://notes.org-a.example",
+        "placement": "service",
+        "status": "active",
+        "revision": 3,
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-10-27T00:00:00Z",
+        "alg": "EdDSA",
+        "kid": "ins-2026-10",
+        "sig": "Zy039Z-rXYXOE5W9ft7WdDN74B9piYp6vSmfe7OQc7h3Xq13nh63hf80QKT1IkdhaVOlT1lojZUENpsEzB_RCg"
+      },
+      "trust": {
+        "now": "2026-10-22T12:00:00Z",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": true,
+        "status": "active",
+        "product": "notes",
+        "origin": "https://notes.org-a.example",
+        "placement": "service",
+        "refreshDue": false,
+        "unchanged": false,
+        "digest": "sha256:4fd3220667976996a2803cc16909755d811833eede60940c4047babde50ff00a",
+        "held": {
+          "revision": 3,
+          "digest": "sha256:4fd3220667976996a2803cc16909755d811833eede60940c4047babde50ff00a"
+        }
+      }
+    },
+    {
+      "name": "retired: a retirement at a higher revision verifies and reads retired",
+      "instance": {
+        "type": "org-instance/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "product": "notes",
+        "origin": "https://notes.org-a.example",
+        "placement": "org-cloud",
+        "status": "retired",
+        "revision": 4,
+        "issuedAt": "2026-10-21T00:00:00Z",
+        "notBefore": "2026-10-21T00:00:00Z",
+        "expiresAt": "2026-10-28T00:00:00Z",
+        "alg": "EdDSA",
+        "kid": "ins-2026-10",
+        "sig": "8OHVIiXg2xmIEXd2nj2R0f3JGqD8uxUihtQh_FUa7L11EMBpcORVLwC-z-T3j7fL6mAihc7qWDmJrtY0fbF6Aw"
+      },
+      "trust": {
+        "now": "2026-10-22T12:00:00Z",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "keySet": "r2",
+        "held": {
+          "revision": 3,
+          "digest": "sha256:a4b7ac48aed13864f1b95c84bb14487acfb877f68886d703dd7165addc35e53d"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "status": "retired",
+        "product": "notes",
+        "origin": "https://notes.org-a.example",
+        "placement": "org-cloud",
+        "refreshDue": false,
+        "unchanged": false,
+        "digest": "sha256:453918ddbbb13d0f9f0d914b01213adff09e890c61730c540fe1c8a4e37016bb",
+        "held": {
+          "revision": 4,
+          "digest": "sha256:453918ddbbb13d0f9f0d914b01213adff09e890c61730c540fe1c8a4e37016bb"
+        }
+      }
+    },
+    {
+      "name": "retired: the active statement after the retirement is stale",
+      "instance": {
+        "type": "org-instance/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "product": "notes",
+        "origin": "https://notes.org-a.example",
+        "placement": "org-cloud",
+        "status": "active",
+        "revision": 3,
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-10-27T00:00:00Z",
+        "alg": "EdDSA",
+        "kid": "ins-2026-10",
+        "sig": "4zcQbQq9qrKriDYfytaLavAoMkOTSSB8QF4ItT9cv6VMSjRjFJiMVa3ETv_RAbHNDTNazx81peQ4VSV0xHAoBQ"
+      },
+      "trust": {
+        "now": "2026-10-22T12:00:00Z",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "keySet": "r2",
+        "held": {
+          "revision": 4,
+          "digest": "sha256:453918ddbbb13d0f9f0d914b01213adff09e890c61730c540fe1c8a4e37016bb"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "stale-revision"
+      }
+    },
+    {
+      "name": "redelivery: the held statement again",
+      "instance": {
+        "type": "org-instance/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "product": "notes",
+        "origin": "https://notes.org-a.example",
+        "placement": "org-cloud",
+        "status": "active",
+        "revision": 3,
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-10-27T00:00:00Z",
+        "alg": "EdDSA",
+        "kid": "ins-2026-10",
+        "sig": "4zcQbQq9qrKriDYfytaLavAoMkOTSSB8QF4ItT9cv6VMSjRjFJiMVa3ETv_RAbHNDTNazx81peQ4VSV0xHAoBQ"
+      },
+      "trust": {
+        "now": "2026-10-22T12:00:00Z",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "keySet": "r2",
+        "held": {
+          "revision": 3,
+          "digest": "sha256:a4b7ac48aed13864f1b95c84bb14487acfb877f68886d703dd7165addc35e53d"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "status": "active",
+        "product": "notes",
+        "origin": "https://notes.org-a.example",
+        "placement": "org-cloud",
+        "refreshDue": false,
+        "unchanged": true,
+        "digest": "sha256:a4b7ac48aed13864f1b95c84bb14487acfb877f68886d703dd7165addc35e53d",
+        "held": {
+          "revision": 3,
+          "digest": "sha256:a4b7ac48aed13864f1b95c84bb14487acfb877f68886d703dd7165addc35e53d"
+        }
+      }
+    },
+    {
+      "name": "replay: a lower revision",
+      "instance": {
+        "type": "org-instance/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "product": "notes",
+        "origin": "https://notes.org-a.example",
+        "placement": "org-cloud",
+        "status": "active",
+        "revision": 2,
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-10-27T00:00:00Z",
+        "alg": "EdDSA",
+        "kid": "ins-2026-10",
+        "sig": "HpIa05v0j5eDy5NzMAV8ImVYtSOOFmONJ09P4jlBFCFaOynbmJF2qntfxdNQFiNHrFxrtyrBRJQW8fTJKZk9AQ"
+      },
+      "trust": {
+        "now": "2026-10-22T12:00:00Z",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "keySet": "r2",
+        "held": {
+          "revision": 3,
+          "digest": "sha256:a4b7ac48aed13864f1b95c84bb14487acfb877f68886d703dd7165addc35e53d"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "stale-revision"
+      }
+    },
+    {
+      "name": "replay: the held revision with other bytes",
+      "instance": {
+        "type": "org-instance/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "product": "notes-pro",
+        "origin": "https://notes.org-a.example",
+        "placement": "org-cloud",
+        "status": "active",
+        "revision": 3,
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-10-27T00:00:00Z",
+        "alg": "EdDSA",
+        "kid": "ins-2026-10",
+        "sig": "gz2tJonxo1yrFZiL_YuYvrDPWVSJa14_wc0mSHGRh0P2XURsbMfifKr5VBNDAJ6wN9Rc3FVs9V9AoUuu48ZjBw"
+      },
+      "trust": {
+        "now": "2026-10-22T12:00:00Z",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "keySet": "r2",
+        "held": {
+          "revision": 3,
+          "digest": "sha256:a4b7ac48aed13864f1b95c84bb14487acfb877f68886d703dd7165addc35e53d"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "revision-conflict"
+      }
+    },
+    {
+      "name": "wrong org: another organization's reader",
+      "instance": {
+        "type": "org-instance/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "product": "notes",
+        "origin": "https://notes.org-a.example",
+        "placement": "org-cloud",
+        "status": "active",
+        "revision": 3,
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-10-27T00:00:00Z",
+        "alg": "EdDSA",
+        "kid": "ins-2026-10",
+        "sig": "4zcQbQq9qrKriDYfytaLavAoMkOTSSB8QF4ItT9cv6VMSjRjFJiMVa3ETv_RAbHNDTNazx81peQ4VSV0xHAoBQ"
+      },
+      "trust": {
+        "now": "2026-10-22T12:00:00Z",
+        "org": "org:org-b",
+        "instanceId": "inst-7f3a",
+        "keySet": "otherOrg"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "wrong-org"
+      }
+    },
+    {
+      "name": "wrong instance: the path names another instance",
+      "instance": {
+        "type": "org-instance/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "product": "notes",
+        "origin": "https://notes.org-a.example",
+        "placement": "org-cloud",
+        "status": "active",
+        "revision": 3,
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-10-27T00:00:00Z",
+        "alg": "EdDSA",
+        "kid": "ins-2026-10",
+        "sig": "4zcQbQq9qrKriDYfytaLavAoMkOTSSB8QF4ItT9cv6VMSjRjFJiMVa3ETv_RAbHNDTNazx81peQ4VSV0xHAoBQ"
+      },
+      "trust": {
+        "now": "2026-10-22T12:00:00Z",
+        "org": "org:org-a",
+        "instanceId": "inst-0000",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "wrong-instance"
+      }
+    },
+    {
+      "name": "wrong issuer: another origin",
+      "instance": {
+        "type": "org-instance/1",
+        "issuer": "https://other.example",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "product": "notes",
+        "origin": "https://notes.org-a.example",
+        "placement": "org-cloud",
+        "status": "active",
+        "revision": 3,
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-10-27T00:00:00Z",
+        "alg": "EdDSA",
+        "kid": "ins-2026-10",
+        "sig": "CoNbJ05OKHaIofQlayZV3Z12Dbxj8tdJ5XbgVMIQugLzd8GjEvTTEPY1uUzDpjWWbWc-UhLg2QMjATLgiRr7Dg"
+      },
+      "trust": {
+        "now": "2026-10-22T12:00:00Z",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "wrong-issuer"
+      }
+    },
+    {
+      "name": "unknown algorithm: ES256",
+      "instance": {
+        "type": "org-instance/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "product": "notes",
+        "origin": "https://notes.org-a.example",
+        "placement": "org-cloud",
+        "status": "active",
+        "revision": 3,
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-10-27T00:00:00Z",
+        "alg": "ES256",
+        "kid": "ins-2026-10",
+        "sig": "2iWPeEE-g7Ee2km7rUNVGcgijD64-rJl4MJzKZwyYcHq-36w334LKRMmeCpjJX4Kn3_YCvJEMcTkj-aT6lh3Aw"
+      },
+      "trust": {
+        "now": "2026-10-22T12:00:00Z",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "unknown-algorithm"
+      }
+    },
+    {
+      "name": "unknown kid: a kid the key set does not list",
+      "instance": {
+        "type": "org-instance/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "product": "notes",
+        "origin": "https://notes.org-a.example",
+        "placement": "org-cloud",
+        "status": "active",
+        "revision": 3,
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-10-27T00:00:00Z",
+        "alg": "EdDSA",
+        "kid": "ins-rogue",
+        "sig": "G4vm2leDXeW_NBykeJyts0j5uJQbk4HG3CJWEOolETy1xtx-Tgnlx_HbOY7GxJmo9pao_u00vQF6nx7Bd-ntDw"
+      },
+      "trust": {
+        "now": "2026-10-22T12:00:00Z",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "unknown-key"
+      }
+    },
+    {
+      "name": "revoked key: signed by a revoked kid",
+      "instance": {
+        "type": "org-instance/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "product": "notes",
+        "origin": "https://notes.org-a.example",
+        "placement": "org-cloud",
+        "status": "active",
+        "revision": 3,
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-10-27T00:00:00Z",
+        "alg": "EdDSA",
+        "kid": "ins-2026-08",
+        "sig": "JXvGPZce8QJTSdCYzaeIImazdzk7vz_1hfjq1xKcS5QwSkzE_ppxHg5hFECbJReIT1yoos6LfNx9BsRWD2JIAw"
+      },
+      "trust": {
+        "now": "2026-10-22T12:00:00Z",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "key-revoked"
+      }
+    },
+    {
+      "name": "unusable key: the listed key names another algorithm",
+      "instance": {
+        "type": "org-instance/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "product": "notes",
+        "origin": "https://notes.org-a.example",
+        "placement": "org-cloud",
+        "status": "active",
+        "revision": 3,
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-10-27T00:00:00Z",
+        "alg": "EdDSA",
+        "kid": "ins-2026-10",
+        "sig": "4zcQbQq9qrKriDYfytaLavAoMkOTSSB8QF4ItT9cv6VMSjRjFJiMVa3ETv_RAbHNDTNazx81peQ4VSV0xHAoBQ"
+      },
+      "trust": {
+        "now": "2026-10-22T12:00:00Z",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "keySet": "algMismatch"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "unusable-key"
+      }
+    },
+    {
+      "name": "small-order key: a listed key of order 4",
+      "instance": {
+        "type": "org-instance/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "product": "notes",
+        "origin": "https://notes.org-a.example",
+        "placement": "org-cloud",
+        "status": "active",
+        "revision": 3,
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-10-27T00:00:00Z",
+        "alg": "EdDSA",
+        "kid": "ins-zero",
+        "sig": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+      },
+      "trust": {
+        "now": "2026-10-22T12:00:00Z",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "keySet": "smallOrder"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "small-order-key"
+      }
+    },
+    {
+      "name": "key not valid: K1 after its window",
+      "instance": {
+        "type": "org-instance/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "product": "notes",
+        "origin": "https://notes.org-a.example",
+        "placement": "org-cloud",
+        "status": "active",
+        "revision": 3,
+        "issuedAt": "2026-11-01T00:00:00Z",
+        "notBefore": "2026-11-01T00:00:00Z",
+        "expiresAt": "2026-11-02T00:00:00Z",
+        "alg": "EdDSA",
+        "kid": "ins-2026-09",
+        "sig": "KBjqjCm479gOqi1KMWfIqZeaf1b6PXfw_Us3FMkK5KWYc078L_UAU2SYRoahxZkI3qzp5Pak8iFlPPJgPpiVCA"
+      },
+      "trust": {
+        "now": "2026-11-01T12:00:00Z",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "key-not-valid"
+      }
+    },
+    {
+      "name": "bad signature: K2's kid, signed by a key nobody lists",
+      "instance": {
+        "type": "org-instance/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "product": "notes",
+        "origin": "https://notes.org-a.example",
+        "placement": "org-cloud",
+        "status": "active",
+        "revision": 3,
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-10-27T00:00:00Z",
+        "alg": "EdDSA",
+        "kid": "ins-2026-10",
+        "sig": "gD9990csPxEwiZLeQCfb5YJqzWAvR9_ZaLoN4zPI6ODi34CocAMTERd9YcX82rPVIHIKZbllZbim9nBdpxZrDQ"
+      },
+      "trust": {
+        "now": "2026-10-22T12:00:00Z",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "bad-signature"
+      }
+    },
+    {
+      "name": "bad signature: a member changed after signing",
+      "instance": {
+        "type": "org-instance/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "product": "notes",
+        "origin": "https://evil.example",
+        "placement": "org-cloud",
+        "status": "active",
+        "revision": 3,
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-10-27T00:00:00Z",
+        "alg": "EdDSA",
+        "kid": "ins-2026-10",
+        "sig": "4zcQbQq9qrKriDYfytaLavAoMkOTSSB8QF4ItT9cv6VMSjRjFJiMVa3ETv_RAbHNDTNazx81peQ4VSV0xHAoBQ"
+      },
+      "trust": {
+        "now": "2026-10-22T12:00:00Z",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "bad-signature"
+      }
+    },
+    {
+      "name": "too long: exactly 7 days",
+      "instance": {
+        "type": "org-instance/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "product": "notes",
+        "origin": "https://notes.org-a.example",
+        "placement": "org-cloud",
+        "status": "active",
+        "revision": 3,
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-10-27T00:00:00Z",
+        "alg": "EdDSA",
+        "kid": "ins-2026-10",
+        "sig": "4zcQbQq9qrKriDYfytaLavAoMkOTSSB8QF4ItT9cv6VMSjRjFJiMVa3ETv_RAbHNDTNazx81peQ4VSV0xHAoBQ"
+      },
+      "trust": {
+        "now": "2026-10-22T12:00:00Z",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": true,
+        "status": "active",
+        "product": "notes",
+        "origin": "https://notes.org-a.example",
+        "placement": "org-cloud",
+        "refreshDue": false,
+        "unchanged": false,
+        "digest": "sha256:a4b7ac48aed13864f1b95c84bb14487acfb877f68886d703dd7165addc35e53d",
+        "held": {
+          "revision": 3,
+          "digest": "sha256:a4b7ac48aed13864f1b95c84bb14487acfb877f68886d703dd7165addc35e53d"
+        }
+      }
+    },
+    {
+      "name": "too long: 7 days and a millisecond",
+      "instance": {
+        "type": "org-instance/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "product": "notes",
+        "origin": "https://notes.org-a.example",
+        "placement": "org-cloud",
+        "status": "active",
+        "revision": 3,
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-10-27T00:00:00.001Z",
+        "alg": "EdDSA",
+        "kid": "ins-2026-10",
+        "sig": "M4RDsT1__LtwNav7SHI3yuScaf25UmykU6XS26bwkU9aKEkondvwAFLf0-yoF0OW4AbkSYTnzJyxS_uNbyL4Aw"
+      },
+      "trust": {
+        "now": "2026-10-22T12:00:00Z",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "too-long-lived"
+      }
+    },
+    {
+      "name": "too long: notBefore before issuedAt",
+      "instance": {
+        "type": "org-instance/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "product": "notes",
+        "origin": "https://notes.org-a.example",
+        "placement": "org-cloud",
+        "status": "active",
+        "revision": 3,
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-19T23:59:59Z",
+        "expiresAt": "2026-10-27T00:00:00Z",
+        "alg": "EdDSA",
+        "kid": "ins-2026-10",
+        "sig": "-7PFEb9Kn6KO1UEaqxYJ-nhf8qLEQPfWz2IdT7_nyNIIzOyoCF_A94LmoVYEYoTa3zEalYKNTsh0xlj0AlVOCw"
+      },
+      "trust": {
+        "now": "2026-10-22T12:00:00Z",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "too-long-lived"
+      }
+    },
+    {
+      "name": "not yet valid: before notBefore",
+      "instance": {
+        "type": "org-instance/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "product": "notes",
+        "origin": "https://notes.org-a.example",
+        "placement": "org-cloud",
+        "status": "active",
+        "revision": 3,
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-25T00:00:00Z",
+        "expiresAt": "2026-10-27T00:00:00Z",
+        "alg": "EdDSA",
+        "kid": "ins-2026-10",
+        "sig": "YaSv8KL4VE39Rv6R40MjeJjA4iso0e3bF8zvB3O3i9vGUZwovgDoWqUhOrETD8Z19gy7YhfaiWGgis7YT8_TCA"
+      },
+      "trust": {
+        "now": "2026-10-22T12:00:00Z",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "not-yet-valid"
+      }
+    },
+    {
+      "name": "not yet valid: 60 s before notBefore is within the clock skew",
+      "instance": {
+        "type": "org-instance/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "product": "notes",
+        "origin": "https://notes.org-a.example",
+        "placement": "org-cloud",
+        "status": "active",
+        "revision": 3,
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-25T00:00:00Z",
+        "expiresAt": "2026-10-27T00:00:00Z",
+        "alg": "EdDSA",
+        "kid": "ins-2026-10",
+        "sig": "YaSv8KL4VE39Rv6R40MjeJjA4iso0e3bF8zvB3O3i9vGUZwovgDoWqUhOrETD8Z19gy7YhfaiWGgis7YT8_TCA"
+      },
+      "trust": {
+        "now": "2026-10-24T23:59:00Z",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": true,
+        "status": "active",
+        "product": "notes",
+        "origin": "https://notes.org-a.example",
+        "placement": "org-cloud",
+        "refreshDue": false,
+        "unchanged": false,
+        "digest": "sha256:bb49976e586c7419918733c344e9bd6cf8c626c0d00f433d0427bb4f316981c4",
+        "held": {
+          "revision": 3,
+          "digest": "sha256:bb49976e586c7419918733c344e9bd6cf8c626c0d00f433d0427bb4f316981c4"
+        }
+      }
+    },
+    {
+      "name": "expired: at expiresAt, no grace",
+      "instance": {
+        "type": "org-instance/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "product": "notes",
+        "origin": "https://notes.org-a.example",
+        "placement": "org-cloud",
+        "status": "active",
+        "revision": 3,
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-10-27T00:00:00Z",
+        "alg": "EdDSA",
+        "kid": "ins-2026-10",
+        "sig": "4zcQbQq9qrKriDYfytaLavAoMkOTSSB8QF4ItT9cv6VMSjRjFJiMVa3ETv_RAbHNDTNazx81peQ4VSV0xHAoBQ"
+      },
+      "trust": {
+        "now": "2026-10-27T00:00:00Z",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "expired"
+      }
+    },
+    {
+      "name": "refresh due: a day before expiresAt",
+      "instance": {
+        "type": "org-instance/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "product": "notes",
+        "origin": "https://notes.org-a.example",
+        "placement": "org-cloud",
+        "status": "active",
+        "revision": 3,
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-10-27T00:00:00Z",
+        "alg": "EdDSA",
+        "kid": "ins-2026-10",
+        "sig": "4zcQbQq9qrKriDYfytaLavAoMkOTSSB8QF4ItT9cv6VMSjRjFJiMVa3ETv_RAbHNDTNazx81peQ4VSV0xHAoBQ"
+      },
+      "trust": {
+        "now": "2026-10-26T00:00:00Z",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": true,
+        "status": "active",
+        "product": "notes",
+        "origin": "https://notes.org-a.example",
+        "placement": "org-cloud",
+        "refreshDue": true,
+        "unchanged": false,
+        "digest": "sha256:a4b7ac48aed13864f1b95c84bb14487acfb877f68886d703dd7165addc35e53d",
+        "held": {
+          "revision": 3,
+          "digest": "sha256:a4b7ac48aed13864f1b95c84bb14487acfb877f68886d703dd7165addc35e53d"
+        }
+      }
+    },
+    {
+      "name": "refresh not due: a millisecond earlier",
+      "instance": {
+        "type": "org-instance/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "product": "notes",
+        "origin": "https://notes.org-a.example",
+        "placement": "org-cloud",
+        "status": "active",
+        "revision": 3,
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-10-27T00:00:00Z",
+        "alg": "EdDSA",
+        "kid": "ins-2026-10",
+        "sig": "4zcQbQq9qrKriDYfytaLavAoMkOTSSB8QF4ItT9cv6VMSjRjFJiMVa3ETv_RAbHNDTNazx81peQ4VSV0xHAoBQ"
+      },
+      "trust": {
+        "now": "2026-10-25T23:59:59.999Z",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": true,
+        "status": "active",
+        "product": "notes",
+        "origin": "https://notes.org-a.example",
+        "placement": "org-cloud",
+        "refreshDue": false,
+        "unchanged": false,
+        "digest": "sha256:a4b7ac48aed13864f1b95c84bb14487acfb877f68886d703dd7165addc35e53d",
+        "held": {
+          "revision": 3,
+          "digest": "sha256:a4b7ac48aed13864f1b95c84bb14487acfb877f68886d703dd7165addc35e53d"
+        }
+      }
+    },
+    {
+      "name": "malformed: an unknown placement",
+      "instance": {
+        "type": "org-instance/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "product": "notes",
+        "origin": "https://notes.org-a.example",
+        "placement": "laptop",
+        "status": "active",
+        "revision": 3,
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-10-27T00:00:00Z",
+        "alg": "EdDSA",
+        "kid": "ins-2026-10",
+        "sig": "a9IqbVInBDTFr1tuTiUOnolhiqFrzCtTk7-xbTb9aTTr0omKRBB4LSVxmCrV60Ck3D29rs0mF-PTFjf5-GwFDQ"
+      },
+      "trust": {
+        "now": "2026-10-22T12:00:00Z",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
+      "name": "malformed: an unknown status",
+      "instance": {
+        "type": "org-instance/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "product": "notes",
+        "origin": "https://notes.org-a.example",
+        "placement": "org-cloud",
+        "status": "paused",
+        "revision": 3,
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-10-27T00:00:00Z",
+        "alg": "EdDSA",
+        "kid": "ins-2026-10",
+        "sig": "dXn_VXQUC22XF528Ty7-SrsZ_1qg1YaN467skGc-QDQhyz6Fme4g2uKdOe9X6WPp6--61p44ce_-FnJe1Pk3Ag"
+      },
+      "trust": {
+        "now": "2026-10-22T12:00:00Z",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
+      "name": "malformed: an origin with a path",
+      "instance": {
+        "type": "org-instance/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "product": "notes",
+        "origin": "https://notes.org-a.example/app",
+        "placement": "org-cloud",
+        "status": "active",
+        "revision": 3,
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-10-27T00:00:00Z",
+        "alg": "EdDSA",
+        "kid": "ins-2026-10",
+        "sig": "XOWJfoxIz7rww5iRPYVXIBa8cCIvI9cyj5B4E8dCxEo9tFzzXCpYaTQtZ5sxJs0J3oNUn2M_45R8CWBbd1JYAQ"
+      },
+      "trust": {
+        "now": "2026-10-22T12:00:00Z",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
+      "name": "malformed: a person named in an extra member",
+      "instance": {
+        "type": "org-instance/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "product": "notes",
+        "origin": "https://notes.org-a.example",
+        "placement": "org-cloud",
+        "status": "active",
+        "revision": 3,
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-10-27T00:00:00Z",
+        "alg": "EdDSA",
+        "kid": "ins-2026-10",
+        "sig": "4zcQbQq9qrKriDYfytaLavAoMkOTSSB8QF4ItT9cv6VMSjRjFJiMVa3ETv_RAbHNDTNazx81peQ4VSV0xHAoBQ",
+        "owner": "alice"
+      },
+      "trust": {
+        "now": "2026-10-22T12:00:00Z",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
+      "name": "malformed: no kid",
+      "instance": {
+        "type": "org-instance/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "product": "notes",
+        "origin": "https://notes.org-a.example",
+        "placement": "org-cloud",
+        "status": "active",
+        "revision": 3,
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-10-27T00:00:00Z",
+        "alg": "EdDSA",
+        "sig": "4zcQbQq9qrKriDYfytaLavAoMkOTSSB8QF4ItT9cv6VMSjRjFJiMVa3ETv_RAbHNDTNazx81peQ4VSV0xHAoBQ"
+      },
+      "trust": {
+        "now": "2026-10-22T12:00:00Z",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
+      "name": "malformed: a membership attestation is not a statement",
+      "instance": {
+        "type": "org-membership/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "product": "notes",
+        "origin": "https://notes.org-a.example",
+        "placement": "org-cloud",
+        "status": "active",
+        "revision": 3,
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-10-27T00:00:00Z",
+        "alg": "EdDSA",
+        "kid": "ins-2026-10",
+        "sig": "4zcQbQq9qrKriDYfytaLavAoMkOTSSB8QF4ItT9cv6VMSjRjFJiMVa3ETv_RAbHNDTNazx81peQ4VSV0xHAoBQ"
+      },
+      "trust": {
+        "now": "2026-10-22T12:00:00Z",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "malformed"
+      }
+    },
+    {
+      "name": "context: no trust",
+      "instance": {
+        "type": "org-instance/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "product": "notes",
+        "origin": "https://notes.org-a.example",
+        "placement": "org-cloud",
+        "status": "active",
+        "revision": 3,
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-10-27T00:00:00Z",
+        "alg": "EdDSA",
+        "kid": "ins-2026-10",
+        "sig": "4zcQbQq9qrKriDYfytaLavAoMkOTSSB8QF4ItT9cv6VMSjRjFJiMVa3ETv_RAbHNDTNazx81peQ4VSV0xHAoBQ"
+      },
+      "trust": null,
+      "expected": {
+        "ok": false,
+        "problem": "context-invalid"
+      }
+    },
+    {
+      "name": "context: a key set of another organization",
+      "instance": {
+        "type": "org-instance/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "product": "notes",
+        "origin": "https://notes.org-a.example",
+        "placement": "org-cloud",
+        "status": "active",
+        "revision": 3,
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-10-27T00:00:00Z",
+        "alg": "EdDSA",
+        "kid": "ins-2026-10",
+        "sig": "4zcQbQq9qrKriDYfytaLavAoMkOTSSB8QF4ItT9cv6VMSjRjFJiMVa3ETv_RAbHNDTNazx81peQ4VSV0xHAoBQ"
+      },
+      "trust": {
+        "now": "2026-10-22T12:00:00Z",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "keySet": "otherOrg"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "context-invalid"
+      }
+    },
+    {
+      "name": "context: an instance id that is not an opaque id",
+      "instance": {
+        "type": "org-instance/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "product": "notes",
+        "origin": "https://notes.org-a.example",
+        "placement": "org-cloud",
+        "status": "active",
+        "revision": 3,
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-10-27T00:00:00Z",
+        "alg": "EdDSA",
+        "kid": "ins-2026-10",
+        "sig": "4zcQbQq9qrKriDYfytaLavAoMkOTSSB8QF4ItT9cv6VMSjRjFJiMVa3ETv_RAbHNDTNazx81peQ4VSV0xHAoBQ"
+      },
+      "trust": {
+        "now": "2026-10-22T12:00:00Z",
+        "org": "org:org-a",
+        "instanceId": "inst 7f3a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "context-invalid"
+      }
+    },
+    {
+      "name": "context: a held record without a digest",
+      "instance": {
+        "type": "org-instance/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "product": "notes",
+        "origin": "https://notes.org-a.example",
+        "placement": "org-cloud",
+        "status": "active",
+        "revision": 3,
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-10-27T00:00:00Z",
+        "alg": "EdDSA",
+        "kid": "ins-2026-10",
+        "sig": "4zcQbQq9qrKriDYfytaLavAoMkOTSSB8QF4ItT9cv6VMSjRjFJiMVa3ETv_RAbHNDTNazx81peQ4VSV0xHAoBQ"
+      },
+      "trust": {
+        "now": "2026-10-22T12:00:00Z",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "keySet": "r2",
+        "held": {
+          "revision": 3,
+          "digest": "x"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "problem": "context-invalid"
+      }
+    },
+    {
+      "name": "no clock: an unreadable now",
+      "instance": {
+        "type": "org-instance/1",
+        "issuer": "https://orgs.example",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "product": "notes",
+        "origin": "https://notes.org-a.example",
+        "placement": "org-cloud",
+        "status": "active",
+        "revision": 3,
+        "issuedAt": "2026-10-20T00:00:00Z",
+        "notBefore": "2026-10-20T00:00:00Z",
+        "expiresAt": "2026-10-27T00:00:00Z",
+        "alg": "EdDSA",
+        "kid": "ins-2026-10",
+        "sig": "4zcQbQq9qrKriDYfytaLavAoMkOTSSB8QF4ItT9cv6VMSjRjFJiMVa3ETv_RAbHNDTNazx81peQ4VSV0xHAoBQ"
+      },
+      "trust": {
+        "now": "2026-10-22 12:00:00",
+        "org": "org:org-a",
+        "instanceId": "inst-7f3a",
+        "keySet": "r2"
+      },
+      "expected": {
+        "ok": false,
+        "problem": "no-clock"
+      }
+    }
+  ]
+}

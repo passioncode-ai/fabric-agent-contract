@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/org-instance.schema.json",
+  "title": "Instance statement, org-instance/1 (DEC-0170)",
+  "description": "The organization server's signed statement that one instance runs for one organization: its id, product, origin, placement, status and revision, for at most 7 days. A signing key of the organization's org-key-set/1 signs it over the RFC 8785 form of the document without sig (the register's org-instance/1, DEC-0063). The platform (instance_put, PLAT-146) and the instance's product verify it offline. It names no person.",
+  "type": "object",
+  "required": [
+    "type",
+    "issuer",
+    "org",
+    "instanceId",
+    "product",
+    "origin",
+    "placement",
+    "status",
+    "revision",
+    "issuedAt",
+    "notBefore",
+    "expiresAt",
+    "alg",
+    "kid",
+    "sig"
+  ],
+  "properties": {
+    "type": {
+      "const": "org-instance/1"
+    },
+    "issuer": {
+      "$ref": "entitlement.schema.json#/$defs/issuer",
+      "description": "The organization server's https:// origin in lower case, as the organization's key set and the estate's pin name it."
+    },
+    "org": {
+      "$ref": "org-membership.schema.json#/$defs/org"
+    },
+    "instanceId": {
+      "$ref": "activity-common.schema.json#/$defs/opaqueId",
+      "description": "The instance's opaque id, as the platform's record and the instance's product name it (DEC-0170 IS-1)."
+    },
+    "product": {
+      "$ref": "activity-common.schema.json#/$defs/opaqueId",
+      "description": "The product the instance runs, the platform's opaque product key."
+    },
+    "origin": {
+      "$ref": "entitlement.schema.json#/$defs/issuer",
+      "description": "The instance's https:// origin in lower case, compared as written."
+    },
+    "placement": {
+      "enum": [
+        "org-cloud",
+        "machine",
+        "service"
+      ],
+      "description": "Where the instance runs: the organization's cloud, a member's or the organization's machine, or a PassionCode service."
+    },
+    "status": {
+      "enum": [
+        "active",
+        "retired"
+      ],
+      "description": "active, or retired: the issuer states a retirement with a higher revision rather than going silent; a reader stops serving or accepting a retired instance."
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991,
+      "description": "Rises with every statement for this (org, instanceId); a reader refuses a lower one and the same one with other bytes."
+    },
+    "issuedAt": {
+      "$ref": "entitlement.schema.json#/$defs/instant"
+    },
+    "notBefore": {
+      "$ref": "entitlement.schema.json#/$defs/instant",
+      "description": "At or after issuedAt (FAC-SEM-177)."
+    },
+    "expiresAt": {
+      "$ref": "entitlement.schema.json#/$defs/instant",
+      "description": "After notBefore and at most 7 days after issuedAt (FAC-SEM-177); no grace."
+    },
+    "alg": {
+      "enum": [
+        "EdDSA"
+      ],
+      "description": "Ed25519 only; ES256 may join additively by a later decision."
+    },
+    "kid": {
+      "$ref": "activity-common.schema.json#/$defs/opaqueId",
+      "description": "The signing key's kid, as the organization's current org-key-set/1 lists it (the platform's request, PLAT-146)."
+    },
+    "sig": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{85}[AQgw]$",
+      "description": "The Ed25519 signature (64 bytes, base64url without padding) over the UTF-8 RFC 8785 form of the document without sig."
+    }
+  },
+  "additionalProperties": false
+}

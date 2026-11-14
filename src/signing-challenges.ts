@@ -69,6 +69,11 @@ export const ORG_MEMBERSHIP_2_FIELDS = [
   "issuer", "org", "audience", "subject", "role", "projects", "external", "status", "revision", "membershipEndsAt", "issuedAt", "notBefore", "expiresAt", "extensions", "alg", "kid"
 ] as const;
 
+/** An instance statement's members beside `type`: the statement without `sig` (DEC-0170 IS-1). */
+export const ORG_INSTANCE_FIELDS = [
+  "issuer", "org", "instanceId", "product", "origin", "placement", "status", "revision", "issuedAt", "notBefore", "expiresAt", "alg", "kid"
+] as const;
+
 /** An organization key set's members beside `type`: the set without `sig` (DEC-0127; `administrators`, DEC-0129). */
 export const ORG_KEY_SET_FIELDS = ["issuer", "org", "revision", "issuedAt", "keys", "revoked", "administrators", "alg", "kid"] as const;
 
@@ -118,6 +123,7 @@ export const SIGNING_STATEMENTS: ReadonlyMap<string, StatementSpec> = new Map<st
   ["entitlement-key-set/1", { signer: "key", fields: ENTITLEMENT_KEY_SET_FIELDS, decision: "DEC-0085" }],
   ["org-membership/1", { signer: "key", fields: ORG_MEMBERSHIP_FIELDS, decision: "DEC-0127" }],
   ["org-membership/2", { signer: "key", fields: ORG_MEMBERSHIP_2_FIELDS, decision: "DEC-0162" }],
+  ["org-instance/1", { signer: "key", fields: ORG_INSTANCE_FIELDS, decision: "DEC-0170" }],
   ["org-key-set/1", { signer: "key", fields: ORG_KEY_SET_FIELDS, decision: "DEC-0127" }],
   // DEC-0129: an administrator's passkey signs the organization's member list by its digest, as estate-revision/1 does a record.
   ["org-authority/1", { signer: "passkey", fields: ["digest"], decision: "DEC-0129", check: (f) => matches(SHA256, f.digest) }]

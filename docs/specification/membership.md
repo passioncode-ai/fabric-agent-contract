@@ -614,6 +614,58 @@ vectors [`levels.json`](../../fixtures/vectors/levels.json).
 - **LV-11, ending.** A membership that ends or is suspended (OM-5, OM-6) ends its level at once (the service keeps the held record per subject from its own `verifyOrgMembership` verdict on every attestation it reads, an ended one included; `actionDecision` reads it and never writes it): a decision or mandate
   that carries an attestation the service no longer accepts is `decision-invalid`, even inside AP-2's window. The service keeps the attestation it accepted last per subject (OM-4), so an older active revision after a later `ended` one is `level-membership: stale-revision`.
 
+## Instances (DEC-0170)
+
+DEC-0170 · rule code `FAC-SEM-177` · schema [`org-instance`](../../schemas/org-instance.schema.json) · code
+[`src/org-instance.ts`](../../src/org-instance.ts) · vectors
+[`fixtures/vectors/org-instance.json`](../../fixtures/vectors/org-instance.json), written by
+[`tools/vectors/org-instance.ts`](../../tools/vectors/org-instance.ts)
+
+`org-instance/1` is the organization server's signed statement that one instance runs for one organization, so a
+reader that never trusted the server's word can check it offline: the platform when an instance's record is put for
+`org:<orgId>` (`instance_put`, PLAT-146), and the instance's own product. A signing key of the organization's
+`org-key-set/1` signs it (OM-3), as it signs attestations, over the UTF-8 RFC 8785 form without `sig` (the register's
+`org-instance/1`).
+
+**IS-1, the fields.** Every member is always present; the schema refuses any it does not list.
+
+| Field | Rule |
+|---|---|
+| `type` | `org-instance/1` |
+| `issuer` | the organization server's `https://` origin, as an attestation states it |
+| `org` | the organization's context id `org:<orgId>` |
+| `instanceId` | the instance's opaque id, as the platform's record and the instance's product name it |
+| `product` | the product the instance runs, the platform's opaque product key |
+| `origin` | the instance's `https://` origin in lower case, compared as written |
+| `placement` | `org-cloud` (the organization's cloud), `machine` (a member's or the organization's machine) or `service` (a PassionCode service) |
+| `status` | `active`, or `retired`: a retirement is stated at a higher revision, never by silence |
+| `revision` | a positive integer that rises with every statement for this (organization, instance) |
+| `issuedAt`, `notBefore`, `expiresAt` | strict RFC 3339 instants with at most three fraction digits, `issuedAt` ≤ `notBefore` < `expiresAt`, and `expiresAt` at most 7 days after `issuedAt` |
+| `alg`, `kid`, `sig` | `EdDSA`, the signing key's `kid` in the organization's key set, and the signature |
+
+It names no person and no network address but the instance's own origin.
+
+**IS-2, the verifier.** `verifyOrgInstance(statement, {now, org, instanceId, keySet, held})` checks with no network,
+in `verifyOrgMembership`'s order, and answers `{ok: true, status, product, origin, placement, refreshDue, unchanged,
+digest, held}` or one problem: `no-clock` and `context-invalid` (`keySet` not a well-formed `EdDSA` key set of `org`,
+`instanceId` not an opaque id, `held` not `{revision, digest}`); `malformed`; `wrong-issuer`; `unknown-algorithm`;
+`unknown-key` and `key-revoked`; `unusable-key` and `small-order-key`; `key-not-valid`; `bad-signature`; `wrong-org`
+(the statement's `org` is not the reader's) and `wrong-instance` (its `instanceId` is not the one the reader asks
+about); `too-long-lived`; `not-yet-valid` (the contract's 60 s of skew); `expired` (no grace); `stale-revision` and
+`revision-conflict` against the held record for that instance. A `retired` statement verifies and reads `status:
+"retired"`: the reader stops serving or accepting the instance, and the earlier `active` statement is then
+`stale-revision`. `refreshDue` is true from 24 hours before `expiresAt`.
+
+**IS-3, the platform's checks.** The four checks the platform runs on `instance_put` (PLAT-146) are IS-2 with its
+context: the signature by the organization's applied key set; `instanceId` equal to the path and `org` equal to the
+record's `subject`; the expiry within the clock skew; a `revision` not below the one accepted. It stores the verdict's
+`digest` and `revision`.
+
+**IS-4, the issuer's duties.** The organization server issues a statement only on a record an owner or an
+administrator made (`org.instance_added`; a level decision where it reads levels, DEC-0162 LV-7), re-issues each active
+one at least a day before `expiresAt`, issues `status: "retired"` at a higher revision on `org.instance_retired` and
+none after it, and never signs one revision with other bytes.
+
 ## Semantic rules
 
 | Code | Kind | Rule |
@@ -623,6 +675,7 @@ vectors [`levels.json`](../../fixtures/vectors/levels.json).
 | <a id="fac-sem-150"></a>`FAC-SEM-150` | `org-authority` | the window is two strict instants with at most three fraction digits, `expiresAt` after `issuedAt` and at most 7 days after it; at most 1024 members, each an object of 1 to 8 keys, each key an object; each subject, each `iss` and each kid once across the list; every kid a `#sig` kid and every key a P-256 point SEC 1 accepts (DEC-0129) |
 | <a id="fac-sem-151"></a>`FAC-SEM-151` | `org-key-set-draft`, `org-authority-draft` | a draft envelope's `digest` is its draft's (what its signer signs), its draft names the envelope's organization, and its revision is one above its base's (1 with none) (DEC-0131) |
 | <a id="fac-sem-153"></a>`FAC-SEM-153` | `org-adaptation` | an adaptation plan names each item's `ref` once and each request's `id` once, and a request's `itemRef` names one of its items (DEC-0138) |
+| <a id="fac-sem-177"></a>`FAC-SEM-177` | `org-instance` | the times are strict RFC 3339 with at most three fraction digits and `issuedAt` ≤ `notBefore` < `expiresAt`, and the life is at most 7 days (DEC-0170 IS-1) |
 | <a id="fac-sem-169"></a>`FAC-SEM-169` | `org-membership-2` | `projects` names 1 to 64 projects, each once, for an `architect` and none for any other role (DEC-0162 LV-1) |
 | <a id="fac-sem-170"></a>`FAC-SEM-170` | `decision`, `mandate` | a level decision or a level mandate (`by: "level"`) carries an `org-membership/2` attestation of its `org`, whose role covers its `level`, made before the attestation's `expiresAt`; one carrying an architect's attestation names its project (a decision's `project`, a mandate's scope `projects`), each among the attestation's `projects` (DEC-0162 LV-3, LV-4, LV-6) |
 | <a id="fac-sem-147"></a>`FAC-SEM-147` | `estate-record` | each organization pinned once by its context, and no pinned root of small order; each context issuer once and its opaque part never containing an estate id of eight characters or more (DEC-0128) |
