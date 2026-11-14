@@ -1353,6 +1353,30 @@ Every button a person has, the person's agent has (except the operator's move of
   it, which the service's audit records with the relaying caller ([governance](governance-and-roles.md#approval-separation),
   DEC-0121). The same holds for a level holder's agent and its holder's decision (DEC-0162 LV-7).
 
+### Read parity and the design order (DEC-0169)
+
+AP-1 gives every button a tool; these rules give an agent everything a person reads, and fix which comes first. They
+answer the operator's words of 2026-11-14, relayed by fabric-agent-adapter (board request `6f1f3ec9`): «любой агент, это
+изначально все функции, это строится как для агентов, для API и MCP. И не бывает функций, которые доступны человеку
+… но они доступны агенту, ни для просмотра, ни для редактирования».
+
+- **RP-1, read parity.** Everything a service shows a person on a dashboard, an app, a page, a bot or a report (a list,
+  a record, a status, a number, a chart's series, a log, a history, a setting, an export, a preview with its diff and
+  hash) MUST be readable by an agent through a tool on the service's agent surface, or through the documented API the
+  page itself calls, with the same data, the same filters and paging, as structured values rather than rendered text
+  (DEC-0169). A view only a person can read is nonconformant, as an action only a person can take is (AP-1). Parity
+  widens no access: an agent reads what its caller's grant, level and context allow, which may be less than the
+  operator sees, and a value the person sees only as a human step (a secret shown once, AP-4) stays a human step.
+- **RP-2, the design order.** Every function of a service is a capability of its agent surface first; a dashboard, an
+  app, a bot, a CLI or a report is a view over those capabilities, never the only home of a function (DEC-0169). A new
+  page, button or report ships with its tool in the same release, or is not shipped.
+- **RP-3, the check.** A well-known document that serves `surfaces.dashboard` serves an agent surface beside it
+  (`surfaces.mcp`, or `surfaces.a2a`), and an MCP surface that lists its `capabilities` lists at least one; otherwise
+  it is nonconformant (`FAC-SEM-176`, kind `service-well-known`, `agentSurfaceRules` in
+  [`src/actions.ts`](../../src/actions.ts)). The rule reads the declaration only: whether each view has its tool is
+  RP-1's and AP-1's, checked by the service's own tests and a host's probe (the adapter's `dashboard.agent-surface`,
+  FAA-332).
+
 `actionDecision` in [`src/actions.ts`](../../src/actions.ts) is the reference a service's tool runs before it acts,
 after DL-13 and DL-21 and after `verifyApproval` when the call presented an approval (DEC-0121). Its inputs are the
 declared `action`, the caller's `tier`, the service's authenticated `caller`, the call's `decision` and `target`, the service's own
@@ -1413,4 +1437,5 @@ behaviour rules (AP-1, AP-2 and AP-4) bind a service at its next pin, and from t
 | <a id="fac-sem-088"></a>`FAC-SEM-088` | `service-peer-request` | a host sends another's request only to a service that declares `peer`, and only at or below its `maxDataClass` (`peerRefusal`) |
 | <a id="fac-sem-101"></a>`FAC-SEM-101` | `service-events-page` | no string in an event's `data.value`, at either level, sits under a credential's name or has a credential's shape; a finding names the place, never the value (DEC-0070) |
 | <a id="fac-sem-143"></a>`FAC-SEM-143` | `page-link`, `interop-input-requests` | a link handed to a person is not a raw `http` or `https` address whose host is a local one as PL's [check](#links-to-a-services-pages) lists it (`127.0.0.0/8`, `[::1]`, the IPv4-mapped `[::ffff:127.x.y.z]`, `localhost` and names under it, and the unspecified `0.0.0.0` and `[::]` a wildcard bind reports), and a `fabric-dashboards:` link follows `fabric-dashboards://service/<id>.<instance>[?path=<path>]` with no other parameter, a path on the service origin and no credential (DEC-0123 PL-1) |
+| <a id="fac-sem-176"></a>`FAC-SEM-176` | `service-well-known` | a service that serves `surfaces.dashboard` serves `surfaces.mcp` or `surfaces.a2a` beside it, and a present `surfaces.mcp.capabilities` is not empty (DEC-0169 RP-3) |
 | <a id="fac-sem-142"></a>`FAC-SEM-142` | `service-well-known`, `action-call` | an actions declaration is its schema's, names each `id` once, carries `humanStep` exactly when `gate` is `human` and names only tools a present `surfaces.mcp.capabilities` lists; a service answers an action call as `actionDecision` does (DEC-0121), except a source hand-over ([source](source.md#handing-over)), out of this rule until a service pins a contract revision carrying CT-181: `--kind action-call` cannot tell a hand-over and is not run on a hand-over's calls until then; and in the authority key, `extensions/authority/0.1` (`authorityExtensionRules`, DEC-0162 LV-5, LV-7), a value its schema refuses, an organization named twice in `levels`, and a level in `actionLevels` for an id that is not a relayed action of the actions declaration |

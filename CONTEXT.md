@@ -133,6 +133,10 @@ agent surface with the same effect, checks and audit record, declared in its wel
 `extensions/actions/0.1` with its `gate` (`none`, `relayed` or `human`); an action offered only on a page is
 nonconformant (except the operator's move of a board slot, a host control until a host ships its twin, DEC-0140 PR-2). `FAC-SEM-142` checks the declared actions (a button whose tool the MCP surface does not serve); a host
 reports a dashboard that declares none (CT-126) ([service](docs/specification/service.md#actions) AP-1, DEC-0121).
+**Read parity** extends it to reading: everything a person reads there an agent reads, structured, within its own
+access, and each function is a capability of the agent surface first; a dashboard with no agent surface is
+nonconformant (`FAC-SEM-176`, [service](docs/specification/service.md#read-parity-and-the-design-order-dec-0169)
+RP-1 to RP-3, DEC-0169).
 
 **Operator's word, carried out the first time**: The rule that an agent carries out its operator's words about a task
 itself, on that word: every step inside the task is the agent's to take within the grants, mandates and limits that

@@ -1,7 +1,7 @@
 import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { actionDecision, actionRules, actionsExtensionRules, actionsView, authorityExtensionRules, authorityView } from "../src/actions.js";
+import { actionDecision, actionRules, actionsExtensionRules, actionsView, agentSurfaceRules, authorityExtensionRules, authorityView } from "../src/actions.js";
 import { SCHEMA_PREFIX, projectRoot } from "../src/contract.js";
 import { EXTENSION_KEYS } from "../src/extensions.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
@@ -62,6 +62,24 @@ describe("actionDecision (DEC-0121 AP-2, AP-4)", () => {
     for (const { name, input } of vectors.cases.filter((c) => c.expected.fault !== "action-invalid")) {
       expect(valid("service-actions-extension.schema.json", { actions: [input.action] }), name).toBe(true);
     }
+  });
+});
+
+describe("FAC-SEM-176: a dashboard has an agent surface beside it (DEC-0169 RP-3)", () => {
+  const at = (surfaces: unknown) => agentSurfaceRules({ surfaces } as Json).map((finding) => `${finding.code} ${finding.instancePath}`);
+  const dashboard = { path: "/dashboard", login: false };
+  const mcp = { path: "/mcp", transport: "streamable-http" };
+  it("passes a dashboard beside an MCP or an A2A surface, and a service with no dashboard", () => {
+    expect(at({ dashboard, mcp })).toEqual([]);
+    expect(at({ dashboard, mcp: { ...mcp, capabilities: ["x.read"] } })).toEqual([]);
+    expect(at({ dashboard, a2a: { path: "/a2a", protocolVersion: "0.3.0" } })).toEqual([]);
+    expect(at({ events: { path: "/events" } })).toEqual([]);
+    expect(at(undefined)).toEqual([]);
+  });
+  it("flags a dashboard alone, and an MCP surface that lists no tool", () => {
+    expect(at({ dashboard })).toEqual(["FAC-SEM-176 /surfaces"]);
+    expect(at({ dashboard, mcp: { ...mcp, capabilities: [] } })).toEqual(["FAC-SEM-176 /surfaces/mcp/capabilities"]);
+    expect(at({ mcp: { ...mcp, capabilities: [] } })).toEqual(["FAC-SEM-176 /surfaces/mcp/capabilities"]);
   });
 });
 

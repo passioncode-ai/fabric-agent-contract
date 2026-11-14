@@ -7266,6 +7266,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Annotated (2026-10-28):** DEC-0147 reads AP-4's `secret` as a secret typed in or handed out (a peer share's
   export), item 4's "typed secrets" included, and names the peer share's export among the steps held in the product's
   app window; it defines the agent twins of the secret prompt's "Decline" and of a peer share's "Open a share".
+- **Annotated (2026-11-14):** AP-1 extended by DEC-0169: everything a person reads is readable by an agent (RP-1), each
+  function is a capability of the agent surface first (RP-2), and a dashboard without an agent surface is
+  nonconformant (RP-3, `FAC-SEM-176`).
 - **Context:** the operator asked (2026-10-24) that when they tell their coding agent to approve something, the agent
   does it, and that any button a service's dashboard shows a person exists for the agent too, for every Fabric agent.
   DL-26 already says that inside the machine boundary the operator's instruction is the authority and that a callee
@@ -12044,3 +12047,46 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Source:** the design `docs/evidence/plans/2026-11-12-ct285-autonomy-profile.md`; the operator's decision of
   2026-11-09 as recorded in fabric-workspace `knowledge/authority.md`; board requests `921edc61` (thread `a3a97cef`)
   and `4a1bf8d6` (thread `8da128cf`); backlog CT-285.
+
+### DEC-0169: read parity and the design order: everything a person reads, an agent reads (extends DEC-0121 AP-1)
+
+- **Date:** 2026-11-14
+- **Status:** Accepted source change (on merge of its pull request). Extends DEC-0121 AP-1. A behaviour rule a service
+  adopts at its next pin; `FAC-SEM-176` reads its well-known document from then. Consumer adoption: board row CT-311:
+  the adapter's kits and probe (FAA-332, 0.88.0, already shipped), every service with a view.
+- **Decision:** in [service → read parity and the design order](specification/service.md#read-parity-and-the-design-order-dec-0169):
+  1. **RP-1, read parity.** Everything a service shows a person on a dashboard, an app, a page, a bot or a report (a
+     list, a record, a status, a number, a chart's series, a log, a history, a setting, an export, a preview with its
+     diff and hash) is readable by an agent through a tool on the agent surface or the documented API the page calls,
+     with the same data, filters and paging, as structured values. A view only a person can read is nonconformant.
+     Parity widens no access: an agent reads within its caller's grant, level and context, and AP-4's human steps
+     stay.
+  2. **RP-2, the design order.** Every function is a capability of the agent surface first; a dashboard, app, bot, CLI
+     or report is a view over those capabilities. A page, button or report ships with its tool in the same release.
+  3. **RP-3, the check.** A well-known document that serves `surfaces.dashboard` serves `surfaces.mcp` or
+     `surfaces.a2a` beside it, and a present `surfaces.mcp.capabilities` is not empty (`FAC-SEM-176`, kind
+     `service-well-known`, `agentSurfaceRules`). The rule reads the declaration; whether each view has its tool is
+     RP-1's and AP-1's, checked by the service's tests and a host's probe.
+- **Why:** the operator's words of 2026-11-14, relayed verbatim by fabric-agent-adapter (board request `6f1f3ec9`,
+  thread `b2eef40c`, adapter session `e03b89b9`): «любой агент, это изначально все функции, это строится как для
+  агентов, для API и MCP. И не бывает функций, которые доступны человеку … но они доступны агенту, ни для просмотра, ни
+  для редактирования». AP-1 gave every button a tool; nothing gave an agent what a person only reads.
+- **Alternatives refused:** a rule that every view names its tool in the well-known document (a page's views are not
+  declared anywhere today, and the probe already finds a dashboard without an agent surface); read parity through
+  screen reading (an agent needs structured values, the same filters and paging); widening an agent's access to what
+  the operator sees (parity is of functions, not of access).
+- **Compatibility:** a tightening that binds a service at its next pin, as DEC-0121's behaviour rules did. A well-known
+  document with a dashboard and no agent surface was schema-valid and stays so; `FAC-SEM-176` reports it. Every
+  positive fixture in the repository already serves `surfaces.mcp`. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:**
+  - spec: `docs/specification/service.md` (*Read parity and the design order*, the rule register),
+    `docs/specification/conformance.md` (a row for a service with a view, the rule register, its next free code);
+  - code: `src/actions.ts` (`agentSurfaceRules`), `src/semantic-rules.ts`;
+  - fixtures: `fixtures/semantic/service-well-known-agent-surface-*.json`;
+  - tests: `test/actions.test.ts`;
+  - docs: `CONTEXT.md` (*Read parity*), `docs/backlog.md` (CT-311).
+- **Not decided here:** a declaration of each view and its tool in the well-known document (a later rule, if hosts need
+  to check views one by one); how a host shows a nonconformant service (Fabric Dashboards' audit already lists it).
+- **Source:** fabric-agent-adapter's board request `6f1f3ec9` (thread `b2eef40c`) and its 0.88.0 (FAA-332, probe
+  `dashboard.agent-surface`); DEC-0121 AP-1. DEC-0169 and `FAC-SEM-176` were reserved by git CAS (`agent_sync.py
+  reserve`, keys `ct311-read-parity` and `ct311-read-parity-sem`).

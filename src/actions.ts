@@ -368,6 +368,24 @@ export function authorityExtensionRules(wellKnown: JsonObject): Finding[] {
   return authorityKeyFindings(wellKnown);
 }
 
+/**
+ * FAC-SEM-176 on a well-known document (kind `service-well-known`, DEC-0169 RP-3): a service that serves a dashboard
+ * serves an agent surface beside it (`surfaces.mcp`, or `surfaces.a2a` for a remote one), and an MCP surface that lists
+ * its capabilities lists at least one. A page with no agent surface is a function only a person reaches (RP-1, RP-2).
+ */
+export function agentSurfaceRules(wellKnown: JsonObject): Finding[] {
+  const surfaces = isObject(wellKnown.surfaces) ? wellKnown.surfaces : {};
+  const findings: Finding[] = [];
+  if (surfaces.dashboard !== undefined && surfaces.mcp === undefined && surfaces.a2a === undefined) {
+    findings.push({ code: "FAC-SEM-176", instancePath: "/surfaces", message: "a service that serves a dashboard serves an agent surface beside it: surfaces.mcp, or surfaces.a2a (DEC-0169 RP-3)" });
+  }
+  const mcp = isObject(surfaces.mcp) ? surfaces.mcp : {};
+  if (Array.isArray(mcp.capabilities) && mcp.capabilities.length === 0) {
+    findings.push({ code: "FAC-SEM-176", instancePath: "/surfaces/mcp/capabilities", message: "an MCP surface serves at least one tool: an empty list is an agent surface an agent cannot use (DEC-0169 RP-3)" });
+  }
+  return findings;
+}
+
 const AUTHORITY_PATH = `/extensions/${pointerToken(EXTENSION_KEYS.authority)}`;
 
 /** The authority key's findings (DEC-0162 LV-5, LV-7), read against the actions declaration when it is valid. */
