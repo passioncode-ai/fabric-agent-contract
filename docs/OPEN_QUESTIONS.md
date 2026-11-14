@@ -7,7 +7,7 @@ No open questions remain from stage 0. Later stages reserve `OQ-####` before add
 an entry. The coordination config declares no `OQ` id register, so an id is taken
 under the lease on this file, from the line below.
 
-**Next free ID:** `OQ-0013`
+**Next free ID:** `OQ-0019` (`OQ-0013` and `OQ-0014` are taken on branch `agent/ct216-usage-data-v2`)
 
 The seven questions below were raised by module AR-1 (DEC-0016) about the contracts
 Fabric locked on 2026-09-29. Each names the part that is implemented and the part that
@@ -190,3 +190,31 @@ ruling; DEC-0017 states what holds now.
   `outcome-unknown`, the caller's act (`jobCallerAction`), the intent's key (`intentIdempotencyKey`), the provider's
   answer to a repeated key, `null` and `partial` in `usage` under the revision `fabric-interop/0.2` a caller names in
   `_meta.protocols`; `FAC-SEM-119`, `FAC-SEM-120`. C4 stays adapter guidance.
+
+### OQ-0015: Is a unit cell drawn from one member's work served inside a larger organization?
+
+- **Status:** Open
+- **Raised:** 2026-11-12, DEC-0164 (CT-259) blind readings
+- **Question:** Units are served only for an organization whose signed member list names at least 3 members ([activity](specification/activity.md#kinds), DEC-0164 AE-3). Inside such an organization a project with one member, an agent only one member runs, or a task class only one member's work falls into gives a cell that is that person's agents' output. Serve such cells, or fold them into the organization's total?
+- **Meanwhile:** folded into the organization's total (the safer, reversible default); the operator answers before the first monthly number is published.
+
+### OQ-0016: Under which access-log scope is a read of a person acceptance logged?
+
+- **Status:** Open
+- **Raised:** 2026-11-12, DEC-0164 (CT-259) blind readings
+- **Question:** A read of a unit whose `acceptedBy` is a person is logged in that person's access log. Under `activity.raw` (which `FAC-SEM-067` narrows to a purpose the person confirmed, served without cost) or a scope of its own?
+- **Meanwhile:** `activity.raw`.
+
+### OQ-0017: Which audience's pairwise subject does a person acceptance carry?
+
+- **Status:** Open
+- **Raised:** 2026-11-12, DEC-0164 (CT-259) blind readings
+- **Question:** A member holds one pairwise subject per (organization, audience) (OM-1). A unit can reach the organization's journal and Observatory's local journal; which audience's subject does a writer put in `acceptedBy.ref`?
+- **Meanwhile:** the organization's own journal's audience; a receiver resolves any audience's subject it issued for that member.
+
+### OQ-0018: Is a cell counting units by the members' own role permitted?
+
+- **Status:** Open
+- **Raised:** 2026-11-12, DEC-0164 (CT-259) blind readings
+- **Question:** DEC-0164 serves units only by agent, project, task class and the organization's total. May a cell count units by the role of the members whose work they are, read from the signed member list (owner, admin, member; an architect only once DEC-0162's `org-membership/2` is read), and with what minimum? The product's existing answer for aggregates of people is a cell of at least five (fabric-workspace `knowledge/north-star.md`, section 9). This is not the North Star's G26, whose role cut is a dashboard per viewer role built from the cells already served (the owner's view is the organization's total).
+- **Meanwhile:** no cell counts units by the members' role; G1-e's per-role dashboards are views over the served cells and wait on nothing here.

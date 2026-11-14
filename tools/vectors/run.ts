@@ -14,6 +14,7 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { projectRoot } from "../../src/contract.js";
 import * as actions from "./actions.js";
+import * as activityUnit from "./activity-unit.js";
 import * as agentNetwork from "./agent-network.js";
 import * as channelAgent from "./channel-agent.js";
 import * as commsHold from "./comms-hold.js";
@@ -22,6 +23,8 @@ import * as contextRoute from "./context-route.js";
 import * as credentialEnvelope from "./credential-envelope.js";
 import * as enrollToken from "./enroll-token.js";
 import * as entitlement from "./entitlement.js";
+import * as levels from "./levels.js";
+import * as profile from "./profile.js";
 import * as orgMembership from "./org-membership.js";
 import * as orgExchange from "./org-exchange.js";
 import * as orgAdaptation from "./org-adaptation.js";
@@ -50,6 +53,7 @@ const one = (file: string, build: () => string) => () => ({ [file]: build() });
 
 export const GENERATORS: readonly Generator[] = [
   { source: "actions.ts", build: one(actions.VECTOR_FILE, actions.buildActionsVectors) },
+  { source: "activity-unit.ts", build: one(activityUnit.VECTOR_FILE, activityUnit.buildActivityUnitVectors) },
   { source: "agent-network.ts", build: one(agentNetwork.VECTOR_FILE, agentNetwork.buildAgentNetworkVectors) },
   { source: "channel-agent.ts", build: one(channelAgent.VECTOR_FILE, channelAgent.buildChannelAgentVectors) },
   { source: "comms-hold.ts", build: one(commsHold.VECTOR_FILE, commsHold.buildCommsHoldVectors) },
@@ -58,6 +62,8 @@ export const GENERATORS: readonly Generator[] = [
   { source: "credential-envelope.ts", build: one(credentialEnvelope.VECTOR_FILE, credentialEnvelope.buildCredentialVectors) },
   { source: "enroll-token.ts", build: one(enrollToken.VECTOR_FILE, enrollToken.buildEnrollTokenVectors) },
   { source: "entitlement.ts", build: one(entitlement.VECTOR_FILE, entitlement.buildEntitlementVectors) },
+  { source: "levels.ts", build: one(levels.VECTOR_FILE, levels.buildLevelsVectors) },
+  { source: "profile.ts", build: one(profile.VECTOR_FILE, profile.buildProfileVectors) },
   { source: "org-membership.ts", build: one(orgMembership.VECTOR_FILE, orgMembership.buildOrgMembershipVectors) },
   { source: "org-exchange.ts", build: one(orgExchange.VECTOR_FILE, orgExchange.buildOrgExchangeVectors) },
   { source: "org-adaptation.ts", build: one(orgAdaptation.VECTOR_FILE, orgAdaptation.buildOrgAdaptationVectors) },

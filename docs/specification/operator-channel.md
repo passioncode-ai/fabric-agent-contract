@@ -136,12 +136,34 @@ computer running the agent.
 
 **OC-11 — The proposal duty.** An agent that has human stops or `notify` events proposes the
 channel to its operator **once**: when it is created or adapted to Fabric, or at its first human
-stop while the channel is off. The proposal lists the four steps that are the operator's:
+stop while the channel is off. The proposal lists its four steps, three of them the operator's:
 
-1. create a bot with @BotFather;
-2. put its token into the secret store under the name the agent states;
-3. run the agent's link command;
-4. type the code it shows in the chat with the bot.
+1. the operator creates a bot with @BotFather (an act in their own messenger account);
+2. the operator puts its token into the secret store under the name the agent states (a typed secret, which the agent
+   hands over as [service](service.md#actions) AP-4's `secret` step with its link, or as the host's secret prompt, SCN-053,
+   never as a command the agent could run itself, OW-2; where the node answers `no-client` (no desktop session, Linux), the
+   person's step is the vault's own command in their own shell, [local channel](local-channel.md) SP-2 and SP-3, the one
+   command a typed secret leaves to the person, since no route of the agent's types a secret);
+3. once the operator has answered `accepted` and the token is in the store under that name, the agent enables the
+   channel on that answer (the operator's decision relayed as [service](service.md#actions) AP-2 says, its words in
+   AP-3's form, OC-1), runs its own link command and shows the code to the person on the dashboard OC-3 names, handed
+   over as the page's [`open_link`](service.md#page-links) (DEC-0123), an agent with a dashboard having its link command print
+   to its own output only that a code was issued, never the code; only an agent without a dashboard shows it in its
+   reply in the operator's session, never in a tool argument, an outward message, a file or any other outward act
+   ([governance and roles](governance-and-roles.md#the-operators-word-carried-out-the-first-time) OW-2 and OW-4,
+   DEC-0156). The agent reads the store for the token whenever it builds its status, at its next start and when the person
+   tells it, or the coding session it runs in, that the token is stored; finding it there while that `accepted` holds and the channel has not been enabled since
+   that `accepted`, it enables the channel on that read (renewing an old `accepted` first, as below), leaving the person no step, and its reply or its dashboard then says that the code is ready. A channel the operator turns off after it was enabled stays off: the agent records that word as the answer `declined` with its time, so the earlier `accepted` no longer holds, and enables the channel again only on a new word (OC-1), recording that word as the answer `accepted` with its time, so step 3 applies to it as to the first. When a code
+   expires unused while that `accepted` holds, the agent issues a new one when the person asks it, or the coding session it runs in,
+   for one, and shows it the same way, on the dashboard when the agent has one; it never issues one because of a message in the chat
+   with the bot (a late code typed there is refused, OC-3). A code in that reply stays in the session's transcript, a residual like DEC-0147's share code, without
+   its comparison code: the code is for one use and at most 10 minutes (OC-3), the operator's own send of a code already spent binds
+   nothing, and the status shows when the chat was bound and for how many users (`binding.linkedAt`,
+   `binding.allowedUsers`), so a binding the operator did not make is seen (no rule here yet names how they remove it, CT-273). Until the token is stored the agent names that
+   step; an `accepted` answer given as a decision and older than AP-2's 24-hour window, or given under a mandate and past
+   that mandate's `expiresAt`, is renewed by one short question ([delegation](delegation.md#the-operators-mandate) MD-1), which is not a repeat of
+   the proposal;
+4. the operator types the code in the chat with the bot (OC-3's binding, which only the person's own send proves).
 
 The agent records the answer — `accepted`, `declined` or `later` — and shows it in its status
 (`proposal`). A recorded answer ends the duty: the agent does not repeat the proposal on its
@@ -226,6 +248,8 @@ missing receiver is never reported as `unlinked`, `linked`, `standby` or `off`, 
 The status schema makes the other states unrepresentable for it (DEC-0058): `unlinked` requires
 `receiver.lease` `held` or `elsewhere`, and a `reason.code` of `receiver-missing` requires `state: degraded`
 and `receiver.lease: none`. Like every channel failure, it degrades the channel, not the service (OC-9).
+A product's own `reason.detail` stays within the schema's 300 characters in every locale it ships, a translation
+included; the fixtures' English examples are not a length budget for another language.
 
 ## Status
 
@@ -233,11 +257,14 @@ Schema: [`operator-channel-status.schema.json`](../../schemas/operator-channel-s
 
 | State | Meaning | Requires |
 |---|---|---|
-| `off` | the operator has not enabled the channel (the default) | — |
+| `off` | the channel is not enabled (the default); with `proposal.answer: accepted` and either `credential.present: false` or no `credential` member it waits for the token (OC-11 step 3: the agent enables it once the token is stored), and the tile names that step, the token to store under `credential.name`, or, with no `credential` member, the step without a name, which the agent states in its reply or on its dashboard, and says to tell the agent, or the coding session it runs in, once it is stored; with `accepted` and `credential.present: true`, for a channel not enabled since that `accepted`, no step is left for the person: the agent has found the token in building this status and enables the channel on that read, as at its next start or when told (OC-11 step 3), so the tile names no person step beyond OC-11 step 3's one renewal question for an `accepted` past its window | no field beyond the common ones |
 | `unlinked` | enabled; no chat is bound yet, the agent waits for a code | `credential`, `receiver` with `receiver.lease: held` or `elsewhere`; no `binding` |
 | `linked` | bound; this process holds the receiving lease | `credential` present, `receiver.lease: held`, `binding`; no `reason` |
 | `standby` | bound; another process of the same agent holds the lease | `reason`, `credential`, `receiver.lease: elsewhere`, `binding` |
 | `degraded` | enabled, but the transport or its credential fails, or nobody receives (OC-17) | `reason`, `credential` |
+
+`proposal.answer` is the operator's latest word on the channel: a turn-off is recorded `declined` and a later word
+`accepted`, each with its time `at` (OC-11 step 3); the schema's description says so at its next change (CT-282).
 
 The document carries no chat id, user id, username or token: `binding` holds counts only, and
 `credential` holds the secret's name and whether it is present. `lastSendAt` and

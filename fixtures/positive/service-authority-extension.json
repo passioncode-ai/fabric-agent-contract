@@ -1,0 +1,13 @@
+{
+  "levels": [
+    {
+      "org": "org:example-org",
+      "audience": "example-publisher.default"
+    }
+  ],
+  "actionLevels": {
+    "change-plan": "owner",
+    "revoke-key": "admin",
+    "approve-rule": "operator"
+  }
+}
