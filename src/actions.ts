@@ -155,20 +155,25 @@ export function actionDecision(input: ActionDecisionInput): ActionDecisionAnswer
   if (input.levels !== undefined && !levelContextsWellFormed(input.levels)) return { fault: "levels-invalid" };
   // A level the service declares for the action that is not one of ACTION_LEVELS is its fault, never "none declared".
   if (input.actionLevel !== undefined && !(ACTION_LEVELS as readonly unknown[]).includes(input.actionLevel)) return { fault: "action-level-invalid" };
-  if (acceptedApproval(approval)) return { ok: true, recordAs: { by: approval.approver, via: "approval", caller } };
   // DEC-0162: a level decision, or a level mandate on a call without a decision, is read at every tier by a service
   // that reads levels (LV-6); one that reads none answers as if the call carried neither (LV-10).
   const levelDecision = isObject(decision) && decision.by === "level";
   const inside = tier === "T0" || tier === "T1";
-  // From T2 an operator decision counts for nothing (DL-17), so a level mandate beside one is still read (LV-6).
-  const levelMandate = (decision === undefined || (!inside && !levelDecision)) && isObject(input.mandate) && input.mandate.by === "level";
-  // LV-7, the operator's answer to question 8: in an organization's context, at a service that reads levels, an act
-  // declared `owner` or `admin` is decided only at that level, never by the instance operator's word (its descriptor's
-  // holder, a member on a member's machine): no elicitation, operator decision or operator mandate is taken for it.
+  // LV-7, the operator's answers to questions 4 and 8: in an organization's context, at a service that reads levels, an
+  // act declared `owner` or `admin` is decided only at that level, never by the instance operator's word (its
+  // descriptor's holder, a member on a member's machine): no approval/1, elicitation, operator decision or operator
+  // mandate is taken for it, at any tier (DL-18's approval is that person's too).
+  // LV-7: at a service that reads levels the action's effect decides whether `change-policy` raises it to `admin`, so
+  // the service owes the effect on every relayed call there, not only on a level form.
+  if (isObject(input.levels) && !(EFFECT_CLASSES as readonly unknown[]).includes(input.effect)) return { fault: "effect-missing" };
   const min = minLevelOf(input);
   const levelAct = isObject(input.levels) && (min === "owner" || min === "admin");
   if (levelAct && (typeof input.context !== "string" || !CALL_CONTEXT.test(input.context))) return { fault: "context-missing" };
   const levelOnly = levelAct && (input.context as string).startsWith("org:");
+  // From T2 an operator decision counts for nothing (DL-17), nor does one for an act only a level decides (LV-7), so a
+  // level mandate beside one is still read (LV-6).
+  const levelMandate = (decision === undefined || ((!inside || levelOnly) && !levelDecision)) && isObject(input.mandate) && input.mandate.by === "level";
+  if (acceptedApproval(approval) && !levelOnly) return { ok: true, recordAs: { by: approval.approver, via: "approval", caller } };
   // The service's own accepted elicitation is the operator's word at T0 or T1 and is read before a level form (LV-4).
   if (inside && elicited === true && !levelOnly) return { ok: true, recordAs: { by: "operator", via: "elicitation", caller } };
   if (isObject(input.levels) && (levelDecision || levelMandate)) {
@@ -189,6 +194,8 @@ export function actionDecision(input: ActionDecisionInput): ActionDecisionAnswer
   }
   if (tier !== "T0" && tier !== "T1") {
     if (typeof actionDigest !== "string" || !SHA256.test(actionDigest)) return { fault: "digest-missing" };
+    // No approval decides an act only a level decides (LV-7), so a T2 caller is told the level, with the digest.
+    if (levelOnly) return { ok: false, code: OPERATOR_DECISION_REQUIRED, data: { detail: `level-insufficient: ${min as "owner" | "admin"}`, actionDigest } };
     return { ok: false, code: APPROVAL_REQUIRED, data: { actionDigest } };
   }
   const clock = strictTime(now);

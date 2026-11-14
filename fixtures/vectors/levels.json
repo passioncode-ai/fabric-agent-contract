@@ -2187,6 +2187,396 @@
       }
     },
     {
+      "name": "an approval of the instance's person on a key revocation declared admin, in an organization's context, from T2",
+      "input": {
+        "action": {
+          "id": "revoke-key",
+          "title": "Revoke a client key",
+          "tool": "keys.revoke",
+          "gate": "relayed"
+        },
+        "tier": "T2",
+        "caller": "agent:claude-code",
+        "effect": "reply",
+        "now": "2026-10-25T11:30:00Z",
+        "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
+        "levels": {
+          "org:org-a": {
+            "audience": "reviews-service-a1",
+            "keySet": {
+              "type": "org-key-set/1",
+              "issuer": "https://orgs.example",
+              "org": "org:org-a",
+              "revision": 1,
+              "issuedAt": "2026-10-15T00:00:00Z",
+              "keys": [
+                {
+                  "kid": "mem-2026-10",
+                  "alg": "EdDSA",
+                  "x": "YxEDJVK86TVti3mnfdU9cSSlKdjXDJM9A3eKVqIxr7U",
+                  "notBefore": "2026-10-15T00:00:00Z",
+                  "notAfter": "2027-01-01T00:00:00Z"
+                }
+              ],
+              "revoked": [],
+              "administrators": [],
+              "alg": "EdDSA",
+              "kid": "root-org-a-1",
+              "sig": "vufCXJ4roCUAM3MEuAikBXHXZ8mdhK7hyiZkkFzc14MuJ8fvPq6zYxOOOH8KtIuBEIUcXesvsy1NXXs9rYqIBw"
+            }
+          }
+        },
+        "context": "org:org-a",
+        "actionLevel": "admin",
+        "approval": {
+          "ok": true,
+          "approver": "member-m"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "operator-decision-required",
+        "data": {
+          "detail": "level-insufficient: admin",
+          "actionDigest": "sha256:abababababababababababababababababababababababababababababababab"
+        }
+      }
+    },
+    {
+      "name": "an approval of the instance's person on a key revocation declared admin, in an organization's context, from T0",
+      "input": {
+        "action": {
+          "id": "revoke-key",
+          "title": "Revoke a client key",
+          "tool": "keys.revoke",
+          "gate": "relayed"
+        },
+        "tier": "T0",
+        "caller": "agent:claude-code",
+        "effect": "reply",
+        "now": "2026-10-25T11:30:00Z",
+        "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
+        "levels": {
+          "org:org-a": {
+            "audience": "reviews-service-a1",
+            "keySet": {
+              "type": "org-key-set/1",
+              "issuer": "https://orgs.example",
+              "org": "org:org-a",
+              "revision": 1,
+              "issuedAt": "2026-10-15T00:00:00Z",
+              "keys": [
+                {
+                  "kid": "mem-2026-10",
+                  "alg": "EdDSA",
+                  "x": "YxEDJVK86TVti3mnfdU9cSSlKdjXDJM9A3eKVqIxr7U",
+                  "notBefore": "2026-10-15T00:00:00Z",
+                  "notAfter": "2027-01-01T00:00:00Z"
+                }
+              ],
+              "revoked": [],
+              "administrators": [],
+              "alg": "EdDSA",
+              "kid": "root-org-a-1",
+              "sig": "vufCXJ4roCUAM3MEuAikBXHXZ8mdhK7hyiZkkFzc14MuJ8fvPq6zYxOOOH8KtIuBEIUcXesvsy1NXXs9rYqIBw"
+            }
+          }
+        },
+        "context": "org:org-a",
+        "actionLevel": "admin",
+        "approval": {
+          "ok": true,
+          "approver": "member-m"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "operator-decision-required",
+        "data": {
+          "detail": "level-insufficient: admin"
+        }
+      }
+    },
+    {
+      "name": "no decision on a key revocation declared admin, in an organization's context, from T2",
+      "input": {
+        "action": {
+          "id": "revoke-key",
+          "title": "Revoke a client key",
+          "tool": "keys.revoke",
+          "gate": "relayed"
+        },
+        "tier": "T2",
+        "caller": "agent:claude-code",
+        "effect": "reply",
+        "now": "2026-10-25T11:30:00Z",
+        "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
+        "levels": {
+          "org:org-a": {
+            "audience": "reviews-service-a1",
+            "keySet": {
+              "type": "org-key-set/1",
+              "issuer": "https://orgs.example",
+              "org": "org:org-a",
+              "revision": 1,
+              "issuedAt": "2026-10-15T00:00:00Z",
+              "keys": [
+                {
+                  "kid": "mem-2026-10",
+                  "alg": "EdDSA",
+                  "x": "YxEDJVK86TVti3mnfdU9cSSlKdjXDJM9A3eKVqIxr7U",
+                  "notBefore": "2026-10-15T00:00:00Z",
+                  "notAfter": "2027-01-01T00:00:00Z"
+                }
+              ],
+              "revoked": [],
+              "administrators": [],
+              "alg": "EdDSA",
+              "kid": "root-org-a-1",
+              "sig": "vufCXJ4roCUAM3MEuAikBXHXZ8mdhK7hyiZkkFzc14MuJ8fvPq6zYxOOOH8KtIuBEIUcXesvsy1NXXs9rYqIBw"
+            }
+          }
+        },
+        "context": "org:org-a",
+        "actionLevel": "admin"
+      },
+      "expected": {
+        "ok": false,
+        "code": "operator-decision-required",
+        "data": {
+          "detail": "level-insufficient: admin",
+          "actionDigest": "sha256:abababababababababababababababababababababababababababababababab"
+        }
+      }
+    },
+    {
+      "name": "a service reading levels that does not say the effect of an operator decision",
+      "input": {
+        "action": {
+          "id": "set-policy",
+          "title": "Change the project's policy",
+          "tool": "policy.set",
+          "gate": "relayed"
+        },
+        "tier": "T0",
+        "caller": "agent:claude-code",
+        "decision": {
+          "by": "operator",
+          "via": "relayed-instruction",
+          "action": "set-policy",
+          "instruction": "Raise the limit",
+          "at": "2026-10-25T11:29:00Z"
+        },
+        "now": "2026-10-25T11:30:00Z",
+        "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
+        "levels": {
+          "org:org-a": {
+            "audience": "reviews-service-a1",
+            "keySet": {
+              "type": "org-key-set/1",
+              "issuer": "https://orgs.example",
+              "org": "org:org-a",
+              "revision": 1,
+              "issuedAt": "2026-10-15T00:00:00Z",
+              "keys": [
+                {
+                  "kid": "mem-2026-10",
+                  "alg": "EdDSA",
+                  "x": "YxEDJVK86TVti3mnfdU9cSSlKdjXDJM9A3eKVqIxr7U",
+                  "notBefore": "2026-10-15T00:00:00Z",
+                  "notAfter": "2027-01-01T00:00:00Z"
+                }
+              ],
+              "revoked": [],
+              "administrators": [],
+              "alg": "EdDSA",
+              "kid": "root-org-a-1",
+              "sig": "vufCXJ4roCUAM3MEuAikBXHXZ8mdhK7hyiZkkFzc14MuJ8fvPq6zYxOOOH8KtIuBEIUcXesvsy1NXXs9rYqIBw"
+            }
+          }
+        },
+        "context": "org:org-a"
+      },
+      "expected": {
+        "fault": "effect-missing"
+      }
+    },
+    {
+      "name": "an administrator's bound level mandate beside a member's operator decision on an act declared admin, in an organization's context, from T1",
+      "input": {
+        "action": {
+          "id": "revoke-key",
+          "title": "Revoke a client key",
+          "tool": "keys.revoke",
+          "gate": "relayed"
+        },
+        "tier": "T1",
+        "caller": "agent:claude-code",
+        "decision": {
+          "by": "operator",
+          "via": "relayed-instruction",
+          "action": "revoke-key",
+          "instruction": "Revoke the old client key",
+          "at": "2026-10-25T11:29:00Z"
+        },
+        "effect": "reply",
+        "now": "2026-10-25T11:30:00Z",
+        "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
+        "levels": {
+          "org:org-a": {
+            "audience": "reviews-service-a1",
+            "keySet": {
+              "type": "org-key-set/1",
+              "issuer": "https://orgs.example",
+              "org": "org:org-a",
+              "revision": 1,
+              "issuedAt": "2026-10-15T00:00:00Z",
+              "keys": [
+                {
+                  "kid": "mem-2026-10",
+                  "alg": "EdDSA",
+                  "x": "YxEDJVK86TVti3mnfdU9cSSlKdjXDJM9A3eKVqIxr7U",
+                  "notBefore": "2026-10-15T00:00:00Z",
+                  "notAfter": "2027-01-01T00:00:00Z"
+                }
+              ],
+              "revoked": [],
+              "administrators": [],
+              "alg": "EdDSA",
+              "kid": "root-org-a-1",
+              "sig": "vufCXJ4roCUAM3MEuAikBXHXZ8mdhK7hyiZkkFzc14MuJ8fvPq6zYxOOOH8KtIuBEIUcXesvsy1NXXs9rYqIBw"
+            }
+          }
+        },
+        "context": "org:org-a",
+        "actionLevel": "admin",
+        "self": "example-reviewer",
+        "callerAgent": "example-developer",
+        "tokenMem": "sha256:5858c2d548aaf65bbe4f80625bb7315693cad1e36ac8b30f08e82cf978ec9ff5",
+        "mandate": {
+          "kind": "mandate/1",
+          "by": "level",
+          "level": "admin",
+          "org": "org:org-a",
+          "membership": {
+            "type": "org-membership/2",
+            "issuer": "https://orgs.example",
+            "org": "org:org-a",
+            "audience": "reviews-service-a1",
+            "subject": "m-admin-02",
+            "role": "admin",
+            "projects": [],
+            "external": false,
+            "status": "active",
+            "revision": 3,
+            "membershipEndsAt": null,
+            "issuedAt": "2026-10-25T11:00:00Z",
+            "notBefore": "2026-10-25T11:00:00Z",
+            "expiresAt": "2026-10-25T12:00:00Z",
+            "extensions": {},
+            "alg": "EdDSA",
+            "kid": "mem-2026-10",
+            "sig": "Rg3hZAm3Hgabq5LB3LPvOjkbms6W_jKJaGFFOHyPFOIabVXhP2gvzpb_wXkR30Xxu3UQK-ZW_eTAF9aF6qwQDA"
+          },
+          "task": "answer the reviews of the week",
+          "instruction": "answer this week's reviews in project alpha",
+          "at": "2026-10-25T11:20:00Z",
+          "expiresAt": "2026-10-26T11:20:00Z",
+          "scope": {
+            "capabilities": [
+              "keys.revoke"
+            ],
+            "effects": [
+              "reply"
+            ]
+          },
+          "chain": [
+            {
+              "agent": "example-developer",
+              "at": "2026-10-25T11:20:00Z"
+            },
+            {
+              "agent": "example-reviewer",
+              "at": "2026-10-25T11:25:00Z"
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": true,
+        "recordAs": {
+          "by": "level",
+          "level": "admin",
+          "org": "org:org-a",
+          "approver": "m-admin-02",
+          "membershipDigest": "sha256:5858c2d548aaf65bbe4f80625bb7315693cad1e36ac8b30f08e82cf978ec9ff5",
+          "revision": 3,
+          "via": "mandate",
+          "task": "answer the reviews of the week",
+          "chain": [
+            "example-developer",
+            "example-reviewer"
+          ],
+          "caller": "agent:claude-code"
+        }
+      }
+    },
+    {
+      "name": "an approval on an act left undeclared, in an organization's context, from T2",
+      "input": {
+        "action": {
+          "id": "approve-reply",
+          "title": "Approve the reply",
+          "tool": "reviews.approve",
+          "gate": "relayed"
+        },
+        "tier": "T2",
+        "caller": "agent:claude-code",
+        "effect": "reply",
+        "now": "2026-10-25T11:30:00Z",
+        "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
+        "levels": {
+          "org:org-a": {
+            "audience": "reviews-service-a1",
+            "keySet": {
+              "type": "org-key-set/1",
+              "issuer": "https://orgs.example",
+              "org": "org:org-a",
+              "revision": 1,
+              "issuedAt": "2026-10-15T00:00:00Z",
+              "keys": [
+                {
+                  "kid": "mem-2026-10",
+                  "alg": "EdDSA",
+                  "x": "YxEDJVK86TVti3mnfdU9cSSlKdjXDJM9A3eKVqIxr7U",
+                  "notBefore": "2026-10-15T00:00:00Z",
+                  "notAfter": "2027-01-01T00:00:00Z"
+                }
+              ],
+              "revoked": [],
+              "administrators": [],
+              "alg": "EdDSA",
+              "kid": "root-org-a-1",
+              "sig": "vufCXJ4roCUAM3MEuAikBXHXZ8mdhK7hyiZkkFzc14MuJ8fvPq6zYxOOOH8KtIuBEIUcXesvsy1NXXs9rYqIBw"
+            }
+          }
+        },
+        "context": "org:org-a",
+        "approval": {
+          "ok": true,
+          "approver": "member-m"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "recordAs": {
+          "by": "member-m",
+          "via": "approval",
+          "caller": "agent:claude-code"
+        }
+      }
+    },
+    {
       "name": "the operator's decision on a key revocation declared admin, in a personal context, from T0",
       "input": {
         "action": {

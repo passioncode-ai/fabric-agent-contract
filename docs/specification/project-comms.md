@@ -685,7 +685,7 @@ The boundary:
 - **Not the caller itself.** The caller's own Project is not listed; `com.status` describes it.
 - **Opt-out.** A Project can be unlisted. Its operator decides it (in an organization, the member who owns the Project, or an owner or an administrator by a level decision, the host declaring `admin` for its list and unlist actions, DEC-0162 LV-7 and the operator's answer to its question 9), in the host (in Fabric per Project) or through their
   agent, which relays the decision to the host's list and unlist actions (`gate: relayed`, [service](service.md#actions)
-  AP-2, DEC-0121; the host's tools are CT-125); an agent never lists or unlists a Project on its own account. An unlisted Project is absent from every page and every
+  AP-2, DEC-0121; the host's tools are CT-125; in an organization's context the member who owns the Project decides it as their own act in the host's controls (the host knows the Project's owner), and in an organization's context their agent has no relayed route for it, since the host declares the action `admin` and LV-7 takes no operator form there (the owning member's agent twin, a route the host checks before `actionDecision`, is CT-307); an owner's or an administrator's agent relays a level decision); an agent never lists or unlists a Project on its own account. An unlisted Project is absent from every page and every
   capability filter.
 - **Unlisting is discovery only.** It does not hide the Project from a sender that already knows its id: that sender
   can still address it, because a listing is discovery, not authority. Unlisting refuses no message; whether a
@@ -738,7 +738,7 @@ Project hold, enrollment and replacement wait for the lift, and its accepted wor
 
 - **Who sets it.** The operator decides a hold (in an organization's context, the member who owns the Project, or an owner or an administrator by a level decision; a host declares `admin` for its set and lift actions in its authority extension, DEC-0162 LV-7 and the operator's answer to its question 9): in the host, or through their agent, which relays the decision to
   the host's set, lift and list actions (`gate: relayed`, [service](service.md#actions) AP-1 and AP-2, DEC-0121; the
-  host's tools are CT-125). An agent never holds or releases work on its own account. A hold is not a grant change and not an authority revision: it never
+  host's tools are CT-125; in an organization's context the member who owns the Project decides it as their own act in the host's controls (the host knows the Project's owner), and in an organization's context their agent has no relayed route for it, since the host declares the action `admin` and LV-7 takes no operator form there (the owning member's agent twin, a route the host checks before `actionDecision`, is CT-307); an owner's or an administrator's agent relays a level decision). An agent never holds or releases work on its own account. A hold is not a grant change and not an authority revision: it never
   answers `authority_changed`, and it resets no cursor.
 - **Held work** is a request whose thread is held, whose target Project is held, or whose target (Project, capability)
   slot is held. The thread is the one the request was submitted in; the target is the request's `target`.

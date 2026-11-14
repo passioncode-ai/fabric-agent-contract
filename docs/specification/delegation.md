@@ -318,7 +318,7 @@ spent when the meter refuses, and stays usable until its `exp`. A source hand-ov
 [source](source.md#handing-over) specifies (DEC-0149). In an organization's context a level decision whose holder's
 attestation the call's token binds by `mem` stands in place of an approval for a relayed action at a service that
 reads levels, so such a T2 caller is not refused `approval-required` ([membership](membership.md#levels) LV-6,
-DEC-0162); a level form that does not stand is refused as LV-10 says (`operator-decision-required` or `decision-invalid`, with `data.actionDigest`, so this rule's route stays open), and a human step as AP-4 says.
+DEC-0162); a level form that does not stand is refused as LV-10 says (`operator-decision-required` or `decision-invalid`, with `data.actionDigest`, so this rule's route stays open, save for an act declared `owner` or `admin` in an organization's context, which no approval decides, LV-7), and a human step as AP-4 says.
 `actionDigest(action)` computes the digest; `jcs` (`rfc8785` in `src/canonical.ts`) is the canonical form —
 RFC 8785, not the settings form a device policy is signed over ([canonical forms](conformance.md#canonical-forms),
 DEC-0043). Products keep their own gates for
