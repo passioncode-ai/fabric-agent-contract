@@ -7,13 +7,13 @@ DEC-0127, DEC-0129, DEC-0131, DEC-0133, DEC-0138, DEC-0162, DEC-0170 · rule cod
 [`org-authority-draft`](../../schemas/org-authority-draft.schema.json) and
 [`org-root-registration`](../../schemas/org-root-registration.schema.json) and the root's answer
 [`org-root`](../../schemas/org-root.schema.json), the adaptation plan's
-[`org-adaptation`](../../schemas/org-adaptation.schema.json), the instance statement's
-[`org-instance`](../../schemas/org-instance.schema.json) and
-[`org-adaptation-receipt`](../../schemas/org-adaptation-receipt.schema.json), and the estate record's `organizations`
+[`org-adaptation`](../../schemas/org-adaptation.schema.json) and
+[`org-adaptation-receipt`](../../schemas/org-adaptation-receipt.schema.json), the instance statement's
+[`org-instance`](../../schemas/org-instance.schema.json), and the estate record's `organizations`
 ([`estate-record`](../../schemas/estate-record.schema.json)) · code [`src/org-membership.ts`](../../src/org-membership.ts), [`src/org-adaptation.ts`](../../src/org-adaptation.ts) (with the vectors
 [`fixtures/vectors/org-adaptation.json`](../../fixtures/vectors/org-adaptation.json)),
 [`src/org-authority.ts`](../../src/org-authority.ts) (with `orgRelayAdmissionSet`),
-[`src/org-exchange.ts`](../../src/org-exchange.ts) · vectors
+[`src/org-exchange.ts`](../../src/org-exchange.ts), [`src/org-instance.ts`](../../src/org-instance.ts) · vectors
 [`fixtures/vectors/org-membership.json`](../../fixtures/vectors/org-membership.json), written by
 [`tools/vectors/org-membership.ts`](../../tools/vectors/org-membership.ts), and the exchange's
 [`fixtures/vectors/org-exchange.json`](../../fixtures/vectors/org-exchange.json), written by
@@ -134,7 +134,8 @@ that signs key sets itself would be a new pin form, and an administrator's devic
 checked: both later decisions.
 
 Rotation, revocation and replay are `entitlement-key-set/1`'s ([entitlement](entitlement.md#issuer-keys)): a new key
-overlaps the old one, an old key stays listed until what it signed is past `expiresAt` (here a day), a revoked kid
+overlaps the old one, an old key stays listed until what it signed is past `expiresAt` (a day for an attestation, 7 days for an instance
+statement, DEC-0170), a revoked kid
 refuses at once what it signed, a lower revision is `stale-revision` and the same revision with other bytes
 `revision-conflict`. Replacing the root is a new pin by the person.
 
@@ -413,7 +414,7 @@ no credential: only the root can make a set that passes.
 **OX-4, readers meanwhile.** A server with no signed set answers the key-set route `404 no-signed-key-set` and issues no
 attestation; a reader's membership stays unverifiable and so suspended (OM-6). While a newer draft waits, the server
 keeps serving the last signed set and signing attestations only with keys it lists. It never signs an attestation
-with a key no signed set lists.
+or an instance statement with a key no signed set lists.
 
 **OX-5, rotation and a late signature.** The server drafts the next set at least 7 days before the newest signing
 key's `notAfter` (`ROTATION_LEAD_SECONDS`), with the new key's window starting at once, so the overlap OM-8 asks for is
@@ -637,7 +638,7 @@ reader that never trusted the server's word can check it offline: the platform w
 | `org` | the organization's context id `org:<orgId>` |
 | `instanceId` | the instance's opaque id, as the platform's record and the instance's product name it, compared as written (the issuer issues it in lower case) |
 | `product` | the product the instance runs, the platform's opaque product key |
-| `origin` | the instance's `https://` origin in lower case, compared as written |
+| `origin` | the instance's `https://` origin in lower case, of two DNS labels or more, with no port, path or trailing slash (the form of entitlement's `issuer`), compared as written; an instance reachable only at a port, or only at `http://127.0.0.1` on a member's machine, is not stated (*Not decided here*) |
 | `placement` | where the instance runs: `org-cloud` (a cloud the organization's hosting runs, the `org-cloud` or `enterprise-cloud` hosting product of DEC-0088), `machine` (any machine, a member's or one the organization runs; whose machine it is is not stated) or `service` (a PassionCode service); a place, not LV-7's device reading of who holds the descriptor |
 | `status` | `active`, or `retired`: a retirement is stated at a higher revision, never by silence |
 | `revision` | a positive integer that rises with every statement for this (organization, instance) |
@@ -665,7 +666,9 @@ record's `subject`; the window: `notBefore` within the clock skew, and no grace 
 **IS-4, the issuer's duties.** The organization server issues a statement only on a record an owner or an
 administrator made (`org.instance_added`; a level decision where it reads levels, DEC-0162 LV-7), re-issues each active
 one at least a day before `expiresAt`, issues `status: "retired"` at a higher revision on `org.instance_retired` and
-none after it, and never signs one revision with other bytes. A retirement reaches a reader when the reader next
+none after it, and never signs one revision with other bytes. It keeps a signing key listed until every instance
+statement that key signed is past `expiresAt`, and re-issues those statements under a listed key before it revokes
+one (OM-8's rotation, carried to instance statements). A retirement reaches a reader when the reader next
 fetches: a reader that fetches only when `refreshDue` may serve a retired instance until its held statement's
 `expiresAt`, at most 7 days; a reader that needs less fetches more often, and an issuer may state shorter lives. How a
 statement reaches the platform and the instance's product is not decided here.
@@ -753,14 +756,16 @@ changes. The member list and its draft name every member and are served only to 
 its relay (OX-6).
 
 An instance statement (DEC-0170) names no person, but it gives the platform and the instance's product a signed
-`origin` with its `placement`: an instance on a member's machine that serves two organizations shows the platform one
-origin in both, so the platform can link those two organizations to one machine.
+`origin` with its `placement`: two organizations' statements that name one origin (one machine hosting an instance for
+each) let the platform, and each organization server that signs that origin, link the two organizations to that
+machine.
 
 ## Not decided here
 
 - **How an instance statement travels (DEC-0170).** The route by which the organization server hands `org-instance/1`
   to the platform (`instance_put`) and to the instance's product, whether a reader fetches it or the server pushes a
-  retirement, and how an instance is created and billed (the platform's and the product's).
+  retirement, and how an instance is created and billed (the platform's and the product's). How an instance that has
+  no `https://` name of its own (one reachable only at a port, or a local instance on a member's machine) is stated.
 
 - **The proof a member-key door asks in an organization's context.** A member's key for an instance the organization deploys is issued and rotated only by the owner or an administrator, in person, a member's own machine included (LV-7, the operator's answer of 2026-11-13). CF-3's doors (the instance's CLI and page) authenticate whoever holds the descriptor, which on a member's machine is the member, and nothing yet tells the owner or an administrator apart there, nor says whether in person admits a remote session. Until DEC-0159's lander, Fabric (CT-208, CO-523) and the organization product name that proof (for example the owner's or an administrator's own credential the organization's key set lists, OM-3), the page and CLI of an instance the organization deploys on a member's machine offer no member-key issue or rotation; revocation stays the level route.
 

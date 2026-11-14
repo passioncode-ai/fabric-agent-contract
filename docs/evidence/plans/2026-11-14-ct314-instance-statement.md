@@ -42,7 +42,7 @@ organization's `org-key-set/1` (`/fabric/membership/v1/{org}/key-set`, OM-3). Ev
 No member names a person or a network address beyond the instance's own origin.
 
 **IS-2, the verifier.** `verifyOrgInstance(statement, {now, org, instanceId, keySet, held})` checks with no network and
-answers `{ok: true, status, refreshDue, unchanged, digest, held}` or one problem, in `verifyOrgMembership`'s order:
+answers `{ok: true, status, product, origin, placement, refreshDue, unchanged, digest, held}` or one problem, in `verifyOrgMembership`'s order:
 `no-clock` and `context-invalid`; `malformed`; `wrong-issuer`; `unknown-algorithm`; `unknown-key` and `key-revoked`;
 `unusable-key` and `small-order-key`; `key-not-valid`; `bad-signature`; `wrong-org` (the statement's `org` is not the
 reader's) and `wrong-instance` (its `instanceId` is not the one the reader asks about, the platform's path); `too-long-lived`;

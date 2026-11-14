@@ -12055,14 +12055,16 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      `origin`, `placement` (`org-cloud`, `machine` or `service`), `status` (`active` or `retired`), `revision`,
      `issuedAt`, `notBefore`, `expiresAt` (at most 7 days after `issuedAt`), `alg` (`EdDSA`), `kid`, `sig`; signed by a
      signing key of the organization's `org-key-set/1` (OM-3) over the RFC 8785 form without `sig` (the register's
-     `org-instance/1`). No person; no address but the instance's origin.
+     `org-instance/1`). No person; no address but the instance's origin (`https://`, lower case, no port, path
+     or trailing slash).
   2. **IS-2, the verifier.** `verifyOrgInstance(statement, {now, org, instanceId, keySet, held})`, in
      `verifyOrgMembership`'s order, with `wrong-instance` beside `wrong-org`, no grace after `expiresAt`, and a
      `retired` statement that verifies and reads `retired`; `refreshDue` from 24 hours before `expiresAt`.
   3. **IS-3, the platform's checks** on `instance_put` are IS-2 with its context (the window: `notBefore` within the
      skew, no grace after `expiresAt`); it stores `digest` and `revision`.
   4. **IS-4, the issuer.** Only on a record an owner or an administrator made; re-issue a day before expiry; a
-     retirement at a higher revision and nothing after it; one revision, one set of bytes. A retirement reaches a
+     retirement at a higher revision and nothing after it; one revision, one set of bytes; a signing key stays
+     listed until what it signed is past `expiresAt` (7 days here) and statements are re-issued before a revocation. A retirement reaches a
      reader at its next fetch, at worst the held statement's `expiresAt` (7 days).
   5. **Rule.** `FAC-SEM-177` (kind `org-instance`): the times strict and in order, and the 7-day life.
 - **Why:** the first organization server's request (board `270b130b`, thread `fb41cd09`) for the issuance statement

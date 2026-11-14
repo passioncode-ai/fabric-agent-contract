@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/org-key-set.schema.json",
   "title": "Organization key set, org-key-set/1 (DEC-0127)",
-  "description": "One organization's signing keys for org-membership/1 attestations, under a monotonic revision, signed by the organization's root key over the RFC 8785 form of the set without sig (the register's org-key-set/1, DEC-0063). The person's estate pins the root (the estate record's organizations); the root signs nothing else. The set also certifies the administrators' signing passkeys (DEC-0129). One root per organization, even on a server that hosts many (MD-9 path (a)).",
+  "description": "One organization's signing keys for org-membership/1 and /2 attestations and org-instance/1 statements (DEC-0170), under a monotonic revision, signed by the organization's root key over the RFC 8785 form of the set without sig (the register's org-key-set/1, DEC-0063). The person's estate pins the root (the estate record's organizations); the root signs nothing else. The set also certifies the administrators' signing passkeys (DEC-0129). One root per organization, even on a server that hosts many (MD-9 path (a)).",
   "type": "object",
   "required": [
     "type",
@@ -68,7 +68,7 @@
           },
           "notAfter": {
             "$ref": "entitlement.schema.json#/$defs/instant",
-            "description": "After notBefore (FAC-SEM-146). An attestation verifies under this key only when its issuedAt is at or after notBefore and before notAfter."
+            "description": "After notBefore (FAC-SEM-146). An attestation or an instance statement verifies under this key only when its issuedAt is at or after notBefore and before notAfter."
           }
         },
         "additionalProperties": false
@@ -82,7 +82,7 @@
       "items": {
         "$ref": "activity-common.schema.json#/$defs/opaqueId"
       },
-      "description": "Kids revoked: absent from keys (FAC-SEM-146), and every attestation one of them signed is refused (key-revoked)."
+      "description": "Kids revoked: absent from keys (FAC-SEM-146), and every attestation or instance statement one of them signed is refused (key-revoked)."
     },
     "administrators": {
       "type": "array",

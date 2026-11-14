@@ -148,6 +148,7 @@ function verifyCases(): Json[] {
     c("malformed: an unknown placement", instance({ placement: "laptop" }), trust(), refused("malformed")),
     c("malformed: an unknown status", instance({ status: "paused" }), trust(), refused("malformed")),
     c("malformed: an origin with a path", instance({ origin: "https://notes.org-a.example/app" }), trust(), refused("malformed")),
+    c("malformed: an origin with a port", instance({ origin: "https://notes.org-a.example:8443" }), trust(), refused("malformed")),
     c("malformed: a person named in an extra member", { ...BASE, owner: "alice" }, trust(), refused("malformed")),
     c("malformed: no kid", (({ kid: _kid, ...rest }) => rest)(BASE), trust(), refused("malformed")),
     c("malformed: a membership attestation is not a statement", { ...BASE, type: "org-membership/1" }, trust(), refused("malformed")),
