@@ -7269,7 +7269,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   export), item 4's "typed secrets" included, and names the peer share's export among the steps held in the product's
   app window; it defines the agent twins of the secret prompt's "Decline" and of a peer share's "Open a share".
 - **Annotated (2026-11-14):** AP-1 extended by DEC-0169: everything a person reads is readable by an agent (RP-1), each
-  function is a capability of the agent surface first (RP-2), and a dashboard without an agent surface is
+  function is built for an agent first, an act a capability of the agent surface and a read through a tool or the
+  documented API the page calls (RP-2), and a dashboard without an agent surface is
   nonconformant (RP-3, `FAC-SEM-176`).
 - **Context:** the operator asked (2026-10-24) that when they tell their coding agent to approve something, the agent
   does it, and that any button a service's dashboard shows a person exists for the agent too, for every Fabric agent.
