@@ -692,7 +692,10 @@ after asking them again. Inside the estate (T0, T1) one approval is enough.
   key's ceiling) is not such a question: it is the person's step of OA-5, handed to them with its link and the amount
   (`human-step-required`). A
   stop condition the relaying agent wrote into its request is that agent's, not the operator's: where the approved
-  scope covers the case, the receiver acts and says so in its reply.
+  scope covers the case, the receiver acts and says so in its reply. A host's gate on a floored act still asks once,
+  quoting the relayed words, which are the reason it quotes, not the agreement
+  ([governance and roles](governance-and-roles.md#the-operators-word-carried-out-the-first-time) OW-3 and OW-5,
+  DEC-0156).
 - **OA-5, what stays the person's.** The human steps of AP-4 and MD-6: a sign-in (with its one-time code), a consent,
   a payment or top-up, a secret typed in or handed out, spend above a limit, a passkey signature, a comparison of codes between two
   people or the choice to share without one (DEC-0142); a decision recorded as the
