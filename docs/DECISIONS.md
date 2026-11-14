@@ -12048,7 +12048,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 ### DEC-0170: `org-instance/1`, a signed statement that an instance runs for an organization
 
 - **Date:** 2026-11-14
-- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: board row CT-314: the first
+- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: backlog row CT-314 (on the CT-302 design branch until it lands): the first
   organization server issues; the platform (PLAT-146, `instance_put`) and an instance's product verify.
 - **Decision:** in [membership → instances](specification/membership.md#instances-dec-0170):
   1. **IS-1, the statement.** `org-instance/1`, every member always present: `issuer`, `org`, `instanceId`, `product`,
@@ -12059,9 +12059,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   2. **IS-2, the verifier.** `verifyOrgInstance(statement, {now, org, instanceId, keySet, held})`, in
      `verifyOrgMembership`'s order, with `wrong-instance` beside `wrong-org`, no grace after `expiresAt`, and a
      `retired` statement that verifies and reads `retired`; `refreshDue` from 24 hours before `expiresAt`.
-  3. **IS-3, the platform's checks** on `instance_put` are IS-2 with its context; it stores `digest` and `revision`.
+  3. **IS-3, the platform's checks** on `instance_put` are IS-2 with its context (the window: `notBefore` within the
+     skew, no grace after `expiresAt`); it stores `digest` and `revision`.
   4. **IS-4, the issuer.** Only on a record an owner or an administrator made; re-issue a day before expiry; a
-     retirement at a higher revision and nothing after it; one revision, one set of bytes.
+     retirement at a higher revision and nothing after it; one revision, one set of bytes. A retirement reaches a
+     reader at its next fetch, at worst the held statement's `expiresAt` (7 days).
   5. **Rule.** `FAC-SEM-177` (kind `org-instance`): the times strict and in order, and the 7-day life.
 - **Why:** the first organization server's request (board `270b130b`, thread `fb41cd09`) for the issuance statement
   its own row and the platform's PLAT-146 cite, which DEC-0162 did not give; its proposal (`983f0303`) and the
@@ -12085,8 +12087,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   - tests: `test/org-instance.test.ts`, `test/signing-challenges.test.ts`, `test/schema-compilation.test.ts`,
     `test/positive-sweep.test.ts`;
   - docs: `CONTEXT.md`, `docs/DOCMAP.md`, the design `docs/evidence/plans/2026-11-14-ct314-instance-statement.md`.
-- **Not decided here:** the public readers list `GET /fabric/membership/v1/{org}/readers` (membership's *Not decided
-  here*, waiting for Fabric); how an instance is created and billed (the platform's and the product's).
+- **Not decided here:** how a statement travels to the platform and the product, and how an instance is created and
+  billed (membership's *Not decided here*); the public readers list `GET /fabric/membership/v1/{org}/readers` (not
+  specified anywhere yet, Fabric's).
 - **Source:** the design above; the first organization server's board messages `270b130b` and `983f0303`; the
   platform's `f126b49d`; DEC-0127, DEC-0129, DEC-0162. DEC-0170 and `FAC-SEM-177` were reserved by git CAS
   (`agent_sync.py reserve`, keys `ct314-org-instance` and `ct314-org-instance-sem`).

@@ -53,7 +53,7 @@ is lower. `refreshDue` from 24 hours before `expiresAt`.
 
 **IS-3, the platform's four checks** (PLAT-146 on `instance_put` for `org:<id>`) are IS-2 with its context: the
 signature by the organization's applied key set; `instanceId` equal to the path and `org` equal to the record's
-`subject`; the expiry within the clock skew; a `revision` not below the one accepted (`stale-revision`). The platform
+`subject`; the window: `notBefore` within the clock skew, and no grace after `expiresAt`; a `revision` not below the one accepted (`stale-revision`). The platform
 stores the `digest` and `revision` the verdict returns.
 
 **IS-4, the issuer's duties.** The organization server issues a statement only on a record an owner or an administrator
@@ -77,7 +77,8 @@ row. How an instance is created and billed: the platform's and the product's.
 ## Open points for the decision
 
 1. The 7-day life: an instance changes far less often than a membership (24 hours), and the platform reads it at
-   `instance_put`, not on every call; the daily re-issue keeps a retirement effective within a day.
+   `instance_put`, not on every call; a retirement reaches a reader at its next fetch, at worst the held statement's
+   `expiresAt` (IS-4).
 2. `placement` as three words rather than the hosting products of `entitlement/1`: a member's machine and a PassionCode
    service host instances no hosting product names.
 3. `product` stays opaque: the contract has no product register.

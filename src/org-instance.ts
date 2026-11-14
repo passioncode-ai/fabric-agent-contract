@@ -13,7 +13,7 @@ import { ORG_INSTANCE_FIELDS, signingStatement } from "./signing-challenges.js";
  * attestations; the platform (`instance_put`, PLAT-146) and the instance's product verify it offline. No person appears.
  */
 export const ORG_INSTANCE_TYPE = "org-instance/1";
-/** The longest life, `expiresAt − issuedAt`: a week, re-issued daily, so a retirement counts within a day. */
+/** The longest life, `expiresAt − issuedAt`: a week, re-issued at least a day before it ends (IS-4). */
 export const MAX_INSTANCE_SECONDS = 7 * 24 * 60 * 60;
 /** The reader asks for the next revision this long before `expiresAt`; the verifier reports `refreshDue` from then on. */
 export const INSTANCE_REFRESH_SECONDS = 24 * 60 * 60;
