@@ -12,7 +12,7 @@ one. The agents database designed the verifier itself (`fabric-agents-database` 
 accepted, `1055b55`, board message `45e934f6`); its open questions OQ-1, OQ-3, OQ-6, OQ-8 and OQ-9 are the contract's.
 Fabric owns the door `decision.verify` and its journal (spec by 2026-11-17); this design owns the wire.
 
-Line numbers cite the repository at `d34aea80` (main on 2026-11-14); read each citation by its rule id first.
+Citations name rule ids on main; read each by its rule id.
 
 ## What the contract says today
 
@@ -179,7 +179,34 @@ database and Fabric listing where this design departs from the source's accepted
 `verified`, `taken`, `forwarded`; `forwarded` in either context where `actionDecision` takes it; `caller-approval` for
 `hub-approval`, no `runner-receipt`; the source's `options[]`, `restrictions[]`, `veto`, `state`, `version` and
 `commandId` in Fabric's store, not on the wire; the `id` without the operation; `kept` bounded by OW-1; OQ-5 decided from the operator's recorded rules rather than his daily review; local acts
-outside this revision) and telling studio-agent that the receipt carries no operator's words (this design's privacy choice) and, plainly, that
+outside this revision; `human` as advice with no addressee when the caller already holds a form the reference takes,
+where the source asks a person on every `human`; the reasons `spend-limit` and `row-advised` added and `not-landed`
+dropped; spend above `autoApproveUsd` as rule 3's request, not the source's keep-or-double step; a T2 `caller-approval`
+call that the hub does not hold back on a verdict) and telling studio-agent that the receipt carries no operator's words (this design's privacy choice) and, plainly, that
 this revision serves neither local acts nor another session's journal as a ground, so most of its measured waits stay
 open (CT-315). Fabric's spec of 2026-11-17 cites this
 design's field names.
+
+## What the DEC carries from the last readings
+
+Rounds 11 and 12 (seam and product) read this design clean twice; these risks are the DEC's to settle, none blocks the
+design:
+
+1. Privacy: whether `caller` and `session` are pairwise in an organization's context, since DV-2 lets the owner and
+   administrators read every verdict there and LV-9 gives them only a pairwise `approver`.
+2. Addressees: who DV-7's AP-4 `spend-above-limit` step goes to in an organization's context (the owner and
+   administrators for L1 and the organization's keys, that estate's operator for a member's own L0 and keys, MD-6,
+   LV-7), and that an owner or administrator who starts the spend approves with their own confirm (spend policy
+   rule 3); when the link arrives (on the callee's refusal, OA-4).
+3. DEC-0168: `allowances: unlimited` never grounds an `allow` and never clears `spend-limit`; `grounds[].kind` has no
+   entitlement.
+4. DV-1's sources of the caller's decision list all four of AP-3 (its own session, a subagent, the operator channel, an
+   OA-2 relay); DV-2's `kept` never asks about the caller's own act under `gate: none`; `ground-invalid`,
+   `outside-window` and `voided` named in the sentence that limits `human`.
+5. DV-7 reads a declared worst case (`maxCostUsd`), not the callee's own estimate MD-3 checks; DV-8 names the action it
+   matches (an action id, read from the callee's actions extension) and the action for a call with no decision or
+   mandate.
+6. The term: CONTEXT says "decision verifier", apart from the entitlement and membership verifiers.
+7. The restatements beyond the list above: `src/protocol-revisions.ts` and its test, `fixtures/catalogue.json`, the
+   adapter's `PROTOCOL_REVISIONS` and Fabric's hub; FLW-29's `verdict-mismatch` branch; SCN-057's link timing; the
+   verifier that is not the approval's `aud` (DL-18) reading an approval.
