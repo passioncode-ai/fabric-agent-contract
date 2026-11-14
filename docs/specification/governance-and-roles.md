@@ -257,7 +257,7 @@ words AP-2 and OA-1 already name; the rules hold for any owner.
   elicitation in the call); a control the contract reserves to the person's own act (the operator's move of a board
   slot, which [project communication](project-comms.md#the-operator-moves-a-slot) DEC-0140 PR-2 leaves to the host's
   operator controls until the move's agent twin ships: no agent moves a slot on its own account or as a relay, and no
-  mandate covers it); a control that has no agent twin (a service that has not shipped its twin, which AP-1 makes nonconformant); and
+  mandate covers it; and, in an organization's context, the hold and the listing a member who owns the Project decides in the host's own controls, which have no relayed route for that member until CT-307's twin ships, DEC-0162 LV-7); a control that has no agent twin (a service that has not shipped its twin, which AP-1 makes nonconformant); and
   a refusal by the agent's own tool or harness, where the person's step is to allow that
   command in the harness's own permission settings, or to answer yes to a host tool the agent runs that installs the
   named rule there on that yes, after which the agent runs it; allowing it lifts the harness's
