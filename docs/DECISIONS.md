@@ -11671,7 +11671,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   OC-6's presses once the receiver is back, the webhook's removal waiting on
   the operator's decision, OC-2, AP-2 and AP-3),
   `docs/specification/operator-channel.md` (OC-11's second step handed over as AP-4's `secret` step or the host's
-  secret prompt, SCN-053, never as a command; its third step the agent's, OW-2, on AP-2's relayed decision, the code
+  secret prompt, SCN-053, never as a command the agent could run itself, where the node answers `no-client` the vault's own command in the person's shell; its third step the agent's, OW-2, on AP-2's relayed decision, the code
   shown to the person only (an agent with a dashboard has its link command print to its output only that a code was issued), the store
   read for the token whenever the agent builds its status, at its next start and when the person says it is stored, the channel enabled on the read that finds it, a new code issued on the
   person's ask when one expires unused while the `accepted` holds and never because of a chat message, an old `accepted` renewed by one question), DEC-0034 (an Annotated line), DEC-0126 (an Annotated line and OA-4's pointer in `docs/specification/delegation.md`: a host's gate still asks once, quoting the relayed words), DEC-0150 (an Annotated line:

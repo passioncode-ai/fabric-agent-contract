@@ -136,7 +136,7 @@ reports a dashboard that declares none (CT-126) ([service](docs/specification/se
 
 **Operator's word, carried out the first time**: The rule that an agent carries out its operator's words about a task
 itself, on that word: every step inside the task is the agent's to take within the grants, mandates and limits that
-apply; it hands the operator no command; a risk the words did not name gets one short message with the corrected way (a
+apply; it hands the operator no command it could run itself (a typed secret where the node answers `no-client` leaves the person the vault's own command, OW-4); a risk the words did not name gets one short message with the corrected way (a
 question where the step must wait) while the rest goes on; the agent adds no question of its own about an act a
 host's gate already asks about, a risk on it travelling as that gate's one ask (where Fabric refuses the act for a
 session whose runner gate is removed, one question in the chat stands in for that ask, and a session with no person in
