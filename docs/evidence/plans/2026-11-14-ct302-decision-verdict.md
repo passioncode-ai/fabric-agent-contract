@@ -12,7 +12,7 @@ one. The agents database designed the verifier itself (`fabric-agents-database` 
 accepted, `1055b55`, board message `45e934f6`); its open questions OQ-1, OQ-3, OQ-6, OQ-8 and OQ-9 are the contract's.
 Fabric owns the door `decision.verify` and its journal (spec by 2026-11-17); this design owns the wire.
 
-Line numbers cite the repository at `980f9013` (main on 2026-11-14); read each citation by its rule id first.
+Line numbers cite the repository at `d34aea80` (main on 2026-11-14); read each citation by its rule id first.
 
 ## What the contract says today
 
@@ -67,11 +67,12 @@ grade: they can make an act `human`, never ground its `allow`, and a `budget` gr
 refuses for want of a person, and beyond that only for a reason it names: evidence it cannot read (`evidence-unknown`,
 `evidence-stale`), its own checks (`vetoed`, `loop`), a `kept` act, money that would cross a limit (`spend-limit`,
 DV-7), or a policy row's `deny` against a form the reference takes (`row-advised`). Where the caller holds a form the reference takes (the operator's word, a mandate in force, a relay
-OA-3 accepts, a bound profile or level form, an accepted `approval/1`), none of these reasons puts a question to a person: such a `human` carries no
+OA-3 accepts, a bound profile or level form, an accepted `approval/1`), none of these reasons, save `spend-limit`, puts a question to a person: such a `human` carries no
 addressee and no `questionId`, and the caller goes on as OW-3 says, with one message that names the concern (OW-1, OA-1,
 OW-4's closed list: the operator is not asked again for an act his word or a mandate already decides); a policy row's `deny` never stands
 against such a form either: the verdict is then `human` (`row-advised`) without an addressee, and an origin under DV-8 dispatches as
-C3.5 says; `kept` applies
+C3.5 says. `spend-limit` goes to the person as DV-7 says even under the operator's word or a mandate: spend above a
+limit is the person's and no word in chat approves it (OW-4, OW-5, OA-4, spend policy step 3). `kept` applies
 at all only where no operator's word and no mandate in force names the act, and a place's standing mandate yields to
 `kept` only within AU-2's bounds (an act AU-2 leaves to a person stays one). A `human` verdict is advice to the caller
 that asked: the hub still forwards a form the reference takes unless the origin opted in under DV-8. A `person-denied`
@@ -126,7 +127,9 @@ OA-4, [spend policy](../../specification/spend-policy.md) L0 to L2 and its step 
 already sends it, never as a second question: above L0, L1 or a key's ceiling as AP-4's human step `spend-above-limit`
 with its amount and, once known, its link (the limit-raising action's own `humanStep` url), and no `questionId`; above
 `autoApproveUsd` within L1 as step 3's one durable approval request (a chat word is never that approval, step 3), in an
-organization's context addressed to its owner and administrators (LV-7, `level.required` `admin`). Neither is the reference's refusal for want of a person, so this is the named reason the `human` above admits. A covered money act under every limit
+organization's context addressed to its owner and administrators (LV-7, `level.required` `admin`), in a personal context to the operator (OC-6's confirmation where the operator channel
+carries it). Neither is the reference's refusal for want of a person, so this is the named reason the `human` above
+admits, and the one that asks a person whatever form the caller holds. A covered money act under every limit
 answers `allow` with `machineForm` as any other, the reservation itself staying the callee's grant check. Nothing in this decision reserves. A hub-side
 reservation the callee's grant check adopts is CT-312; until it lands a verifier enforces no money act.
 
