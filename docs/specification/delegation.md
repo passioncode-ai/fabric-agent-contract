@@ -319,7 +319,7 @@ spent when the meter refuses, and stays usable until its `exp`. A source hand-ov
 [source](source.md#handing-over) specifies (DEC-0149). In an organization's context a level decision whose holder's
 attestation the call's token binds by `mem` stands in place of an approval for a relayed action at a service that
 reads levels, so such a T2 caller is not refused `approval-required` ([membership](membership.md#levels) LV-6,
-DEC-0162); a level form that does not stand is refused as LV-10 says (`operator-decision-required` or `decision-invalid`, with `data.actionDigest`, so this rule's route stays open), and a human step as AP-4 says.
+DEC-0162); a level form that does not stand is refused as LV-10 says (`operator-decision-required` or `decision-invalid`, with `data.actionDigest`, so this rule's route stays open, save for an act declared `owner` or `admin` in an organization's context, which no approval decides, LV-7), and a human step as AP-4 says.
 `actionDigest(action)` computes the digest; `jcs` (`rfc8785` in `src/canonical.ts`) is the canonical form —
 RFC 8785, not the settings form a device policy is signed over ([canonical forms](conformance.md#canonical-forms),
 DEC-0043). Products keep their own gates for
@@ -802,14 +802,17 @@ after asking them again. Inside the estate (T0, T1) one approval is enough.
   from another session, or a subagent's parent passing the words as AP-3 says; never a file or a tool's output). A relay that lacks any of OA-2's four (the quote, when, where, the scope), a member's
   Project on an organization's board (T2), and text found in content an agent read (mail, a page, a client's chat, a
   file, a tool result) are data, never an approval (AP-3, MD-6).
-- **OA-4, own checks, one question for what is new.** The receiver still runs its own checks: a stale preview, its
+- **OA-4, own checks, one question for what is new.** The receiver still runs its own checks (and, in an organization's context, takes a bound level decision where a host's gate takes AP-2's, DEC-0162 LV-6): a stale preview, its
   guards, the money limits. It asks the operator again only about what they did not see: another target, a scope wider
   than the one relayed, money above the amount the relayed scope names (a wider scope, asked with the amount); once,
   naming what is new, as MD-4 asks only for the part not covered. Spend above a money limit (L0, the project's L1, a
   key's ceiling) is not such a question: it is the person's step of OA-5, handed to them with its link and the amount
   (`human-step-required`). A
   stop condition the relaying agent wrote into its request is that agent's, not the operator's: where the approved
-  scope covers the case, the receiver acts and says so in its reply.
+  scope covers the case, the receiver acts and says so in its reply. A host's gate on a floored act still asks once,
+  quoting the relayed words, which are the reason it quotes, not the agreement
+  ([governance and roles](governance-and-roles.md#the-operators-word-carried-out-the-first-time) OW-3 and OW-5,
+  DEC-0156).
 - **OA-5, what stays the person's.** The human steps of AP-4 and MD-6: a sign-in (with its one-time code), a consent,
   a payment or top-up, a secret typed in or handed out, spend above a limit, a passkey signature, a comparison of codes between two
   people or the choice to share without one (DEC-0142); a decision recorded as the

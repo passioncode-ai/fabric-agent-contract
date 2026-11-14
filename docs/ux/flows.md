@@ -743,14 +743,14 @@ flowchart TD
 
 - **Screens traversed:** SCR-28 queue, issued, refused, revoked; SCR-29 the calls between agents.
 
-### FLW-29: The operator's word, relayed by their agent, to a service's action
+### FLW-29: The operator's word, relayed by their agent, to a service's action or a whole task
 
-- **Traces:** ST-035 (JTBD-07, JRN-06/#3)
-- **Goal:** a step the operator would take on a dashboard happens when they tell their agent, recorded as their decision
-- **Entry points:** the operator's chat with their agent; a level holder's chat with their own agent (DEC-0162); a service's `operator-decision-required`; a job waiting for a choice; a word the operator gives in a customer chat a channel agent answers (DEC-0150 CA-8)
-- **Success exit:** the service took the action as the operator's decision (or a level holder's, DEC-0162), and its audit names the agent that relayed it
-- **Task analysis:** the operator tells the agent → the agent calls the action's tool with `_meta.decision` (the action, the object when the operator named one, the quoted sentence, the time) → the service runs `actionDecision` → it acts as its page would and records the decision. A level holder's path is the same with a level decision bound by the token's `mem` (DEC-0162), recorded with the level, the organization and the approver.
-- **Rejected shape:** the agent approving without the operator's words, or a service sending the operator to its page for a step its agent was told to take: rejected, because the decision is the operator's and parity is the rule (DEC-0121); the one page-only step is the operator's move of a board slot until its twin ships (DEC-0140, SCN-051). A word the operator gives in a customer chat a channel agent answers, reaching a service action: rejected, because a word given in a customer chat reaches no service action (DEC-0150 CA-8, SCN-043).
+- **Traces:** ST-035 (JTBD-07, JRN-06/#3, JRN-06/#4); SCN-057, DEC-0156
+- **Goal:** a whole task the operator gives is done on their first word (DEC-0156), and a step the operator would take on a dashboard happens when they tell their agent, recorded as their decision
+- **Entry points:** the operator's chat with their agent, a single step or a whole task (DEC-0156); a level holder's chat with their own agent (DEC-0162); a service's `operator-decision-required`; a job waiting for a choice; a word the operator gives in a customer chat a channel agent answers (DEC-0150 CA-8)
+- **Success exit:** the service took the action as the operator's decision (or a level holder's, DEC-0162), and its audit names the agent that relayed it; for a whole task, the task done on the first word, each step that waits named in the report, nothing handed over but OW-4's steps
+- **Task analysis:** the operator tells the agent → the agent calls the action's tool with `_meta.decision` (the action, the object when the operator named one, the quoted sentence, the time) → the service runs `actionDecision` → it acts as its page would and records the decision; for a whole task, the operator gives the task → the agent takes each step itself, the acts the words name through the service's gate with the words as AP-2's decision → one message on a risk the words did not name → the waits named → the report. A level holder's path is the same with a level decision bound by the token's `mem` (DEC-0162), recorded with the level, the organization and the approver.
+- **Rejected shape:** the agent approving without the operator's words, or a service sending the operator to its page for a step its agent was told to take: rejected, because the decision is the operator's and parity is the rule (DEC-0121); the one page-only step is the operator's move of a board slot until its twin ships (DEC-0140, SCN-051). A word the operator gives in a customer chat a channel agent answers, reaching a service action: rejected, because a word given in a customer chat reaches no service action (DEC-0150 CA-8, SCN-043). For a whole task: a command handed to the operator to run, or a stop at a risk that a clean corrected way covers: rejected (DEC-0156 OW-2, OW-3).
 - **Flow:**
 
 ```mermaid
@@ -776,6 +776,33 @@ flowchart TD
   Q --> O
   D -->|invalid| I[decision-invalid; the agent asks again]
   D -->|valid| R[Taken as the operator's; audited with the agent]
+  O -->|a whole task| K1[The agent takes each step itself: commands, builds, the acts the words name, OW-1 and OW-2]
+  K1 -->|at a step with a risk| R1{a risk the words did not name}
+  R1 -->|corrected way undoes cleanly and meets the word, no gate| T1[One message with the corrected way; taken and reported; the rest goes on]
+  R1 -->|a relayed act neither named nor covered, a gate of OW-5 other than a human step, a reserved control or a host's gate, or no clean corrected way| Q1[One question; that step waits, the rest goes on; unanswered, it stays open in the report; with no person in the chat, asked once through the organization's PM agent, whose reply starts the next run, which takes the step only on the operator's word or an accepted relay and otherwise asks the operator once, or the host's question surface, whose answer starts no run and on which the request is submitted again only on the operator's word relayed to the requester, or by the operator's own session when they own the requesting Project]
+  T1 -->|the operator names another way| K1
+  T1 -->|a bare no| U1[The corrected way undone where it can; the step left open]
+  Q1 -->|yes, or another way named| K1
+  Q1 -->|a bare no| U2[The step left open; the rest goes on]
+  K1 -->|a step of OW-4's list| H1[Handed over with the reason and the exact step OW-4 names for it: a link, the command and the setting, the decision's question, the hand-over statement, the binding's step]
+  K1 -->|a relayed act the words name| C
+  K1 -->|a decision recorded as the operator's own holds the work| S1[Its question asked as that decision says; Fabric's intake.spec-first: the rest waits]
+  S1 -->|answered| K1
+  H1 -->|allowed| K1
+  K1 -->|a host's gate on an act, Fabric's floor.ask-first| F1[Asked once with the words, and with the risk and the corrected way when a risk brought the step here, no question of the agent's own; the report, and a statement in the chat when the person is in it, names where to agree: Fabric's refused card, whose Allow once is the agreement here, unlike under FA-09; on agreement called again and taken; unanswered, left open; with no person in the chat, left open for a session the person is in and the request settled as OW-3 says, resubmitted once a grant lets a no-person session take it]
+  R1 -->|the step is one a host's gate holds| F1
+  F1 -->|agreed| K1
+  F1 -->|declined| SL[The step left open; the rest goes on]
+  SL --> K1
+  F1 -->|refused for the session whatever is agreed, FA-09| FA[With the person in the chat: one question naming the act, its target and the words, standing in for the gate's ask, a risk on the step in it; on yes the agent does it and records it with the words and the card's state in its own report; unanswered, left open. With no person in the chat: no question, the act not performed, left open and named in the board reply and the report as a step for a session the person is in, the request settled failed_known with observed false before any effect, never begun, a progress note and a reply naming the open act and saying it waits for a session the person is in and nobody submits the request again, that session recording the act in the request's thread when it performs it and the requester submitting nothing, or completed with the open act named when only a side act stays open, both saying the card does not allow the act and what a press leaves; a relay naming the act is the reason the later question quotes, not the agreement. Fabric's refused card, until its third owed change, is no question the agent asks: unpressed it stays refused; its Allow once grant does not lift the refusal and another session of the project keeping its runner gate could spend it without asking, yet the card reads Allowed once and leaves the queue while the act stays undone; OW-5 still holds]
+  R -->|inside a whole task| K1
+  H -->|inside a whole task| H1
+  H1 -->|not yet| K1
+  FA --> K1
+  T1 -->|no answer needed| K1
+  U1 --> K1
+  U2 --> K1
+  K1 -->|no risk or gate left| Z1[Task done; the report with its evidence, open steps named]
   O -->|in a customer chat| W[Word in a customer chat]
   W -->|account channel| K[CA-8 on an account channel, the operator's own account, every other session of it the operator's own, no business bot connected, the message not marked offline or scheduled, and the send record showing it not sent through the session owner: acts inside that chat only; a send the account's session owner holds stays held under the owner's approval rules, and the chat word does not release it; a request outside the chat causes no action and is recorded in the agent's audit]
   W -->|a group the agent's own bot answers, not the operator channel's bot| B[CA-8, the operator's allowlisted id bound in a private chat with that bot, sender_chat unset, not marked offline or scheduled: acts inside that chat only; the agent's own hold is lifted; a request outside the chat causes no action and is recorded in the agent's audit]

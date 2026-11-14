@@ -34,6 +34,12 @@ describe("profileDigest and mandateCovers on a standing mandate (DEC-0166 AU-3)"
     expect(mandateCovers({ ...base, tier: "T1" })).toEqual({ ignored: "standing-not-read" });
     expect(mandateCovers({ ...base, tier: "T2", standing: true })).toEqual({ ignored: "mandate-at-t2" });
   });
+  it("faults context-missing when a callee that reads it names no context of a known form (AU-1)", () => {
+    const call = { capability: "site.deploy", effect: "deploy" };
+    const base = { mandate, now: "2026-11-12T10:00:00Z", self: "example-deployer", callerAgent: "example-runner", tier: "T1", standing: true };
+    expect(mandateCovers({ ...base, call })).toEqual({ fault: "context-missing" });
+    expect(mandateCovers({ ...base, call: { ...call, context: "Org:Org-A" } })).toEqual({ fault: "context-missing" });
+  });
 });
 
 describe("levelShortOf (DEC-0166 AU-2, DEC-0162 LV-7)", () => {
