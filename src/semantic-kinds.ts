@@ -61,6 +61,7 @@ export const SEMANTIC_KINDS: Readonly<Record<string, SemanticKind>> = Object.fre
   "device-rotation": wrap("answered", "request", "response"),
   "enroll-token": doc("enroll-token.schema.json"),
   entitlement: doc("entitlement.schema.json"),
+  "entitlement-2": doc("entitlement-2.schema.json"),
   "entitlement-key-set": doc("entitlement-key-set.schema.json"),
   "org-membership": doc("org-membership.schema.json"),
   "org-membership-2": doc("org-membership-2.schema.json"),
