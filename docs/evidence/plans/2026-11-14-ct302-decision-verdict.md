@@ -47,11 +47,12 @@ refuse: AP-2's table, LV-7 and AU-2 decide exactly as today.
 | `askedDigest` | sha256 of `asked`'s canonical JSON |
 | `caller`, `session` | the principal and session the host authenticated |
 | `verdict` | `allow`, `human` or `deny` |
-| `rule` | the contract rule that decided, by its id (`AP-2`, `AP-4`, `AP-5`, `LV-4`, `LV-7`, `AU-1`, `AU-2`, `MD-3`, `MD-6`, `DL-17`, `OA-3`), a policy row (`row:<id>`), or the person's answer (`answer:<questionId>`) for `person-denied` and `rejected` |
+| `rule` | the contract rule that decided, by its id (`AP-2`, `AP-4`, `AP-5`, `LV-4`, `LV-7`, `AU-1`, `AU-2`, `MD-3`, `MD-6`, `DL-17`, `OA-3`, `OW-4`, and `spend-step-3` for the spend policy's step 3), a policy row (`row:<id>`), or the person's answer (`answer:<questionId>`) for `person-denied` and `rejected` |
 | `reason` | a closed code: `covered` (allow); `body-gate`, `kept`, `level-insufficient`, `not-covered`, `outside-window`, `evidence-unknown`, `evidence-stale`, `ground-invalid`, `vetoed`, `loop`, `voided`, `spend-limit` (DV-7), `row-advised` (a policy row's `deny` against a form the reference takes) (human); `forbidden`, `other-context`, `self-approval`, `person-denied`, `rejected` (deny; `self-approval` only for an approval on the caller agent's own account that no relayed operator's approval carries, AP-5) |
 | `level` | `{required, satisfiedBy}`: `operator`, `instance-operator`, `owner`, `admin`, `architect` or `own-act` |
 | `route` | `operator`, `level`, `profile`, `mandate`, `approval`, `own-act` or `forwarded`, with `allow` only |
-| `machineForm` | with `allow` only, how the form reaches the callee: `hub-dispatch` (the hub forwards or states it in the call it dispatches, C3.5), `caller-approval` (the caller carries an `approval/1`, DL-18), `executed-by-holder` (a level holder's own agent performs the act under its own level decision, LV-10) or `none` (the caller's own act); never the form itself. A `local` act a runner performs itself (a deploy, a merge) reaches no contract callee, so it is outside `decision-verdict/1` in this revision: the contract records no verdict for it, and the runner acts as OW-1 says (and, on a headless place, as the place's profile and Fabric's floor that reads it allow, DEC-0166) (a runner reading a verdict is Fabric's OQ-4 and a later revision) |
+| `machineForm` | with `allow` only, how the form reaches the callee: `hub-dispatch` (the hub forwards or states it in the call it dispatches, C3.5), `caller-approval` (the caller carries an `approval/1`, DL-18; C3.5's `agent.call` has no approval member, so such a
+call reaches the callee without the hub's verdict check, DV-8), `executed-by-holder` (a level holder's own agent performs the act under its own level decision, LV-10) or `none` (the caller's own act); never the form itself. A `local` act a runner performs itself (a deploy, a merge) reaches no contract callee, so it is outside `decision-verdict/1` in this revision: the contract records no verdict for it, and the runner acts as OW-1 says (and, on a headless place, as the place's profile and Fabric's floor that reads it allow, DEC-0166) (a runner reading a verdict is Fabric's OQ-4 and a later revision) |
 | `grounds[]` | each `{kind, ref, grade}`: `kind` one of `decision`, `level-decision`, `level-mandate`, `standing`, `mandate`, `approval`, `relay`, `grant`, `budget`, `check`; `ref` an id or a digest |
 | `policy` | `{version, digest}` of the table the verifier read |
 | `human` | with `human` only: `{addressees, questionId?}` (`addressees` empty, and no `questionId`, for advice that asks no one), or `{addressees, humanStep, url?}` for an AP-4 step (a link only with a human step, and only once the callee's refusal gave it) |
@@ -83,7 +84,7 @@ in the forms and the host's journal: this design's own privacy choice, kept in O
 sessions only (in an organization's context also its owner and administrators); `human.addressees` names principals by their host id, never a person's
 address. Text fields are bounded and redacted like a decision's.
 
-**DV-3, the reduction (`FAC-SEM-175`).** On the document alone: `allow` names a `route`, a `machineForm` and a
+**DV-3, the reduction (its rule code).** On the document alone: `allow` names a `route`, a `machineForm` and a
 ground for its route (none for `own-act`), and no `human`; `human` names `human` and no `route`; `deny` names a `rule`;
 the reason belongs to the verdict's group in DV-2's list; a ground of grade `data`, or an unknown, never stands beside
 `allow`; `reason: body-gate` carries a `humanStep`; `expiresAt` within DV-2's bounds. Against the contract, by
@@ -125,7 +126,8 @@ L1 with its `autoApproveUsd`, L0 and each key's ceiling, and the call's own esti
 against `perCallMaxUsd`); an estimate that would cross a limit is `human`, the limits staying the person's (MD-6,
 OA-4, [spend policy](../../specification/spend-policy.md) L0 to L2 and its step 3), and goes out the way the contract
 already sends it, never as a second question: above L0, L1 or a key's ceiling as AP-4's human step `spend-above-limit`
-with its amount and, once known, its link (the limit-raising action's own `humanStep` url), and no `questionId`; above
+with its amount and its link once one is known (the callee's refusal's `url`, DV-2; in an organization's context the
+limit change is the owner's or an admin's relayed `change-policy` act, LV-7), and no `questionId`; above
 `autoApproveUsd` within L1 as step 3's one durable approval request (a chat word is never that approval, step 3), in an
 organization's context addressed to its owner and administrators (LV-7, `level.required` `admin`), in a personal context to the operator (OC-6's confirmation where the operator channel
 carries it). Neither is the reference's refusal for want of a person, so this is the named reason the `human` above
@@ -159,12 +161,12 @@ beyond the contract) is decided from the operator's recorded rules (the agents d
    of `interop-agent-call` gated by `decision-verdict/1`; it amends C3.5's closed list of `agent.call` fields for
    that revision, the sealed call whose `call` refers to it, DL-19's "Refused by" for `decision-invalid` (the hub too),
    and FLW-29's branch for `verdict-mismatch` (back to the door, never to the operator). Single use at the callee (CT-313) and the money reservation (CT-312) are their own decisions.
-2. The rule code is the next free one at landing (`FAC-SEM-175` by the SEM counter on 2026-11-14), reserved by the
-   CAS counter.
+2. The rule code is the next free one at landing, reserved by the CAS counter (DEC-0168 to DEC-0170 took
+   `FAC-SEM-175` to `FAC-SEM-177`).
 
 ## Next
 
-The DEC with the schema, `FAC-SEM-175`, the reference check, `fixtures/vectors/decision-verdict.json` (with a level
+The DEC with the schema, its rule code, the reference check, `fixtures/vectors/decision-verdict.json` (with a level
 form and a bound standing mandate taken at T2) and the restatements: the authority extension, C3.5, `interop-agent-call`,
 the sealed call and machine calls, DL-19's details, versioning's protocol list, FLW-29, SCN-043 and SCN-057 (a
 `verdict-mismatch` goes back to the door, and a `human` verdict is advice, never a hold, for an origin that did not opt
