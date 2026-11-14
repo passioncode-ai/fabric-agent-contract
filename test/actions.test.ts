@@ -99,6 +99,7 @@ describe("FAC-SEM-142 on a well-known document (DEC-0121 AP-1)", () => {
     expect(authorityView({})).toEqual({ declared: false });
     expect(authorityView(doc({ levels, actionLevels: { "approve-reply": "admin" } }))).toEqual({ declared: true, valid: true, levels, actionLevels: { "approve-reply": "admin" } });
     expect(authorityView(doc({}))).toEqual({ declared: true, valid: false, errors: ["/ minProperties"] });
+    expect(authorityView(doc({ standing: true }))).toEqual({ declared: true, valid: true, standing: true });
     expect(actionsView(doc({ levels }))).toEqual({ declared: true, valid: true, actions: actions.actions });
     const key = `/extensions/${EXTENSION_KEYS.authority.replace(/\//g, "~1")}`;
     const paths = (authority: unknown) => authorityExtensionRules(doc(authority)).map((finding) => finding.instancePath);
@@ -129,7 +130,7 @@ describe("FAC-SEM-142 on a well-known document (DEC-0121 AP-1)", () => {
 
 describe("kind action-call (FAC-SEM-142)", () => {
   const dir = path.join(projectRoot(), "fixtures/semantic");
-  const fixtures = readdirSync(dir).filter((name) => /^(action-call|service-well-known-actions|service-well-known-authority)-/.test(name)).map((name) => ({ name, ...(JSON.parse(readFileSync(path.join(dir, name), "utf8")) as { kind: string; expect: string[]; input: Json }) }));
+  const fixtures = readdirSync(dir).filter((name) => /^(standing-action-call|action-call|service-well-known-actions|service-well-known-authority)[-.]/.test(name)).map((name) => ({ name, ...(JSON.parse(readFileSync(path.join(dir, name), "utf8")) as { kind: string; expect: string[]; input: Json }) }));
   it("has fixtures for both kinds, and each finds what it expects", () => {
     expect(fixtures.filter((f) => f.kind === "action-call").length).toBeGreaterThan(5);
     expect(fixtures.filter((f) => f.kind === "service-well-known").length).toBeGreaterThan(5);

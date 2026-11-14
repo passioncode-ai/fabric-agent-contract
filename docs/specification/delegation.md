@@ -70,6 +70,7 @@ in the shape of OAuth 2.0 Token Exchange (RFC 8693):
 | `project` | no in the schema | the grant's project; every standing grant names one, so a token minted under a grant always carries it (`FAC-SEM-050`) |
 | `task` | no | the issuing host's task the work runs under, set by the hub when the session or run has one (DEC-0041): an opaque id in the session id's grammar, 1–128 characters of `[A-Za-z0-9._:-]`; the meter keys the `task` window on it (DL-24) |
 | `mem` | no | the digest (`sha256:` and 64 lowercase hex) of an `org-membership/2` attestation the hub verified as its own principal's in that organization's context (OM-2) before writing it; it binds a level decision or a level mandate to this caller (DEC-0162 LV-5, [membership](membership.md#levels)). An onward token keeps the parent's `mem` or none, never another (`FAC-SEM-050`) |
+| `prof` | no | the `profileDigest` (`sha256:` and 64 lowercase hex) of the standing mandate, a place's autonomy profile, the hub stated for the assignment the token serves; it binds that mandate to a T2 caller (DEC-0166 AU-3). An onward token keeps the parent's `prof` or none, never another (`FAC-SEM-050`) |
 | `iat`, `exp` | yes | issued and expiry times; `exp` is after `iat` and **at most 600 seconds** after it (`FAC-SEM-049`) |
 | `jti` | yes | a unique id, 16–128 characters of `[A-Za-z0-9._~-]` |
 
@@ -358,7 +359,7 @@ unchanged (DL-21 step 6), so a meter's code reaches a caller from a callee.
 | `issuer-unavailable` | no hub to mint, or no usable published keys, or no usable estate revision to certify them (DL-14) | caller, callee (verifier) | 503 |
 | `unknown-state` | the refusing side cannot establish the state; an unknown state is a denial | any | 503 |
 | `operator-decision-required` | a `relayed` action from a T0 or T1 caller without the operator's decision, or a call the caller's mandate does not cover (`error.data.detail` `outside-mandate: <part>`, with `estimateUsd` and `perCallMaxUsd` for spend), or, from any tier, a level below the action's (`error.data.detail` `level-insufficient: owner`, `admin` or `operator`, DEC-0162 LV-10: file one request to a holder of that level through the product's own approval surface, or take `operator` to the operator); ask the operator and call again with their answer in `_meta.decision`, or with a mandate that covers the call ([service](service.md#actions) AP-2, DEC-0121; [MD-4](#the-operators-mandate), DEC-0125); a source hand-over answers this code as [source](source.md#handing-over) specifies (DEC-0149) | callee | 403 |
-| `decision-invalid` | the call's decision is not valid for this action, object or time (AP-2, DEC-0121), or its mandate is not (`error.data.detail`: `mandate-malformed`, `mandate-widened`, `mandate-expired`, `mandate-early`, `mandate-not-for-this-call`; MD-3, DEC-0125), or its level decision or level mandate is not (`level-membership: <problem>`, `level-unbound`, `level-audience`, `level-expired`, `level-role` (DEC-0162 LV-10)); a source hand-over answers this code as [source](source.md#handing-over) specifies (DEC-0149) | callee | 403 |
+| `decision-invalid` | the call's decision is not valid for this action, object or time (AP-2, DEC-0121), or its mandate is not (`error.data.detail`: `mandate-malformed`, `mandate-widened`, `mandate-expired`, `mandate-early`, `mandate-not-for-this-call`; MD-3, DEC-0125), or its level decision or level mandate is not (`level-membership: <problem>`, `level-unbound`, `level-audience`, `level-expired`, `level-role` (DEC-0162 LV-10)), or its standing mandate's token binds another profile (`profile-unbound`, DEC-0166 AU-3, AU-7); a source hand-over answers this code as [source](source.md#handing-over) specifies (DEC-0149) | callee | 403 |
 | `human-step-required` | the action is the person's (a sign-in, a consent, a payment, a secret, spend above a limit, a passkey signature, a comparison of codes between two people or the choice to share without one); `error.data.humanStep` names it and `error.data.url` links to it (AP-4, DEC-0121) | callee | 403 |
 
 A product maps its own authorisation codes onto these and keeps its words in `error.data`. Fabric's hub maps
@@ -627,7 +628,9 @@ it reaches acts on them without asking, within what they cover.
   above, when the call's token binds the attestation by `mem` and the holder's level covers the call (an architect's,
   the call's project among its projects), and records `{by: "level", level, org, project?, approver, membershipDigest, revision, via: "mandate", task, chain, caller}` ([membership](membership.md#levels) LV-6, LV-9, LV-10); it stands only at the service its
   attestation's audience names, so handed on to another it is refused `level-audience` and the hub states a new one
-  for that service; a callee that reads no levels answers as if the call carried no mandate.
+  for that service; a callee that reads no levels answers as if the call carried no mandate. A place's standing mandate
+  (DEC-0166 AU-1) is taken from T0 or T1 as above and from T2 when the call's token binds it by `prof` (AU-3), at a
+  callee that declares `standing`; it is recorded `via: "profile"` with the place, the revision and the digest (AU-6).
 - **MD-4, asking only for the rest.** A call the mandate does not cover is refused `operator-decision-required` with
   `data.detail` `outside-mandate: <action|capability|effect|spend|project>`, naming the first part not covered, and for
   spend `estimateUsd` and `perCallMaxUsd`; a job's step it does not cover waits `input_required`, naming the part. The
@@ -637,14 +640,14 @@ it reaches acts on them without asking, within what they cover.
   a mandate that covers it. A mandate that is not valid (malformed, widened, expired, given more than 60 seconds after
   the callee's clock, or not addressed to this call) is refused `decision-invalid` with its `detail`; at a job's step,
   which has no refusal to send, the job waits `input_required` instead ([interop C3.3](interop.md#c33-awaiting-a-choice)).
-- **MD-5, beyond the estate.** A T2 caller's operator mandate changes nothing: the callee applies the whole profile as if it were
+- **MD-5, beyond the estate.** A T2 caller's operator mandate changes nothing: the callee applies the whole compatibility profile as if it were
   absent (DL-8, DL-13, DL-17), so a relayed action still answers `approval-required`; a level mandate its token binds is
-  taken as MD-3 says (DEC-0162 LV-6); a source hand-over answers as
+  taken as MD-3 says (DEC-0162 LV-6), and so is a place's standing mandate its token binds by `prof` (DEC-0166 AU-3); a source hand-over answers as
   [source](source.md#handing-over) specifies (DEC-0149). Toward another person's
   machine or another organization's agents the operator's authority travels only as a delegation token under a grant
   (DL-4, DEC-0039), which the hub mints for the mandate's scope once Fabric's issuer serves it. Inside the estate (T0,
   T1) the mandate needs no token, before and after the issuer exists (DL-26).
-- **MD-6, what never travels.** A mandate never covers a human step (AP-4: a sign-in, a consent, a payment or top-up, a
+- **MD-6, what never travels.** No mandate, a task's included, covers `autonomy.profile.set` (DEC-0166 AU-5, `outside-mandate: capability`). A mandate never covers a human step (AP-4: a sign-in, a consent, a payment or top-up, a
   secret typed in or handed out, spend above a limit, a passkey signature, a comparison of codes between two people or the choice to share without one (DEC-0142)): spend above the project's L1 per-task threshold, an L0
   limit or a key's ceiling stays the person's ([spend policy](spend-policy.md#levels); in an organization's project the threshold, the project's L1 and the ceiling of a key the organization holds are the owner's or an administrator's, spend policy rule 3, DEC-0162 LV-7, while a member's own L0 stays that estate operator's). A mandate never covers a source hand-over
   (DEC-0149): it is taken only on the operator's word for that act (for an organization's own agent, instead, only an owner's or an administrator's level decision, DEC-0162 LV-6), as [source](source.md#handing-over) specifies. It
@@ -656,6 +659,120 @@ it reaches acts on them without asking, within what they cover.
   from one adds an approval (DL-17). Binding the mandate to its callee, and to its caller where the callee authenticated
   the caller's agent id, keeps a copied one from serving another callee; without such an id (the shared descriptor token on loopback, a T1 call over the relay, a call the hub forwards without a delegation token) an agent or a
   local process could reuse one at the same callee within its scope and expiry, as it could reuse a decision.
+
+### A place's standing mandate (DEC-0166)
+
+Which acts an agent finishes end to end without a person is a setting per place, not a constant (the operator's
+decision of 2026-11-09, fabric-workspace `knowledge/authority.md`, *Autonomy by place*). The setting is a place's
+**autonomy profile**, carried as a mandate that is not tied to one task. Rules AU-1 to AU-7; the code is
+`mandateCovers` and `profileDigest` in [`src/mandate.ts`](../../src/mandate.ts) and `actionDecision` in
+[`src/actions.ts`](../../src/actions.ts); the vectors are [`fixtures/vectors/profile.json`](../../fixtures/vectors/profile.json).
+
+- **AU-1, the profile is a standing mandate.** A place's hub (the machine's, the OS space's, the VM's or the cloud's)
+  holds the place's profile at a rising revision and states it, for each assignment it starts there, as a `mandate/1`
+  with the member `standing` (`place`, `placeKind` `headless` or `person`, `revision`), `task` naming the assignment,
+  `by: "operator"` (the operator of the estate the place belongs to; in an organization's context the operator of the
+  estate its instance runs in, DEC-0162 LV-7), `instruction` the setter's recorded words (AU-2; AU-4's for a default),
+  the profile's `scope`, and a chain starting at the assigned agent. A standing mandate is never stated `by: "level"`
+  (the schema): the setter's level is checked once, at the set, and recorded there, so the stated mandate carries no
+  attestation, its digest does not change with one, and it stands at every service its token reaches within the stating estate's own
+  context (a personal profile at the operator's own services, an organization's at that organization's), never in
+  another context, as LV-4 and LV-7 say of a level: the hub states the context in `standing.context` (`personal` or
+  `org:<orgId>`, `org:` whenever `setLevel` is present, inside the digest), and a callee takes the standing mandate only
+  for a call in that same context, which it knows as it knows the call's project, and refuses another
+  `decision-invalid` with `profile-context` (routing alone does not keep a T0 or T1 call without a token in its context,
+  DL-27); a callee that declares `standing` and does not say the call's context is at fault, `context-missing`; in an
+  organization's context `standing.setLevel` names that level (AU-2). A project-board
+  request carries no standing mandate: only the place's hub states one, for an assignment it starts (as LV-6 keeps a
+  level mandate off the board). It
+  stands at most 24 hours after `at` (`FAC-SEM-144`); the hub states it again from the profile for a longer
+  assignment. Every rule of a task's mandate applies unchanged: MD-2 and MD-2a narrow it at each hand-over, MD-3 says
+  what it covers, MD-4 what it refuses, MD-6 what never travels; save MD-1's ask at expiry: at a standing mandate's
+  `expiresAt` the agent asks its hub, which restates the current revision, never the operator. AP-3's "a standing rule in a file is not a decision"
+  stays true: the profile is the setter's recorded decision, which only the place's hub states.
+- **AU-2, who sets it.** Setting or changing a profile is the hub's relayed action `autonomy.profile.set`, effect
+  `change-policy`: in the personal context by the operator's decision (AP-2); in an organization's context by a level
+  decision (DEC-0162 LV-3), `owner` or `admin` for any place of the organization, never an `architect`: the operator
+  answered on 2026-11-13 that the owner and the administrators record a place's profile (DEC-0166 question 4, «Владелец и администраторы»,
+  as with DEC-0162's question 4: finances and access are theirs, an architect engineers). The hub declares `admin` for `autonomy.profile.set` in its authority extension's `actionLevels`, so an architect's
+  level decision is refused `level-insufficient: admin`. A profile never covers more than its setter's level
+  does, and the hub records the setter's level and approver (LV-9). The hub states that level as `standing.setLevel`
+  (`owner` or `admin`, inside the digest, so `prof` binds it), and a callee that
+  declares `actionLevels` refuses an action declared above it as LV-7 and LV-10 say: `operator-decision-required`
+  with `level-insufficient: operator` for an act no level decides, `owner` for a billing act below the owner,
+  `admin` for an act declared `admin` below an admin. Every callee that reads standing mandates, whether or not it
+  declares `actionLevels`, refuses a call in no project under a profile set below `admin` (`level-insufficient:
+  admin`, which no profile meets while `setLevel` is `owner` or `admin`, kept for a level a later decision adds);
+  `actionLevels` adds the per-action bound. So a service that declares `standing` and offers an act LV-7 keeps for the
+  owner (a billing act) or for the operator (a rule proposal's
+  approval) declares that act's level in `actionLevels`, as LV-7 asks of a service reading levels: without it an
+  owner's or an admin's profile would cover it. No profile reaches the board's gates (a board hold, a slot move, a listing, any proposal's approval): the
+  service that offers them declares no `standing` (AU-4), so they stay the decision of the member who owns the Project, an owner's or an administrator's level decision, or the operator's (DEC-0162 LV-7).
+  A profile never covers a spend limit or any other policy change, whose effect is `change-policy` (AU-5, MD-3), nor
+  spend above a limit (MD-6), nor a client key's issue, rotation or revocation or a grant at an access gate (in an organization's
+  context the owner's and the administrators' own word, DEC-0162 question 4 for an access grant and question 8's follow-up for a client key), which a service declaring `standing`
+  offers with the effect `change-policy`, in either context. A provider key the place's own estate issues through its
+  own doors (Observatory's) is not a client key: it is that estate's relayed act, which a profile covers as any other
+  (AU-4, question 5), at the ceiling its door gives a new key by default (a rotation keeping its predecessor's ceiling
+  included); a key issued at any other ceiling, or a ceiling changed, is a spend limit (`change-policy`, DEC-0162 LV-7)
+  that no profile covers, decided for a key an organization holds by the owner or an administrator, for a key in a
+  member's own estate by that estate's operator ([spend policy](spend-policy.md#levels) L0), and in the personal
+  context by the operator (the operator, 2026-11-13, choosing «Ключ с потолком хозяйства по умолчанию агент выпускает сам по профилю; любой другой потолок (выше или ниже) решают владелец или администратор»; asked again the same day: a rotation keeping a raised ceiling is covered, «Покрыта», and a key in a member's own estate is that member's to decide, «Сам участник»). No profile covers a send to people outside the estate: it stays a person's decision (the operator's answer of 2026-11-13, «Да, человек», narrowing question 1). Outside the estate is any person or account that is not the estate's own (its operator, its agents): the estate is one person's, so in an organization's context a member, a colleague included, is outside it. So a service declaring `standing` answers a standing mandate on such a send as absent. An owner's or an admin's profile covers, within its scope and effects, the
+  other acts its setter could decide, save at a service that reads levels, in an organization's context, an act declared `owner` or `admin` (a `change-policy` action included): LV-7 takes only a level form for it, and `setLevel` is the hub's statement, not an attestation the callee verifies, so the callee refuses the profile there `level-insufficient` as it refuses an operator form (an attested setter's level is CT-309). An organization's profile always names `setLevel`: one without it is `decision-invalid` `mandate-malformed` (the schema requires it with an `org:` context). The operator's own profile carries no `setLevel` and is the
+  operator's word.
+- **AU-3, how it binds.** A callee reads standing mandates only when its authority extension declares `standing`
+  (`extensions/authority/0.1`, `service-authority-extension.schema.json`); an agent sends one, and the hub forwards one, only to such a callee, and
+  one that does not declare it answers as if the call carried no mandate. Inside the boundary (T0, T1) a standing
+  mandate is taken as MD-3 says. From T2 it is taken only when the call's delegation token carries the claim `prof`,
+  the mandate's `profileDigest` (sha256 of the RFC 8785 canonical JSON of the mandate without its `chain` and its `source`, which grows at each hand-over and which OA-7 strips toward a target that does not list `operator-source/1`), which the
+  hub writes when it mints the assignment's token; a T2 call without `prof` changes nothing (MD-5), and a `prof` that
+  is not the mandate's, at any tier, is `decision-invalid` `profile-unbound`. An onward token keeps the parent's
+  `prof` or none (`FAC-SEM-050`). A revision the hub replaced binds no token minted after it, so a narrower revision is
+  outrun by an older one for no longer than that token's life (at most 600 seconds, DL-13) and the older mandate's day.
+  Inside the boundary no token binds it, so a narrowed revision, or a place whose watcher stops answering (AU-6),
+  reaches an assignment already running only at its stated mandate's `expiresAt`, at most 24 hours later; from T2 a
+  token minted at the new revision refuses the older mandate `profile-unbound`, and the agent asks its hub, which
+  restates the current revision. This decision names no faster stop of an assignment already running: the hub's own
+  stop of its assignments, where it has one, is the operator's lever until one is decided. From T2 the token binds the profile, not the chain: a hand-over's narrowing binds a T2
+  presenter only as far as the onward token's own scope, effect and spend (DL-5), so a hand-over to a T2 agent narrows
+  the token as well as the chain. An origin
+  sends a standing mandate only to a hub whose `protocols` list `standing/1`, which forwards it from any origin with
+  the origin's token (interop C3.5).
+- **AU-4, the defaults.** A place with no profile recorded behaves by its kind. `headless`: the hub states a profile
+  covering every effect class but `change-policy` (deploy, merge, publish, send, delete, charge within the limits)
+  for every capability of the services registered in the place's estate, which the hub states as
+  `standing.estateCapabilities: true` with no `capabilities` in the scope (an estate's services declare more than the
+  scope's 64 names; the flag names a call only from T0 or T1, inside the estate, where a callee requires no token,
+  DL-26, and from T2 a call under it is `outside-mandate: capability`; a hand-over under it narrows by effects, projects and the ceiling only, since MD-2a refuses a step that adds a `capabilities` list or actions where the scope has none, so a step listing capabilities is `mandate-widened`), in the personal context, its
+  `instruction` the operator's recorded words of 2026-11-09 and its `source` the session where they were said
+  (`{project: "fabric-workspace", session: "a616cbcb"}`, kept in the hub's record unless the target lists
+  `operator-source/1`, OA-7); in an organization's context it states nothing
+  until the organization's `owner` or an `admin` records a profile, no architect ending the wait (the operator's answer
+  to DEC-0166 question 4, 2026-11-13). The organization's credential issuer (credentials, DEC-0111) declares no `standing`, so a profile reaches no credential request's decision. In the personal context the operator's own default, carrying no `setLevel`, is the operator's word and covers an act a service declares `operator` like any other act its scope names, save `change-policy` and MD-6's list. A rule proposal's approval is the operator's alone and never a policy's ([proposals](proposals.md), `FAC-SEM-104`), so the service that offers it (the board's gate) declares no `standing`, as the credential issuer does, and no profile reaches it. A profile decides no credential request: that stays as
+  [credentials](credentials.md) has it (the administrator or the auto-approval policy, DEC-0111; question 5); a key
+  the place's own estate issues through its own doors (Observatory's) at the door's default ceiling (a rotation keeping its
+  predecessor's ceiling included) is that estate's relayed act, which the profile covers as any other (any other ceiling
+  is a spend limit, AU-2), and a send to people outside the estate is never among them (AU-2). `person`: nothing beyond what the session's own person decides,
+  until the person, or in an organization's context on that computer its owner or an administrator, records a profile, chosen from
+  the hub's presets (none, drafts only, finish everything) or set in full.
+- **AU-5, the bounds.** No mandate of any kind, a task's included, covers `autonomy.profile.set`, the hub's tool name and the action's id alike, and no profile covers what MD-6 lists (a human step of AP-4, spend above a limit, a source hand-over,
+  approving one's own promotion, grant, checker rule or policy change), nor `autonomy.profile.set`, so no assignment
+  raises its own place's autonomy: a standing mandate naming it, or listing `change-policy`, is `FAC-SEM-173`, and a
+  call of it is `outside-mandate: capability`. The money limits bind as everywhere (L0, the project's L1, each key's
+  ceiling).
+- **AU-6, watching and the record.** The hub states a `headless` profile only while the place's record names its
+  watcher (the agent that monitors the place's assignments) and that watcher answers its probe; otherwise it treats
+  the place as `person`. A call taken under a profile is recorded `via: profile` with the place, the revision, the
+  digest, the setter's level where the profile carries one (`setLevel`), the assignment (`task`), the chain and the
+  caller the service authenticated; the approver who set the profile is read from the hub's record at that revision
+  (LV-9), which the service's row names by place and revision.
+- **AU-7, refusals.** As MD-4: `operator-decision-required` with `outside-mandate: <part>` for an act the profile does
+  not cover; `decision-invalid` with `profile-unbound`, or the mandate's own detail (`mandate-malformed`,
+  `mandate-expired` and the others); from T2 every refusal carries `data.actionDigest` (DL-18). A mandate stated
+  `by: "level"` with `standing` is malformed (`FAC-SEM-144`), yet a service that reads no levels answers it as if
+  absent before it reads its schema, as LV-10 says of every level form. The hub's own states (a
+  stale revision, an unwatched place) never reach a callee as a refusal: the hub states no new mandate in them, and a
+  mandate stated before them stands until its `expiresAt` (AU-3).
 
 ### One approval binds all the operator's agents
 
@@ -692,7 +809,7 @@ after asking them again. Inside the estate (T0, T1) one approval is enough.
   key's ceiling) is not such a question: it is the person's step of OA-5, handed to them with its link and the amount
   (`human-step-required`). A
   stop condition the relaying agent wrote into its request is that agent's, not the operator's: where the approved
-  scope covers the case, the receiver acts and says so in its reply. A host's gate on a floored act still asks once,
+  scope covers the case, the receiver acts and says so in its reply. A host's gate on a floored act still asks once (save where a floor that reads a place's profile covering the act takes it as decided (DEC-0166, CT-285; Fabric CO-547)),
   quoting the relayed words, which are the reason it quotes, not the agreement
   ([governance and roles](governance-and-roles.md#the-operators-word-carried-out-the-first-time) OW-3 and OW-5,
   DEC-0156).
@@ -733,11 +850,12 @@ product that needs protection from a hostile local process adds an approval (DL-
 | Code | Kind | Rule |
 |---|---|---|
 | <a id="fac-sem-049"></a>`FAC-SEM-049` | `delegation-claims` | a delegation token expires after it was issued and at most 600 seconds after; its scope names each capability once; its spend names each window once |
-| <a id="fac-sem-050"></a>`FAC-SEM-050` | `delegation-mint` | a token is minted under an active delegation grant that its `grant` claim names, and names no other (DEC-0045): its audience, its capabilities, its effect ceiling (itself within the grant's effects), its start and expiry, its project, a limited spend under a limited grant whose windows are the grant's and hold no more than its limits, a per-call maximum no larger than the grant's, and the actor and person the grant names; at most four actors, five only in a token for the meter; a token for the meter reads only its grant-check capability under the parent's one grant; an onward token keeps the parent's issuer, principal and project, adds one actor (the parent's audience) to the parent's chain, and carries no wider effect, no later expiry, no more remaining spend and no larger per-call maximum than its parent; it keeps the parent's `task` or none, and the meter's token keeps it (DEC-0041) |
+| <a id="fac-sem-050"></a>`FAC-SEM-050` | `delegation-mint` | a token is minted under an active delegation grant that its `grant` claim names, and names no other (DEC-0045): its audience, its capabilities, its effect ceiling (itself within the grant's effects), its start and expiry, its project, a limited spend under a limited grant whose windows are the grant's and hold no more than its limits, a per-call maximum no larger than the grant's, and the actor and person the grant names; at most four actors, five only in a token for the meter; a token for the meter reads only its grant-check capability under the parent's one grant; an onward token keeps the parent's issuer, principal and project, adds one actor (the parent's audience) to the parent's chain, and carries no wider effect, no later expiry, no more remaining spend and no larger per-call maximum than its parent; it keeps the parent's `task` or none, and the meter's token keeps it (DEC-0041); it keeps the parent's `mem` or none (DEC-0162) and the parent's `prof` or none (DEC-0166) |
 | <a id="fac-sem-051"></a>`FAC-SEM-051` | `approval-claims` | an approval expires after it was issued and at most 24 hours after |
 | <a id="fac-sem-081"></a>`FAC-SEM-081` | `delegation-hub-key` | a verifier that reads the estate record answers as DL-14 says (DEC-0060): `certified` when exactly one machine's `hubKey` (in an organization's `context`, one of that context's pinned `contextHubKeys`, DEC-0128) carries the `kid` and the published `x`, inside the revision's window, neither revoked, and the revision not lower than (nor forked from) the applied one; otherwise `kid-not-certified`, `estate-unreadable`, `estate-outside-window`, `estate-rolled-back`, `estate-forked` or `no-clock`; with a `context` that is neither `personal` nor an organization's context id, `kid-not-certified` |
-| <a id="fac-sem-144"></a>`FAC-SEM-144` | `mandate` | a mandate is its schema's, stands at most 7 days after `at`, each step of its chain never goes back in time from the one before (the first from `at`; an equal time is in order) and stays before `expiresAt`, names each agent once and at most four, and each narrower scope is within the one before, keeping every list and the per-call ceiling it narrows and adding no `capabilities` or `actions` list the one before leaves out, except `actions` under listed `capabilities`; its problems are read as the schema, the span, then each step in turn (its time before its scope), then a repeated agent, and the first one found is the answer (DEC-0125 MD-1, MD-2; DEC-0136 MD-2a) |
+| <a id="fac-sem-144"></a>`FAC-SEM-144` | `mandate` | a mandate is its schema's, stands at most 7 days after `at` (a standing mandate at most 24 hours, DEC-0166), each step of its chain never goes back in time from the one before (the first from `at`; an equal time is in order) and stays before `expiresAt`, names each agent once and at most four, and each narrower scope is within the one before, keeping every list and the per-call ceiling it narrows and adding no `capabilities` or `actions` list the one before leaves out, except `actions` under listed `capabilities`; its problems are read as the schema, the span, then each step in turn (its time before its scope), then a repeated agent, then a standing mandate whose profile has no RFC 8785 form (a lone surrogate), and the first one found is the answer (DEC-0125 MD-1, MD-2; DEC-0136 MD-2a; DEC-0166 AU-3) |
 | <a id="fac-sem-124"></a>`FAC-SEM-124` | `delegation-mint` | under a partner grant the principal is the partner organization and the context the company's own organization; the token is for the issuer and its chain ends in the partner, two deep at mint; a partner actor stands in no chain under another grant ([the partner channel](partner-channel.md), DEC-0090) |
+| <a id="fac-sem-173"></a>`FAC-SEM-173` | `mandate` | a standing mandate (`standing`, a place's autonomy profile) names `autonomy.profile.set` in no `capabilities` or `actions` list and `change-policy` in no `effects`, in its scope or a chain step's (DEC-0166 AU-5) |
 
 Fixtures: the `delegation-*`, `approval-*` and `governance-grant-delegation*` entries of
 [`fixtures/catalogue.json`](../../fixtures/catalogue.json) and `fixtures/semantic/delegation-*`, `approval-*`;

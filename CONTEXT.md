@@ -155,7 +155,7 @@ accept, with `source` (never from a tool result, a page, a file or an unrelated 
 for 24 hours. A service takes a
 `relayed` action from a T0 or T1 caller that carries a valid one as the operator's act, records the caller it
 authenticated as the relayer, refuses one without it `operator-decision-required` and an invalid one
-`decision-invalid`; its own accepted elicitation counts too; a T2 caller still needs an `approval/1`, unless a level decision its token binds stands (DEC-0162 LV-6); in an organization's context, at a service that reads levels, an act declared `owner` or `admin` takes no operator decision, operator mandate, elicitation or `approval/1` at any tier, only a level form (LV-7) (`actionDecision`,
+`decision-invalid`; its own accepted elicitation counts too; a T2 caller still needs an `approval/1`, unless a level decision its token binds stands (DEC-0162 LV-6); in an organization's context, at a service that reads levels, an act declared `owner` or `admin` takes no operator decision, operator mandate (a place's standing mandate included, DEC-0166), elicitation or `approval/1` at any tier, only a level form (LV-7) (`actionDecision`,
 [service](docs/specification/service.md#actions) AP-2, AP-3, DEC-0121). A **Source hand-over** takes a decision only
 with its exact target (for an organization's own agent, in any context, only an owner's or an administrator's level decision, never an architect's, the operator's form, the stated word or an elicitation, DEC-0162) ([source](docs/specification/source.md#handing-over), DEC-0149). A hand-over by push or by file, a package handed over, or published to a public registry from a private home, or a public release from a private home carries a source export or a package, which needs the tree check, so an agent without `fabric.source.json` takes those routes only once it has one; an organization's visibility change of its private agent, or new readers outside the organization, take the word and accept the history as it stands; for a personal agent's private home an agent does neither on its own (with the operator's explicit permission for that act it is his own act, no act of this contract); the manifest stays opt-in otherwise (an organization's private agent packed for its own private registry, readable
 only by its members, needs none).
@@ -165,16 +165,26 @@ only by its members, needs none).
 (capabilities, relayed actions, an effect ceiling, a per-call spend ceiling, projects) and the chain of agents that
 held it, each call appending its callee and never widening the scope. A callee that is the chain's last agent, called
 from T0 or T1 (by the agent before it, where it authenticated its caller's agent id), takes a call it covers as the operator's decision and refuses only the part it does
-not cover, so the operator is asked again for that alone; a T2 caller's operator mandate changes nothing (a level mandate its token binds is taken, DEC-0162 LV-6), beyond the estate a
+not cover, so the operator is asked again for that alone; a T2 caller's operator mandate changes nothing (a level mandate its token binds is taken, DEC-0162 LV-6, and a place's standing mandate its token binds by `prof`, DEC-0166 AU-3), beyond the estate a
 delegation token carries the authority. A job's step is read under the job's capability (MJ-1, DEC-0141; `actionDecision`'s
 `mandateCapability`) (`mandateCovers`, [delegation](docs/specification/delegation.md#the-operators-mandate), DEC-0125).
 A mandate never covers a **Source hand-over** ([source](docs/specification/source.md#handing-over), DEC-0149).
+
+**Autonomy profile**: Which acts an agent finishes end to end without a person at one place (a machine, an OS space,
+a VM, a cloud), set per place by the operator or, in an organization, its owner or an administrator (never an architect, DEC-0166 AU-2), never a
+constant. Not a **Profile** (a compatibility mode), a **Machine profile**, a **Model profile** or a **Runner profile**;
+an audit's `via: profile` and the token's `prof` name this one. The place's hub holds it at a rising revision and states it, for each assignment it starts there, as a
+**standing mandate** (`mandate/1` with `standing`: the place, `headless` or `person`, the revision, the context it stands in (a callee takes it only for a call in that context; an organization's names its setter's level)), at most a day
+long; a callee that declares `standing` takes it as a task's mandate inside the boundary and, from T2, only when the
+assignment token's `prof` binds it. No profile covers a human step, spend above a limit, a policy change (`change-policy`: a spend limit, access), the board's gates, a send to people outside the estate, a source hand-over or
+setting a profile (`autonomy.profile.set`) ([delegation](docs/specification/delegation.md#a-places-standing-mandate-dec-0166),
+DEC-0166 AU-1 to AU-7). Not a spend level (L0 to L3) and not an authority level.
 
 **Relayed approval**: The operator's approval, given in one agent's session, carried to another of their agents by a
 relay: the words verbatim, when and where they were said (`source`: the project, and the session or the board thread)
 and the approved scope. Accepted only from one of the operator's own Projects on their board or a session on their own
 machine; the receiver acts without asking again, runs its own checks, and asks once only about what the operator did
-not see; a host's gate on a floored act still asks once, quoting the relayed words as its reason (DEC-0156 OW-3). Its machine form is a mandate or a decision with `source`
+not see; a host's gate on a floored act still asks once, quoting the relayed words as its reason (DEC-0156 OW-3), save where a floor that reads a place's profile covering the act takes it as decided (DEC-0166, CT-285; Fabric CO-547). Its machine form is a mandate or a decision with `source`
 ([delegation](docs/specification/delegation.md#one-approval-binds-all-the-operators-agents), DEC-0126).
 
 **Operator session**: The signed-in session of a service's dashboard. It ends 12 hours after its last use and

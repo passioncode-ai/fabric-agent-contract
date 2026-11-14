@@ -64,6 +64,7 @@
     "iat": { "type": "integer", "minimum": 0 },
     "exp": { "type": "integer", "minimum": 0, "description": "At most 600 seconds after iat (FAC-SEM-049)." },
     "jti": { "type": "string", "pattern": "^[A-Za-z0-9._~-]{16,128}$" },
+    "prof": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$", "description": "DEC-0166 AU-3: the profileDigest of the standing mandate (a place's autonomy profile) the hub stated for this assignment; a standing mandate is taken from a T2 caller only when its token's prof is the mandate's digest, and from T0 or T1 a present prof must match. Absent, the token binds no profile. An onward token keeps the parent's prof or none, never another." },
     "mem": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$", "description": "DEC-0162 LV-5: the digest of an org-membership/2 attestation the hub verified as its own principal's in that organization's context (OM-2) before it wrote this claim. A level decision or a level mandate is taken only from a call whose token's mem is its attestation's digest; absent, the token binds no level. An onward token keeps the parent's mem or none, never another." }
   },
   "additionalProperties": false,

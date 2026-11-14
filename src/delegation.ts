@@ -90,6 +90,9 @@ export interface DelegationClaims {
   /** DEC-0162 LV-5: the digest of the `org-membership/2` attestation the hub bound to its principal; a level decision
    * or mandate is taken only from a call whose token's `mem` is its attestation's digest. */
   mem?: string;
+  /** DEC-0166 AU-3: the `profileDigest` of the standing mandate (a place's autonomy profile) the hub stated for the
+   * assignment; a standing mandate is taken from a T2 caller only when its token's `prof` is that digest. */
+  prof?: string;
   iat: number;
   exp: number;
   jti: string;
@@ -392,7 +395,7 @@ type Shaped<T> = { claims: T } | { problem: string };
  * token this verifier accepts; both refuse every token with a wrong type.
  */
 function delegationShape(payload: JsonObject): Shaped<DelegationClaims> & { depth?: number } {
-  const { iss, sub, act, aud, scope, effect, grant, spend, project, task, mem, iat, exp, nbf, jti } = payload;
+  const { iss, sub, act, aud, scope, effect, grant, spend, project, task, mem, prof, iat, exp, nbf, jti } = payload;
   const depth = actorChainDepth(act);
   if (depth === undefined) return { problem: "malformed-chain" };
   const typed = isUri(iss) && isUri(sub) && typeof aud === "string" && AGENT_ID.test(aud)
@@ -405,6 +408,8 @@ function delegationShape(payload: JsonObject): Shaped<DelegationClaims> & { dept
     && (task === undefined || (typeof task === "string" && OPAQUE_ID.test(task)))
     // DEC-0162 LV-5: the membership a level decision is bound by, a sha256 digest.
     && (mem === undefined || (typeof mem === "string" && MEMBERSHIP_DIGEST.test(mem)))
+    // DEC-0166 AU-3: the standing mandate a profile is bound by, a sha256 digest of the same form.
+    && (prof === undefined || (typeof prof === "string" && MEMBERSHIP_DIGEST.test(prof)))
     && isTime(iat) && isTime(exp) && (nbf === undefined || isTime(nbf)) && typeof jti === "string" && JTI.test(jti);
   return typed ? { claims: payload as unknown as DelegationClaims, depth } : { problem: "malformed-claims" };
 }

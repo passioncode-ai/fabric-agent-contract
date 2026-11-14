@@ -6,7 +6,7 @@ import { type Finding, type JsonObject, isObject } from "./findings.js";
 import { CLOCK_SKEW_SECONDS, strictTime } from "./rfc3339.js";
 import { type LevelContexts, type LevelRecord, levelContextsWellFormed, levelStanding, ACTION_LEVELS, CALL_CONTEXT } from "./levels.js";
 import { EFFECT_CLASSES } from "./delegation.js";
-import { type OperatorSource, mandateCovers } from "./mandate.js";
+import { type OperatorSource, type ProfileRecord, mandateCovers } from "./mandate.js";
 import { createValidatorSync } from "./validator.js";
 
 // #region actions (docs: docs/specification/service.md#actions)
@@ -74,7 +74,8 @@ export interface ActionDecisionInput {
   project?: unknown;
   /** The context the call acts in, the service's own knowledge as the project is: `org:<orgId>` or `personal`
    * (DEC-0082); required to read a level decision or a level mandate, which stands only in its own organization
-   * (DEC-0162 LV-4), and, at a service given `levels`, an act declared `owner` or `admin` (LV-7). */
+   * (DEC-0162 LV-4), at a service given `levels` an act declared `owner` or `admin` (LV-7), and a place's standing
+   * mandate, which stands only in its own context (DEC-0166 AU-1). */
   context?: unknown;
   /** The organizations this service reads levels in, by `org:<orgId>` (DEC-0162); absent, it reads none, and a level
    * decision or mandate is read as absent and any other form the call carries answers as AP-2 says (LV-10). */
@@ -85,9 +86,13 @@ export interface ActionDecisionInput {
    * architect in the call's project, admin for a call in no project; an action whose effect is `change-policy` is read
    * as `admin` at least whatever this says. */
   actionLevel?: unknown;
+  /** True when this service declares `standing` in its authority extension (DEC-0166 AU-3): it reads standing mandates. Never passed for a send to people outside the estate, which no profile covers (AU-2). */
+  standing?: unknown;
+  /** The `prof` claim of the call's verified delegation token, absent when it presented none (DEC-0166 AU-3). */
+  tokenProf?: unknown;
 }
 
-export type DecisionVia = "relayed-instruction" | "elicitation" | "approval" | "mandate" | "level-command";
+export type DecisionVia = "relayed-instruction" | "elicitation" | "approval" | "mandate" | "profile" | "level-command";
 export type DecisionRecord = {
   by: string;
   via: DecisionVia;
@@ -95,6 +100,7 @@ export type DecisionRecord = {
   task?: string;
   chain?: string[];
   source?: OperatorSource;
+  profile?: ProfileRecord;
 } & Partial<Omit<LevelRecord, "by">>;
 export type ActionDecisionAnswer =
   | { ok: true; recordAs: "caller" }
@@ -136,7 +142,9 @@ function acceptedApproval(approval: unknown): approval is { ok: true; approver: 
  * - `relayed`, in this order: an accepted approval (any tier) is the approver's decision; a T2 caller without one is
  *   refused `approval-required` with the action's digest, whatever operator form its call carries; the service's own
  *   record of an accepted elicitation is the operator's decision at T0 or T1; at a service given `levels`, a level
- *   decision or level mandate is read at every tier (DEC-0162 LV-6), a T2 refusal on it carrying the digest too; without a decision `operator-decision-required`; a decision not
+ *   decision or level mandate is read at every tier (DEC-0162 LV-6), a T2 refusal on it carrying the digest too; at a
+ *   service that declares `standing`, a place's standing mandate is read at every tier, from T2 only under a matching
+ *   `prof` (`profile-unbound` otherwise, DEC-0166 AU-3); without a decision `operator-decision-required`; a decision not
  *   valid against `decision.schema.json`, for another action, naming a `target` the call does not act on, or whose
  *   `at` does not read strictly, lies more than
  *   CLOCK_SKEW_SECONDS after `now` or more than DECISION_LIFETIME_SECONDS before it, `decision-invalid`; otherwise the
@@ -176,15 +184,24 @@ export function actionDecision(input: ActionDecisionInput): ActionDecisionAnswer
   if (acceptedApproval(approval) && !levelOnly) return { ok: true, recordAs: { by: approval.approver, via: "approval", caller } };
   // The service's own accepted elicitation is the operator's word at T0 or T1 and is read before a level form (LV-4).
   if (inside && elicited === true && !levelOnly) return { ok: true, recordAs: { by: "operator", via: "elicitation", caller } };
-  if (isObject(input.levels) && (levelDecision || levelMandate)) {
+  // DEC-0166 AU-3: a standing mandate (a place's autonomy profile) is read at every tier by a service that declares
+  // `standing`; from T2 it stands only when the call's token binds it by `prof`.
+  // As a level mandate: from T2 an operator decision, or a level decision where no levels are read, counts for nothing.
+  // An act only a level decides (LV-7) takes no standing mandate either: its `setLevel` is the hub's statement, not an
+  // attestation, so it falls to the level-insufficient refusal below like any operator form (DEC-0166 AU-2).
+  const levelRead = levelDecision && isObject(input.levels);
+  const standingMandate = !levelOnly && (decision === undefined || (!inside && !levelRead)) && input.standing === true && isObject(input.mandate) && isObject(input.mandate.standing);
+  if ((isObject(input.levels) && (levelDecision || levelMandate)) || standingMandate) {
     const clock = strictTime(now);
     if (Number.isNaN(clock)) return { fault: "now-unreadable" };
     // LV-4: a level stands only in the organization the call acts in, so the service owes that context.
-    if (typeof input.context !== "string" || !CALL_CONTEXT.test(input.context)) return { fault: "context-missing" };
+    if (((isObject(input.levels) && (levelDecision || levelMandate)) || standingMandate) && (typeof input.context !== "string" || !CALL_CONTEXT.test(input.context))) return { fault: "context-missing" };
     // At T2 every refusal on this branch keeps DL-18's route open, so the service owes the action's digest here too.
     if (!inside && (typeof actionDigest !== "string" || !SHA256.test(actionDigest))) return { fault: "digest-missing" };
-    // A level mandate at a service given `levels` is never ignored: mandateCovers reads it at every tier.
-    const answer = levelDecision ? byLevel(input, action, caller, clock) : (byMandate(input, action, caller) as ActionDecisionAnswer);
+    const read = levelRead ? byLevel(input, action, caller, clock) : byMandate(input, action, caller);
+    // Ignored (an unbound standing mandate from T2, a standing level mandate where no levels are read): as if absent.
+    if ("ignored" in read) return inside ? { ok: false, code: OPERATOR_DECISION_REQUIRED } : { ok: false, code: APPROVAL_REQUIRED, data: { actionDigest: actionDigest as string } };
+    const answer = read;
     if (!inside && "ok" in answer && !answer.ok && (answer.code === OPERATOR_DECISION_REQUIRED || answer.code === DECISION_INVALID)) {
       return { ...answer, data: { ...(answer.data ?? {}), actionDigest } } as ActionDecisionAnswer;
     }
@@ -249,6 +266,7 @@ function byMandate(input: ActionDecisionInput, action: DeclaredAction, caller: s
     mandate: input.mandate, tier: input.tier, now: input.now, self: input.self,
     ...(input.callerAgent === undefined ? {} : { callerAgent: input.callerAgent }),
     ...(isObject(input.levels) ? { levels: input.levels as LevelContexts, tokenMem: input.tokenMem } : {}),
+    ...(input.standing === true ? { standing: true, ...(input.tokenProf === undefined ? {} : { tokenProf: input.tokenProf }) } : {}),
     call: { capability, action: action.id, effect, ...(typeof spendUsd === "number" ? { spendUsd } : {}), ...(typeof project === "string" ? { project } : {}), ...(typeof input.context === "string" ? { context: input.context } : {}), ...(minLevelOf(input) === undefined ? {} : { minLevel: minLevelOf(input) as string }) }
   });
   if ("recordAs" in answer) return { ok: true, recordAs: { ...answer.recordAs, caller } };
@@ -311,7 +329,7 @@ export function actionsView(wellKnown: unknown): ActionsView {
 export type AuthorityView =
   | { declared: false }
   | { declared: true; valid: false; errors: string[] }
-  | { declared: true; valid: true; levels?: Array<{ org: string; audience: string }>; actionLevels?: Record<string, (typeof ACTION_LEVELS)[number]> };
+  | { declared: true; valid: true; levels?: Array<{ org: string; audience: string }>; actionLevels?: Record<string, (typeof ACTION_LEVELS)[number]>; standing?: true };
 
 let authorityShape: ValidateFunction | undefined;
 /** The host reader of extensions/authority/0.1 (DEC-0162 LV-5, LV-7), beside `actionsView`, which it never changes. */
@@ -323,8 +341,8 @@ export function authorityView(wellKnown: unknown): AuthorityView {
   if (authorityShape(value) !== true) {
     return { declared: true, valid: false, errors: (authorityShape.errors as ErrorObject[]).map((error) => `${error.instancePath || "/"} ${error.keyword}`) };
   }
-  const { levels, actionLevels } = value as { levels?: Array<{ org: string; audience: string }>; actionLevels?: Record<string, (typeof ACTION_LEVELS)[number]> };
-  return { declared: true, valid: true, ...(levels === undefined ? {} : { levels }), ...(actionLevels === undefined ? {} : { actionLevels }) };
+  const { levels, actionLevels, standing } = value as { levels?: Array<{ org: string; audience: string }>; actionLevels?: Record<string, (typeof ACTION_LEVELS)[number]>; standing?: true };
+  return { declared: true, valid: true, ...(levels === undefined ? {} : { levels }), ...(actionLevels === undefined ? {} : { actionLevels }), ...(standing === undefined ? {} : { standing }) };
 }
 
 const pointerToken = (token: string) => token.replace(/~/g, "~0").replace(/\//g, "~1");

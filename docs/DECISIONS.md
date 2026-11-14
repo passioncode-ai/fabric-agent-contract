@@ -7367,6 +7367,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   backlog CT-124 to CT-127.
 - **Source:** the operator's instruction of 2026-10-24; two rounds of seam and product readings, 2026-10-24.
 - **Annotated (2026-11-14):** AP-2 amended by DEC-0162: at a service that reads levels, a level holder's decision or level mandate bound to the call's delegation token decides a relayed action at its level from any tier (LV-6); in an organization's context an act declared `owner` or `admin` takes no operator decision, operator mandate, elicitation or `approval/1` (LV-7); a service that reads no levels reads the level form as absent (LV-10).
+- **Annotated (2026-11-14):** AP-3 amended by DEC-0166: a place's standing mandate, which the place's hub states for one assignment at a time from the profile its owner, an administrator or the operator recorded, is the one standing form a callee that declares `standing` reads (delegation AU-1, AU-3); every other standing rule in a file stays refused.
 
 ### DEC-0122: a service names its A2A Agent Card in `surfaces.a2a`; `ai-catalog.json` stays out of `fabric-service/0.1`
 
@@ -7651,6 +7652,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   a second seam reading, which found no authenticated agent id on the operator's own routes, an actions-only scope
   covering every external call and the reference's table stale.
 - **Annotated (2026-11-14):** MD-3 and MD-5 amended by DEC-0162: a level mandate (`by: "level"`) is read at every tier by a service that reads levels and stands within the holder's level (LV-6); no mandate covers `change-policy`, a level mandate included.
+- **Annotated (2026-11-14):** MD-1, MD-5 and `FAC-SEM-144` amended by DEC-0166: a mandate may carry `standing` (a place's autonomy profile), which lives at most 24 hours and, from T2, stands only when the call's token binds it by `prof` (AU-1, AU-3); no mandate of any kind covers `autonomy.profile.set` (AU-5).
 
 ### DEC-0126: one approval binds all the operator's agents
 
@@ -11710,6 +11712,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `b66a8fae`); their words of 2026-11-07 that they press nothing in any interface (relayed by one of their projects
   on board thread `c4ec741b`, announcement `e6385b29`), which OW-2 states, keeping one press of its own beside the steps OW-4 hands the person, a host gate's agreement
   (Fabric's "Allow once" under `floor.ask-first`, OW-3), while Fabric's question `add1df7c` stays open; backlog CT-220; DEC-0156 reserved by git CAS on 2026-11-07.
+- **Annotated (2026-11-14):** OW-3's case of a step with no person present amended by DEC-0166: on a headless place a standing mandate is a mandate in force (AU-1), so it clears OW-3's first wait for a relayed act it covers; OW-3's other waits and a host's gate stay as written.
 
 ### DEC-0162: authority levels: `org-membership/2`, the level decision and the level mandate
 
@@ -11780,7 +11783,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   delegation travelling to other products (refused, design question 6: it stays inside that product, and what travels
   is the level decision and a `mandate/1`); `projects` present only for an architect, as the design first said
   (refused: OM-1 and the signing register keep every member present, so it is always present and empty for others); a
-  level mandate with its own `project` (refused: its scope's `projects` already names where it acts); the design's single `level-insufficient: <level>` (refused for two details, `owner` and `admin`, the only levels a call can need beyond an architect's own); the level mandate's record without `project` (refused: it carries the call's project when there is one); a level form outranking the service's own accepted elicitation (refused: the elicitation is the operator's word, read first); a board hold, a slot move and a Project's listing kept the operator's alone (round 3's default of question 9, refused by the operator's answer of 2026-11-13: an administrator decides them too); a project's L1 the owner's alone and an architect changing its own projects' policies (the defaults of questions 4 and 2, refused by the operator's answer of 2026-11-13: finances and access are the owner's and the administrators'); an administrator's command waiting for the level route across products until each adopts (the default of question 10, refused by the operator's answer of 2026-11-13); a level form sent to any hub, relying on an old reader ignoring it (refused: a reader pinned before this decision refuses it, so `levels/1` gates it); client keys kept the operator's by the absence of `mem` alone (refused: CF-3's twin is open to a delegation-token caller, so the authority extension declares its level, `admin` in an organization since the operator's answer of 2026-11-13); client keys kept the instance operator's in an organization (question 8's first answer, replaced the same day: «Владелец и администратор везде»); an authority extension closed at its root (refused in round 4: a later member, as DEC-0166's `standing`, on branch `agent/ct285-autonomy-profile-20261112` until it lands, would make a reader built to this decision drop the whole declaration, so the root is open and each member closed); `levels` and an action's `level` inside the actions extension, as round 2 had them (refused in round 3: its schema is closed and every deployed reader refuses unknown members, so a service adopting levels would lose all its declared actions in hosts not yet updated).
+  level mandate with its own `project` (refused: its scope's `projects` already names where it acts); the design's single `level-insufficient: <level>` (refused for two details, `owner` and `admin`, the only levels a call can need beyond an architect's own); the level mandate's record without `project` (refused: it carries the call's project when there is one); a level form outranking the service's own accepted elicitation (refused: the elicitation is the operator's word, read first); a board hold, a slot move and a Project's listing kept the operator's alone (round 3's default of question 9, refused by the operator's answer of 2026-11-13: an administrator decides them too); a project's L1 the owner's alone and an architect changing its own projects' policies (the defaults of questions 4 and 2, refused by the operator's answer of 2026-11-13: finances and access are the owner's and the administrators'); an administrator's command waiting for the level route across products until each adopts (the default of question 10, refused by the operator's answer of 2026-11-13); a level form sent to any hub, relying on an old reader ignoring it (refused: a reader pinned before this decision refuses it, so `levels/1` gates it); client keys kept the operator's by the absence of `mem` alone (refused: CF-3's twin is open to a delegation-token caller, so the authority extension declares its level, `admin` in an organization since the operator's answer of 2026-11-13); client keys kept the instance operator's in an organization (question 8's first answer, replaced the same day: «Владелец и администратор везде»); an authority extension closed at its root (refused in round 4: a later member, as DEC-0166's `standing` does, would make a reader built to this decision drop the whole declaration, so the root is open and each member closed); `levels` and an action's `level` inside the actions extension, as round 2 had them (refused in round 3: its schema is closed and every deployed reader refuses unknown members, so a service adopting levels would lose all its declared actions in hosts not yet updated).
 - **Compatibility:** additive, gated by `levels/1`. A `/1` reader never receives `/2` and refuses it if it does. A service that reads no
   levels answers a level form as if absent; a reader pinned before this decision, which every deployed reader is today, answers `decision-invalid` (`mandate-malformed` for a mandate), since its schemas fix `by` to `operator`, so an origin sends a level form only to a hub listing `levels/1` or to a callee declaring `levels`. Either way its callers fall back to the operator's decision. Read on 2026-11-12:
   no product issues `/2` or writes `mem` yet. Owed: the organization product issues `/2` to the readers it registers
@@ -11804,6 +11807,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Source:** the design `docs/evidence/plans/2026-11-12-ct250-authority-levels.md`; the operator's decision of
   2026-11-06 as recorded in fabric-workspace `knowledge/authority.md`; board request `4a1bf8d6` (thread `8da128cf`);
   backlog CT-250.
+- **Annotated (2026-11-14):** LV-7 amended by DEC-0166: in an organization's context, at a service that reads levels, an act declared `owner` or `admin` takes no place's standing mandate either, its `setLevel` being the hub's statement rather than an attestation (AU-2; an attested setter's level is CT-309).
 
 ### DEC-0163: a usage report's cost sums hold within each row's rounding
 
@@ -11928,3 +11932,115 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/specification/conformance.md` (a writer and a reader row, the rule code), `docs/specification/contexts.md` (Routing), `CONTEXT.md` (Activity telemetry, Telemetry event), `docs/specification/README.md`, `src/protocol-revisions.ts` and `docs/specification/versioning.md` (`activity-unit/1`), `fixtures/catalogue.json` and the unit fixtures; `docs/specification/membership.md` (OM-7's units row, the enrollment's own events narrowed), `docs/ux/scenarios.md` (SCN-010), `docs/backlog.md` (CT-259, CT-297), `docs/DOCMAP.md`, `docs/specification/devices.md` (`retention.raw_days`), `docs/OPEN_QUESTIONS.md` (OQ-0015 to OQ-0018), `docs/ux/flows.md` (FLW-06), `docs/ux/screens.md` (SCR-09), `schemas/access-log.schema.json` and `schemas/activity-batch-ack.schema.json` (their descriptions).
 - **Source:** the design `docs/evidence/plans/2026-11-12-ct259-activity-unit.md`; board request `e9d30889`; Observatory's
   answers on threads `b83440d6` and `52aa2f93`; backlog CT-259.
+
+### DEC-0166: a place's autonomy profile as a standing mandate
+
+- **Date:** 2026-11-12
+- **Status:** Accepted 2026-11-14, merged with this change: rounds 25 (`a8f648af`) and 26 (`61e20d91`) of the coordinator's blind readings were clean on all three tiers, their risks filed as CT-310. Proposed 2026-11-12, from the design `docs/evidence/plans/2026-11-12-ct285-autonomy-profile.md` (CT-285),
+  with questions 4 and 5 added here and question 1 widened in round 4, all five answered by the operator on 2026-11-13 in this repository's session `7c9eb2c2` (asked in its chat; a relayed «Принять все дефолты», fabric-workspace session `fd5dfcf0`, board message `36b1981b`, is superseded: asked about the conflict, the operator answered «Мои ответы здесь»): questions 1, 2, 3 and 5 as their defaults, question 4 otherwise (only the owner and the administrators record an organization's profile, an architect none: «Владелец и администраторы»); and, asked after round 12 the same day, a provider key issued through the estate's own doors is covered at its door's default ceiling only (a rotation keeping its predecessor's ceiling included), any other ceiling being a spend limit (`change-policy`): for a key an organization holds the owner's or an administrator's, for a key in a member's own estate that estate operator's (L0), in the personal context the operator's (the option chosen reading «Ключ с потолком хозяйства по умолчанию агент выпускает сам по профилю; любой другой потолок (выше или ниже) решают владелец или администратор»; asked once more the same day: a rotation keeping a raised ceiling is covered («Покрыта») and a key in a member's own estate is that member's («Сам участник»), AU-2). A send to people outside the estate stays a person's, narrowing question 1 («Да, человек», the option reading «Отправка людям вне хозяйства остаётся решением человека; профиль её не покрывает»); the question had stated, wrongly, that question 1's default already excluded the send, while it covered it, and the option's own words decide, as the operator's standing rule of the same day keeps such a send with a person; accepted when the
+  coordinator's blind readings are clean on two consecutive rounds (rounds 1 to 11, 13 to 20, 22 and 24 not clean, folded, 12, 21 and 23 clean). It reads DEC-0162's levels and lands after it (DEC-0162 landed 2026-11-14, #305): the
+  branch `agent/ct285-autonomy-profile-20261112` is stacked on DEC-0162's. An answer from the operator after
+  acceptance is a new decision amending this one.
+- **Context:** the operator decided on 2026-11-09 (fabric-workspace session `a616cbcb`, recorded verbatim in
+  fabric-workspace `knowledge/authority.md`, *Autonomy by place*, at `73171ed0`; board request `921edc61`, thread
+  `a3a97cef`) that which acts an agent finishes end to end without a person is a setting per place: a headless place
+  finishes everything by default, watched by agents and each process's own checks; a person's own computer follows the
+  scenario the person or their administrator chooses; the owner, an organization administrator or a project's
+  architect sets it within their level (narrowed by the operator's answer to question 4 on 2026-11-13: the owner and the administrators set a profile, an architect does not); only the body's gates stay everywhere. North Star gap G19. The contract had a
+  per-task mandate (DEC-0125) and the operator's decision per action (AP-2, DEC-0121), and AP-3 refuses a standing rule
+  in a file, so a headless assignment had nobody to ask. This decision is narrower than the operator's "only the body's
+  gates" in three ways (the third, a send to people outside the estate kept with a person, the operator's answer of 2026-11-13): every profile keeps `change-policy` and MD-6's list (a source hand-over, AP-5's approvals) with a
+  person, and in an organization's context a profile set below an act's declared level never covers it (no level's
+  profile covers an act declared `operator`; only an owner's covers a billing act, and at a service that reads levels no profile decides an act declared `owner` or `admin`, LV-7, round 19, CT-309). In the personal context the
+  operator's own default is the operator's word and covers the acts a service declares `operator` like any other, save
+  the board's gates (a hold, a slot move, a listing, any proposal's approval, a rule proposal's among them, `FAC-SEM-104`),
+  which no profile reaches (the board's gates declare no `standing`), and a client key or an access grant, offered as
+  `change-policy` (DEC-0162's answers of 2026-11-13 for an organization's context; in the personal context DEC-0166's own narrowing, so no profile revokes a client key either); a provider key the estate issues through its own doors stays covered at its door's default ceiling (a rotation keeping its predecessor's ceiling included), any other ceiling being `change-policy` (the answer recorded in the Status);
+  question 1 asks about the 2026-11-05 gates.
+- **Decision:**
+  1. **The profile is a standing mandate (AU-1).** `mandate.schema.json` gains the optional member `standing`
+     (`place`, `placeKind` `headless` or `person`, `context` `personal` or `org:<orgId>` (round 18: a callee takes it only for a call in that context, `profile-context` otherwise), `revision`). The place's hub states the profile, for each assignment
+     it starts there, as a `mandate/1` with `standing`, `task` naming the assignment, `by: "operator"` (the operator of
+     the estate the place belongs to, in an organization's context the estate its instance runs in) with the setter's
+     recorded words, the profile's scope and a chain starting at the assigned agent; it stands at most 24 hours after `at`
+     (`FAC-SEM-144` amended) and the hub restates it. MD-2, MD-2a, MD-3, MD-4 and MD-6 apply unchanged.
+  2. **Who sets it (AU-2).** The hub's relayed action `autonomy.profile.set`, effect `change-policy`: by AP-2's decision
+     in the personal context, by a level decision (DEC-0162 LV-3) in an organization's (`owner` or `admin` for any
+     place, never an `architect`, question 4). The hub states the setter's level as
+     `standing.setLevel` (`owner` or `admin`, inside the digest), and a callee that
+     declares `actionLevels` refuses an action declared above it `level-insufficient` (LV-7, LV-10; `levelShortOf`
+     in `src/levels.ts`), so a profile never covers more than its setter's level does. At a service that reads levels, in an organization's context, no profile decides an act declared `owner` or `admin`: DEC-0162 LV-7 takes only a level form for it, and `setLevel` is the hub's statement, not an attestation (round 19; an attested setter's level is CT-309). An organization's profile always names `setLevel`: the schema requires it with an `org:` context. No profile reaches the board's
+     gates, which declare no `standing`, and none covers a policy change, a spend limit, a client key or an access grant
+     (`change-policy`, AU-5), nor a send to people outside the estate.
+  3. **Binding (AU-3).** A callee reads standing mandates only when its authority extension declares `standing`; an agent
+     sends one, and the hub forwards one, only to such a callee, and the protocol name `standing/1` gates the form
+     toward a hub. From T0 or T1 it is taken as MD-3 says; from T2 only when the call's delegation token carries the new
+     claim `prof`, the mandate's `profileDigest` (sha256 of the RFC 8785 canonical JSON of the mandate without its
+     `chain` and `source`), which the hub writes for the assignment's token; a `prof` that is not the mandate's is `decision-invalid`
+     `profile-unbound` at any tier; an onward token keeps the parent's `prof` or none (`FAC-SEM-050`).
+  4. **Defaults, bounds, watching, refusals (AU-4 to AU-7).** A headless place with no recorded profile covers every
+     effect class but `change-policy`, and no send to people outside the estate (any person or account not the estate's own, an organization's member included, round 17), for every capability of the services registered in the place's estate, which
+     the hub states as `standing.estateCapabilities` (inside the boundary only); a person's computer nothing beyond its person's own decisions until a profile is
+     recorded from the hub's presets; in an organization's context a headless place with no recorded profile states
+     nothing until its owner or an administrator records one (question 4). A profile decides no credential request
+     (question 5). No mandate of any kind covers `autonomy.profile.set`, and no profile covers MD-6's list or `autonomy.profile.set` (`FAC-SEM-173` on the
+     document, `outside-mandate: capability` on the call). The hub states a headless profile only while the place's
+     watcher answers. A call taken under it is recorded `via: profile` with the place, revision, digest, assignment,
+     chain and caller; refusals are MD-4's, `profile-unbound` and the mandate's own details, from T2 with the digest.
+  5. **Reference and vectors.** `mandateCovers` and `profileDigest` in `src/mandate.ts`, `actionDecision` in
+     `src/actions.ts` (`standing`, `tokenProf`), the `prof` claim in `src/delegation.ts` and `src/delegation-rules.ts`;
+     `fixtures/vectors/profile.json`, written by `tools/vectors/profile.ts`; `test/profile.test.ts`.
+- **Why:** reusing the mandate keeps one way to say "these acts need no further word", with its narrowing, refusals and
+  bounds already read by every service; a profile bound to the assignment's token reaches a T2 callee without a person
+  in the loop, as DEC-0162 binds a level; a day's life and a token's ten minutes bound how long a narrower revision is
+  outrun.
+- **Alternatives considered:** a new document type for profiles (refused: a second form of "no further word" every
+  service would read separately); `kind` changed for a standing mandate (refused: `standing` under `mandate/1` makes a
+  reader at an older pin refuse it as `mandate-malformed`, and the protocol name gates it); `prof` carrying the
+  revision beside the digest (refused: the digest covers `standing.revision`); the design's `profile-stale` and
+  `profile-unwatched` as callee refusals (refused: a callee cannot know the hub's latest revision or its watcher, so
+  they are the hub's states, in which it states no mandate); a standing mandate living 7 days as a task's (refused: the
+  hub restates it daily, so a narrowed profile reaches every assignment within a day); a T2 standing mandate without a
+  token (refused, as DEC-0162 refused a level without one: a copied mandate would serve any caller); a standing
+  mandate stated by its setter's `by` (`by: "level"` for an administrator's profile), as round 0 had it (refused in
+  round 1: a level mandate stands only at its attestation's audience and the hub writes `mem` only for its own
+  principal (DEC-0162 LV-5, LV-6), so an organization's headless place, with no person, could state none, and a fresh
+  attestation would change the digest; the setter's level is checked once, at `autonomy.profile.set`, and recorded
+  there); the profile's digest in the settings canonical form (refused in round 1: it has no form for a fractional
+  `perCallMaxUsd`, so RFC 8785, as `actionDigest`); `standing` as a member of the actions extension, as the first cut had it (refused: that extension is closed and every deployed reader refuses unknown members, so `standing` sits in DEC-0162's authority extension, `extensions/authority/0.1`).
+- **Compatibility:** additive, gated by `standing` in the callee's authority extension and `standing/1` toward a hub. A
+  reader pinned before this decision refuses a standing mandate as `mandate-malformed` (its schema closes `mandate/1`),
+  so no agent sends it there; a port pinned past this decision adds `standing` ['1'] to the adapter kits' hand-kept
+  `PROTOCOL_REVISIONS` whether or not it reads standing (their feed-protocols test checks it). Read on 2026-11-12: no hub states a profile and no service declares `standing` yet. Owed:
+  Fabric (CO-547, whose hub mirror `hubAuthority.ts` and its parity cases gain a standing case at its repin: the dispatcher and headless assignments read the profile, its hub writes `prof`, its floor treats a
+  covered effect as decided; its board-mandate reader `boardMandate.ts` reads `standing` in a board block as no mandate (AU-1) and its hub forward path `hubCall.ts`/`hubTools.ts` forwards a standing mandate only to a callee declaring `standing` (AU-3), both owed at any repin past this decision, CO-523's levels repin included; ADR-0168's machine permission choice stays the runner's prompt mode), the organization
+  product (who may change a profile, shown per place), the PM agent, the host's admin agent (records a place's kind and
+  watcher), every service with `relayed` actions an assignment calls (the adapter's kits FAA-249, whose `mandateCovers` ports run `profile.json` before a kit service may declare `standing`, and whose board reader (FAA-135's `readMandate`) answers a standing mandate in a board block as no mandate). The operator's
+  answers of 2026-11-13: (1) the headless default covers a production deploy of a surface with outside
+  users, a publish outward and a force-push within the repository's own rules, and, narrowed later the same day, never a send to people outside the estate (asked again, the operator answered «Да, человек»: a person decides it, as the rule that agents close questions themselves also keeps) (each a
+  gate of the operator's rule of 2026-11-05), and a project that wants a gate narrows its own profile (the send and
+  force-push clause added in round 4, never posted, the board's MCP being unreachable; answered as the default on 2026-11-13); (2) an organization administrator sets a profile
+  on a member's computer only inside the organization's context there; (3) watched means a monitoring agent declared in
+  the place's record and answering its probe; (4, added) a headless place of an organization with no recorded profile
+  takes the default only once its owner or an administrator records it, an architect recording none (the operator's answer of 2026-11-13, not the default, which let an architect record one for its own projects), and states nothing until then (written into
+  AU-4); (5, added in round 1) a profile decides no credential request, which stays the administrator's or the
+  auto-approval policy's (credentials, DEC-0111), although the operator's record lists key issuance through
+  Observatory's doors among a headless place's acts: a key a place's own estate issues through its own doors is that
+  estate's relayed act, which the profile covers as any other, at its door's default ceiling only (a rotation keeping its predecessor's ceiling included) (narrowed by the later answer in the Status). The questions were posted on thread `8da128cf` as
+  message `bd18b1fa` on 2026-11-12 once the board answered again; the operator answered them on 2026-11-13 in this repository's chat (questions 1, 2, 3 and 5 as the defaults, question 4 as above).
+- **Consequences / affects:** `schemas/mandate.schema.json` (`standing`), `schemas/delegation-token.schema.json`
+  (`prof`), `schemas/service-authority-extension.schema.json` (`standing`); `src/mandate.ts`, `src/actions.ts`,
+  `src/delegation.ts`, `src/delegation-rules.ts`, `src/protocol-revisions.ts` (`standing/1`);
+  `fixtures/vectors/profile.json`, `tools/vectors/profile.ts`, `tools/vectors/run.ts`, `test/profile.test.ts`,
+  `test/meter-grant.test.ts`; `docs/specification/delegation.md` (the section, MD-5, the `prof` row, `FAC-SEM-050`,
+  `FAC-SEM-144`, `FAC-SEM-173`), `service.md` (the `actionDecision` table), `interop.md` (C3.5), `versioning.md`,
+  `conformance.md` (rows, module, register), `CONTEXT.md` (Autonomy profile, Mandate), `service.md` (AP-2's inputs,
+  AP-3's routes), `schemas/interop-agent-call.schema.json` and `interop-request-meta.schema.json` (the hub forwards a
+  standing mandate), `src/semantic-kinds.ts` and `fixtures/semantic/standing-action-call*.json` (a prefix no port's `action-call-*` glob reaches, so a port pinned past this decision that reads no standing keeps its sweep and its count), `docs/ux/foundation.md` (ST-043),
+  `docs/ux/scenarios.md` (SCN-061, SCN-062), `docs/ux/flows.md` (FLW-31), `docs/ux/screens.md` (SCR-30); the restatements in `membership.md` (LV-7's operator mandate, the interim text), `spend-policy.md` (L0, L2), `credentials.md`, `project-comms.md` (a standing mandate in a board block), `governance-and-roles.md` (OW-3's headless case) and `docs/guides/connecting-compatible-agents.md`. Not decided here: the monitoring agent's
+  own contract (the North Star's monitoring role, G27); rollback at the process level (each product's checks and
+  receipts); a coding harness's own refusal (the safety classifier G19 measured), which a profile does not change: this
+  decision closes G19's part that services' relayed actions ask, and the harness's part stays G19's.
+- **Source:** the design `docs/evidence/plans/2026-11-12-ct285-autonomy-profile.md`; the operator's decision of
+  2026-11-09 as recorded in fabric-workspace `knowledge/authority.md`; board requests `921edc61` (thread `a3a97cef`)
+  and `4a1bf8d6` (thread `8da128cf`); backlog CT-285.
