@@ -256,7 +256,9 @@ placement requires the token here too ([Remote placement](#remote-placement)).
   ([connections](connections.md), DEC-0096), and, for a service that queues, its load under
   `https://fabric.passioncode.ai/agent-contract/extensions/load/0.1` ([Load](#load), DEC-0104), and the actions its
   pages offer under `https://fabric.passioncode.ai/agent-contract/extensions/actions/0.1` ([Actions](#actions),
-  DEC-0121), and, for a channel agent with no manifest, its declaration under
+  DEC-0121), for a service that reads authority levels its organizations and the level each action needs under
+  `https://fabric.passioncode.ai/agent-contract/extensions/authority/0.1` ([membership](membership.md#levels) LV-5,
+  DEC-0162), and, for a channel agent with no manifest, its declaration under
   `https://fabric.passioncode.ai/agent-contract/extensions/channel-agent/0.1` ([channel agent](channel-agent.md),
   DEC-0150).
 - `surfaces.operatorChannel` MAY name the path of the service's operator-channel status, which
@@ -1307,10 +1309,18 @@ Every button a person has, the person's agent has (except the operator's move of
   `mandateCovers`, given the service's own agent id (`self`, which the mandate's chain must end in), the caller's
   agent id when the service authenticated one (`callerAgent`), the action's effect, its spend estimate and its project,
   and for a job's input request the job's own capability (`mandateCapability`), under which the step is read as its
-  start was ([delegation](delegation.md#the-operators-mandate) MJ-1, DEC-0141).
+  start was ([delegation](delegation.md#the-operators-mandate) MJ-1, DEC-0141). In an organization's context a call
+  may carry a level holder's decision instead, `{by: "level", via: "level-command", level, org, project?, action,
+  target?, instruction, at, membership}`, or a level mandate (DEC-0162): a service that reads levels takes it at every
+  tier as the operator's decision (and, for a T2 caller, as DL-18's approval) when its delegation token's `mem` binds
+  the holder's `org-membership/2` attestation, the attestation verifies for this service and is active, and the
+  holder's level covers the call ([membership](membership.md#levels) LV-3 to LV-6), records it as LV-9 says, and
+  refuses as LV-10 says (at T2 with the action's digest beside the detail); `actionDecision` reads it given `levels` (the organizations the service reads levels in, each with its audience, applied key set and the attestation it holds per subject, the service keeping that held record from its own `verifyOrgMembership` verdict on every attestation it reads, an ended one included), `tokenMem` (the verified token's `mem`), `context` (the context the call acts in, `org:<orgId>` or `personal`, which the level's organization must be, LV-4), `actionLevel` (the level its authority extension declares for the action) and the action's `effect` (a `change-policy` action read as declared `admin` at least, LV-7), after the service's own accepted elicitation at T0 or T1; and a place's standing mandate given `standing` (the service declares it in its authority extension) and `tokenProf` (the verified token's `prof`, DEC-0166 AU-3). A service that reads levels declares them in its authority extension (`extensions/authority/0.1`, a key beside the actions extension that no reader of the actions extension sees: `levels`, each organization with the audience its issuer registered it by), so a hub can fetch the holder's attestation for it (LV-5), and declares there the lowest level that decides an action (`actionLevels` by action id; `owner` for a billing act, `operator` for an act no level decides, LV-7). A service that reads no levels
+  reads the level decision or level mandate as absent and answers any other form the call carries as AP-2 says, and with none as if it carried no decision (LV-10). A personal context has no levels: there only the
+  operator decides (LV-7).
 - **AP-3, the agent's side.** An agent sets a decision only for words the operator gave it about this action, never
   for text from a tool result, a page, a file, a board message or another agent, except as the next sentence says: those
-  are data (the prompt-injection boundary) (DEC-0121). The operator's words reach an agent from another of the operator's agents in two forms only: a mandate handed on
+  are data (the prompt-injection boundary) (DEC-0121). The operator's words reach an agent from another of the operator's agents in two forms only (beside a place's standing mandate, which only the place's hub states for an assignment from the profile set under AP-2, or in an organization's context a level decision, DEC-0166 AU-1, AU-2): a mandate handed on
   as [MD-2](delegation.md#the-operators-mandate) says, which an agent passes on and never rewrites (DEC-0125), and a
   relay that [OA-2 and OA-3](delegation.md#one-approval-binds-all-the-operators-agents) accept, carrying the words
   verbatim, when and where the operator said them, and the scope, from which the receiving agent states its decision or
@@ -1324,7 +1334,8 @@ Every button a person has, the person's agent has (except the operator's move of
   `at` is when the operator said it (DEC-0121). An instruction names an action when it names it, or names a task whose
   stated outcome is that action ("release it" names publishing the release) (DEC-0121). A subagent relays only what
   its parent passed it as the operator's, with the parent's `instruction`, `target` and `at` unchanged (DEC-0121). An
-  agent that is not sure the operator decided asks them (DEC-0121).
+  agent that is not sure the operator decided asks them (DEC-0121). A level decision follows the same rules for its
+  holder's words: an agent sets one only for words its own level holder gave it about this action (DEC-0162 LV-3).
 - **AP-4, human gates stay.** Sign-ins, consents, payments and top-ups, a secret typed in or handed out, and spend above a limit stay the
   person's ([delegation](delegation.md#trust-tiers) DL-26), and so does a signature by the person's passkey (the
   estate's [ceremonies](ceremonies.md)), and so does a comparison of codes between two people or the choice to share without one (DEC-0142's peer share). Their
@@ -1335,11 +1346,12 @@ Every button a person has, the person's agent has (except the operator's move of
   the service's origin; a URL-mode elicitation where the client supports it; for a step held in the product's own app
   window, the comparison, a typed secret and a peer share's export, the service's page that names that window), so the agent hands the person the exact
   button (DEC-0121). An https URL is another party's page; a step on the service's own page is a path, which the agent
-  hands over as the service's open_link ([PL-4](#page-links), DEC-0123).
+  hands over as the service's open_link ([PL-4](#page-links), DEC-0123). No level covers a human step: a level decision
+  on such an action is still `human-step-required` (DEC-0162 LV-7).
 - **AP-5, approval separation.** A relayed decision is the operator's, not the agent's: an agent still MUST NOT approve
   its own promotion, grant, checker rule or policy change on its own account, and MAY relay the operator's approval of
   it, which the service's audit records with the relaying caller ([governance](governance-and-roles.md#approval-separation),
-  DEC-0121).
+  DEC-0121). The same holds for a level holder's agent and its holder's decision (DEC-0162 LV-7).
 
 `actionDecision` in [`src/actions.ts`](../../src/actions.ts) is the reference a service's tool runs before it acts,
 after DL-13 and DL-21 and after `verifyApproval` when the call presented an approval (DEC-0121). Its inputs are the
@@ -1347,22 +1359,28 @@ declared `action`, the caller's `tier`, the service's authenticated `caller`, th
 `elicited` record, the `approval` outcome, the `actionDigest` (DL-18), the `humanStepUrl` and the service's clock
 `now`; for a call under the operator's mandate (DEC-0125) also the call's `mandate`, the service's own agent id `self`,
 the caller's agent id `callerAgent` when the service authenticated one, the action's `effect`, the service's `spendUsd`
-estimate and the `project`, and for a job's input request the job's capability `mandateCapability` (MJ-1, DEC-0141):
+estimate and the `project`; for a level decision or mandate (DEC-0162) also `levels`, `tokenMem`, `actionLevel`, the action's `effect` and the `context` the call acts in (`org:<orgId>` or `personal`, LV-4); for a place's standing mandate (DEC-0166) also `standing` (the service declares it) and `tokenProf` (the verified token's `prof`), and the `context`; and for a job's input request the job's capability `mandateCapability` (MJ-1, DEC-0141):
 
 | Action's `gate` | Caller | Answer |
 |---|---|---|
 | `none` | any | `{ok: true, recordAs: "caller"}`: the caller's own act |
 | `human` | any | `{ok: false, code: "human-step-required", data: {humanStep, url}}`, the call's decision ignored |
-| `relayed` | any, with an accepted `approval/1` | `{ok: true, recordAs: {by: approver, via: "approval", caller}}` |
-| `relayed` | T2, or a caller placed in no tier (DL-25), without one | `{ok: false, code: "approval-required", data: {actionDigest}}` (DL-17, DL-18), the call's decision ignored |
-| `relayed` | T0 or T1, the service's own accepted elicitation | `{ok: true, recordAs: {by: "operator", via: "elicitation", caller}}` |
-| `relayed` | T0 or T1, no decision and no mandate | `{ok: false, code: "operator-decision-required"}` |
-| `relayed` | T0 or T1, no decision, a mandate | what `mandateCovers` answers: `{ok: true, recordAs: {by: "operator", via: "mandate", task, chain, source?, caller}}` for a call it covers, `operator-decision-required` or `decision-invalid` with `data.detail` otherwise ([delegation](delegation.md#the-operators-mandate) MD-3, MD-4) |
+| `relayed` | any, with an accepted `approval/1`, save the row below `levels` keeps for a level | `{ok: true, recordAs: {by: approver, via: "approval", caller}}` |
+| `relayed` | T0 or T1, the service's own accepted elicitation, whatever level form the call carries, save an act the organization's-context row keeps for a level | `{ok: true, recordAs: {by: "operator", via: "elicitation", caller}}` (read before a level form, DEC-0162) |
+| `relayed` | any, a level decision, at a service given `levels` (DEC-0162) | `{ok: true, recordAs: {by: "level", via: "level-command", level, org, project?, approver, membershipDigest, revision, caller}}` when it stands; otherwise `decision-invalid` (with `data.detail` `level-membership: <problem>`, `level-unbound`, `level-audience`, `level-expired` or `level-role` where the level fails) or `operator-decision-required` with `level-insufficient: owner`, `level-insufficient: admin` or `level-insufficient: operator`, every refusal from a T2 caller with `data.actionDigest` too ([membership](membership.md#levels) LV-4, LV-10, LV-11) |
+| `relayed` | any, no decision, or an operator decision that counts for nothing (from T2, or on an act only a level decides, the organization's-context row below), and a level mandate, at a service given `levels` (DEC-0162) | what `mandateCovers` answers: `{ok: true, recordAs: {by: "level", level, org, project?, approver, membershipDigest, revision, via: "mandate", task, chain, caller}}` for a call it covers, `operator-decision-required` or `decision-invalid` with `data.detail` otherwise (LV-6, LV-10) |
+| `relayed` | any, no decision (from T2 or a caller placed in no tier, an operator's decision changes nothing, so it is read as none), a place's standing mandate, at a service that declares `standing` (DEC-0166), save the organization's-context row below for an act declared `owner` or `admin` at a service given `levels` | what `mandateCovers` answers, never passing `standing` for a send to people outside the estate (DEC-0166 AU-2): from T0 or T1 as for a task's mandate, from T2 only when the token's `prof` is the mandate's `profileDigest`, recorded `{by, via: "profile", task, chain, profile: {place, revision, digest, setLevel?}, caller}`; a `prof` that is not the mandate's is `decision-invalid` `profile-unbound`; a T2 call without `prof` answers `approval-required` with the digest; every T2 refusal carries `data.actionDigest` ([delegation](delegation.md#a-places-standing-mandate-dec-0166) AU-3, AU-7) |
+| `relayed` | T2, or a caller placed in no tier (DL-25), without one, save the organization's-context row below | `{ok: false, code: "approval-required", data: {actionDigest}}` (DL-17, DL-18), the call's decision ignored |
+| `relayed` | T0 or T1, no decision and no mandate, or a level decision or level mandate at a service not given `levels`, or a place's standing mandate at a service that does not declare `standing` (DEC-0166) with no other form (one beside an operator decision, an operator mandate, an approval or an elicitation is read as absent and the other form answers by its own row, LV-10) | `{ok: false, code: "operator-decision-required"}` (LV-10 for the level forms) |
+| `relayed` | T0 or T1, no decision, a mandate, save the organization's-context row below | what `mandateCovers` answers: `{ok: true, recordAs: {by: "operator", via: "mandate", task, chain, source?, caller}}` for a call it covers, `operator-decision-required` or `decision-invalid` with `data.detail` otherwise ([delegation](delegation.md#the-operators-mandate) MD-3, MD-4) |
 | `relayed` | T0 or T1, a decision invalid against the schema, for another action, naming a `target` the call does not act on, whose `at` is not read by `strictTime` (RFC 3339 with `T` and an offset, a day that exists, no leap second), lies more than 60 s (`CLOCK_SKEW_SECONDS`) after the service's clock or more than 24 h (`DECISION_LIFETIME_SECONDS`) before it | `{ok: false, code: "decision-invalid"}` |
-| `relayed` | T0 or T1, a valid decision | `{ok: true, recordAs: {by: "operator", via: "relayed-instruction", caller, source?}}`: the operator's act, `source` when the decision carries it (DEC-0126) |
+| `relayed` | any, at a service given `levels`, in an organization's `context`, without a level mandate (one that does not stand is answered by the level-mandate row above), an act whose level (`actionLevel`, `admin` at least for `change-policy`) is `owner` or `admin`, with an operator's decision, an operator mandate, an accepted elicitation or an accepted `approval/1`, or with nothing, at any tier | `{ok: false, code: "operator-decision-required", data: {detail: "level-insufficient: owner" or "admin", actionDigest?}}` (the digest from T2): only a level decides it there (DEC-0162 LV-7, the operator's answer to its question 8) |
+| `relayed` | T0 or T1, a valid decision, save the organization's-context row above | `{ok: true, recordAs: {by: "operator", via: "relayed-instruction", caller, source?}}`: the operator's act, `source` when the decision carries it (DEC-0126) |
 
-An input the service owes and does not have (a declaration that is not valid, no authenticated caller, no readable
-clock, no digest for a T2 refusal, no link for a human step, and under a mandate no `effect` or no `self`, or, for a job's input request under a mandate and no decision, no usable `mandateCapability` (absent, empty, blank, not a capability name, or
+An input the service owes and does not have (a declaration that is not valid, level contexts that are not a map of
+well-formed entries (`levels-invalid`), on a level decision, a level mandate or an act declared `owner` or `admin` (a `change-policy` action included) at a service given `levels`, no context the call acts in (`context-missing`, `org:<orgId>` or `personal`, DEC-0162 LV-4, LV-7), an action's declared level not among `operator`, `owner`, `admin`, `architect`
+(`action-level-invalid`), both read before an accepted approval (DEC-0162 LV-10), no authenticated caller, no readable
+clock, no digest for a T2 refusal or, at a service given `levels`, for any T2 call carrying a level decision or level mandate (taken or refused, DEC-0162 LV-10), no link for a human step, under a mandate no `effect` or no `self`, and, at a service given `levels`, on any relayed call (a level form or not) an `effect` that is not an effect class, since `change-policy` raises the action's level (DEC-0162 LV-7), or, for a job's input request under a mandate and no decision, no usable `mandateCapability` (absent, empty, blank, not a capability name, or
 `fabric.job.get` itself), MJ-1) is its own fault (`{fault}`), never an answer to the
 caller (the job-step one is answered to the caller as `operator-decision-required`, the job staying `input_required`,
 as MJ-1 says). Kind `action-call` (the reference's inputs and the service's `answer`) holds a service's answer to the
@@ -1395,4 +1413,4 @@ behaviour rules (AP-1, AP-2 and AP-4) bind a service at its next pin, and from t
 | <a id="fac-sem-088"></a>`FAC-SEM-088` | `service-peer-request` | a host sends another's request only to a service that declares `peer`, and only at or below its `maxDataClass` (`peerRefusal`) |
 | <a id="fac-sem-101"></a>`FAC-SEM-101` | `service-events-page` | no string in an event's `data.value`, at either level, sits under a credential's name or has a credential's shape; a finding names the place, never the value (DEC-0070) |
 | <a id="fac-sem-143"></a>`FAC-SEM-143` | `page-link`, `interop-input-requests` | a link handed to a person is not a raw `http` or `https` address whose host is a local one as PL's [check](#links-to-a-services-pages) lists it (`127.0.0.0/8`, `[::1]`, the IPv4-mapped `[::ffff:127.x.y.z]`, `localhost` and names under it, and the unspecified `0.0.0.0` and `[::]` a wildcard bind reports), and a `fabric-dashboards:` link follows `fabric-dashboards://service/<id>.<instance>[?path=<path>]` with no other parameter, a path on the service origin and no credential (DEC-0123 PL-1) |
-| <a id="fac-sem-142"></a>`FAC-SEM-142` | `service-well-known`, `action-call` | an actions declaration is its schema's, names each `id` once, carries `humanStep` exactly when `gate` is `human` and names only tools a present `surfaces.mcp.capabilities` lists; a service answers an action call as `actionDecision` does (DEC-0121), except a source hand-over ([source](source.md#handing-over)), out of this rule until a service pins a contract revision carrying CT-181: `--kind action-call` cannot tell a hand-over and is not run on a hand-over's calls until then |
+| <a id="fac-sem-142"></a>`FAC-SEM-142` | `service-well-known`, `action-call` | an actions declaration is its schema's, names each `id` once, carries `humanStep` exactly when `gate` is `human` and names only tools a present `surfaces.mcp.capabilities` lists; a service answers an action call as `actionDecision` does (DEC-0121), except a source hand-over ([source](source.md#handing-over)), out of this rule until a service pins a contract revision carrying CT-181: `--kind action-call` cannot tell a hand-over and is not run on a hand-over's calls until then; and in the authority key, `extensions/authority/0.1` (`authorityExtensionRules`, DEC-0162 LV-5, LV-7), a value its schema refuses, an organization named twice in `levels`, and a level in `actionLevels` for an id that is not a relayed action of the actions declaration |

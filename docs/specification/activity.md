@@ -1,6 +1,6 @@
 # Activity telemetry `fabric-activity/0.1`
 
-DEC-0030, amended by DEC-0052, DEC-0068, DEC-0082 and DEC-0090; its transport by DEC-0056 · rule codes `FAC-SEM-037`…`FAC-SEM-040`, `FAC-SEM-067`, `FAC-SEM-100`, `FAC-SEM-123` (and `FAC-SEM-045`,
+DEC-0030, amended by DEC-0052, DEC-0068, DEC-0082, DEC-0090 and DEC-0164; its transport by DEC-0056 · rule codes `FAC-SEM-037`…`FAC-SEM-040`, `FAC-SEM-067`, `FAC-SEM-100`, `FAC-SEM-123`, `FAC-SEM-171` (and `FAC-SEM-045`,
 [devices](devices.md#attribution)) · schemas [`telemetry-event`](../../schemas/telemetry-event.schema.json),
 [`activity-batch`](../../schemas/activity-batch.schema.json),
 [`activity-batch-ack`](../../schemas/activity-batch-ack.schema.json),
@@ -10,7 +10,9 @@ DEC-0030, amended by DEC-0052, DEC-0068, DEC-0082 and DEC-0090; its transport by
 [`activity-common`](../../schemas/activity-common.schema.json)
 
 Activity telemetry records **when an agent session worked, waited or idled, and what each model
-call used** — for debugging, for memory of how work went, and for spend reconciliation. A collector
+call used**: for debugging, for memory of how work went, and for spend reconciliation. Since DEC-0164 it also records the
+**units of work an agent did** (`unit`), which a device's collector sends or a kit records through Project
+Observatory's capability. A collector
 on a device reads what coding-agent runtimes already emit (OpenTelemetry exports, transcripts,
 rollout files, the desktop switchboard, process sampling). It turns that into telemetry events of
 this shape and sends them in batches to an organization server (the **receiver**). Only a receiver
@@ -20,9 +22,9 @@ DEC-0157).
 
 The contract names every field it defines and closes every object it defines. A collector MUST NOT
 add content or person attributes: no prompt, response, command line, window title or diff, and no
-name, address, team or rank. A person appears only as an opaque `user.id`, in raw events only;
-summaries have no person dimension. `FAC-SEM-037` is a **best-effort key filter** — a deny-list of
-names checked in every spelling, plus a refusal of home paths in values — and not a proof that no
+name, address, team or rank. A person appears only as an opaque `user.id`, in raw events only, or as a unit acceptance's pairwise subject
+(`acceptedBy`, kept in the organization's own journal, DEC-0164 AE-3); a unit's tracker key, or an evidence link in its raw event, may also name a tracker account (a GitHub owner that is a user), which the contract cannot resolve to a member ([kinds](#kinds)); summaries have no person dimension. `FAC-SEM-037` is a **best-effort key filter** (a deny-list of
+names checked in every spelling, plus a refusal of home paths in values), not a proof that no
 content passes. The schema's bounds on extension data (two levels, short tokens without whitespace)
 are the stronger guard.
 
@@ -53,7 +55,8 @@ Telemetry events and check-ins that carry a `user.id`, or come from a device bou
 - MUST record every read of a person's raw data in that person's [access log](#access-log) and MUST
   let the person read it.
 - MUST **delete** raw events when `retention.raw_days` expires. Only summaries already built from
-  them remain, and a summary has no person dimension. Raw events are not kept under any other scope
+  them remain, and a summary has no person dimension; for `unit` events the journal's person-free monthly counts
+  remain as well, and each unit's `(unit, month)` key as a keyed digest, with only the person-free cell it was counted in, until that month's count closes ([kinds](#kinds), DEC-0164). Raw events are not kept under any other scope
   past their retention (operator decision 2026-10-08, DEC-0030).
 
 The operator confirmed this shape on 2026-10-08 (DEC-0030): per-person presence estimates, labelled
@@ -92,6 +95,11 @@ values are **estimates**, not observations of a person:
 Each one comes from the `method` the event names, with the `idleThresholdSeconds` it used. The
 [kinds](#kinds) below use the same wording.
 
+A `unit` whose `acceptedBy` is of kind `person` is personal data whatever channel wrote it (a kit with no device included,
+DEC-0164 AE-3). Its retention is the organization's `retention.raw_days`, the server layer of the device policy where
+no device carries one, 30 days where the server layer sets none ([devices](devices.md#policy)); past it the journal keeps only its person-free monthly counts and, until its month's count closes, a
+unit's `(unit, month)` key as a keyed digest with only its person-free cell ([kinds](#kinds)), beside the summaries.
+
 ## Telemetry event
 
 Schema: [`telemetry-event.schema.json`](../../schemas/telemetry-event.schema.json). Fields are
@@ -103,11 +111,11 @@ policy key names).
 | Field | Meaning |
 |---|---|
 | `eventId` | The idempotency key ([below](#event-id)). |
-| `kind` | `session.interval`, `usage.line`, `session.annotation`, `buffer.overflow`, `policy.violation`, `grant.usage`, `result`, an extension `x-<namespace>.<kind>`, or a kind a later revision adds. |
-| `source` | Where the collector read it. Open vocabulary; known: `claude_code.otel`, `claude_code.transcript`, `codex.otel`, `codex.rollout`, `switchboard`, `process`. |
-| `sourceKey` | Present exactly when `eventId` is derived. Either the source's own id of the record (a request id, a line uuid) or, for a key derived from a file, `hmac-sha256:` under the device's telemetry key ([below](#event-id)). Never a path: the schema refuses a slash and an encoded home-directory fragment, the dashed form at the start or after any character that is not an ASCII letter or digit (DEC-0105). |
+| `kind` | `session.interval`, `usage.line`, `session.annotation`, `buffer.overflow`, `policy.violation`, `grant.usage`, `result`, `unit` (DEC-0164), an extension `x-<namespace>.<kind>`, or a kind a later revision adds. |
+| `source` | Where the collector read it. Open vocabulary; known: `claude_code.otel`, `claude_code.transcript`, `codex.otel`, `codex.rollout`, `switchboard`, `process`, `unit` (DEC-0164). |
+| `sourceKey` | Present exactly when `eventId` is derived. Either the source's own id of the record (a request id, a line uuid) or, for a key derived from a file, `hmac-sha256:` under the device's telemetry key ([below](#event-id)). Never a path: the schema refuses a slash and an encoded home-directory fragment, the dashed form at the start or after any character that is not an ASCII letter or digit (DEC-0105). A `unit` event's is `sha256:` of its own fields (`unitSourceKey`, DEC-0164), with `source` `unit`. |
 | `collector.id`, `collector.epoch`, `seq` | The stream position ([below](#streams)). |
-| `occurred` | The device's wall clock when it happened. |
+| `occurred` | The device's wall clock when it happened; for a `unit`, when its writer recorded the transition, which a collector holding it ([below](#kinds), `unit`) never restamps (DEC-0164). |
 | `bootId`, `monotonicNs` | A monotonic reading ([below](#clocks)). |
 | `received` | Set by the receiver when it stores the event. A device never sends it (the batch schema refuses it). |
 | `user.id` | Optional and opaque: an organization membership id or a local profile id. The receiver sets it from the binding recorded for the event's epoch ([attribution](devices.md#attribution)). The pattern refuses `@` and spaces, so an e-mail address does not fit; a name-like id does, so issuing opaque values is the issuer's duty. |
@@ -213,6 +221,47 @@ it never attaches a user to a result and serves results only as project or agent
 (`activity.results`, `FAC-SEM-067`). `data`: `signal` (the declared signal's name),
 `outcome` (`met`, `not_met`) and an optional `count`. A summary gains no person dimension from it.
 
+**`unit`**: one transition of one unit of work an agent did (DEC-0164, North Star gap G1-a): the event the North
+Star metric counts as accepted units per task class. It requires `run.root` and `project.id`, and carries **no `user`
+and no `session`** (schema): a unit is the agent's, never a person's (AE-1). Its `source` is `unit` and its `sourceKey`
+is `sha256:` and the hex SHA-256 of the settings-form canonical JSON `{"agent", "key", "run", "system", "transition"}`
+(the agent, `unit.key`, `run.root`, `unit.system`, the transition), so its derived `eventId` is the same from every
+writer and a repeated write of one transition is one event; a unit reopened and accepted again is a new attempt with
+its own `run.root`, so its second acceptance is a new event (AE-2, [`unitSourceKey`](../../src/activity-rules.ts),
+`FAC-SEM-171`). `data`:
+
+| Field | Rule |
+|---|---|
+| `agent` | the agent that did the work, as its descriptor names it (`id.instance`), never a person |
+| `unit` | `{system, key}`: the tracker or surface that owns the unit (an open vocabulary: `github`, `jira`, `store`, `mail`, `board`) and its stable key there, as `task.ref`; the key in one form every writer derives (AE-2): `github` `<owner>:<repo>#<number>` with owner and repo lower-cased (GitHub names are case-insensitive; a managed user's owner holds `_`) and the number as GitHub returns it, with no leading zero, `jira` the issue key as Jira returns it, with no system prefix (`PROJ-412`, never `jira:PROJ-412`), `mail` the first 40 lower-case hexadecimal digits of the SHA-256 of the Message-ID's UTF-8 bytes without its angle brackets, and any other system its own id; a form that does not fit `activity-common` `taskRef.key` (`^[A-Za-z0-9][A-Za-z0-9._:#-]{0,63}$`, a github key over 64 characters included) is replaced by the first 40 lower-case hexadecimal digits of the SHA-256 of its UTF-8 bytes; the digest is written only for a form that does not fit, which a reader cannot check; `FAC-SEM-171` refuses a github, jira or mail key outside its form |
+| `transition` | `started`, `ended`, `handed-over` or `accepted` |
+| `taskClass` | the assessment's class id, or `unclassified` until its class map names one |
+| `taskClassMap` | `{id, revision}` of the class map `taskClass` was read from, the revision a positive integer its owner raises; present exactly when `taskClass` is not `unclassified`, so a reader of a past month maps a renamed, split or merged class through the owner's table between revisions or counts it under its old name, visibly (AE-2a) |
+| `outcome` | on `ended` only: `completed`, `failed` or `abandoned` |
+| `evidence` | 0 to 8 references, each an http(s) URI without user information, a URN or a `sha256:` digest (a receipt, a test run, a review mark); never content, which the writer keeps out of a query string too; a link whose path holds a home-path segment (`/Users/<name>`, `/home/<name>`, as in a repository named `home`) is refused as any value is (`FAC-SEM-037`) |
+| `acceptedBy` | on `accepted` only: `{kind, ref}`, `kind` being `rule` (`ref` the acceptance rule's id), `agent` (`ref` an agent's id) or `person` (`ref` the subject the organization issued the person for the audience [OQ-0017](../OPEN_QUESTIONS.md) names (default: its own journal's audience; a receiver resolves any audience's subject it issued for that member), [membership](membership.md) OM-1; never a name or an address) |
+| `acceptedAt` | on `accepted` only: when it was accepted, not after the event's `occurred` (60 s of skew, measured to the millisecond, `FAC-SEM-171`); its UTC month is the month an acceptance counts in, `occurred` being when the writer recorded the transition (holding never restamps it); a reader counts a unit accepted once per month of its `acceptedAt`, the one with the latest `acceptedAt` if several while the counted one's raw event is kept (past it the counted cell stands, [below](#kinds)) |
+| `cost` | the agent's spend on the unit since its previous transition (a reader sums a unit's transitions; `0` on a transition that spent nothing), an attribution of spend its run's usage lines already carry, never added to them or to any usage total, as the envelope states a cost: `{usd, basis}`, or `{usd: null}` when unknown (the cost's own form: an unknown carries no basis); never 0 for unknown is the writer's duty, with no tokens on the event to check it against |
+
+The receiver never attaches a user to a `unit` event, never puts a unit into a summary cell by person, and serves
+units only as agent, project or task-class cells, and the organization's total, of an organization whose signed member list (`org-authority/1`, DEC-0129) names at least 3 members, the list in force on the period's last day (a unit carries no `user.id` or `session.id`, so the [minimum cell](#minimum-cell)'s population is the member list's here; the organization's server, which drafts the list and may read it, OX-6, publishes the count to the journal; a unit cell is not an `activity-summary/1` cell; no cut by person is served; a cell counting units by the members' own role waits for [OQ-0018](../OPEN_QUESTIONS.md), default none, while each role's dashboard (the North Star's G26) is a view built from the cells served here, the owner's being the organization's total; a cell of a project, an agent or a task class drawn from one member's work is folded into the organization's total until [OQ-0015](../OPEN_QUESTIONS.md) is answered; the journal knows a cell draws from two members or more only by the project's registered members or the agent's registration, never by joining a usage line's `user` to `run.root`, and one with neither serves only the total). The 3-member gate holds for counts; a single `unit` event is read raw only by a member of the organization, under `activity.raw`: one with a rule or an agent acceptance as any raw event, one with a person acceptance only under the accepting member's confirmed purpose, without its `cost`, and logged, as below (the device's stream is attributed to a
+user and a usage line with a `user` carries the same `run.root`, so the restraint is the receiver's); an `acceptedBy` of kind `person` stays in the organization's own journal
+for the trust guardrail (members see what agents did on their work) and never reaches a summary, a usage report or
+another organization (AE-3); a read of it is recorded in that person's [access log](#access-log), under `activity.raw` until the operator answers which scope ([OQ-0016](../OPEN_QUESTIONS.md)). A `unit` event from a device bound to a person, and any `unit` whose `acceptedBy` is of kind `person` whatever channel wrote it, is personal data as [above](#personal-data-and-purpose) says: collected for the purpose the organization's notice states for its agents' activity, deleted at the organization's `retention.raw_days`, a past month being read from the journal's monthly counts, which carry no `acceptedBy` and no person. A person acceptance by a member whose acknowledged notice does not name that purpose is not kept: the receiver answers that event `purpose`, as for any event not collected for that person (DEC-0100); that answer to a person acceptance is consumed and holds nothing at the collector, whose device's person may be another member, while a `unit` refused for the device's own person holds as any kind ([batch and acknowledgement](#batch-and-acknowledgement)). A raw read of a `unit` a device bound to a person sent is recorded in that person's [access log](#access-log), as for a person acceptance: the receiver keeps the sending device beside the event, never in it. Another member's read of a person acceptance is under `activity.raw` and so needs a purpose the accepting member confirmed (`FAC-SEM-067`), and serves the acceptance without its `cost`; the PM agent's digest is logged as a read by each person it is delivered to (`reader.user`), so the same rule holds for it. A device collector sends `unit` events in its activity batches like any kind; a kit with
+no collector records them through Project Observatory's capability `activity.unit.record` (OBS-378), bound as Observatory's `ops.digest.record` is, by Observatory's own answers on the board (thread `b83440d6`, message `b8d911c0`, and thread `52aa2f93`, message `55fa0fd7`: an access binding with that scope and effect `propose` over stdio, a hub delegation token with that scope on the memory-http door), the event's `project.id` the transport's project and `data.agent` a service the registry attributes to it; there the capability is the collector and writes the envelope's `collector`, `seq`, `bootId` and `monotonicNs` itself; the event's shape is this one either way (AE-4). A reader at an
+older pin reads `unit` as an unknown kind and validates its `data` as extension data: one that fits (no `evidence`,
+no string over 64 characters) it stores and counts nothing, and any other it refuses as that event's `schema`
+rejection, which is consumed (AE-5, as `grant.usage` [above](#kinds)); Observatory's server answered that a pin
+before this decision refuses the kind by purpose. So a collector holds a unit's transitions outside its stream and
+writes each as an event (taking its `seq`) only once the receiver's latest `protocols` list names `activity-unit/1`,
+as `grant.usage` holds its day behind its gate, so a held unit never stalls the stream. It holds a transition no longer than the smaller of the server layer's `retention.raw_days` and the device's effective value ([devices](devices.md#policy); 30 days where the server layer sets none), dropping older ones, and on 410 `organization-closed` drops its held transitions with every event it holds; it also drops the held transitions recorded under an epoch's binding when the device is enrolled again with a binding to a different person, or from a person to none, so a held unit never joins another person's epoch ([devices](devices.md#attribution)). Such a drop is not reported: the loss is accepted, so an organization whose server lists `activity-unit/1` late undercounts its first months, which the journal states as a gap of its own; past raw retention the journal keeps a unit's `(unit, month)` key only as a keyed digest (`hmac-sha256` under a key the journal generates and never exports, over the settings-form canonical JSON `{key, month, system}`, the month `YYYY-MM` in UTC of the acceptance), dropped once that month's count closes (a month's count closes at its end plus the server layer's `retention.raw_days` in force at that end, 30 days where it sets none, which bounds a held transition, plus the 60 s skew; the journal reads that value from its own enrolled node's server layer; an acceptance recorded later is a late gap, below), since a tracker key can name a person (a GitHub owner that is a user account): a unit still counts once a month, the journal alone can compare its digests, and none outlives its month's count. Beside each digest the journal keeps only the person-free cell it counted the unit in (agent, project, task class), never an `acceptedAt`: while the counted acceptance's raw event is kept, an acceptance with a later `acceptedAt` in that month moves the unit to its cell and an earlier one changes nothing; once that raw event is deleted the counted cell stands, and a later acceptance in that month changes nothing; its HMAC key lives at least as long as the open month it serves. An acceptance whose month's count is already closed is never added to that month: the journal counts it as a late gap of that month, person-free (an upper bound: a unit already counted in that month, or accepted twice late, is counted again as a gap), as it states the gap of a server that lists `activity-unit/1` late; the sending device kept beside a raw event goes with it. A unit whose key names a tracker account is read raw only as above (a member under `activity.raw`, deleted at `retention.raw_days`); no access log is owed to an account the contract cannot resolve to a member. A unit event names no organization: a device collector sends it to the enrollment of the organization that owns its
+`project.id` as the device's folder attribution names it, never for a personal or unattributed project, and on a
+device that cannot tell sends none ([contexts](contexts.md#routing); the route function is CT-297); a project with no
+membership keeps it in Observatory's local journal only, its writer recording `acceptedBy` of kind `rule` or `agent` only (no organization issues a person's subject there; an acceptance by a person there is not recorded), for the local journal's own retention. Two different acceptances of one unit under one `run.root`
+(a rule's, then a person's) have one `eventId`, so the receiver keeps the first; a person who accepts after a rule
+does so under a new `run.root`, with no `started` required under it, and a reader keys a repeated acceptance by the
+unit and its `run.root`.
+
 **`session.annotation`** — what a surface reported about a session, read by the device's collector (DEC-0068): Fabric's
 `session.ended` or `terminal.opened`, Switchboard's `journal_launch`. It requires `session` and `runtime`. `data`: `by`
 (the surface), `label` (what it reported) and `at`. It carries no start, end, tokens or cost, and no `user` (schema):
@@ -250,7 +299,7 @@ from the device certificate ([attribution](devices.md#attribution)), and a conte
 another organization's id. A collector sends a session's events only to the organization server of the one enrollment
 whose organization is the session's `org:<orgId>`, compared as written, and never an event of a `personal` session
 (`routeTarget`); it sends `grant.usage` by the grant's own context (`routeGrantUsage`), which the event carries
-(DEC-0086); and the device sends each
+(DEC-0086); it sends a `unit` to the organization that owns its project (DEC-0164 AE-4, CT-297); and the device sends each
 enrollment's check-ins to that enrollment's server ([devices → check-in](devices.md#check-in)). The shared vectors are
 [`fixtures/vectors/context-route.json`](../../fixtures/vectors/context-route.json) ([contexts → routing](contexts.md#routing)).
 
@@ -311,7 +360,7 @@ A collector MUST drop content and person attributes at the source. Claude Code's
 
 ### Event id
 
-`eventId` makes delivery idempotent: a receiver keeps one event per (`device.id`, `eventId`).
+`eventId` makes delivery idempotent: a receiver keeps one event per (`device.id`, `eventId`), save a `unit` event, which it keeps once per `eventId` within the organization whatever device or channel wrote it (a copy from a second device is counted in `duplicates` and consumes its `seq` in the sending stream), since its id derives from the unit and not from a device (DEC-0164 AE-2).
 
 - An event read from a source that can be read again — an export that is retried, a transcript that
   is re-scanned after a restart — MUST carry a **derived** id, so a second read yields the same id.
@@ -378,14 +427,15 @@ A mismatch is refused (`FAC-SEM-045`, [devices](devices.md#attribution)). The re
 
 - `accepted`, `duplicates`, `rejected[]` — one of the three for every event, so
   `accepted + duplicates + rejected.length` equals the batch's event count (`FAC-SEM-039`). A
-  duplicate (`device.id`, `eventId`) is accepted again and counted, never an error. A retried batch
+  duplicate (`device.id`, `eventId`), or a `unit` event's `eventId` the organization already holds, is accepted
+  again and counted, never an error. A retried batch
   is harmless.
 - `rejected[]` — `eventId` and `reason`: `schema`, `content-field`, `person-field`, `stream`,
   `attribution`, `purpose`, `before-purpose`. **A rejected event is consumed with a rejection.** The collector does not resend
   it, and the stream does not stall on it. `purpose` (DEC-0100) says the receiver does not collect that event for that
   person now, under the notice they acknowledged ([notice](#notice)): a receiver answers it only when the purpose is not
   collected for that person when it answers (DEC-0102); the collector then sends no event of that kind for
-  that person until the device's policy names a later `noticeVersion`, or a check-in response names an `acknowledgedNoticeVersion` other than the one it held at the rejection (the person acknowledged the notice in force, [devices](devices.md#check-in)), never on a timer (DEC-0100, DEC-0102). Only a present value that differs from the one held at the rejection resumes, absence at the rejection included (a first acknowledgement is a change, as on a managed machine whose collection started at the deadline); a value that becomes absent is no signal. `before-purpose` (DEC-0102) says the event occurred before its purpose was collected for that person (their acknowledgement of the notice naming it, or the mdm deadline where the organization collects under it; a device bound to no person collects only from that deadline, its `collectionStart`), and that purpose is collected now: a receiver may keep such an event, and when it does not (a buffered event from before that start) it answers `before-purpose`, never `purpose`; the event is consumed and the collector holds nothing. A receiver sends it to every collector, whatever its pin: a rejection is consumed whatever its reason (DEC-0100), so a collector consumes each `rejected[]` entry by its `eventId` and never refuses an acknowledgement for a reason it does not know. A held collector whose server starts stating `acknowledgedNoticeVersion` late resumes once and may be refused again: one extra round, consumed, never a stall. A device bound to no person never receives the member and resumes on a later `noticeVersion`. An event from before `collectionStart` is not this case: it is never uploaded (`FAC-SEM-068`, [devices](devices.md#collection-start)), and one that is uploaded is the device's fault. An `attribution` rejection stays what it was:
+  that person (save a `unit` whose `acceptedBy` is of kind `person`, whose `purpose` answer may concern the member who accepted it rather than the device's person: it is consumed and holds nothing, DEC-0164; any other `unit` holds as any kind) until the device's policy names a later `noticeVersion`, or a check-in response names an `acknowledgedNoticeVersion` other than the one it held at the rejection (the person acknowledged the notice in force, [devices](devices.md#check-in)), never on a timer (DEC-0100, DEC-0102). Only a present value that differs from the one held at the rejection resumes, absence at the rejection included (a first acknowledgement is a change, as on a managed machine whose collection started at the deadline); a value that becomes absent is no signal. `before-purpose` (DEC-0102) says the event occurred before its purpose was collected for that person (their acknowledgement of the notice naming it, or the mdm deadline where the organization collects under it; a device bound to no person collects only from that deadline, its `collectionStart`), and that purpose is collected now: a receiver may keep such an event, and when it does not (a buffered event from before that start) it answers `before-purpose`, never `purpose`; the event is consumed and the collector holds nothing. A receiver sends it to every collector, whatever its pin: a rejection is consumed whatever its reason (DEC-0100), so a collector consumes each `rejected[]` entry by its `eventId` and never refuses an acknowledgement for a reason it does not know. A held collector whose server starts stating `acknowledgedNoticeVersion` late resumes once and may be refused again: one extra round, consumed, never a stall. A device bound to no person never receives the member and resumes on a later `noticeVersion`. An event from before `collectionStart` is not this case: it is never uploaded (`FAC-SEM-068`, [devices](devices.md#collection-start)), and one that is uploaded is the device's fault. An `attribution` rejection stays what it was:
   the event names another organization, device or user than its certificate.
 - `acks[]` — for every stream the batch carried, `seq` and optional `held`, both computed over
   **everything the receiver holds for the stream across batches** — the same state it judges tamper
@@ -473,8 +523,9 @@ dimension.
 
 Schema: [`access-log.schema.json`](../../schemas/access-log.schema.json), format `access-log/1`.
 
-Every read of a subject's data is recorded. That covers raw activity keyed by their `user.id`, and
-anything keyed by **a device bound to them**: health, check-ins and policy, which reveal for example
+Every read of a subject's data is recorded. That covers raw activity keyed by their `user.id`, a
+`unit` they accepted (found by the pairwise subject the organization issued them as `acceptedBy`, OM-1, which the
+receiver resolves to their `user.id`, DEC-0164), a `unit` a device bound to them sent (the receiver keeps the sending device beside the event, never in it, and records a raw read of it in that device's person's log, DEC-0164), and anything keyed by **a device bound to them**: health, check-ins and policy, which reveal for example
 that the device is `logging_disabled`. Each entry records:
 
 - `at`: when the read happened;
@@ -508,15 +559,17 @@ every contributing member's log (DEC-0090).
 <a id="otlp-intake"></a>
 
 **OTLP intake** (operator decision 2026-10-08). Beside HTTPS batches, a receiver MAY accept the same
-events as OTLP logs, mapped by the table below. The second intake changes no rule:
+events as OTLP logs, mapped by the table below. The second intake changes no rule (a `unit`'s `acceptedBy` maps to
+`fabric.data.acceptedBy.kind` and `.ref` on the intake; the table's "not exported" row is for export to any backend
+other than the organization's own receiver, so a person acceptance is never lost on the intake):
 
 - events arrive over the same enrolled mutual-TLS channel, signed as every device request is
   ([devices, transport](devices.md#transport), DEC-0056), attributed by certificate and epoch
   ([devices](devices.md#attribution));
 - each log record is mapped back to a telemetry event and checked against the same schema and the
-  same `FAC-SEM-037`…`039` rules;
-- deduplication is the same: on (`device.id`, `eventId`), and on `dedupeKey` for usage lines, across
-  both intakes;
+  same rules (`FAC-SEM-037`…`039`, and `FAC-SEM-171` for a `unit`, a failure of which is rejected as `schema`);
+- deduplication is the same: on (`device.id`, `eventId`), a `unit` event once per `eventId` within the organization
+  ([Event id](#event-id)), and on `dedupeKey` for usage lines, across both intakes;
 - an OTLP record that does not map to a valid event is refused, as in a batch.
 
 OTLP's own acknowledgement carries no stream position, so a collector that sends over OTLP still
@@ -544,7 +597,8 @@ not an identity: the runtimes' own exports use other names (Claude Code: `input_
 | `data.model` | attribute `gen_ai.request.model` |
 | `data.tokens.input`, `.output` | attributes `gen_ai.usage.input_tokens`, `gen_ai.usage.output_tokens` |
 | `data.tokens.cacheRead`, `.cacheWrite` | attributes `gen_ai.usage.cache_read.input_tokens`, `gen_ai.usage.cache_creation.input_tokens` |
-| `data.cost.usd`, `data.cost.basis`, `data.dedupeKey` | attributes `fabric.cost.usd`, `fabric.cost.basis`, `fabric.dedupe_key` |
+| `data.cost.usd`, `data.cost.basis`, `data.dedupeKey` | attributes `fabric.cost.usd`, `fabric.cost.basis`, `fabric.dedupe_key`; for a `unit`, `fabric.unit.cost.usd` and `fabric.unit.cost.basis`, so a backend summing `fabric.cost.usd` never adds a unit's attributed cost to its usage lines |
+| a `unit`'s `data.acceptedBy` of kind `person` | not exported: it stays in the organization's own journal (DEC-0164 AE-3) |
 | other `data.*` | attributes `fabric.data.*` |
 
 ## Semantic rules
@@ -558,6 +612,7 @@ not an identity: the runtimes' own exports use other names (Claude Code: `input_
 | <a id="fac-sem-067"></a>`FAC-SEM-067` | `access-log-disclosure` | a read served to a person other than the subject shows the subject's time or presence only under a `purposeId` the subject confirmed, and the subject's usage and cost only per UTC day or billing period |
 | <a id="fac-sem-100"></a>`FAC-SEM-100` | `session-join` | every `session.interval` and `usage.line` of one `session.id` carries one `collector.id`, and the intervals of one session do not overlap; annotations are not counted (DEC-0068) |
 | <a id="fac-sem-123"></a>`FAC-SEM-123` | `access-log-disclosure` | an entry whose reader's `role` is `partner` is a service's read (no `user`) of `activity.usage`, per UTC day or billing period, keyed by no device ([the partner channel](partner-channel.md), DEC-0090) |
+| <a id="fac-sem-171"></a>`FAC-SEM-171` | `activity-batch`, `telemetry-event` | a `unit` event's `source` is `unit` and its `sourceKey` is `unitSourceKey`'s for its agent, unit, transition and `run.root`; its `acceptedAt` is not after its `occurred` (60 s of skew); a `github` key is lower-case `<owner>:<repo>#<number>`, a `jira` key the bare issue key, each else a lower-case 40-hex digest, and a `mail` key a lower-case 40-hex digest ([the unit row](#kinds)) (DEC-0164 AE-1, AE-2) |
 
 `activity-ack` checks `{known?, batch, ack}`: `known` is the receiver's stream state before the
 batch (`[{collector, held, accounted, pending?}]`; `pending`, a check-in's dropped ranges, never moves
@@ -567,7 +622,7 @@ access log and the subject's `consent` messages.
 - Fixtures: `fixtures/positive/telemetry-event-*`, `activity-*` and `access-log.json`;
   `fixtures/negative/telemetry-event-*`, `activity-*` and `access-log-*`.
 - Rule inputs: `fixtures/semantic/telemetry-event-*`, `activity-*` and `access-log-*`.
-- Tests: `test/activity-rules.test.ts`.
+- Tests: `test/activity-rules.test.ts`, `test/activity-unit.test.ts`; vectors `fixtures/vectors/activity-unit.json`.
 
 ## Decided after the first draft
 

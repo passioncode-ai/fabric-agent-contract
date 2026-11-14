@@ -185,6 +185,10 @@ function delegationMintRules(value: JsonObject): Finding[] {
   // task window on it, so the meter's token keeps it.
   if (token.task !== undefined && token.task !== parent.task) push("/token/task", parent.task === undefined ? "an onward token of a parent without a task names none" : `an onward token keeps the parent's task ${show(parent.task)} or none, never ${show(token.task)}`);
   if (forMeter && parent.task !== undefined && token.task === undefined) push("/token/task", "a token for the meter keeps the parent's task, which the meter keys the task window on");
+  // DEC-0162 LV-5: the membership a level decision is bound by follows the chain or is dropped, never replaced.
+  if (token.mem !== undefined && token.mem !== parent.mem) push("/token/mem", parent.mem === undefined ? "an onward token of a parent without mem names none" : `an onward token keeps the parent's mem ${show(parent.mem)} or none, never ${show(token.mem)}`);
+  // DEC-0166 AU-3: the profile an assignment runs under follows the chain or is dropped, never replaced.
+  if (token.prof !== undefined && token.prof !== parent.prof) push("/token/prof", parent.prof === undefined ? "an onward token of a parent without prof names none" : `an onward token keeps the parent's prof ${show(parent.prof)} or none, never ${show(token.prof)}`);
   const parentExp = time(parent.exp);
   if (exp !== undefined && parentExp !== undefined && exp > parentExp) push("/token/exp", "an onward token expires no later than its parent");
   const above = remaining(parent.spend);

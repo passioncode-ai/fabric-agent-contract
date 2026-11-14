@@ -18,6 +18,7 @@ import { deviceRules } from "./device-rules.js";
 import { deviceTransportRules } from "./device-transport-rules.js";
 import { delegationRules } from "./delegation-rules.js";
 import { deepLinkRules } from "./fabric-links.js";
+import { levelRules } from "./levels.js";
 import { mandateRules } from "./mandate.js";
 import { pageLinkRules } from "./page-link-rules.js";
 import { sessionHandoffRules } from "./session-handoff.js";
@@ -46,7 +47,7 @@ import { orgMembershipRules } from "./org-membership.js";
 import { shareRegistrationRules } from "./share-registration.js";
 import { nodeSummaryRules } from "./node-summary.js";
 import { agentNetworkRules, loadExtensionRules } from "./agent-network.js";
-import { actionRules, actionsExtensionRules } from "./actions.js";
+import { actionRules, actionsExtensionRules, authorityExtensionRules } from "./actions.js";
 import { channelAgentRules } from "./channel-agent.js";
 import { machineCallRules } from "./machine-call.js";
 import { machineReportRules } from "./machine-report.js";
@@ -85,6 +86,8 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   if (pageLink) return pageLink;
   const mandate = mandateRules(kind, value);
   if (mandate) return mandate;
+  // DEC-0162: a level decision's attestation, checked without a key (FAC-SEM-170); a level mandate's is mandateRules'.
+  if (kind === "decision") return levelRules(kind, value) ?? [];
   if (kind === "service-lock-outcome") return lockOutcomeRules(value);
   if (kind === "windows-token-file") return windowsTokenRules(value);
   const profiles = profileRules(kind, value);
@@ -208,7 +211,7 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   if (kind === "service-well-known") findings.push(...dashboardDeclarationRules(value));
   if (kind === "service-well-known") findings.push(...connectionsRules(value));
   if (kind === "service-well-known") findings.push(...loadExtensionRules(value));
-  if (kind === "service-well-known") findings.push(...actionsExtensionRules(value));
+  if (kind === "service-well-known") findings.push(...actionsExtensionRules(value), ...authorityExtensionRules(value));
   if (kind === "service-well-known") findings.push(...channelAgentRules(value, "well-known"));
   if (kind === "service-well-known") findings.push(...embeddedProtocolsFindings(value.protocols, "/protocols"));
   if (kind === "service-descriptor") findings.push(...serviceCommands(value), ...remoteShape(value), ...commandLines(kind, value), ...descriptorPeerRules(value), ...digestFoldersRules(value));

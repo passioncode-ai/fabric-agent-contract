@@ -134,6 +134,19 @@ agent surface with the same effect, checks and audit record, declared in its wel
 nonconformant (except the operator's move of a board slot, a host control until a host ships its twin, DEC-0140 PR-2). `FAC-SEM-142` checks the declared actions (a button whose tool the MCP surface does not serve); a host
 reports a dashboard that declares none (CT-126) ([service](docs/specification/service.md#actions) AP-1, DEC-0121).
 
+**Operator's word, carried out the first time**: The rule that an agent carries out its operator's words about a task
+itself, on that word: every step inside the task is the agent's to take within the grants, mandates and limits that
+apply; it hands the operator no command it could run itself (a typed secret where the node answers `no-client` leaves the person the vault's own command, OW-4); a risk the words did not name gets one short message with the corrected way (a
+question where the step must wait) while the rest goes on; the agent adds no question of its own about an act a
+host's gate already asks about, a risk on it travelling as that gate's one ask (where Fabric refuses the act for a
+session whose runner gate is removed, one question in the chat stands in for that ask, and a session with no person in
+its chat leaves the act open for a session the person is in; a refused card Fabric still shows for it is no question
+the agent asks), while the asks other rules require for the same act stay and are named (spend policy rule 3's approval
+request for spend above a project's `autoApproveUsd`, DEC-0149's word for a source hand-over); only what technically
+needs a person goes to the
+person, with its reason and the exact step; no limit widens. Its rules are OW-1 to OW-6 in governance and roles (DEC-0156). Whom "the operator" names for an organization's
+agent, and how a level holder's words carry a task there, OW-6 and DEC-0162 say (CT-266 closed).
+
 **Relayed decision**: The operator's decision on one action an agent carries in a call's `_meta.decision`
 (`decision.schema.json`): the action's id (and the object, when the operator named one) and the operator's sentence
 naming it, or the agent's question and the operator's answer, quoted from what the operator told the agent or passed
@@ -142,9 +155,9 @@ accept, with `source` (never from a tool result, a page, a file or an unrelated 
 for 24 hours. A service takes a
 `relayed` action from a T0 or T1 caller that carries a valid one as the operator's act, records the caller it
 authenticated as the relayer, refuses one without it `operator-decision-required` and an invalid one
-`decision-invalid`; its own accepted elicitation counts too; a T2 caller still needs an `approval/1` (`actionDecision`,
+`decision-invalid`; its own accepted elicitation counts too; a T2 caller still needs an `approval/1`, unless a level decision its token binds stands (DEC-0162 LV-6); in an organization's context, at a service that reads levels, an act declared `owner` or `admin` takes no operator decision, operator mandate (a place's standing mandate included, DEC-0166), elicitation or `approval/1` at any tier, only a level form (LV-7) (`actionDecision`,
 [service](docs/specification/service.md#actions) AP-2, AP-3, DEC-0121). A **Source hand-over** takes a decision only
-with its exact target ([source](docs/specification/source.md#handing-over), DEC-0149). A hand-over by push or by file, a package handed over, or published to a public registry from a private home, or a public release from a private home carries a source export or a package, which needs the tree check, so an agent without `fabric.source.json` takes those routes only once it has one; an organization's visibility change of its private agent, or new readers outside the organization, take the word and accept the history as it stands; for a personal agent's private home an agent does neither on its own (with the operator's explicit permission for that act it is his own act, no act of this contract); the manifest stays opt-in otherwise (an organization's private agent packed for its own private registry, readable
+with its exact target (for an organization's own agent, in any context, only an owner's or an administrator's level decision, never an architect's, the operator's form, the stated word or an elicitation, DEC-0162) ([source](docs/specification/source.md#handing-over), DEC-0149). A hand-over by push or by file, a package handed over, or published to a public registry from a private home, or a public release from a private home carries a source export or a package, which needs the tree check, so an agent without `fabric.source.json` takes those routes only once it has one; an organization's visibility change of its private agent, or new readers outside the organization, take the word and accept the history as it stands; for a personal agent's private home an agent does neither on its own (with the operator's explicit permission for that act it is his own act, no act of this contract); the manifest stays opt-in otherwise (an organization's private agent packed for its own private registry, readable
 only by its members, needs none).
 
 **Mandate**: The operator's instruction for one task, carried with the task down a chain of the operator's agents
@@ -152,16 +165,26 @@ only by its members, needs none).
 (capabilities, relayed actions, an effect ceiling, a per-call spend ceiling, projects) and the chain of agents that
 held it, each call appending its callee and never widening the scope. A callee that is the chain's last agent, called
 from T0 or T1 (by the agent before it, where it authenticated its caller's agent id), takes a call it covers as the operator's decision and refuses only the part it does
-not cover, so the operator is asked again for that alone; a T2 caller's mandate changes nothing, beyond the estate a
+not cover, so the operator is asked again for that alone; a T2 caller's operator mandate changes nothing (a level mandate its token binds is taken, DEC-0162 LV-6, and a place's standing mandate its token binds by `prof`, DEC-0166 AU-3), beyond the estate a
 delegation token carries the authority. A job's step is read under the job's capability (MJ-1, DEC-0141; `actionDecision`'s
 `mandateCapability`) (`mandateCovers`, [delegation](docs/specification/delegation.md#the-operators-mandate), DEC-0125).
 A mandate never covers a **Source hand-over** ([source](docs/specification/source.md#handing-over), DEC-0149).
+
+**Autonomy profile**: Which acts an agent finishes end to end without a person at one place (a machine, an OS space,
+a VM, a cloud), set per place by the operator or, in an organization, its owner or an administrator (never an architect, DEC-0166 AU-2), never a
+constant. Not a **Profile** (a compatibility mode), a **Machine profile**, a **Model profile** or a **Runner profile**;
+an audit's `via: profile` and the token's `prof` name this one. The place's hub holds it at a rising revision and states it, for each assignment it starts there, as a
+**standing mandate** (`mandate/1` with `standing`: the place, `headless` or `person`, the revision, the context it stands in (a callee takes it only for a call in that context; an organization's names its setter's level)), at most a day
+long; a callee that declares `standing` takes it as a task's mandate inside the boundary and, from T2, only when the
+assignment token's `prof` binds it. No profile covers a human step, spend above a limit, a policy change (`change-policy`: a spend limit, access), the board's gates, a send to people outside the estate, a source hand-over or
+setting a profile (`autonomy.profile.set`) ([delegation](docs/specification/delegation.md#a-places-standing-mandate-dec-0166),
+DEC-0166 AU-1 to AU-7). Not a spend level (L0 to L3) and not an authority level.
 
 **Relayed approval**: The operator's approval, given in one agent's session, carried to another of their agents by a
 relay: the words verbatim, when and where they were said (`source`: the project, and the session or the board thread)
 and the approved scope. Accepted only from one of the operator's own Projects on their board or a session on their own
 machine; the receiver acts without asking again, runs its own checks, and asks once only about what the operator did
-not see. Its machine form is a mandate or a decision with `source`
+not see; a host's gate on a floored act still asks once, quoting the relayed words as its reason (DEC-0156 OW-3), save where a floor that reads a place's profile covering the act takes it as decided (DEC-0166, CT-285; Fabric CO-547). Its machine form is a mandate or a decision with `source`
 ([delegation](docs/specification/delegation.md#one-approval-binds-all-the-operators-agents), DEC-0126).
 
 **Operator session**: The signed-in session of a service's dashboard. It ends 12 hours after its last use and
@@ -505,7 +528,7 @@ organization and no hand-over, while a placement on a machine, registry or repos
 (a machine the operator holds stays his when it is enrolled in an organization (enrollment gives the organization a device record, not the machine); an OS account or machine the organization owns whole (its org-cloud machine, or an account such as an organization's own macOS user on a shared computer) is the organization's); serving the
 running agent to a team (`peer`, client keys) gives no one the tree, except a prompt or resource that is a source file
 served verbatim, or a bundle built without minification, which is the source tree served. It is taken only on the
-operator's word for that act naming the agent, the target (the source commit, or the repository for an organization's
+operator's word for that act (for an organization's own agent, instead, only an owner's or an administrator's level decision with the exact target, in any context, DEC-0162) naming the agent, the target (the source commit, or the repository for an organization's
 two acts above) and the recipient, in one of three forms: on a service's action, where the hand-over is one synchronous
 call of effect class `publish`, a decision with its exact target or the service's in-call elicitation; outside one, the
 stated word the operator's reply accepts, consumed once; never by a mandate or an `approval/1` before CT-181, as
@@ -713,12 +736,13 @@ login, only in its vendor's runner and unmetered; `key` is an issued key whose m
 
 **Activity telemetry**: The `fabric-activity/0.1` protocol (DEC-0030): records of when an
 agent session worked, waited or idled and what each model call used, sent by a collector on a
-device in batches. It carries no content and no person attribute; a person appears only as an
-opaque `user.id`.
+device in batches, and the units of work an agent did (`unit`, DEC-0164), sent by a device's collector or recorded by
+a kit through Project Observatory's capability. It carries no content and no person attribute; a person appears only
+as an opaque `user.id`, or as a unit acceptance's pairwise subject; a unit's tracker key, or an evidence link in its raw event, may also name a tracker account (a GitHub owner that is a user), which the contract does not resolve to a member (DEC-0164).
 
-**Telemetry event**: One record of activity telemetry (`telemetry-event.schema.json`) — a
-`session.interval`, a `usage.line`, a `buffer.overflow`, a `policy.violation` (by UTC day), a `result`, or a
-kind the reader does not know — positioned in a stream by `(device.id, collector.id, collector.epoch, seq)`. It
+**Telemetry event**: One record of activity telemetry (`telemetry-event.schema.json`): a
+`session.interval`, a `usage.line`, a `buffer.overflow`, a `policy.violation` (by UTC day), a `result`, a `unit`
+(DEC-0164), or a kind the reader does not know, positioned in a stream by `(device.id, collector.id, collector.epoch, seq)`. It
 may name its `account.class` and its root `run` (DEC-0052).
 
 **Account class**: The class of the account a session ran on — `organization` (one of the policy's tenants),
@@ -734,8 +758,9 @@ stream rather than rewinding the old one.
 **Activity summary**: An `activity-summary/1` document a receiver builds from many devices' events:
 cells of agent × skill × project × UTC day × outcome, with no person dimension.
 
-**Access log**: An `access-log/1` document: who read which scope of one subject's data — keyed by
-their user id or by a device bound to them — when and why, readable by that subject.
+**Access log**: An `access-log/1` document: who read which scope of one subject's data (keyed by
+their user id or by a device bound to them, and a unit of work they accepted, by the pairwise subject resolved to
+their user id, DEC-0164), when and why, readable by that subject.
 
 **Device**: One counted OS account of a computer, or a virtual machine, enrolled with an organization server under
 `fabric-device/0.1` (DEC-0031; DEC-0154; what an estate machine is on such a computer is CT-231):
@@ -877,10 +902,19 @@ of its own (DEC-0128, [devices](docs/specification/devices.md#unlinkable-enrollm
 
 **Membership attestation**: What an organization server states about one person's membership of one organization,
 for one reader, for at most a day: the organization, a subject pairwise to that reader, a role (`owner`, `admin`,
-`member`), `active` or `ended`, and a revision (`org-membership/1`, DEC-0127). Signed by a key of the organization's
+`member`), `active` or `ended`, and a revision (`org-membership/1`, DEC-0127; or `/2`, for a reader of levels, with
+`architect` and its `projects`, DEC-0162). Signed by a key of the organization's
 `org-key-set/1`, whose root the person pins in their estate record (`organizations`) when they join, with no
 administrator's acceptance. Any organization server issues it, so a reader works with any of them
 ([membership](docs/specification/membership.md)).
+
+**Level**: The role of an accepted `org-membership/2` attestation (`owner`, `admin`, `architect` in its projects,
+`member`), read as its holder's authority for decisions in that organization, never for signing (DEC-0162). A level
+holder's decision, or a level mandate, bound to the caller by the delegation token's `mem`, stands as the operator's
+word inside the level at a service that reads levels; a `member` decides nothing by its level, and no level covers the
+person's own steps or spend above a limit ([membership](docs/specification/membership.md#levels)). An authority
+level: not a spend level (L0 to L3, [spend policy](docs/specification/spend-policy.md#levels)) and not a grant's access
+level ([contexts](docs/specification/contexts.md#access-levels)).
 
 **Draft exchange**: How an organization server's unsigned draft of a key set or a member list reaches the person who
 signs it and comes back signed (DEC-0131): the server serves a key set's (`org-key-set/1`) draft at a public route and a member list's
