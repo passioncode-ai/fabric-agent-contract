@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0156` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0168` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -334,6 +334,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Annotated (2026-10-12):** the usage report amended by DEC-0065 (its 31-day window checked; `byProject` attribution by project and task run, never by caller).
 - **Annotated (2026-10-11):** `budget` amended by DEC-0027 (a usage report lists every spending limit the service applies).
 - **Annotated (2026-10-23):** a host sums money over the rows not on a subscription; a `subscription` row's `costUsd` is an estimate, never money (DEC-0110).
+- **Annotated (2026-11-12):** the day's cost against its models holds within each known row's rounding, and rows may be written rounded to 6 places once its readers apply DEC-0163.
 - **Amends:** the `fabric-service/0.1` extension (additive, DEC-0016 extension policy)
 - **Decision:** A service MAY declare `surfaces.usage.path` in its well-known document and
   answer there, behind the service token, a `service-usage.schema.json` report. The report gives
@@ -762,7 +763,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 ### DEC-0030 — Activity telemetry: events, batches, a receiver-built summary without a person dimension, and an access log (`fabric-activity/0.1`)
 
 - **Date:** 2026-10-08
-- **Status:** Accepted source change (on merge of its pull request); consumer adoption pending.
+- **Status:** Accepted source change (on merge of its pull request); consumer adoption pending. Narrowed for one kind by DEC-0164 AE-3: past raw retention the organization's journal keeps, for `unit` events, person-free monthly counts and, until each month's count closes, `(unit, month)` keyed digests with only their person-free cell; nothing else outlives raw retention. Also for `unit` only (DEC-0164 AE-1, AE-2): delivery is kept once per `eventId` within the organization's stream (one id from every writer), and no user is attached to a unit.
   Revised before merge by the contract owner's review of PR #22 (head `0994981`) and re-review
   (head `19e2b58`).
 - **Annotated (2026-10-12):** item 10 (presence) is **narrowed by OD-1 for owner and administrator views** by DEC-0052 item 4: the schema keeps the per-person estimates; what a receiver serves another person of them needs a purpose the subject confirmed. DEC-0052 also amends items 1, 4 (an ack never moves over check-in drops), 6 and 7.
@@ -1130,6 +1131,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Status:** Accepted source change (on merge of its pull request); provider adoption pending.
 - **Annotated (2026-10-11):** extended by DEC-0035 (a shared group: OC-14…OC-17).
 - **Annotated (2026-10-12):** the status table's `unlinked` row amended by DEC-0058 (`receiver.lease` `held` or `elsewhere`; a channel nobody receives on is only `degraded` with `receiver-missing`).
+- **Annotated (2026-11-08):** OC-11 amended by DEC-0156 (proposed): of the proposal's four steps, enabling the
+  channel and running the link command are the agent's once the operator answers `accepted` and the token is stored
+  (AP-2, OW-2); creating the bot, storing its token and typing the code stay the operator's; and the Status table's
+  `off` row (an `accepted` answer waiting for the token).
 - **Amends:** nothing — a new profile beside `fabric-service/0.1` and `fabric-project-comms/0.1`,
   added under the DEC-0016 extension policy; one optional well-known surface.
 - **Decision:** An agent MAY have an **operator channel** — its own messenger channel to its
@@ -1207,6 +1212,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-10-10
 - **Status:** Accepted source change (on merge of its pull request); provider adoption pending.
 - **Annotated (2026-10-12):** its *Compatibility* line ("schema is unchanged") is superseded by DEC-0058, which makes a channel nobody receives on representable only as `degraded` with `receiver-missing` and `receiver.lease: none`.
+- **Annotated (2026-11-12):** OC-17 gains, by DEC-0156 (proposed), that a product's own `reason.detail` stays within
+  300 characters in every locale it ships.
 - **Amends:** DEC-0034 additively: four rules appended to the
   [operator channel](specification/operator-channel.md) profile and one known reason code. OC-1…
   OC-13 are unchanged; OC-14 narrows the optional refusals of OC-3 and OC-7 to addressed input.
@@ -2118,6 +2125,221 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   runner-model-profiles-20261012 DEC`, `--key runner-model-profiles-{catalogue,runner-profile,resolution}-20261012
   SEM`); this file, `conformance.md` and `backlog.md` were edited under git leases; the record plane is `fs`.
 
+### DEC-0047 — The relay and the secret envelope: admission by device key inside the WebSocket, store-and-forward that never reports done, trust tiers from the signed sender, HPKE envelopes sealed to `#kem` (`fabric-relay/0.1`, `fabric-secret-envelope/1`)
+
+- **Date:** 2026-10-12
+- **Status:** Accepted source change (on merge of its pull request). Consumer adoption:
+- **Annotated (2026-10-26):** DEC-0134 decides the organization relay's handshake (relay.md OR-1 to OR-5); the relay's
+  attestation status check is CT-162. OR-5 narrows item 6's T2 sentence: every member of an organization is T2 to every
+  other on its relay, two enrollments of one owner included, not only "to a recipient of another owner". Item 9's
+  `welcome` (`estateRevision` "always present", `deltaHead`, heartbeat) is an estate's relay's; an organization's
+  relay welcomes with its member list instead (OR-2).
+- **Annotated (2026-10-26):** DEC-0129 gives an organization's relay its admission set (`orgRelayAdmissionSet`, the
+  member list `org-authority/1`); the organization relay's handshake stays open (CT-37).
+- **Annotated (2026-10-15):** amended by DEC-0084: a relay opens a one-time pairing rendezvous that lives at most 600 s and carries `pairing-message/1` frames only, with one `abort` after both reveals (relay.md, *The pairing rendezvous*; its frame types are not decided); `relayAdmissionSet` subtracts a key revoked by its kid or its key reference `<kid>@sha256:<hex>` and reports a malformed reference (`unread`); F7: it admits a `#sig` key only under its own machine's kid `<id>#sig`, and a kid listed twice for neither (`bad-key`), as `FAC-SEM-073` says, even over a held record; an open session stands only while its kid maps to the key octets it was proven under (`sessionStands`, which amends DEC-0066's revalidation by kid), so a session proven under a replaced key ends; `estateEnvelopeContext` takes the applied delta entries' revocations (`extraRevocations`), so an envelope's sender key is refused once a delta revokes it. Shared vectors: `fixtures/vectors/relay.json` `admissionSet` (five new cases) and `session` (new).
+- **Annotated (2026-10-13):** amended by DEC-0082: an envelope names no context, so a target's open context (`estateEnvelopeContext`) reads only personal secret placements, and an organization's instance fills its slot on its own machine (`FAC-SEM-075`), never by an envelope (`docs/specification/contexts.md`).
+- **Annotated (2026-10-12):** the `Fabric-Relay-Request` wire form, which DEC-0047 left unspecified: base64url (no padding, canonical) of the RFC 8785 bytes of `{alg, kid, recipients, iat, sig}`, at most 8192 bytes (431 `too-large`), parsed strictly (400 `malformed`); 1–64 `#sig` recipients of at most 256 characters; a GET's signer must be a stored recipient, sign the stored list letter for letter and be in the current admission set; a PUT of a held blob with another list is 409 `recipients-mismatch` (a new code); the reference is `parseRelayRequest`/`verifyBlobRequest`, the vectors `fixtures/vectors/relay.json` `blobRequest` ([relay](specification/relay.md#blobs)).
+  - the relay server, [passioncode-ai/relay](https://github.com/passioncode-ai/relay), implements the handshake and
+    sessions from this text (its RLY-02) and runs the vectors;
+  - Project Observatory's node is a relay client and opens envelopes into its vault;
+  - Fabric's remote surfaces are clients. An amendment of Fabric ADR-0088 §3 naming `fabric-relay/0.1` is owed:
+    nothing of it is on Fabric's main yet;
+  - the hub carries T2 messages under DL-8, and the first organization server takes its organization record as the
+    source of admission and keeps the presence rule (item 5).
+- **Annotated (2026-10-12, CON-022):** this describes relay.md as it stood before DEC-0066. Item 7's open order and
+  relay.md's were one order in two numberings: relay.md listed eleven steps, its 9 and 10 (the life, then `now < exp`)
+  being item 7's 9, and its 11 item 7's 10. (DEC-0066 adds `replayed`/`sequence-reused` as relay.md's step 8, so relay.md
+  now lists twelve: its 1–7 are item 7's 1–7, its 9–11 item 7's 8–9, its 12 item 7's 10.) Step 4's refusals are
+  `unsupported-alg` for an Ed25519 sender key and `bad-key` for a key the record does not list, any other key that is
+  not a valid P-256 key and an encapsulated key that fails SEC 1, as `openEnvelope` answers; relay.md's step 4 now names
+  them. *Consequences / affects* also cover `test/relay-request.test.ts` (#60) and `src/webauthn.ts` (#59,
+  `ef7573a`, the JWK key form).
+- **Amended (2026-10-12) by DEC-0066:** items 2, 3, 4, 5, 7, 8 and 9 — low-S and strict instants, the close-code table
+  and frames, one `unauthenticated` until the signer is proven with the estate compared inside `admit`, revalidation of
+  open sessions, the recipient's own kid as `to` and the replay window, the envelope's sequence and mark, the blob
+  check order, and where delta entries come from. `fabric-relay/0.1` and `fabric-secret-envelope/1` are amended in
+  place; relay.md now lists twelve open steps.
+- **Amends:** nothing. It is a new protocol under the DEC-0016 extension policy. It builds on:
+  - DEC-0053's P-256 device keys by role (`<device.id>#sig`, `<device.id>#kem`);
+  - DEC-0045's trust tiers (DL-25, DL-26);
+  - DEC-0043's register of canonical forms (every signed or hashed document here is RFC 8785).
+
+  It implements the relay half of the first organization server's target architecture v4 §12 row "secret envelope
+  (sealed to a device key)", and the transport of its "revocation delta and timestamp heartbeat" row. The documents
+  themselves are DEC-0054's.
+- **Decision:** in [relay](specification/relay.md) unless named otherwise —
+  1. **Roles.**
+     - A relay admits machines, queues and delivers opaque messages, stores envelopes and blobs by digest, reports
+       when a machine was last seen, and carries signed deltas and heartbeats unchanged.
+     - It holds no authority. It never reads a body or a secret, decides a tier, signs anything a node relies on,
+       reports a queued command done, or serves a signing page.
+  2. **Keys.**
+     - A relay participant's keys are P-256, two per machine, never one key in both roles.
+     - **Its `#sig` is ES256 only.** devices.md admits an Ed25519 `#sig` for a device; a relay refuses one, and any
+       `alg` other than `ES256`, as `unsupported-alg`. Every signed document names the algorithm in a signed field:
+       `relay-auth/1`, `relay-blob/1` and the envelope header carry `alg: "ES256"`, and the message body is a JWS.
+     - Every public key is validated before use by SEC 1 v2 §3.2.2 (`p256KeyRefusal` in `src/p256.ts`), one function
+       that names the refusal and that `isValidP256Key` is expressed by. A key that fails is refused as `bad-key`.
+     - A key reaches every check in either spelling: DEC-0053's base64 SEC 1 octets or a JWK (`p256Point`,
+       `p256PublicKey`), with the same answers for both.
+     - All signatures are ES256, raw `r ‖ s`.
+     - Times are RFC 3339 UTC; one that does not parse to an instant is refused, never compared. A signed `iat` more
+       than 60 s ahead of the verifier's clock is `not-yet-valid`, in admission, in a message body and in an
+       envelope.
+  3. **Transport.**
+     - One WebSocket (RFC 6455) per connection to `/v1/connect`, with subprotocol `fabric-relay.v1`, over TLS 1.2
+       or newer, TLS 1.3 (RFC 8446) SHOULD.
+     - No credential travels in the URL or in an HTTP header.
+     - UTF-8 JSON text frames of at most 1 MiB, each with `{v: 1, type, id}`
+       ([`relay-frame.schema.json`](../schemas/relay-frame.schema.json)).
+     - Unknown members are ignored. An unknown `type` is answered with `error` `unknown-type`.
+     - Close codes: 1009 for a frame over 1 MiB, 1003 for a binary frame, 4401 after `unauthenticated`, 4403 after
+       `not-admitted`, and 1001 after 90 s of silence (`CLOSE_CODES`, `IDLE_CLOSE_SECONDS`).
+  4. **Admission** (`admit`). A machine answers `hello`'s nonce, within 10 s, with an ES256 signature over the RFC
+     8785 bytes of `{type: "relay-auth/1", alg: "ES256", relay, nonce, estate, kid, iat}`. The relay admits it only
+     when all of these hold:
+     - the protocol is this one, and `alg` is `ES256`;
+     - `iat` is an instant at most 60 s old and at most 60 s ahead (`not-yet-valid` beyond that);
+     - the nonce is this connection's own, and is used once;
+     - `kid` is in the admission set;
+     - the signature verifies.
+
+     It then attributes every later frame on the connection to that `kid`.
+     - **The admission set** is the set of `#sig` keys of the machines in the estate record the relay holds,
+       minus revoked machines and keys (`relayAdmissionSet`). It is not authorization.
+     - **Only from a verified revision.** The relay pins the estate's first passkeys when it is set up for the
+       estate, the same act as a machine's enrollment pin. It applies a revision only when it is valid against the
+       schema and `verifyEstateRecord` accepts it against the revision it holds (revision 1: against the pinned
+       passkeys). A refused revision changes nothing, and a relay never starts with a configured set.
+     - **Fails closed.** When the held revision's window ends, the relay admits no new `auth` until a newer verified
+       revision arrives; open sessions end at their next re-authentication, and queued mail stays until its `ttl`.
+       Presence and `lastSeen` follow the same verified set.
+     - **No organization record yet.** An organization's relay has no admission source of its own until
+       `org-authority/1` (Fabric D8) is decided.
+     - `relayAdmissionSet` takes the schema check from its caller, which MUST pass the validator of
+       `estate-record.schema.json`; `() => true` is not conformant.
+  5. **Messages.**
+     - `send` → `accepted {msgId, seq}` → `deliver {from, msgId, seq, body, sentAt}` → `ack {seq}`.
+     - Delivery is at least once. A repeated `msgId` from the same sender within its `ttl` answers its first `seq`.
+     - `ttl` is 1 s to 7 days and bounds only the mailbox. A body is at most 765 KiB decoded, so the largest frame
+       around it fits 1 MiB.
+     - **The body is end to end:** a compact JWS (`ES256`, `typ: fabric-relay-message+jwt`) over the RFC 8785 payload
+       `{type, from, to, msgId, iat, exp, payload}`. `exp` is signed: the recipient judges the message's life by it,
+       at most 7 days after `iat`, never by the frame's `ttl`. A recipient (`verifyMessageBody`) refuses a body whose
+       signed `from`, `to` or `msgId` differs from the frame's, and names `not-yet-valid`, `lifetime-too-long` and
+       `expired`.
+     - **A relay never reports a command done.** Only the recipient's own signed message back reports an outcome
+       (Fabric ADR-0088).
+     - Presence frames give `{kid, state, lastSeen}`, and **only to machines of the same owner** (J10/OD-1). An
+       organization's relay sends no presence from one member to another.
+  6. **Trust tiers follow the signed sender, never the connection.**
+     - Relay traffic is never T0.
+     - **T1** is a verified `from` that is an enrolled machine of the recipient's **same owner** (DL-25), current
+       and not revoked (DL-26).
+     - **T2** is anything else (DL-8): a machine listed only in an organization record, to a recipient of another
+       owner, and a body signed by an outsider and forwarded by a T1 session.
+  7. **The secret envelope** (`fabric-secret-envelope/1`,
+     [`secret-envelope.schema.json`](../schemas/secret-envelope.schema.json), `src/secret-envelope.ts`).
+     - **Seal:**
+       - HPKE base mode, DHKEM(P-256, HKDF-SHA256) / HKDF-SHA256 / AES-128-GCM, `[16, 1, 1]`, checked against RFC 9180
+         §A.3.1;
+       - recipient: the target's `#kem` key;
+       - `info`: the ASCII bytes `fabric-secret-envelope/1`;
+       - additional data: the RFC 8785 header `{type, alg, suite, recipient, sender, agentRef, slot, placement, iat,
+         exp, enc}`: a slot is named with its agent, since one slot name can belong to two agents.
+     - A sealer refuses a recipient kid without `#kem` and a sender kid without `#sig`.
+     - The sender signs `{header, ct}` with its `#sig` key. The envelope is named by
+       `sha256:<hex of its RFC 8785 bytes>`.
+     - **A target opens an envelope only when all of these hold, checked in this order** (a refusal names the first
+       that failed; relay.md and `openEnvelope` keep the same order):
+       1. it is well formed, its times real instants (`malformed`);
+       2. `alg` is `ES256` (`unsupported-alg`);
+       3. the recipient is its own `#kem` (`wrong-recipient`);
+       4. the sender's key is P-256 and it and the encapsulated key pass SEC 1 (`unsupported-alg`, `bad-key`);
+       5. the signature is 64 canonical bytes and verifies (`bad-signature`);
+       6. the latest estate-record revision the target verified and applied (DEC-0055) places `(agentRef, slot)` on
+          it from the sender's machine (`sender-not-allowed`);
+       7. `placement` is at least the revision from which that placement holds unchanged and at most the latest
+          revision the target has applied: a newer one is fetched and verified first (`placement-stale`);
+       8. `iat` is at most 60 s ahead (`not-yet-valid`);
+       9. the life is more than zero and at most 24 hours (`lifetime-too-long`), and not over (`expired`);
+       10. HPKE opens (`cannot-open`).
+
+       `estateEnvelopeContext` derives the holder, the sender's key and the current placement from the target's
+       applied revisions.
+  8. **Blobs.**
+     - `PUT`/`GET /v1/blobs/<digest>` carry `Fabric-Relay-Request`: an ES256 signature over the RFC 8785 bytes of
+       `{type: "relay-blob/1", alg: "ES256", relay, method, digest, recipients, iat}`. It is accepted within 60 s and bound to the
+       method, the digest and the recipients, so it is not a bearer credential.
+     - A blob's name is always `sha256:` and the hex SHA-256 of its bytes. A package travels as its archive's
+       bytes; its DEC-0050 content digest is not its blob name.
+     - The relay recomputes every digest.
+     - A blob is kept until every recipient fetched it, or until 7 days pass.
+  9. **Revocation travels, it is not defined, here.**
+     - `welcome` carries `deltaHead {sequence, sha256}`, the shape of DEC-0053's check-in
+       `records.revocationDelta`, so a node reports it as it came, and `estateRevision`, the verified revision (1 or
+       more) the relay admits from — always present, since a relay without one admits nobody.
+     - New deltas and heartbeats are pushed to every connected machine they name. A node behind the head asks with
+       `delta-query`.
+     - A relay can delay revocation, which the signed heartbeat exposes, but it cannot forge it. The documents, keys,
+       head hash, the 72-hour rule and their vectors are DEC-0054.
+     - The check-in's `records` of DEC-0053 carry that head unchanged. Their `heartbeat` is DEC-0054's document,
+       and `leases` are the window lease's own decision.
+  10. **Rules:**
+      - `FAC-SEM-070`: an envelope is sealed to a `#kem` key by a `#sig` key under `ES256`, with the admitted suite,
+        a life of more than zero and at most 24 hours, and a valid encapsulated key;
+      - `FAC-SEM-071`: an `auth` frame names a `#sig` key, `ES256` and this protocol; a `send` frame addresses a
+        `#sig` key, with a bounded `ttl` and body.
+- **Why:**
+  - **The operator decided D6 on 2026-10-12:** the relay gets its own open repository, with Project Observatory as
+    code owner, and self-hosting stays (V2-21).
+  - **A relay is the one component every person's machines, and later colleagues' machines, must pass through.**
+    Putting authority anywhere but in end-to-end signatures and seals would make its compromise the estate's. With
+    this text, a compromised relay can deny service and see metadata, nothing more.
+  - **The two-key rule and SEC 1 validation close the invalid-curve attack on ECDH and the confusion of a signature
+    with a seal.** The envelope reuses a published, vector-checked construction (RFC 9180) rather than a bespoke one.
+  - **ES256 only for the relay, departing from devices.md's Ed25519 `#sig`** (in the way DEC-0053 item 7 departs):
+    the platform keystore holds P-256, and the envelope's `#kem` is P-256 anyway, so one curve and one verifier serve
+    every relay participant. The algorithm is named in each signed document, as the wave-3 rule asks.
+  - **The owner's rulings on the review of #53:** T1 is DL-25's same owner; presence stays within one owner; ES256
+    with a signed `alg`; one `{sequence, sha256}` head shape; not-before; a signed `exp`.
+- **Compatibility:** Additive under DEC-0016:
+  - two new schemas (`relay-frame`, `secret-envelope`), two rule codes, three vector files (`relay.json`,
+    `secret-envelope.json`, and `p256.json` extended with refusal names and JWK cases);
+  - `isValidP256Key` keeps its answers for every byte string, and now also accepts a JWK.
+
+  `contractVersion` stays `0.1.0`.
+- **Consequences / affects:**
+  - spec: `docs/specification/relay.md` (new), `docs/specification/conformance.md` (rule register, canonical forms),
+    `docs/specification/devices.md` (the `#kem` and `records` passages point here and to DEC-0054);
+  - schemas: `schemas/relay-frame.schema.json`, `schemas/secret-envelope.schema.json`,
+    `schemas/device-check-in.schema.json` (descriptions of `records` only);
+  - source: `src/relay.ts`, `src/secret-envelope.ts`, `src/relay-rules.ts`, `src/p256.ts` (`p256KeyRefusal`),
+    `src/semantic-rules.ts`;
+  - vectors and fixtures: `fixtures/vectors/{relay,secret-envelope,p256}.json`, `fixtures/semantic/relay-*.json`;
+  - tests: `test/relay.test.ts`, `test/secret-envelope.test.ts`, `test/relay-rules.test.ts`, `test/p256.test.ts`,
+    `test/schema-compilation.test.ts`;
+  - docs: `docs/DOCMAP.md`.
+- **Not decided here:**
+  - the guest OAuth page and its binding ceremony;
+  - attestation formats (OQ-0010);
+  - mailbox quotas;
+  - whether a self-hosted relay federates with the hosted one;
+  - the documents of the revocation delta and heartbeat (DEC-0054);
+  - the window lease.
+- **Source:**
+  - The operator's D6 decision and its relay transport ADR, private to Project Observatory, agreed with Fabric's,
+    the knowledge base's and the first organization server's owners. Its public part is relay ADR-0001.
+  - The contract owner's review of the draft (relay `docs/protocol/dec-0047-draft.md`), with its answers on P-256
+    keys, the DEC-0054 split and the admission removal point.
+  - RFC 9180, RFC 8785, SEC 1 v2, RFC 7518, RFC 6455 and RFC 8446.
+  - The contract owner's review of #53 and rulings (2026-10-12).
+  - The target architecture v4 at `9c6a780`, §4, §7 and §12.
+  - The board item `V4-SECURE-TRANSPORT`.
+  - DEC-0047 was reserved by git CAS (`agent_sync.py reserve --key relay-protocol-20261012 DEC`), and `FAC-SEM-070`
+    and `FAC-SEM-071` by `--key relay-protocol-20261012-sem-{envelope,frame} SEM`. This file and `conformance.md` were
+    edited under git leases of run `project-observatory-3d-relay`; the record plane is `fs`.
+
 ### DEC-0050 — The package, `fabric-package/1`: one folder per version, its digest over RFC 8785, and `agentRef`
 
 - **Date:** 2026-10-12
@@ -2446,6 +2668,108 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `--key w3-p3-02-sem-{device-action,root-certification}-20261012 SEM`); this file, `conformance.md` and `backlog.md`
   were edited under git leases; the record plane is `fs`.
 
+### DEC-0054 — The revocation delta and the timestamp heartbeat: entries signed by the estate key and chained by hash, a heartbeat that commits to the head, the 72-hour rule, and reconciliation with the next revision (`revocation-delta/1`, `heartbeat/1`)
+
+- **Date:** 2026-10-12
+- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: Fabric's hub issues entries and
+  heartbeats under a certified hub key, keeps one chain per estate and lists every entry in the next revision it drafts
+  (backlog CT-19); Project Observatory's node applies them under the highest revision it applied, reports the head and
+  the heartbeat in its check-in, refuses what arrives from other machines unless current and refuses an unreconciled
+  revision (CT-20), and its relay client reads the frames as these documents (CT-34); the relay carries them unchanged
+  (DEC-0047).
+- **Annotated (2026-10-13):** amended by DEC-0076: `isRevoked`, and so `reconcileRevision` (`FAC-SEM-084`), matches a `grant` revocation by the normal form of the grant's id; every other kind exactly (`docs/specification/identifiers.md`).
+- **Annotated (2026-10-12):** HB-0 — a held heartbeat the machine could not have accepted is refused `malformed`, never read as nothing held (the owed reading of #64; packet P6-08).
+- **Amends:** nothing; it gives DEC-0053 item 9's `records.heartbeat` and `records.revocationDelta`, and DEC-0047 item
+  9's `delta`, `heartbeat` and `welcome` frames, the documents they named as this decision's. It adds a precondition to
+  DEC-0055's application of a revision (reconciliation, item 6). Implements the first organization server's target
+  architecture v4 (commit `9c6a780`) §7 *Freshness* and §12's row "revocation delta and timestamp heartbeat" for an
+  estate. Closes V4-DELTA-HEARTBEAT (board run N18, packet P4-06).
+- **Decision:** in [revocation delta](specification/revocation-delta.md) unless named otherwise —
+  1. **The estate key signs.** Every entry and heartbeat is signed by a `hubKey` that the highest estate-record revision
+     the verifier verified and applied certifies (DEC-0055 item 4): compared by exact kid, certified for one machine,
+     Ed25519 of full order (DEC-0045), revoked neither there (`hub-key`, `machine`) nor by an entry applied before
+     (`estateSigner`). `alg` is `EdDSA`, signed; ES256 joins with Fabric's D2. The passkey cannot sign an hourly
+     heartbeat (UP and UV every time); the relay holds no authority (DEC-0047 item 1); the hub key is not the estate's
+     record key, as v4 §7 asks of a timestamp key.
+  2. **`revocation-delta/1`** ([`revocation-delta.schema.json`](../schemas/revocation-delta.schema.json)): an entry is
+     `{type, alg, estate, sequence, prev, at, revocation, kid, sig}`, one revocation in the estate record's shape and
+     kinds without `authority` (a passkey is revoked only by a revision a passkey signs). The signing input is the RFC
+     8785 form without `sig`; the entry's hash, the next head, is its hex SHA-256 (`deltaEntryHash`); entry 1's `prev`
+     is the genesis, SHA-256 of `{type, estate, sequence: 0}` (`deltaGenesis`). The head is `{sequence, sha256}` —
+     DEC-0053's `records.revocationDelta` and DEC-0047's `welcome.deltaHead`. A page `{head, entries}` (at most 256) is
+     what a `delta` frame and a check-in response carry; its `head` is a hint.
+  3. **`heartbeat/1`** ([`heartbeat.schema.json`](../schemas/heartbeat.schema.json)): `{type, alg, estate, sequence, at,
+     deltaHead, estateRecord: {revision, digest}, kid, sig}`; a check-in reports its `sequence` and `at` (DEC-0053). A
+     running hub signs one after every entry and every revision, SHOULD sign one hourly, and lets at most 24 hours pass
+     (v4 §7 "daily").
+  4. **Applying a page** (`applyDelta`, RD-1…RD-10): the clock first, then each entry's shape, estate, `EdDSA`, kind, not
+     more than 60 s ahead, the estate key, the signature — and only then its place: held (skipped), a `gap` (ask with
+     `delta-query`), or a second signed history (`broken-chain`, `fork`), which marks the machine broken and keeps that
+     entry's revocation in force. The entries before a refused one stay applied.
+  5. **Accepting a heartbeat** (`acceptHeartbeat`, HB-1…HB-3): the same checks, then `not-newer`, `fork` (the held
+     sequence with other bytes, a head or revision contradicting what the machine holds) or `regressed`.
+  6. **The 72-hour rule** (`deltaFreshness`, `freshnessAnswer`): `broken`, `stale` (no readable clock, no heartbeat, or
+     one more than 72 hours old; exactly 72 is fresh), `behind` (the heartbeat's head or revision past what is applied),
+     else `current`. Unless `current`, a machine places no caller in T1 and accepts no T2 call (DL-25, DL-26) — no
+     delegated call, command message, share-grant call or new secret envelope from another machine — and keeps the
+     person's own work (T0), every revocation in force, and the way back. Revocations in force are the revision's, the
+     applied entries' and forked ones' (`effectiveRevocations`); every check that reads the record's revocations reads
+     these.
+  7. **Reconciliation** (`reconcileRevision`): a revision issued at or after an entry's `at` lists its revocation; a
+     machine holding the entry refuses it as `unreconciled`. A machine applies a revision only when it is schema-valid,
+     `verifyEstateRecord` accepts it and it is reconciled.
+  8. **Rules:** `FAC-SEM-082` (a page), `FAC-SEM-083` (a heartbeat; a machine's freshness answer), `FAC-SEM-084`
+     (reconciliation). Times everywhere are RFC 3339 with `T`, an offset and a day that exists (`deltaTime`), refused
+     before any comparison.
+- **Why:** v4 §7 makes revocation take effect within seconds online and at most by the next heartbeat, and closes the
+  dropped-revocation gap by having the heartbeat sign the delta's head (its R4-8). A revision is a whole record a person
+  signs and machines fetch hourly, so it cannot be the fast path; a relay carries everything but must be able to delay
+  revocation only, never forge or hide it. A compromised estate key can only revoke and stop heartbeats — denial of
+  service, and less than it can already do with delegation tokens — and cannot revoke a passkey, so the person can
+  always sign the revision that revokes it. J10: an entry names a machine id, a kid, a digest or a grant id; a heartbeat
+  a counter, a time, a head and a revision; neither names a person.
+- **Compatibility:** Additive: two schemas, three rule codes, one module. Tightening, each with what a consumer does: a
+  check-in response's `records.heartbeat` and `records.revocationDelta`, and a relay's `welcome.heartbeat`, `delta` and
+  `heartbeat` frames, which DEC-0053 and DEC-0047 left as any object, must now be these documents (a server or relay
+  sends them as signed); a machine holding a delta entry refuses a revision that leaves it out (a hub lists every
+  entry). Nothing is deployed against the placeholders (CT-04, CT-34). `contractVersion` stays `0.1.0`.
+- **Consequences / affects:**
+  - spec: `docs/specification/revocation-delta.md` (new), `docs/specification/relay.md` (revocation and heartbeat,
+    welcome), `docs/specification/devices.md` (check-in), `docs/specification/estate-record.md` (revocations, who adopts
+    it, not decided), `docs/specification/conformance.md` (register, readers, canonical forms);
+  - schemas: `schemas/revocation-delta.schema.json` (new), `schemas/heartbeat.schema.json` (new),
+    `schemas/device-check-in.schema.json`, `schemas/relay-frame.schema.json`;
+  - code: `src/revocation-delta.ts` (new), `src/revocation-delta-rules.ts` (new), `src/semantic-rules.ts`;
+  - fixtures: `fixtures/catalogue.json`, `fixtures/positive/revocation-delta-page.json`, `fixtures/positive/heartbeat*.json`,
+    `fixtures/positive/relay-frame-delta.json`, `fixtures/positive/relay-frame-heartbeat.json`,
+    `fixtures/positive/device-check-in-response-records.json`, `fixtures/negative/revocation-delta-authority.json`,
+    `fixtures/negative/heartbeat-*.json`, `fixtures/negative/relay-frame-delta-unsigned-entry.json`,
+    `fixtures/negative/device-check-in-response-heartbeat-placeholder.json`,
+    `fixtures/semantic/{revocation-delta,heartbeat,delta-freshness,delta-reconciliation}-*`,
+    `fixtures/vectors/revocation-delta.json` (new);
+  - tests: `test/revocation-delta.test.ts` (new), `test/rule-tolerance.test.ts`, `test/positive-sweep.test.ts`,
+    `test/schema-compilation.test.ts`; floors in `vitest.config.ts` and
+    `docs/evidence/specs/2026-10-11-board-waves/coverage-baseline.md`;
+  - docs: `docs/evidence/sources.md` (RFC 8032 and RFC 8785 rows), `CONTEXT.md`, `docs/DOCMAP.md`, `README.md`,
+    `docs/backlog.md`, the packet `docs/evidence/specs/2026-10-11-board-waves/packets/wave-4/P4-06-delta-heartbeat.md`,
+    the handoff `docs/handoffs/2026-10-12-w4-p4-06-delta-heartbeat.md` and `docs/handoffs/README.md`.
+- **Not decided here:** the organization's documents and their key (`org-authority/1`, Fabric D8, or a role in
+  DEC-0031's key set), the 7-day validity of the organization's records and the heartbeat extension of up to 7 days the
+  organization root or a quorum of administrators may sign (v4 §7); DEC-0053's 7-day revocation list stays the
+  certified root's and is not reused here, because an estate's record lives 30 days and its heartbeat 72 hours.
+  Recovery from a fork (a new chain anchored in a revision); compaction (a checkpoint for a machine that enrolls late);
+  how two hubs agree on the next sequence (Fabric's); the organization's kinds (members, `subject.erase`); Fabric's D3
+  (which key is the hub key) and D2 (ES256 for it). DL-14's reference function takes the delta's part as `{extraRevocations}` (DEC-0060,
+  merged first), so item 6 holds for it.
+- **Source:** the first organization server's target architecture v4 at `9c6a780` (§7 *Freshness*, §12, §20 V2-15 and
+  V2-22); DEC-0047, DEC-0053, DEC-0055; RFC 8785 and RFC 8032 in the [source ledger](evidence/sources.md); the
+  board-waves inventory V4-DELTA-HEARTBEAT, packet P4-06. DEC-0054 was reserved by git CAS before this run, by the owner
+  session's P3-02 run (`agent_sync.py reserve --key revocation-delta-20261012 DEC`, run `r-51535649e`, commit `776e807`,
+  2026-10-12T00:43:06Z); this run reserved no decision id. `FAC-SEM-082`…`FAC-SEM-084` were reserved by git CAS
+  (`--key w4-p4-06-sem-{delta,heartbeat,reconcile}-20261012 SEM`, receipts SEM-0082…SEM-0084). This file,
+  `conformance.md` and `backlog.md` were edited in the run's branch without a lease, by the wave's arrangement (the owner
+  session takes the leases when it merges); the record plane is `fs`.
+
 ### DEC-0055 — The estate record, `estate-record/1`: whole revisions chained by digest, keys by role, placements by reference, signed by a passkey
 
 - **Date:** 2026-10-12
@@ -2549,348 +2873,111 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `--key w3-p3-03-sem-estate-{chain,machines,packages,secrets,grants}-20261012 SEM`); this file, `conformance.md` and
   `backlog.md` were edited under git leases; the record plane is `fs`.
 
-### DEC-0047 — The relay and the secret envelope: admission by device key inside the WebSocket, store-and-forward that never reports done, trust tiers from the signed sender, HPKE envelopes sealed to `#kem` (`fabric-relay/0.1`, `fabric-secret-envelope/1`)
+### DEC-0056 — Device transport: an HTTP message signature on every device request beside mutual TLS, key roles counted at enrollment, and the estate revision's digest in the check-in
 
 - **Date:** 2026-10-12
-- **Status:** Accepted source change (on merge of its pull request). Consumer adoption:
-- **Annotated (2026-10-26):** DEC-0134 decides the organization relay's handshake (relay.md OR-1 to OR-5); the relay's
-  attestation status check is CT-162. OR-5 narrows item 6's T2 sentence: every member of an organization is T2 to every
-  other on its relay, two enrollments of one owner included, not only "to a recipient of another owner". Item 9's
-  `welcome` (`estateRevision` "always present", `deltaHead`, heartbeat) is an estate's relay's; an organization's
-  relay welcomes with its member list instead (OR-2).
-- **Annotated (2026-10-26):** DEC-0129 gives an organization's relay its admission set (`orgRelayAdmissionSet`, the
-  member list `org-authority/1`); the organization relay's handshake stays open (CT-37).
-- **Annotated (2026-10-15):** amended by DEC-0084: a relay opens a one-time pairing rendezvous that lives at most 600 s and carries `pairing-message/1` frames only, with one `abort` after both reveals (relay.md, *The pairing rendezvous*; its frame types are not decided); `relayAdmissionSet` subtracts a key revoked by its kid or its key reference `<kid>@sha256:<hex>` and reports a malformed reference (`unread`); F7: it admits a `#sig` key only under its own machine's kid `<id>#sig`, and a kid listed twice for neither (`bad-key`), as `FAC-SEM-073` says, even over a held record; an open session stands only while its kid maps to the key octets it was proven under (`sessionStands`, which amends DEC-0066's revalidation by kid), so a session proven under a replaced key ends; `estateEnvelopeContext` takes the applied delta entries' revocations (`extraRevocations`), so an envelope's sender key is refused once a delta revokes it. Shared vectors: `fixtures/vectors/relay.json` `admissionSet` (five new cases) and `session` (new).
-- **Annotated (2026-10-13):** amended by DEC-0082: an envelope names no context, so a target's open context (`estateEnvelopeContext`) reads only personal secret placements, and an organization's instance fills its slot on its own machine (`FAC-SEM-075`), never by an envelope (`docs/specification/contexts.md`).
-- **Annotated (2026-10-12):** the `Fabric-Relay-Request` wire form, which DEC-0047 left unspecified: base64url (no padding, canonical) of the RFC 8785 bytes of `{alg, kid, recipients, iat, sig}`, at most 8192 bytes (431 `too-large`), parsed strictly (400 `malformed`); 1–64 `#sig` recipients of at most 256 characters; a GET's signer must be a stored recipient, sign the stored list letter for letter and be in the current admission set; a PUT of a held blob with another list is 409 `recipients-mismatch` (a new code); the reference is `parseRelayRequest`/`verifyBlobRequest`, the vectors `fixtures/vectors/relay.json` `blobRequest` ([relay](specification/relay.md#blobs)).
-  - the relay server, [passioncode-ai/relay](https://github.com/passioncode-ai/relay), implements the handshake and
-    sessions from this text (its RLY-02) and runs the vectors;
-  - Project Observatory's node is a relay client and opens envelopes into its vault;
-  - Fabric's remote surfaces are clients. An amendment of Fabric ADR-0088 §3 naming `fabric-relay/0.1` is owed:
-    nothing of it is on Fabric's main yet;
-  - the hub carries T2 messages under DL-8, and the first organization server takes its organization record as the
-    source of admission and keeps the presence rule (item 5).
-- **Annotated (2026-10-12, CON-022):** this describes relay.md as it stood before DEC-0066. Item 7's open order and
-  relay.md's were one order in two numberings: relay.md listed eleven steps, its 9 and 10 (the life, then `now < exp`)
-  being item 7's 9, and its 11 item 7's 10. (DEC-0066 adds `replayed`/`sequence-reused` as relay.md's step 8, so relay.md
-  now lists twelve: its 1–7 are item 7's 1–7, its 9–11 item 7's 8–9, its 12 item 7's 10.) Step 4's refusals are
-  `unsupported-alg` for an Ed25519 sender key and `bad-key` for a key the record does not list, any other key that is
-  not a valid P-256 key and an encapsulated key that fails SEC 1, as `openEnvelope` answers; relay.md's step 4 now names
-  them. *Consequences / affects* also cover `test/relay-request.test.ts` (#60) and `src/webauthn.ts` (#59,
-  `ef7573a`, the JWK key form).
-- **Amended (2026-10-12) by DEC-0066:** items 2, 3, 4, 5, 7, 8 and 9 — low-S and strict instants, the close-code table
-  and frames, one `unauthenticated` until the signer is proven with the estate compared inside `admit`, revalidation of
-  open sessions, the recipient's own kid as `to` and the replay window, the envelope's sequence and mark, the blob
-  check order, and where delta entries come from. `fabric-relay/0.1` and `fabric-secret-envelope/1` are amended in
-  place; relay.md now lists twelve open steps.
-- **Amends:** nothing. It is a new protocol under the DEC-0016 extension policy. It builds on:
-  - DEC-0053's P-256 device keys by role (`<device.id>#sig`, `<device.id>#kem`);
-  - DEC-0045's trust tiers (DL-25, DL-26);
-  - DEC-0043's register of canonical forms (every signed or hashed document here is RFC 8785).
-
-  It implements the relay half of the first organization server's target architecture v4 §12 row "secret envelope
-  (sealed to a device key)", and the transport of its "revocation delta and timestamp heartbeat" row. The documents
-  themselves are DEC-0054's.
-- **Decision:** in [relay](specification/relay.md) unless named otherwise —
-  1. **Roles.**
-     - A relay admits machines, queues and delivers opaque messages, stores envelopes and blobs by digest, reports
-       when a machine was last seen, and carries signed deltas and heartbeats unchanged.
-     - It holds no authority. It never reads a body or a secret, decides a tier, signs anything a node relies on,
-       reports a queued command done, or serves a signing page.
-  2. **Keys.**
-     - A relay participant's keys are P-256, two per machine, never one key in both roles.
-     - **Its `#sig` is ES256 only.** devices.md admits an Ed25519 `#sig` for a device; a relay refuses one, and any
-       `alg` other than `ES256`, as `unsupported-alg`. Every signed document names the algorithm in a signed field:
-       `relay-auth/1`, `relay-blob/1` and the envelope header carry `alg: "ES256"`, and the message body is a JWS.
-     - Every public key is validated before use by SEC 1 v2 §3.2.2 (`p256KeyRefusal` in `src/p256.ts`), one function
-       that names the refusal and that `isValidP256Key` is expressed by. A key that fails is refused as `bad-key`.
-     - A key reaches every check in either spelling: DEC-0053's base64 SEC 1 octets or a JWK (`p256Point`,
-       `p256PublicKey`), with the same answers for both.
-     - All signatures are ES256, raw `r ‖ s`.
-     - Times are RFC 3339 UTC; one that does not parse to an instant is refused, never compared. A signed `iat` more
-       than 60 s ahead of the verifier's clock is `not-yet-valid`, in admission, in a message body and in an
-       envelope.
-  3. **Transport.**
-     - One WebSocket (RFC 6455) per connection to `/v1/connect`, with subprotocol `fabric-relay.v1`, over TLS 1.2
-       or newer, TLS 1.3 (RFC 8446) SHOULD.
-     - No credential travels in the URL or in an HTTP header.
-     - UTF-8 JSON text frames of at most 1 MiB, each with `{v: 1, type, id}`
-       ([`relay-frame.schema.json`](../schemas/relay-frame.schema.json)).
-     - Unknown members are ignored. An unknown `type` is answered with `error` `unknown-type`.
-     - Close codes: 1009 for a frame over 1 MiB, 1003 for a binary frame, 4401 after `unauthenticated`, 4403 after
-       `not-admitted`, and 1001 after 90 s of silence (`CLOSE_CODES`, `IDLE_CLOSE_SECONDS`).
-  4. **Admission** (`admit`). A machine answers `hello`'s nonce, within 10 s, with an ES256 signature over the RFC
-     8785 bytes of `{type: "relay-auth/1", alg: "ES256", relay, nonce, estate, kid, iat}`. The relay admits it only
-     when all of these hold:
-     - the protocol is this one, and `alg` is `ES256`;
-     - `iat` is an instant at most 60 s old and at most 60 s ahead (`not-yet-valid` beyond that);
-     - the nonce is this connection's own, and is used once;
-     - `kid` is in the admission set;
-     - the signature verifies.
-
-     It then attributes every later frame on the connection to that `kid`.
-     - **The admission set** is the set of `#sig` keys of the machines in the estate record the relay holds,
-       minus revoked machines and keys (`relayAdmissionSet`). It is not authorization.
-     - **Only from a verified revision.** The relay pins the estate's first passkeys when it is set up for the
-       estate, the same act as a machine's enrollment pin. It applies a revision only when it is valid against the
-       schema and `verifyEstateRecord` accepts it against the revision it holds (revision 1: against the pinned
-       passkeys). A refused revision changes nothing, and a relay never starts with a configured set.
-     - **Fails closed.** When the held revision's window ends, the relay admits no new `auth` until a newer verified
-       revision arrives; open sessions end at their next re-authentication, and queued mail stays until its `ttl`.
-       Presence and `lastSeen` follow the same verified set.
-     - **No organization record yet.** An organization's relay has no admission source of its own until
-       `org-authority/1` (Fabric D8) is decided.
-     - `relayAdmissionSet` takes the schema check from its caller, which MUST pass the validator of
-       `estate-record.schema.json`; `() => true` is not conformant.
-  5. **Messages.**
-     - `send` → `accepted {msgId, seq}` → `deliver {from, msgId, seq, body, sentAt}` → `ack {seq}`.
-     - Delivery is at least once. A repeated `msgId` from the same sender within its `ttl` answers its first `seq`.
-     - `ttl` is 1 s to 7 days and bounds only the mailbox. A body is at most 765 KiB decoded, so the largest frame
-       around it fits 1 MiB.
-     - **The body is end to end:** a compact JWS (`ES256`, `typ: fabric-relay-message+jwt`) over the RFC 8785 payload
-       `{type, from, to, msgId, iat, exp, payload}`. `exp` is signed: the recipient judges the message's life by it,
-       at most 7 days after `iat`, never by the frame's `ttl`. A recipient (`verifyMessageBody`) refuses a body whose
-       signed `from`, `to` or `msgId` differs from the frame's, and names `not-yet-valid`, `lifetime-too-long` and
-       `expired`.
-     - **A relay never reports a command done.** Only the recipient's own signed message back reports an outcome
-       (Fabric ADR-0088).
-     - Presence frames give `{kid, state, lastSeen}`, and **only to machines of the same owner** (J10/OD-1). An
-       organization's relay sends no presence from one member to another.
-  6. **Trust tiers follow the signed sender, never the connection.**
-     - Relay traffic is never T0.
-     - **T1** is a verified `from` that is an enrolled machine of the recipient's **same owner** (DL-25), current
-       and not revoked (DL-26).
-     - **T2** is anything else (DL-8): a machine listed only in an organization record, to a recipient of another
-       owner, and a body signed by an outsider and forwarded by a T1 session.
-  7. **The secret envelope** (`fabric-secret-envelope/1`,
-     [`secret-envelope.schema.json`](../schemas/secret-envelope.schema.json), `src/secret-envelope.ts`).
-     - **Seal:**
-       - HPKE base mode, DHKEM(P-256, HKDF-SHA256) / HKDF-SHA256 / AES-128-GCM, `[16, 1, 1]`, checked against RFC 9180
-         §A.3.1;
-       - recipient: the target's `#kem` key;
-       - `info`: the ASCII bytes `fabric-secret-envelope/1`;
-       - additional data: the RFC 8785 header `{type, alg, suite, recipient, sender, agentRef, slot, placement, iat,
-         exp, enc}`: a slot is named with its agent, since one slot name can belong to two agents.
-     - A sealer refuses a recipient kid without `#kem` and a sender kid without `#sig`.
-     - The sender signs `{header, ct}` with its `#sig` key. The envelope is named by
-       `sha256:<hex of its RFC 8785 bytes>`.
-     - **A target opens an envelope only when all of these hold, checked in this order** (a refusal names the first
-       that failed; relay.md and `openEnvelope` keep the same order):
-       1. it is well formed, its times real instants (`malformed`);
-       2. `alg` is `ES256` (`unsupported-alg`);
-       3. the recipient is its own `#kem` (`wrong-recipient`);
-       4. the sender's key is P-256 and it and the encapsulated key pass SEC 1 (`unsupported-alg`, `bad-key`);
-       5. the signature is 64 canonical bytes and verifies (`bad-signature`);
-       6. the latest estate-record revision the target verified and applied (DEC-0055) places `(agentRef, slot)` on
-          it from the sender's machine (`sender-not-allowed`);
-       7. `placement` is at least the revision from which that placement holds unchanged and at most the latest
-          revision the target has applied: a newer one is fetched and verified first (`placement-stale`);
-       8. `iat` is at most 60 s ahead (`not-yet-valid`);
-       9. the life is more than zero and at most 24 hours (`lifetime-too-long`), and not over (`expired`);
-       10. HPKE opens (`cannot-open`).
-
-       `estateEnvelopeContext` derives the holder, the sender's key and the current placement from the target's
-       applied revisions.
-  8. **Blobs.**
-     - `PUT`/`GET /v1/blobs/<digest>` carry `Fabric-Relay-Request`: an ES256 signature over the RFC 8785 bytes of
-       `{type: "relay-blob/1", alg: "ES256", relay, method, digest, recipients, iat}`. It is accepted within 60 s and bound to the
-       method, the digest and the recipients, so it is not a bearer credential.
-     - A blob's name is always `sha256:` and the hex SHA-256 of its bytes. A package travels as its archive's
-       bytes; its DEC-0050 content digest is not its blob name.
-     - The relay recomputes every digest.
-     - A blob is kept until every recipient fetched it, or until 7 days pass.
-  9. **Revocation travels, it is not defined, here.**
-     - `welcome` carries `deltaHead {sequence, sha256}`, the shape of DEC-0053's check-in
-       `records.revocationDelta`, so a node reports it as it came, and `estateRevision`, the verified revision (1 or
-       more) the relay admits from — always present, since a relay without one admits nobody.
-     - New deltas and heartbeats are pushed to every connected machine they name. A node behind the head asks with
-       `delta-query`.
-     - A relay can delay revocation, which the signed heartbeat exposes, but it cannot forge it. The documents, keys,
-       head hash, the 72-hour rule and their vectors are DEC-0054.
-     - The check-in's `records` of DEC-0053 carry that head unchanged. Their `heartbeat` is DEC-0054's document,
-       and `leases` are the window lease's own decision.
-  10. **Rules:**
-      - `FAC-SEM-070`: an envelope is sealed to a `#kem` key by a `#sig` key under `ES256`, with the admitted suite,
-        a life of more than zero and at most 24 hours, and a valid encapsulated key;
-      - `FAC-SEM-071`: an `auth` frame names a `#sig` key, `ES256` and this protocol; a `send` frame addresses a
-        `#sig` key, with a bounded `ttl` and body.
-- **Why:**
-  - **The operator decided D6 on 2026-10-12:** the relay gets its own open repository, with Project Observatory as
-    code owner, and self-hosting stays (V2-21).
-  - **A relay is the one component every person's machines, and later colleagues' machines, must pass through.**
-    Putting authority anywhere but in end-to-end signatures and seals would make its compromise the estate's. With
-    this text, a compromised relay can deny service and see metadata, nothing more.
-  - **The two-key rule and SEC 1 validation close the invalid-curve attack on ECDH and the confusion of a signature
-    with a seal.** The envelope reuses a published, vector-checked construction (RFC 9180) rather than a bespoke one.
-  - **ES256 only for the relay, departing from devices.md's Ed25519 `#sig`** (in the way DEC-0053 item 7 departs):
-    the platform keystore holds P-256, and the envelope's `#kem` is P-256 anyway, so one curve and one verifier serve
-    every relay participant. The algorithm is named in each signed document, as the wave-3 rule asks.
-  - **The owner's rulings on the review of #53:** T1 is DL-25's same owner; presence stays within one owner; ES256
-    with a signed `alg`; one `{sequence, sha256}` head shape; not-before; a signed `exp`.
-- **Compatibility:** Additive under DEC-0016:
-  - two new schemas (`relay-frame`, `secret-envelope`), two rule codes, three vector files (`relay.json`,
-    `secret-envelope.json`, and `p256.json` extended with refusal names and JWK cases);
-  - `isValidP256Key` keeps its answers for every byte string, and now also accepts a JWK.
-
-  `contractVersion` stays `0.1.0`.
+- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: the first organization server
+  verifies the binding as receiver and runs the vectors at its next contract pin; a collector and Project Observatory's
+  node sign every batch, check-in and rotation request with the device's `#sig` key, and the node reports the applied
+  estate revision's `digest` (backlog CT-04, CT-20, CT-32).
+- **Amends:** DEC-0031 items 1 and 2 (transport and attribution) and DEC-0053 items 8 and 9 (device keys, check-in
+  fields), additively except where *Compatibility* says. Closes DEV-HTTPSIG, DEV-KEY-ROLES and DEV-CHECKIN-DIGEST
+  (board run N18, packet P4-04).
+- **Decision:** in [devices](specification/devices.md#transport) unless named otherwise —
+  1. **A device signs every request after enrollment.** Every batch (`fabric-activity/0.1`), check-in and rotation
+     request (`certificate.action: "rotate"`) carries an HTTP message signature, a subset of RFC 9421, beside mutual TLS,
+     not instead of it. On one request (the owner session's ruling): a signature that is present is always verified;
+     beside a client certificate, `keyid` MUST equal that certificate's serial, else 401 `certificate-unknown`; an invalid
+     signature over a valid mutual-TLS session is refused with the signature step's code; an unsigned request is accepted
+     only by a receiver that sees the client certificate, while that certificate is known, not revoked and valid. A
+     receiver behind a host that terminates TLS therefore requires the signature. Enrollment is unchanged: its proof
+     travels in `Authorization`. A device signs each retry afresh, with a new `nonce` and `created`.
+  2. **The signature's shape.** Label `fabric-device`; covered components `("@method" "@target-uri" "content-digest")`
+     in that order; parameters `created`, `nonce`, `keyid`, `alg`, in that order and no other; `keyid` the certificate's
+     serial; `alg` `ecdsa-p256-sha256` (RFC 9421 §3.3.4, r ‖ s) for an `es256` signing key, `ed25519` (§3.3.6) for an
+     `ed25519` one; `nonce` 22–64 base64url characters, required; `Content-Digest` exactly one member, `sha-256`, over
+     the body's bytes (RFC 9530 §2). The fields are RFC 8941 Dictionaries (RFC 9651's Date and Display String admitted on
+     other members); a parameter repeated on the `fabric-device` member is refused, while other members keep RFC 8941's
+     last-wins rule. The signature base is RFC 9421 §2.5's with §2.3's signature parameters last.
+  3. **The signing key** is the `#sig` key of the enrollment whose epoch the certificate carries (rotation keeps it), or,
+     where that enrollment listed no `deviceKeys`, the certified key (DEC-0031's key on record); the receiver's data model
+     records which. Serials are unique among the certificates one receiver accepts. A P-256 key passes SEC 1 §3.2.2
+     (`isValidP256Key`), an Ed25519 key the small-order check (DEC-0045), before anything is verified under it.
+  4. **The target URI** is built from the receiver's public base URL — `https://` and the authority the device enrolled
+     with, host in lower case, no default port, no path — and the request target as received; never from `Host`.
+  5. **The receiver's steps and codes**, each refusal HTTP 401: `signature-missing` (no conforming `fabric-device`
+     signature, a missing or malformed nonce among them), `digest-mismatch`, `signature-stale` (`created` more than 300 s
+     from its clock, either way), `certificate-unknown` (also a `keyid` that is not the client certificate's serial),
+     `certificate-revoked` (`revoked` present and not `false`), `certificate-expired` (outside
+     `notBefore` ≤ t < `notAfter`, read strictly as RFC 3339), `signature-invalid` (the wrong `alg` for the key, an
+     unusable key, a base that cannot be built, a signature that does not verify) and `signature-replayed`. A context that
+     is not usable — not an object, an unreadable clock, a malformed public base URL, a certificate lookup or nonce store
+     that is not a function — is refused first, as the receiver's own fault (`context-invalid`, `clock-unreadable`,
+     `base-url-invalid`); the verifier answers and never throws.
+  6. **Replay.** Only after the signature verifies does the receiver record (serial, `nonce`), atomically, and it keeps
+     the pair at least while its clock is at or before `created + 300` s; a repeat answers `signature-replayed`. A
+     refused request records nothing. The store is an interface (`NonceStore`); it detects repeats and nothing else.
+  7. **Attribution is unchanged:** the certificate the verified signature names stands where the client certificate
+     stands (`FAC-SEM-045`).
+  8. **The reference verifier** is `src/http-signature.ts` (`checkDeviceSignature`, `verifyDeviceRequest`, the signer
+     `signDeviceRequest`, which refuses a nonce, serial or `created` the receiver would refuse, `parseDictionary`,
+     `signatureBase`), with the vectors `fixtures/vectors/http-signature.json` that a server and a collector run.
+     **`FAC-SEM-077`** (`device-request-signature`, receipt SEM-0077), in its own module `src/device-transport-rules.ts`
+     so a consumer that vendors `src/device-rules.ts` needs no HTTP layer: the answer of a receiver that requires the
+     signature, or that sees a client certificate, is the one the binding gives.
+  9. **Key roles at enrollment (DEV-KEY-ROLES).** `FAC-SEM-044` counts roles: an enrollment that lists `deviceKeys`
+     lists exactly one `#sig` and at most one `#kem`, as the estate record's `FAC-SEM-073` does (DEC-0055).
+  10. **The revision's digest (DEV-CHECKIN-DIGEST).** The check-in's `records.estateRecord` MAY carry `digest`
+      (`sha256:` and 64 hex, DEC-0055's `digest`) beside `revision`, so a receiver tells two revisions with one number
+      apart (`schemas/device-check-in.schema.json`). A device omits it toward a receiver pinned before this decision.
+  11. **J10.** The binding carries a certificate serial, a nonce and a time; it describes a device's key and nothing about
+      a person. The nonce store detects repeats only: a pair SHOULD be deleted once the clock passes its `keepUntil`, and
+      the store is never read as a record of activity.
+- **Why:** a host that terminates TLS at its edge never passes a client certificate on, so DEC-0031's mutual TLS proves
+  nothing there; the first organization server runs on such a host and proposed this binding (its ADR-0007). The nonce
+  makes a replay visible: a check-in's `sequenceNum` drives OpAMP's full-state request on a gap, not a refusal, so a
+  check-in replayed inside the window would be read again and could bring back an old posture and hide `tampered`. A
+  receiver must know the one key that signs, which is why the enrollment's key roles are counted. A fork of the estate
+  record (two revisions, one number) was invisible in a check-in that carried only the number (PR #54's seam review).
+- **Compatibility:** Additive in schema: a new optional `digest`, a new rule code, a new module. Tightening, each with
+  what a consumer does: an enrollment listing two `#sig` keys, or two `#kem` keys, or only a `#kem` key, is refused by
+  `FAC-SEM-044` (a collector lists one of each role); a device signs every request (a collector built against mutual TLS
+  alone adds the signature; none is deployed, CT-04); a receiver behind a TLS-terminating host refuses an unsigned
+  request with `signature-missing`. The first organization server's implementation (its commit `7a47447`) already
+  speaks this label, these parameters and these codes; the seam reading ran it against the vectors, and these
+  differences remain for its next pin: (a) its anchored pattern answers `signature-missing` when another signature is
+  beside ours; (b) an off-curve P-256 key on record throws (a 500, not a 401); (c) it accepts an `http://` public base
+  URL; (d) it refuses an expired (serial, nonce) pair until its purge runs, where the binding lets it lapse after
+  `keepUntil`; (e) it does not refuse a small-order key at enrollment; (f) it upper-cases `@method`; (g) it verifies
+  under the CSR's key rather than the `#sig` key. `contractVersion` stays `0.1.0`.
 - **Consequences / affects:**
-  - spec: `docs/specification/relay.md` (new), `docs/specification/conformance.md` (rule register, canonical forms),
-    `docs/specification/devices.md` (the `#kem` and `records` passages point here and to DEC-0054);
-  - schemas: `schemas/relay-frame.schema.json`, `schemas/secret-envelope.schema.json`,
-    `schemas/device-check-in.schema.json` (descriptions of `records` only);
-  - source: `src/relay.ts`, `src/secret-envelope.ts`, `src/relay-rules.ts`, `src/p256.ts` (`p256KeyRefusal`),
+  - spec: `docs/specification/devices.md` (transport, enrollment, device keys, attribution, check-in, rules),
+    `docs/specification/activity.md` (batch transport, OTLP intake), `docs/specification/estate-record.md` (device-key
+    counts, the fork), `docs/specification/conformance.md` (register, readers, canonical forms);
+  - schemas: `schemas/device-check-in.schema.json`, `schemas/device-enrollment.schema.json`,
+    `schemas/activity-batch.schema.json`, `schemas/activity-common.schema.json` (descriptions);
+  - code: `src/http-signature.ts` (new), `src/device-transport-rules.ts` (new), `src/device-rules.ts`,
     `src/semantic-rules.ts`;
-  - vectors and fixtures: `fixtures/vectors/{relay,secret-envelope,p256}.json`, `fixtures/semantic/relay-*.json`;
-  - tests: `test/relay.test.ts`, `test/secret-envelope.test.ts`, `test/relay-rules.test.ts`, `test/p256.test.ts`,
-    `test/schema-compilation.test.ts`;
-  - docs: `docs/DOCMAP.md`.
-- **Not decided here:**
-  - the guest OAuth page and its binding ceremony;
-  - attestation formats (OQ-0010);
-  - mailbox quotas;
-  - whether a self-hosted relay federates with the hosted one;
-  - the documents of the revocation delta and heartbeat (DEC-0054);
-  - the window lease.
-- **Source:**
-  - The operator's D6 decision and its relay transport ADR, private to Project Observatory, agreed with Fabric's,
-    the knowledge base's and the first organization server's owners. Its public part is relay ADR-0001.
-  - The contract owner's review of the draft (relay `docs/protocol/dec-0047-draft.md`), with its answers on P-256
-    keys, the DEC-0054 split and the admission removal point.
-  - RFC 9180, RFC 8785, SEC 1 v2, RFC 7518, RFC 6455 and RFC 8446.
-  - The contract owner's review of #53 and rulings (2026-10-12).
-  - The target architecture v4 at `9c6a780`, §4, §7 and §12.
-  - The board item `V4-SECURE-TRANSPORT`.
-  - DEC-0047 was reserved by git CAS (`agent_sync.py reserve --key relay-protocol-20261012 DEC`), and `FAC-SEM-070`
-    and `FAC-SEM-071` by `--key relay-protocol-20261012-sem-{envelope,frame} SEM`. This file and `conformance.md` were
-    edited under git leases of run `project-observatory-3d-relay`; the record plane is `fs`.
-
-### DEC-0058 — Operator-channel status invariants: a channel nobody receives on is only `degraded`, and every state invariant has a killing fixture
-
-- **Date:** 2026-10-12
-- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: channel-status producers — every agent
-  that publishes the operator-channel status, and the fabric-agent-adapter's kits when they serve the status (a new
-  adapter row under backlog CT-18) — report a channel whose receiver is missing as `degraded` with `receiver-missing` and `receiver.lease: none`, also while it waits for a
-  link code, and never as `unlinked`.
-- **Amends:** DEC-0035, whose *Compatibility* said `operator-channel-status.schema.json` was unchanged: this decision
-  tightens that schema. DEC-0034's status table gains the lease `unlinked` requires. Closes F-B-204, F-B-205 and
-  F-B-219 of the board-waves inventory (node N09, backlog CT-13).
-- **Decision:** in the [operator channel](specification/operator-channel.md) and its status schema —
-  1. **`unlinked` has someone receiving.** A status in state `unlinked` carries `receiver.lease` `held` or `elsewhere`,
-     never `none` (schema, `unlinked` branch). A waiting channel nobody receives on is `degraded` with
-     `receiver-missing` (OC-17), and the status table says so.
-  2. **`receiver-missing` is one shape.** A status whose `reason.code` is `receiver-missing` has `state: degraded` and a
-     `receiver` with `lease: none` (schema, an `if`/`then` on `reason.code`). OC-17's closing list names `unlinked`
-     beside `linked`, `standby` and `off`: a missing receiver is never reported in any of them.
-     `receiver.lease` reads `none` whenever the receiver is missing, even while a process still renews the lease (the
-     not-draining condition). In the first 120 seconds after a lease stops being renewed the receiver is not yet
-     missing: the last status stands and the lapse is never reported as `unlinked`; after 120 seconds the status is
-     `degraded` with `receiver-missing`. The lease's schema description says the same.
-  3. **Every state invariant has a fixture that kills it.** Negative fixtures for each required member of `linked`,
-     `standby`, `unlinked` and `degraded`, the leases of `linked`, `standby` and `unlinked`, a present credential under
-     `linked`, `receiver-missing` in a state other than `degraded`, with a held lease and without a receiver, the
-     sixteen-chat limit and an `excluded.liftedAt` that is an absolute URL. `test/operator-channel.test.ts` removes
-     each invariant from a copy of the schema (twenty-two mutants) and fails if no negative fixture is then accepted, and
-     an identity mutant must let none through;
-     one, `linked` without `receiver`, survived before this change, because the fixture of that name carried a receiver
-     with lease `none`.
-  4. **The glossary's *Addressed message*** names the one unaddressed input OC-15 honours: a bare `/link CODE` that
-     matches the agent's own pending code.
-- **Why:** the audit's probe (F-B-204) published the defect DEC-0035 was written for — on 2026-10-10 two bots had
-  nobody receiving while their status said nothing — as a valid status in state `unlinked` with `receiver.lease:
-  none`, and as `receiver-missing` with a held lease or no receiver at all, because the schema left both
-  representable. F-B-205 removed eight state invariants one at a time and every test still passed: the schema stated
-  them and nothing proved them.
-- **Compatibility:** tightening under DEC-0016, `contractVersion` stays `0.1.0`. A status that reported a channel
-  nobody receives on as `unlinked`, or `receiver-missing` with another lease or state, was already against OC-17's
-  text and is now refused by the schema; the agent reports `degraded` instead. No positive fixture changes; one is
-  added, a waiting channel nobody receives on. No semantic rule code is allocated.
-- **Consequences / affects:**
-  - spec: `docs/specification/operator-channel.md` (OC-17's closing paragraph, the `unlinked` row, the
-    `receiver-missing` code, *Not decided here*);
-  - schema: `schemas/operator-channel-status.schema.json` (the `unlinked` branch, the `receiver-missing` branch, the
-    `state` description);
-  - fixtures: `fixtures/positive/operator-channel-status-degraded-receiver-missing-unlinked.json`,
-    `fixtures/negative/operator-channel-status-*` (seventeen new), `fixtures/catalogue.json`;
-  - tests: `test/operator-channel.test.ts` (this entry, the boundaries, the mutants), `test/schema-mutants.ts` (new);
-  - docs: `CONTEXT.md` (*Addressed message*), `docs/ux/scenarios.md` (SCN-012), `docs/backlog.md` (CT-13, CT-18),
-    `docs/DECISIONS.md` (DEC-0034 and DEC-0035 annotated), the
-    handoff `docs/handoffs/2026-10-12-w4-p4-03-channel-dashboard.md` and `docs/handoffs/README.md`.
-- **Not decided here:** whether `off` may carry a `receiver` at all; reason codes other than `receiver-missing` keep an
-  open vocabulary and constrain no lease.
-- **Source:** the board-waves inventory F-B-204, F-B-205, F-B-219
-  (`docs/evidence/specs/2026-10-11-board-waves/inventory.json`), packet P4-03. DEC-0058 was reserved by git CAS
-  (`agent_sync.py reserve --key w4-p4-03-channel-dashboard-20261012 DEC`); this file, `conformance.md` and `backlog.md`
-  were edited in the run's branch without a lease, by the wave-4 arrangement: the owner session takes those leases when
-  it merges; the record plane is `fs`.
-
-### DEC-0059 — Embedded dashboard amended: the appearance cookie per host or per store, a page applies only the fields it declares, an invalid declaration is not declared (`FAC-SEM-080`)
-
-- **Date:** 2026-10-12
-- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: Fabric Dashboards consumes
-  ED-9 `appearance` and validates the declaration, logging an invalid one once per load (its own row, filed by its
-  session, under backlog CT-21); the fabric-agent-adapter's dashboard kit applies only the fields it declares, keeps the page's own saved value
-  for a field it does not list and hides only the listed fields' controls, and its `check_service.py` keeps checking
-  the declaration (a new adapter row under CT-18). Fabric Dashboards' FD-42 sentence that it "reloads only the pages
-  that do not declare appearance" is superseded: a page that lists no field reads no cookie (CT-21).
-- **Amends:** DEC-0036 (ED-6, ED-8, ED-9 and its *Not decided here*; its *Compatibility* said no semantic rule code is
-  allocated, and this decision allocates one); DEC-0040's FB-6 and DEC-0045 item 9 (the `fabric_button` cookie takes
-  ED-8's scope). Agreed with Fabric Dashboards' session (FD-37, its `main` `e1fdd64`).
-  Closes F-B-214, F-B-215, F-B-216 and F-B-217 of the board-waves inventory (node N09, backlog CT-13).
-- **Decision:** in the [embedded dashboard](specification/embedded-dashboard.md) —
-  1. **ED-8, the cookie's scope.** The appearance cookie is set for the page's host in the store the page reads. A
-     cookie is not isolated by port (RFC 6265 §8.5), so it is "per host in a shared cookie store; per service where
-     the host gives each service its own store": every local service on `127.0.0.1` sharing one store reads and can
-     overwrite one cookie, and Fabric Dashboards, which gives each service the partition `persist:svc-<key>`
-     (`src/electron/policy.ts` `partitionFor`, `src/electron/views.ts`), carries it per service. **FB-6's `fabric_button` cookie** has the same scope: in a
-     shared store an `owner=host` written for one local service hides the button of every local service on that host.
-  2. **ED-6 follows ED-9's `appearance`.** A page takes from the cookie exactly the fields its declaration lists, hides
-     only those fields' controls while the cookie is present, and keeps the others. A page that lists none — no
-     `appearance`, no declaration, or an invalid one — takes nothing from the cookie and follows
-     `prefers-color-scheme` only. (Fabric Dashboards already keeps that in agreement with the theme chosen in the app,
-     `nativeTheme.themeSource`.) ED-8's reload sentence follows: a page that lists no field reads no cookie.
-  3. **ED-9, an invalid declaration.** A host validates the value against
-     `service-dashboard-extension.schema.json`, treats an invalid one as not declared (a legacy dashboard: host floor
-     480, no carrier field) and reports it. **`FAC-SEM-080`** (`service-well-known`, receipt SEM-0080) reports it on the
-     well-known document, once per schema error, at the extension key; the well-known schema cannot, because
-     `extensions` is open. `hostView` in `src/dashboard-declaration.ts` is the reference reading, with vectors in
-     `fixtures/vectors/dashboard-declaration.json` for a host's port (21 cases: the floors 359, 360, 480, 481,
-     1280 and 1281, a valid floor beside a field named twice, and `360.0` given as raw JSON text).
-  4. **Killing fixtures for the declaration (F-B-217):** a declaration without `minWidth`, a fractional one, one above
-     1280, a theme or a carrier field twice, an empty `themes` and 33 themes. `test/embedded-dashboard.test.ts` removes
-     each of ten constraints from a copy of the schema and fails if no negative fixture is then accepted; an identity
-     mutant, which changes nothing, must let no negative fixture through.
-- **Why:** ED-8 said the cookie lived "on the service origin", which RFC 6265 contradicts for every local service on
-  one address (F-B-214). ED-6 bound every declaring page to both carrier fields while ED-9 let it declare a subset,
-  so a subset had no conformant meaning (F-B-215). The audit's probe put `{minWidth: 99999, zoom: 3}` under the key
-  and the well-known schema accepted it; a host computing `max(480, minWidth)` from it would give the page more than
-  any window, and only the adapter's script checked it (F-B-216). Four schema constraints survived their removal
-  (F-B-217). The three texts were agreed with Fabric Dashboards' session on 2026-10-12.
-- **Compatibility:** under DEC-0016, `contractVersion` stays `0.1.0`. ED-8's change describes what a cookie already
-  does. ED-6 narrows: a page that applied a field it did not list now falls short of ED-6 and lists it; a page that
-  listed both is unaffected. `FAC-SEM-080` is new: a well-known document carrying an invalid declaration was
-  schema-valid and stays so, and the checker now reports it; a host already treating it as not declared
-  (Fabric Dashboards) is unaffected. `service-dashboard-extension.schema.json` changes only its descriptions.
-- **Consequences / affects:**
-  - spec: `docs/specification/embedded-dashboard.md` (ED-6, ED-8, ED-9, *How a page shows that it holds*, *Semantic
-    rules* (new), *Not decided here*), `docs/specification/fabric-button.md` (FB-6),
-    `docs/specification/conformance.md` (the register row);
-  - schema: `schemas/service-dashboard-extension.schema.json` (descriptions);
-  - code: `src/dashboard-declaration.ts` (new: `hostView`, `dashboardDeclarationRules`), `src/semantic-rules.ts`;
-  - fixtures: `fixtures/negative/service-dashboard-extension-*` (seven new), `fixtures/semantic/service-well-known-dashboard-*`,
-    `fixtures/vectors/dashboard-declaration.json`, `fixtures/catalogue.json`;
-  - tests: `test/embedded-dashboard.test.ts`, `test/delegation-sealed.test.ts` (FB-6's scope), `test/rule-tolerance.test.ts`,
-    `test/schema-mutants.ts`; the floor in
+  - fixtures: `fixtures/catalogue.json`, `fixtures/positive/device-check-in-records-digest.json`,
+    `fixtures/negative/device-check-in-records-digest-bare-hex.json`, `fixtures/semantic/device-enrollment-device-keys-*`,
+    `fixtures/semantic/device-request-signature-*`, `fixtures/vectors/http-signature.json` (new);
+  - tests: `test/http-signature.test.ts` (new), `test/device-rules.test.ts`, `test/rule-tolerance.test.ts`; floors in
     `vitest.config.ts` and `docs/evidence/specs/2026-10-11-board-waves/coverage-baseline.md`;
-  - docs: `docs/evidence/sources.md` (RFC 6265), `CONTEXT.md` (*Appearance carrier*), `docs/DOCMAP.md`,
-    `docs/ux/foundation.md`, `docs/ux/flows.md`, `docs/ux/screens.md`, `docs/ux/scenarios.md` (SCN-021, SCN-022),
-    `docs/backlog.md` (CT-13, CT-18, CT-21), the handoff `docs/handoffs/2026-10-12-w4-p4-03-channel-dashboard.md`.
-- **Not decided here:** a per-service appearance choice for pages that share a cookie store; it needs another carrier
-  (a cookie name per service, a message to the page). The host's picker stays Fabric Dashboards' screen.
-- **Source:** Fabric Dashboards' session (FD-37), its `main` `e1fdd64`, on 2026-10-12; RFC 6265 in the
-  [source ledger](evidence/sources.md); the board-waves inventory F-B-214…F-B-217, packet P4-03. DEC-0059 and
-  `FAC-SEM-080` were reserved by git CAS (`agent_sync.py reserve --key w4-p4-03-dashboard-20261012 DEC`,
-  `--key w4-p4-03-sem-dashboard-declaration-20261012 SEM`); this file, `conformance.md` and `backlog.md` were edited in
-  the run's branch without a lease, by the wave-4 arrangement; the record plane is `fs`.
+  - docs: `docs/evidence/sources.md` (RFC 9421, RFC 9530, RFC 8941, RFC 9651), `CONTEXT.md`, `docs/DOCMAP.md`, `README.md`,
+    `docs/backlog.md`, the handoff `docs/handoffs/2026-10-12-w4-p4-04-device-transport.md` and `docs/handoffs/README.md`.
+- **Not decided here:** a response signature (the server signing its answers; a device trusts the TLS channel and the
+  signed policy and key sets); the URL paths of batches, check-ins and rotation (the vectors' paths are examples); how a
+  receiver behind a TLS-terminating host learns a revoked certificate beyond its own records; what a receiver does when
+  a check-in's estate digest shows a fork; RFC 9421's successor drafts and `Accept-Signature`; clock skew (whether a
+  device reports a `signature-stale` refusal); several certificate issuers behind one receiver, whose serials could
+  collide.
+- **Source:** the first organization server's ADR-0007, amended 2026-10-12 at its commit `7a47447`, agreed with this
+  repository's owner session on 2026-10-12; RFC 9421, RFC 9530 and RFC 8941 in the [source ledger](evidence/sources.md);
+  the board-waves inventory DEV-HTTPSIG, DEV-KEY-ROLES, DEV-CHECKIN-DIGEST, packet P4-04. DEC-0056 and `FAC-SEM-077`
+  were reserved by git CAS (`agent_sync.py reserve --key w4-p4-04-device-transport-20261012 DEC`,
+  `--key w4-p4-04-sem-request-signature-20261012 SEM`); this file, `conformance.md` and `backlog.md` were edited in the
+  run's branch without a lease, by the wave's arrangement (the owner session takes the leases when it merges); the
+  record plane is `fs`.
 
 ### DEC-0057 — Services on every system: one copy under any supervisor and its marker (CT-01), the lifecycle per system, the descriptor's hygiene and the Windows token-file reader
 
@@ -3028,111 +3115,133 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   without a lease, by the wave's arrangement (the owner session takes the leases when it merges); the record plane is
   `fs`.
 
-### DEC-0056 — Device transport: an HTTP message signature on every device request beside mutual TLS, key roles counted at enrollment, and the estate revision's digest in the check-in
+### DEC-0058 — Operator-channel status invariants: a channel nobody receives on is only `degraded`, and every state invariant has a killing fixture
 
 - **Date:** 2026-10-12
-- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: the first organization server
-  verifies the binding as receiver and runs the vectors at its next contract pin; a collector and Project Observatory's
-  node sign every batch, check-in and rotation request with the device's `#sig` key, and the node reports the applied
-  estate revision's `digest` (backlog CT-04, CT-20, CT-32).
-- **Amends:** DEC-0031 items 1 and 2 (transport and attribution) and DEC-0053 items 8 and 9 (device keys, check-in
-  fields), additively except where *Compatibility* says. Closes DEV-HTTPSIG, DEV-KEY-ROLES and DEV-CHECKIN-DIGEST
-  (board run N18, packet P4-04).
-- **Decision:** in [devices](specification/devices.md#transport) unless named otherwise —
-  1. **A device signs every request after enrollment.** Every batch (`fabric-activity/0.1`), check-in and rotation
-     request (`certificate.action: "rotate"`) carries an HTTP message signature, a subset of RFC 9421, beside mutual TLS,
-     not instead of it. On one request (the owner session's ruling): a signature that is present is always verified;
-     beside a client certificate, `keyid` MUST equal that certificate's serial, else 401 `certificate-unknown`; an invalid
-     signature over a valid mutual-TLS session is refused with the signature step's code; an unsigned request is accepted
-     only by a receiver that sees the client certificate, while that certificate is known, not revoked and valid. A
-     receiver behind a host that terminates TLS therefore requires the signature. Enrollment is unchanged: its proof
-     travels in `Authorization`. A device signs each retry afresh, with a new `nonce` and `created`.
-  2. **The signature's shape.** Label `fabric-device`; covered components `("@method" "@target-uri" "content-digest")`
-     in that order; parameters `created`, `nonce`, `keyid`, `alg`, in that order and no other; `keyid` the certificate's
-     serial; `alg` `ecdsa-p256-sha256` (RFC 9421 §3.3.4, r ‖ s) for an `es256` signing key, `ed25519` (§3.3.6) for an
-     `ed25519` one; `nonce` 22–64 base64url characters, required; `Content-Digest` exactly one member, `sha-256`, over
-     the body's bytes (RFC 9530 §2). The fields are RFC 8941 Dictionaries (RFC 9651's Date and Display String admitted on
-     other members); a parameter repeated on the `fabric-device` member is refused, while other members keep RFC 8941's
-     last-wins rule. The signature base is RFC 9421 §2.5's with §2.3's signature parameters last.
-  3. **The signing key** is the `#sig` key of the enrollment whose epoch the certificate carries (rotation keeps it), or,
-     where that enrollment listed no `deviceKeys`, the certified key (DEC-0031's key on record); the receiver's data model
-     records which. Serials are unique among the certificates one receiver accepts. A P-256 key passes SEC 1 §3.2.2
-     (`isValidP256Key`), an Ed25519 key the small-order check (DEC-0045), before anything is verified under it.
-  4. **The target URI** is built from the receiver's public base URL — `https://` and the authority the device enrolled
-     with, host in lower case, no default port, no path — and the request target as received; never from `Host`.
-  5. **The receiver's steps and codes**, each refusal HTTP 401: `signature-missing` (no conforming `fabric-device`
-     signature, a missing or malformed nonce among them), `digest-mismatch`, `signature-stale` (`created` more than 300 s
-     from its clock, either way), `certificate-unknown` (also a `keyid` that is not the client certificate's serial),
-     `certificate-revoked` (`revoked` present and not `false`), `certificate-expired` (outside
-     `notBefore` ≤ t < `notAfter`, read strictly as RFC 3339), `signature-invalid` (the wrong `alg` for the key, an
-     unusable key, a base that cannot be built, a signature that does not verify) and `signature-replayed`. A context that
-     is not usable — not an object, an unreadable clock, a malformed public base URL, a certificate lookup or nonce store
-     that is not a function — is refused first, as the receiver's own fault (`context-invalid`, `clock-unreadable`,
-     `base-url-invalid`); the verifier answers and never throws.
-  6. **Replay.** Only after the signature verifies does the receiver record (serial, `nonce`), atomically, and it keeps
-     the pair at least while its clock is at or before `created + 300` s; a repeat answers `signature-replayed`. A
-     refused request records nothing. The store is an interface (`NonceStore`); it detects repeats and nothing else.
-  7. **Attribution is unchanged:** the certificate the verified signature names stands where the client certificate
-     stands (`FAC-SEM-045`).
-  8. **The reference verifier** is `src/http-signature.ts` (`checkDeviceSignature`, `verifyDeviceRequest`, the signer
-     `signDeviceRequest`, which refuses a nonce, serial or `created` the receiver would refuse, `parseDictionary`,
-     `signatureBase`), with the vectors `fixtures/vectors/http-signature.json` that a server and a collector run.
-     **`FAC-SEM-077`** (`device-request-signature`, receipt SEM-0077), in its own module `src/device-transport-rules.ts`
-     so a consumer that vendors `src/device-rules.ts` needs no HTTP layer: the answer of a receiver that requires the
-     signature, or that sees a client certificate, is the one the binding gives.
-  9. **Key roles at enrollment (DEV-KEY-ROLES).** `FAC-SEM-044` counts roles: an enrollment that lists `deviceKeys`
-     lists exactly one `#sig` and at most one `#kem`, as the estate record's `FAC-SEM-073` does (DEC-0055).
-  10. **The revision's digest (DEV-CHECKIN-DIGEST).** The check-in's `records.estateRecord` MAY carry `digest`
-      (`sha256:` and 64 hex, DEC-0055's `digest`) beside `revision`, so a receiver tells two revisions with one number
-      apart (`schemas/device-check-in.schema.json`). A device omits it toward a receiver pinned before this decision.
-  11. **J10.** The binding carries a certificate serial, a nonce and a time; it describes a device's key and nothing about
-      a person. The nonce store detects repeats only: a pair SHOULD be deleted once the clock passes its `keepUntil`, and
-      the store is never read as a record of activity.
-- **Why:** a host that terminates TLS at its edge never passes a client certificate on, so DEC-0031's mutual TLS proves
-  nothing there; the first organization server runs on such a host and proposed this binding (its ADR-0007). The nonce
-  makes a replay visible: a check-in's `sequenceNum` drives OpAMP's full-state request on a gap, not a refusal, so a
-  check-in replayed inside the window would be read again and could bring back an old posture and hide `tampered`. A
-  receiver must know the one key that signs, which is why the enrollment's key roles are counted. A fork of the estate
-  record (two revisions, one number) was invisible in a check-in that carried only the number (PR #54's seam review).
-- **Compatibility:** Additive in schema: a new optional `digest`, a new rule code, a new module. Tightening, each with
-  what a consumer does: an enrollment listing two `#sig` keys, or two `#kem` keys, or only a `#kem` key, is refused by
-  `FAC-SEM-044` (a collector lists one of each role); a device signs every request (a collector built against mutual TLS
-  alone adds the signature; none is deployed, CT-04); a receiver behind a TLS-terminating host refuses an unsigned
-  request with `signature-missing`. The first organization server's implementation (its commit `7a47447`) already
-  speaks this label, these parameters and these codes; the seam reading ran it against the vectors, and these
-  differences remain for its next pin: (a) its anchored pattern answers `signature-missing` when another signature is
-  beside ours; (b) an off-curve P-256 key on record throws (a 500, not a 401); (c) it accepts an `http://` public base
-  URL; (d) it refuses an expired (serial, nonce) pair until its purge runs, where the binding lets it lapse after
-  `keepUntil`; (e) it does not refuse a small-order key at enrollment; (f) it upper-cases `@method`; (g) it verifies
-  under the CSR's key rather than the `#sig` key. `contractVersion` stays `0.1.0`.
+- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: channel-status producers — every agent
+  that publishes the operator-channel status, and the fabric-agent-adapter's kits when they serve the status (a new
+  adapter row under backlog CT-18) — report a channel whose receiver is missing as `degraded` with `receiver-missing` and `receiver.lease: none`, also while it waits for a
+  link code, and never as `unlinked`.
+- **Amends:** DEC-0035, whose *Compatibility* said `operator-channel-status.schema.json` was unchanged: this decision
+  tightens that schema. DEC-0034's status table gains the lease `unlinked` requires. Closes F-B-204, F-B-205 and
+  F-B-219 of the board-waves inventory (node N09, backlog CT-13).
+- **Decision:** in the [operator channel](specification/operator-channel.md) and its status schema —
+  1. **`unlinked` has someone receiving.** A status in state `unlinked` carries `receiver.lease` `held` or `elsewhere`,
+     never `none` (schema, `unlinked` branch). A waiting channel nobody receives on is `degraded` with
+     `receiver-missing` (OC-17), and the status table says so.
+  2. **`receiver-missing` is one shape.** A status whose `reason.code` is `receiver-missing` has `state: degraded` and a
+     `receiver` with `lease: none` (schema, an `if`/`then` on `reason.code`). OC-17's closing list names `unlinked`
+     beside `linked`, `standby` and `off`: a missing receiver is never reported in any of them.
+     `receiver.lease` reads `none` whenever the receiver is missing, even while a process still renews the lease (the
+     not-draining condition). In the first 120 seconds after a lease stops being renewed the receiver is not yet
+     missing: the last status stands and the lapse is never reported as `unlinked`; after 120 seconds the status is
+     `degraded` with `receiver-missing`. The lease's schema description says the same.
+  3. **Every state invariant has a fixture that kills it.** Negative fixtures for each required member of `linked`,
+     `standby`, `unlinked` and `degraded`, the leases of `linked`, `standby` and `unlinked`, a present credential under
+     `linked`, `receiver-missing` in a state other than `degraded`, with a held lease and without a receiver, the
+     sixteen-chat limit and an `excluded.liftedAt` that is an absolute URL. `test/operator-channel.test.ts` removes
+     each invariant from a copy of the schema (twenty-two mutants) and fails if no negative fixture is then accepted, and
+     an identity mutant must let none through;
+     one, `linked` without `receiver`, survived before this change, because the fixture of that name carried a receiver
+     with lease `none`.
+  4. **The glossary's *Addressed message*** names the one unaddressed input OC-15 honours: a bare `/link CODE` that
+     matches the agent's own pending code.
+- **Why:** the audit's probe (F-B-204) published the defect DEC-0035 was written for — on 2026-10-10 two bots had
+  nobody receiving while their status said nothing — as a valid status in state `unlinked` with `receiver.lease:
+  none`, and as `receiver-missing` with a held lease or no receiver at all, because the schema left both
+  representable. F-B-205 removed eight state invariants one at a time and every test still passed: the schema stated
+  them and nothing proved them.
+- **Compatibility:** tightening under DEC-0016, `contractVersion` stays `0.1.0`. A status that reported a channel
+  nobody receives on as `unlinked`, or `receiver-missing` with another lease or state, was already against OC-17's
+  text and is now refused by the schema; the agent reports `degraded` instead. No positive fixture changes; one is
+  added, a waiting channel nobody receives on. No semantic rule code is allocated.
 - **Consequences / affects:**
-  - spec: `docs/specification/devices.md` (transport, enrollment, device keys, attribution, check-in, rules),
-    `docs/specification/activity.md` (batch transport, OTLP intake), `docs/specification/estate-record.md` (device-key
-    counts, the fork), `docs/specification/conformance.md` (register, readers, canonical forms);
-  - schemas: `schemas/device-check-in.schema.json`, `schemas/device-enrollment.schema.json`,
-    `schemas/activity-batch.schema.json`, `schemas/activity-common.schema.json` (descriptions);
-  - code: `src/http-signature.ts` (new), `src/device-transport-rules.ts` (new), `src/device-rules.ts`,
-    `src/semantic-rules.ts`;
-  - fixtures: `fixtures/catalogue.json`, `fixtures/positive/device-check-in-records-digest.json`,
-    `fixtures/negative/device-check-in-records-digest-bare-hex.json`, `fixtures/semantic/device-enrollment-device-keys-*`,
-    `fixtures/semantic/device-request-signature-*`, `fixtures/vectors/http-signature.json` (new);
-  - tests: `test/http-signature.test.ts` (new), `test/device-rules.test.ts`, `test/rule-tolerance.test.ts`; floors in
+  - spec: `docs/specification/operator-channel.md` (OC-17's closing paragraph, the `unlinked` row, the
+    `receiver-missing` code, *Not decided here*);
+  - schema: `schemas/operator-channel-status.schema.json` (the `unlinked` branch, the `receiver-missing` branch, the
+    `state` description);
+  - fixtures: `fixtures/positive/operator-channel-status-degraded-receiver-missing-unlinked.json`,
+    `fixtures/negative/operator-channel-status-*` (seventeen new), `fixtures/catalogue.json`;
+  - tests: `test/operator-channel.test.ts` (this entry, the boundaries, the mutants), `test/schema-mutants.ts` (new);
+  - docs: `CONTEXT.md` (*Addressed message*), `docs/ux/scenarios.md` (SCN-012), `docs/backlog.md` (CT-13, CT-18),
+    `docs/DECISIONS.md` (DEC-0034 and DEC-0035 annotated), the
+    handoff `docs/handoffs/2026-10-12-w4-p4-03-channel-dashboard.md` and `docs/handoffs/README.md`.
+- **Not decided here:** whether `off` may carry a `receiver` at all; reason codes other than `receiver-missing` keep an
+  open vocabulary and constrain no lease.
+- **Source:** the board-waves inventory F-B-204, F-B-205, F-B-219
+  (`docs/evidence/specs/2026-10-11-board-waves/inventory.json`), packet P4-03. DEC-0058 was reserved by git CAS
+  (`agent_sync.py reserve --key w4-p4-03-channel-dashboard-20261012 DEC`); this file, `conformance.md` and `backlog.md`
+  were edited in the run's branch without a lease, by the wave-4 arrangement: the owner session takes those leases when
+  it merges; the record plane is `fs`.
+
+### DEC-0059 — Embedded dashboard amended: the appearance cookie per host or per store, a page applies only the fields it declares, an invalid declaration is not declared (`FAC-SEM-080`)
+
+- **Date:** 2026-10-12
+- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: Fabric Dashboards consumes
+  ED-9 `appearance` and validates the declaration, logging an invalid one once per load (its own row, filed by its
+  session, under backlog CT-21); the fabric-agent-adapter's dashboard kit applies only the fields it declares, keeps the page's own saved value
+  for a field it does not list and hides only the listed fields' controls, and its `check_service.py` keeps checking
+  the declaration (a new adapter row under CT-18). Fabric Dashboards' FD-42 sentence that it "reloads only the pages
+  that do not declare appearance" is superseded: a page that lists no field reads no cookie (CT-21).
+- **Amends:** DEC-0036 (ED-6, ED-8, ED-9 and its *Not decided here*; its *Compatibility* said no semantic rule code is
+  allocated, and this decision allocates one); DEC-0040's FB-6 and DEC-0045 item 9 (the `fabric_button` cookie takes
+  ED-8's scope). Agreed with Fabric Dashboards' session (FD-37, its `main` `e1fdd64`).
+  Closes F-B-214, F-B-215, F-B-216 and F-B-217 of the board-waves inventory (node N09, backlog CT-13).
+- **Decision:** in the [embedded dashboard](specification/embedded-dashboard.md) —
+  1. **ED-8, the cookie's scope.** The appearance cookie is set for the page's host in the store the page reads. A
+     cookie is not isolated by port (RFC 6265 §8.5), so it is "per host in a shared cookie store; per service where
+     the host gives each service its own store": every local service on `127.0.0.1` sharing one store reads and can
+     overwrite one cookie, and Fabric Dashboards, which gives each service the partition `persist:svc-<key>`
+     (`src/electron/policy.ts` `partitionFor`, `src/electron/views.ts`), carries it per service. **FB-6's `fabric_button` cookie** has the same scope: in a
+     shared store an `owner=host` written for one local service hides the button of every local service on that host.
+  2. **ED-6 follows ED-9's `appearance`.** A page takes from the cookie exactly the fields its declaration lists, hides
+     only those fields' controls while the cookie is present, and keeps the others. A page that lists none — no
+     `appearance`, no declaration, or an invalid one — takes nothing from the cookie and follows
+     `prefers-color-scheme` only. (Fabric Dashboards already keeps that in agreement with the theme chosen in the app,
+     `nativeTheme.themeSource`.) ED-8's reload sentence follows: a page that lists no field reads no cookie.
+  3. **ED-9, an invalid declaration.** A host validates the value against
+     `service-dashboard-extension.schema.json`, treats an invalid one as not declared (a legacy dashboard: host floor
+     480, no carrier field) and reports it. **`FAC-SEM-080`** (`service-well-known`, receipt SEM-0080) reports it on the
+     well-known document, once per schema error, at the extension key; the well-known schema cannot, because
+     `extensions` is open. `hostView` in `src/dashboard-declaration.ts` is the reference reading, with vectors in
+     `fixtures/vectors/dashboard-declaration.json` for a host's port (21 cases: the floors 359, 360, 480, 481,
+     1280 and 1281, a valid floor beside a field named twice, and `360.0` given as raw JSON text).
+  4. **Killing fixtures for the declaration (F-B-217):** a declaration without `minWidth`, a fractional one, one above
+     1280, a theme or a carrier field twice, an empty `themes` and 33 themes. `test/embedded-dashboard.test.ts` removes
+     each of ten constraints from a copy of the schema and fails if no negative fixture is then accepted; an identity
+     mutant, which changes nothing, must let no negative fixture through.
+- **Why:** ED-8 said the cookie lived "on the service origin", which RFC 6265 contradicts for every local service on
+  one address (F-B-214). ED-6 bound every declaring page to both carrier fields while ED-9 let it declare a subset,
+  so a subset had no conformant meaning (F-B-215). The audit's probe put `{minWidth: 99999, zoom: 3}` under the key
+  and the well-known schema accepted it; a host computing `max(480, minWidth)` from it would give the page more than
+  any window, and only the adapter's script checked it (F-B-216). Four schema constraints survived their removal
+  (F-B-217). The three texts were agreed with Fabric Dashboards' session on 2026-10-12.
+- **Compatibility:** under DEC-0016, `contractVersion` stays `0.1.0`. ED-8's change describes what a cookie already
+  does. ED-6 narrows: a page that applied a field it did not list now falls short of ED-6 and lists it; a page that
+  listed both is unaffected. `FAC-SEM-080` is new: a well-known document carrying an invalid declaration was
+  schema-valid and stays so, and the checker now reports it; a host already treating it as not declared
+  (Fabric Dashboards) is unaffected. `service-dashboard-extension.schema.json` changes only its descriptions.
+- **Consequences / affects:**
+  - spec: `docs/specification/embedded-dashboard.md` (ED-6, ED-8, ED-9, *How a page shows that it holds*, *Semantic
+    rules* (new), *Not decided here*), `docs/specification/fabric-button.md` (FB-6),
+    `docs/specification/conformance.md` (the register row);
+  - schema: `schemas/service-dashboard-extension.schema.json` (descriptions);
+  - code: `src/dashboard-declaration.ts` (new: `hostView`, `dashboardDeclarationRules`), `src/semantic-rules.ts`;
+  - fixtures: `fixtures/negative/service-dashboard-extension-*` (seven new), `fixtures/semantic/service-well-known-dashboard-*`,
+    `fixtures/vectors/dashboard-declaration.json`, `fixtures/catalogue.json`;
+  - tests: `test/embedded-dashboard.test.ts`, `test/delegation-sealed.test.ts` (FB-6's scope), `test/rule-tolerance.test.ts`,
+    `test/schema-mutants.ts`; the floor in
     `vitest.config.ts` and `docs/evidence/specs/2026-10-11-board-waves/coverage-baseline.md`;
-  - docs: `docs/evidence/sources.md` (RFC 9421, RFC 9530, RFC 8941, RFC 9651), `CONTEXT.md`, `docs/DOCMAP.md`, `README.md`,
-    `docs/backlog.md`, the handoff `docs/handoffs/2026-10-12-w4-p4-04-device-transport.md` and `docs/handoffs/README.md`.
-- **Not decided here:** a response signature (the server signing its answers; a device trusts the TLS channel and the
-  signed policy and key sets); the URL paths of batches, check-ins and rotation (the vectors' paths are examples); how a
-  receiver behind a TLS-terminating host learns a revoked certificate beyond its own records; what a receiver does when
-  a check-in's estate digest shows a fork; RFC 9421's successor drafts and `Accept-Signature`; clock skew (whether a
-  device reports a `signature-stale` refusal); several certificate issuers behind one receiver, whose serials could
-  collide.
-- **Source:** the first organization server's ADR-0007, amended 2026-10-12 at its commit `7a47447`, agreed with this
-  repository's owner session on 2026-10-12; RFC 9421, RFC 9530 and RFC 8941 in the [source ledger](evidence/sources.md);
-  the board-waves inventory DEV-HTTPSIG, DEV-KEY-ROLES, DEV-CHECKIN-DIGEST, packet P4-04. DEC-0056 and `FAC-SEM-077`
-  were reserved by git CAS (`agent_sync.py reserve --key w4-p4-04-device-transport-20261012 DEC`,
-  `--key w4-p4-04-sem-request-signature-20261012 SEM`); this file, `conformance.md` and `backlog.md` were edited in the
-  run's branch without a lease, by the wave's arrangement (the owner session takes the leases when it merges); the
-  record plane is `fs`.
+  - docs: `docs/evidence/sources.md` (RFC 6265), `CONTEXT.md` (*Appearance carrier*), `docs/DOCMAP.md`,
+    `docs/ux/foundation.md`, `docs/ux/flows.md`, `docs/ux/screens.md`, `docs/ux/scenarios.md` (SCN-021, SCN-022),
+    `docs/backlog.md` (CT-13, CT-18, CT-21), the handoff `docs/handoffs/2026-10-12-w4-p4-03-channel-dashboard.md`.
+- **Not decided here:** a per-service appearance choice for pages that share a cookie store; it needs another carrier
+  (a cookie name per service, a message to the page). The host's picker stays Fabric Dashboards' screen.
+- **Source:** Fabric Dashboards' session (FD-37), its `main` `e1fdd64`, on 2026-10-12; RFC 6265 in the
+  [source ledger](evidence/sources.md); the board-waves inventory F-B-214…F-B-217, packet P4-03. DEC-0059 and
+  `FAC-SEM-080` were reserved by git CAS (`agent_sync.py reserve --key w4-p4-03-dashboard-20261012 DEC`,
+  `--key w4-p4-03-sem-dashboard-declaration-20261012 SEM`); this file, `conformance.md` and `backlog.md` were edited in
+  the run's branch without a lease, by the wave-4 arrangement; the record plane is `fs`.
 
 ### DEC-0060 — A delegation key the estate record certifies: `hubKeyCertified`, whose fault each refusal is, the highest applied revision, and an unreadable clock refused first
 
@@ -3236,108 +3345,6 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   option); DEC-0045's refusal wire; RFC 3339 and RFC 7519 in the [source ledger](evidence/sources.md); the board-waves
   inventory DL-HUBKEY, packet P4-07. DEC-0060 and `FAC-SEM-081` were reserved by git CAS
   (`agent_sync.py reserve --key w4-p4-07-hubkey-20261012 DEC`, `--key w4-p4-07-sem-hubkey-20261012 SEM`); this file,
-
-### DEC-0054 — The revocation delta and the timestamp heartbeat: entries signed by the estate key and chained by hash, a heartbeat that commits to the head, the 72-hour rule, and reconciliation with the next revision (`revocation-delta/1`, `heartbeat/1`)
-
-- **Date:** 2026-10-12
-- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: Fabric's hub issues entries and
-  heartbeats under a certified hub key, keeps one chain per estate and lists every entry in the next revision it drafts
-  (backlog CT-19); Project Observatory's node applies them under the highest revision it applied, reports the head and
-  the heartbeat in its check-in, refuses what arrives from other machines unless current and refuses an unreconciled
-  revision (CT-20), and its relay client reads the frames as these documents (CT-34); the relay carries them unchanged
-  (DEC-0047).
-- **Annotated (2026-10-13):** amended by DEC-0076: `isRevoked`, and so `reconcileRevision` (`FAC-SEM-084`), matches a `grant` revocation by the normal form of the grant's id; every other kind exactly (`docs/specification/identifiers.md`).
-- **Annotated (2026-10-12):** HB-0 — a held heartbeat the machine could not have accepted is refused `malformed`, never read as nothing held (the owed reading of #64; packet P6-08).
-- **Amends:** nothing; it gives DEC-0053 item 9's `records.heartbeat` and `records.revocationDelta`, and DEC-0047 item
-  9's `delta`, `heartbeat` and `welcome` frames, the documents they named as this decision's. It adds a precondition to
-  DEC-0055's application of a revision (reconciliation, item 6). Implements the first organization server's target
-  architecture v4 (commit `9c6a780`) §7 *Freshness* and §12's row "revocation delta and timestamp heartbeat" for an
-  estate. Closes V4-DELTA-HEARTBEAT (board run N18, packet P4-06).
-- **Decision:** in [revocation delta](specification/revocation-delta.md) unless named otherwise —
-  1. **The estate key signs.** Every entry and heartbeat is signed by a `hubKey` that the highest estate-record revision
-     the verifier verified and applied certifies (DEC-0055 item 4): compared by exact kid, certified for one machine,
-     Ed25519 of full order (DEC-0045), revoked neither there (`hub-key`, `machine`) nor by an entry applied before
-     (`estateSigner`). `alg` is `EdDSA`, signed; ES256 joins with Fabric's D2. The passkey cannot sign an hourly
-     heartbeat (UP and UV every time); the relay holds no authority (DEC-0047 item 1); the hub key is not the estate's
-     record key, as v4 §7 asks of a timestamp key.
-  2. **`revocation-delta/1`** ([`revocation-delta.schema.json`](../schemas/revocation-delta.schema.json)): an entry is
-     `{type, alg, estate, sequence, prev, at, revocation, kid, sig}`, one revocation in the estate record's shape and
-     kinds without `authority` (a passkey is revoked only by a revision a passkey signs). The signing input is the RFC
-     8785 form without `sig`; the entry's hash, the next head, is its hex SHA-256 (`deltaEntryHash`); entry 1's `prev`
-     is the genesis, SHA-256 of `{type, estate, sequence: 0}` (`deltaGenesis`). The head is `{sequence, sha256}` —
-     DEC-0053's `records.revocationDelta` and DEC-0047's `welcome.deltaHead`. A page `{head, entries}` (at most 256) is
-     what a `delta` frame and a check-in response carry; its `head` is a hint.
-  3. **`heartbeat/1`** ([`heartbeat.schema.json`](../schemas/heartbeat.schema.json)): `{type, alg, estate, sequence, at,
-     deltaHead, estateRecord: {revision, digest}, kid, sig}`; a check-in reports its `sequence` and `at` (DEC-0053). A
-     running hub signs one after every entry and every revision, SHOULD sign one hourly, and lets at most 24 hours pass
-     (v4 §7 "daily").
-  4. **Applying a page** (`applyDelta`, RD-1…RD-10): the clock first, then each entry's shape, estate, `EdDSA`, kind, not
-     more than 60 s ahead, the estate key, the signature — and only then its place: held (skipped), a `gap` (ask with
-     `delta-query`), or a second signed history (`broken-chain`, `fork`), which marks the machine broken and keeps that
-     entry's revocation in force. The entries before a refused one stay applied.
-  5. **Accepting a heartbeat** (`acceptHeartbeat`, HB-1…HB-3): the same checks, then `not-newer`, `fork` (the held
-     sequence with other bytes, a head or revision contradicting what the machine holds) or `regressed`.
-  6. **The 72-hour rule** (`deltaFreshness`, `freshnessAnswer`): `broken`, `stale` (no readable clock, no heartbeat, or
-     one more than 72 hours old; exactly 72 is fresh), `behind` (the heartbeat's head or revision past what is applied),
-     else `current`. Unless `current`, a machine places no caller in T1 and accepts no T2 call (DL-25, DL-26) — no
-     delegated call, command message, share-grant call or new secret envelope from another machine — and keeps the
-     person's own work (T0), every revocation in force, and the way back. Revocations in force are the revision's, the
-     applied entries' and forked ones' (`effectiveRevocations`); every check that reads the record's revocations reads
-     these.
-  7. **Reconciliation** (`reconcileRevision`): a revision issued at or after an entry's `at` lists its revocation; a
-     machine holding the entry refuses it as `unreconciled`. A machine applies a revision only when it is schema-valid,
-     `verifyEstateRecord` accepts it and it is reconciled.
-  8. **Rules:** `FAC-SEM-082` (a page), `FAC-SEM-083` (a heartbeat; a machine's freshness answer), `FAC-SEM-084`
-     (reconciliation). Times everywhere are RFC 3339 with `T`, an offset and a day that exists (`deltaTime`), refused
-     before any comparison.
-- **Why:** v4 §7 makes revocation take effect within seconds online and at most by the next heartbeat, and closes the
-  dropped-revocation gap by having the heartbeat sign the delta's head (its R4-8). A revision is a whole record a person
-  signs and machines fetch hourly, so it cannot be the fast path; a relay carries everything but must be able to delay
-  revocation only, never forge or hide it. A compromised estate key can only revoke and stop heartbeats — denial of
-  service, and less than it can already do with delegation tokens — and cannot revoke a passkey, so the person can
-  always sign the revision that revokes it. J10: an entry names a machine id, a kid, a digest or a grant id; a heartbeat
-  a counter, a time, a head and a revision; neither names a person.
-- **Compatibility:** Additive: two schemas, three rule codes, one module. Tightening, each with what a consumer does: a
-  check-in response's `records.heartbeat` and `records.revocationDelta`, and a relay's `welcome.heartbeat`, `delta` and
-  `heartbeat` frames, which DEC-0053 and DEC-0047 left as any object, must now be these documents (a server or relay
-  sends them as signed); a machine holding a delta entry refuses a revision that leaves it out (a hub lists every
-  entry). Nothing is deployed against the placeholders (CT-04, CT-34). `contractVersion` stays `0.1.0`.
-- **Consequences / affects:**
-  - spec: `docs/specification/revocation-delta.md` (new), `docs/specification/relay.md` (revocation and heartbeat,
-    welcome), `docs/specification/devices.md` (check-in), `docs/specification/estate-record.md` (revocations, who adopts
-    it, not decided), `docs/specification/conformance.md` (register, readers, canonical forms);
-  - schemas: `schemas/revocation-delta.schema.json` (new), `schemas/heartbeat.schema.json` (new),
-    `schemas/device-check-in.schema.json`, `schemas/relay-frame.schema.json`;
-  - code: `src/revocation-delta.ts` (new), `src/revocation-delta-rules.ts` (new), `src/semantic-rules.ts`;
-  - fixtures: `fixtures/catalogue.json`, `fixtures/positive/revocation-delta-page.json`, `fixtures/positive/heartbeat*.json`,
-    `fixtures/positive/relay-frame-delta.json`, `fixtures/positive/relay-frame-heartbeat.json`,
-    `fixtures/positive/device-check-in-response-records.json`, `fixtures/negative/revocation-delta-authority.json`,
-    `fixtures/negative/heartbeat-*.json`, `fixtures/negative/relay-frame-delta-unsigned-entry.json`,
-    `fixtures/negative/device-check-in-response-heartbeat-placeholder.json`,
-    `fixtures/semantic/{revocation-delta,heartbeat,delta-freshness,delta-reconciliation}-*`,
-    `fixtures/vectors/revocation-delta.json` (new);
-  - tests: `test/revocation-delta.test.ts` (new), `test/rule-tolerance.test.ts`, `test/positive-sweep.test.ts`,
-    `test/schema-compilation.test.ts`; floors in `vitest.config.ts` and
-    `docs/evidence/specs/2026-10-11-board-waves/coverage-baseline.md`;
-  - docs: `docs/evidence/sources.md` (RFC 8032 and RFC 8785 rows), `CONTEXT.md`, `docs/DOCMAP.md`, `README.md`,
-    `docs/backlog.md`, the packet `docs/evidence/specs/2026-10-11-board-waves/packets/wave-4/P4-06-delta-heartbeat.md`,
-    the handoff `docs/handoffs/2026-10-12-w4-p4-06-delta-heartbeat.md` and `docs/handoffs/README.md`.
-- **Not decided here:** the organization's documents and their key (`org-authority/1`, Fabric D8, or a role in
-  DEC-0031's key set), the 7-day validity of the organization's records and the heartbeat extension of up to 7 days the
-  organization root or a quorum of administrators may sign (v4 §7); DEC-0053's 7-day revocation list stays the
-  certified root's and is not reused here, because an estate's record lives 30 days and its heartbeat 72 hours.
-  Recovery from a fork (a new chain anchored in a revision); compaction (a checkpoint for a machine that enrolls late);
-  how two hubs agree on the next sequence (Fabric's); the organization's kinds (members, `subject.erase`); Fabric's D3
-  (which key is the hub key) and D2 (ES256 for it). DL-14's reference function takes the delta's part as `{extraRevocations}` (DEC-0060,
-  merged first), so item 6 holds for it.
-- **Source:** the first organization server's target architecture v4 at `9c6a780` (§7 *Freshness*, §12, §20 V2-15 and
-  V2-22); DEC-0047, DEC-0053, DEC-0055; RFC 8785 and RFC 8032 in the [source ledger](evidence/sources.md); the
-  board-waves inventory V4-DELTA-HEARTBEAT, packet P4-06. DEC-0054 was reserved by git CAS before this run, by the owner
-  session's P3-02 run (`agent_sync.py reserve --key revocation-delta-20261012 DEC`, run `r-51535649e`, commit `776e807`,
-  2026-10-12T00:43:06Z); this run reserved no decision id. `FAC-SEM-082`…`FAC-SEM-084` were reserved by git CAS
-  (`--key w4-p4-06-sem-{delta,heartbeat,reconcile}-20261012 SEM`, receipts SEM-0082…SEM-0084). This file,
-  `conformance.md` and `backlog.md` were edited in the run's branch without a lease, by the wave's arrangement (the owner
-  session takes the leases when it merges); the record plane is `fs`.
 
 ### DEC-0061 — The descriptor for listings: a service offered to others (`peer`), the kind of its runner's sign-in, who installed it, and the node as supervisor
 
@@ -3658,6 +3665,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   task runs when its own cost is known, and all projects together no more than the days, a `null` cost counting as
   none, within the rounding the day's cost check allows (so rows are written unrounded); and a project holds at least its
   task runs' priced calls (`src/usage-rules.ts`, test/usage-rules.test.ts).
+- **Annotated (2026-11-12):** the rounding clause above is replaced: cost sums hold within each known row's rounding, and rows may be written rounded to 6 places once its readers apply DEC-0163.
 - **Annotated (2026-10-13):** amended by DEC-0076: `byProject` names each project once by the normal form of `projectId`, and the finding names the second spelling (`docs/specification/identifiers.md`).
 - **Annotated (2026-10-12):** `attributionHeaders` answers a missing request as `not-openrouter` instead of throwing; vectors pin the default port, a trailing dot, the WHATWG-only forms, the other user-set headers, empty categories and the 64-character slug; adoption.md names how Project Observatory's private node is read (the owed reading of #68; packet P6-08).
 - **Amends:** DEC-0021 (the usage report: the window rule and `byProject`). Annotates DEC-0020…DEC-0029 with measured
@@ -5836,6 +5844,60 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   DEC-0076. DEC-0089 and `FAC-SEM-121` were reserved by git CAS (`agent_sync.py reserve`, key
   `ct57-folder-attribution`).
 
+### DEC-0090: The partner channel: a partner's publisher key trusted per context, its agents' usage, and owner to partner to agents (`FAC-SEM-122`…`FAC-SEM-124`)
+
+- **Date:** 2026-10-20
+- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: board row CT-58.
+- **Decision:** in [the partner channel](specification/partner-channel.md), a partner is named by its organization
+  context `org:<partnerOrgId>` (the first organization server's PA-01):
+  1. **A partner's publisher key, trusted per context (`FAC-SEM-122`).** `estate-record/1` gains an optional
+     `publisherScopes[]`, each `{kid, partner, contexts}`: `kid` a key of `publisherKeys`, `partner` the partner,
+     `contexts` 1 to 64 distinct organization contexts, never `personal`. `placementTrust` hands a scoped key to
+     `verifyPackage` only for a placement in one of its contexts. The rule refuses a placement or an installation under a
+     scoped key elsewhere, a key scoped twice and a scope naming a key the record does not pin. An unscoped key keeps
+     DEC-0051's meaning.
+  2. **A partner reads its agents' usage (`FAC-SEM-123`).** `partnerUsage({usage, publishers, step})` answers, over one
+     organization's joined `grant.usage` rows (DEC-0086), cells per `agentRef` and UTC day or billing period of
+     the partner's publishers, with no person, device or grant; `costUsd` is `null` exactly when every call of the cell
+     is unpriced, the priced costs summed smallest first so the order of the rows does not change a cell. A cell may be
+     one person's usage when one member uses the agent; a minimum population is not decided here. Each read is logged in every contributing member's access log as `reader: {service: "org:<partnerOrgId>", role:
+     "partner"}`, scope `activity.usage`, step `day` or `period`, and the organization server's notice names each partner
+     reader before its first read; the rule refuses a partner entry read as a person, of
+     another scope or step, or keyed by a device.
+  3. **Owner to partner to agents (`FAC-SEM-124`).** A grant whose `principalKind` is `partner` has the partner as its
+     principal and the company's own `org:<orgId>` as its `context`; being in an organization's context, it is named by
+     a share grant id (`urn:fabric:share:<32 hex>`, `FAC-SEM-117`). A token under it is for the grant's issuer, and its
+     chain holds the partner actor `{partner: "org:<partnerOrgId>"}` innermost, counted toward DL-6's depth; an onward
+     token keeps it innermost. A partner actor stands in no chain under another kind of grant, and a verifier admits it
+     only innermost.
+- **Why:** the operator's standing decision SD-1 (2026-10-19): partners build paid agents and sell them to companies as
+  a setup, and the company pays the platform only for the cloud. PA-06 asked the contract for these three parts (board
+  thread `6e66a023`, accepted in principle there on 2026-10-19, pull request targeted by 2026-10-27).
+- **Alternatives refused:** a scope inside the publisher JWK (the JWK is closed, and a key's trust is the record's to
+  state); a partner reading per-person or per-grant usage (OD-1 shows another party sums only); the partner as an agent
+  id the hub registers (it would hide which partner a chain runs through); a partner actor anywhere in the chain (only
+  innermost says on whose behalf).
+- **Compatibility:** additive: `publisherScopes`, the `partner` principal kind and the partner actor are new, and a
+  record, grant or token without them reads as before. A reader pinned before DEC-0090 refuses a record with
+  `publisherScopes`, a partner grant and a token whose chain holds a partner actor (closed schemas), so a partner channel
+  needs the reader at this pin, and a writer gates on every reader's pin as DEC-0082 does (every machine for
+  `publisherScopes`, the meter for a partner grant). `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** schemas `schemas/estate-record.schema.json`, `schemas/delegation-token.schema.json`,
+  `schemas/governance.schema.json`; code `src/estate-record-rules.ts`, `src/partner-usage.ts`, `src/activity-rules.ts`,
+  `src/delegation.ts`, `src/delegation-rules.ts`; tests `test/estate-record.test.ts`, `test/activity-rules.test.ts`;
+  fixture `fixtures/semantic/delegation-mint-agent-grant-partner-actor.json`; docs `docs/specification/package.md`; vectors `fixtures/vectors/partner-usage.json` (written by
+  `tools/vectors/partner-usage.ts`); fixtures `fixtures/semantic/{estate-partner,access-log-partner,delegation-mint-partner}-*`;
+  tests `test/partner-usage.test.ts`, `test/partner-channel.test.ts`, `test/contexts.test.ts`, `test/delegation.test.ts`;
+  docs `docs/specification/partner-channel.md`, `estate-record.md`, `activity.md`, `delegation.md`, `conformance.md`,
+  `docs/DOCMAP.md`, `README.md`, `CONTEXT.md`, `docs/backlog.md` (CT-58), `docs/handoffs/2026-10-20-partner-channel.md`;
+  brief `docs/evidence/specs/2026-10-19-partner-channel/brief.md`.
+- **Source:** board thread `6e66a023` (SD-1, passioncode-platform's ADR-0007 reply, the contract's acceptance; the first
+  organization server's PA-01); DEC-0090 and `SEM-0122` reserved under the key `ct58-partner-channel`,
+  `SEM-0123` under `ct58-partner-channel-2`, `SEM-0124` under `ct58-partner-channel-3`. Two counter commits are not in
+  the chains on origin, the receipt-chain defect the CT-57 handoff records: DEC's (it moves from `a24dc0f`, next 90, to
+  `7b857d5`, next 92) and `SEM-0124`'s `0bfa93f` (SEM moves from `5f2665c`, next 124, to `4c4598f`, next 127). No other
+  branch uses DEC-0090 or `FAC-SEM-122` to `FAC-SEM-124`.
+
 ### DEC-0091: A usage report counts the calls whose tokens are unknown (`unmeasuredCalls`)
 
 - **Date:** 2026-10-20
@@ -6005,60 +6067,6 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Source:** issue #125 (passioncode-ai/fabric-agent-contract); DEC-0095 and `SEM-0126` reserved by git CAS (key
   `ct61-support-quality`, counter commits `8a62c04` and `4c4598f`).
 
-### DEC-0090: The partner channel: a partner's publisher key trusted per context, its agents' usage, and owner to partner to agents (`FAC-SEM-122`…`FAC-SEM-124`)
-
-- **Date:** 2026-10-20
-- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: board row CT-58.
-- **Decision:** in [the partner channel](specification/partner-channel.md), a partner is named by its organization
-  context `org:<partnerOrgId>` (the first organization server's PA-01):
-  1. **A partner's publisher key, trusted per context (`FAC-SEM-122`).** `estate-record/1` gains an optional
-     `publisherScopes[]`, each `{kid, partner, contexts}`: `kid` a key of `publisherKeys`, `partner` the partner,
-     `contexts` 1 to 64 distinct organization contexts, never `personal`. `placementTrust` hands a scoped key to
-     `verifyPackage` only for a placement in one of its contexts. The rule refuses a placement or an installation under a
-     scoped key elsewhere, a key scoped twice and a scope naming a key the record does not pin. An unscoped key keeps
-     DEC-0051's meaning.
-  2. **A partner reads its agents' usage (`FAC-SEM-123`).** `partnerUsage({usage, publishers, step})` answers, over one
-     organization's joined `grant.usage` rows (DEC-0086), cells per `agentRef` and UTC day or billing period of
-     the partner's publishers, with no person, device or grant; `costUsd` is `null` exactly when every call of the cell
-     is unpriced, the priced costs summed smallest first so the order of the rows does not change a cell. A cell may be
-     one person's usage when one member uses the agent; a minimum population is not decided here. Each read is logged in every contributing member's access log as `reader: {service: "org:<partnerOrgId>", role:
-     "partner"}`, scope `activity.usage`, step `day` or `period`, and the organization server's notice names each partner
-     reader before its first read; the rule refuses a partner entry read as a person, of
-     another scope or step, or keyed by a device.
-  3. **Owner to partner to agents (`FAC-SEM-124`).** A grant whose `principalKind` is `partner` has the partner as its
-     principal and the company's own `org:<orgId>` as its `context`; being in an organization's context, it is named by
-     a share grant id (`urn:fabric:share:<32 hex>`, `FAC-SEM-117`). A token under it is for the grant's issuer, and its
-     chain holds the partner actor `{partner: "org:<partnerOrgId>"}` innermost, counted toward DL-6's depth; an onward
-     token keeps it innermost. A partner actor stands in no chain under another kind of grant, and a verifier admits it
-     only innermost.
-- **Why:** the operator's standing decision SD-1 (2026-10-19): partners build paid agents and sell them to companies as
-  a setup, and the company pays the platform only for the cloud. PA-06 asked the contract for these three parts (board
-  thread `6e66a023`, accepted in principle there on 2026-10-19, pull request targeted by 2026-10-27).
-- **Alternatives refused:** a scope inside the publisher JWK (the JWK is closed, and a key's trust is the record's to
-  state); a partner reading per-person or per-grant usage (OD-1 shows another party sums only); the partner as an agent
-  id the hub registers (it would hide which partner a chain runs through); a partner actor anywhere in the chain (only
-  innermost says on whose behalf).
-- **Compatibility:** additive: `publisherScopes`, the `partner` principal kind and the partner actor are new, and a
-  record, grant or token without them reads as before. A reader pinned before DEC-0090 refuses a record with
-  `publisherScopes`, a partner grant and a token whose chain holds a partner actor (closed schemas), so a partner channel
-  needs the reader at this pin, and a writer gates on every reader's pin as DEC-0082 does (every machine for
-  `publisherScopes`, the meter for a partner grant). `contractVersion` stays `0.1.0`.
-- **Consequences / affects:** schemas `schemas/estate-record.schema.json`, `schemas/delegation-token.schema.json`,
-  `schemas/governance.schema.json`; code `src/estate-record-rules.ts`, `src/partner-usage.ts`, `src/activity-rules.ts`,
-  `src/delegation.ts`, `src/delegation-rules.ts`; tests `test/estate-record.test.ts`, `test/activity-rules.test.ts`;
-  fixture `fixtures/semantic/delegation-mint-agent-grant-partner-actor.json`; docs `docs/specification/package.md`; vectors `fixtures/vectors/partner-usage.json` (written by
-  `tools/vectors/partner-usage.ts`); fixtures `fixtures/semantic/{estate-partner,access-log-partner,delegation-mint-partner}-*`;
-  tests `test/partner-usage.test.ts`, `test/partner-channel.test.ts`, `test/contexts.test.ts`, `test/delegation.test.ts`;
-  docs `docs/specification/partner-channel.md`, `estate-record.md`, `activity.md`, `delegation.md`, `conformance.md`,
-  `docs/DOCMAP.md`, `README.md`, `CONTEXT.md`, `docs/backlog.md` (CT-58), `docs/handoffs/2026-10-20-partner-channel.md`;
-  brief `docs/evidence/specs/2026-10-19-partner-channel/brief.md`.
-- **Source:** board thread `6e66a023` (SD-1, passioncode-platform's ADR-0007 reply, the contract's acceptance; the first
-  organization server's PA-01); DEC-0090 and `SEM-0122` reserved under the key `ct58-partner-channel`,
-  `SEM-0123` under `ct58-partner-channel-2`, `SEM-0124` under `ct58-partner-channel-3`. Two counter commits are not in
-  the chains on origin, the receipt-chain defect the CT-57 handoff records: DEC's (it moves from `a24dc0f`, next 90, to
-  `7b857d5`, next 92) and `SEM-0124`'s `0bfa93f` (SEM moves from `5f2665c`, next 124, to `4c4598f`, next 127). No other
-  branch uses DEC-0090 or `FAC-SEM-122` to `FAC-SEM-124`.
-
 ### DEC-0096: What an agent uses: `extensions/connections/0.1` (`FAC-SEM-127`)
 
 - **Date:** 2026-10-21
@@ -6223,7 +6231,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 ### DEC-0100: A `purpose` rejection, a share registration sent again after the notice, and renewal within 30 days of expiry
 
 - **Date:** 2026-10-22
-- **Status:** Accepted source change (on merge of PR #143). Consumer adoption: board row CT-88.
+- **Status:** Accepted source change (on merge of PR #143). Consumer adoption: board row CT-88. Narrowed for one kind by DEC-0164 AE-3: a `purpose` answer to a `unit` whose `acceptedBy` is a person holds nothing at the collector.
   Annotated (2026-10-22): corrected by DEC-0102, items 6 (the renewal clock), 7 (SR-5a lets a withdrawal pass), 8 (resuming after `purpose`) and 11 (compatibility wording).
 - **Annotated (2026-11-02):** DEC-0148: a renewal by the key on record repeated while the certificate it was
   issued is unpresented and not ended is answered with that certificate, or refused, never another (`FAC-SEM-155`).
@@ -7358,6 +7366,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `interop-agent-call`; `src/actions.ts`, `src/delegation.ts`; the vector file `fixtures/vectors/actions.json`;
   backlog CT-124 to CT-127.
 - **Source:** the operator's instruction of 2026-10-24; two rounds of seam and product readings, 2026-10-24.
+- **Annotated (2026-11-14):** AP-2 amended by DEC-0162: at a service that reads levels, a level holder's decision or level mandate bound to the call's delegation token decides a relayed action at its level from any tier (LV-6); in an organization's context an act declared `owner` or `admin` takes no operator decision, operator mandate, elicitation or `approval/1` (LV-7); a service that reads no levels reads the level form as absent (LV-10).
+- **Annotated (2026-11-14):** AP-3 amended by DEC-0166: a place's standing mandate, which the place's hub states for one assignment at a time from the profile its owner, an administrator or the operator recorded, is the one standing form a callee that declares `standing` reads (delegation AU-1, AU-3); every other standing rule in a file stays refused.
 
 ### DEC-0122: a service names its A2A Agent Card in `surfaces.a2a`; `ai-catalog.json` stays out of `fabric-service/0.1`
 
@@ -7641,6 +7651,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   spend unenforceable and the operator's literal example refused, the hub and job routes missing and T1 contradicted;
   a second seam reading, which found no authenticated agent id on the operator's own routes, an actions-only scope
   covering every external call and the reference's table stale.
+- **Annotated (2026-11-14):** MD-3 and MD-5 amended by DEC-0162: a level mandate (`by: "level"`) is read at every tier by a service that reads levels and stands within the holder's level (LV-6); no mandate covers `change-policy`, a level mandate included.
+- **Annotated (2026-11-14):** MD-1, MD-5 and `FAC-SEM-144` amended by DEC-0166: a mandate may carry `standing` (a place's autonomy profile), which lives at most 24 hours and, from T2, stands only when the call's token binds it by `prof` (AU-1, AU-3); no mandate of any kind covers `autonomy.profile.set` (AU-5).
 
 ### DEC-0126: one approval binds all the operator's agents
 
@@ -7650,6 +7662,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (DEC-0125) for a relay. Adoption: CT-149.
 - **Annotated (2026-11-02):** DEC-0147 adds to OA-6 that the receiver's record of the operator's words replaces a
   peer share link's fragment with the share id (PS-4).
+- **Annotated (2026-11-08):** DEC-0156 (proposed) adds to OA-4 that a host's gate on a floored act (Fabric's
+  `floor.ask-first`) still asks once, quoting the relayed words as its reason, not as the agreement (OW-3, OW-5).
 - **Context:** the operator, 2026-10-26, relayed by one of the operator's agents (request `519d7b21`, thread `3e8f706c`):
   «хочу чтобы на уровне мои агентов работающи по моей команде не было двойного апрува, я сказал одному = сказал всем,
   передай это в фабрик контракт и в фабрик агентам тоже пусть там у себы поправят». On 2026-10-25 the operator approved
@@ -7803,6 +7817,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   decision), CT-37 (narrowed to `org-authority/1`'s member list, with CT-122).
 - **Source:** CT-137; the organization train's TP-00, N-1, step 1.1 and X-6; MD-9; R1-D12; board request `8e2d5099`
   (thread `8d115bed`); DEC-0031, DEC-0045, DEC-0063, DEC-0082, DEC-0085, DEC-0103.
+- **Annotated (2026-11-14):** OL-6 amended by DEC-0162: `org-membership/2` carries a role that decides as a level (`owner`, `admin`, `architect` with its projects), bound to the call by the delegation token's `mem` (LV-1 to LV-5); `/1` is unchanged and grants nothing.
 
 ### DEC-0128: unlinkable memberships, an identity per enrollment and a key and issuer per context
 
@@ -8152,6 +8167,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `test/org-exchange.test.ts`, `test/schema-compilation.test.ts`, `test/positive-sweep.test.ts`;
   `docs/specification/README.md`; backlog CT-37, CT-158, CT-159, CT-160; `docs/handoffs/README.md`.
 - **Source:** CT-158; Fabric ADR-0180 (fabric `1d49ed3b`; thread `115ef7fb`); DEC-0129, DEC-0131.
+- **Annotated (2026-11-14):** "A role is no authority" amended by DEC-0162 for `org-membership/2` under `levels/1`: an attested role decides at its level where a service reads levels (LV-1); `/1` still grants nothing.
 
 ### DEC-0134: the organization's relay, its handshake on the signed member list
 
@@ -8539,6 +8555,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (SCN-051, the move), `docs/ux/screens.md` (SCR-32), `docs/ux/flows.md` (FLW-16, FLW-29's rejected shape), `docs/ux/foundation.md` (JRN-08 stage 5, an ST-020 criterion), DEC-0020, DEC-0022, DEC-0079, DEC-0081 and DEC-0121 (annotations); backlog CT-125 (the move's agent twin), CT-174, CT-175, CT-176, CT-179, CT-181, CT-182 and CT-183 (filed); fabric-workspace `knowledge/agents-first.md` (its parity paragraph, at the merge); the handoff
   `docs/handoffs/2026-10-26-simple-fabric-decisions.md` and its row in `docs/handoffs/README.md`.
 - **Source:** CT-174; Fabric's request `23ba0e97` (thread `6a8d2f9c`).
+- **Annotated (2026-11-14):** Holds, slot moves and a Project's listing amended by DEC-0162: in an organization's context the member who owns the Project, or an owner or an administrator by a level decision, decides them (question 9); the owning member's agent route is CT-307.
 
 ### DEC-0141: a job's step under a mandate is read under the job's capability
 
@@ -9844,6 +9861,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   item DS; rounds 81 and 82 at `d03ae791` clean on all three tiers),
   cited by round number (their heads were on the review branch, not kept at landing),
   decided by the coordinator.
+- **Annotated (2026-11-14):** A source hand-over of an organization's own agent amended by DEC-0162: only an owner's or an administrator's level decision with the exact target hands it over, in any context; an architect moves source within the organization's members-only places with no word (LV-6).
 
 ### DEC-0150: an agent that answers people on a channel declares `extensions/channel-agent/0.1`
 
@@ -9860,6 +9878,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   in turns). The Source's counter sentence agrees with DEC-0151's Source: `ee67e35e` (key `support-quality-v2-dec`,
   next 152) is DEC-0151's reservation and `d3da4336` (next 149) the value before it; DEC-0149's own reservation is
   `e27a5441` (key `ct194-source-manifest`, next 150).
+- **Annotated (2026-11-08):** CA-8's bound, which the Decision gives "CT-220, when drafted" to keep, is kept by
+  DEC-0156 (proposed) [governance and roles](specification/governance-and-roles.md#the-operators-word-carried-out-the-first-time)
+  OW-6: a word in a customer chat acts only inside that chat and is no AP-3 or OA-2 source (CA-8).
 - **Context:** a project on the board asked (request `437c404b`, thread `b6820b97`, 2026-11-04) for an extension key
   under which an agent that answers people on a channel (mail, Telegram, store reviews) declares what
   `channel-agent-standard/1` asks, checked statically by the Fabric Agent Adapter's service check (its row FAA-197),
@@ -11384,6 +11405,315 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `peer_owner` 1.3.0 proposal (`914c0383`), sshlg-fabric-server's (`ed799cae`, `93886034`) and the adapter's (`b8053022`)
   inputs; backlog CT-261.
 
+### DEC-0156: the operator's word is carried out the first time, by the agent itself
+
+- **Date:** 2026-11-07
+- **Status:** Accepted 2026-11-14, merged to main: rounds 36 (at `c0625532`) and 37 (at `a3d59238`, main `28c4de4c`
+  merged in) of the blind readings clean on all three tiers, read under the finish-line rule (a tier fails only on a
+  blocking finding); rounds 1 to 33 and 35 folded, 34 clean; their risks are CT-306. Fabric's questions `add1df7c`
+  and `46167c9f` stay open (OW-2's kept press, CT-220). A rule of every
+  agent's conduct, stated in [governance and roles](specification/governance-and-roles.md#the-operators-word-carried-out-the-first-time)
+  as OW-1 to OW-6; no schema, field or rule code changes.
+- **Context:** the operator, 2026-11-04, in one product's session, relayed on the board (thread `b91254c4`, then
+  thread `a7a9d05d`, message `b66a8fae`, with the request to fix it across the agent system): «мое слово исполнение с
+  первого раза, если есть риски уточнить и корректировать и выполнить» and «сколько повторять за мной только команды /
+  команды тебе». Agents handed the operator commands to run, stopped at a risk instead of correcting their way, and
+  asked leave for steps inside a task the operator had already given. The contract already says whose words decide an
+  action (DEC-0121 AP-2, AP-3), that one approval binds every agent it reaches (DEC-0126 OA-1 to OA-7), what a mandate
+  covers (DEC-0125) and which steps stay the person's (AP-4, OA-5); it did not say that the agent carries the word out
+  itself. Backlog CT-220.
+- **Decision:**
+  1. OW-1: the operator's words about a task, in a form AP-3 admits (its own session, a subagent receiving them
+     verbatim from the session that started it, the operator channel, a mandate handed on as MD-2 says, a relay OA-2 and OA-3 accept), are carried out on
+     that word; every step inside the task is the agent's to take within the grants, mandates and money limits that
+     already apply, without asking leave for each; a relayed act the words do not name is covered by the leading
+     agent's mandate (MD-1) or raised under OW-3 while the rest goes on; a task that may outlive a decision's 24 hours
+     is carried under a mandate stated from the words, so the operator is not asked again for a word they gave while it
+     lasts, except for an act no mandate covers (MD-3, MD-6 and PR-2: among them a change-policy effect, a source
+     hand-over, the move of a board slot and MD-6's human steps): the word for a change-policy effect or a source
+     hand-over is renewed by one short question as AP-2 says (a source hand-over's word is consumed once by the act it
+     names, as source's Handing over says), and the move of a board slot and a human step go to the person as OW-4
+     says.
+  2. OW-2: the agent runs commands itself and never asks the operator to run one, paste an output, press a button, open
+     a page to confirm or choose on a card where an agent twin it may take itself (`gate` `none` or `relayed`, AP-1) or
+     another route of its own reaches the step (the operator's word of 2026-11-07 that they press nothing); the one
+     press it itself keeps, beside the steps OW-4 hands the person, is a host gate's agreement where neither reaches the act (on Fabric the "Allow once" of a
+     `floor.ask-first` refusal, OW-3), while Fabric's question `add1df7c` stays open; a refusal by its own tool or
+     harness goes to OW-4.
+  3. OW-3: a risk the words did not name gets one short message, once, naming the risk and the corrected way; the rest
+     of the task goes on; the step waits for the answer when its corrected way is a relayed act the words do not name
+     and the mandate does not cover, a step a limit of OW-5 gates (a source hand-over, an effect outside a grant),
+     other than a human step, a reserved control (OW-4) or a host's gate, or when no corrected way both undoes cleanly and still meets the word (the one stop this rule adds itself, grounded in AP-3);
+     the message is a question for a step that waits, and states the corrected way as under way and how to stop it for
+     any other; where the step is one a host's gate holds, the message is no question of its own but travels as that
+     gate's one ask, its reason naming the risk, the corrected way and the words; otherwise the agent takes the safest
+     corrected way that undoes cleanly and still meets the word and reports it; a decision recorded as the operator's
+     own that holds work until a question the words do not answer is answered governs; a host's gate that holds an act
+     the agent performs itself or through that host until a person agrees (Fabric's `floor.ask-first`; a service's
+     relayed action meets that service's gate) stays, the agent asking through it once with the words as its reason,
+     naming where the gate asks (on Fabric the refused card, whose "Allow once" is the agreement there, unlike under
+     FA-09) in its report and in a statement in the chat, and calling it again after the agreement; under a gate that refuses the act for the session whatever is agreed
+     (Fabric's FA-09), in a session whose chat the person is in, the agent asks the operator once in the chat (one
+     short question naming the act, its target and the operator's words, standing in for the gate's ask), goes on with
+     the rest, and on the operator's yes performs the act itself and records it with the words in its own report, and
+     in a session with no person in its chat it does not perform the act and asks nothing from that session, leaving
+     the act open and naming it, in its board reply and its report, as a step for a session the person is in (as
+     Fabric's `board.read-at-start` hands a production step to such a session) and settling the board request under
+     SA-6's `com.accept`, then `com.complete`, with OW-3's additions (a `com.progress` note naming the open act and what
+     blocks it, SA-5; no `com.effect_begin` for an act not begun, so the request stays `accepted` with its effect
+     `not_started` until it settles; a request whose asked act is the open one settled `failed_known` with
+     `observed: false` before any effect, a `com.reply` to it naming the open act and saying that it waits for a
+     session the person is in and that nobody submits the request to the board again, the person's session that
+     performs the act recording that in the request's thread and the requester submitting nothing; one whose asked
+     act was done, with only a side act left open, settled `completed` with the open act named in its result), every
+     other step that waits in such a session left open and named, one of OW-3's three waits named with where its question went and asked as the operator's word of 2026-11-12 says
+     (questions to the people who decide through the organization's PM agent, as Fabric's `QUESTIONS_RULE` carries it
+     with its fallback to the host's question surface, `9420da79`): settled first by the recorded decisions, the goal
+     and the safest reversible option, then once per task to the project offering `people.ask` or through
+     `fabric_question_ask`; a `people.ask` reply starts the asking project's next run, which takes the step only on the
+     operator's word (their own surface or an accepted relay) and otherwise leaves a step only that word decides open
+     and asks the operator once, naming the request and posting in its thread what the second route's reply says,
+     while an answer through `fabric_question_ask` starts no run and wakes nobody, so the
+     reply tells the requester that the request is submitted again only on the operator's word relayed to it, or by the operator's own session when they own the requesting Project, the
+     answer able to sit unacted on until Fabric wakes the asking project (asked under `add1df7c`); a session without the board's tools writing `answered` with the open step, its question and its resubmission in the result, read as `failed_known` is; a request settled `failed_known` there, or `answered` so, submitted
+     again only where what the person does lets a session with no person take the step and no such next run has
+     taken it (a decision or a relay naming the step, an answered question among them, a grant, a human step cleared), by the operator's session in the requesting Project (its agent,
+     on their word) when they own the requesting Project and by the requester otherwise, a relay or a mandate that names the
+     act changing neither mode, being the reason the one ask quotes, not the agreement the gate holds the act for; the
+     agent adds no question of its own
+     about an act a host's gate already asks about (a risk on it travels as that gate's one ask), while the asks other
+     rules require for the same act stay and are named: spend policy rule 3's approval request for spend above a
+     project's `autoApproveUsd` (OW-4, CT-291), DEC-0149's stated word for a source hand-over the words do not give
+     (OW-4), and the host's own gate; the other host gates OW-5 keeps are met as their own text says; Fabric's refused
+     card for an FA-09 refusal in its attention queue, announced once by its OS notification when Fabric is not in
+     front, until Fabric ships the third change owed below, is no question the agent asks: its "Allow once" issues a
+     single-use one-hour grant scoped to the project, floor class and target with no action class, which does not lift
+     the refusal and which a session of the project that keeps its runner gate and asks for the same floor class and
+     target would spend without asking, after which the card reads "Allowed once, until {time}" and leaves the queue
+     while the act stays undone, and unpressed the card stays refused, the act done or not, so the chat question, which says
+     the card does not allow the act and names it by its label in the operator's interface language, is the one the
+     operator answers, and the agent's report (with no person in the chat, its board reply too) says the card does not
+     allow the act, stays refused and what its press would leave; until Fabric
+     answers its open question `add1df7c` this FA-09 reading is the contract's; a waiting step with no answer stays
+     open and named, a step taken stays done and reported, and the message is not repeated; an answer naming another
+     way is a new word, a bare refusal undoes the corrected way where it can and leaves the step open.
+  4. OW-4: of the task's steps, only what technically needs a person goes to the person (a binding only the person's
+     own act proves, OC-3 and OC-11; AP-4 and OA-5's human steps, a
+     decision recorded as the operator's own that the words do not cover, the operator's word for a source hand-over
+     the words do not give, a control the contract reserves to the person's own act (the move of a board slot, DEC-0140
+     PR-2), a control with no agent twin, a refusal by the agent's own tool or harness (its runner's
+     permission system or a tool that refuses the act itself; a host's gate is OW-3's), for which the
+     person allows the command in the harness or the tool (or answers yes to a host tool the agent runs that installs
+     the named rule), which lifts only that stop; such a refusal is never routed
+     around and is handed over without trying another route),
+     and spend above a project's `autoApproveUsd` or with no project policy
+     yet (spend policy rule 3), with the reason and the exact step, a control with no twin and any step a route of the
+     agent's own reaches only after those routes (a route performing the act with the same checks and audit as AP-1's
+     twin, never a write that skips the control), a human step, a reserved control and a refusal at once, no route
+     taking a human step or a reserved control in the person's place, while
+     the rest of the task goes on; OW-4 limits what is handed over, not the questions AP-2, AP-3, MD-1, MD-4, OA-4, SA-6
+     or an approval request for an effect outside a grant have the agent ask.
+  5. OW-5: no limit widens: money limits, credentials held by reference, the separation the operator keeps between
+     unrelated businesses (recorded in the operator's own instructions), the word for each source hand-over (DEC-0149),
+     approval separation (AP-5), an effect outside a grant, the move of a board slot reserved to the host's operator
+     controls until its twin ships (DEC-0140 PR-2) and a host's gate that holds an act until a person agrees (OW-3)
+     stay.
+  6. OW-6: only the operator's words carry a task on OW-1's terms; a board request, another agent's call and a request
+     on a channel are taken as their own rules say (SA-5, SA-6, MD-3, CA-8); other content the agent reads is data
+     (AP-3), a mandate handed on and an accepted relay excepted; a word in a customer chat acts only there (DEC-0150
+     CA-8).
+- **Why:** an agent that hands its operator a command or stops at a risk makes the person do the work the agent was
+  given, and repeats the cost every time. The contract's gates already stand where a person is needed; OW-1 to OW-4
+  say that everywhere else the agent acts, and OW-5 and OW-6 keep every gate and boundary that existed. OW-3 reads
+  «уточнить» two ways the operator may overrule (Fabric questions `46167c9f` and `add1df7c`): it adds one stop of its
+  own, when no corrected way both undoes cleanly and still meets the word (then the agent cannot be sure the operator
+  decided, AP-3); and it states a corrected way it takes as under way with how to stop it, asking a question only for
+  a step that waits. The operator's decision of 2026-11-09 (fabric-workspace `knowledge/authority.md`, *Autonomy by
+  place*: on a headless place no act waits for a person) bears on question `46167c9f` for headless places; CT-285's
+  decision states what OW-3's no-person case and its own stop become there. The operator's decision of 2026-11-07
+  (agents run without permission prompts; questions and the task's bounds settled when the task is set, after that
+  only delegation and execution, the same page) bears on the host's gate OW-3 keeps and on OW-3's own stop and its
+  question for a step that waits; it is put to question `46167c9f` beside `add1df7c`, and until they are answered OW-3
+  holds as written. The operator's word of 2026-11-12 (questions to the people who decide through the organization's
+  PM agent), as Fabric's `QUESTIONS_RULE` carries it with its fallback to the host's question surface (on-demand spec
+  §3.10, `9420da79`), is how OW-3's no-person case asks for its three waits; only the PM agent's reply starts a next
+  run, so while no project offers `people.ask` the answer is a decision on which the request is submitted again
+  only on the operator's word relayed to the requester (or by the owner's own session).
+- **Alternatives considered:** leave it to each product's prompt (the products diverged: some shipped it, some did
+  not, so the operator repeated the word); make it a host setting the operator switches on (the operator's word was a
+  rule for every agent, not a mode); stop at every risk until the operator answers (the operator's word says to
+  correct and carry out; OW-3's own waits are its three cases for the step a risk message concerns, beside those other
+  rules and gates already impose: MD-4, a decision recorded as the operator's, a host's gate).
+- **Compatibility:** nothing on the wire changes. Read on 2026-11-07: the Fabric Agent Adapter ships the rule in part
+  (FAA-207, released in `v0.63.0`: working-with-fabric `SKILL.md` and creating-fabric-agents `references/practices.md`,
+  citing CT-220, pinned by `test/test_mandate_prose.py`). Its text ("on a risk, one short question, then do it"; only a
+  sign-in, a one-time code, a payment or a refusing tool goes to the person) owes, at its next release: the DEC-0156
+  citation; OW-3's three waits and its bare-refusal case; OW-4's full list (a decision recorded as the operator's own,
+  the word for a source hand-over under DEC-0149, which its skills do not name today, a control with no agent twin); and
+  the pinned phrase in its test and the behaviour eval `test/evals/working-with-fabric/scenarios.json` (the scenario
+  `the-operators-word-is-done-the-first-time`, whose expected lines grade the old rule) with them. fabric-workspace states the rule in `knowledge/agents-first.md`
+  (`956afadf`) and owes the link to the OW rules with OW-3's waits, its message form and OW-4's list, and in its refusals
+  section's item 4 that a rule's form is chosen before acting and a refused act is handed over, never re-formed. Fabric's session rules (the
+  obligations `fabric_whoami` hands every session, `apps/desktop/src/shared/protocolObligations.ts` at `a0a89d1b`) do
+  not state it; Fabric owes OW-1 to OW-6 in them. Four of those obligations hold or carry an OW-1 step, read on its main at
+  `eafcf2e4`: `board.read-at-start`'s production stop (a session carrying out a board request with no person in its
+  chat hands any step that touches production to a session the person is in or to the operator, lifted only by the
+  operator's word said in its chat or relayed verbatim with its date, source and scope naming the step) and
+  `ladder.no-self-close` (a session cannot close a task itself; `fabric_task_close` carries the operator's words when
+  they told it to close or cancel that very task) are host gates that OW-3 and OW-5 keep (`board.read-at-start` is
+  advice the session keeps, its mode `ADVICE` in `protocolObligations.ts` from line 197, not a refusal Fabric enforces;
+  `ladder.no-self-close` is a refusal, mode `REFUSED`): the agent meets each as its text says, carrying the operator's words where the gate takes them, and goes on with the rest; the other two follow. `floor.ask-first` (spending
+  money, deleting what cannot be recovered and publishing outward need a person; the agent asks with
+  `fabric_effect_request`, whose first answer is a refusal; a grant row the database requires, Fabric ADR-0004 and
+  ADR-0028; the operator's instruction of 2026-10-15 that spending above a project's limit or a key's ceiling,
+  publishing outward and deleting what cannot be restored still stop and ask, ADR-0160 section 4; its stop on spend
+  within a limit is Fabric's own gate) is a host's
+  gate that OW-3 and OW-5 keep: the agent asks through it once, quoting the operator's words as its reason, and goes on
+  with the rest. Whether the operator's words pass that gate without a second ask the operator has decided in principle
+  (2026-10-26: no second approval, fabric-workspace `knowledge/agents-first.md`, *One approval binds all*; 2026-11-06: a
+  command of the owner, an administrator or an architect, or their agents, runs without a prompt of its own, not built
+  yet, `knowledge/authority.md`, *Access levels*; 2026-11-07: agents run without permission prompts, questions and bounds settled when the task is set, `knowledge/authority.md`, *Agents run without permission prompts*); until CT-250's decision and Fabric's answer to question `add1df7c`
+  land, the floor asks as Fabric does today, and Fabric owes nothing for it here. Noted beside that question: Fabric's
+  relay test for the production stop (a relay whose scope names the step) is narrower than a mandate handed on as MD-2
+  says, whose scope names capabilities (`mandate.schema.json`) and whose `source` may be absent (OA-7); until Fabric
+  says otherwise, a relayed mandate that does not name the step meets that stop, which OW-5 keeps. A relay that does name
+  the step lifts that production stop and not the floor: under FA-09, as in a session the person is in, the operator's
+  words are the reason the one ask quotes, so the step still goes to a session the person is in, and the session that
+  lands this decision adds that case to question `add1df7c`. For a session whose runner gate is
+  removed (FA-09, the machine's default mode under Fabric ADR-0168, and every session Fabric did not launch), Fabric
+  refuses every floored act whatever is agreed and returns a remedy with two options ("Run it in a mode where the runner
+  asks before each tool, or perform the effect yourself", `containment.ts`). Fabric's own record reads that remedy as
+  addressed to the person (`containment.ts`: "refuse the profile the action"; the FA-09 audit packet's acceptance, `docs/audit/2026-09-09-final/packets/FA-09.md` line 44: «profile явно не допускается к этому действию»; `policy.ts`: a person acting with their own hands is the floor),
+  and Fabric question `add1df7c` is open. Until Fabric answers it, OW-3 reads the refusal so that both modes behave
+  alike: in a session whose chat the person is in, the agent asks the operator once in the chat, standing in for the
+  floor's ask, goes on with the rest, and on the yes performs the act itself and records it with the words in its own
+  report, while a session with its runner gate asks once through the floor; in a session with no person in its chat
+  the agent does not perform the act and asks nothing from that session, leaving the act open and naming it, in its
+  board reply and its report, as a step for a session the person is in, as `board.read-at-start` already hands a
+  production step to such a session (`protocolObligations.ts` from line 197). So the agent adds no question of its
+  own about a floored act, the floor's ask being the one ADR-0160 section 4 has; the asks other rules require for the
+  same act stay and are named: spend policy rule 3's approval request for spend above a project's `autoApproveUsd`,
+  DEC-0149's stated word for a source hand-over the words do not give (OW-4), and the floor's own ask. Fabric owes three changes for it. First, the fixed next line of every refusal ("The operator has
+  been asked. Do the act only after asking again and being allowed.", `agentSurface.ts`, read on its main at
+  `bc21883d`) tells an uncontained session to wait for an allowance that cannot come, since FA-09 is checked before any
+  grant, so for an FA-09 refusal that line names the remedy instead. Second, a way to record an act the operator agreed to
+  after an FA-09 refusal (`fabric_effect_report` takes only an effect id an allow issued, so today such an act leaves
+  no receipt in Fabric, only the agent's own report). Third, an FA-09 refusal not offered as a grantable card in its
+  attention queue or the OS notification that announces it, issuing no grant (the press creates nothing a later
+  session could spend), its status line never reading "Allowed" for an FA-09 refusal, and the card resolving when the
+  agent records the act the operator agreed to in the chat, and never showing the grant note Fabric `5676cd88`
+  (2026-11-11) added to every grantable refusal (`launch.board.decide.grantNote`, «он попросит снова, и действие
+  пройдёт», `BoardScreen.tsx` line 495 at Fabric main `2ace88c2`, beside the refused card's new headline by floor class
+  and its kind «Ждёт разрешения», `ru.ts` line 482), which is false under FA-09 (read at `0e7a8a00` before that: every refusal the
+  journal records as `policy.decided@1` with the verdict `refuse` becomes a red "refused" card with a grant button,
+  `apps/desktop/src/shared/attention.ts` lines 257 to 274, `renderer/src/launch/ObligationActs.tsx` line 108, announced
+  once by an OS notification when Fabric is not in front, which carries no button, `shared/notify.ts`
+  `decideNotification` from line 46, reading the same queue, `main/index.ts` near line 3423; the card stays in the
+  queue as refused until 50 newer policy decisions push it out, `main/index.ts` line 3429 `REFUSAL_WINDOW = 50`, unless
+  a later grant or a later decision allowing the same floor class and target, in the project or estate-wide, resolves
+  it first, `shared/attention.ts` `openRefusals` from line 222 (Fabric main `0e7a8a00`); the
+  button reads "Allow once" (in Russian «Разрешить один раз», the card's kind «заблокировано» or «Отказано» and its
+  status «Разрешено один раз, до {time}», `renderer/src/i18n/ru.ts` lines 2419, 2423 to 2424 and 476; from Fabric `5676cd88`, after release 0.3.19, the kind reads «Ждёт разрешения» and the card is headed by its floor class) and issues a
+  single-use one-hour grant scoped to the project, the floor class and the target with no action class, the
+  `attentionGrant` handler with `ttlMs: 60 * 60 * 1000` at `main/index.ts` line 4192, which `main/policy.ts`
+  `findGrantFor` (lines 208 to 237) hands to any session of the project that keeps its runner gate and asks for the
+  same floor class and target, so such a session would spend it without asking,
+  `renderer/src/launch/ObligationActs.tsx` lines 125 to 150 and `renderer/src/i18n/en.ts` lines 731 and 732; the grant
+  does not lift the refusal, FA-09 being checked before any grant, `main/policy.ts` lines 324 to 346, yet the card then
+  shows "Allowed once, until {time}" and leaves the queue, a later grant of the same floor class and target resolving
+  the refusal there, `shared/attention.ts` lines 184 and 222 to 240 and `main/index.ts` line 3582, while the act stays
+  undone; and nothing resolves the card after the agent acts on the chat yes). Until Fabric ships it, OW-3 has the
+  operator see that card beside the agent's chat question, the chat question saying that the card's "Allow once" does
+  not allow the act, naming the card by its label in the operator's interface language, and being the one the operator
+  answers, and the agent's report (with no person in the chat, its board reply too) saying that the card does not allow
+  the act, that it stays refused and that a press would leave such a grant. `intake.spec-first` (build nothing
+  while the specification is incomplete) rests on the operator's own recorded decision (Fabric ADR-0176, 2026-10-23):
+  its question (the missing parts of a specification) is one the words do not answer, so under OW-3 it stands and
+  Fabric owes nothing for it (Fabric question `46167c9f` asked whether it, and OW-3's added wait, stand). The adapter's line that `fabric_effect_request` is for acts on the agent's own initiative
+  (working-with-fabric `SKILL.md`, since `344ed96c`) owes the same for an act the agent performs itself or through
+  Fabric: an act the operator ordered still asks Fabric's floor once with the words as its reason; its carve-out for a
+  service's relayed action (AP-2) stays. The adapter's owed list, which the conformance row points to: the DEC-0156
+  citation; OW-3's waits, its message form (a statement as under way with how to stop it, a question only for a step
+  that waits; a risk on a step a host's gate holds carried as that gate's one ask), its bare refusal and its one
+  question in the chat under an FA-09 refusal and, with no person in the chat, the act left open and named for a
+  session the person is in (Fabric's refused card no question of the agent's); the asks other rules require for the
+  same act named (rule 3's approval request, DEC-0149's word); working-with-fabric `references/on-demand-session.md`
+  asking OW-3's three waits by the no-person route (its step 7's "step 3's gate question is the only one" excepting
+  that question, lines 183 to 202 at `97ca5b5e`), with its eval; OW-4's full list with the word for a source hand-over (DEC-0149) and the rule that
+  a refusal by its own tool or harness is never routed around and is handed over without first trying other routes
+  (its `references/practices.md` says "after the agent's own routes"); the floor line above; its prose test and
+  behaviour eval with them; and its operator-channel references (`operator-channel-and-repository.md` in
+  creating-fabric-agents and adapting-projects-to-fabric, step 3 "run the agent's link command"), creating-fabric-agents'
+  Step 6 and adapting-projects-to-fabric's section 8 (both "Propose the operator channel": "the operator's four steps",
+  read on the adapter's main at `2c0b1b18`) and their evals, which OC-11 now gives the agent the link command in
+  (OW-2), the code shown to the person only (on the agent's dashboard, else only in its reply in the operator's
+  session, never in a tool argument, a message, a file or an outward act); and both skills' `references/source-and-instance.md` line 7 ("handing over, a new remote, a push or a change
+  of visibility stays the owner's act, each time"), which under OW-4 reads as the owner's word for each such act
+  (DEC-0149's word where the act is a source hand-over), the agent performing it. Fabric owes the same for `floor.ask-first`'s own text ("Ask again once they have agreed"), which tells a session
+  with no runner gate to wait for agreement that changes nothing under FA-09; in that default mode OW-3's FA-09 reading
+  has the agent ask once in the chat instead (or, with no person in the chat, leave the act for a session the person
+  is in), which the operator's answer to question `add1df7c` may change. Fabric's board shows a request settled `failed_known` with `observed: false` as failed («сбой (причина известна)», "failed (known)") and drops it from «Ждут ответа» ("Waiting for an answer"), its feed reading `failed_known` as settled (`CommsFeed.tsx` lines 23 to 25 at `ebbdf32d`); Fabric owes showing one whose reply names an open step as waiting on the operator and keeping it in that filter; until then the reply and the report say that the board shows it as failed (known) (round 33, product). fabric-workspace's section on refusals (`knowledge/agents-first.md`, never work around a
+  refusal) agrees with OW-4; its CT-220 bullet (a refusal goes to the person "after the agent tried every route of its
+  own") owes the same exception, beside the link to the OW rules, OW-3's waits, its message form and OW-4's list. Owed
+  item, owner fabric-workspace's knowledge base, the whole of its list above: `knowledge/agents-first.md` links the OW
+  rules (it has no link today), its stale CT-220 paragraph is rewritten to them (OW-3's waits, its message form and
+  OW-4's list), its "every route of its own" bullet takes the refusal exception, and its refusals section's item 4
+  says a rule's form is chosen before acting, never re-formed; the session that lands this decision lands that change,
+  merged in fabric-workspace in the same run (the handoff's landing step). Providers of `fabric-operator-channel/0.1` adopt OC-11's step 3 (the agent enables the
+  channel and runs its link command on the `accepted` answer) through the adapter's kits at their next adaptation;
+  this decision changes no provider by itself. On a headless place (the operator's decision of 2026-11-09, recorded in
+  fabric-workspace `knowledge/authority.md`, *Autonomy by place*, and designed as CT-285's autonomy profile), OW-3's
+  no-person case and its own stop hold as written until CT-285's decision amends them; whichever of the two lands
+  second makes OW-3 cite it. The same OA-4 change reaches three statements of the relayed approval here (SCN-046,
+  CONTEXT's *Relayed approval*, the relay receiver's conformance row), which say that a host's gate on a floored act
+  still asks once, quoting the relayed words as its reason; and two consumer copies, owed: fabric-workspace's "One
+  approval binds all" items 1 and 5 say the same, as Fabric's current behaviour pending CT-250's decision and Fabric's answer to question `add1df7c` (the operator's decisions of 2026-10-26, 2026-11-06 and 2026-11-07), and Fabric's session obligation `operator.told-one-is-told-all`
+  ("do not ask the operator again (DEC-0126)") names the floor's one ask (OW-3). `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** `docs/specification/governance-and-roles.md` (the section *The operator's word, carried
+  out the first time*; OW-4's hand-over of a typed secret where the node answers `no-client` is the vault's own command
+  in the person's shell, local channel SP-2 and SP-3, read and kept, round 35), `docs/specification/conformance.md` (one row for every agent that takes the operator's words),
+  `docs/ux/scenarios.md` (SCN-057 and its index row; SCN-044's alt path, the host app's update asked once and done by
+  the agent through the host app's own update route, or its supervisor where it publishes a descriptor, and its Coverage; SCN-012's step 1, its alt paths (one for an `accepted` given before the token is stored) and its recovery, and SCN-014's recovery: the link command the agent's, a stopped receiver
+  restarted by OC-17's supervisor and, if the status stays, by the agent on the operator's word, given to it or the
+  coding session it runs in,
+  a waiting decision answered on the dashboard, not in the bot's chat, spend above a project's `autoApproveUsd` only
+  through spend policy rule 3's approval request, never a chat or session message (CT-291), a paid action within a
+  limit as AP-1's `relayed` class, on the dashboard or by telling the agent as AP-2 says, in the bot's chat only with
+  OC-6's presses once the receiver is back, the webhook's removal waiting on
+  the operator's decision, OC-2, AP-2 and AP-3),
+  `docs/specification/operator-channel.md` (OC-11's second step handed over as AP-4's `secret` step or the host's
+  secret prompt, SCN-053, never as a command the agent could run itself, where the node answers `no-client` the vault's own command in the person's shell; its third step the agent's, OW-2, on AP-2's relayed decision, the code
+  shown to the person only (an agent with a dashboard has its link command print to its output only that a code was issued), the store
+  read for the token whenever the agent builds its status, at its next start and when the person says it is stored, the channel enabled on the read that finds it, a new code issued on the
+  person's ask when one expires unused while the `accepted` holds and never because of a chat message, an old `accepted` renewed by one question), DEC-0034 (an Annotated line), DEC-0126 (an Annotated line and OA-4's pointer in `docs/specification/delegation.md`: a host's gate still asks once, quoting the relayed words), DEC-0150 (an Annotated line:
+  OW-6 keeps CA-8's bound), the operator channel's status fixtures whose
+  `detail`, one sentence each as the schema describes it and within about 280 characters, now says what happens for a
+  stopped receiver (a supervisor restarts it; if it does not, the person asks the agent, in the unlinked example or the
+  coding session it runs in, to restart it, and answers decisions other than a spend approval on its dashboard or by
+  telling the agent, never in the bot's chat, which may lose them after 24 hours, OC-5 and OC-17, the detail offering
+  a spend approval no chat or session route, spend policy rule 3; while unlinked, the code,
+  or a new one the person asks the agent for once it expires, OC-11) and, for a set
+  webhook, that removing it or switching to it is the operator's decision, told to the agent or the coding session it runs in,
+  never in the bot's chat, or taken by them in the channel settings (OC-2)
+  (`fixtures/positive/operator-channel-status-degraded.json`, `-degraded-receiver-missing.json`,
+  `-degraded-receiver-missing-unlinked.json`; the new `-off-awaiting-token.json` for the Status table's `off` row; `fixtures/negative/operator-channel-status-degraded-without-credential.json`,
+  `-receiver-missing-lease-held.json`, `-receiver-missing-without-receiver.json`, each negative for its original
+  reason), `docs/ux/foundation.md` (JRN-04/#2's touchpoint and ST-035), `docs/ux/screens.md` (SCR-30), `docs/DOCMAP.md`,
+  `docs/specification/README.md`, `docs/specification/channel-agent.md` (CA-8's pointer), `CONTEXT.md` (the operator's
+  word), the separation of the operator's businesses (OW-5) as a pointer to the
+  operator's own instructions outside this contract, `docs/ux/flows.md` (FLW-29), backlog CT-220, CT-266, CT-291,
+  CT-271, CT-273, CT-278 and CT-282 (filed; CT-271 rewrites the recoveries other scenarios still give the operator, under OW-2
+  and OW-3; CT-273 names how the operator removes a channel binding they did not make; CT-278 puts the dashboard's
+  link code on a screen; CT-282 brings the status schema's `off` description to the Status table), the operator
+  channel's Status table (its `off` row: an `accepted` answer waiting for the token, with or without a `credential`
+  member, the tile naming the token to store and saying to tell the agent once it is stored, and with the token present no person step, the agent enabling the channel on its own status read, only for a channel not enabled since that `accepted`; a channel the operator turns off stays off, recorded as `declined`, OC-1) and OC-17 (a product's own `reason.detail` within 300 characters in every locale it ships); the handoff
+  `docs/handoffs/2026-11-07-operators-word.md` and its row in `docs/handoffs/README.md`.
+- **Source:** the operator's words of 2026-11-04 relayed on board threads `b91254c4` and `a7a9d05d` (message
+  `b66a8fae`); their words of 2026-11-07 that they press nothing in any interface (relayed by one of their projects
+  on board thread `c4ec741b`, announcement `e6385b29`), which OW-2 states, keeping one press of its own beside the steps OW-4 hands the person, a host gate's agreement
+  (Fabric's "Allow once" under `floor.ask-first`, OW-3), while Fabric's question `add1df7c` stays open; backlog CT-220; DEC-0156 reserved by git CAS on 2026-11-07.
+- **Annotated (2026-11-14):** OW-3's case of a step with no person present amended by DEC-0166: on a headless place a standing mandate is a mandate in force (AU-1), so it clears OW-3's first wait for a relayed act it covers; OW-3's other waits and a host's gate stay as written.
+
 ### DEC-0160: the port claim's schema `passioncode-port-claim/1` and the port-choice reference (CT-228)
 
 - **Date:** 2026-11-08
@@ -11494,3 +11824,334 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/handoffs/2026-11-08-port-claim.md`.
 - **Source:** DEC-0154 (HA-1); backlog CT-228; board threads `d5abc880`, `1fe66e6e` and `50a7ece3`; the blind readings
   of rounds 1 to 4 (unit, seam, product) recorded in the handoff.
+
+### DEC-0162: authority levels: `org-membership/2`, the level decision and the level mandate
+
+- **Date:** 2026-11-12
+- **Status:** Accepted 2026-11-14, merged with this change: rounds 33 and 34 of the coordinator's blind readings (at `65dca9b4` and `58172849`) were clean on all three tiers, their risks filed as CT-308. Proposed 2026-11-12, from the design `docs/evidence/plans/2026-11-12-ct250-authority-levels.md` (CT-250),
+  the design's operator-question defaults taken until the operator answered them on 2026-11-13 (below); accepted when the coordinator's blind readings are
+  clean on two consecutive rounds; rounds 1 to 22 (2026-11-12 and 13) and 23 and 25 to 32 (2026-11-14, read under the finish-line rule) were not clean and are folded, 24 clean (the unit tier was clean in rounds 3 to 13 and 18 to 22, risks aside, the seam in rounds 7 to 13 save round 10). Questions 1 to 9 were posted on board thread `8da128cf` as messages `b719b08e`, `9faffa1d` and `25f3ca27`; question 10, question 9's listing and settlement clauses (round 6) and question 8 widened to the architect (round 8) were posted as `bd18b1fa` once the board answered again on 2026-11-12, and questions 11 and 12 and question 8's round-12 clause were never posted, the board's MCP having been disconnected after `bd18b1fa`. A relayed «Принять все дефолты» (fabric-workspace session `fd5dfcf0`, board thread `16093ded`, message `36b1981b`, 2026-11-13) is superseded: asked about the conflict in this repository's chat the same morning, the operator answered «Мои ответы здесь», so the per-question answers below stand. The operator answered all twelve questions on 2026-11-13 in this repository's session `7c9eb2c2`, asked in its chat: questions 1, 3, 5 to 7, 11 and 12 as their defaults; question 8 first as its default, then replaced the same morning (a client key in an organization's context the owner's or an administrator's wherever the instance runs, «Владелец и администратор везде»); two further answers, not among the twelve: spend above the auto-approve threshold in an organization's project is the owner's or an administrator's, and an action a service leaves out of `actionLevels` stays an architect's in its project; two answered later the same day: a source hand-over that changes the repository's visibility or adds a reader outside the organization is the owner's or an administrator's, never an architect's, refining question 1 (a route to the organization's own members-only place being no hand-over, every hand-over left is theirs, the action declaring `admin`, and for an organization's own agent the operator's decision, the stated word and an elicitation are never taken, in any context, the service eliciting nothing; asked once more, a member's own repository or a file sent to a member is not inside the organization: «Только места организации») («Архитектор передаёт исходники внутри организации без смены видимости; всё, что открывает доступ наружу или меняет видимость, решают владелец или администратор»), and a member's key for an instance the organization deploys is issued and rotated only by the owner or an administrator, decided and taken in person, a member's own machine included, never by the member («Ключи экземпляров организации выдают только они, даже на машине участника»); question 4 otherwise (a project's L1 and every spend limit the owner's or an administrator's, never an architect's: «владелец и администратор … архитектор инженерит но по финансам и доступам это админ и овнер»), which also answers question 2 (an architect changes no policy); question 9 otherwise (an administrator decides a board hold, a slot move and a Project's listing too); question 10 otherwise (an administrator's command does not wait for the level route). The answers are folded below; an answer after acceptance is a new decision amending this one. It adds a membership type, a decision form, a mandate form, a token claim, a new extension key beside the actions extension, `extensions/authority/0.1` (`levels`, `actionLevels`, which no reader of the actions extension sees) and two rule codes (`FAC-SEM-169`, `FAC-SEM-170`); what it amends: OL-6 (a role decides as a level), MD-5 (a level mandate from T2), the setter of an organization project's L1 (spend policy), and holds, slot moves and Project listing decided by an owner or an administrator in an organization's context. The operator's questions and answers are below.
+- **Context:** the operator decided four access levels on 2026-11-06 (fabric-workspace session `74a9440a`, relayed on
+  board threads `eefa7959`, message `23746581`, and `8bd78e76`; recorded verbatim in fabric-workspace
+  `knowledge/authority.md`, *Access levels: who approves*, at `73171ed0`): the organization's owner, the organization's
+  administrator, the project architect and the user. A command from the owner, an administrator, or an architect in
+  their project, and from the agents acting for them, is approved at once and recorded with the approver; a user's
+  request goes through the approvals the product provides; only the person's physical steps stay (North Star gap G2).
+  The contract had no architect, read a role as no authority (OL-6, DEC-0133), let only the operator decide a relayed
+  action (AP-2, DEC-0121), asked a T2 caller for an `approval/1` per effect (DL-17, DL-18), and ignored a T2 caller's
+  mandate (MD-5, DEC-0125), so an administrator's agent on the administrator's own machine, T2 to the organization's
+  services, waited on an approval for each effect. fabric-workspace asked for the decision for the organization slice of
+  2026-11-21 (board request `4a1bf8d6`, thread `8da128cf`, line 1.2).
+- **Decision:** [membership](specification/membership.md#levels) LV-1 to LV-11.
+  1. **`org-membership/2` (LV-1).** `/1` with `role` among `owner`, `admin`, `architect`, `member`, and `projects`, always
+     present: 1 to 64 projects for an architect, each once, none for any other role (`FAC-SEM-169`). Registered in the
+     signing register as `org-membership/2` over every member but `type` and `sig`. An issuer issues it only to a reader
+     it registered for `/2`; to a `/1` reader it issues `/1`, an architect read as `member`. `verifyOrgMembership` reads
+     `/2` only for a reader with `levels: true` and refuses it `malformed` otherwise; its verdict for `/2` adds `type`,
+     `projects` and `expiresAt`, and its verdict for `/1` keeps its shape.
+  2. **A role is a level, for decisions only (LV-2; OL-6 amended).** `owner` covers `admin`, `admin` covers every
+     `architect`, an `architect` covers only its `projects`, `member` decides nothing; a level never makes a signer.
+  3. **The level decision (LV-3, LV-4).** `decision.schema.json` is the operator's form or `{by: "level", via:
+     "level-command", level, org, project?, action, target?, instruction, at, membership}`, `project` required for an
+     architect. A service that reads levels takes it, at every tier, when the decision is for the called action and
+     target, within AP-2's window, naming the call's project when it names one; its `org` is the context the call acts
+     in, the service's own knowledge as the project is (another organization or a personal context: `level-membership:
+     context-invalid`; a service that does not say the context: its fault `context-missing`, round 23); the attestation verifies for this
+     service's audience under the organization's applied key set, is active, covers the level and, for an architect,
+     the call's project; the decision was made before the attestation's `expiresAt`; and the token binds it (item 4). The level covers the call when it is at least the level the service declares on the action (its `actionLevels` entry, `owner` for a billing act), at least `admin` for a call in no project, and, for an `architect` attestation, the call's project is among its `projects`; an owner or an admin deciding at the architect level is bounded by the call's project alone. The service's own accepted elicitation at T0 or T1 is read first, as the operator's word, save, in an organization's context, for an act item 6 keeps for a level.
+  4. **Binding (LV-5).** `delegation-token.schema.json` gains the optional claim `mem`, an attestation's digest the hub
+     writes only for its own principal's attestation (OM-2); an onward token keeps the parent's `mem` or none
+     (`FAC-SEM-050`). A level is taken only from a call whose verified token carries the attestation's digest as `mem`;
+     a T0 or T1 caller presents a token to carry a level (DL-26) and without one keeps the operator's path. The route: a service declares `levels` in the authority extension (`extensions/authority/0.1`, `service-authority-extension.schema.json`) (each organization and the audience its issuer registered it by); the hub reads it, asks the issuer for its principal's `org-membership/2` for that audience over the principal's own session (a new OM-7 row), verifies it and writes `mem`; the hub forwards a level form from any origin (interop C3.5 amended), dropping only a T2 origin's operator forms, and only to a callee that declares `levels` for the form's organization. The protocol name `levels/1` (registered in `src/protocol-revisions.ts`) gates the form: an origin sends a level form only to a hub that lists it, or directly to a callee that declares `levels`, since a reader pinned before this decision refuses it.
+  5. **What a level stands as (LV-6).** The operator's decision of AP-2, the `approval/1` of DL-17 and DL-18 for a T2
+     caller, and the operator's word in a mandate: `mandate/1` takes `by: "level"` with `level`, `org` and
+     `membership` (an architect's scope lists its `projects`), taken from any tier when bound (MD-3; MD-5 amended), stands while the attestation the call carries is accepted (the hub re-carries it with a fresh one, its `instruction`, `at`, `expiresAt` and scope unchanged, so the holder is not asked again and MD-1's ask comes at the mandate's `expiresAt`), and stands only at the service its attestation is for: to engage another service the hub states a new one.
+  6. **Bounds, the user, the record, refusals, ending (LV-7 to LV-11).** No level covers a human step, spend above a limit, a personal context or another organization; in an organization's context, at a service that reads levels, an act declared `owner` or `admin` (`change-policy` included) is decided only by that level: no operator decision, operator mandate, elicitation or `approval/1`, whoever holds the instance's descriptor (a member on a member's machine), from any tier (`level-insufficient`, the digest from T2), the service owing the call's `context` (`context-missing`); the member who owns a Project decides its hold and listing in the host's own controls (CT-307) (rounds 25 and 26, the operator's answers to questions 4, 8 and 9); a billing act (the plan, the payment method, invoices) is the `owner`'s, as the operator's decision of 2026-11-06 gives billing to the owner alone; a spend limit (setting or changing L1, a key's ceiling or an organization-wide total once one is specified) is the `owner`'s or an `admin`'s, declared `admin`, its effect `change-policy`, which no mandate covers (the operator's answer to question 4); an act a service keeps for the operator alone it declares `operator` in its authority extension's `actionLevels` (refused `level-insufficient: operator` at every level; in an organization's context "the operator" of such an act is the instance's operator, the one who holds its descriptor (DEC-0159 CF-2): the operator of the estate the instance runs in, or for an instance on an organization's own `org-cloud` machine whoever holds its descriptor), a board hold's set and lift, the move of a responder slot and a Project's listing and unlisting in the directory are the Project owner's or an `owner`'s or `admin`'s, declared `admin` (the operator's answer to question 9), an owner's settlement being the owning principal's own call that no level reaches, a rule proposal's approval (type `rule`, a rule for an agent binding) the operator's alone (`FAC-SEM-104`), and another proposal type's approval declared `admin` (an owner or an admin, recorded as `approvedBy: {role: "administrator"}`; never an architect); a credential request's decision stays credentials.md's (the organization's administrator or its auto-approval policy, DEC-0111), declared `admin` where a service offers it as a relayed action; `change-policy` is decided by `owner` or `admin`, never by an
+     architect (question 4): a service reads an action of that effect as declared `admin` at least, whatever its `actionLevels` says (`actionDecision`), and never by a mandate; approval separation holds for a holder's agent. A member's
+     request carries no level. The record is `{by: "level", via, level, org, project?, approver, membershipDigest,
+     revision, caller}`, `approver` the attestation's pairwise subject, `instruction` in the service's own audit only.
+     No new error code: `operator-decision-required` with `level-insufficient: owner` or `level-insufficient: admin` (the agent files one request to a holder of that level, whose own agent acts under its own level decision); `decision-invalid` with
+     `level-membership: <problem>`, `level-unbound`, `level-audience`, `level-expired` or `level-role`; a service that
+     reads no levels reads a level form as absent and answers any other form the call carries as AP-2 says, and with none as if the call carried no decision or mandate; from T2 every refusal of a level form carries the action's digest too, which the service owes on every T2 call carrying a level form. An ended or suspended membership ends its level at once, and the service keeps the attestation it accepted last per subject. The organization's issuer resolves `approver` for the organization's owner and administrators.
+  7. **The reference.** `src/levels.ts` (`levelStanding`, `levelRules` for `FAC-SEM-170` on kinds `decision` and
+     `mandate`), read by `actionDecision` (inputs `levels` and `tokenMem`) and `mandateCovers`; the vectors
+     `fixtures/vectors/levels.json`, written by `tools/vectors/levels.ts`; the scenario SCN-060.
+  8. **Tasks, gates and keys.** Inside its level and bound as item 4 says, a level holder's words carry a task for the
+     organization's own agents as the operator's do under DEC-0156 OW-1 and OW-6 (OW-6 reading "the operator's or, in an
+     organization, a level holder's within LV-2"); a host's gate that takes AP-2's decision (Fabric's Agent access gates and the board's gates, save every act LV-7 keeps for the operator: a rule proposal's approval; a client key's revocation in an organization's context (its issue and rotation being CF-3's human step, LV-7), a board hold, a slot move, a Project's listing and unlisting and an Agent access gate's grant to an agent or a person take an `admin` level decision; an owner's settlement is no gate; OW-2's kept press) takes a bound level decision the same way, and every other ask stays (OW-2, OW-3,
+     OW-5, OA-4); CT-266 is decided with it. A client key carries no `mem`, so no level stands for a client-key caller;
+     issuing, rotating and revoking client keys stay the instance operator's in the personal context (DEC-0159 CF-3); in an organization's context a client key's issue, rotation and revocation of an instance the organization deploys is the `owner`'s or an `admin`'s wherever the instance runs, a member's own machine included, declared `admin` (the operator's answer of 2026-11-13 to a follow-up on question 8: «Владелец и администратор везде», replacing the first answer): CF-3's relayed key twins declare `admin` in the authority extension's `actionLevels` for the organization, so an owner's or an administrator's bound level decision from a delegation-token caller stands there and an architect's is refused (A level reaches only CF-3's revoking twin (an issuing twin takes only client-key callers, which carry no `mem`); issuing or rotating a member's or another agent's key is CF-3's human step (a secret handed out, AP-4), which no level covers: in an organization's context the owner or an administrator decides it (the operator, 2026-11-13: only they, never the member), through the product's own approval surface, recorded with them as approver, and takes it in person on the machine the instance runs on, a member's own machine included, so the member never issues or rotates it; until the member-key door's proof is named (membership, Not decided), an instance the organization deploys on a member's machine offers no member-key issue or rotation: «Ключи экземпляров организации выдают только они, даже на машине участника»); CF-4's twins of page answers
+     take a bound level decision as AP-2's. A level holder's task travels over the project board as words a dispatched run reads, never as a service mandate (a level mandate stands only at its attestation's audience); the run's agent states one with the hub per service (DEC-0158 OS-7). Whichever of DEC-0156, DEC-0159 and this decision lands second restates its
+     texts to agree (the handoff's landing notes).
+- **Why:** the operator's decision makes an owner's, an administrator's and an architect's word the operator's within
+  their scope; a signed, short-lived, audience-bound attestation from the organization's own issuer is the only proof
+  of a role the contract already verifies, and binding it to the caller through the hub's token keeps a copied
+  attestation from deciding anything. Keeping the level for decisions only leaves signing, and the person's own steps,
+  where they were.
+- **Alternatives considered:** a level read from `/1`'s `extensions` (refused: OM-1 says an extension grants nothing,
+  and a reader could not tell an architect's projects); a level decision without a token at T0 or T1 (refused, design
+  question 5: a local process could replay a copied attestation, CT-168); an organization product's own signed
+  delegation travelling to other products (refused, design question 6: it stays inside that product, and what travels
+  is the level decision and a `mandate/1`); `projects` present only for an architect, as the design first said
+  (refused: OM-1 and the signing register keep every member present, so it is always present and empty for others); a
+  level mandate with its own `project` (refused: its scope's `projects` already names where it acts); the design's single `level-insufficient: <level>` (refused for two details, `owner` and `admin`, the only levels a call can need beyond an architect's own); the level mandate's record without `project` (refused: it carries the call's project when there is one); a level form outranking the service's own accepted elicitation (refused: the elicitation is the operator's word, read first); a board hold, a slot move and a Project's listing kept the operator's alone (round 3's default of question 9, refused by the operator's answer of 2026-11-13: an administrator decides them too); a project's L1 the owner's alone and an architect changing its own projects' policies (the defaults of questions 4 and 2, refused by the operator's answer of 2026-11-13: finances and access are the owner's and the administrators'); an administrator's command waiting for the level route across products until each adopts (the default of question 10, refused by the operator's answer of 2026-11-13); a level form sent to any hub, relying on an old reader ignoring it (refused: a reader pinned before this decision refuses it, so `levels/1` gates it); client keys kept the operator's by the absence of `mem` alone (refused: CF-3's twin is open to a delegation-token caller, so the authority extension declares its level, `admin` in an organization since the operator's answer of 2026-11-13); client keys kept the instance operator's in an organization (question 8's first answer, replaced the same day: «Владелец и администратор везде»); an authority extension closed at its root (refused in round 4: a later member, as DEC-0166's `standing` does, would make a reader built to this decision drop the whole declaration, so the root is open and each member closed); `levels` and an action's `level` inside the actions extension, as round 2 had them (refused in round 3: its schema is closed and every deployed reader refuses unknown members, so a service adopting levels would lose all its declared actions in hosts not yet updated).
+- **Compatibility:** additive, gated by `levels/1`. A `/1` reader never receives `/2` and refuses it if it does. A service that reads no
+  levels answers a level form as if absent; a reader pinned before this decision, which every deployed reader is today, answers `decision-invalid` (`mandate-malformed` for a mandate), since its schemas fix `by` to `operator`, so an origin sends a level form only to a hub listing `levels/1` or to a callee declaring `levels`. Either way its callers fall back to the operator's decision. Read on 2026-11-12:
+  no product issues `/2` or writes `mem` yet. Owed: the organization product issues `/2` to the readers it registers
+  (its levels row); Fabric's hub writes `mem` and its Agent access and board gates read levels (CO-523); every service
+  with `relayed` actions reads level decisions and mandates (the adapter's kits FAA-249, Project Observatory OBS-377,
+  Switchboard SB-291, Fabric Inbox B-232, Fabric Dashboards FD-164, the launcher PC-162, the copy service AUTH-01, the
+  platform PLAT-141 and PLAT-146 (a port pinned past this decision either reads the level form or leaves out the `decision-level` and `mandate-level` fixtures by name until it adopts; the `service-well-known-authority-*` fixtures reach no port's glob; counted on 2026-11-12, the adapter's actions well-known documents go from 7 to 8 (`-levels-ok`, which expects nothing of an actions-only reader) and its actions fixtures from 14 to 15 and its mandate fixtures from 5 to 6 with `decision-level` and `mandate-level` left out (16 and 7 once it reads the level form), both kits' hand-kept `PROTOCOL_REVISIONS` gain `levels` ['1'] and `org-membership` ['1', '2'] whether or not the port adopts the level form (its feed-protocols test checks them against the contract's register), a port faults `effect-missing` on any relayed call at a service given `levels` whose `effect` is not an effect class and reads a `change-policy` action as `admin` at least (two `levels.json` vectors), a port that types DL-2's claims refuses a malformed `mem` `malformed-claims` as `verifyDelegation` does (its delegation vectors gain a `mem` case), and Fabric Dashboards' actions fixtures from 7 to 8, FAA-249, FD-164), a messaging gateway's send approvals, whose row its owner is asked for on the board at landing; the organization product's row is VES-AUTHORITY-LEVELS). Until a product adopts it, an administrator's command does not wait (the operator's answer to question 10): under fabric-workspace's interim reading (`knowledge/authority.md`, «one approval for all agents») a product's agents take it at once through the product's own approval surface or the board inside the holder's estate, from that product or another, recorded with the administrator as approver; under the contract an agent still sets `by: operator` only for the operator's words (AP-3). The level form's schemas reference no membership schema (`org` and `project` patterns inline, `membership` an object the service verifies), so a consumer that vendors `decision.schema.json` or `mandate.schema.json` vendors nothing new. The operator's answers of 2026-11-13: a level stands for a source hand-over for an
+  organization's own agents with the exact target (DEC-0149), only where the holder's agent is T0 or T1 to the hand-over service (from T2 the hand-over waits for the estate route, `handover-needs-estate-route`, as for any T2 caller) (question 1, the default; asked again on 2026-11-13: a hand-over that changes the repository's visibility or adds a reader outside the organization is access, the owner's or an administrator's, never an architect's; a route to the organization's own members-only place being no hand-over, every hand-over left is the owner's or an administrator's, the action declaring `admin`, and a member's own repository is not the organization's place, «Только места организации»), an architect changes no policy, its own projects' included (question 2, the design's default refused by question 4's answer), 64 projects per attestation, no level without a token, no traveling product delegation, and the issuer resolving `approver` for the organization's owner and administrators (question 7, added in round 1, not the design's) (questions 3, 5, 6 and 7, the defaults); question 4 (who sets and changes a project's L1 in an organization) answered otherwise: the owner or an administrator, every spend limit with it, never an architect («архитектор инженерит но по финансам и доступам это админ и овнер»), billing itself (the plan, the payment method, invoices) staying the owner's by the operator's record; question 8 first as its default, then, asked again the same morning against question 4's «доступам», otherwise: in an organization's context a client key's issue, rotation and revocation of an instance the organization deploys is the `owner`'s or an `admin`'s wherever the instance runs, a member's own machine included, declared `admin` (the operator's answer of 2026-11-13 to a follow-up on question 8: «Владелец и администратор везде», replacing the first answer); on the organization's own `org-cloud` machine the instance's operator is whoever holds its descriptor, which may be the owner or an administrator (for an act declared `operator`; a member's key goes by LV-7's own clause, the owner or an administrator in person); spend above the auto-approve threshold in an organization's project (asked the same morning, not among the twelve): the owner or an administrator decides it; an action a service leaves out of `actionLevels` stays an architect's in its project (asked the same morning; a `change-policy` action read as `admin` at least); question 9 answered otherwise: a board hold's set and lift, a slot move and a Project's listing and unlisting are decided in an organization's context by the member who owns the Project or by an owner or an administrator, a host declaring `admin` for each (an owner's settlement stays the owning principal's own `com.reconcile`, no gate); question 10 answered otherwise: the interim reading of «one approval for all agents» is not held back by the level route, so an administrator's command is taken at once across products through each product's own approval surface, while AP-3 still keeps `by: operator` for the operator's own words; question 11 as its default: a rule proposal's approval stays the operator's alone (`FAC-SEM-104`) and an architect approves no proposal; question 12 as its default: an architect decides no credential request, the administrator or the auto-approval policy deciding as credentials.md has it, a service declaring the decision `admin`.
+- **Consequences / affects:** `schemas/org-membership-2.schema.json` (new), `schemas/decision.schema.json` (the level
+  form), `schemas/mandate.schema.json` (`by: "level"`), `schemas/delegation-token.schema.json` (`mem`);
+  `src/org-membership.ts`, `src/signing-challenges.ts`, `src/levels.ts` (new), `src/actions.ts`, `src/mandate.ts`,
+  `src/delegation.ts`, `src/delegation-rules.ts`, `src/semantic-kinds.ts`, `src/semantic-rules.ts`, `schemas/service-authority-extension.schema.json` (new, the key `extensions/authority/0.1`: `levels`, `actionLevels`, the root open to later members), `src/extensions.ts` (the authority key), `docs/specification/project-comms.md` (Holds, PR-2, owner settlement, Opt-out), `governance-and-roles.md` (approval separation, proposals' `approvedBy`), `contexts.md` (Access levels), `spend-policy.md` (L0, L1, L2), `docs/ux/flows.md` (FLW-10, FLW-29) and `foundation.md` (ST-012, ST-035), `docs/DOCMAP.md`, `docs/guides/connecting-compatible-agents.md` (the producer checklist), `schemas/interop-agent-call.schema.json` and `interop-request-meta.schema.json` (descriptions), `docs/specification/interop.md` (C3.5 and the actions section), `docs/ux/scenarios.md` (SCN-060) and `screens.md`, the glossary,
+  `src/protocol-revisions.ts` (`org-membership` 1 and 2, `levels/1`), `docs/specification/versioning.md`, `docs/specification/README.md` (the membership row), `CONTEXT.md` (Membership attestation, Level, Mandate, Relayed decision, Source hand-over), `docs/handoffs/README.md`; `fixtures/vectors/levels.json`, `tools/vectors/levels.ts`,
+  `test/levels.test.ts`, positive, negative and semantic fixtures; `docs/specification/membership.md` (`/2`, OL-6,
+  *Levels*, rules, adopters, not decided), `service.md` (AP-2 to AP-5 and the `actionDecision` table), `delegation.md`
+  (`mem`, DL-18, DL-26, MD-3, MD-5, MD-6), `governance-and-roles.md` (approval separation), `source.md` (a level
+  decision as the word for an organization's own agent's hand-over), `conformance.md` (rows, modules, rule codes,
+  signing register). Not decided here: the autonomy profile per place (CT-285), the estate-scoped
+  manager (CT-252), calls only within an organization (CT-251), a faster end
+  than an attestation's day, and how a hub confirms that the `levels` audience a service declares is the one the issuer registered for that service (CO-523 and the organization product; until then the hub reads the declaration only at the service's own origin).
+- **Source:** the design `docs/evidence/plans/2026-11-12-ct250-authority-levels.md`; the operator's decision of
+  2026-11-06 as recorded in fabric-workspace `knowledge/authority.md`; board request `4a1bf8d6` (thread `8da128cf`);
+  backlog CT-250.
+- **Annotated (2026-11-14):** LV-7 amended by DEC-0166: in an organization's context, at a service that reads levels, an act declared `owner` or `admin` takes no place's standing mandate either, its `setLevel` being the hub's statement rather than an attestation (AU-2; an attested setter's level is CT-309).
+
+### DEC-0163: a usage report's cost sums hold within each row's rounding
+
+- **Date:** 2026-11-12
+- **Status:** Accepted 2026-11-12, merged with this change: rounds 5 and 6 of the coordinator's blind readings (at `4275ffff` and `43d123f2`) clean on all three tiers; rounds 1 to 4 folded.
+  It loosens `FAC-SEM-025`'s cost comparisons only; no schema or field changes.
+- **Amends:** DEC-0065 (the CT-40 annotation's rounding clause, "so rows are written unrounded") and DEC-0021 (the day's cost against its models).
+- **Context:** `FAC-SEM-025` compared a usage report's cost sums (a day against its models, a project against its task
+  runs, the projects against the days) within a fixed 0.000001 and a relative 1e-9, and the service page asked a
+  service to write each row's `costUsd` unrounded. A service that rounds each row to 6 decimal places, as the adapter's
+  kit does, can honestly put N rows up to N x 0.0000005 over their sum: the adapter measured 2.926432 against 2.926429
+  on a run localized into 15 languages (board request `785fd306`, thread `14937b75`, FAA-310).
+- **Decision:** every cost sum `FAC-SEM-025` checks holds within 0.000001, plus 0.0000005 for each row with a known cost summed on either
+  side of the comparison, plus a relative 1e-9 ([service](specification/service.md#usage-report)): a day against its
+  models counts the day's row and each model's row with a known cost; a project against its task runs counts each run
+  with a known cost and the project; the projects against the days count each project and each day with a known cost
+  (a `null` row carries no rounding and widens nothing). Only the day against its models is a distance, so a sum that is
+  not a finite number (a cost that is not a number, or a sum that overflows) is never close; a project against its task
+  runs and the projects against the days stay one-sided: an excess beyond the allowance is refused, as is a sum that
+  overflows against a finite one, and any shortfall passes, as before. A service may write each row's
+  `costUsd` rounded to 6 decimal places or unrounded. Calls and tokens, which are integers, are compared exactly as
+  before.
+- **Why:** the rounding of each written row is independent, so the error bound of a sum grows with the rows in it; a
+  fixed bound fails honest reports on rounding alone, while the allowance still catches any excess beyond it: 0.000001,
+  plus half a millionth for each row counted, plus 1e-9 of the larger sum.
+- **Alternatives considered:** requiring unrounded costs (refused: a service writing JSON from decimal money cannot
+  always keep binary floats unrounded, and the adapter already rounds); a fixed but larger bound (refused: it fails for
+  enough rows and hides an excess for few).
+- **Compatibility:** looser only for this repository's checker: every report whose costs sum to finite numbers that passed still passes; a report whose bounded side's sum overflows to an infinity while the side bounding it stays finite (runs against their project, projects against the days), or whose models' sum overflows against a finite day, is now refused; two sums that both overflow, or an overflowing bound against a finite sum, pass. Read on
+  2026-11-12, the copies of the rule that do not read it from here and keep the fixed tolerance: the adapter's kit in
+  Python and Node (`fabric_usage.py`, `fabric-usage.mjs`) and the probe that runs it, which owe the per-row allowance
+  and a test of ten rows rounded up (FAA-310 part 2); and every copy outside it, which its owner changes. On the
+  operator's machine on 2026-11-12 the message `is not the sum of its models` appeared in 45 files outside this
+  repository and the adapter (run from the workspace folder that holds the checkouts: `rg -l 'is not the sum of its
+  models' .` with the globs `!_worktrees/**`, `!fabric-agent-contract/**`, `!fabric-agent-adapter/**`,
+  `!**/node_modules/**`, `!**/.git/**`, `!**/coverage/**`, `!**/dist/**`, `!*.test.*` and `!test_*.py`): 39 vendored kit
+  copies (34 under the current names `fabric_usage.py` and `fabric-usage.mjs`, Fabric Dashboards' sample-service fixture
+  among them, and 5 under the older single-file names `fabric_service.py` and `kit.mjs`), 3 vendored probes
+  (`check_service.py`), 2 ports of the probe (`usage-probe.ts`) and 1 vendored copy of `src/usage-rules.ts`. The
+  current-name kits follow at their next kit refresh; the old-name kits, the probes and the ports owe the per-row
+  allowance from their owners. Until each changes, a service that rounds its
+  rows is refused by that reader, so a service writes rounded rows only once its readers apply this decision. The kit
+  already writes rounded rows, so the window closes only when the kit's own copies carry the allowance and each vendored
+  copy is refreshed; the handoff tracks it. A pin alone
+  is not enough for a copy, so the positive fixture `service-usage-rounded-rows.json` (ten rows rounded to 6 places),
+  which a copy's parity test reads with the other positive usage fixtures, fails that test at repin until the copy
+  changes. No vector
+  file covers FAC-SEM-025's sums: `test/usage-rules.test.ts` and the rounded-rows fixture hold the cases, and the adapter generates its usage vectors
+  from `usageRules` at its pin.
+- **Consequences / affects:** `src/usage-rules.ts` (`allowance`, `exceeds` and `ROW_ROUNDING_USD`, exported; the day check's
+  `close`), `docs/specification/service.md` (the usage report's sentence on rounding and `FAC-SEM-025`'s row),
+  `test/usage-rules.test.ts` (ten rows rounded up, an excess beyond rounding, each count at its boundary), `fixtures/positive/service-usage-rounded-rows.json` and `fixtures/catalogue.json`, `docs/specification/conformance.md` (the usage host row), DOCMAP, the DEC-0021 and DEC-0065 annotations.
+- **Source:** fabric-agent-adapter's board request `785fd306` (FAA-310); backlog CT-295. Course check (AGENTS.md 1a): it serves this repository's goal, interoperability, so that a kit's honest usage report passes every reader of `FAC-SEM-025`.
+
+### DEC-0164: the unit of work as an activity event, kind `unit`
+
+- **Date:** 2026-11-12
+- **Status:** Accepted 2026-11-14, merged to main: rounds 18 (at `b92de352`) and 19 (at `8af9cf21`, main merged in) of
+  the blind readings clean on all three tiers, read under the finish-line rule (a tier fails only on a blocking finding);
+  rounds 1 to 13 and 15 to 17 folded, 14 clean; their risks are CT-305. Proposed 2026-11-12 from the design
+  `docs/evidence/plans/2026-11-12-ct259-activity-unit.md` (CT-259), whose shape Project Observatory confirmed on the board
+  (thread `b83440d6`, message `b8d911c0`; thread `52aa2f93`, message `55fa0fd7`). A new core kind
+  inside `fabric-activity/0.1` and one rule code (`FAC-SEM-171`). It narrows three things for the new kind only: DEC-0030's retention (past raw retention the journal keeps person-free monthly counts and, until each month's count closes, `(unit, month)` keyed digests with their person-free cell), DEC-0100's purpose hold (a `unit` whose `acceptedBy` is a person) and activity's *Event id* (a unit's derived `sourceKey`); no other kind changes meaning.
+- **Context:** the North Star metric counts accepted units of work per task class (fabric-workspace
+  `knowledge/system/measure.md`, *The activity event*; North Star gap G1-a). The activity protocol had no agent id, no
+  unit and no acceptance: `result` says whether a run met a signal, not which unit was delivered and accepted.
+  fabric-workspace asked for it (board request `e9d30889`, thread `8da128cf`, line 1.1); Observatory's journal
+  (OBS-378) reads it.
+- **Decision:** [activity](specification/activity.md) *Kinds*, `unit`.
+  1. **AE-1.** A `telemetry-event` of kind `unit` records one transition (`started`, `ended`, `handed-over`,
+     `accepted`) of one unit of work; it requires `run.root` and `project.id` and carries no `user` and no `session`.
+     `data`: `agent` (`id.instance`), `unit` `{system, key}`, `transition`, `taskClass` (or `unclassified`),
+     `taskClassMap` `{id, revision}` exactly when classified (a reader of a past month maps a class through its owner's table between revisions, [activity](specification/activity.md#kinds)), `outcome` on `ended` only, `evidence` (0 to 8
+     references, never content), `acceptedBy` `{kind: rule|agent|person, ref}` and `acceptedAt` on `accepted` only, and
+     `cost` as the envelope states one (`{usd: null}` when unknown), the spend since the previous transition, an
+     attribution of usage-line spend never added to it; `occurred` is when the writer recorded the transition, which
+     holding never restamps; the event carries no envelope `task`.
+  2. **AE-2.** Its `source` is `unit` and its `sourceKey` the `sha256:` of the settings-form canonical JSON of the agent,
+     the unit's system and key, the transition and `run.root` (`unitSourceKey`), so every writer derives one `eventId`
+     and a reopened unit accepted again under a new `run.root` is a new event; the unit's key takes one form per
+     system ([activity](specification/activity.md#kinds): `github` lower-case `<owner>:<repo>#<number>`, `jira` the bare
+     issue key, `mail` a 40-hex digest, a form that does not fit the key's pattern its digest; a digest is the first 40 lower-case hex digits of the SHA-256 of the UTF-8 bytes) (`FAC-SEM-171`, with
+     an acceptance not recorded before it happened and the github, jira and mail key forms).
+  3. **AE-3.** No user is attached to a unit, no unit is served by person (units only in agent, project or
+     task-class cells and the organization's total, of an organization whose signed member list names at least 3
+     members, as `result`, never by person, by the members' role only once OQ-0018 allows it; a cell drawn from one member's work is folded
+     into the organization's total until OQ-0015 is answered), and a `person` acceptance stays in the organization's own journal; the 3-member gate holds for counts, and a single unit event is read raw only
+     by a member of the organization under `activity.raw`, a person acceptance under its member's confirmed purpose, a read of it logged
+     in that person's access log under a purpose the person confirmed (OQ-0016; the subject's audience OQ-0017); a unit with a person acceptance is personal data
+     whatever channel wrote it. The receiver answers `purpose` for a person acceptance when the accepting member's purpose
+     is not collected (that answer holds nothing at the collector, any other unit's holds as any kind, DEC-0100 narrowed for
+     this kind); it keeps a unit's sending device beside the event, never in it, and a raw read of a unit a person's device
+     sent is logged in the log of the person bound to the event's epoch, under a purpose that person confirmed; past raw
+     retention the journal keeps each unit's `(unit, month)` key only as an `hmac-sha256` digest of `{key, month, system}` under a
+     key it never exports, dropped once that month's count closes (its end plus the server layer's `retention.raw_days` in force then, 30 days where it sets none, plus 60 s), beside each only its person-free cell, since a tracker key can name a person; a collector drops
+     held transitions (kept no longer than the smaller of the server layer's `retention.raw_days` (30 days where it sets none) and the device's effective value) when its device is enrolled again with a binding to a different
+     person, or from a person to none; an acceptance for a month whose count is closed is a late gap, never added to it.
+  4. **AE-4.** A device collector sends it in its batches, to the enrollment of the organization that owns its
+     `project.id` by the device's folder attribution (never for a personal or unattributed project; the route
+     function is CT-297); a kit without one records it through Observatory's `activity.unit.record`, bound as
+     Observatory's `ops.digest.record` is (its answers: thread `b83440d6`, message `b8d911c0`; thread `52aa2f93`, message `55fa0fd7`).
+     **AE-5.** An older reader validates `unit` as an unknown kind's extension data: one that fits it stores and
+     counts nothing, one with `evidence` (or a string over 64 characters) it refuses as that event's `schema`
+     rejection, which is consumed; so a collector holds a unit's transitions outside its stream and writes each as an
+     event only once the receiver's `protocols` name `activity-unit/1`, so a held unit never stalls the stream. Its
+     `cost` is the spend since the previous transition, summed by a reader.
+- **Why:** one record per unit transition, owned by the agent and joined by `run.root`, is what the metric counts; a
+  derived id makes the count idempotent across writers; keeping the person out of the event and out of every summary
+  keeps it from being served as a person's score (nothing is served for an organization of fewer than 3 members, no cell is by person, none by
+  the members' role until OQ-0018 allows it, and a cell drawn from one member's work is folded into the total until
+  OQ-0015 is answered).
+- **Alternatives considered:** a separate document type for the journal (refused: Observatory confirmed `unit` inside
+  `fabric-activity/0.1`, one transport, one attribution, one person rule); `org` in the event (refused: the stream's
+  attribution names the organization); `cost` as `null` (refused for the envelope's own form, `{usd: null}`, which
+  `FAC-SEM-038` already reads); an id without `run.root` (refused on Observatory's answer: a second acceptance would be dropped as a repeat). Where the decision departs from the design: `evidence` any URI (narrowed to an http(s) URI without user information, a URN or a `sha256:` digest, so user information and a local path do not ride as evidence; a credential in a query string or a URN body is the writer's duty, as for any reference); `taskClassMap` "required unless unclassified" (now present exactly when classified, so an unclassified unit names no map it was not read from); no bound on `acceptedAt` (added: not after `occurred`, with 60 s of skew, an acceptance not recorded before it happened, and `acceptedAt` named the month key); `acceptedBy` in `activity-common` (kept in `$defs/unit`, its only user); one rule code carrying every conditional (the conditionals moved to the schema, one event per transition and `run.root` to `FAC-SEM-039`'s duplicate id, and `FAC-SEM-171` carries the derivation, the `acceptedAt` bound and the github, jira and mail key forms); `cost` the agent's spend on the unit (now the spend since the previous transition, summed by a reader, an attribution never added to usage totals); serving per agent, project or task class (now also only for an organization whose member list names at least 3 members, never by role or person); `occurred` the event's time (for a held unit, when its writer recorded the transition, never restamped); the key as the tracker returns it (now one form per system, so two writers of one unit derive one id).
+- **Compatibility:** additive for a receiver that lists `activity-unit/1`; an older one stores a `unit` without `evidence` as an unknown kind and refuses one with it (AE-5), which `test/activity-unit.test.ts` pins against the unknown-kind branch. A receiver keeps a `unit` event once per `eventId` within the organization, whatever device or channel wrote it (activity's *Event id*, Batch and OTLP intake amended). Activity telemetry is restated by kind and channel (activity's opening, CONTEXT.md); DEC-0157 UD-6's description of it, on branch `agent/ct216-usage-data-v2` until it lands, is restated by whichever lands second (the handoff's landing note). Owed: the route function for a unit (CT-297); the adapter kits' hand-kept `PROTOCOL_REVISIONS` gain `activity-unit` ['1'] at their next repin (their feed-protocols test checks them); Observatory's node outbox, which mints a ULID today and must derive a unit's id and carry `run` and `project`; Observatory's journal and its
+  capability `activity.unit.record` (OBS-378, after this decision); the adapter's kit writer (G1-b); the assessment's
+  class map (G1-c); the join into the metric (G1-d).
+- **Consequences / affects:** `schemas/telemetry-event.schema.json` (`$defs/unit` and the kind), `src/activity-rules.ts`
+  (`unitSourceKey`, `FAC-SEM-171`), `tools/vectors/activity-unit.ts`, `fixtures/vectors/activity-unit.json`,
+  `test/activity-unit.test.ts`; `docs/specification/activity.md` (the envelope's kinds, `unit`, the rule),
+  `docs/specification/conformance.md` (a writer and a reader row, the rule code), `docs/specification/contexts.md` (Routing), `CONTEXT.md` (Activity telemetry, Telemetry event), `docs/specification/README.md`, `src/protocol-revisions.ts` and `docs/specification/versioning.md` (`activity-unit/1`), `fixtures/catalogue.json` and the unit fixtures; `docs/specification/membership.md` (OM-7's units row, the enrollment's own events narrowed), `docs/ux/scenarios.md` (SCN-010), `docs/backlog.md` (CT-259, CT-297), `docs/DOCMAP.md`, `docs/specification/devices.md` (`retention.raw_days`), `docs/OPEN_QUESTIONS.md` (OQ-0015 to OQ-0018), `docs/ux/flows.md` (FLW-06), `docs/ux/screens.md` (SCR-09), `schemas/access-log.schema.json` and `schemas/activity-batch-ack.schema.json` (their descriptions).
+- **Source:** the design `docs/evidence/plans/2026-11-12-ct259-activity-unit.md`; board request `e9d30889`; Observatory's
+  answers on threads `b83440d6` and `52aa2f93`; backlog CT-259.
+
+### DEC-0166: a place's autonomy profile as a standing mandate
+
+- **Date:** 2026-11-12
+- **Status:** Accepted 2026-11-14, merged with this change: rounds 25 (`a8f648af`) and 26 (`61e20d91`) of the coordinator's blind readings were clean on all three tiers, their risks filed as CT-310. Proposed 2026-11-12, from the design `docs/evidence/plans/2026-11-12-ct285-autonomy-profile.md` (CT-285),
+  with questions 4 and 5 added here and question 1 widened in round 4, all five answered by the operator on 2026-11-13 in this repository's session `7c9eb2c2` (asked in its chat; a relayed «Принять все дефолты», fabric-workspace session `fd5dfcf0`, board message `36b1981b`, is superseded: asked about the conflict, the operator answered «Мои ответы здесь»): questions 1, 2, 3 and 5 as their defaults, question 4 otherwise (only the owner and the administrators record an organization's profile, an architect none: «Владелец и администраторы»); and, asked after round 12 the same day, a provider key issued through the estate's own doors is covered at its door's default ceiling only (a rotation keeping its predecessor's ceiling included), any other ceiling being a spend limit (`change-policy`): for a key an organization holds the owner's or an administrator's, for a key in a member's own estate that estate operator's (L0), in the personal context the operator's (the option chosen reading «Ключ с потолком хозяйства по умолчанию агент выпускает сам по профилю; любой другой потолок (выше или ниже) решают владелец или администратор»; asked once more the same day: a rotation keeping a raised ceiling is covered («Покрыта») and a key in a member's own estate is that member's («Сам участник»), AU-2). A send to people outside the estate stays a person's, narrowing question 1 («Да, человек», the option reading «Отправка людям вне хозяйства остаётся решением человека; профиль её не покрывает»); the question had stated, wrongly, that question 1's default already excluded the send, while it covered it, and the option's own words decide, as the operator's standing rule of the same day keeps such a send with a person; accepted when the
+  coordinator's blind readings are clean on two consecutive rounds (rounds 1 to 11, 13 to 20, 22 and 24 not clean, folded, 12, 21 and 23 clean). It reads DEC-0162's levels and lands after it (DEC-0162 landed 2026-11-14, #305): the
+  branch `agent/ct285-autonomy-profile-20261112` is stacked on DEC-0162's. An answer from the operator after
+  acceptance is a new decision amending this one.
+- **Context:** the operator decided on 2026-11-09 (fabric-workspace session `a616cbcb`, recorded verbatim in
+  fabric-workspace `knowledge/authority.md`, *Autonomy by place*, at `73171ed0`; board request `921edc61`, thread
+  `a3a97cef`) that which acts an agent finishes end to end without a person is a setting per place: a headless place
+  finishes everything by default, watched by agents and each process's own checks; a person's own computer follows the
+  scenario the person or their administrator chooses; the owner, an organization administrator or a project's
+  architect sets it within their level (narrowed by the operator's answer to question 4 on 2026-11-13: the owner and the administrators set a profile, an architect does not); only the body's gates stay everywhere. North Star gap G19. The contract had a
+  per-task mandate (DEC-0125) and the operator's decision per action (AP-2, DEC-0121), and AP-3 refuses a standing rule
+  in a file, so a headless assignment had nobody to ask. This decision is narrower than the operator's "only the body's
+  gates" in three ways (the third, a send to people outside the estate kept with a person, the operator's answer of 2026-11-13): every profile keeps `change-policy` and MD-6's list (a source hand-over, AP-5's approvals) with a
+  person, and in an organization's context a profile set below an act's declared level never covers it (no level's
+  profile covers an act declared `operator`; only an owner's covers a billing act, and at a service that reads levels no profile decides an act declared `owner` or `admin`, LV-7, round 19, CT-309). In the personal context the
+  operator's own default is the operator's word and covers the acts a service declares `operator` like any other, save
+  the board's gates (a hold, a slot move, a listing, any proposal's approval, a rule proposal's among them, `FAC-SEM-104`),
+  which no profile reaches (the board's gates declare no `standing`), and a client key or an access grant, offered as
+  `change-policy` (DEC-0162's answers of 2026-11-13 for an organization's context; in the personal context DEC-0166's own narrowing, so no profile revokes a client key either); a provider key the estate issues through its own doors stays covered at its door's default ceiling (a rotation keeping its predecessor's ceiling included), any other ceiling being `change-policy` (the answer recorded in the Status);
+  question 1 asks about the 2026-11-05 gates.
+- **Decision:**
+  1. **The profile is a standing mandate (AU-1).** `mandate.schema.json` gains the optional member `standing`
+     (`place`, `placeKind` `headless` or `person`, `context` `personal` or `org:<orgId>` (round 18: a callee takes it only for a call in that context, `profile-context` otherwise), `revision`). The place's hub states the profile, for each assignment
+     it starts there, as a `mandate/1` with `standing`, `task` naming the assignment, `by: "operator"` (the operator of
+     the estate the place belongs to, in an organization's context the estate its instance runs in) with the setter's
+     recorded words, the profile's scope and a chain starting at the assigned agent; it stands at most 24 hours after `at`
+     (`FAC-SEM-144` amended) and the hub restates it. MD-2, MD-2a, MD-3, MD-4 and MD-6 apply unchanged.
+  2. **Who sets it (AU-2).** The hub's relayed action `autonomy.profile.set`, effect `change-policy`: by AP-2's decision
+     in the personal context, by a level decision (DEC-0162 LV-3) in an organization's (`owner` or `admin` for any
+     place, never an `architect`, question 4). The hub states the setter's level as
+     `standing.setLevel` (`owner` or `admin`, inside the digest), and a callee that
+     declares `actionLevels` refuses an action declared above it `level-insufficient` (LV-7, LV-10; `levelShortOf`
+     in `src/levels.ts`), so a profile never covers more than its setter's level does. At a service that reads levels, in an organization's context, no profile decides an act declared `owner` or `admin`: DEC-0162 LV-7 takes only a level form for it, and `setLevel` is the hub's statement, not an attestation (round 19; an attested setter's level is CT-309). An organization's profile always names `setLevel`: the schema requires it with an `org:` context. No profile reaches the board's
+     gates, which declare no `standing`, and none covers a policy change, a spend limit, a client key or an access grant
+     (`change-policy`, AU-5), nor a send to people outside the estate.
+  3. **Binding (AU-3).** A callee reads standing mandates only when its authority extension declares `standing`; an agent
+     sends one, and the hub forwards one, only to such a callee, and the protocol name `standing/1` gates the form
+     toward a hub. From T0 or T1 it is taken as MD-3 says; from T2 only when the call's delegation token carries the new
+     claim `prof`, the mandate's `profileDigest` (sha256 of the RFC 8785 canonical JSON of the mandate without its
+     `chain` and `source`), which the hub writes for the assignment's token; a `prof` that is not the mandate's is `decision-invalid`
+     `profile-unbound` at any tier; an onward token keeps the parent's `prof` or none (`FAC-SEM-050`).
+  4. **Defaults, bounds, watching, refusals (AU-4 to AU-7).** A headless place with no recorded profile covers every
+     effect class but `change-policy`, and no send to people outside the estate (any person or account not the estate's own, an organization's member included, round 17), for every capability of the services registered in the place's estate, which
+     the hub states as `standing.estateCapabilities` (inside the boundary only); a person's computer nothing beyond its person's own decisions until a profile is
+     recorded from the hub's presets; in an organization's context a headless place with no recorded profile states
+     nothing until its owner or an administrator records one (question 4). A profile decides no credential request
+     (question 5). No mandate of any kind covers `autonomy.profile.set`, and no profile covers MD-6's list or `autonomy.profile.set` (`FAC-SEM-173` on the
+     document, `outside-mandate: capability` on the call). The hub states a headless profile only while the place's
+     watcher answers. A call taken under it is recorded `via: profile` with the place, revision, digest, assignment,
+     chain and caller; refusals are MD-4's, `profile-unbound` and the mandate's own details, from T2 with the digest.
+  5. **Reference and vectors.** `mandateCovers` and `profileDigest` in `src/mandate.ts`, `actionDecision` in
+     `src/actions.ts` (`standing`, `tokenProf`), the `prof` claim in `src/delegation.ts` and `src/delegation-rules.ts`;
+     `fixtures/vectors/profile.json`, written by `tools/vectors/profile.ts`; `test/profile.test.ts`.
+- **Why:** reusing the mandate keeps one way to say "these acts need no further word", with its narrowing, refusals and
+  bounds already read by every service; a profile bound to the assignment's token reaches a T2 callee without a person
+  in the loop, as DEC-0162 binds a level; a day's life and a token's ten minutes bound how long a narrower revision is
+  outrun.
+- **Alternatives considered:** a new document type for profiles (refused: a second form of "no further word" every
+  service would read separately); `kind` changed for a standing mandate (refused: `standing` under `mandate/1` makes a
+  reader at an older pin refuse it as `mandate-malformed`, and the protocol name gates it); `prof` carrying the
+  revision beside the digest (refused: the digest covers `standing.revision`); the design's `profile-stale` and
+  `profile-unwatched` as callee refusals (refused: a callee cannot know the hub's latest revision or its watcher, so
+  they are the hub's states, in which it states no mandate); a standing mandate living 7 days as a task's (refused: the
+  hub restates it daily, so a narrowed profile reaches every assignment within a day); a T2 standing mandate without a
+  token (refused, as DEC-0162 refused a level without one: a copied mandate would serve any caller); a standing
+  mandate stated by its setter's `by` (`by: "level"` for an administrator's profile), as round 0 had it (refused in
+  round 1: a level mandate stands only at its attestation's audience and the hub writes `mem` only for its own
+  principal (DEC-0162 LV-5, LV-6), so an organization's headless place, with no person, could state none, and a fresh
+  attestation would change the digest; the setter's level is checked once, at `autonomy.profile.set`, and recorded
+  there); the profile's digest in the settings canonical form (refused in round 1: it has no form for a fractional
+  `perCallMaxUsd`, so RFC 8785, as `actionDigest`); `standing` as a member of the actions extension, as the first cut had it (refused: that extension is closed and every deployed reader refuses unknown members, so `standing` sits in DEC-0162's authority extension, `extensions/authority/0.1`).
+- **Compatibility:** additive, gated by `standing` in the callee's authority extension and `standing/1` toward a hub. A
+  reader pinned before this decision refuses a standing mandate as `mandate-malformed` (its schema closes `mandate/1`),
+  so no agent sends it there; a port pinned past this decision adds `standing` ['1'] to the adapter kits' hand-kept
+  `PROTOCOL_REVISIONS` whether or not it reads standing (their feed-protocols test checks it). Read on 2026-11-12: no hub states a profile and no service declares `standing` yet. Owed:
+  Fabric (CO-547, whose hub mirror `hubAuthority.ts` and its parity cases gain a standing case at its repin: the dispatcher and headless assignments read the profile, its hub writes `prof`, its floor treats a
+  covered effect as decided; its board-mandate reader `boardMandate.ts` reads `standing` in a board block as no mandate (AU-1) and its hub forward path `hubCall.ts`/`hubTools.ts` forwards a standing mandate only to a callee declaring `standing` (AU-3), both owed at any repin past this decision, CO-523's levels repin included; ADR-0168's machine permission choice stays the runner's prompt mode), the organization
+  product (who may change a profile, shown per place), the PM agent, the host's admin agent (records a place's kind and
+  watcher), every service with `relayed` actions an assignment calls (the adapter's kits FAA-249, whose `mandateCovers` ports run `profile.json` before a kit service may declare `standing`, and whose board reader (FAA-135's `readMandate`) answers a standing mandate in a board block as no mandate). The operator's
+  answers of 2026-11-13: (1) the headless default covers a production deploy of a surface with outside
+  users, a publish outward and a force-push within the repository's own rules, and, narrowed later the same day, never a send to people outside the estate (asked again, the operator answered «Да, человек»: a person decides it, as the rule that agents close questions themselves also keeps) (each a
+  gate of the operator's rule of 2026-11-05), and a project that wants a gate narrows its own profile (the send and
+  force-push clause added in round 4, never posted, the board's MCP being unreachable; answered as the default on 2026-11-13); (2) an organization administrator sets a profile
+  on a member's computer only inside the organization's context there; (3) watched means a monitoring agent declared in
+  the place's record and answering its probe; (4, added) a headless place of an organization with no recorded profile
+  takes the default only once its owner or an administrator records it, an architect recording none (the operator's answer of 2026-11-13, not the default, which let an architect record one for its own projects), and states nothing until then (written into
+  AU-4); (5, added in round 1) a profile decides no credential request, which stays the administrator's or the
+  auto-approval policy's (credentials, DEC-0111), although the operator's record lists key issuance through
+  Observatory's doors among a headless place's acts: a key a place's own estate issues through its own doors is that
+  estate's relayed act, which the profile covers as any other, at its door's default ceiling only (a rotation keeping its predecessor's ceiling included) (narrowed by the later answer in the Status). The questions were posted on thread `8da128cf` as
+  message `bd18b1fa` on 2026-11-12 once the board answered again; the operator answered them on 2026-11-13 in this repository's chat (questions 1, 2, 3 and 5 as the defaults, question 4 as above).
+- **Consequences / affects:** `schemas/mandate.schema.json` (`standing`), `schemas/delegation-token.schema.json`
+  (`prof`), `schemas/service-authority-extension.schema.json` (`standing`); `src/mandate.ts`, `src/actions.ts`,
+  `src/delegation.ts`, `src/delegation-rules.ts`, `src/protocol-revisions.ts` (`standing/1`);
+  `fixtures/vectors/profile.json`, `tools/vectors/profile.ts`, `tools/vectors/run.ts`, `test/profile.test.ts`,
+  `test/meter-grant.test.ts`; `docs/specification/delegation.md` (the section, MD-5, the `prof` row, `FAC-SEM-050`,
+  `FAC-SEM-144`, `FAC-SEM-173`), `service.md` (the `actionDecision` table), `interop.md` (C3.5), `versioning.md`,
+  `conformance.md` (rows, module, register), `CONTEXT.md` (Autonomy profile, Mandate), `service.md` (AP-2's inputs,
+  AP-3's routes), `schemas/interop-agent-call.schema.json` and `interop-request-meta.schema.json` (the hub forwards a
+  standing mandate), `src/semantic-kinds.ts` and `fixtures/semantic/standing-action-call*.json` (a prefix no port's `action-call-*` glob reaches, so a port pinned past this decision that reads no standing keeps its sweep and its count), `docs/ux/foundation.md` (ST-043),
+  `docs/ux/scenarios.md` (SCN-061, SCN-062), `docs/ux/flows.md` (FLW-31), `docs/ux/screens.md` (SCR-30); the restatements in `membership.md` (LV-7's operator mandate, the interim text), `spend-policy.md` (L0, L2), `credentials.md`, `project-comms.md` (a standing mandate in a board block), `governance-and-roles.md` (OW-3's headless case) and `docs/guides/connecting-compatible-agents.md`. Not decided here: the monitoring agent's
+  own contract (the North Star's monitoring role, G27); rollback at the process level (each product's checks and
+  receipts); a coding harness's own refusal (the safety classifier G19 measured), which a profile does not change: this
+  decision closes G19's part that services' relayed actions ask, and the harness's part stays G19's.
+- **Source:** the design `docs/evidence/plans/2026-11-12-ct285-autonomy-profile.md`; the operator's decision of
+  2026-11-09 as recorded in fabric-workspace `knowledge/authority.md`; board requests `921edc61` (thread `a3a97cef`)
+  and `4a1bf8d6` (thread `8da128cf`); backlog CT-285.
