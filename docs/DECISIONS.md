@@ -12116,6 +12116,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Source:** passioncode-platform's board message `caab9b65` (thread `16093ded`, relayed by fabric-workspace); the
   design above; DEC-0085, DEC-0088, DEC-0063, DEC-0162. DEC-0168 and `FAC-SEM-175` were reserved by git CAS
   (`agent_sync.py reserve`, keys `ct299-entitlement-2` and `ct299-entitlement-2-sem`).
+
 ### DEC-0169: read parity and the design order: everything a person reads, an agent reads (extends DEC-0121 AP-1)
 
 - **Date:** 2026-11-14
