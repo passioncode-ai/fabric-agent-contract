@@ -48,7 +48,7 @@ refuse: AP-2's table, LV-7 and AU-2 decide exactly as today.
 | `caller`, `session` | the principal and session the host authenticated |
 | `verdict` | `allow`, `human` or `deny` |
 | `rule` | the contract rule that decided, by its id (`AP-2`, `AP-4`, `AP-5`, `LV-4`, `LV-7`, `AU-1`, `AU-2`, `MD-3`, `MD-6`, `DL-17`, `OA-3`), a policy row (`row:<id>`), or the person's answer (`answer:<questionId>`) for `person-denied` and `rejected` |
-| `reason` | a closed code: `covered` (allow); `body-gate`, `kept`, `level-insufficient`, `not-covered`, `outside-window`, `evidence-unknown`, `evidence-stale`, `ground-invalid`, `vetoed`, `loop`, `voided` (human); `forbidden`, `other-context`, `self-approval`, `person-denied`, `rejected` (deny) |
+| `reason` | a closed code: `covered` (allow); `body-gate`, `kept`, `level-insufficient`, `not-covered`, `outside-window`, `evidence-unknown`, `evidence-stale`, `ground-invalid`, `vetoed`, `loop`, `voided`, `spend-limit` (DV-7), `row-advised` (a policy row's `deny` against a form the reference takes) (human); `forbidden`, `other-context`, `self-approval`, `person-denied`, `rejected` (deny; `self-approval` only for an approval on the caller agent's own account that no relayed operator's approval carries, AP-5) |
 | `level` | `{required, satisfiedBy}`: `operator`, `instance-operator`, `owner`, `admin`, `architect` or `own-act` |
 | `route` | `operator`, `level`, `profile`, `mandate`, `approval`, `own-act` or `forwarded`, with `allow` only |
 | `machineForm` | with `allow` only, how the form reaches the callee: `hub-dispatch` (the hub forwards or states it in the call it dispatches, C3.5), `caller-approval` (the caller carries an `approval/1`, DL-18), `executed-by-holder` (a level holder's own agent performs the act under its own level decision, LV-10) or `none` (the caller's own act); never the form itself. A `local` act a runner performs itself (a deploy, a merge) reaches no contract callee, so it is outside `decision-verdict/1` in this revision: the contract records no verdict for it, and the runner acts as OW-1 says (and, on a headless place, as the place's profile and Fabric's floor that reads it allow, DEC-0166) (a runner reading a verdict is Fabric's OQ-4 and a later revision) |
@@ -65,13 +65,15 @@ AU-3 takes inside the boundary; `forwarded`, an OA-2 relay OA-3 accepts; `data`,
 verifier reads beside authority (`grant`, `budget`, `check`) carry no grade, the one exception to a ground's required
 grade: they can make an act `human`, never ground its `allow`, and a `budget` ground reads "read, not reserved". A verifier never answers `allow` where the reference refuses (DV-3). It answers `human` where the reference
 refuses for want of a person, and beyond that only for a reason it names: evidence it cannot read (`evidence-unknown`,
-`evidence-stale`), its own checks (`vetoed`, `loop`), or a `kept` act. Where the caller holds a form the reference takes (the operator's word, a mandate in force, a relay
+`evidence-stale`), its own checks (`vetoed`, `loop`), a `kept` act, money that would cross a limit (`spend-limit`,
+DV-7), or a policy row's `deny` against a form the reference takes (`row-advised`). Where the caller holds a form the reference takes (the operator's word, a mandate in force, a relay
 OA-3 accepts, a bound profile or level form, an accepted `approval/1`), none of these reasons puts a question to a person: such a `human` carries no
 addressee and no `questionId`, and the caller goes on as OW-3 says, with one message that names the concern (OW-1, OA-1,
 OW-4's closed list: the operator is not asked again for an act his word or a mandate already decides); a policy row's `deny` never stands
-against such a form either: the verdict is then `human` without an addressee, and an origin under DV-8 dispatches as
+against such a form either: the verdict is then `human` (`row-advised`) without an addressee, and an origin under DV-8 dispatches as
 C3.5 says; `kept` applies
-at all only where no operator's word and no mandate in force names the act. A `human` verdict is advice to the caller
+at all only where no operator's word and no mandate in force names the act, and a place's standing mandate yields to
+`kept` only within AU-2's bounds (an act AU-2 leaves to a person stays one). A `human` verdict is advice to the caller
 that asked: the hub still forwards a form the reference takes unless the origin opted in under DV-8. A `person-denied`
 verdict ends when the operator's later word names the act (OW-1). The door's
 own bookkeeping (a verdict's state and version in its journal, the question's identity, each restriction's outcome,
@@ -122,15 +124,16 @@ L1 with its `autoApproveUsd`, L0 and each key's ceiling, and the call's own esti
 against `perCallMaxUsd`); an estimate that would cross a limit is `human`, the limits staying the person's (MD-6,
 OA-4, [spend policy](../../specification/spend-policy.md) L0 to L2 and its step 3), and goes out the way the contract
 already sends it, never as a second question: above L0, L1 or a key's ceiling as AP-4's human step `spend-above-limit`
-with its link and amount and no `questionId`; above `autoApproveUsd` within L1 as step 3's one durable approval
-request. Neither is the reference's refusal for want of a person, so this is the named reason the `human` above admits. A covered money act under every limit
+with its amount and, once known, its link (the limit-raising action's own `humanStep` url), and no `questionId`; above
+`autoApproveUsd` within L1 as step 3's one durable approval request (a chat word is never that approval, step 3), in an
+organization's context addressed to its owner and administrators (LV-7, `level.required` `admin`). Neither is the reference's refusal for want of a person, so this is the named reason the `human` above admits. A covered money act under every limit
 answers `allow` with `machineForm` as any other, the reservation itself staying the callee's grant check. Nothing in this decision reserves. A hub-side
 reservation the callee's grant check adopts is CT-312; until it lands a verifier enforces no money act.
 
 **DV-8, the receipt on the call (the verifier's OQ-1).** A new revision of `interop-agent-call.schema.json` beside the
 old one gains an optional `verdict` member `{id, askedDigest}` a client passes when it asks the hub to dispatch an act
 a verdict allowed; the hub reads the verdict by `id` from its journal, dispatches only while it is a current `allow`, checks the call's
-`agentId`, `capability` and action against `asked` and its `input` against `argsDigest`, and refuses a mismatch or a verdict that is not a current `allow` with
+`agentId`, `capability` and action (the call's `decision.action`, or for a mandate-covered call its capability) against `asked` and its `input` against `argsDigest`, and refuses a mismatch or a verdict that is not a current `allow` with
 `decision-invalid` detail `verdict-mismatch` (a new DL-19 detail, the one the hub answers itself, so DL-19 names the
 hub beside the callee for it, and the DEC gives FLW-29 the branch that sends the agent back to the door, never to the
 operator). This amends C3.5's "the schema admits no field
@@ -160,13 +163,15 @@ beyond the contract) is decided from the operator's recorded rules (the agents d
 
 The DEC with the schema, `FAC-SEM-175`, the reference check, `fixtures/vectors/decision-verdict.json` (with a level
 form and a bound standing mandate taken at T2) and the restatements: the authority extension, C3.5, `interop-agent-call`,
-the sealed call and machine calls, DL-19's details, versioning's protocol list, FLW-29 and SCN-043 and SCN-057 (a
-`verdict-mismatch` goes back to the door), and a CONTEXT term for the decision verdict; read under the finish-line rule.
+the sealed call and machine calls, DL-19's details, versioning's protocol list, FLW-29, SCN-043 and SCN-057 (a
+`verdict-mismatch` goes back to the door, and a `human` verdict is advice, never a hold, for an origin that did not opt
+in), SCN-046 and SCN-061 (a verdict changes nothing for a relay or a profile the reference takes), and a CONTEXT term for the decision verdict; read under the finish-line rule.
 The sibling rows CT-312 (the money reservation) and CT-313 (single use at the callee). A board message to the agents
 database and Fabric listing where this design departs from the source's accepted text (no confirmation press; grades
 `verified`, `taken`, `forwarded`; `forwarded` in either context where `actionDecision` takes it; `caller-approval` for
 `hub-approval`, no `runner-receipt`; the source's `options[]`, `restrictions[]`, `veto`, `state`, `version` and
-`commandId` in Fabric's store, not on the wire; the `id` without the operation; `kept` bounded by OW-1; local acts
-outside this revision) and telling studio-agent that the receipt carries no operator's words (this design's privacy choice) and that this
-revision serves neither local acts nor another session's journal as a ground. Fabric's spec of 2026-11-17 cites this
+`commandId` in Fabric's store, not on the wire; the `id` without the operation; `kept` bounded by OW-1; OQ-5 decided from the operator's recorded rules rather than his daily review; local acts
+outside this revision) and telling studio-agent that the receipt carries no operator's words (this design's privacy choice) and, plainly, that
+this revision serves neither local acts nor another session's journal as a ground, so most of its measured waits stay
+open (CT-315). Fabric's spec of 2026-11-17 cites this
 design's field names.
