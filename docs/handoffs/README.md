@@ -4,6 +4,7 @@ Each run leaves a handoff naming its objective, what it did, what is open and th
 
 | Handoff | Decisions | Merge |
 |---|---|---|
+| [2026-11-14 (part 3) unlimited entitlements, read parity, instance statements](2026-11-14-entitlement-parity-instances.md) | DEC-0168 (CT-299), DEC-0169 (CT-311), DEC-0170 (CT-314), drafted and gated | branches pushed, not merged |
 | [2026-11-14 restore, audit, land and release](2026-11-14-restore-audit-release.md) | DEC-0156 and DEC-0164 landed; CT-302 to CT-307 filed | released `v0.1.0+2026-11-14`; DEC-0162 and DEC-0166 in rounds |
 | [2026-11-12 four North Star designs and Observatory's answer](2026-11-12-north-star-designs.md) | none yet (CT-250, CT-285, CT-252, CT-259 designed; CT-290 filed) | designs merged 2026-11-12, #270 `a054fdc6`; Observatory's answer merged with this change |
 | [2026-11-07 the operator's word, carried out the first time](2026-11-07-operators-word.md) | DEC-0156 (CT-220; CT-266, CT-291, CT-271, CT-273, CT-278, CT-282, CT-306 filed); rounds 36 and 37 clean on all three tiers | accepted 2026-11-14; merged |
