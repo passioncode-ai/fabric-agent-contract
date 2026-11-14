@@ -1359,7 +1359,7 @@ declared `action`, the caller's `tier`, the service's authenticated `caller`, th
 `elicited` record, the `approval` outcome, the `actionDigest` (DL-18), the `humanStepUrl` and the service's clock
 `now`; for a call under the operator's mandate (DEC-0125) also the call's `mandate`, the service's own agent id `self`,
 the caller's agent id `callerAgent` when the service authenticated one, the action's `effect`, the service's `spendUsd`
-estimate and the `project`; for a level decision or mandate (DEC-0162) also `levels`, `tokenMem`, `actionLevel`, the action's `effect` and the `context` the call acts in (`org:<orgId>` or `personal`, LV-4); and for a job's input request the job's capability `mandateCapability` (MJ-1, DEC-0141):
+estimate and the `project`; for a level decision or mandate (DEC-0162) also `levels`, `tokenMem`, `actionLevel`, the action's `effect` and the `context` the call acts in (`org:<orgId>` or `personal`, LV-4); for a place's standing mandate (DEC-0166) also `standing` (the service declares it) and `tokenProf` (the verified token's `prof`), and the `context`; and for a job's input request the job's capability `mandateCapability` (MJ-1, DEC-0141):
 
 | Action's `gate` | Caller | Answer |
 |---|---|---|

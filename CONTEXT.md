@@ -184,7 +184,7 @@ DEC-0166 AU-1 to AU-7). Not a spend level (L0 to L3) and not an authority level.
 relay: the words verbatim, when and where they were said (`source`: the project, and the session or the board thread)
 and the approved scope. Accepted only from one of the operator's own Projects on their board or a session on their own
 machine; the receiver acts without asking again, runs its own checks, and asks once only about what the operator did
-not see; a host's gate on a floored act still asks once, quoting the relayed words as its reason (DEC-0156 OW-3). Its machine form is a mandate or a decision with `source`
+not see; a host's gate on a floored act still asks once, quoting the relayed words as its reason (DEC-0156 OW-3), save where a floor that reads a place's profile covering the act takes it as decided (DEC-0166, CT-285; Fabric CO-547). Its machine form is a mandate or a decision with `source`
 ([delegation](docs/specification/delegation.md#one-approval-binds-all-the-operators-agents), DEC-0126).
 
 **Operator session**: The signed-in session of a service's dashboard. It ends 12 hours after its last use and

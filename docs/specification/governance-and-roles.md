@@ -117,7 +117,7 @@ words AP-2 and OA-1 already name; the rules hold for any owner.
   itself under the words, a decision or a mandate in force exists (`gate` `none` or `relayed`, AP-1), or another route
   reaches the step (the service's API or tool, its
   command line, a credential the estate holds); a command is for the agent (the operator's word of 2026-11-07 that they
-  press nothing). The one press this rule itself keeps, beside the steps OW-4 hands the person, is a host gate's agreement to an act it holds, where neither a twin nor
+  press nothing). The one press this rule itself keeps, beside the steps OW-4 hands the person, is a host gate's agreement to an act it holds (none where a floor that reads a place's profile covering the act takes it as decided (DEC-0166, CT-285; Fabric CO-547)), where neither a twin nor
   a route reaches it: on Fabric the "Allow once" of a `floor.ask-first` refusal (OW-3), while Fabric's question
   `add1df7c` on whether the operator's words pass that gate stays open. A refusal by the agent's own tool or harness is not a command for the operator: it is
   OW-4's step.
@@ -245,7 +245,7 @@ words AP-2 and OA-1 already name; the rules hold for any owner.
   operator's session in the requesting Project (its agent, on their word) submits it again when they own the requesting Project, and the requester otherwise, and the `com.reply`
   names which. An act that only a session the person is in can take (the FA-09 case) is never submitted again, as
   that case says. On a place the operator's decision of 2026-11-09 makes headless (fabric-workspace
-  `knowledge/authority.md`, *Autonomy by place*), where no person's session comes, a place's standing mandate is a mandate in force (DEC-0166 AU-1, CT-285), so it clears OW-3's first wait for a relayed act it covers; OW-3's other waits and a host's gate (the FA-09 case, a floor that asks first), which no profile changes, stay this case as written.
+  `knowledge/authority.md`, *Autonomy by place*), where no person's session comes, a place's standing mandate is a mandate in force (DEC-0166 AU-1, CT-285), so it clears OW-3's first wait for a relayed act it covers, and a host's floor that reads the place's profile (Fabric CO-547) takes an effect the profile covers as decided and asks no one; OW-3's other waits, a host's gate that reads no profile, and the FA-09 case (a harness's own refusal, which no profile changes) stay this case as written.
 - **OW-4, only what needs the person.** Of the task's steps, the agent hands the person only those that technically
   need a person: a binding that only the person's own act proves (a bot created in their own messenger account, the
   code typed in their own chat, OC-3 and OC-11); a human step of AP-4 and OA-5 (a sign-in with its one-time code, a consent, a payment or top-up, a

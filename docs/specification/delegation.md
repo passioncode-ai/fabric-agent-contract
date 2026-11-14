@@ -809,7 +809,7 @@ after asking them again. Inside the estate (T0, T1) one approval is enough.
   key's ceiling) is not such a question: it is the person's step of OA-5, handed to them with its link and the amount
   (`human-step-required`). A
   stop condition the relaying agent wrote into its request is that agent's, not the operator's: where the approved
-  scope covers the case, the receiver acts and says so in its reply. A host's gate on a floored act still asks once,
+  scope covers the case, the receiver acts and says so in its reply. A host's gate on a floored act still asks once (save where a floor that reads a place's profile covering the act takes it as decided (DEC-0166, CT-285; Fabric CO-547)),
   quoting the relayed words, which are the reason it quotes, not the agreement
   ([governance and roles](governance-and-roles.md#the-operators-word-carried-out-the-first-time) OW-3 and OW-5,
   DEC-0156).
