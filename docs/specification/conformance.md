@@ -570,9 +570,9 @@ were reserved by DEC-0150's run (receipts SEM-0162 to SEM-0165).
 | `FAC-SEM-166` | `ops-digest-hourly`, `ops-digest-daily` | [operations digests](ops-digest.md#semantic-rules) | SEM-0166 |
 | `FAC-SEM-167` | `ops-digest-hourly`, `ops-digest-daily` | [operations digests](ops-digest.md#semantic-rules) | SEM-0167 |
 | `FAC-SEM-168` | `service-descriptor` | [operations digests](ops-digest.md#semantic-rules) | SEM-0168 |
-| `FAC-SEM-171` | `activity-batch`, `telemetry-event` | [activity](activity.md#semantic-rules) | SEM-0171 |
 | `FAC-SEM-169` | `org-membership-2` | [membership](membership.md#semantic-rules) | SEM-0169 |
 | `FAC-SEM-170` | `decision`, `mandate` | [membership](membership.md#semantic-rules) | SEM-0170 |
+| `FAC-SEM-171` | `activity-batch`, `telemetry-event` | [activity](activity.md#semantic-rules) | SEM-0171 |
 | `FAC-SEM-173` | `mandate` | [delegation](delegation.md#semantic-rules) | SEM-0173 |
 
 ## Compatibility policy
