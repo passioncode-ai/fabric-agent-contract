@@ -89,11 +89,13 @@
             "owner",
             "admin"
           ],
-          "description": "DEC-0166 AU-2: in an organization's context, the level of the holder who set the profile, the owner or an administrator (an architect records no profile, the operator's answer to DEC-0166 question 4); absent on the operator's own profile. Inside the digest, so a token's prof binds it. A callee that declares actionLevels (extensions/authority/0.1) refuses an action declared above it operator-decision-required with level-insufficient, as LV-7 and LV-10 say."
+          "description": "DEC-0166 AU-2: in an organization's context, the level of the holder who set the profile, the owner or an administrator (an architect records no profile, the operator's answer to DEC-0166 question 4); absent on the operator's own profile and required in an organization's context. Inside the digest, so a token's prof binds it. A callee that declares actionLevels (extensions/authority/0.1) refuses an action declared above it operator-decision-required with level-insufficient, as LV-7 and LV-10 say."
         }
       },
-      "if": { "properties": { "setLevel": true }, "required": ["setLevel"] },
-      "then": { "properties": { "context": { "type": "string", "pattern": "^org:" } } }
+      "allOf": [
+        { "if": { "properties": { "setLevel": true }, "required": ["setLevel"] }, "then": { "properties": { "context": { "type": "string", "pattern": "^org:" } } } },
+        { "if": { "properties": { "context": { "type": "string", "pattern": "^org:" } }, "required": ["context"] }, "then": { "required": ["setLevel"] } }
+      ]
     },
     "task": {
       "type": "string",

@@ -1067,7 +1067,7 @@ independent agent author and P-02 project operator.
 - **Entry point:** an assignment the always-on machine's hub starts (no person watching)
 - **Preconditions:** the place's record names its watcher, which answers; its profile (revision 3) covers `site.deploy` with effect `deploy`; `example-deployer` declares `standing` in `extensions/authority/0.1`; the hub lists `standing/1`
 - **Steps:**
-  1. The hub starts the assignment -> it states the profile as a standing mandate (`by: operator`, `standing {place, placeKind: headless, revision: 3}`, at most 24 hours) and mints the assignment's token with `prof`, its digest.
+  1. The hub starts the assignment -> it states the profile as a standing mandate (`by: operator`, `standing {place, placeKind: headless, revision: 3, context: personal}`, at most 24 hours) and mints the assignment's token with `prof`, its digest.
   2. The runner calls `site.deploy` on `example-deployer` with the mandate, its chain ending at the deployer -> the deployer takes it as MD-3 says, from T2 only because the token's `prof` binds it.
   3. The deployer deploys -> its audit records `via: profile` with the place, revision 3, the digest, the assignment and the chain.
 - **Expected result:** the deploy finishes with no question to anyone, recorded as the profile's.

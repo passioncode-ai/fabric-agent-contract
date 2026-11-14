@@ -186,8 +186,10 @@ export function actionDecision(input: ActionDecisionInput): ActionDecisionAnswer
   // DEC-0166 AU-3: a standing mandate (a place's autonomy profile) is read at every tier by a service that declares
   // `standing`; from T2 it stands only when the call's token binds it by `prof`.
   // As a level mandate: from T2 an operator decision, or a level decision where no levels are read, counts for nothing.
+  // An act only a level decides (LV-7) takes no standing mandate either: its `setLevel` is the hub's statement, not an
+  // attestation, so it falls to the level-insufficient refusal below like any operator form (DEC-0166 AU-2).
   const levelRead = levelDecision && isObject(input.levels);
-  const standingMandate = (decision === undefined || (!inside && !levelRead)) && input.standing === true && isObject(input.mandate) && isObject(input.mandate.standing);
+  const standingMandate = !levelOnly && (decision === undefined || (!inside && !levelRead)) && input.standing === true && isObject(input.mandate) && isObject(input.mandate.standing);
   if ((isObject(input.levels) && (levelDecision || levelMandate)) || standingMandate) {
     const clock = strictTime(now);
     if (Number.isNaN(clock)) return { fault: "now-unreadable" };

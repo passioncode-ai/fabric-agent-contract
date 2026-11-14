@@ -49,6 +49,8 @@ const prof = (mandate: Json) => {
   const { chain: _chain, source: _source, ...stated } = mandate;
   return `sha256:${createHash("sha256").update(rfc8785(stated), "utf8").digest("hex")}`;
 };
+/** DEC-0162's level contexts, as its own vectors give a service that reads levels in `org:org-a`. */
+const LEVELS = (JSON.parse(readFileSync(path.join(projectRoot(), "fixtures/vectors/levels.json"), "utf8")) as { actions: [{ input: { levels: Json } }] }).actions[0].input.levels;
 const call = (tier: string, mandate: Json, extra: Json = {}): Json => ({
   action: deploy, tier, caller: CALLER, callerAgent: RUNNER, self: SELF, mandate, effect: "deploy", now: NOW,
   // The context the call acts in, the service's own knowledge: the profile's own unless a case says otherwise (AU-1).
@@ -111,9 +113,16 @@ function actionCases(): Json[] {
     ["an administrator's profile on a call in another organization, from T1", call("T1", byAdmin, { actionLevel: "admin", context: "org:org-b" }), { ok: false, code: "decision-invalid", data: { detail: "profile-context" } }],
     ["the operator's personal profile on a call in an organization's context, from T1", call("T1", p, { context: "org:org-a", actionLevel: "owner" }), { ok: false, code: "decision-invalid", data: { detail: "profile-context" } }],
     ["a service reading profiles that does not say the call's context", (({ context: _c, ...rest }) => rest)(call("T1", p)), { fault: "context-missing" }],
+    // AU-1, AU-2: an organization's profile always names its setter's level.
+    ["an organization's profile without a setter's level, from T1", call("T1", profile({ standing: ORG_STANDING })), { ok: false, code: "decision-invalid", data: { detail: "mandate-malformed" } }],
     ["a profile with a setter's level stated for the personal context", call("T1", profile({ standing: { ...STANDING, setLevel: "admin" } })), { ok: false, code: "decision-invalid", data: { detail: "mandate-malformed" } }],
     ["the operator's own profile at an action declared operator, from T1", call("T1", p, { actionLevel: "operator" }), taken(p)],
     // AU-2: an architect records no profile (the operator's answer to question 4, 2026-11-13), so the schema refuses its level.
+    // AU-2 and DEC-0162 LV-7: at a service that reads levels, in an organization's context, an act declared owner or admin
+    // takes only a level form; a profile's setLevel is the hub's statement, so it is refused like an operator form.
+    ["an owner's profile on an act declared owner, at a service reading levels, from T1", call("T1", byOwner, { levels: LEVELS, actionLevel: "owner" }), { ok: false, code: "operator-decision-required", data: { detail: "level-insufficient: owner" } }],
+    ["an administrator's profile on an act declared admin, at a service reading levels, from T2 with prof", call("T2", byAdmin, { levels: LEVELS, actionLevel: "admin", tokenProf: prof(byAdmin) }), { ok: false, code: "operator-decision-required", data: { detail: "level-insufficient: admin", actionDigest: DIGEST } }],
+    ["an administrator's profile on an act left undeclared, at a service reading levels, from T1", call("T1", byAdmin, { levels: LEVELS }), taken(byAdmin)],
     ["a profile an architect set, from T1", call("T1", profile({ standing: { ...STANDING, setLevel: "architect" } }), { project: "alpha" }), { ok: false, code: "decision-invalid", data: { detail: "mandate-malformed" } }],
     // A non-object standing is no standing mandate: refused as malformed even where standing is not read.
     ["a mandate whose standing is null, at a callee that reads no standing mandate, from T1", call("T1", { ...task({ capabilities: ["site.deploy"], effects: ["deploy"] }), standing: null }, { standing: undefined }), { ok: false, code: "decision-invalid", data: { detail: "mandate-malformed" } }],
