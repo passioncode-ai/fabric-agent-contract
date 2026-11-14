@@ -289,13 +289,14 @@ independent agent author and P-02 project operator.
 - **Feature:** telemetry
 - **Traces:** ST-007, FLW-06 (JTBD-04, JRN-03/#3)
 - **Entry point:** the organization's member page
-- **Preconditions:** the member's device is enrolled; an administrator read the member's raw events and their device's health this week
+- **Preconditions:** the member's device is enrolled; an administrator read the member's raw events and their device's health this week; a partner organization read usage sums that include the member (DEC-0090); a colleague read a unit the member accepted, under a purpose the member confirmed (DEC-0164)
 - **Steps:**
-  1. Member opens the access log -> the receiver lists `access-log/1` entries for the member's `user.id` and bound devices.
+  1. Member opens the access log -> the receiver lists `access-log/1` entries for the member's `user.id`, bound devices and the pairwise subjects the organization issued them for each audience (resolved to the `user.id`, DEC-0164).
   2. The first entry is `activity.raw` by role `org.admin` with a purpose sentence -> the member sees who read and why.
   3. The second entry is `device.health` with the device id -> the member sees the read of their device's state.
   4. A third entry is a partner organization's read of the usage of its agents the member used (`activity.usage`, service `org:<partnerOrgId>`, role `partner`, per day or period, no device; DEC-0090) -> the member sees which partner read sums that include them.
-- **Expected result:** every read of the member's raw data and device state is listed with role, scope, range and purpose, and so is a partner's read of usage sums; other reads of summaries are not listed, because summaries carry no person.
+  5. A fourth entry is another member's read of a unit of work the member accepted (`activity.raw`, under a purpose the member confirmed, `FAC-SEM-067`, served without its cost; the member's pairwise subject as `acceptedBy`, DEC-0164 AE-3; the scope is the operator's open question) -> the member sees who looked at what agents did on their work.
+- **Expected result:** every read of the member's raw data and device state is listed with role, scope, range and purpose, and so is a partner's read of usage sums, a read of a unit the member accepted and a raw read of a unit the member's own device sent (DEC-0164); other reads of summaries are not listed, because summaries carry no person.
 - **Alt paths:** no read in the range -> the empty state says so.
 - **UI elements:** entry list, reader role, scope, device, purpose.
 - **States covered:** empty, success

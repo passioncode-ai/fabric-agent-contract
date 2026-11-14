@@ -231,7 +231,8 @@ list come from them (DEC-0129):
 | the enrollment's own requests | enrollment (its `org.id`, `device.id`, platform, key description, CSR, an optional platform attestation and its proof), certificate rotation, renewal | [devices](devices.md), DEC-0031, DEC-0094, DEC-0100 |
 | check-ins | the enrollment of that organization, its streams only | [devices](devices.md#check-in), DEC-0031 |
 | a session's events | sessions whose context is that `org:<orgId>`, as `routeTarget` answers | DEC-0082 |
-| the enrollment's own activity events | events that carry no session, such as `policy.violation` | [activity](activity.md), DEC-0052 |
+| the enrollment's own activity events | events that carry no session and have no route of their own below or in [activity](activity.md), such as `policy.violation` (not `grant.usage`, routed by its `data.context`, nor `unit`, routed by its project) | [activity](activity.md), DEC-0052 |
+| units of work | `unit` events whose `project.id` that organization owns by the device's attribution, never a personal or unattributed project; an `acceptedBy` person subject the organization issued that person (OM-1; the audience is OQ-0017's) | [activity](activity.md#kinds), DEC-0164 AE-3, AE-4 |
 | proposals | proposals submitted to that organization's server | [proposals](proposals.md), DEC-0072 |
 | `grant.usage` and share registrations | grants whose context is that `org:<orgId>` | DEC-0086 |
 | `node-summary/1` | the enrollment's own record: what DEC-0118 lists for the machine's mode (under `C` this context only, under `A` the whole harness) | DEC-0102, DEC-0118 |
@@ -421,7 +422,11 @@ set and is the draft). A relay reads the signed list from `GET .../authority`. A
 subject, role, `iss` and keys, so unlike a key set it is not public: the server answers the two authority GETs only to
 a caller it authenticates as one of the organization's administrators or its relay, and `404` to anyone else; how it
 authenticates them is the server's (DEC-0134 OR-4: a credential it issues when it sets the relay up). A POST still needs no credential: only
-an administrator's passkey makes a list that passes.
+an administrator's passkey makes a list that passes. The server derives from the signed list only the number of its
+members, the list in force on a period's last day, and gives that count, no subject, to the organization's own
+journal, which gates a `unit` cell by it ([activity](activity.md#kinds), DEC-0164 AE-3); the North Star metric's
+per-person denominator is a separate roster (fabric-workspace `knowledge/system/measure.md`); keeping the two from the same
+members is the measure's owner's duty, stated there.
 
 ## The adaptation plan
 

@@ -763,7 +763,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 ### DEC-0030 — Activity telemetry: events, batches, a receiver-built summary without a person dimension, and an access log (`fabric-activity/0.1`)
 
 - **Date:** 2026-10-08
-- **Status:** Accepted source change (on merge of its pull request); consumer adoption pending.
+- **Status:** Accepted source change (on merge of its pull request); consumer adoption pending. Narrowed for one kind by DEC-0164 AE-3: past raw retention the organization's journal keeps, for `unit` events, person-free monthly counts and, until each month's count closes, `(unit, month)` keyed digests with only their person-free cell; nothing else outlives raw retention. Also for `unit` only (DEC-0164 AE-1, AE-2): delivery is kept once per `eventId` within the organization's stream (one id from every writer), and no user is attached to a unit.
   Revised before merge by the contract owner's review of PR #22 (head `0994981`) and re-review
   (head `19e2b58`).
 - **Annotated (2026-10-12):** item 10 (presence) is **narrowed by OD-1 for owner and administrator views** by DEC-0052 item 4: the schema keeps the per-person estimates; what a receiver serves another person of them needs a purpose the subject confirmed. DEC-0052 also amends items 1, 4 (an ack never moves over check-in drops), 6 and 7.
@@ -6225,7 +6225,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 ### DEC-0100: A `purpose` rejection, a share registration sent again after the notice, and renewal within 30 days of expiry
 
 - **Date:** 2026-10-22
-- **Status:** Accepted source change (on merge of PR #143). Consumer adoption: board row CT-88.
+- **Status:** Accepted source change (on merge of PR #143). Consumer adoption: board row CT-88. Narrowed for one kind by DEC-0164 AE-3: a `purpose` answer to a `unit` whose `acceptedBy` is a person holds nothing at the collector.
   Annotated (2026-10-22): corrected by DEC-0102, items 6 (the renewal clock), 7 (SR-5a lets a withdrawal pass), 8 (resuming after `purpose`) and 11 (compatibility wording).
 - **Annotated (2026-11-02):** DEC-0148: a renewal by the key on record repeated while the certificate it was
   issued is unpresented and not ended is answered with that certificate, or refused, never another (`FAC-SEM-155`).
@@ -11386,6 +11386,76 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `peer_owner` 1.3.0 proposal (`914c0383`), sshlg-fabric-server's (`ed799cae`, `93886034`) and the adapter's (`b8053022`)
   inputs; backlog CT-261.
 
+### DEC-0164: the unit of work as an activity event, kind `unit`
+
+- **Date:** 2026-11-12
+- **Status:** Accepted 2026-11-14, merged to main: rounds 18 (at `b92de352`) and 19 (at `8af9cf21`, main merged in) of
+  the blind readings clean on all three tiers, read under the finish-line rule (a tier fails only on a blocking finding);
+  rounds 1 to 13 and 15 to 17 folded, 14 clean; their risks are CT-305. Proposed 2026-11-12 from the design
+  `docs/evidence/plans/2026-11-12-ct259-activity-unit.md` (CT-259), whose shape Project Observatory confirmed on the board
+  (thread `b83440d6`, message `b8d911c0`; thread `52aa2f93`, message `55fa0fd7`). A new core kind
+  inside `fabric-activity/0.1` and one rule code (`FAC-SEM-171`). It narrows three things for the new kind only: DEC-0030's retention (past raw retention the journal keeps person-free monthly counts and, until each month's count closes, `(unit, month)` keyed digests with their person-free cell), DEC-0100's purpose hold (a `unit` whose `acceptedBy` is a person) and activity's *Event id* (a unit's derived `sourceKey`); no other kind changes meaning.
+- **Context:** the North Star metric counts accepted units of work per task class (fabric-workspace
+  `knowledge/system/measure.md`, *The activity event*; North Star gap G1-a). The activity protocol had no agent id, no
+  unit and no acceptance: `result` says whether a run met a signal, not which unit was delivered and accepted.
+  fabric-workspace asked for it (board request `e9d30889`, thread `8da128cf`, line 1.1); Observatory's journal
+  (OBS-378) reads it.
+- **Decision:** [activity](specification/activity.md) *Kinds*, `unit`.
+  1. **AE-1.** A `telemetry-event` of kind `unit` records one transition (`started`, `ended`, `handed-over`,
+     `accepted`) of one unit of work; it requires `run.root` and `project.id` and carries no `user` and no `session`.
+     `data`: `agent` (`id.instance`), `unit` `{system, key}`, `transition`, `taskClass` (or `unclassified`),
+     `taskClassMap` `{id, revision}` exactly when classified (a reader of a past month maps a class through its owner's table between revisions, [activity](specification/activity.md#kinds)), `outcome` on `ended` only, `evidence` (0 to 8
+     references, never content), `acceptedBy` `{kind: rule|agent|person, ref}` and `acceptedAt` on `accepted` only, and
+     `cost` as the envelope states one (`{usd: null}` when unknown), the spend since the previous transition, an
+     attribution of usage-line spend never added to it; `occurred` is when the writer recorded the transition, which
+     holding never restamps; the event carries no envelope `task`.
+  2. **AE-2.** Its `source` is `unit` and its `sourceKey` the `sha256:` of the settings-form canonical JSON of the agent,
+     the unit's system and key, the transition and `run.root` (`unitSourceKey`), so every writer derives one `eventId`
+     and a reopened unit accepted again under a new `run.root` is a new event; the unit's key takes one form per
+     system ([activity](specification/activity.md#kinds): `github` lower-case `<owner>:<repo>#<number>`, `jira` the bare
+     issue key, `mail` a 40-hex digest, a form that does not fit the key's pattern its digest; a digest is the first 40 lower-case hex digits of the SHA-256 of the UTF-8 bytes) (`FAC-SEM-171`, with
+     an acceptance not recorded before it happened and the github, jira and mail key forms).
+  3. **AE-3.** No user is attached to a unit, no unit is served by person (units only in agent, project or
+     task-class cells and the organization's total, of an organization whose signed member list names at least 3
+     members, as `result`, never by person, by the members' role only once OQ-0018 allows it; a cell drawn from one member's work is folded
+     into the organization's total until OQ-0015 is answered), and a `person` acceptance stays in the organization's own journal; the 3-member gate holds for counts, and a single unit event is read raw only
+     by a member of the organization under `activity.raw`, a person acceptance under its member's confirmed purpose, a read of it logged
+     in that person's access log under a purpose the person confirmed (OQ-0016; the subject's audience OQ-0017); a unit with a person acceptance is personal data
+     whatever channel wrote it. The receiver answers `purpose` for a person acceptance when the accepting member's purpose
+     is not collected (that answer holds nothing at the collector, any other unit's holds as any kind, DEC-0100 narrowed for
+     this kind); it keeps a unit's sending device beside the event, never in it, and a raw read of a unit a person's device
+     sent is logged in the log of the person bound to the event's epoch, under a purpose that person confirmed; past raw
+     retention the journal keeps each unit's `(unit, month)` key only as an `hmac-sha256` digest of `{key, month, system}` under a
+     key it never exports, dropped once that month's count closes (its end plus the server layer's `retention.raw_days` in force then, 30 days where it sets none, plus 60 s), beside each only its person-free cell, since a tracker key can name a person; a collector drops
+     held transitions (kept no longer than the smaller of the server layer's `retention.raw_days` (30 days where it sets none) and the device's effective value) when its device is enrolled again with a binding to a different
+     person, or from a person to none; an acceptance for a month whose count is closed is a late gap, never added to it.
+  4. **AE-4.** A device collector sends it in its batches, to the enrollment of the organization that owns its
+     `project.id` by the device's folder attribution (never for a personal or unattributed project; the route
+     function is CT-297); a kit without one records it through Observatory's `activity.unit.record`, bound as
+     Observatory's `ops.digest.record` is (its answers: thread `b83440d6`, message `b8d911c0`; thread `52aa2f93`, message `55fa0fd7`).
+     **AE-5.** An older reader validates `unit` as an unknown kind's extension data: one that fits it stores and
+     counts nothing, one with `evidence` (or a string over 64 characters) it refuses as that event's `schema`
+     rejection, which is consumed; so a collector holds a unit's transitions outside its stream and writes each as an
+     event only once the receiver's `protocols` name `activity-unit/1`, so a held unit never stalls the stream. Its
+     `cost` is the spend since the previous transition, summed by a reader.
+- **Why:** one record per unit transition, owned by the agent and joined by `run.root`, is what the metric counts; a
+  derived id makes the count idempotent across writers; keeping the person out of the event and out of every summary
+  keeps it from being served as a person's score (nothing is served for an organization of fewer than 3 members, no cell is by person, none by
+  the members' role until OQ-0018 allows it, and a cell drawn from one member's work is folded into the total until
+  OQ-0015 is answered).
+- **Alternatives considered:** a separate document type for the journal (refused: Observatory confirmed `unit` inside
+  `fabric-activity/0.1`, one transport, one attribution, one person rule); `org` in the event (refused: the stream's
+  attribution names the organization); `cost` as `null` (refused for the envelope's own form, `{usd: null}`, which
+  `FAC-SEM-038` already reads); an id without `run.root` (refused on Observatory's answer: a second acceptance would be dropped as a repeat). Where the decision departs from the design: `evidence` any URI (narrowed to an http(s) URI without user information, a URN or a `sha256:` digest, so user information and a local path do not ride as evidence; a credential in a query string or a URN body is the writer's duty, as for any reference); `taskClassMap` "required unless unclassified" (now present exactly when classified, so an unclassified unit names no map it was not read from); no bound on `acceptedAt` (added: not after `occurred`, with 60 s of skew, an acceptance not recorded before it happened, and `acceptedAt` named the month key); `acceptedBy` in `activity-common` (kept in `$defs/unit`, its only user); one rule code carrying every conditional (the conditionals moved to the schema, one event per transition and `run.root` to `FAC-SEM-039`'s duplicate id, and `FAC-SEM-171` carries the derivation, the `acceptedAt` bound and the github, jira and mail key forms); `cost` the agent's spend on the unit (now the spend since the previous transition, summed by a reader, an attribution never added to usage totals); serving per agent, project or task class (now also only for an organization whose member list names at least 3 members, never by role or person); `occurred` the event's time (for a held unit, when its writer recorded the transition, never restamped); the key as the tracker returns it (now one form per system, so two writers of one unit derive one id).
+- **Compatibility:** additive for a receiver that lists `activity-unit/1`; an older one stores a `unit` without `evidence` as an unknown kind and refuses one with it (AE-5), which `test/activity-unit.test.ts` pins against the unknown-kind branch. A receiver keeps a `unit` event once per `eventId` within the organization, whatever device or channel wrote it (activity's *Event id*, Batch and OTLP intake amended). Activity telemetry is restated by kind and channel (activity's opening, CONTEXT.md); DEC-0157 UD-6's description of it, on branch `agent/ct216-usage-data-v2` until it lands, is restated by whichever lands second (the handoff's landing note). Owed: the route function for a unit (CT-297); the adapter kits' hand-kept `PROTOCOL_REVISIONS` gain `activity-unit` ['1'] at their next repin (their feed-protocols test checks them); Observatory's node outbox, which mints a ULID today and must derive a unit's id and carry `run` and `project`; Observatory's journal and its
+  capability `activity.unit.record` (OBS-378, after this decision); the adapter's kit writer (G1-b); the assessment's
+  class map (G1-c); the join into the metric (G1-d).
+- **Consequences / affects:** `schemas/telemetry-event.schema.json` (`$defs/unit` and the kind), `src/activity-rules.ts`
+  (`unitSourceKey`, `FAC-SEM-171`), `tools/vectors/activity-unit.ts`, `fixtures/vectors/activity-unit.json`,
+  `test/activity-unit.test.ts`; `docs/specification/activity.md` (the envelope's kinds, `unit`, the rule),
+  `docs/specification/conformance.md` (a writer and a reader row, the rule code), `docs/specification/contexts.md` (Routing), `CONTEXT.md` (Activity telemetry, Telemetry event), `docs/specification/README.md`, `src/protocol-revisions.ts` and `docs/specification/versioning.md` (`activity-unit/1`), `fixtures/catalogue.json` and the unit fixtures; `docs/specification/membership.md` (OM-7's units row, the enrollment's own events narrowed), `docs/ux/scenarios.md` (SCN-010), `docs/backlog.md` (CT-259, CT-297), `docs/DOCMAP.md`, `docs/specification/devices.md` (`retention.raw_days`), `docs/OPEN_QUESTIONS.md` (OQ-0015 to OQ-0018), `docs/ux/flows.md` (FLW-06), `docs/ux/screens.md` (SCR-09), `schemas/access-log.schema.json` and `schemas/activity-batch-ack.schema.json` (their descriptions).
+- **Source:** the design `docs/evidence/plans/2026-11-12-ct259-activity-unit.md`; board request `e9d30889`; Observatory's
+  answers on threads `b83440d6` and `52aa2f93`; backlog CT-259.
 
 ### DEC-0163: a usage report's cost sums hold within each row's rounding
 
