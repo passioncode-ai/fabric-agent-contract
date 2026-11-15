@@ -66,6 +66,7 @@
 | SCN-053 | An agent needs a token; I type it into my app's own window | secret prompt | P-02 | ST-040, FLW-34 | draft | not audited |
 | SCN-055 | An agent author learns that a channel-agent declaration is not read and why, or what it still owes | authoring | P-01 | ST-001, FLW-01 | draft | not audited |
 | SCN-057 | Tell my agent to do a task: it carries my word out the first time | governance | P-02 | ST-035, FLW-29 | draft | not audited |
+| SCN-063 | As my organization's administrator, read how long agents' turns take and which plans our machines hold, as cells | telemetry | P-02 | ST-044, FLW-35 | draft | not audited |
 
 ## Personas
 
@@ -307,6 +308,27 @@ independent agent author and P-02 project operator.
 - **Errors & recovery:** a read without a logged entry is a receiver defect against DEC-0030; the member raises it with the organization under its notice.
 - **Status:** draft
 - **Coverage:** `access-log.schema.json`, fixtures `access-log*`
+- **Product:** unobserved
+
+### SCN-063: As my organization's administrator, read how long agents' turns take and which plans our machines hold, as cells
+
+- **Persona:** P-02
+- **Feature:** telemetry
+- **Traces:** ST-044, FLW-35 (JTBD-11, JRN-10/#1)
+- **Entry point:** the organization receiver's summary page
+- **Preconditions:** the organization's notice lists `turn` under `activity-logs` and `account.inventory` under `usage-and-cost` (DEC-0171); seven members' collectors sent turns this week; one member works alone on a project; the machines hold two provider plans of the organization; the receiver's `minPopulation` is 5
+- **Steps:**
+  1. Administrator opens the summary for the week -> the receiver serves `activity-summary/2` for each day.
+  2. The turn cells list each agent, workflow and project with its turns, buckets and model and tool time -> the administrator sees which agent and workflow waits longest, by bucket.
+  3. The lone member's project has a population of 1 -> its turns are folded into the day's other cell or suppressed and counted in `suppressedCells`; no cell names the project with that member's turns alone.
+  4. The inventory cells list each provider, plan and billing with machines and accounts -> the administrator sees what the organization pays for; no personal or unknown account appears (SI-2).
+- **Expected result:** turn time and accounts are read only as cells at or above `minPopulation`, never per person, machine or session; a partner organization is never served them (DEC-0171 RT-4, SI-5); a member's access log lists none of these reads, because a cell carries no person (SCN-010).
+- **Alt paths:** the receiver reads neither kind -> the lists are empty and the page says this receiver does not collect them; no cell reaches the floor on a day -> the empty state says so and shows `suppressedCells`.
+- **UI elements:** day or range, turn cells, inventory cells, other cell, suppressed count.
+- **States covered:** not collected, empty, success
+- **Errors & recovery:** a cell below the floor, buckets that do not add up to the turns or a population above the turns are refused by `FAC-SEM-040`; the receiver republishes the day.
+- **Status:** draft
+- **Coverage:** `activity-summary-2.schema.json`, fixture `positive/activity-summary-2.json`, vectors `activity-turn.json`
 - **Product:** unobserved
 
 ### SCN-011: A locked setting is refused and shown
