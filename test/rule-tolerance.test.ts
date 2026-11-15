@@ -39,7 +39,9 @@ const KINDS = [
   // An agent's source manifest, its tree and the package beside it (FAC-SEM-156 to FAC-SEM-160, DEC-0149).
   "source-manifest", "source-tree", "source-package",
   // An operations digest, its window, its sums and its rises (FAC-SEM-166), no credential as an operation (FAC-SEM-167, DEC-0153).
-  "ops-digest-hourly", "ops-digest-daily"
+  "ops-digest-hourly", "ops-digest-daily",
+  // A statement that an instance runs for an organization (DEC-0170).
+  "org-instance"
 ];
 const WRONG: unknown[] = [null, 7, "x", true, [], [null, 3, "y"], { a: null }];
 /** An object whose every member named in `names` holds `value`. */

@@ -646,7 +646,7 @@ reader that never trusted the server's word can check it offline: the platform w
 | `issuedAt`, `notBefore`, `expiresAt` | strict RFC 3339 instants with at most three fraction digits, `issuedAt` ≤ `notBefore` < `expiresAt`, and `expiresAt` at most 7 days after `issuedAt` |
 | `alg`, `kid`, `sig` | `EdDSA`, the signing key's `kid` in the organization's key set, and the signature |
 
-It names no person and no network address but the instance's own origin.
+It names no person and no network address but two origins: the issuer's and the instance's own.
 
 **IS-2, the verifier.** `verifyOrgInstance(statement, {now, org, instanceId, keySet, held})` checks with no network,
 in `verifyOrgMembership`'s order, and answers `{ok: true, status, product, origin, placement, refreshDue, unchanged,
