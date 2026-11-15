@@ -30,6 +30,11 @@ const valid = (schema: string, value: unknown) => validateDocument(validator, `$
 const vectors = JSON.parse(readFileSync(path.join(root, "fixtures/vectors/protocol-revisions.json"), "utf8")) as { cases: Array<{ name: string; received: unknown; accepted: string[]; expect: unknown }> };
 
 describe("protocol-revisions vectors", () => {
+  // CT-323: the register is kept in code-unit order, so a new protocol has one place to go.
+  it("lists its protocols in code-unit order", () => {
+    const names = [...PROTOCOL_REVISIONS.keys()];
+    expect(names).toEqual([...names].sort());
+  });
   it.each(vectors.cases.map((c) => [c.name, c] as const))("%s", (_name, c) => expect(negotiateRevision(c.received, c.accepted)).toEqual(c.expect));
   it("truncates a long received value to 80 characters", () => {
     const answer = negotiateRevision(`x/${"1".repeat(100)}`, ["fabric-device/0.1"]);

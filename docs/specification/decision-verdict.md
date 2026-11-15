@@ -58,8 +58,9 @@ without consuming its `jti`, which only the callee consumes, DL-17; a verifier t
 only as such an inspection, DL-18; a level decision or mandate bound by `mem`; a standing mandate bound by `prof`);
 `taken`, a form `actionDecision` or `mandateCovers` takes from this caller without a signature to verify (the operator's
 words through one of AP-3's four sources, a task mandate MD-3 takes, a place's standing mandate AU-3 takes inside the
-boundary, a task mandate relayed under OA-2 with its `source` included); `forwarded`, an OA-2 relay of a decision OA-3
-accepts; `data`, anything else. A `grant`, a `budget` or a `check` carries no
+boundary, a task mandate relayed under OA-2 with its `source` included); `forwarded`, an OA-2 relay OA-3 accepts, as a
+`relay` ground or as the `decision` it carries (a mandate stated from it, or relayed as one, is `taken`); `data`,
+anything else. A `grant`, a `budget` or a `check` carries no
 grade: it can make an act `human`, never ground its `allow`, and a `budget` reads "read, not reserved". An entitlement
 (DEC-0168) is no ground: `allowances: unlimited` never grounds an `allow` and never clears `spend-limit`.
 
