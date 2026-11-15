@@ -108,7 +108,8 @@ else the capability), and its `effect`, `context`, `project` and `spendUsd` wher
 input's (so a verifier builds the reference input from `asked`: a declared `maxCostUsd` as the input's `spendUsd`, a
 declared `actionEffects` as its `effect`). A job's input step reaches the hub as `fabric.job.get`, so its verdict asks
 about `fabric.job.get` and is checked only with `{check: "action"}`, whose `mandateCapability` carries the job's own
-capability (MJ-1); a mandate reference for a step is refused. An `allow` is consistent only when the reference takes the call, and its route is how the reference
+capability (MJ-1); a mandate reference for a step is refused. A step's verdict is advice only: the step carries no
+receipt (DV-8). An `allow` is consistent only when the reference takes the call, and its route is how the reference
 took it (an accepted approval `approval`; an elicitation or the operator's words in the caller's own session `operator`;
 the operator's words carrying OA-6's `source` `forwarded`; a level command, or a mandate stated `by: level`, `level`; a
 standing mandate `profile`; a task mandate `mandate`; the caller's own act `own-act`). So the check fails an `allow` of a
@@ -181,7 +182,9 @@ operator. The hub drops `verdict` before it forwards the call or seals it for an
 ([machine calls](machine-calls.md)), so a callee never sees it and a receiving node never reads another machine's journal;
 the sealed call still carries `interop-agent-call`'s first revision. Only an origin that passes `verdict` gets a withheld
 dispatch; without it the hub forwards as C3.5 says. An origin sends `verdict` only to a hub whose `protocols` list
-`decision-verdict/1` ([versioning](versioning.md#protocol-revisions)).
+`decision-verdict/1` ([versioning](versioning.md#protocol-revisions)). A job's input step goes through the hub's own
+`fabric.job.get` ([interop](interop.md) C3.5), whose arguments stay closed to `{id, inputResponses}`, so it carries no
+receipt in this revision: a step's verdict is advice, and the hub never withholds a step for one.
 
 ## What this page does not decide
 

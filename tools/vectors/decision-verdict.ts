@@ -51,7 +51,7 @@ function verdict(parts: Json, asked: Json = {}): Json {
   return v;
 }
 
-const human = (reason: string, h: Json, extra: Json = {}) => verdict({ verdict: "human", reason, rule: extra.rule ?? "AP-2", route: undefined, machineForm: undefined, human: h, expiresAt: "2026-11-15T18:00:00Z", ...extra });
+const human = (reason: string, h: Json, extra: Json = {}, asked: Json = {}) => verdict({ verdict: "human", reason, rule: extra.rule ?? "AP-2", route: undefined, machineForm: undefined, human: h, expiresAt: "2026-11-15T18:00:00Z", ...extra }, asked);
 const deny = (reason: string, rule: string, extra: Json = {}) => verdict({ verdict: "deny", reason, rule, route: undefined, machineForm: undefined, grounds: [], expiresAt: "2026-11-15T10:30:00Z", ...extra });
 
 function documents(): Json[] {
@@ -70,7 +70,8 @@ function documents(): Json[] {
     ok("advice with no addressee: a policy row against the operator's word (row-advised)", human("row-advised", { addressees: [] }, { rule: "row:no-friday-publish", grounds: [{ kind: "decision", ref: `sha256:${"d1".repeat(32)}`, grade: "taken" }] })),
     ok("a question to the operator: no form the reference takes (not-covered)", human("not-covered", { addressees: ["operator"], questionId: "q-77" })),
     ok("spend above a key's ceiling, the person's step with its link once the callee gave it (DV-7)", human("spend-limit", { addressees: ["operator"], humanStep: "spend-above-limit", url: "https://hub.example/steps/88" }, { rule: "spend-rule-3" })),
-    ok("rule 3's durable approval request, asking the organization's owner and administrators", human("spend-limit", { addressees: ["m-owner-01", "m-admin-02"] }, { rule: "spend-rule-3", level: { required: "admin", satisfiedBy: "own-act" } })),
+    ok("rule 3's durable approval request in an organization's context, asking its owner and administrators", human("spend-limit", { addressees: ["m-owner-01", "m-admin-02"] }, { rule: "spend-rule-3", level: { required: "admin", satisfiedBy: "own-act" } }, { context: "org:org-a" })),
+    ok("rule 3's durable approval request in a personal context, asking the operator", human("spend-limit", { addressees: ["operator"] }, { rule: "spend-rule-3" })),
     ok("a body gate: the person's sign-in (AP-4)", human("body-gate", { addressees: ["operator"], humanStep: "sign-in" }, { rule: "AP-4" })),
     ok("a policy row forbids it", deny("forbidden", "row:never-delete-prod")),
     ok("the operator said no", deny("person-denied", "answer:q-77", { expiresAt: "2026-11-16T09:00:00Z" })),
@@ -160,7 +161,6 @@ function references(): Json[] {
 /** DV-8: the hub's check of a call that carries a verdict's receipt. */
 function dispatches(): Json[] {
   const allowed = verdict({}, { callee: "reviews-service", capability: "reviews.approve", action: "approve-reply" });
-  const step = verdict({ route: "mandate", rule: "MD-3", grounds: [{ kind: "mandate", ref: `sha256:${"a5".repeat(32)}`, grade: "taken" }] }, { callee: "reviews-service", capability: "fabric.job.get", action: "fabric.job.get", effect: "reply" });
   const ownAct = verdict({ route: "own-act", machineForm: "none", grounds: [] }, { callee: "reviews-service", capability: "reviews.approve", action: "reviews.approve", effect: "none" });
   const call = (extra: Json = {}): Json => ({ agentId: "reviews-service", capability: "reviews.approve", input: CALL_INPUT, decision: { by: "operator", via: "relayed-instruction", action: "approve-reply", instruction: "approve the reply to the review from Anna", at: "2026-11-15T09:59:00Z" }, verdict: { id: allowed.id, askedDigest: allowed.askedDigest }, ...extra });
   const mismatch = { ok: false, code: "decision-invalid", data: { detail: "verdict-mismatch" } };
@@ -169,7 +169,6 @@ function dispatches(): Json[] {
   return [
     d("a current allow that matches the call", call(), allowed, "2026-11-15T10:05:00Z", { dispatch: "verified" }),
     d("an own act's allow, asked by its capability, on a call with no decision", (({ decision: _d, ...rest }) => ({ ...rest, verdict: { id: ownAct.id, askedDigest: ownAct.askedDigest } }))(call()), ownAct, "2026-11-15T10:05:00Z", { dispatch: "verified" }),
-    d("a job's input step, asked as fabric.job.get, on a call with no decision", { agentId: "reviews-service", capability: "fabric.job.get", input: CALL_INPUT, verdict: { id: step.id, askedDigest: step.askedDigest } }, step, "2026-11-15T10:05:00Z", { dispatch: "verified" }),
     d("a journal entry that is no decision-verdict/1", call(), changed((v) => { delete v.policy; }), "2026-11-15T10:05:00Z", mismatch),
     d("a call without a verdict is forwarded as C3.5 says", (({ verdict: _v, ...rest }) => rest)(call()), null, "2026-11-15T10:05:00Z", { dispatch: "forward" }),
     d("an expired allow", call(), allowed, "2026-11-15T10:10:00Z", mismatch),

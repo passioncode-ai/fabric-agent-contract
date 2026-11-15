@@ -406,7 +406,54 @@
       "findings": []
     },
     {
-      "name": "rule 3's durable approval request, asking the organization's owner and administrators",
+      "name": "rule 3's durable approval request in an organization's context, asking its owner and administrators",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:541793064812981068f4cbc005d816c9a637cc443de6abe3f856e665e6b08ce6",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T18:00:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "org:org-a",
+          "tier": "T1",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:e974b5f09b31a67003fa1b19e2b2f447b125ca4722421352c31ec5ffcbaf202c",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "human",
+        "rule": "spend-rule-3",
+        "reason": "spend-limit",
+        "grounds": [
+          {
+            "kind": "decision",
+            "ref": "sha256:d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1",
+            "grade": "taken"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        },
+        "human": {
+          "addressees": [
+            "m-owner-01",
+            "m-admin-02"
+          ]
+        },
+        "level": {
+          "required": "admin",
+          "satisfiedBy": "own-act"
+        }
+      },
+      "schemaValid": true,
+      "findings": []
+    },
+    {
+      "name": "rule 3's durable approval request in a personal context, asking the operator",
       "verdict": {
         "kind": "decision-verdict/1",
         "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
@@ -440,13 +487,8 @@
         },
         "human": {
           "addressees": [
-            "m-owner-01",
-            "m-admin-02"
+            "operator"
           ]
-        },
-        "level": {
-          "required": "admin",
-          "satisfiedBy": "own-act"
         }
       },
       "schemaValid": true,
@@ -3348,59 +3390,6 @@
         "route": "own-act",
         "machineForm": "none",
         "grounds": [],
-        "policy": {
-          "version": "2026-11-15.1",
-          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
-        }
-      },
-      "now": "2026-11-15T10:05:00Z",
-      "answer": {
-        "dispatch": "verified"
-      }
-    },
-    {
-      "name": "a job's input step, asked as fabric.job.get, on a call with no decision",
-      "call": {
-        "agentId": "reviews-service",
-        "capability": "fabric.job.get",
-        "input": {
-          "reviewId": "r-412",
-          "reply": "draft-7"
-        },
-        "verdict": {
-          "id": "sha256:52e48941ee7e6bf35b676917c8e1184d1508b65cadc78771c81a309731704284",
-          "askedDigest": "sha256:3cc67abb837a275f23975acece811df9cf78e68cc407dcba07a390732675b79a"
-        }
-      },
-      "journal": {
-        "kind": "decision-verdict/1",
-        "id": "sha256:52e48941ee7e6bf35b676917c8e1184d1508b65cadc78771c81a309731704284",
-        "at": "2026-11-15T10:00:00Z",
-        "expiresAt": "2026-11-15T10:10:00Z",
-        "asked": {
-          "callee": "reviews-service",
-          "capability": "fabric.job.get",
-          "action": "fabric.job.get",
-          "effect": "reply",
-          "context": "personal",
-          "tier": "T1",
-          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
-        },
-        "askedDigest": "sha256:3cc67abb837a275f23975acece811df9cf78e68cc407dcba07a390732675b79a",
-        "caller": "agent-claude-code",
-        "session": "s-7f3a91",
-        "verdict": "allow",
-        "rule": "MD-3",
-        "reason": "covered",
-        "route": "mandate",
-        "machineForm": "hub-dispatch",
-        "grounds": [
-          {
-            "kind": "mandate",
-            "ref": "sha256:a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
-            "grade": "taken"
-          }
-        ],
         "policy": {
           "version": "2026-11-15.1",
           "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"

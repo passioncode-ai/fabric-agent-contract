@@ -12804,7 +12804,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   hub, the decision's action else the capability; the reference check ties `asked` to the call its input names; the hub
   dispatches only a valid `decision-verdict/1`; SCN-046's route `mandate`; SCN-057's local acts have no verdict; round 2
   folded: a job's input step asks about `fabric.job.get` and is checked with `check: action` only; an inherited route
-  name never throws; `asked.action` takes a capability name; DV-5's keys are action ids). It answers studio-agent's proposal (board message `1f2cfb98`, thread
+  name never throws; `asked.action` takes a capability name; DV-5's keys are action ids; round 4 folded: a job's input
+  step carries no receipt, since the hub's `fabric.job.get` arguments are closed, so its verdict is advice in this
+  revision; rule 3's request to the owner and administrators is vectored in an organization's context, and its personal
+  twin to the operator). It answers studio-agent's proposal (board message `1f2cfb98`, thread
   `e2b29f77`, 2026-11-13), which relays the operator's word: an automatic verifier of decisions that applies the recorded
   rules and access levels and calls a person in only at a level the rules keep for one. The agents database designed the
   verifier (`fabric-agents-database` `docs/designs/decision-verifier.md` at `1055b55`) and follows this wire (its decision
@@ -12851,7 +12854,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      `checkVerdictDispatch` answers `verified`, refuses anything else `decision-invalid` `verdict-mismatch` (DL-19's one
      hub detail; the agent goes back to the verifier, never to the operator, FLW-29), drops `verdict` before it forwards
      or seals the call (the sealed call keeps the first revision), and forwards a call without it as C3.5 says. An origin
-     sends `verdict` only to a hub whose `protocols` list `decision-verdict/1`.
+     sends `verdict` only to a hub whose `protocols` list `decision-verdict/1`. A job's input step answered through the
+     hub's own `fabric.job.get` carries no receipt (its arguments stay closed), so a step's verdict is advice in this
+     revision and the hub never withholds a step for one.
 - **Why:** a receipt keeps a wrong verifier from minting a form the rules refuse; checking an `allow` by construction
   against the reference keeps the verifier and the contract from drifting apart; keeping arguments, the operator's words
   and persons' addresses off the record keeps the journal's copies harmless.
