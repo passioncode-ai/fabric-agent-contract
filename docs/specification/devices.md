@@ -428,7 +428,8 @@ that enrollment (`org`, `device`, `user` when one was bound). For a batch or a c
 
 - `device.id` in the body MUST equal the certificate's device;
 - every event's `user.id` MUST equal the user bound to **the event's epoch**, or be absent when that
-  epoch was issued with no user;
+  epoch was issued with no user; a kind that carries no `user` (`result`, `unit`, `turn`, `account.inventory`) is
+  attributed to that epoch's binding without one;
 - an event of an epoch with no recorded binding for this device is refused;
 - a `grant.usage`'s `data.context` MUST be `org:` followed by the certificate's `org.id` as written: it is the grant's
   own context (DEC-0086), and another organization's usage, or one whose context differs only in case, is refused;

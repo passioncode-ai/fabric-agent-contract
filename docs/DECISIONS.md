@@ -12655,9 +12655,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 ### DEC-0171: an agent turn's duration (`turn`) and a machine's organization accounts (`account.inventory`)
 
 - **Date:** 2026-11-15
-- **Status:** Proposed 2026-11-15 from the design `docs/evidence/plans/2026-11-15-ct318-ct319-response-time-subscriptions.md`
-  (CT-318, CT-319), which rounds 4 and 5 of the blind readings (seam and product) read clean; accepted when the
-  coordinator's blind readings are clean on two consecutive rounds (round 1 folded: a turn adds no subject to an
+- **Status:** Accepted 2026-11-15, merged to main: rounds 3 (at `ff01c540`) and 4 (at `7f230f38`) of the blind readings
+  clean on all three tiers, read under the finish-line rule; their risks are CT-322. Proposed 2026-11-15 from the design
+  `docs/evidence/plans/2026-11-15-ct318-ct319-response-time-subscriptions.md` (CT-318, CT-319), which rounds 4 and 5 of
+  the design's readings (seam and product) read clean (round 1 folded: a turn adds no subject to an
   `activity-summary/1` cell; each kind waits for its own protocol name; FAC-SEM-045's input names `tenants`; round 2
   folded: membership's OM-7 lists account inventories; an unbound device counts as one subject; held day-end events
   dropped on a rebinding; one method per session's turns; `toolKinds` never empty; round 3 clean on all three tiers,
