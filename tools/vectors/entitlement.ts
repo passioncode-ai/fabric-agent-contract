@@ -1,5 +1,5 @@
 /**
- * The generator of the entitlement vectors (DEC-0085): `fixtures/vectors/entitlement.json`, shared by the issuer (the
+ * The generator of the entitlement vectors (DEC-0085, `entitlement/2` DEC-0168): `fixtures/vectors/entitlement.json`, shared by the issuer (the
  * PassionCode platform) and every verifier (the first organization server, a personal cloud).
  *
  *   tsx tools/vectors/entitlement.ts --check   compare the committed file with what this writes (exit 1 on a difference)
@@ -126,8 +126,19 @@ const BASE = entitlement();
 const PERSONAL = entitlement(PERSONAL_LINES);
 const ORG_B_DOC = entitlement({ subject: ORG_B, order: { id: "ord-org-b-0001", revision: 1 }, licence: { members: 400 }, support: { tier: "managed" } });
 
+/** An `entitlement/2` (DEC-0168): `/1`'s members, and `allowances` between `agents` and `alg` (the order RFC 8785 ignores). */
+function entitlement2(allowances: unknown, change: Json = {}, key: TestKey = K2): Json {
+  const { sig: _sig, ...lines } = entitlement(change, key);
+  return signed({ ...lines, type: "entitlement/2", allowances }, key);
+}
+const UNLIMITED = entitlement2("unlimited");
+
 const held = (doc: Json) => ({ orderId: doc.order.id, revision: doc.order.revision, issuedAt: doc.issuedAt, digest: digest(doc) });
-const accepted = (doc: Json, state: "active" | "grace", refreshDue: boolean, unchanged = false) => ({ ok: true, state, refreshDue, unchanged, digest: digest(doc), held: held(doc) });
+const accepted = (doc: Json, state: "active" | "grace", refreshDue: boolean, unchanged = false) => ({
+  ok: true, state, refreshDue, unchanged, digest: digest(doc), held: held(doc),
+  // DEC-0168 EU-5: an entitlement/2 verdict names its type and allowances; an entitlement/1 verdict keeps its shape.
+  ...(doc.type === "entitlement/2" ? { type: "entitlement/2", allowances: doc.allowances } : {})
+});
 const refused = (problem: string) => ({ ok: false, problem });
 const NOW = "2026-10-25T12:00:00Z";
 const orgTrust = (change: Json = {}) => ({ now: NOW, subject: ORG_A, keySet: "r2", ...change });
@@ -224,8 +235,38 @@ function verifyCases(): Json[] {
     c("context: a key set signed under an algorithm the verifier does not know", BASE, orgTrust({ keySet: "es256" }), refused("context-invalid")),
     c("context: a held record without a digest", BASE, orgTrust({ held: { ...held(BASE), digest: "x" } }), refused("context-invalid")),
     c("no clock: an unreadable now", BASE, orgTrust({ now: "2026-10-25 12:00:00" }), refused("no-clock")),
-    c("no clock: an unreadable now beside an invalid subject answers no-clock", BASE, orgTrust({ now: "2026-10-25 12:00:00", subject: "person:p-1" }), refused("no-clock"))
+    c("no clock: an unreadable now beside an invalid subject answers no-clock", BASE, orgTrust({ now: "2026-10-25 12:00:00", subject: "person:p-1" }), refused("no-clock")),
+    ...allowanceCases(c)
   ];
+}
+
+/** DEC-0168: `entitlement/2` and its `allowances` (EU-1 to EU-5). */
+function allowanceCases(c: (name: string, doc: unknown, trust: Json | null, expected: Json) => Json): Json[] {
+  const limited = entitlement2("limited");
+  const personal = entitlement2("limited", PERSONAL_LINES);
+  const personalTrust = { now: NOW, subject: "personal", estate: ESTATE, keySet: "r2" };
+  const renewed = entitlement2("unlimited", { order: { id: "ord-org-a-0001", revision: 4 }, issuedAt: "2026-10-24T00:00:00Z", notBefore: "2026-10-24T00:00:00Z", expiresAt: "2026-11-28T00:00:00Z" });
+  const off = entitlement2("limited", { order: { id: "ord-org-a-0001", revision: 5 }, issuedAt: "2026-10-25T00:00:00Z", notBefore: "2026-10-25T00:00:00Z", expiresAt: "2026-11-29T00:00:00Z" });
+  const { allowances: _a, ...noAllowances } = UNLIMITED;
+  const relabelled = { ...BASE, type: "entitlement/2", allowances: "unlimited" };
+  return [
+    c("allowances: an organization's entitlement/2, unlimited", UNLIMITED, orgTrust(), accepted(UNLIMITED, "active", false)),
+    c("allowances: an organization's entitlement/2, limited", limited, orgTrust(), accepted(limited, "active", false)),
+    c("allowances: a personal entitlement/2, limited", personal, personalTrust, accepted(personal, "active", false)),
+    c("allowances: a personal entitlement/2 marked unlimited is malformed", entitlement2("unlimited", PERSONAL_LINES), personalTrust, refused("malformed")),
+    c("allowances: an entitlement/2 without allowances is malformed", resignedWithout(noAllowances), orgTrust(), refused("malformed")),
+    c("allowances: an unknown allowances value is malformed", entitlement2("infinite"), orgTrust(), refused("malformed")),
+    c("allowances: an entitlement/1 carrying allowances is malformed", entitlement({ allowances: "unlimited" }), orgTrust(), refused("malformed")),
+    c("allowances: an entitlement/1 relabelled entitlement/2 after signing", relabelled, orgTrust(), refused("bad-signature")),
+    c("allowances: a type change is a new revision of the same order", renewed, orgTrust({ held: held(BASE) }), accepted(renewed, "active", false)),
+    c("allowances: unlimited turned off by a later revision", off, orgTrust({ now: "2026-10-25T12:00:00Z", held: held(renewed) }), accepted(off, "active", false)),
+    c("allowances: the held revision as entitlement/1 instead of entitlement/2", entitlement({ order: renewed.order, issuedAt: renewed.issuedAt, notBefore: renewed.notBefore, expiresAt: renewed.expiresAt }), orgTrust({ held: held(renewed) }), refused("revision-conflict"))
+  ];
+}
+
+/** A document signed by K2 as it stands, whatever its members (the issuer's signer would refuse to build it). */
+function resignedWithout(doc: Json): Json {
+  return signed(doc, K2);
 }
 
 // ---- Key-set cases ------------------------------------------------------------------------------------------------
@@ -278,11 +319,12 @@ export function entitlementVectors(): Json {
     return [name, { seed, kid, x }];
   }));
   return {
-    about: "Vectors for entitlement/1 and entitlement-key-set/1 (DEC-0085), written by tools/vectors/entitlement.ts, never by hand. keys: Ed25519 test keys, each seed the SHA-256 of a published label (anyone can derive them; nothing trusts them); Ed25519 is deterministic, so a port's signer reproduces every sig. root: the issuer's root key a verifier pins. keySets: documents the root signed; handedKeySets: key sets built by hand to reach the entitlement verifier's key checks, never root-signed. keySet cases: verifyEntitlementKeySet(keySet, trust), keySet a document or the name of one in keySets, trust.root the pinned {issuer, kid, x}. verify cases: verifyEntitlement(entitlement, trust), trust.now an RFC 3339 string a port parses strictly (an unparseable one is an unreadable clock), trust.keySet the name of a key set in keySets or handedKeySets, trust.held the record held for the subject. expected is exactly what the reference returns; digest is sha256: of the signed bytes.",
+    about: "Vectors for entitlement/1 and entitlement-key-set/1 (DEC-0085) and entitlement/2 (DEC-0168), written by tools/vectors/entitlement.ts, never by hand. keys: Ed25519 test keys, each seed the SHA-256 of a published label (anyone can derive them; nothing trusts them); Ed25519 is deterministic, so a port's signer reproduces every sig. root: the issuer's root key a verifier pins. keySets: documents the root signed; handedKeySets: key sets built by hand to reach the entitlement verifier's key checks, never root-signed. keySet cases: verifyEntitlementKeySet(keySet, trust), keySet a document or the name of one in keySets, trust.root the pinned {issuer, kid, x}. verify cases: verifyEntitlement(entitlement, trust), trust.now an RFC 3339 string a port parses strictly (an unparseable one is an unreadable clock), trust.keySet the name of a key set in keySets or handedKeySets, trust.held the record held for the subject. expected is exactly what the reference returns (an entitlement/2 verdict also names its type and allowances, DEC-0168 EU-5); digest is sha256: of the signed bytes.",
     keys,
     root: ROOT_PIN,
     signingInput: {
       entitlement: { document: BASE, input: statement(BASE).toString("utf8") },
+      entitlement2: { document: UNLIMITED, input: statement(UNLIMITED).toString("utf8") },
       keySet: { document: KEY_SETS.r2, input: statement(KEY_SETS.r2 as Json).toString("utf8") }
     },
     keySets: KEY_SETS,

@@ -23,6 +23,7 @@ import * as contextRoute from "./context-route.js";
 import * as credentialEnvelope from "./credential-envelope.js";
 import * as enrollToken from "./enroll-token.js";
 import * as entitlement from "./entitlement.js";
+import * as orgInstance from "./org-instance.js";
 import * as levels from "./levels.js";
 import * as profile from "./profile.js";
 import * as orgMembership from "./org-membership.js";
@@ -65,6 +66,7 @@ export const GENERATORS: readonly Generator[] = [
   { source: "levels.ts", build: one(levels.VECTOR_FILE, levels.buildLevelsVectors) },
   { source: "profile.ts", build: one(profile.VECTOR_FILE, profile.buildProfileVectors) },
   { source: "org-membership.ts", build: one(orgMembership.VECTOR_FILE, orgMembership.buildOrgMembershipVectors) },
+  { source: "org-instance.ts", build: one(orgInstance.VECTOR_FILE, orgInstance.buildOrgInstanceVectors) },
   { source: "org-exchange.ts", build: one(orgExchange.VECTOR_FILE, orgExchange.buildOrgExchangeVectors) },
   { source: "org-adaptation.ts", build: one(orgAdaptation.VECTOR_FILE, orgAdaptation.buildOrgAdaptationVectors) },
   { source: "ops-digest.ts", build: one(opsDigest.VECTOR_FILE, opsDigest.buildOpsDigestVectors) },

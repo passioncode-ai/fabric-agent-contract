@@ -1,6 +1,6 @@
-# Membership: `org-membership/1` and `/2`, `org-key-set/1` and `org-authority/1`
+# Membership: `org-membership/1` and `/2`, `org-key-set/1`, `org-authority/1` and `org-instance/1`
 
-DEC-0127, DEC-0129, DEC-0131, DEC-0133, DEC-0138, DEC-0162 · rule codes `FAC-SEM-145`, `FAC-SEM-146`, `FAC-SEM-147`, `FAC-SEM-150`, `FAC-SEM-151`, `FAC-SEM-153`, `FAC-SEM-169`, `FAC-SEM-170` · schemas
+DEC-0127, DEC-0129, DEC-0131, DEC-0133, DEC-0138, DEC-0162, DEC-0170 · rule codes `FAC-SEM-145`, `FAC-SEM-146`, `FAC-SEM-147`, `FAC-SEM-150`, `FAC-SEM-151`, `FAC-SEM-153`, `FAC-SEM-169`, `FAC-SEM-170`, `FAC-SEM-177` · schemas
 [`org-membership`](../../schemas/org-membership.schema.json), [`org-membership-2`](../../schemas/org-membership-2.schema.json), [`org-key-set`](../../schemas/org-key-set.schema.json),
 [`org-authority`](../../schemas/org-authority.schema.json), the exchange's
 [`org-key-set-draft`](../../schemas/org-key-set-draft.schema.json),
@@ -8,11 +8,12 @@ DEC-0127, DEC-0129, DEC-0131, DEC-0133, DEC-0138, DEC-0162 · rule codes `FAC-SE
 [`org-root-registration`](../../schemas/org-root-registration.schema.json) and the root's answer
 [`org-root`](../../schemas/org-root.schema.json), the adaptation plan's
 [`org-adaptation`](../../schemas/org-adaptation.schema.json) and
-[`org-adaptation-receipt`](../../schemas/org-adaptation-receipt.schema.json), and the estate record's `organizations`
+[`org-adaptation-receipt`](../../schemas/org-adaptation-receipt.schema.json), the instance statement's
+[`org-instance`](../../schemas/org-instance.schema.json), and the estate record's `organizations`
 ([`estate-record`](../../schemas/estate-record.schema.json)) · code [`src/org-membership.ts`](../../src/org-membership.ts), [`src/org-adaptation.ts`](../../src/org-adaptation.ts) (with the vectors
 [`fixtures/vectors/org-adaptation.json`](../../fixtures/vectors/org-adaptation.json)),
 [`src/org-authority.ts`](../../src/org-authority.ts) (with `orgRelayAdmissionSet`),
-[`src/org-exchange.ts`](../../src/org-exchange.ts) · vectors
+[`src/org-exchange.ts`](../../src/org-exchange.ts), [`src/org-instance.ts`](../../src/org-instance.ts) · vectors
 [`fixtures/vectors/org-membership.json`](../../fixtures/vectors/org-membership.json), written by
 [`tools/vectors/org-membership.ts`](../../tools/vectors/org-membership.ts), and the exchange's
 [`fixtures/vectors/org-exchange.json`](../../fixtures/vectors/org-exchange.json), written by
@@ -93,7 +94,7 @@ gated theirs).
 
 **OM-3, the key set.** The membership root signs only `org-key-set/1` documents; signing keys sign attestations. It is
 a key of its own, never the same key as the organization's `policyRootKey` (DEC-0031), which signs device policy key
-sets only. One membership root signs for one organization, even on a server that hosts many: an issuer key belongs to
+sets only; signing keys also sign instance statements (`org-instance/1`, DEC-0170). One membership root signs for one organization, even on a server that hosts many: an issuer key belongs to
 the organization, so another server can take the organization over under the same `org:<orgId>` by the person's new
 pin (a new id is a new organization and context). An organization deleted at one server leaves its root in the owner's
 Fabric (DEC-0129), and a key set naming that server still needs each member's pin, which names the issuer. A signing key is listed in one organization's set only; the verifier still checks the attestation's `org`, so
@@ -133,7 +134,8 @@ that signs key sets itself would be a new pin form, and an administrator's devic
 checked: both later decisions.
 
 Rotation, revocation and replay are `entitlement-key-set/1`'s ([entitlement](entitlement.md#issuer-keys)): a new key
-overlaps the old one, an old key stays listed until what it signed is past `expiresAt` (here a day), a revoked kid
+overlaps the old one, an old key stays listed until what it signed is past `expiresAt` (a day for an attestation, 7 days for an instance
+statement, DEC-0170), a revoked kid
 refuses at once what it signed, a lower revision is `stale-revision` and the same revision with other bytes
 `revision-conflict`. Replacing the root is a new pin by the person.
 
@@ -412,7 +414,7 @@ no credential: only the root can make a set that passes.
 **OX-4, readers meanwhile.** A server with no signed set answers the key-set route `404 no-signed-key-set` and issues no
 attestation; a reader's membership stays unverifiable and so suspended (OM-6). While a newer draft waits, the server
 keeps serving the last signed set and signing attestations only with keys it lists. It never signs an attestation
-with a key no signed set lists.
+or an instance statement with a key no signed set lists.
 
 **OX-5, rotation and a late signature.** The server drafts the next set at least 7 days before the newest signing
 key's `notAfter` (`ROTATION_LEAD_SECONDS`), with the new key's window starting at once, so the overlap OM-8 asks for is
@@ -614,6 +616,63 @@ vectors [`levels.json`](../../fixtures/vectors/levels.json).
 - **LV-11, ending.** A membership that ends or is suspended (OM-5, OM-6) ends its level at once (the service keeps the held record per subject from its own `verifyOrgMembership` verdict on every attestation it reads, an ended one included; `actionDecision` reads it and never writes it): a decision or mandate
   that carries an attestation the service no longer accepts is `decision-invalid`, even inside AP-2's window. The service keeps the attestation it accepted last per subject (OM-4), so an older active revision after a later `ended` one is `level-membership: stale-revision`.
 
+## Instances (DEC-0170)
+
+DEC-0170 · rule code `FAC-SEM-177` · schema [`org-instance`](../../schemas/org-instance.schema.json) · code
+[`src/org-instance.ts`](../../src/org-instance.ts) · vectors
+[`fixtures/vectors/org-instance.json`](../../fixtures/vectors/org-instance.json), written by
+[`tools/vectors/org-instance.ts`](../../tools/vectors/org-instance.ts)
+
+`org-instance/1` is the organization server's signed statement that one instance runs for one organization, so a
+reader that never trusted the server's word can check it offline: the platform when an instance's record is put for
+`org:<orgId>` (`instance_put`, PLAT-146), and the instance's own product. A signing key of the organization's
+`org-key-set/1` signs it (OM-3), as it signs attestations, over the UTF-8 RFC 8785 form without `sig` (the register's
+`org-instance/1`).
+
+**IS-1, the fields.** Every member is always present; the schema refuses any it does not list.
+
+| Field | Rule |
+|---|---|
+| `type` | `org-instance/1` |
+| `issuer` | the organization server's `https://` origin, as an attestation states it |
+| `org` | the organization's context id `org:<orgId>` |
+| `instanceId` | the instance's opaque id, as the platform's record and the instance's product name it, compared as written (the issuer issues it in lower case) |
+| `product` | the product the instance runs, the platform's opaque product key |
+| `origin` | the instance's `https://` origin in lower case, of two DNS labels or more, with no port, path or trailing slash (the form of entitlement's `issuer`), compared as written; an instance reachable only at a port, or only at `http://127.0.0.1` on a member's machine, is not stated (*Not decided here*) |
+| `placement` | where the instance runs: `org-cloud` (a cloud the organization's hosting runs, the `org-cloud` or `enterprise-cloud` hosting product of DEC-0088), `machine` (any machine, a member's or one the organization runs; whose machine it is is not stated) or `service` (a PassionCode service); a place, not the device role `org-cloud` ([devices](devices.md), DEC-0099) nor LV-7's reading of who holds the descriptor |
+| `status` | `active`, or `retired`: a retirement is stated at a higher revision, never by silence |
+| `revision` | a positive integer that rises with every statement for this (organization, instance) |
+| `issuedAt`, `notBefore`, `expiresAt` | strict RFC 3339 instants with at most three fraction digits, `issuedAt` ≤ `notBefore` < `expiresAt`, and `expiresAt` at most 7 days after `issuedAt` |
+| `alg`, `kid`, `sig` | `EdDSA`, the signing key's `kid` in the organization's key set, and the signature |
+
+It names no person and no network address but the instance's own origin.
+
+**IS-2, the verifier.** `verifyOrgInstance(statement, {now, org, instanceId, keySet, held})` checks with no network,
+in `verifyOrgMembership`'s order, and answers `{ok: true, status, product, origin, placement, refreshDue, unchanged,
+digest, held}` or one problem: `no-clock` and `context-invalid` (`keySet` not a well-formed `EdDSA` key set of `org`,
+`instanceId` not an opaque id, `held` not `{revision, digest}`); `malformed`; `wrong-issuer`; `unknown-algorithm`;
+`unknown-key` and `key-revoked`; `unusable-key` and `small-order-key`; `key-not-valid`; `bad-signature`; `wrong-org`
+(the statement's `org` is not the reader's) and `wrong-instance` (its `instanceId` is not the one the reader asks
+about); `too-long-lived`; `not-yet-valid` (the contract's 60 s of skew); `expired` (no grace); `stale-revision` and
+`revision-conflict` against the held record for that instance. A `retired` statement verifies and reads `status:
+"retired"`: the reader stops serving or accepting the instance, and the earlier `active` statement is then
+`stale-revision`. `refreshDue` is true from 24 hours before `expiresAt`.
+
+**IS-3, the platform's checks.** The four checks the platform runs on `instance_put` (PLAT-146) are IS-2 with its
+context: the signature by the organization's applied key set; `instanceId` equal to the path and `org` equal to the
+record's `subject`; the window: `notBefore` within the clock skew, and no grace after `expiresAt`; a `revision` not below the one accepted. It stores the verdict's
+`digest` and `revision`.
+
+**IS-4, the issuer's duties.** The organization server issues a statement only on a record an owner or an
+administrator made (`org.instance_added`; a level decision where it reads levels, DEC-0162 LV-3 and LV-4), re-issues each active
+one at least a day before `expiresAt`, issues `status: "retired"` at a higher revision on `org.instance_retired` and
+none after it, and never signs one revision with other bytes. It keeps a signing key listed until every instance
+statement that key signed is past `expiresAt`, and re-issues those statements under a listed key before it revokes
+one (OM-8's rotation, carried to instance statements). A retirement reaches a reader when the reader next
+fetches: a reader that fetches only when `refreshDue` may serve a retired instance until its held statement's
+`expiresAt`, at most 7 days; a reader that needs less fetches more often, and an issuer may state shorter lives. How a
+statement reaches the platform and the instance's product is not decided here.
+
 ## Semantic rules
 
 | Code | Kind | Rule |
@@ -623,12 +682,16 @@ vectors [`levels.json`](../../fixtures/vectors/levels.json).
 | <a id="fac-sem-150"></a>`FAC-SEM-150` | `org-authority` | the window is two strict instants with at most three fraction digits, `expiresAt` after `issuedAt` and at most 7 days after it; at most 1024 members, each an object of 1 to 8 keys, each key an object; each subject, each `iss` and each kid once across the list; every kid a `#sig` kid and every key a P-256 point SEC 1 accepts (DEC-0129) |
 | <a id="fac-sem-151"></a>`FAC-SEM-151` | `org-key-set-draft`, `org-authority-draft` | a draft envelope's `digest` is its draft's (what its signer signs), its draft names the envelope's organization, and its revision is one above its base's (1 with none) (DEC-0131) |
 | <a id="fac-sem-153"></a>`FAC-SEM-153` | `org-adaptation` | an adaptation plan names each item's `ref` once and each request's `id` once, and a request's `itemRef` names one of its items (DEC-0138) |
+| <a id="fac-sem-177"></a>`FAC-SEM-177` | `org-instance` | the times are strict RFC 3339 with at most three fraction digits and `issuedAt` ≤ `notBefore` < `expiresAt`, and the life is at most 7 days (DEC-0170 IS-1) |
 | <a id="fac-sem-169"></a>`FAC-SEM-169` | `org-membership-2` | `projects` names 1 to 64 projects, each once, for an `architect` and none for any other role (DEC-0162 LV-1) |
 | <a id="fac-sem-170"></a>`FAC-SEM-170` | `decision`, `mandate` | a level decision or a level mandate (`by: "level"`) carries an `org-membership/2` attestation of its `org`, whose role covers its `level`, made before the attestation's `expiresAt`; one carrying an architect's attestation names its project (a decision's `project`, a mandate's scope `projects`), each among the attestation's `projects` (DEC-0162 LV-3, LV-4, LV-6) |
 | <a id="fac-sem-147"></a>`FAC-SEM-147` | `estate-record` | each organization pinned once by its context, and no pinned root of small order; each context issuer once and its opaque part never containing an estate id of eight characters or more (DEC-0128) |
 
 ## Who adopts it
 
+- **Instances (DEC-0170)**: the first organization server issues `org-instance/1`; the platform verifies it on
+  `instance_put` (PLAT-146, IS-3) and the instance's product verifies it before serving; both run
+  `fixtures/vectors/org-instance.json`.
 - **Levels (DEC-0162)**: the organization product issues `org-membership/2` to the readers it registers for it (its
   levels row, the roles' source of truth); the platform (PLAT-141, PLAT-146); Fabric's hub writes `mem` and its Agent
   access and board gates read levels (CO-523); Project Observatory (OBS-377), Switchboard (SB-291), Fabric Inbox
@@ -692,7 +755,16 @@ organization, so they add no link between organizations, but anyone can count th
 changes. The member list and its draft name every member and are served only to the organization's administrators and
 its relay (OX-6).
 
+An instance statement (DEC-0170) names no person, but it gives the platform and the instance's product a signed
+`origin` with its `placement`: two organizations' statements that name one origin (one host serving an instance for
+each) let the platform, and an organization server that signs for both, link the two organizations to that host.
+
 ## Not decided here
+
+- **How an instance statement travels (DEC-0170).** The route by which the organization server hands `org-instance/1`
+  to the platform (`instance_put`) and to the instance's product, whether a reader fetches it or the server pushes a
+  retirement, and how an instance is created and billed (the platform's and the product's). How an instance that has
+  no `https://` name of its own (one reachable only at a port, or a local instance on a member's machine) is stated.
 
 - **The proof a member-key door asks in an organization's context.** A member's key for an instance the organization deploys is issued and rotated only by the owner or an administrator, in person, a member's own machine included (LV-7, the operator's answer of 2026-11-13). CF-3's doors (the instance's CLI and page) authenticate whoever holds the descriptor, which on a member's machine is the member, and nothing yet tells the owner or an administrator apart there, nor says whether in person admits a remote session. Until DEC-0159's lander, Fabric (CT-208, CO-523) and the organization product name that proof (for example the owner's or an administrator's own credential the organization's key set lists, OM-3), the page and CLI of an instance the organization deploys on a member's machine offer no member-key issue or rotation; revocation stays the level route.
 

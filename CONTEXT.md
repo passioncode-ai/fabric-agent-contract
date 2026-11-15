@@ -133,6 +133,12 @@ agent surface with the same effect, checks and audit record, declared in its wel
 `extensions/actions/0.1` with its `gate` (`none`, `relayed` or `human`); an action offered only on a page is
 nonconformant (except the operator's move of a board slot, a host control until a host ships its twin, DEC-0140 PR-2). `FAC-SEM-142` checks the declared actions (a button whose tool the MCP surface does not serve); a host
 reports a dashboard that declares none (CT-126) ([service](docs/specification/service.md#actions) AP-1, DEC-0121).
+**Read parity** extends it to reading: everything a person reads there an agent reads, structured, within its own
+access (a human step, such as a secret shown once or the operator channel's link code, stays one), and each function
+is built for an agent first: an act a capability of the agent surface, a read through a tool or the documented API the
+page calls (except the operator's move of a board slot, a host control until the host ships its twin, DEC-0140 PR-2); a dashboard with no agent surface is
+nonconformant (`FAC-SEM-176`, [service](docs/specification/service.md#read-parity-and-the-design-order-dec-0169)
+RP-1 to RP-3, DEC-0169).
 
 **Operator's word, carried out the first time**: The rule that an agent carries out its operator's words about a task
 itself, on that word: every step inside the task is the agent's to take within the grants, mandates and limits that
@@ -889,7 +895,9 @@ to its hub over the relay, or on the hub's own machine through the node's `machi
 `org:<orgId>`, or one person's estate, `personal`) for at most 38 days: a member allowance, a hosting product, a
 support tier and the paid agents, never an amount (`entitlement/1`, DEC-0085). Signed by a key the issuer's
 **Entitlement key set** lists, which a root key the verifier pins signs; it verifies in `grace` for 14 days after it
-expires ([entitlement](docs/specification/entitlement.md)).
+expires ([entitlement](docs/specification/entitlement.md)). `entitlement/2` (DEC-0168) adds `allowances`: `limited`,
+or `unlimited` when the order sets no ceiling on its own allowances; it never lifts a spend limit, a level or a human
+step ([allowances](docs/specification/entitlement.md#allowances-dec-0168)).
 
 **Entitlement key set**: The issuer's signing keys for entitlements under a rising revision, each with a window, and the
 kids it revokes (`entitlement-key-set/1`, DEC-0085), signed by the issuer's root key, which a verifier pins at
@@ -899,6 +907,11 @@ installation and which signs nothing else ([entitlement](docs/specification/enti
 enrollments or its estate: its own `device.id`, keys, kids, telemetry key, collector ids and counters, no estate record
 in its check-ins and no estate document in their answers, and in its organization's context a hub key and token issuer
 of its own (DEC-0128, [devices](docs/specification/devices.md#unlinkable-enrollments)).
+
+**Instance statement**: The organization server's signed statement that one instance runs for one organization: its
+id, product, origin, placement and `active` or `retired` status, for at most 7 days (`org-instance/1`, DEC-0170),
+signed by a key of the organization's key set and verified offline by the platform and the instance's product
+([membership](docs/specification/membership.md#instances-dec-0170)).
 
 **Membership attestation**: What an organization server states about one person's membership of one organization,
 for one reader, for at most a day: the organization, a subject pairwise to that reader, a role (`owner`, `admin`,

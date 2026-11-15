@@ -5304,6 +5304,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   PassionCode platform issues (its PLAT-020), the first organization server and a personal cloud verify.
 - **Annotated (2026-10-19):** item 3 amended by DEC-0088 (`enterprise-cloud`, a third hosting product for an
   organization).
+- **Annotated (2026-11-14):** extended by DEC-0168: `entitlement/2`, this record with `allowances` (`limited` or
+  `unlimited`), beside `entitlement/1`, which stays as it is.
 - **Amends:** nothing. It answers the platform's request PLAT-020 on the project board (2026-10-17), which left the
   signature, the grace and the refresh to the contract, and serves the platform's organization offer (its ADR-0005,
   accepted 2026-10-16, D-2 and D-4).
@@ -7266,6 +7268,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Annotated (2026-10-28):** DEC-0147 reads AP-4's `secret` as a secret typed in or handed out (a peer share's
   export), item 4's "typed secrets" included, and names the peer share's export among the steps held in the product's
   app window; it defines the agent twins of the secret prompt's "Decline" and of a peer share's "Open a share".
+- **Annotated (2026-11-14):** AP-1 extended by DEC-0169: everything a person reads is readable by an agent (RP-1), each
+  function is built for an agent first, an act a capability of the agent surface and a read through a tool or the
+  documented API the page calls (RP-2), and a dashboard without an agent surface is
+  nonconformant (RP-3, `FAC-SEM-176`).
 - **Context:** the operator asked (2026-10-24) that when they tell their coding agent to approve something, the agent
   does it, and that any button a service's dashboard shows a person exists for the agent too, for every Fabric agent.
   DL-26 already says that inside the machine boundary the operator's instruction is the authority and that a callee
@@ -12456,3 +12462,176 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Source:** the design `docs/evidence/plans/2026-11-12-ct285-autonomy-profile.md`; the operator's decision of
   2026-11-09 as recorded in fabric-workspace `knowledge/authority.md`; board requests `921edc61` (thread `a3a97cef`)
   and `4a1bf8d6` (thread `8da128cf`); backlog CT-285.
+
+### DEC-0168: `entitlement/2`, an order with no limits on its own allowances (extends DEC-0085)
+
+- **Date:** 2026-11-14
+- **Status:** Accepted source change (on merge of its pull request). Extends DEC-0085; `entitlement/1` stays as it
+  is. Consumer adoption: board row CT-299: the PassionCode platform issues (its PLAT-154), the first organization
+  server verifies and confirms on the board.
+- **Decision:** in [entitlement → allowances](specification/entitlement.md#allowances-dec-0168):
+  1. **EU-1, a new type.** `entitlement/2` has every member of `entitlement/1`, with the same rules, and `allowances`,
+     always present: `limited` or `unlimited`. A changed field list is a new type (DEC-0063): its own schema
+     (`entitlement-2.schema.json`), its register statement (`entitlement/2`), the rule kind `entitlement-2`
+     (`FAC-SEM-115` with its kinds widened to `entitlement-2`, and `FAC-SEM-175`), and `entitlement` `["1", "2"]` in the protocol register. The signature,
+     windows, `held` record, key sets and refusals are `entitlement/1`'s.
+  2. **EU-2, what `unlimited` lifts.** Only the order's own allowances: the verifier does not refuse a member past
+     `licence.members`, switches on an agent the organization adds beyond `agents` without refusing it as unpaid,
+     and the product may grow `hosting.size` without a new order; `licence`, `agents` and `hosting` still carry what
+     the order was priced on, and metering stays the server's own.
+  3. **EU-3, what it never lifts.** The estate's L0 (its total and each key's own ceiling), a project's L1 (an
+     `unlimited` order never records `mode: no-project-limit`), a grant's `perCallMaxUsd` and `autoApproveUsd`,
+     a mandate's bounds (MD-6), a product's emergency stops, DEC-0162's levels, DEC-0166's profiles and AP-4's human
+     steps.
+  4. **EU-4, the issuer.** It marks an order `unlimited` only as its own owner-level scope recorded it (the platform's
+     `customers:tier`): PassionCode's owner at the issuer, never the subject organization's owner or administrators,
+     whose billing act (DEC-0162 LV-7) chooses no allowance; a `personal` entitlement is `limited` (`FAC-SEM-175`, EN-2); it sends
+     `entitlement/2` only to a verifier whose owner confirmed on the board that it re-vendored at or after DEC-0168,
+     `entitlement/1` to every other (a subject with a verifier that has not confirmed stays on `entitlement/1`); a
+     change of `allowances` or of type is a new revision of the same order, and the same revision under the other
+     type is `revision-conflict`.
+  5. **EU-5, the verifier's answer.** `verifyEntitlement` reads both types; an `entitlement/2` verdict adds `type` and
+     `allowances`, an `entitlement/1` verdict keeps its shape and reads as `limited`.
+- **Why:** the operator asked the platform for an "unlimited" tier («Всё без лимитов», platform session `fbc88a8a`,
+  2026-11-13), the platform built it in 0.17.0 (`customers.tier`, scope `customers:tier`, PLAT-154), and a verifier
+  could not tell from a closed `entitlement/1` that an organization has no limits.
+- **Alternatives refused:** a member added to `entitlement/1` (its schema is closed: every pinned verifier would
+  refuse every entitlement); a boolean (a later order kind, a trial or a capped plan, would need a third type);
+  `unlimited` as an absent `licence` (a `null` line already means the order has no such line); letting `unlimited`
+  set a project's or the estate's spend limits (they protect the operator's money and stay the person's, AP-4).
+- **Compatibility:** additive. Every DEC-0085 and DEC-0088 document keeps its verdict and its verdict's shape; a
+  verifier pinned before DEC-0168 refuses `entitlement/2` as `malformed` (another type), so the issuer sends it only
+  to verifiers that confirmed. A port that repins past DEC-0168 adds the rule kind `entitlement-2` where it sweeps
+  `fixtures/semantic/entitlement-*` (the new `entitlement-2-*` fixtures match that glob), the register's
+  `entitlement/2` row with `entitlement.ts`, `entitlement` `["1", "2"]` to its own copy of `PROTOCOL_REVISIONS` where
+  it keeps one (the adapter's kits), and, at the issuer, a signer that builds the `entitlement/2` statement (the
+  platform's signer branches on `entitlement/1` today). `contractVersion` stays `0.1.0`.
+- **Consequences / affects:**
+  - spec: `docs/specification/versioning.md` (the `protocols` paragraph: for an entitlement the board confirmation
+    decides), `docs/specification/share-registration.md` (the receiver's policy under `unlimited`),
+    `docs/specification/README.md` (the index row), `docs/specification/entitlement.md` (the header, EN-2, the issuer's duties, *Allowances*, the semantic rules,
+    *Who adopts it*), `docs/specification/conformance.md` (the module row, the verifier and issuer rows, the signing
+    register, the rule register and its next free code);
+  - schemas: `schemas/entitlement-2.schema.json`;
+  - code: `src/entitlement.ts` (`ENTITLEMENT_2_TYPE`, `ENTITLEMENT_TYPES`, `ALLOWANCES`, the verdict's `type` and
+    `allowances`, `FAC-SEM-175`), `src/signing-challenges.ts` (`ENTITLEMENT_2_FIELDS`, the register row),
+    `src/protocol-revisions.ts`, `src/semantic-kinds.ts`; `tools/vectors/entitlement.ts`;
+  - fixtures: `fixtures/vectors/entitlement.json` (the `allowances:` cases and `signingInput.entitlement2`),
+    `fixtures/positive/entitlement-2.json`, `fixtures/negative/entitlement-2-no-allowances.json`,
+    `fixtures/semantic/entitlement-2-*.json`, `fixtures/catalogue.json`;
+  - tests: `test/entitlement.test.ts`, `test/signing-challenges.test.ts`, `test/protocol-revisions.test.ts`,
+    `test/schema-compilation.test.ts`;
+  - docs: `CONTEXT.md`, `docs/DOCMAP.md`, `docs/backlog.md` (CT-299), the design
+    `docs/evidence/plans/2026-11-14-ct299-unlimited-entitlement.md`.
+- **Not decided here:** how a product shows `unlimited` to an administrator, what it bills, which functions a lapse
+  switches off (the verifying product's); whether an organization's spend limits default otherwise under
+  `unlimited` (not asked).
+- **Source:** passioncode-platform's board message `caab9b65` (thread `16093ded`, relayed by fabric-workspace); the
+  design above; DEC-0085, DEC-0088, DEC-0063, DEC-0162. DEC-0168 and `FAC-SEM-175` were reserved by git CAS
+  (`agent_sync.py reserve`, keys `ct299-entitlement-2` and `ct299-entitlement-2-sem`).
+
+### DEC-0169: read parity and the design order: everything a person reads, an agent reads (extends DEC-0121 AP-1)
+
+- **Date:** 2026-11-14
+- **Status:** Accepted source change (on merge of its pull request). Extends DEC-0121 AP-1. A behaviour rule a service
+  adopts at its next pin; `FAC-SEM-176` reads its well-known document from then. Consumer adoption: board row CT-311:
+  the adapter's kits and probe (FAA-332, 0.88.0: the probe counts `surfaces.a2a` only for a remote service and reads
+  emptiness from `tools/list`, a tell owed to it), every service with a view.
+- **Decision:** in [service → read parity and the design order](specification/service.md#read-parity-and-the-design-order-dec-0169):
+  1. **RP-1, read parity.** Everything a service shows a person on a dashboard, an app, a page, a bot or a report (a
+     list, a record, a status, a number, a chart's series, a log, a history, a setting, an export, a preview with its
+     diff and hash) is readable by an agent through a tool on the agent surface or the documented API the page calls,
+     with the same data, filters and paging, as structured values. A view only a person can read is nonconformant.
+     Parity widens no access: an agent reads within its caller's grant, level and context, and a value a person sees
+     only as a human step stays one (AP-4's secret shown once, the operator channel's link code OC-3).
+  2. **RP-2, the design order.** Every function is built for an agent first: what a person does is a capability of the
+     agent surface, what a person reads is readable by RP-1's route; a dashboard, app, bot, CLI or report is a view
+     over them. A page, button or report ships with its agent route in the same release (a button its twin; what it
+     only shows, the tool or the documented API RP-1 names).
+     AP-1's one exception stands: the operator's move of a board slot stays a host control until the host ships its
+     twin (DEC-0140 PR-2).
+  3. **RP-3, the check.** A well-known document that serves `surfaces.dashboard` serves `surfaces.mcp` or
+     `surfaces.a2a` beside it, and a present `surfaces.mcp.capabilities` is not empty (`FAC-SEM-176`, kind
+     `service-well-known`, `agentSurfaceRules`). The rule reads the declaration; whether each view has its tool is
+     RP-1's and AP-1's, checked by the service's tests and a host's probe.
+- **Why:** the operator's words of 2026-11-14, relayed verbatim by fabric-agent-adapter (board request `6f1f3ec9`,
+  thread `b2eef40c`, adapter session `e03b89b9`): «любой агент, это изначально все функции, это строится как для
+  агентов, для API и MCP. И не бывает функций, которые доступны человеку … но они доступны агенту, ни для просмотра, ни
+  для редактирования». AP-1 gave every button a tool; nothing gave an agent what a person only reads.
+- **Alternatives refused:** a rule that every view names its tool in the well-known document (a page's views are not
+  declared anywhere today, and the probe already finds a dashboard without an agent surface); read parity through
+  screen reading (an agent needs structured values, the same filters and paging); widening an agent's access to what
+  the operator sees (parity is of functions, not of access).
+- **Compatibility:** a tightening that binds a service at its next pin, as DEC-0121's behaviour rules did. A well-known
+  document with a dashboard and no agent surface was schema-valid and stays so; `FAC-SEM-176` reports it, and also a
+  present but empty `surfaces.mcp.capabilities`, with or without a dashboard. RP-3 counts `surfaces.a2a` at any
+  placement (A2A may sit on a local origin), wider than the request and the adapter's probe, which count it for a
+  remote service only and pass an empty list it has not read: a tell to the adapter. Every
+  positive fixture in the repository already serves `surfaces.mcp`. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:**
+  - spec: `docs/specification/service.md` (*Read parity and the design order*, the rule register),
+    `docs/specification/conformance.md` (a row for a service with a view, the rule register, its next free code);
+  - code: `src/actions.ts` (`agentSurfaceRules`), `src/semantic-rules.ts`;
+  - fixtures: `fixtures/semantic/service-well-known-agent-surface-*.json`;
+  - tests: `test/actions.test.ts`;
+  - docs: `CONTEXT.md` (*Read parity*), `docs/backlog.md` (CT-311).
+- **Not decided here:** a declaration of each view and its tool in the well-known document (a later rule, if hosts need
+  to check views one by one); a check for a bot or channel agent's views (RP-1 binds them, RP-3 reads dashboards only);
+  how a remote agent whose MCP sits behind a gateway outside its origin declares it (until then it declares its A2A
+  card, or `FAC-SEM-176` reports it); how a host shows a nonconformant service (the adapter's probe `dashboard.agent-surface`
+  finds it, FAA-332).
+- **Source:** fabric-agent-adapter's board request `6f1f3ec9` (thread `b2eef40c`) and its 0.88.0 (FAA-332, probe
+  `dashboard.agent-surface`); DEC-0121 AP-1. DEC-0169 and `FAC-SEM-176` were reserved by git CAS (`agent_sync.py
+  reserve`, keys `ct311-read-parity` and `ct311-read-parity-sem`).
+
+### DEC-0170: `org-instance/1`, a signed statement that an instance runs for an organization
+
+- **Date:** 2026-11-14
+- **Status:** Accepted source change (on merge of its pull request). Consumer adoption: backlog row CT-314: the first
+  organization server issues; the platform (PLAT-146, `instance_put`) and an instance's product verify.
+- **Decision:** in [membership → instances](specification/membership.md#instances-dec-0170):
+  1. **IS-1, the statement.** `org-instance/1`, every member always present: `issuer`, `org`, `instanceId`, `product`,
+     `origin`, `placement` (`org-cloud`, `machine` or `service`), `status` (`active` or `retired`), `revision`,
+     `issuedAt`, `notBefore`, `expiresAt` (at most 7 days after `issuedAt`), `alg` (`EdDSA`), `kid`, `sig`; signed by a
+     signing key of the organization's `org-key-set/1` (OM-3) over the RFC 8785 form without `sig` (the register's
+     `org-instance/1`). No person; no address but the instance's origin (`https://`, lower case, no port, path
+     or trailing slash).
+  2. **IS-2, the verifier.** `verifyOrgInstance(statement, {now, org, instanceId, keySet, held})`, in
+     `verifyOrgMembership`'s order, with `wrong-instance` beside `wrong-org`, no grace after `expiresAt`, and a
+     `retired` statement that verifies and reads `retired`; `refreshDue` from 24 hours before `expiresAt`.
+  3. **IS-3, the platform's checks** on `instance_put` are IS-2 with its context (the window: `notBefore` within the
+     skew, no grace after `expiresAt`); it stores `digest` and `revision`.
+  4. **IS-4, the issuer.** Only on a record an owner or an administrator made; re-issue a day before expiry; a
+     retirement at a higher revision and nothing after it; one revision, one set of bytes; a signing key stays
+     listed until what it signed is past `expiresAt` (7 days here) and statements are re-issued before a
+     revocation. A retirement reaches a reader at its next fetch, at worst the held statement's `expiresAt` (7 days).
+  5. **Rule.** `FAC-SEM-177` (kind `org-instance`): the times strict and in order, and the 7-day life.
+- **Why:** the first organization server's request (board `270b130b`, thread `fb41cd09`) for the issuance statement
+  its own row and the platform's PLAT-146 cite, which DEC-0162 did not give; its proposal (`983f0303`) and the
+  platform's reading (`f126b49d`: a `kid`, vectors a port reproduces, the four checks), accepted on the board
+  (`3bb1d765`). Needed by 2026-11-28.
+- **Alternatives refused:** an `org-membership` extension (a membership names a person's role, not an instance); a
+  statement signed by the organization's root (the root signs key sets only, OM-3); a 24-hour life (an instance changes
+  far less often than a membership, and the platform reads it at `instance_put`); `placement` as `entitlement/1`'s
+  hosting products (a member's machine and a PassionCode service host instances no hosting product names).
+- **Compatibility:** additive: a new type, a new rule code; nothing existing changes. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:**
+  - spec: `docs/specification/membership.md` (*Instances*, the rule register, its header and title, OM-3, the key
+    rotation and OX-4, *Who adopts it*, *Privacy*, *Not decided here*), `docs/specification/conformance.md`
+    (the module row, the issuer and reader rows, the signing register, the rule register and its next free code);
+  - schemas: `schemas/org-instance.schema.json`; the descriptions of `schemas/org-key-set.schema.json`;
+  - code: `src/org-instance.ts`, `src/signing-challenges.ts` (`ORG_INSTANCE_FIELDS`, the register row),
+    `src/protocol-revisions.ts`, `src/semantic-kinds.ts`, `src/semantic-rules.ts`; `tools/vectors/org-instance.ts`,
+    `tools/vectors/run.ts`;
+  - fixtures: `fixtures/vectors/org-instance.json`, `fixtures/positive/org-instance.json`,
+    `fixtures/negative/org-instance-unknown-placement.json`, `fixtures/semantic/org-instance-*.json`,
+    `fixtures/catalogue.json`;
+  - tests: `test/org-instance.test.ts`, `test/signing-challenges.test.ts`, `test/schema-compilation.test.ts`,
+    `test/positive-sweep.test.ts`;
+  - docs: `CONTEXT.md`, `docs/DOCMAP.md`, the design `docs/evidence/plans/2026-11-14-ct314-instance-statement.md`.
+- **Not decided here:** how a statement travels to the platform and the product, and how an instance is created and
+  billed (membership's *Not decided here*); the public readers list `GET /fabric/membership/v1/{org}/readers` (not
+  specified anywhere yet, Fabric's).
+- **Source:** the design above; the first organization server's board messages `270b130b` and `983f0303`; the
+  platform's `f126b49d`; DEC-0127, DEC-0129, DEC-0162. DEC-0170 and `FAC-SEM-177` were reserved by git CAS
+  (`agent_sync.py reserve`, keys `ct314-org-instance` and `ct314-org-instance-sem`).
