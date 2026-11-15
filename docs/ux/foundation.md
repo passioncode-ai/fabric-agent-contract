@@ -806,7 +806,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 
 ### ST-044: My organization reads how long its agents' turns take and which accounts its machines hold, never a person
 
-- **Story:** As P-02, the administrator of an organization, I want to read how long our agents' turns take per agent, workflow and project, and which provider plans our machines hold, so that I can see where agents wait and what we pay for, without timing or listing any one person.
+- **Story:** As P-02, the administrator of an organization, I want to read how long our agents' turns take per agent, workflow and project, and which provider plans our machines hold, so that I can see where agents wait and which plans our machines hold, without timing or listing any one person.
 - **Traces:** JTBD-11, JRN-10/#1
 - **Acceptance criteria:**
   - Given members whose collectors send `turn` events, when I open the summary for a day, then I see `activity-summary/2`'s turn cells per agent, workflow and project with their turn counts, buckets and model and tool time, never a cell per person, machine or session (DEC-0171 RT-4).

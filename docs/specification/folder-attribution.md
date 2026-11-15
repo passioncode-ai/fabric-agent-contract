@@ -284,7 +284,7 @@ Project yet because the folder's Git facts cannot be read.
   there later (AT-3 comes before AT-12), and only work by two Projects with nothing recorded ties, so SCN-055's
   "it leaves the first one" ends; a worktree right under home refused at attach as at creation; recording by `record`; its snapshot's
   `containers` including Observatory's declared ones where it can read them; its CLI text on containers and its
-  scenarios (SCN-055, SCN-063, SCN-068) updated with them.
+  scenarios (its own SCN-055, SCN-063, SCN-068, numbered in that repository, not this one's) updated with them.
 - **Project Observatory** (its engine, `project-observatory-open-source`) runs the vectors in its scan and in its local
   answer while Fabric is not running; at a session's start it asks Fabric's capability (D4 as corrected) rather than
   serving one. Owed, whatever its resolver does today (the vectors run against it are the measure): its session-start
