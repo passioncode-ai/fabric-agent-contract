@@ -817,6 +817,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Priority:** should
 - **Status:** draft
 - **Product:** unobserved
+
 ## Design tooling
 
 - **Figma:** disabled
