@@ -124,8 +124,10 @@ const MEMBER_OF: Readonly<Record<FactField, string>> = { audience: "access/audie
 
 /**
  * FAC-SEM-180 (DEC-0173 IF-6). Kind `service-descriptor`: the descriptor's own facts against its peer, placement and
- * runner. Kind `service-well-known`: a value that fails the schema, and `entry` against the same document's dashboard.
- * Kind `service-observation` (`{descriptor, wellKnown}`, the identity pair): every clause, both documents.
+ * runner, and its label's shape. Kind `service-well-known`: a value that fails the schema, `entry` against the same
+ * document's dashboard, and its label's shape. Kind `service-observation` (`{descriptor, wellKnown}`, the identity
+ * pair): only what neither document alone shows (a well-known value against the descriptor, a descriptor's `entry`
+ * against the dashboard), so each problem is reported once.
  * A finding never changes the service's state; the fact it names reads not declared.
  */
 export function instanceFactsRules(kind: string, value: JsonObject): Finding[] {
@@ -135,7 +137,14 @@ export function instanceFactsRules(kind: string, value: JsonObject): Finding[] {
   let prefix: (document: FactsDocument) => FactsDocument | undefined;
   if (kind === "service-descriptor") { view = instanceFacts(value, undefined); prefix = () => undefined; }
   else if (kind === "service-well-known") { view = instanceFacts(undefined, value); prefix = () => undefined; }
-  else if (kind === "service-observation") { view = instanceFacts(value.descriptor, value.wellKnown); prefix = (document) => document; }
+  else if (kind === "service-observation") {
+    // The pair reports only what neither document read alone shows, so `pnpm validate` prints each problem once.
+    const pair = instanceFacts(value.descriptor, value.wellKnown);
+    const alone = [...instanceFacts(value.descriptor, undefined).refused, ...instanceFacts(undefined, value.wellKnown).refused];
+    const seen = (refused: RefusedFact) => alone.some((other) => other.document === refused.document && other.field === refused.field);
+    view = { ...pair, invalid: [], refused: pair.refused.filter((refused) => !seen(refused)) };
+    prefix = (document) => document;
+  }
   else return [];
   return [
     ...view.invalid.map((document) => ({ code: "FAC-SEM-180", instancePath: at(prefix(document)), message: "the instance facts fail their schema; a host reads none of them from this document (DEC-0173)" })),

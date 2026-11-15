@@ -126,7 +126,8 @@ and recorded as DEC-0001.
 | The design of the activity event of a unit of work, proposed as DEC-0164 (CT-259) with Observatory's OBS-378 (2026-11-12) | `docs/evidence/plans/2026-11-12-ct259-activity-unit.md` |
 | The design of the context of a task, settled before an agent acts on another organization's resources, the decision CT-292 owes (2026-11-12) | `docs/evidence/plans/2026-11-12-ct292-task-context.md` |
 | The design of an agent's turn time and an organization's account inventory, which DEC-0171 decides (CT-318, CT-319, 2026-11-15) | `docs/evidence/plans/2026-11-15-ct318-ct319-response-time-subscriptions.md` |
-| The design of three optional instance facts (access, tenancy, space) as an extension a host reads, for a DEC to decide (CT-321, 2026-11-15) | `docs/evidence/plans/2026-11-15-ct321-instance-facts.md` |
+| The design of three optional instance facts (access, tenancy, space) as an extension a host reads, which DEC-0173 decides (CT-321, 2026-11-15) | `docs/evidence/plans/2026-11-15-ct321-instance-facts.md` |
+| What a service declares of an instance (who it serves, how it keeps data apart, its space) and how a host reads it: DEC-0173, `FAC-SEM-180`, the details panel (SCN-065) | `docs/specification/service.md#instance-facts`, `schemas/service-instance-facts-extension.schema.json`, `src/instance-facts.ts`, `fixtures/vectors/instance-facts.json` |
 | A node's harness summary, the baseline and its drift, repairs; `FAC-SEM-128`, `FAC-SEM-129` | `docs/specification/node-summary.md`, `src/node-summary.ts`, `fixtures/vectors/repair-decision.json` written by `tools/vectors/repair-decision.ts` (DEC-0101) |
 | Licence and repository-standard handoff | `docs/handoffs/2026-09-30-repository-standard.md` |
 | Settings backup and feed-client handoff (DEC-0025) | `docs/handoffs/2026-10-05-settings-backup.md` |

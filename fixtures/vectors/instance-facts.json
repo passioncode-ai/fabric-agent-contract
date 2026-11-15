@@ -1,5 +1,5 @@
 {
-  "about": "Vectors for extensions/instance-facts/0.1 (DEC-0173), written by tools/vectors/instance-facts.ts, never by hand. Each case gives a descriptor and a well-known document (null: not read). `read` is instanceFacts(descriptor, wellKnown): the five facts, field by field, the well-known document first; a refused value is never read, the field then read from the other document; a dashboard that requires a host's login code reads host-signin. `findings` are FAC-SEM-180's on the pair (kind service-observation, `{descriptor, wellKnown}`), as code and path; with a document missing they are the findings of the kind of the one document given.",
+  "about": "Vectors for extensions/instance-facts/0.1 (DEC-0173), written by tools/vectors/instance-facts.ts, never by hand. Each case gives a descriptor and a well-known document (null: not read). `read` is instanceFacts(descriptor, wellKnown): the five facts, field by field, the well-known document first; a refused value is never read, the field then read from the other document; a dashboard that requires a host's login code reads host-signin. `findings` are FAC-SEM-180's as code and path, per kind: `descriptor` (kind service-descriptor), `wellKnown` (service-well-known) and `pair` (service-observation, `{descriptor, wellKnown}`, only what neither document alone shows), null where a document is not given.",
   "key": "https://fabric.passioncode.ai/agent-contract/extensions/instance-facts/0.1",
   "cases": [
     {
@@ -17,8 +17,11 @@
         "refused": [],
         "invalid": []
       },
-      "kind": "service-observation",
-      "findings": []
+      "findings": {
+        "descriptor": [],
+        "wellKnown": [],
+        "pair": []
+      }
     },
     {
       "name": "a local operator's instance: its own facts in the descriptor",
@@ -56,8 +59,11 @@
         "refused": [],
         "invalid": []
       },
-      "kind": "service-observation",
-      "findings": []
+      "findings": {
+        "descriptor": [],
+        "wellKnown": [],
+        "pair": []
+      }
     },
     {
       "name": "an empty access object declares nothing",
@@ -79,11 +85,14 @@
         "refused": [],
         "invalid": []
       },
-      "kind": "service-descriptor",
-      "findings": []
+      "findings": {
+        "descriptor": [],
+        "wellKnown": null,
+        "pair": null
+      }
     },
     {
-      "name": "the well-known document wins field by field; the descriptor's entry stands where the well-known names none",
+      "name": "the well-known document wins field by field; the descriptor's entry stands where the well-known declares no entry",
       "descriptor": {
         "protocol": "fabric-service/0.1",
         "id": "notes",
@@ -120,8 +129,11 @@
         "refused": [],
         "invalid": []
       },
-      "kind": "service-observation",
-      "findings": []
+      "findings": {
+        "descriptor": [],
+        "wellKnown": [],
+        "pair": []
+      }
     },
     {
       "name": "a dashboard that requires a host's login code reads host-signin whatever is declared",
@@ -163,10 +175,13 @@
         ],
         "invalid": []
       },
-      "kind": "service-observation",
-      "findings": [
-        "FAC-SEM-180 /descriptor/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1instance-facts~10.1/access/entry"
-      ]
+      "findings": {
+        "descriptor": [],
+        "wellKnown": [],
+        "pair": [
+          "FAC-SEM-180 /descriptor/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1instance-facts~10.1/access/entry"
+        ]
+      }
     },
     {
       "name": "a dashboard that takes no host's code refuses host-signin and keeps own-signin",
@@ -215,10 +230,13 @@
         ],
         "invalid": []
       },
-      "kind": "service-observation",
-      "findings": [
-        "FAC-SEM-180 /descriptor/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1instance-facts~10.1/access/entry"
-      ]
+      "findings": {
+        "descriptor": [],
+        "wellKnown": [],
+        "pair": [
+          "FAC-SEM-180 /descriptor/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1instance-facts~10.1/access/entry"
+        ]
+      }
     },
     {
       "name": "organization beside peer: an agent shared into an organization's context",
@@ -257,8 +275,11 @@
         "refused": [],
         "invalid": []
       },
-      "kind": "service-observation",
-      "findings": []
+      "findings": {
+        "descriptor": [],
+        "wellKnown": [],
+        "pair": []
+      }
     },
     {
       "name": "organization on a local placement without peer is refused",
@@ -288,10 +309,13 @@
         ],
         "invalid": []
       },
-      "kind": "service-observation",
-      "findings": [
-        "FAC-SEM-180 /descriptor/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1instance-facts~10.1/access/audience"
-      ]
+      "findings": {
+        "descriptor": [
+          "FAC-SEM-180 /extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1instance-facts~10.1/access/audience"
+        ],
+        "wellKnown": [],
+        "pair": []
+      }
     },
     {
       "name": "operator beside peer is refused",
@@ -330,10 +354,13 @@
         ],
         "invalid": []
       },
-      "kind": "service-observation",
-      "findings": [
-        "FAC-SEM-180 /descriptor/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1instance-facts~10.1/access/audience"
-      ]
+      "findings": {
+        "descriptor": [
+          "FAC-SEM-180 /extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1instance-facts~10.1/access/audience"
+        ],
+        "wellKnown": [],
+        "pair": []
+      }
     },
     {
       "name": "a service offered to others that no grant reaches yet leaves audience out",
@@ -368,8 +395,11 @@
         "refused": [],
         "invalid": []
       },
-      "kind": "service-observation",
-      "findings": []
+      "findings": {
+        "descriptor": [],
+        "wellKnown": [],
+        "pair": []
+      }
     },
     {
       "name": "a remote service others call with their own keys: public, shared, system",
@@ -416,8 +446,11 @@
         "refused": [],
         "invalid": []
       },
-      "kind": "service-observation",
-      "findings": []
+      "findings": {
+        "descriptor": [],
+        "wellKnown": [],
+        "pair": []
+      }
     },
     {
       "name": "a remote service only an organization's members reach with their own keys: organization without peer",
@@ -448,8 +481,11 @@
         "refused": [],
         "invalid": []
       },
-      "kind": "service-observation",
-      "findings": []
+      "findings": {
+        "descriptor": [],
+        "wellKnown": [],
+        "pair": []
+      }
     },
     {
       "name": "public on a local placement is refused",
@@ -479,10 +515,13 @@
         ],
         "invalid": []
       },
-      "kind": "service-observation",
-      "findings": [
-        "FAC-SEM-180 /descriptor/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1instance-facts~10.1/access/audience"
-      ]
+      "findings": {
+        "descriptor": [
+          "FAC-SEM-180 /extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1instance-facts~10.1/access/audience"
+        ],
+        "wellKnown": [],
+        "pair": []
+      }
     },
     {
       "name": "public beside a subscription runner is refused",
@@ -516,10 +555,13 @@
         ],
         "invalid": []
       },
-      "kind": "service-observation",
-      "findings": [
-        "FAC-SEM-180 /descriptor/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1instance-facts~10.1/access/audience"
-      ]
+      "findings": {
+        "descriptor": [
+          "FAC-SEM-180 /extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1instance-facts~10.1/access/audience"
+        ],
+        "wellKnown": [],
+        "pair": []
+      }
     },
     {
       "name": "shared on a local placement is refused",
@@ -549,10 +591,13 @@
         ],
         "invalid": []
       },
-      "kind": "service-observation",
-      "findings": [
-        "FAC-SEM-180 /descriptor/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1instance-facts~10.1/tenancy/mode"
-      ]
+      "findings": {
+        "descriptor": [
+          "FAC-SEM-180 /extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1instance-facts~10.1/tenancy/mode"
+        ],
+        "wellKnown": [],
+        "pair": []
+      }
     },
     {
       "name": "system on a local placement is refused",
@@ -582,10 +627,13 @@
         ],
         "invalid": []
       },
-      "kind": "service-observation",
-      "findings": [
-        "FAC-SEM-180 /descriptor/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1instance-facts~10.1/space/kind"
-      ]
+      "findings": {
+        "descriptor": [
+          "FAC-SEM-180 /extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1instance-facts~10.1/space/kind"
+        ],
+        "wellKnown": [],
+        "pair": []
+      }
     },
     {
       "name": "a container behind its own account's forwarder",
@@ -611,8 +659,11 @@
         "refused": [],
         "invalid": []
       },
-      "kind": "service-observation",
-      "findings": []
+      "findings": {
+        "descriptor": [],
+        "wellKnown": [],
+        "pair": []
+      }
     },
     {
       "name": "a local well-known document's account label is refused; the descriptor's stands",
@@ -655,10 +706,13 @@
         ],
         "invalid": []
       },
-      "kind": "service-observation",
-      "findings": [
-        "FAC-SEM-180 /wellKnown/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1instance-facts~10.1/space/account"
-      ]
+      "findings": {
+        "descriptor": [],
+        "wellKnown": [],
+        "pair": [
+          "FAC-SEM-180 /wellKnown/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1instance-facts~10.1/space/account"
+        ]
+      }
     },
     {
       "name": "a remote well-known document may carry the label",
@@ -688,8 +742,11 @@
         "refused": [],
         "invalid": []
       },
-      "kind": "service-observation",
-      "findings": []
+      "findings": {
+        "descriptor": [],
+        "wellKnown": [],
+        "pair": []
+      }
     },
     {
       "name": "a label shaped like a credential is refused",
@@ -722,10 +779,13 @@
         ],
         "invalid": []
       },
-      "kind": "service-descriptor",
-      "findings": [
-        "FAC-SEM-180 /extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1instance-facts~10.1/space/account"
-      ]
+      "findings": {
+        "descriptor": [
+          "FAC-SEM-180 /extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1instance-facts~10.1/space/account"
+        ],
+        "wellKnown": null,
+        "pair": null
+      }
     },
     {
       "name": "a value that fails the schema: none of that document's facts is read",
@@ -761,10 +821,13 @@
           "descriptor"
         ]
       },
-      "kind": "service-observation",
-      "findings": [
-        "FAC-SEM-180 /descriptor/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1instance-facts~10.1"
-      ]
+      "findings": {
+        "descriptor": [
+          "FAC-SEM-180 /extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1instance-facts~10.1"
+        ],
+        "wellKnown": [],
+        "pair": []
+      }
     },
     {
       "name": "a well-known document read alone: no clause on peer or placement applies",
@@ -796,8 +859,11 @@
         "refused": [],
         "invalid": []
       },
-      "kind": "service-well-known",
-      "findings": []
+      "findings": {
+        "descriptor": null,
+        "wellKnown": [],
+        "pair": null
+      }
     },
     {
       "name": "a descriptor read alone: no clause on the dashboard applies",
@@ -823,8 +889,152 @@
         "refused": [],
         "invalid": []
       },
-      "kind": "service-descriptor",
-      "findings": []
+      "findings": {
+        "descriptor": [],
+        "wellKnown": null,
+        "pair": null
+      }
+    },
+    {
+      "name": "a tenancy without its mode fails the schema: none of that document's facts is read",
+      "descriptor": {
+        "protocol": "fabric-service/0.1",
+        "id": "notes",
+        "instance": "default",
+        "origin": "http://127.0.0.1:47910",
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/instance-facts/0.1": {
+            "access": {
+              "audience": "operator"
+            },
+            "tenancy": {}
+          }
+        }
+      },
+      "wellKnown": {},
+      "read": {
+        "declared": false,
+        "facts": {},
+        "refused": [],
+        "invalid": [
+          "descriptor"
+        ]
+      },
+      "findings": {
+        "descriptor": [
+          "FAC-SEM-180 /extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1instance-facts~10.1"
+        ],
+        "wellKnown": [],
+        "pair": []
+      }
+    },
+    {
+      "name": "a remote descriptor may carry the label",
+      "descriptor": {
+        "protocol": "fabric-service/0.1",
+        "id": "research",
+        "instance": "default",
+        "placement": "remote",
+        "origin": "https://research.example",
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/instance-facts/0.1": {
+            "space": {
+              "kind": "system",
+              "account": "eu-pool-3"
+            }
+          }
+        }
+      },
+      "wellKnown": {},
+      "read": {
+        "declared": true,
+        "facts": {
+          "kind": "system",
+          "account": "eu-pool-3"
+        },
+        "refused": [],
+        "invalid": []
+      },
+      "findings": {
+        "descriptor": [],
+        "wellKnown": [],
+        "pair": []
+      }
+    },
+    {
+      "name": "a dashboard that requires a host's login code reads host-signin even when the well-known extension fails its schema",
+      "descriptor": {
+        "protocol": "fabric-service/0.1",
+        "id": "notes",
+        "instance": "default",
+        "origin": "http://127.0.0.1:47910"
+      },
+      "wellKnown": {
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/instance-facts/0.1": {
+            "access": {
+              "audience": "everyone"
+            }
+          }
+        },
+        "surfaces": {
+          "dashboard": {
+            "path": "/dashboard",
+            "login": true
+          },
+          "events": {
+            "path": "/events"
+          }
+        }
+      },
+      "read": {
+        "declared": true,
+        "facts": {
+          "entry": "host-signin"
+        },
+        "refused": [],
+        "invalid": [
+          "wellKnown"
+        ]
+      },
+      "findings": {
+        "descriptor": [],
+        "wellKnown": [
+          "FAC-SEM-180 /extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1instance-facts~10.1"
+        ],
+        "pair": []
+      }
+    },
+    {
+      "name": "a remote container",
+      "descriptor": {
+        "protocol": "fabric-service/0.1",
+        "id": "research",
+        "instance": "default",
+        "placement": "remote",
+        "origin": "https://research.example",
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/instance-facts/0.1": {
+            "space": {
+              "kind": "container"
+            }
+          }
+        }
+      },
+      "wellKnown": {},
+      "read": {
+        "declared": true,
+        "facts": {
+          "kind": "container"
+        },
+        "refused": [],
+        "invalid": []
+      },
+      "findings": {
+        "descriptor": [],
+        "wellKnown": [],
+        "pair": []
+      }
     }
   ]
 }

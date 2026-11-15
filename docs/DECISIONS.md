@@ -12891,7 +12891,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-11-16
 - **Status:** Proposed 2026-11-16 from the design `docs/evidence/plans/2026-11-15-ct321-instance-facts.md` (CT-321),
   whose rounds 5 and 6 of the blind readings (seam and product) read clean; accepted when the coordinator's blind
-  readings are clean on two consecutive rounds. It answers Fabric Dashboards' request `5da92f65` (thread `589abe7e`,
+  readings are clean on two consecutive rounds (round 1 folded: `mode` and `kind` required inside their objects; the
+  label's rule by placement and its grammar; the pair reports only cross-document findings; a refused value never read,
+  the other document's shown). It answers Fabric Dashboards' request `5da92f65` (thread `589abe7e`,
   FD-273, 2026-11-15), relaying the operator's ask `d660cc30` that pointing at an agent show where it runs, its
   organization, whose instance it is, who has access and how its data is kept apart. The contract accepted it in
   principle on the board (`1fa97798`) and named Prowl Agent the first declarer, as the operator said.
@@ -12904,8 +12906,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Decision:** [service](specification/service.md#instance-facts) *Instance facts*:
   1. **IF-1, an extension.** The facts ride as one value under the contract's key ending `extensions/instance-facts/0.1`
      (`EXTENSION_KEYS.instanceFacts`, schema `service-instance-facts-extension.schema.json`), in the descriptor, the
-     well-known document or both; protocol `fabric-instance-facts/0.1`, named only. Every member and field is optional;
-     an absent one, and an empty object, declare nothing. Declared, never verified.
+     well-known document or both; protocol `fabric-instance-facts/0.1`, named only. Every member and field is optional,
+     save that a present `tenancy` names its `mode` and a present `space` its `kind`; an absent one, and an empty `access`,
+     declare nothing. Declared, never verified.
   2. **IF-2, `access`.** `audience` `operator`, `organization` or `public` and `entry` `host-signin`, `own-signin` or
      `none`. `organization` needs `peer` on a local placement (a host routes others only to a service that declares it,
      DEC-0061); on a remote one it also covers an organization's members reaching its own surface with their own keys.
@@ -12915,13 +12918,21 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   3. **IF-3, `tenancy`.** `mode` `single`, `per-organization` (a product's own per-organization copy) or `shared` (several
      tenants' data in one instance, a remote placement's only). No member says whose instance it is.
   4. **IF-4, `space`.** `kind` `user`, `container`, `vm` or `system` (a remote placement's only); `account` an opaque
-     label, never an OS account's or a person's name, a path or a credential, written only in a local service's descriptor.
+     label of 1 to 64 characters of `[A-Za-z0-9._-]` starting with a letter or digit, never an OS account's or a person's
+     name, a path or a credential; on a local placement written only in the descriptor, never the well-known document.
+     `container` and `vm` may be either placement's.
   5. **IF-5, the reading.** `instanceFacts(descriptor, wellKnown)`: five facts, each from the well-known document where it
      declares a value no clause refuses, else from the descriptor's; a refused value is reported, never read; `entry`
      `host-signin` whenever the dashboard requires a host's login code; a document whose value fails the schema gives
      none of its facts.
-  6. **IF-6, `FAC-SEM-180`.** The schema and the clauses above, on kinds `service-descriptor`, `service-well-known` and
-     the pair `service-observation`; a finding never changes the service's state.
+  6. **IF-6, `FAC-SEM-180`.** The schema and the clauses above: kind `service-descriptor` checks a descriptor's own facts,
+     `service-well-known` a document's schema, its `entry` against its own dashboard and its label's shape, and the pair
+     `service-observation` only what neither document alone shows, so each problem is reported once; a finding never
+     changes the service's state.
+  7. **IF-7, whose instance and the rest.** A placed instance's organization is its placement's `context`, a remote one's
+     its `org-instance/1` statement where a host holds one; a local service no estate record places reads `personal`, as
+     an absent `context` does (DEC-0082). A personal instance with `peer` that a colleague's grant reaches keeps `single`:
+     the grant lets the colleague call it, its data stays the operator's.
 - **Why:** an extension is the one route that breaks no host pinned today; keeping whose instance it is on the placement
   leaves one answer to that question; binding `audience` to `peer`, the placement and the runner keeps a declaration
   from naming a reach the contract does not route; keeping the label out of a local well-known document keeps it from
@@ -12939,10 +12950,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   a local well-known document through the authority extension) is outside this decision.
 - **Consequences / affects:** `schemas/service-instance-facts-extension.schema.json` (new), `src/instance-facts.ts`
   (new), `src/extensions.ts`, `src/protocol-revisions.ts`, `src/semantic-rules.ts`, `tools/vectors/instance-facts.ts`,
-  `tools/vectors/run.ts`, `fixtures/vectors/instance-facts.json`, `test/instance-facts.test.ts`, the fixtures and
-  `fixtures/catalogue.json`, `vitest.config.ts`; `docs/specification/service.md` (*Instance facts*, `FAC-SEM-180`),
+  `tools/vectors/run.ts`, `fixtures/vectors/instance-facts.json`, `test/instance-facts.test.ts`, `test/consistency.test.ts`,
+  `test/positive-sweep.test.ts`, `test/schema-compilation.test.ts`, the fixtures and `fixtures/catalogue.json`,
+  `vitest.config.ts`; `docs/specification/service.md` (*Instance facts*, `FAC-SEM-180`),
   `interop.md` (the extension keys), `versioning.md` (named protocols), `conformance.md` (a service and a host row, the
-  module, the register); `CONTEXT.md`; `docs/ux/` (ST-045, FLW-36, SCR-36, SCN-065); `docs/backlog.md` (CT-321).
-- **Source:** the design above; board messages `5da92f65`, `1fa97798` and `8601034d`; DEC-0061, DEC-0082, DEC-0086,
+  module, the register); `CONTEXT.md`; `docs/ux/` (ST-045, FLW-36, SCR-36, SCN-065); `docs/DOCMAP.md`; `docs/backlog.md` (CT-321); the design's status note.
+- **Source:** the design above; board messages `5da92f65`, `1fa97798`, `8601034d` and Fabric Dashboards' acceptance `b62f8db9`; DEC-0061, DEC-0082, DEC-0086,
   DEC-0142, DEC-0154, DEC-0170. DEC-0173 and `FAC-SEM-180` were reserved by git CAS (`agent_sync.py reserve`, key
   `ct321-instance-facts`).

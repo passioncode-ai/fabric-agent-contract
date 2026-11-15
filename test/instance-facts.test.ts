@@ -17,9 +17,10 @@ describe("extensions/instance-facts/0.1 (DEC-0173)", () => {
   it("the vector file is the generator's output", () => expect(committed).toBe(buildInstanceFactsVectors()));
   it.each(vectors.cases.map((c) => [c.name, c] as const))("%s", (_name, c) => {
     expect(instanceFacts(c.descriptor ?? undefined, c.wellKnown ?? undefined)).toEqual(c.read);
-    const input = c.kind === "service-observation" ? { descriptor: c.descriptor, wellKnown: c.wellKnown } : (c.descriptor ?? c.wellKnown);
-    const codes = evaluateSemanticRules(c.kind, input).filter((f) => f.code === "FAC-SEM-180").map((f) => `${f.code} ${f.instancePath}`);
-    expect(codes).toEqual(c.findings);
+    const codes = (kind: string, input: unknown) => evaluateSemanticRules(kind, input).filter((f) => f.code === "FAC-SEM-180").map((f) => `${f.code} ${f.instancePath}`);
+    if (c.descriptor !== null) expect(codes("service-descriptor", c.descriptor)).toEqual(c.findings.descriptor);
+    if (c.wellKnown !== null) expect(codes("service-well-known", c.wellKnown)).toEqual(c.findings.wellKnown);
+    if (c.descriptor !== null && c.wellKnown !== null) expect(codes("service-observation", { descriptor: c.descriptor, wellKnown: c.wellKnown })).toEqual(c.findings.pair);
   });
   it("reports nothing for a kind it does not read", () => expect(instanceFactsRules("result", {})).toEqual([]));
   it("never throws on any shape, a member that cannot be printed included", () => {
