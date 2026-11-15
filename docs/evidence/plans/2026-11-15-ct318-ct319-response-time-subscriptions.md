@@ -121,8 +121,8 @@ FAC-SEM-040): none is a content or person word. `response` is a content word the
   organization pays for on the platform stays the platform's licences.
 - **SI-6, the gate.** As RT-5, under `activity-inventory/1`.
 - **SI-7, not usage data.** Both kinds are activity telemetry under the organization's notice, never a product's
-  anonymous usage data (DEC-0157 UD-6, on its branch until it lands; whichever lands second restates UD-6's description
-  of activity telemetry to name both kinds): Switchboard's own usage-data switch does not govern them, and neither
+  anonymous usage data (DEC-0157 UD-6, landed 2026-11-15; this DEC, landing after it, restates UD-6's description of
+  activity telemetry to name both kinds): Switchboard's own usage-data switch does not govern them, and neither
   travels in the other's channel.
 
 ### Notice purposes
@@ -165,3 +165,31 @@ sampling sends no turns), the source of RT-6's routing of personal-account sessi
 (`contexts.md`), scenarios for an administrator's response-time and inventory reports, and a vector of one person
 across five sessions; read under the finish-line rule; then the board reply on thread `1efdc2e1` and tells to
 Observatory (collector) and Switchboard (inventory record).
+
+## What the DEC carries from the readings
+
+Rounds 4 and 5 (seam and product) read this design clean twice; these are the DEC's to settle, none blocks the design:
+
+1. RT-2's derived id: over the session id and the turn's ordinal only (not the stream), so a collector that re-reads a
+   transcript after a re-enrollment mints the same id; or the DEC states a re-enrollment never re-emits past turns.
+2. RT-1's `transcript` and `rollout` methods have only wall-clock times: such a turn is not sent unless the collector
+   stamped it live with a monotonic reading.
+3. One writer per session for turns: FAC-SEM-100 extended to `turn`, or a rule of its own.
+4. The access log carries no kinds, so "no turn or inventory for another person" is a receiver duty FAC-SEM-067 cannot
+   check as coded; the DEC restates every `activity.*` scope (`activity.presence` and `activity.usage` too), not only
+   `activity.raw`, and says the restraint is the receiver's.
+5. RT-4's "else its session's user.id" adds nothing (the binding sets `user.id`); buckets give the bucket of the median
+   or p95, not the value.
+6. SI-3's routing is a new function for two organizations naming one `tenantRef` (not `routeTarget`'s same-organization
+   `ambiguous`); a receiver checks that `tenantRef` is one of its own `accounts.tenants`, as FAC-SEM-045 checks a
+   `grant.usage` context; an API key held by name maps to a tenant only where `accounts.tenants` names it.
+7. SI-4: with a derived id the second event is a repeated id, handled by the repeated-id check, not a per-tuple rule.
+8. Seat counting: one inventory writer per device and a holder precedence (a seat Switchboard holds and the runtime is
+   signed in to counts once), or the holder as a cell dimension.
+9. Whether turn and inventory cells reach a partner organization (DEC-0090).
+10. The board reply says: response time is measured from the runtime's turns, not derived from `usage.line` timing; a
+    small pilot below the receiver's `minPopulation` sees no cells; "workflow" is `skill` unless the requester names
+    another key; the organization's notice may need a new `noticeVersion` (else the receiver answers `purpose`).
+11. Restatements beyond Next: the attribution text for two more kinds with no user, the `sourceKey` description's
+    `sha256:` form beyond `unit`, the CT-318 row's notice-purpose clause.
+
