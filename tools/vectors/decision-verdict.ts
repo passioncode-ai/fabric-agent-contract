@@ -100,6 +100,7 @@ function documents(): Json[] {
     refused("an entitlement as a ground (DEC-0168)", verdict({ grounds: [{ kind: "entitlement", ref: "ent:1", grade: "verified" }] })),
     refused("the arguments themselves in asked", verdict({}, { input: CALL_INPUT })),
     refused("a plain hash of the arguments", verdict({}, { argsDigest: sha(rfc8785(CALL_INPUT)) })),
+    refused("an inherited name as a route", tampered(verdict({}), (d) => { d.route = "toString"; })),
     refused("the operator's words on the wire", verdict({ instruction: "approve the reply" }))
   ];
 }
@@ -149,6 +150,8 @@ function references(): Json[] {
     c("a human verdict is the verifier's own: advice beside a form the reference takes", human("row-advised", { addressees: [] }, { rule: "row:no-friday-publish" }), action("actions.json", "cases", "relayed from T1 with the operator's instruction"), []),
     c("a denial is the verifier's own", deny("forbidden", "row:never-delete-prod"), action("actions.json", "cases", "relayed from T1 with the operator's instruction"), []),
     c("an allow that asked about a T2 call, checked against the T1 call the reference reads", verdict({}, { tier: "T2" }), action("actions.json", "cases", "relayed from T1 with the operator's instruction"), ["FAC-SEM-179 /verdict/asked/tier"], true),
+    c("a job's input step under the task's mandate, read as the hub sees it", verdict({ route: "mandate", rule: "MD-3", grounds: [{ kind: "mandate", ref: `sha256:${"a5".repeat(32)}`, grade: "taken" }] }, { effect: "reply", tier: "T0" }), action("actions.json", "jobSteps", "a step of a job the mandate's capabilities cover"), []),
+    c("a job's input step checked against mandateCovers, which reads the job's capability", rederive({ ...verdict({ route: "mandate", rule: "MD-3", grounds: [{ kind: "mandate", ref: `sha256:${"a5".repeat(32)}`, grade: "taken" }] }), asked: { ...verdict({}).asked, tier: "T0", capability: "fabric.job.get", action: "fabric.job.get", effect: "none" } }), mandate("the operator's words with no amount: the paid research is covered, the money limits decide its spend"), ["FAC-SEM-179 /reference/check", "FAC-SEM-179 /verdict/asked/capability", "FAC-SEM-179 /verdict/asked/action", "FAC-SEM-179 /verdict/asked/effect", "FAC-SEM-179 /verdict/asked/project", "FAC-SEM-179 /verdict/asked/spendUsd"], true),
     c("an allow that asked about another action than the reference's", verdict({}, { action: "delete-reply" }), action("actions.json", "cases", "relayed from T1 with the operator's instruction"), ["FAC-SEM-179 /verdict/asked/action"], true),
     c("an allow that asked about less spend than the mandate's call", rederive({ ...verdict({ route: "mandate", rule: "MD-3", grounds: [{ kind: "mandate", ref: `sha256:${"a5".repeat(32)}`, grade: "taken" }] }), asked: { ...verdict({}).asked, ...{ tier: "T0", capability: "research.run", action: "research.run", effect: "charge", project: "example-site", spendUsd: 1 } } }), mandate("the operator's words with no amount: the paid research is covered, the money limits decide its spend"), ["FAC-SEM-179 /verdict/asked/spendUsd"], true)
   ];
@@ -157,6 +160,7 @@ function references(): Json[] {
 /** DV-8: the hub's check of a call that carries a verdict's receipt. */
 function dispatches(): Json[] {
   const allowed = verdict({}, { callee: "reviews-service", capability: "reviews.approve", action: "approve-reply" });
+  const step = verdict({ route: "mandate", rule: "MD-3", grounds: [{ kind: "mandate", ref: `sha256:${"a5".repeat(32)}`, grade: "taken" }] }, { callee: "reviews-service", capability: "fabric.job.get", action: "fabric.job.get", effect: "reply" });
   const ownAct = verdict({ route: "own-act", machineForm: "none", grounds: [] }, { callee: "reviews-service", capability: "reviews.approve", action: "reviews.approve", effect: "none" });
   const call = (extra: Json = {}): Json => ({ agentId: "reviews-service", capability: "reviews.approve", input: CALL_INPUT, decision: { by: "operator", via: "relayed-instruction", action: "approve-reply", instruction: "approve the reply to the review from Anna", at: "2026-11-15T09:59:00Z" }, verdict: { id: allowed.id, askedDigest: allowed.askedDigest }, ...extra });
   const mismatch = { ok: false, code: "decision-invalid", data: { detail: "verdict-mismatch" } };
@@ -165,6 +169,7 @@ function dispatches(): Json[] {
   return [
     d("a current allow that matches the call", call(), allowed, "2026-11-15T10:05:00Z", { dispatch: "verified" }),
     d("an own act's allow, asked by its capability, on a call with no decision", (({ decision: _d, ...rest }) => ({ ...rest, verdict: { id: ownAct.id, askedDigest: ownAct.askedDigest } }))(call()), ownAct, "2026-11-15T10:05:00Z", { dispatch: "verified" }),
+    d("a job's input step, asked as fabric.job.get, on a call with no decision", { agentId: "reviews-service", capability: "fabric.job.get", input: CALL_INPUT, verdict: { id: step.id, askedDigest: step.askedDigest } }, step, "2026-11-15T10:05:00Z", { dispatch: "verified" }),
     d("a journal entry that is no decision-verdict/1", call(), changed((v) => { delete v.policy; }), "2026-11-15T10:05:00Z", mismatch),
     d("a call without a verdict is forwarded as C3.5 says", (({ verdict: _v, ...rest }) => rest)(call()), null, "2026-11-15T10:05:00Z", { dispatch: "forward" }),
     d("an expired allow", call(), allowed, "2026-11-15T10:10:00Z", mismatch),

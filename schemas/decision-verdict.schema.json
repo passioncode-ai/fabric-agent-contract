@@ -54,7 +54,14 @@
           "description": "The tool the call names; the hub matches it with the call's capability (DV-8)."
         },
         "action": {
-          "$ref": "interop-common.schema.json#/$defs/requestKey",
+          "anyOf": [
+            {
+              "$ref": "interop-common.schema.json#/$defs/requestKey"
+            },
+            {
+              "$ref": "common.schema.json#/$defs/capabilityName"
+            }
+          ],
           "description": "The call's decision.action where it carries a decision (the action's id in the callee's actions extension), else its capability (a call under a mandate, the callee's own elicitation, the caller's own act): the hub matches it the same way (DV-8)."
         },
         "effect": {

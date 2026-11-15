@@ -105,7 +105,10 @@ AP-2's table with LV-7, AU-2 and DL-17 inside it) or `{check: "mandate", input}`
 [`mandateCovers`](../../src/mandate.ts) input, MD-3, MD-6, AU-5), the form the verdict's route and grounds name with the
 call it asked about. The verdict's `asked` names that call: its `tier`, `capability` and `action` (the decision's action,
 else the capability), and its `effect`, `context`, `project` and `spendUsd` where the input names them, each equal to the
-input's. An `allow` is consistent only when the reference takes the call, and its route is how the reference
+input's (so a verifier builds the reference input from `asked`: a declared `maxCostUsd` as the input's `spendUsd`, a
+declared `actionEffects` as its `effect`). A job's input step reaches the hub as `fabric.job.get`, so its verdict asks
+about `fabric.job.get` and is checked only with `{check: "action"}`, whose `mandateCapability` carries the job's own
+capability (MJ-1); a mandate reference for a step is refused. An `allow` is consistent only when the reference takes the call, and its route is how the reference
 took it (an accepted approval `approval`; an elicitation or the operator's words in the caller's own session `operator`;
 the operator's words carrying OA-6's `source` `forwarded`; a level command, or a mandate stated `by: level`, `level`; a
 standing mandate `profile`; a task mandate `mandate`; the caller's own act `own-act`). So the check fails an `allow` of a
@@ -184,7 +187,7 @@ dispatch; without it the hub forwards as C3.5 says. An origin sends `verdict` on
 
 The door `decision.verify`, the policy table, the journal's store and retention, the question's presentation and the
 veto check are Fabric's; the pattern, its gold cases and the consumer client are the agents database's. A runner's
-`local` act (a deploy, a merge) reaches no contract callee, so it is outside `decision-verdict/1` in this revision: the
+`local` act (a local deploy, a merge; not a call to a service's relayed action such as SCN-061's `site.deploy`) reaches no contract callee, so it is outside `decision-verdict/1` in this revision: the
 runner acts as OW-1 says (and, on a headless place, as the place's profile and Fabric's floor allow, DEC-0166); a runner
 reading a verdict is a later revision. Single use at the callee (CT-313) and the money reservation (CT-312) are their own
 decisions.

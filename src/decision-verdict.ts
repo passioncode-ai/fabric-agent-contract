@@ -82,7 +82,7 @@ function verdictDocument(value: JsonObject, at = ""): Finding[] {
   }
   const grounds = Array.isArray(value.grounds) ? value.grounds.filter(isObject) : [];
   if (value.verdict === "allow") {
-    const route = typeof value.route === "string" ? ROUTE_GROUNDS[value.route] : undefined;
+    const route = typeof value.route === "string" && Object.hasOwn(ROUTE_GROUNDS, value.route) ? ROUTE_GROUNDS[value.route] : undefined;
     if (route !== undefined && !grounds.some((g) => route.kinds.includes(g.kind as string) && route.grades.includes(g.grade as string))) {
       flag("/grounds", `an allow by route ${String(value.route)} stands on a ${route.kinds.join(" or ")} ground graded ${route.grades.join(" or ")}`);
     }
@@ -154,6 +154,11 @@ function verdictAgainstReference(value: JsonObject): Finding[] {
   const reference = isObject(value.reference) ? value.reference : {};
   const asked = isObject(verdict.asked) ? verdict.asked : {};
   const call = callOfReference(reference);
+  // A job's input step reaches the hub as `fabric.job.get`, while `mandateCovers` reads the job's own capability (MJ-1),
+  // so a step is checked only against `actionDecision`, whose `mandateCapability` carries the job's capability.
+  if (reference.check === "mandate" && asked.capability === "fabric.job.get") {
+    findings.push({ code: "FAC-SEM-179", instancePath: "/reference/check", message: "a job's input step is checked with check: action, which reads it as the hub sees it (fabric.job.get) and the job's capability as mandateCapability" });
+  }
   for (const field of ["tier", "capability", "action", "effect", "context", "project", "spendUsd"]) {
     if (call[field] !== undefined && asked[field] !== call[field]) {
       findings.push({ code: "FAC-SEM-179", instancePath: `/verdict/asked/${field}`, message: `the verdict asked about another call than the reference reads: ${field} ${String(asked[field])}, not ${String(call[field])}` });

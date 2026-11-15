@@ -52,6 +52,7 @@ describe("decision verdicts (DEC-0172)", () => {
     expect(codes("decision-verdict-reference", { verdict: allow, reference: { check: "other" } })).toEqual(["FAC-SEM-179 /verdict/verdict"]);
     expect(codes("decision-verdict-reference", { verdict: allow, reference: "none" })).toEqual(["FAC-SEM-179 /verdict/verdict"]);
     expect(codes("decision-verdict-reference", { verdict: "none" })).toEqual([]);
+    for (const route of ["toString", "constructor", "__proto__"]) expect(() => codes("decision-verdict", { ...allow, route })).not.toThrow();
     expect(checkVerdictDispatch({ call: { verdict: "x" }, journal: allow, now: "2026-11-15T10:05:00Z", hostKey })).toEqual({ ok: false, code: "decision-invalid", data: { detail: "verdict-mismatch" } });
     expect(checkVerdictDispatch({ call: { ...(vectors.dispatches[0] as Json).call }, journal: { ...allow, asked: "none" }, now: "2026-11-15T10:05:00Z", hostKey })).toEqual({ ok: false, code: "decision-invalid", data: { detail: "verdict-mismatch" } });
   });

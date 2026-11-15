@@ -366,7 +366,7 @@ trace id is accepted but its span is recorded `incomplete`.
 ## C3.5 The hub
 
 Fabric's MCP is the only route between agents: an agent reaches another agent
-by calling Fabric's `agent.call {agentId, capability, input, idempotencyKey?, decision?, mandate?}` (and
+by calling Fabric's `agent.call {agentId, capability, input, idempotencyKey?, decision?, mandate?}` (its second revision adds `verdict?`, DEC-0172) (and
 `fabric.job.get/cancel` for the job it returns). Fabric enforces the caller's MCP access binding
 (ADR-0026), mints the callee's credential itself, and journals one span per hop. Credentials
 travel over HTTP only in headers (`Authorization: Bearer <token>`), and over the relay only in a sealed call's

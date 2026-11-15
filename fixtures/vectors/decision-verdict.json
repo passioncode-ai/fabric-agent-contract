@@ -1594,6 +1594,45 @@
       "findings": []
     },
     {
+      "name": "an inherited name as a route",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T10:10:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "personal",
+          "tier": "T1",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "allow",
+        "rule": "AP-2",
+        "reason": "covered",
+        "route": "toString",
+        "machineForm": "hub-dispatch",
+        "grounds": [
+          {
+            "kind": "decision",
+            "ref": "sha256:d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1",
+            "grade": "taken"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        }
+      },
+      "schemaValid": false,
+      "findings": []
+    },
+    {
       "name": "the operator's words on the wire",
       "verdict": {
         "kind": "decision-verdict/1",
@@ -2887,6 +2926,180 @@
       ]
     },
     {
+      "name": "a job's input step under the task's mandate, read as the hub sees it",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:dbd557ad615de25a6df1c19d3c3f3ba4e6952b49b399209108305dbda7351d63",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T10:10:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "fabric.job.get",
+          "action": "fabric.job.get",
+          "effect": "reply",
+          "context": "personal",
+          "tier": "T0",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:11146392167b7165db69ff7fdc5eae0cb6d0073afa0f2f71e156056457e2d0ac",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "allow",
+        "rule": "MD-3",
+        "reason": "covered",
+        "route": "mandate",
+        "machineForm": "hub-dispatch",
+        "grounds": [
+          {
+            "kind": "mandate",
+            "ref": "sha256:a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+            "grade": "taken"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        }
+      },
+      "reference": {
+        "check": "action",
+        "input": {
+          "action": {
+            "id": "choose-variant",
+            "title": "Choose a variant",
+            "tool": "fabric.job.get",
+            "gate": "relayed"
+          },
+          "caller": "agent:claude-code",
+          "now": "2026-10-24T09:30:00Z",
+          "tier": "T0",
+          "self": "example-reviewer",
+          "callerAgent": "example-developer",
+          "effect": "reply",
+          "mandateCapability": "reviews.approve",
+          "mandate": {
+            "kind": "mandate/1",
+            "by": "operator",
+            "task": "answer the reviews of the week",
+            "instruction": "approve the replies to this week's reviews",
+            "at": "2026-10-24T08:00:00Z",
+            "expiresAt": "2026-10-25T08:00:00Z",
+            "scope": {
+              "capabilities": [
+                "reviews.approve"
+              ],
+              "effects": [
+                "reply"
+              ]
+            },
+            "chain": [
+              {
+                "agent": "example-developer",
+                "at": "2026-10-24T08:01:00Z"
+              },
+              {
+                "agent": "example-reviewer",
+                "at": "2026-10-24T08:02:00Z"
+              }
+            ]
+          }
+        }
+      },
+      "findings": []
+    },
+    {
+      "name": "a job's input step checked against mandateCovers, which reads the job's capability",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:0add3f6f57b56b21671f84a8315ccd9e5557e43ba33f390abf9c7cc70ec14fb6",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T10:10:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "fabric.job.get",
+          "action": "fabric.job.get",
+          "effect": "none",
+          "context": "personal",
+          "tier": "T0",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:de78bd8ec516e1f606b39866463d2fa04a3dce5b746869bf2950f988f37e8f4e",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "allow",
+        "rule": "MD-3",
+        "reason": "covered",
+        "route": "mandate",
+        "machineForm": "hub-dispatch",
+        "grounds": [
+          {
+            "kind": "mandate",
+            "ref": "sha256:a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+            "grade": "taken"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        }
+      },
+      "reference": {
+        "check": "mandate",
+        "input": {
+          "mandate": {
+            "kind": "mandate/1",
+            "by": "operator",
+            "task": "research the eSIM market for the pricing page",
+            "instruction": "run the research on eSIM competitors' prices",
+            "at": "2026-10-26T10:00:00Z",
+            "expiresAt": "2026-10-27T10:00:00Z",
+            "scope": {
+              "capabilities": [
+                "research.run",
+                "research.ask",
+                "page.update"
+              ],
+              "effects": [
+                "charge",
+                "draft"
+              ],
+              "projects": [
+                "example-site"
+              ]
+            },
+            "chain": [
+              {
+                "agent": "example-developer",
+                "at": "2026-10-26T10:01:00Z"
+              },
+              {
+                "agent": "example-researcher",
+                "at": "2026-10-26T10:05:00Z"
+              }
+            ]
+          },
+          "tier": "T0",
+          "now": "2026-10-26T12:00:00Z",
+          "self": "example-researcher",
+          "callerAgent": "example-developer",
+          "call": {
+            "capability": "research.run",
+            "effect": "charge",
+            "spendUsd": 12,
+            "project": "example-site"
+          }
+        }
+      },
+      "findings": [
+        "FAC-SEM-179 /reference/check",
+        "FAC-SEM-179 /verdict/asked/capability",
+        "FAC-SEM-179 /verdict/asked/action",
+        "FAC-SEM-179 /verdict/asked/effect",
+        "FAC-SEM-179 /verdict/asked/project",
+        "FAC-SEM-179 /verdict/asked/spendUsd"
+      ]
+    },
+    {
       "name": "an allow that asked about another action than the reference's",
       "verdict": {
         "kind": "decision-verdict/1",
@@ -3135,6 +3348,59 @@
         "route": "own-act",
         "machineForm": "none",
         "grounds": [],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        }
+      },
+      "now": "2026-11-15T10:05:00Z",
+      "answer": {
+        "dispatch": "verified"
+      }
+    },
+    {
+      "name": "a job's input step, asked as fabric.job.get, on a call with no decision",
+      "call": {
+        "agentId": "reviews-service",
+        "capability": "fabric.job.get",
+        "input": {
+          "reviewId": "r-412",
+          "reply": "draft-7"
+        },
+        "verdict": {
+          "id": "sha256:52e48941ee7e6bf35b676917c8e1184d1508b65cadc78771c81a309731704284",
+          "askedDigest": "sha256:3cc67abb837a275f23975acece811df9cf78e68cc407dcba07a390732675b79a"
+        }
+      },
+      "journal": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:52e48941ee7e6bf35b676917c8e1184d1508b65cadc78771c81a309731704284",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T10:10:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "fabric.job.get",
+          "action": "fabric.job.get",
+          "effect": "reply",
+          "context": "personal",
+          "tier": "T1",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:3cc67abb837a275f23975acece811df9cf78e68cc407dcba07a390732675b79a",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "allow",
+        "rule": "MD-3",
+        "reason": "covered",
+        "route": "mandate",
+        "machineForm": "hub-dispatch",
+        "grounds": [
+          {
+            "kind": "mandate",
+            "ref": "sha256:a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+            "grade": "taken"
+          }
+        ],
         "policy": {
           "version": "2026-11-15.1",
           "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"

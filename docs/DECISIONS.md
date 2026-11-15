@@ -12657,7 +12657,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-11-15
 - **Status:** Proposed 2026-11-15 from the design `docs/evidence/plans/2026-11-14-ct302-decision-verdict.md` (CT-302),
   whose rounds 11 and 12 of the blind readings (seam and product) read clean; accepted when the coordinator's blind
-  readings are clean on two consecutive rounds. It answers studio-agent's proposal (board message `1f2cfb98`, thread
+  readings are clean on two consecutive rounds (round 1 folded: `asked.action` read one way by the verifier and the
+  hub, the decision's action else the capability; the reference check ties `asked` to the call its input names; the hub
+  dispatches only a valid `decision-verdict/1`; SCN-046's route `mandate`; SCN-057's local acts have no verdict; round 2
+  folded: a job's input step asks about `fabric.job.get` and is checked with `check: action` only; an inherited route
+  name never throws; `asked.action` takes a capability name; DV-5's keys are action ids). It answers studio-agent's proposal (board message `1f2cfb98`, thread
   `e2b29f77`, 2026-11-13), which relays the operator's word: an automatic verifier of decisions that applies the recorded
   rules and access levels and calls a person in only at a level the rules keep for one. The agents database designed the
   verifier (`fabric-agents-database` `docs/designs/decision-verifier.md` at `1055b55`) and follows this wire (its decision
@@ -12674,7 +12678,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      only make the hub withhold a form.
   2. **DV-2.** `decision-verdict/1`: `id` (`sha256:` of the RFC 8785 form of `{askedDigest, caller, policy, session}`),
      `at` and `expiresAt` (an `allow` at most 15 minutes, a `human` 24 hours, a `deny` 1 hour, `person-denied` 24 hours),
-     `asked` (`callee`, `capability`, `action`, `effect`, `target?`, `context`, `project?`, `tier`, `argsDigest` (an
+     `asked` (`callee`, `capability`, `action` (the call's `decision.action`, else its capability), `effect`, `target?`, `context`, `project?`, `tier`, `argsDigest` (an
      HMAC under the host's own key of the call's input), `actionDigest?`, `spendUsd?`; never the arguments), `askedDigest`,
      `caller` and `session` (pairwise in an organization's context), `verdict`, `rule`, `reason` (a closed code in its
      verdict's group), `level?`, `route` and `machineForm` (with `allow` only), `grounds[]` (graded `verified`, `taken`,
@@ -12687,8 +12691,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      exactly with `own-act`, `caller-approval` exactly with `approval`, `executed-by-holder` only with `level`; a `human`
      asks only named addressees, links only with a step, names a step for `body-gate` and a step only for it or
      `spend-above-limit` with `spend-limit`; a person's denial names their answer, a self-approval AP-5. Against the
-     reference (kind `decision-verdict-reference`, `{verdict, reference}`): an `allow` is one `actionDecision` or
-     `mandateCovers` takes, by the route it took.
+     reference (kind `decision-verdict-reference`, `{verdict, reference}`): an `allow` asked about the call the input
+     names (tier, capability, action, and effect, context, project and spend where named; a job's step only with
+     `check: action`) and is one `actionDecision` or `mandateCovers` takes, by the route it took.
   4. **DV-4.** The host's journal of the operator's words is no new channel: a copy of what AP-3 and OA-3 already accept,
      with no host-only press and no confirmation.
   5. **DV-5.** The authority extension gains optional per-action members keyed by action id: `actionEffects`,

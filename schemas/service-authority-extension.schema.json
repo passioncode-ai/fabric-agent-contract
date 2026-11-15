@@ -58,8 +58,7 @@
       "minProperties": 1,
       "maxProperties": 128,
       "propertyNames": {
-        "type": "string",
-        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$"
+        "$ref": "interop-common.schema.json#/$defs/requestKey"
       },
       "additionalProperties": {
         "enum": [
@@ -82,8 +81,7 @@
       "minProperties": 1,
       "maxProperties": 128,
       "propertyNames": {
-        "type": "string",
-        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$"
+        "$ref": "interop-common.schema.json#/$defs/requestKey"
       },
       "additionalProperties": {
         "type": "array",
@@ -102,8 +100,7 @@
       "minProperties": 1,
       "maxProperties": 128,
       "propertyNames": {
-        "type": "string",
-        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$"
+        "$ref": "interop-common.schema.json#/$defs/requestKey"
       },
       "additionalProperties": {
         "type": "number",
@@ -116,8 +113,7 @@
       "minProperties": 1,
       "maxProperties": 128,
       "propertyNames": {
-        "type": "string",
-        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$"
+        "$ref": "interop-common.schema.json#/$defs/requestKey"
       },
       "additionalProperties": {
         "type": "string",
@@ -130,8 +126,7 @@
       "minProperties": 1,
       "maxProperties": 128,
       "propertyNames": {
-        "type": "string",
-        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$"
+        "$ref": "interop-common.schema.json#/$defs/requestKey"
       },
       "additionalProperties": {
         "type": "object"
