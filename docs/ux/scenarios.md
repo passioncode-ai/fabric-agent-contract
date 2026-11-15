@@ -317,16 +317,16 @@ independent agent author and P-02 project operator.
 - **Feature:** telemetry
 - **Traces:** ST-044, FLW-35 (JTBD-11, JRN-10/#1)
 - **Entry point:** the organization receiver's summary page
-- **Preconditions:** the organization's notice covers `turn` and `account.inventory` under its purposes (the first organization server chose `activity-logs` and `usage-and-cost`, DEC-0171's Status; the contract names no purpose for them); seven members' collectors sent turns this week; one member works alone on a project; the machines hold two provider plans of the organization; the receiver's `minPopulation` is 5
+- **Preconditions:** the organization's notice covers `turn` and `account.inventory` under its purposes (the first organization server chose `activity-logs` and `usage-and-cost`, DEC-0171's Compatibility; the contract names no purpose for them); seven members' collectors sent turns this week; one member works alone on a project; the machines hold two provider plans of the organization; the receiver's `minPopulation` is 5
 - **Steps:**
   1. Administrator opens the summary for the week -> the receiver serves `activity-summary/2` for each day.
   2. The turn cells list each agent, workflow and project with its turns, buckets and model and tool time -> the administrator sees which agent and workflow waits longest, by bucket.
   3. The lone member's project has a population of 1 -> its turns are folded into the day's other cell or suppressed and counted in `suppressedCells`; no cell names the project with that member's turns alone.
   4. The inventory cells list each provider, plan and billing with machines and accounts -> the administrator sees what the organization pays for; no personal or unknown account appears (SI-2).
 - **Expected result:** turn time and accounts are read only as cells at or above `minPopulation`, never per person, machine or session; a partner organization is never served them (DEC-0171 RT-4, SI-5); a member's access log lists none of these reads, because a cell carries no person (SCN-010).
-- **Alt paths:** the summary's lists are empty, or it is `/1` -> the page says no turn or inventory cells are published for the range; no cell reaches the floor on a day -> the empty state says so and shows `suppressedCells`.
+- **Alt paths:** the summary's lists are empty, or it is `/1` -> the page says no turn or inventory cells are published for the range and shows `suppressedCells`, without a reason (too few people and a receiver that does not read these kinds look the same).
 - **UI elements:** day or range, turn cells, inventory cells, other cell, suppressed count.
-- **States covered:** none published, empty, success
+- **States covered:** none published, success
 - **Errors & recovery:** a cell below the floor, buckets that do not add up to the turns or a population above the turns are refused by `FAC-SEM-040`; the receiver republishes the day.
 - **Status:** draft
 - **Coverage:** `activity-summary-2.schema.json`, fixture `positive/activity-summary-2.json`, vectors `activity-turn.json`

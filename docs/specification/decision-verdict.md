@@ -124,7 +124,8 @@ the verifier's own and is checked as a document.
 
 A record the verifier's journal keeps of the operator's words is a copy of what the contract already accepts, never a
 new source: in the agent's own session it is the words the agent heard (`taken`), and across sessions it grounds an act
-exactly as an OA-2 relay does when it carries OA-2's four parts from OA-3's provenance (`forwarded`, accepted without a
+exactly as an OA-2 relay does when it carries OA-2's four parts from OA-3's provenance (a decision `forwarded`, a
+relayed task mandate `taken` under route `mandate`; accepted without a
 second approval, DEC-0126). AP-1 and AP-3 are unchanged: no host-only press is added, and no record needs the person to
 confirm it (OW-2). A record read back through the door is a tool's output, which OA-3 calls data: it grounds another
 session only when the same words also arrived through OA-3's provenance. A record the operator withdrew, or whose words
