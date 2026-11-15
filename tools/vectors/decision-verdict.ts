@@ -33,6 +33,14 @@ const args = (input: unknown) => `hmac-sha256:${createHmac("sha256", hostKey).up
 const POLICY = { version: "2026-11-15.1", digest: `sha256:${"5e".repeat(32)}` };
 const CALL_INPUT = { reviewId: "r-412", reply: "draft-7" };
 
+/** A verdict's digests derived again over its members (after `asked` changed). */
+function rederive(v: Json): Json {
+  const out = clone(v);
+  out.askedDigest = sha(rfc8785(out.asked));
+  out.id = sha(rfc8785({ askedDigest: out.askedDigest, caller: out.caller, policy: out.policy, session: out.session }));
+  return out;
+}
+
 /** One verdict, its digests derived; `patch` replaces members after the derivation unless `derive` is asked again. */
 function verdict(parts: Json, asked: Json = {}): Json {
   const a = { callee: "reviews-service", capability: "reviews.approve", action: "approve-reply", effect: "publish", context: "personal", tier: "T1", argsDigest: args(CALL_INPUT), ...asked };
@@ -57,7 +65,7 @@ function documents(): Json[] {
     ok("an allow by an administrator's bound level decision", verdict({ route: "level", rule: "LV-7", level: { required: "admin", satisfiedBy: "admin" }, grounds: [{ kind: "level-decision", ref: `sha256:${"a1".repeat(32)}`, grade: "verified" }] }, { context: "org:org-a", tier: "T2" })),
     ok("an allow a level holder's own agent executes", verdict({ route: "level", machineForm: "executed-by-holder", rule: "LV-7", grounds: [{ kind: "level-decision", ref: `sha256:${"a2".repeat(32)}`, grade: "verified" }] }, { context: "org:org-a" })),
     ok("an allow under the caller's approval/1, which the hub does not hold back (DV-8)", verdict({ route: "approval", machineForm: "caller-approval", rule: "DL-17", grounds: [{ kind: "approval", ref: `sha256:${"a3".repeat(32)}`, grade: "verified" }] }, { tier: "T2" })),
-    ok("an allow of the caller's own act, with a budget read and not reserved", verdict({ route: "own-act", machineForm: "none", grounds: [{ kind: "budget", ref: "l1:example-site" }] }, { effect: "none" })),
+    ok("an allow of the caller's own act, with a budget read and not reserved", verdict({ route: "own-act", machineForm: "none", grounds: [{ kind: "budget", ref: "l1:example-site" }] }, { effect: "none", action: "reviews.approve" })),
     ok("an allow by a bound standing mandate", verdict({ route: "profile", rule: "AU-1", grounds: [{ kind: "standing", ref: `sha256:${"a4".repeat(32)}`, grade: "verified" }] }, { effect: "deploy", tier: "T2" })),
     ok("advice with no addressee: a policy row against the operator's word (row-advised)", human("row-advised", { addressees: [] }, { rule: "row:no-friday-publish", grounds: [{ kind: "decision", ref: `sha256:${"d1".repeat(32)}`, grade: "taken" }] })),
     ok("a question to the operator: no form the reference takes (not-covered)", human("not-covered", { addressees: ["operator"], questionId: "q-77" })),
@@ -108,7 +116,21 @@ function references(): Json[] {
   const relayed = action("actions.json", "cases", "relayed from T1 with the operator's instruction");
   relayed.input.decision.source = { project: "example-analyst", thread: "example-thread-3" };
   const level = verdict({ route: "level", rule: "LV-7", grounds: [{ kind: "level-decision", ref: `sha256:${"a1".repeat(32)}`, grade: "verified" }] }, { context: "org:org-a", tier: "T2" });
-  const c = (name: string, v: Json, reference: Json, findings: string[]) => ({ name, verdict: v, reference, findings });
+  /** The call the reference reads, as a verifier writes it in `asked` (DV-2: the decision's action, else the capability). */
+  const askedFrom = (reference: Json): Json => {
+    const input = reference.input;
+    if (reference.check === "mandate") {
+      const call = input.call;
+      return { tier: input.tier, capability: call.capability, action: call.capability, effect: call.effect, ...(call.project ? { project: call.project } : {}), ...(call.spendUsd !== undefined ? { spendUsd: call.spendUsd } : {}) };
+    }
+    const action = input.decision?.action ?? input.action.tool;
+    return { tier: input.tier, capability: input.action.tool, action, ...(input.effect ? { effect: input.effect } : {}), ...(input.context ? { context: input.context } : {}), ...(input.project ? { project: input.project } : {}) };
+  };
+  /** The verdict re-derived over the reference's call, unless the case keeps its own `asked` on purpose. */
+  const c = (name: string, v: Json, reference: Json, findings: string[], keepAsked = false) => {
+    const verdictFor = keepAsked ? v : rederive({ ...v, asked: { ...v.asked, ...askedFrom(reference) } });
+    return { name, verdict: verdictFor, reference, findings };
+  };
   return [
     c("the operator's word from T1, which the reference takes", verdict({}), action("actions.json", "cases", "relayed from T1 with the operator's instruction"), []),
     c("the service's own accepted elicitation, the operator's word", verdict({}), action("actions.json", "cases", "relayed from T0 after the service's own elicitation was accepted"), []),
@@ -125,19 +147,25 @@ function references(): Json[] {
     c("a task mandate that covers the research", verdict({ route: "mandate", rule: "MD-3", grounds: [{ kind: "mandate", ref: `sha256:${"a5".repeat(32)}`, grade: "taken" }] }, { action: "research.run", capability: "research.run", effect: "none", tier: "T0" }), mandate("the operator's words with no amount: the paid research is covered, the money limits decide its spend"), []),
     c("a policy change under a mandate, which no mandate covers (AP-5)", verdict({ route: "mandate", rule: "MD-3", grounds: [{ kind: "mandate", ref: `sha256:${"a5".repeat(32)}`, grade: "taken" }] }, { action: "page.update", capability: "page.update", effect: "change-policy", tier: "T0" }), mandate("a policy change, which no mandate covers (AP-5)"), ["FAC-SEM-179 /verdict/verdict"]),
     c("a human verdict is the verifier's own: advice beside a form the reference takes", human("row-advised", { addressees: [] }, { rule: "row:no-friday-publish" }), action("actions.json", "cases", "relayed from T1 with the operator's instruction"), []),
-    c("a denial is the verifier's own", deny("forbidden", "row:never-delete-prod"), action("actions.json", "cases", "relayed from T1 with the operator's instruction"), [])
+    c("a denial is the verifier's own", deny("forbidden", "row:never-delete-prod"), action("actions.json", "cases", "relayed from T1 with the operator's instruction"), []),
+    c("an allow that asked about a T2 call, checked against the T1 call the reference reads", verdict({}, { tier: "T2" }), action("actions.json", "cases", "relayed from T1 with the operator's instruction"), ["FAC-SEM-179 /verdict/asked/tier"], true),
+    c("an allow that asked about another action than the reference's", verdict({}, { action: "delete-reply" }), action("actions.json", "cases", "relayed from T1 with the operator's instruction"), ["FAC-SEM-179 /verdict/asked/action"], true),
+    c("an allow that asked about less spend than the mandate's call", rederive({ ...verdict({ route: "mandate", rule: "MD-3", grounds: [{ kind: "mandate", ref: `sha256:${"a5".repeat(32)}`, grade: "taken" }] }), asked: { ...verdict({}).asked, ...{ tier: "T0", capability: "research.run", action: "research.run", effect: "charge", project: "example-site", spendUsd: 1 } } }), mandate("the operator's words with no amount: the paid research is covered, the money limits decide its spend"), ["FAC-SEM-179 /verdict/asked/spendUsd"], true)
   ];
 }
 
 /** DV-8: the hub's check of a call that carries a verdict's receipt. */
 function dispatches(): Json[] {
   const allowed = verdict({}, { callee: "reviews-service", capability: "reviews.approve", action: "approve-reply" });
+  const ownAct = verdict({ route: "own-act", machineForm: "none", grounds: [] }, { callee: "reviews-service", capability: "reviews.approve", action: "reviews.approve", effect: "none" });
   const call = (extra: Json = {}): Json => ({ agentId: "reviews-service", capability: "reviews.approve", input: CALL_INPUT, decision: { by: "operator", via: "relayed-instruction", action: "approve-reply", instruction: "approve the reply to the review from Anna", at: "2026-11-15T09:59:00Z" }, verdict: { id: allowed.id, askedDigest: allowed.askedDigest }, ...extra });
   const mismatch = { ok: false, code: "decision-invalid", data: { detail: "verdict-mismatch" } };
   const d = (name: string, c: Json, journal: Json | null, now: string, answer: Json) => ({ name, call: c, journal, now, answer });
   const changed = (change: (v: Json) => void) => { const v = clone(allowed); change(v); return v; };
   return [
     d("a current allow that matches the call", call(), allowed, "2026-11-15T10:05:00Z", { dispatch: "verified" }),
+    d("an own act's allow, asked by its capability, on a call with no decision", (({ decision: _d, ...rest }) => ({ ...rest, verdict: { id: ownAct.id, askedDigest: ownAct.askedDigest } }))(call()), ownAct, "2026-11-15T10:05:00Z", { dispatch: "verified" }),
+    d("a journal entry that is no decision-verdict/1", call(), changed((v) => { delete v.policy; }), "2026-11-15T10:05:00Z", mismatch),
     d("a call without a verdict is forwarded as C3.5 says", (({ verdict: _v, ...rest }) => rest)(call()), null, "2026-11-15T10:05:00Z", { dispatch: "forward" }),
     d("an expired allow", call(), allowed, "2026-11-15T10:10:00Z", mismatch),
     d("before the verdict was given", call(), allowed, "2026-11-15T09:59:59Z", mismatch),

@@ -39,7 +39,7 @@ AU-2 decide exactly as before.
 | `kind` | `decision-verdict/1` |
 | `id` | `sha256:` of the RFC 8785 canonical JSON of `{askedDigest, caller, policy, session}` ([`verdictId`](../../src/decision-verdict.ts)): every reader recomputes it, and the same act asked again in one session under one policy has one id; Fabric's journal keeps each answer to it as a new version, so a repeat AP-2 allows within its 24 hours is a new version, never a `loop` |
 | `at`, `expiresAt` | RFC 3339; an `allow` at most the earliest of its grounds' windows and never more than 15 minutes after `at`; a `human` at most 24 hours; a `deny` at most 1 hour, `person-denied` at most 24 hours |
-| `asked` | `{callee, capability, action, effect, target?, context, project?, tier, argsDigest, actionDigest?, spendUsd?}`: the deciding values and digests, never the arguments themselves. `action` is the action's id in the callee's actions extension, or for a call under a mandate with no decision its capability; `effect` the callee's declared `actionEffects` (DV-5), else the capability's DL-3 effect as a floor; `argsDigest` an HMAC-SHA-256 under the host's own key of the RFC 8785 canonical JSON of the call's `input` ([`argsDigest`](../../src/decision-verdict.ts)), and a `target` that names a person carried the same way, never a plain hash a reader could reverse by guessing; `spendUsd` the action's declared `maxCostUsd` where it declares one, else the call's own estimate (DV-7) |
+| `asked` | `{callee, capability, action, effect, target?, context, project?, tier, argsDigest, actionDigest?, spendUsd?}`: the deciding values and digests, never the arguments themselves. `action` is the call's `decision.action` where it carries a decision (the action's id in the callee's actions extension), else its capability (a call under a mandate, the callee's own elicitation, the caller's own act under `gate: none`), the same reading the hub's check makes (DV-8); `effect` the callee's declared `actionEffects` (DV-5), else the capability's DL-3 effect as a floor; `argsDigest` an HMAC-SHA-256 under the host's own key of the RFC 8785 canonical JSON of the call's `input` ([`argsDigest`](../../src/decision-verdict.ts)), and a `target` that names a person carried the same way, never a plain hash a reader could reverse by guessing; `spendUsd` the action's declared `maxCostUsd` where it declares one, else the call's own estimate (DV-7) |
 | `askedDigest` | `sha256:` of `asked`'s RFC 8785 canonical JSON ([`askedDigest`](../../src/decision-verdict.ts)) |
 | `caller`, `session` | the principal and the session the host authenticated; in an organization's context the host's pairwise ids for that organization, as LV-9's `approver` is, never a person's address |
 | `verdict` | `allow`, `human` or `deny` |
@@ -68,7 +68,8 @@ that only for a reason it names: evidence it cannot read (`evidence-unknown`, `e
 hold (`ground-invalid`, `outside-window`, `voided`), its own checks (`vetoed`, `loop`), a `kept` act, money that would
 cross a limit (`spend-limit`, DV-7), or a policy row's `deny` against a form the reference takes (`row-advised`). Where
 the caller holds a form the reference takes (the operator's word, a mandate in force, a relay OA-3 accepts, a bound
-profile or level form, an accepted `approval/1`), none of these reasons, save `spend-limit`, puts a question to a person:
+profile or level form, an accepted `approval/1`), or the act is its own under `gate: none`, none of these reasons, save
+`spend-limit`, puts a question to a person:
 such a `human` carries no addressee and no `questionId`, and the caller goes on as OW-3 says, with one message that names
 the concern (OW-1, OA-1, OW-4's closed list: the operator is not asked again for an act his word or a mandate already
 decides); a policy row's `deny` never stands against such a form either: the verdict is then `human` (`row-advised`)
@@ -102,7 +103,9 @@ Against the contract it checks by construction rather than by restating its rule
 `{verdict, reference}`): `reference` is `{check: "action", input}` (an [`actionDecision`](../../src/actions.ts) input,
 AP-2's table with LV-7, AU-2 and DL-17 inside it) or `{check: "mandate", input}` (a
 [`mandateCovers`](../../src/mandate.ts) input, MD-3, MD-6, AU-5), the form the verdict's route and grounds name with the
-call it asked about. An `allow` is consistent only when the reference takes the call, and its route is how the reference
+call it asked about. The verdict's `asked` names that call: its `tier`, `capability` and `action` (the decision's action,
+else the capability), and its `effect`, `context`, `project` and `spendUsd` where the input names them, each equal to the
+input's. An `allow` is consistent only when the reference takes the call, and its route is how the reference
 took it (an accepted approval `approval`; an elicitation or the operator's words in the caller's own session `operator`;
 the operator's words carrying OA-6's `source` `forwarded`; a level command, or a mandate stated `by: level`, `level`; a
 standing mandate `profile`; a task mandate `mandate`; the caller's own act `own-act`). So the check fails an `allow` of a
@@ -165,8 +168,8 @@ callee's grant check adopts is CT-312, and until it lands a verifier enforces no
 
 `interop-agent-call-2` ([schema](../../schemas/interop-agent-call-2.schema.json)) is `agent.call`'s arguments with one
 optional member more, `verdict` `{id, askedDigest}`, which a client passes when it asks the hub to dispatch an act a
-verdict allowed. The hub reads the verdict by `id` from its journal and dispatches only while it is a current `allow`
-(`at` ≤ now < `expiresAt`) whose `id` and `askedDigest` are the receipt's, whose own digests derive, and whose `asked`
+verdict allowed. The hub reads the verdict by `id` from its journal and dispatches only while it is a current `allow`, a valid `decision-verdict/1`
+(`at` ≤ now < `expiresAt`), whose `id` and `askedDigest` are the receipt's, whose own digests derive, and whose `asked`
 names the call's `agentId` (`callee`), `capability` and action (the call's `decision.action`, else its capability) and
 whose `argsDigest` is the call's `input` under the host's key; it refuses anything else `decision-invalid` with detail
 `verdict-mismatch`, the one DL-19 detail the hub answers itself
@@ -190,7 +193,7 @@ decisions.
 
 | Code | Kind | Rule |
 |---|---|---|
-| <a id="fac-sem-179"></a>`FAC-SEM-179` | `decision-verdict`, `decision-verdict-reference` | a verdict's `askedDigest` and `id` are their derivations; it expires after it is given and within its verdict's bound (an `allow` 15 minutes, a `human` 24 hours, a `deny` 1 hour, `person-denied` 24 hours); an `allow` stands on a ground of its route graded as the route needs, carries no ground graded `data`, and goes by `none` exactly with `own-act`, `caller-approval` exactly with `approval` and `executed-by-holder` only with `level`; a `human` asks only addressees it names, links only with a step, names a step for `body-gate` and a step only for it or `spend-above-limit` with `spend-limit`; a person's denial names their answer and a self-approval AP-5; against the reference, an `allow` is one `actionDecision` or `mandateCovers` takes, by the route it took (DEC-0172 DV-2, DV-3) |
+| <a id="fac-sem-179"></a>`FAC-SEM-179` | `decision-verdict`, `decision-verdict-reference` | a verdict's `askedDigest` and `id` are their derivations; it expires after it is given and within its verdict's bound (an `allow` 15 minutes, a `human` 24 hours, a `deny` 1 hour, `person-denied` 24 hours); an `allow` stands on a ground of its route graded as the route needs, carries no ground graded `data`, and goes by `none` exactly with `own-act`, `caller-approval` exactly with `approval` and `executed-by-holder` only with `level`; a `human` asks only addressees it names, links only with a step, names a step for `body-gate` and a step only for it or `spend-above-limit` with `spend-limit`; a person's denial names their answer and a self-approval AP-5; against the reference, an `allow` asked about the call the reference input names (its tier, capability and action, and its effect, context, project and spend where named) and is one `actionDecision` or `mandateCovers` takes, by the route it took (DEC-0172 DV-2, DV-3) |
 
 `decision-verdict-reference` checks `{verdict, reference}`: `reference` is `{check: "action" | "mandate", input}`.
 

@@ -4,6 +4,8 @@ import { rfc8785 } from "./canonical.js";
 import { type Finding, type JsonObject, isObject } from "./findings.js";
 import { mandateCovers } from "./mandate.js";
 import { strictTime } from "./rfc3339.js";
+import { createValidatorSync } from "./validator.js";
+import { SCHEMA_PREFIX } from "./contract.js";
 
 // #region decision-verdict — docs: docs/specification/decision-verdict.md
 /**
@@ -122,16 +124,41 @@ function routesOf(recordAs: unknown): string[] {
 }
 
 /**
+ * What the reference input says of the call a verdict asked about (DV-3): the tier, the capability, the action (the
+ * decision's action where the call carries one, else the capability, DV-2), and the effect, context, project and spend
+ * where the input carries them.
+ */
+function callOfReference(reference: JsonObject): JsonObject {
+  const input = isObject(reference.input) ? reference.input : {};
+  if (reference.check === "mandate") {
+    const call = isObject(input.call) ? input.call : {};
+    return { tier: input.tier, capability: call.capability, action: call.capability, effect: call.effect, context: call.context, project: call.project, spendUsd: call.spendUsd };
+  }
+  const declared = isObject(input.action) ? input.action : {};
+  const decided = isObject(input.decision) && typeof input.decision.action === "string" ? input.decision.action : undefined;
+  return { tier: input.tier, capability: declared.tool, action: decided ?? declared.tool, effect: input.effect, context: input.context, project: input.project, spendUsd: input.spendUsd };
+}
+
+/**
  * FAC-SEM-179 against the contract (DV-3, by construction): `{verdict, reference}`, `reference` being `{check: "action",
  * input}` (an `actionDecision` input) or `{check: "mandate", input}` (a `mandateCovers` input), the form the verdict's
- * route and grounds name with the call it asked about. An `allow` is consistent only when the reference takes the call,
- * and its route is how the reference took it; a `human` or a `deny` is the verifier's own and checked as a document.
+ * route and grounds name with the call it asked about. The verdict's `asked` is that call (its tier, capability and
+ * action, and its effect, context, project and spend where the input names them); an `allow` is consistent only when the
+ * reference takes the call, and its route is how the reference took it; a `human` or a `deny` is the verifier's own and
+ * checked as a document.
  */
 function verdictAgainstReference(value: JsonObject): Finding[] {
   const verdict = isObject(value.verdict) ? value.verdict : {};
   const findings = verdictDocument(verdict, "/verdict");
   if (verdict.verdict !== "allow") return findings;
   const reference = isObject(value.reference) ? value.reference : {};
+  const asked = isObject(verdict.asked) ? verdict.asked : {};
+  const call = callOfReference(reference);
+  for (const field of ["tier", "capability", "action", "effect", "context", "project", "spendUsd"]) {
+    if (call[field] !== undefined && asked[field] !== call[field]) {
+      findings.push({ code: "FAC-SEM-179", instancePath: `/verdict/asked/${field}`, message: `the verdict asked about another call than the reference reads: ${field} ${String(asked[field])}, not ${String(call[field])}` });
+    }
+  }
   const flag = (message: string) => findings.push({ code: "FAC-SEM-179", instancePath: "/verdict/verdict", message });
   let answer: unknown;
   try {
@@ -147,6 +174,8 @@ function verdictAgainstReference(value: JsonObject): Finding[] {
   if (!routes.includes(verdict.route as string)) flag(`the reference took the call by route ${routes.join(" or ") || "none"}, not ${String(verdict.route)}`);
   return findings;
 }
+
+let verdictShape: ((value: unknown) => boolean) | undefined;
 
 /** A hub's answer to a call that carries a verdict's receipt (DV-8). */
 export type VerdictDispatch =
@@ -168,6 +197,9 @@ export function checkVerdictDispatch(input: { call: unknown; journal: unknown; n
   if (receipt === undefined) return { dispatch: "forward" };
   const verdict = input.journal;
   if (!isObject(receipt) || !isObject(verdict) || !isObject(verdict.asked)) return mismatch;
+  // The journal is the hub's own store, but a record that is not a decision-verdict/1 never dispatches.
+  verdictShape ??= createValidatorSync().getSchema(`${SCHEMA_PREFIX}schemas/decision-verdict.schema.json`) ?? undefined;
+  if (verdictShape === undefined || verdictShape(verdict) !== true) return mismatch;
   if (verdict.verdict !== "allow" || verdict.id !== receipt.id || verdict.askedDigest !== receipt.askedDigest) return mismatch;
   if (verdictDocument(verdict).length > 0) return mismatch;
   const clock = strictTime(input.now);

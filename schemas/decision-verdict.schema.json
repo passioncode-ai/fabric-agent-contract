@@ -55,7 +55,7 @@
         },
         "action": {
           "$ref": "interop-common.schema.json#/$defs/requestKey",
-          "description": "The action's id in the callee's actions extension; for a call under a mandate with no decision, its capability."
+          "description": "The call's decision.action where it carries a decision (the action's id in the callee's actions extension), else its capability (a call under a mandate, the callee's own elicitation, the caller's own act): the hub matches it the same way (DV-8)."
         },
         "effect": {
           "enum": [
