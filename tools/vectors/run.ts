@@ -22,6 +22,7 @@ import * as commsHold from "./comms-hold.js";
 import * as connections from "./connections.js";
 import * as contextRoute from "./context-route.js";
 import * as credentialEnvelope from "./credential-envelope.js";
+import * as decisionVerdict from "./decision-verdict.js";
 import * as enrollToken from "./enroll-token.js";
 import * as entitlement from "./entitlement.js";
 import * as orgInstance from "./org-instance.js";
@@ -63,6 +64,7 @@ export const GENERATORS: readonly Generator[] = [
   { source: "connections.ts", build: one(connections.VECTOR_FILE, connections.buildConnectionsVectors) },
   { source: "context-route.ts", build: one(contextRoute.VECTOR_FILE, contextRoute.buildContextRouteVectors) },
   { source: "credential-envelope.ts", build: one(credentialEnvelope.VECTOR_FILE, credentialEnvelope.buildCredentialVectors) },
+  { source: "decision-verdict.ts", build: one(decisionVerdict.VECTOR_FILE, decisionVerdict.buildDecisionVerdictVectors) },
   { source: "enroll-token.ts", build: one(enrollToken.VECTOR_FILE, enrollToken.buildEnrollTokenVectors) },
   { source: "entitlement.ts", build: one(entitlement.VECTOR_FILE, entitlement.buildEntitlementVectors) },
   { source: "levels.ts", build: one(levels.VECTOR_FILE, levels.buildLevelsVectors) },

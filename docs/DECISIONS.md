@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0172` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0173` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -12794,3 +12794,94 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Source:** the design above; the first organization server's board message `356b6aae` (thread `1efdc2e1`) and the
   contract's answer `6ddf439d`; DEC-0030, DEC-0052, DEC-0068, DEC-0082, DEC-0090, DEC-0157, DEC-0164. DEC-0171 and
   `FAC-SEM-178` were reserved by git CAS (`agent_sync.py reserve`, key `ct318-turn-inventory`).
+
+### DEC-0172: the decision verdict `decision-verdict/1`, a receipt a decision verifier writes and a hub checks
+
+- **Date:** 2026-11-15
+- **Status:** Accepted 2026-11-15, merged to main: rounds 5 and 6 (at `1ecd626a`) of the blind readings clean on all
+  three tiers, read under the finish-line rule; their risks are CT-323. Proposed 2026-11-15 from the design
+  `docs/evidence/plans/2026-11-14-ct302-decision-verdict.md` (CT-302),
+  whose rounds 11 and 12 of the blind readings (seam and product) read clean; accepted when the coordinator's blind
+  readings are clean on two consecutive rounds (round 1 folded: `asked.action` read one way by the verifier and the
+  hub, the decision's action else the capability; the reference check ties `asked` to the call its input names; the hub
+  dispatches only a valid `decision-verdict/1`; SCN-046's route `mandate`; SCN-057's local acts have no verdict; round 2
+  folded: a job's input step asks about `fabric.job.get` and is checked with `check: action` only; an inherited route
+  name never throws; `asked.action` takes a capability name; DV-5's keys are action ids; round 4 folded: a job's input
+  step carries no receipt, since the hub's `fabric.job.get` arguments are closed, so its verdict is advice in this
+  revision; rule 3's request to the owner and administrators is vectored in an organization's context, and its personal
+  twin to the operator). It answers studio-agent's proposal (board message `1f2cfb98`, thread
+  `e2b29f77`, 2026-11-13), which relays the operator's word: an automatic verifier of decisions that applies the recorded
+  rules and access levels and calls a person in only at a level the rules keep for one. The agents database designed the
+  verifier (`fabric-agents-database` `docs/designs/decision-verifier.md` at `1055b55`) and follows this wire (its decision
+  D-45); Fabric owns the door `decision.verify` and its journal (spec due 2026-11-17). One new record, its rule code
+  `FAC-SEM-179`, the authority extension's optional per-action members, and a second revision of `agent.call`'s
+  arguments gated by `decision-verdict/1`; DEC-0162's levels and DEC-0166's place profile are read and not edited.
+- **Context:** the contract decides a `relayed` act by the operator's decision, an elicitation, an `approval/1`, a
+  mandate, a level form or a place's profile (AP-2, LV-7, AU-2, MD-3), with `actionDecision` and `mandateCovers` as the
+  reference; it had no record of what a verifier concluded about one act, and why, that every party reads the same way.
+- **Decision:** [decision verdict](specification/decision-verdict.md).
+  1. **DV-1.** A verdict is a receipt, never an authority: a callee never takes it as a decision; an `allow` names the
+     route by which a form the callee already accepts reaches it (AP-3's four sources of the operator's words, a task
+     mandate, a level form, a place's standing mandate, an `approval/1`, the caller's own act), so a wrong verifier can
+     only make the hub withhold a form.
+  2. **DV-2.** `decision-verdict/1`: `id` (`sha256:` of the RFC 8785 form of `{askedDigest, caller, policy, session}`),
+     `at` and `expiresAt` (an `allow` at most 15 minutes, a `human` 24 hours, a `deny` 1 hour, `person-denied` 24 hours),
+     `asked` (`callee`, `capability`, `action` (the call's `decision.action`, else its capability), `effect`, `target?`, `context`, `project?`, `tier`, `argsDigest` (an
+     HMAC under the host's own key of the call's input), `actionDigest?`, `spendUsd?`; never the arguments), `askedDigest`,
+     `caller` and `session` (pairwise in an organization's context), `verdict`, `rule`, `reason` (a closed code in its
+     verdict's group), `level?`, `route` and `machineForm` (with `allow` only), `grounds[]` (graded `verified`, `taken`,
+     `forwarded` or `data`, a grant, budget or check ungraded and never an `allow`'s ground; no entitlement), `policy`
+     and `human` (with `human` only: addressees by host id, a question, an AP-4 step and its link). No operator's
+     `instruction` or `source` on the wire. A `human` asks no one where the caller holds a form the reference takes, save
+     `spend-limit`.
+  3. **DV-3, `FAC-SEM-179`.** On the document (kind `decision-verdict`): the digests derive; the lifetime bounds; an
+     `allow` stands on a ground of its route graded as the route needs, carries no `data` ground, and goes by `none`
+     exactly with `own-act`, `caller-approval` exactly with `approval`, `executed-by-holder` only with `level`; a `human`
+     asks only named addressees, links only with a step, names a step for `body-gate` and a step only for it or
+     `spend-above-limit` with `spend-limit`; a person's denial names their answer, a self-approval AP-5. Against the
+     reference (kind `decision-verdict-reference`, `{verdict, reference}`): an `allow` asked about the call the input
+     names (tier, capability, action, and effect, context, project and spend where named; a job's step only with
+     `check: action`) and is one `actionDecision` or `mandateCovers` takes, by the route it took.
+  4. **DV-4.** The host's journal of the operator's words is no new channel: a copy of what AP-3 and OA-3 already accept,
+     with no host-only press and no confirmation.
+  5. **DV-5.** The authority extension gains optional per-action members keyed by action id: `actionEffects`,
+     `decidingArgs`, `maxCostUsd`, `targetArg`, `actionObject`.
+  6. **DV-6.** Single use at the callee stays CT-313; nothing here amends AP-2, MD-3, LV-4, LV-6, AU-3, DL-26 or C3.5
+     for it.
+  7. **DV-7.** Money is read, not reserved: an amount over L0, L1 or a key's ceiling is `human` (`spend-limit`) sent as
+     AP-4's `spend-above-limit` step (to the owner and administrators for an organization's L1 and keys, to that
+     estate's operator for a member's own L0 and keys, the link once the callee's refusal gives it), one over
+     `autoApproveUsd` as rule 3's one durable request; the reservation is CT-312.
+  8. **DV-8.** `interop-agent-call-2` adds `verdict` `{id, askedDigest}`; the hub dispatches such a call only while
+     `checkVerdictDispatch` answers `verified`, refuses anything else `decision-invalid` `verdict-mismatch` (DL-19's one
+     hub detail; the agent goes back to the verifier, never to the operator, FLW-29), drops `verdict` before it forwards
+     or seals the call (the sealed call keeps the first revision), and forwards a call without it as C3.5 says. An origin
+     sends `verdict` only to a hub whose `protocols` list `decision-verdict/1`. A job's input step answered through the
+     hub's own `fabric.job.get` carries no receipt (its arguments stay closed), so a step's verdict is advice in this
+     revision and the hub never withholds a step for one.
+- **Why:** a receipt keeps a wrong verifier from minting a form the rules refuse; checking an `allow` by construction
+  against the reference keeps the verifier and the contract from drifting apart; keeping arguments, the operator's words
+  and persons' addresses off the record keeps the journal's copies harmless.
+- **Alternatives considered:** a verdict as a new decision form (refused: DV-1); a host-only press to confirm the
+  operator's words (refused: OW-2, the operator presses nothing); the operation in the id (refused: CT-313); a hub-side
+  reservation (CT-312). Where the decision departs from the design: `asked.capability` added, so the hub matches the tool
+  the call names (the design matched the action only); `spendUsd` named the declared `maxCostUsd` where declared (a worst
+  case), else the call's estimate; `caller` and `session` pairwise in an organization's context; `level` optional; an
+  `allow`'s route and its grounds, and its machine form, checked against each other; no entitlement among the grounds.
+- **Compatibility:** additive. A callee reads nothing new. A hub that does not list `decision-verdict/1` never receives
+  `verdict` and forwards as before. The adapter kits' hand-kept `PROTOCOL_REVISIONS` gain `decision-verdict` `['1']` at
+  their next repin. Owed: Fabric's door and hub (the spec of 2026-11-17 cites this page's names; `checkVerdictDispatch`
+  is the hub's check), the agents database's client (D-45), a board message to both listing the departures, and to
+  studio-agent that the receipt carries no operator's words and that this revision serves neither local acts nor another
+  session's journal as a ground (CT-315).
+- **Consequences / affects:** `schemas/decision-verdict.schema.json` and `schemas/interop-agent-call-2.schema.json`
+  (new), `schemas/service-authority-extension.schema.json` (DV-5's members), `src/decision-verdict.ts`,
+  `src/semantic-kinds.ts`, `src/semantic-rules.ts`, `src/protocol-revisions.ts`, `tools/vectors/decision-verdict.ts`,
+  `fixtures/vectors/decision-verdict.json`, `test/decision-verdict.test.ts`, the fixtures and `fixtures/catalogue.json`;
+  `docs/specification/decision-verdict.md` (new), `interop.md` (C3.5), `delegation.md` (DL-19), `machine-calls.md` (the
+  sealed call), `conformance.md` (a verifier and a hub row, the module, the register), `README.md`; `CONTEXT.md`;
+  `docs/ux/flows.md` (FLW-29), `docs/ux/scenarios.md` (SCN-043, SCN-046, SCN-057, SCN-061); `docs/DOCMAP.md`;
+  `docs/backlog.md` (CT-302).
+- **Source:** the design above; board messages `1f2cfb98` and `45e934f6`; the agents database's design at `1055b55` and
+  its D-45; DEC-0121, DEC-0125, DEC-0126, DEC-0156, DEC-0162, DEC-0166. DEC-0172 and `FAC-SEM-179` were reserved by git
+  CAS (`agent_sync.py reserve`, key `ct302-decision-verdict`).

@@ -70,6 +70,7 @@ export const NOT_SWEPT: readonly string[] = [
   "grant-check-request.schema.json",
   "grant-check.schema.json",
   "interop-agent-call.schema.json",
+  "interop-agent-call-2.schema.json",
   "interop-capability.schema.json",
   "interop-job-handle.schema.json",
   "interop-job-request.schema.json",
@@ -136,7 +137,7 @@ describe("every positive fixture passes the semantic rules", () => {
   });
 
   it("names only kinds a rule reads and schemas that exist, and sweeps a fixture of each", () => {
-    const sources = ["semantic-rules", "job-limits", "registry-rules", "interop-rules", "route-rules", "activity-rules", "device-rules", "delegation-rules", "session-handoff", "profile-rules", "package-rules", "estate-record-rules", "enroll-token", "relay-rules", "revocation-delta-rules", "window-lease", "entitlement", "share-registration", "openrouter-attribution", "core-rules", "protocol-revisions", "feed-data", "proposal-rules", "node-summary", "agent-network", "credentials", "mandate", "levels", "org-membership", "org-instance", "org-authority", "org-exchange", "org-adaptation", "ops-digest", "machine-report", "source-rules"]
+    const sources = ["semantic-rules", "job-limits", "registry-rules", "interop-rules", "route-rules", "activity-rules", "device-rules", "delegation-rules", "session-handoff", "profile-rules", "package-rules", "estate-record-rules", "enroll-token", "relay-rules", "revocation-delta-rules", "window-lease", "entitlement", "share-registration", "openrouter-attribution", "core-rules", "protocol-revisions", "feed-data", "proposal-rules", "node-summary", "agent-network", "credentials", "mandate", "levels", "org-membership", "org-instance", "org-authority", "org-exchange", "org-adaptation", "ops-digest", "machine-report", "source-rules", "decision-verdict"]
       .map((name) => readFileSync(path.join(root, "src", `${name}.ts`), "utf8"))
       .join("\n");
     for (const [schema, kind] of Object.entries(KIND_OF_SCHEMA)) {

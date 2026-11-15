@@ -1,0 +1,488 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/decision-verdict.schema.json",
+  "title": "decision-verdict/1: what a decision verifier concluded about one act, and why (DEC-0172)",
+  "description": "A receipt, never an authority (DV-1): a callee never takes a verdict as a decision, and an allow names the route by which a form the callee already accepts reaches it. Its id derives from {askedDigest, caller, policy, session} (verdictId); the arguments themselves, the operator's instruction and source never ride in it. A checker reports a verdict whose parts do not agree, and an allow the reference refuses, as FAC-SEM-179. docs/specification/decision-verdict.md.",
+  "type": "object",
+  "required": [
+    "kind",
+    "id",
+    "at",
+    "expiresAt",
+    "asked",
+    "askedDigest",
+    "caller",
+    "session",
+    "verdict",
+    "rule",
+    "reason",
+    "grounds",
+    "policy"
+  ],
+  "properties": {
+    "kind": {
+      "const": "decision-verdict/1"
+    },
+    "id": {
+      "$ref": "common.schema.json#/$defs/sha256",
+      "description": "sha256 of the RFC 8785 canonical JSON of {askedDigest, caller, policy, session} (verdictId): the same act asked again in one session under one policy has one id; the verifier's journal keeps each answer to it as a new version."
+    },
+    "at": {
+      "$ref": "common.schema.json#/$defs/timestamp"
+    },
+    "expiresAt": {
+      "$ref": "common.schema.json#/$defs/timestamp",
+      "description": "allow: at most the earliest of its grounds' windows and never more than 15 minutes after at; human: at most 24 hours; deny: at most 1 hour, person-denied at most 24 hours (FAC-SEM-179)."
+    },
+    "asked": {
+      "type": "object",
+      "required": [
+        "callee",
+        "capability",
+        "action",
+        "effect",
+        "context",
+        "tier",
+        "argsDigest"
+      ],
+      "properties": {
+        "callee": {
+          "$ref": "common.schema.json#/$defs/agentId"
+        },
+        "capability": {
+          "$ref": "common.schema.json#/$defs/capabilityName",
+          "description": "The tool the call names; the hub matches it with the call's capability (DV-8)."
+        },
+        "action": {
+          "anyOf": [
+            {
+              "$ref": "interop-common.schema.json#/$defs/requestKey"
+            },
+            {
+              "$ref": "common.schema.json#/$defs/capabilityName"
+            }
+          ],
+          "description": "The call's decision.action where it carries a decision (the action's id in the callee's actions extension), else its capability (a call under a mandate, the callee's own elicitation, the caller's own act): the hub matches it the same way (DV-8)."
+        },
+        "effect": {
+          "enum": [
+            "none",
+            "draft",
+            "publish",
+            "send",
+            "reply",
+            "charge",
+            "delete",
+            "merge",
+            "deploy",
+            "change-policy"
+          ],
+          "description": "The DL-3 effect class: the callee's declared actionEffects where it declares one, else the capability's effect as a floor (DV-5)."
+        },
+        "target": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "description": "The one object the act acts on, as the callee identifies it; one that names a person is carried as hmac-sha256: under the host's own key, never a plain hash a reader could reverse by guessing."
+        },
+        "context": {
+          "$ref": "common.schema.json#/$defs/contextId"
+        },
+        "project": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "tier": {
+          "enum": [
+            "T0",
+            "T1",
+            "T2"
+          ]
+        },
+        "argsDigest": {
+          "type": "string",
+          "pattern": "^hmac-sha256:[a-f0-9]{64}$",
+          "description": "HMAC-SHA-256 under the host's own key of the RFC 8785 canonical JSON of the call's input (argsDigest): never the arguments themselves, and no plain hash a reader could reverse by guessing."
+        },
+        "actionDigest": {
+          "$ref": "common.schema.json#/$defs/sha256",
+          "description": "The action's digest (DL-18), where the callee declares the object it is computed over (actionObject, DV-5) or its refusal gave it."
+        },
+        "spendUsd": {
+          "type": "number",
+          "minimum": 0,
+          "description": "The act's worst-case cost: the callee's declared maxCostUsd where it declares one, else the call's own estimate; DV-7 compares it with the limits."
+        }
+      },
+      "additionalProperties": false,
+      "description": "The deciding values and digests of the act, never its arguments."
+    },
+    "askedDigest": {
+      "$ref": "common.schema.json#/$defs/sha256",
+      "description": "sha256 of the RFC 8785 canonical JSON of asked."
+    },
+    "caller": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:~-]{0,127}$",
+      "description": "The principal the host authenticated; in an organization's context the host's pairwise id for that organization, as LV-9's approver is, never a person's address."
+    },
+    "session": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:~-]{0,127}$",
+      "description": "The session the host authenticated; in an organization's context a pairwise id, as caller."
+    },
+    "verdict": {
+      "enum": [
+        "allow",
+        "human",
+        "deny"
+      ]
+    },
+    "rule": {
+      "anyOf": [
+        {
+          "enum": [
+            "AP-2",
+            "AP-4",
+            "AP-5",
+            "LV-4",
+            "LV-7",
+            "AU-1",
+            "AU-2",
+            "MD-3",
+            "MD-6",
+            "DL-17",
+            "OA-3",
+            "OW-4",
+            "spend-rule-3"
+          ]
+        },
+        {
+          "type": "string",
+          "pattern": "^row:[A-Za-z0-9._-]{1,64}$"
+        },
+        {
+          "type": "string",
+          "pattern": "^answer:[A-Za-z0-9._-]{1,128}$"
+        }
+      ],
+      "description": "The contract rule that decided, by its id (spend-rule-3 for the spend policy's rule 3), a policy row (row:<id>), or the person's answer (answer:<questionId>) for person-denied and rejected."
+    },
+    "reason": {
+      "enum": [
+        "covered",
+        "body-gate",
+        "kept",
+        "level-insufficient",
+        "not-covered",
+        "outside-window",
+        "evidence-unknown",
+        "evidence-stale",
+        "ground-invalid",
+        "vetoed",
+        "loop",
+        "voided",
+        "spend-limit",
+        "row-advised",
+        "forbidden",
+        "other-context",
+        "self-approval",
+        "person-denied",
+        "rejected"
+      ],
+      "description": "allow: covered; human: body-gate, kept, level-insufficient, not-covered, outside-window, evidence-unknown, evidence-stale, ground-invalid, vetoed, loop, voided, spend-limit, row-advised; deny: forbidden, other-context, self-approval, person-denied, rejected (FAC-SEM-179 keeps each in its verdict's group)."
+    },
+    "level": {
+      "type": "object",
+      "required": [
+        "required",
+        "satisfiedBy"
+      ],
+      "properties": {
+        "required": {
+          "enum": [
+            "operator",
+            "instance-operator",
+            "owner",
+            "admin",
+            "architect",
+            "own-act"
+          ]
+        },
+        "satisfiedBy": {
+          "enum": [
+            "operator",
+            "instance-operator",
+            "owner",
+            "admin",
+            "architect",
+            "own-act"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "route": {
+      "enum": [
+        "operator",
+        "level",
+        "profile",
+        "mandate",
+        "approval",
+        "own-act",
+        "forwarded"
+      ],
+      "description": "With allow only: how the reference takes the act (FAC-SEM-179)."
+    },
+    "machineForm": {
+      "enum": [
+        "hub-dispatch",
+        "caller-approval",
+        "executed-by-holder",
+        "none"
+      ],
+      "description": "With allow only: how the form reaches the callee, never the form itself: caller-approval with route approval, executed-by-holder with route level, none exactly with own-act, hub-dispatch otherwise (FAC-SEM-179)."
+    },
+    "grounds": {
+      "type": "array",
+      "maxItems": 16,
+      "items": {
+        "type": "object",
+        "required": [
+          "kind",
+          "ref"
+        ],
+        "properties": {
+          "kind": {
+            "enum": [
+              "decision",
+              "level-decision",
+              "level-mandate",
+              "standing",
+              "mandate",
+              "approval",
+              "relay",
+              "grant",
+              "budget",
+              "check"
+            ]
+          },
+          "ref": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "grade": {
+            "enum": [
+              "verified",
+              "taken",
+              "forwarded",
+              "data"
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "enum": [
+                    "grant",
+                    "budget",
+                    "check"
+                  ]
+                }
+              },
+              "required": [
+                "kind"
+              ]
+            },
+            "then": {
+              "type": "object",
+              "properties": {
+                "grade": false
+              }
+            },
+            "else": {
+              "type": "object",
+              "required": [
+                "grade"
+              ]
+            }
+          }
+        ]
+      },
+      "description": "Each a form or a requirement the verifier read, by id or digest. An authority's grade says what the reference takes from this caller at its tier (verified, taken, forwarded) or not (data); a grant, a budget or a check carries no grade and never grounds an allow (a budget is read, not reserved). An entitlement (DEC-0168) is no ground."
+    },
+    "policy": {
+      "type": "object",
+      "required": [
+        "version",
+        "digest"
+      ],
+      "properties": {
+        "version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "digest": {
+          "$ref": "common.schema.json#/$defs/sha256"
+        }
+      },
+      "additionalProperties": false,
+      "description": "The verifier's policy table it read, by version and digest."
+    },
+    "human": {
+      "type": "object",
+      "required": [
+        "addressees"
+      ],
+      "properties": {
+        "addressees": {
+          "type": "array",
+          "maxItems": 16,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:~-]{0,127}$"
+          },
+          "description": "Principals by their host id, never a person's address; empty for advice that asks no one."
+        },
+        "questionId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "humanStep": {
+          "enum": [
+            "sign-in",
+            "consent",
+            "payment",
+            "secret",
+            "spend-above-limit",
+            "passkey",
+            "comparison"
+          ]
+        },
+        "url": {
+          "type": "string",
+          "pattern": "^(https://|/)",
+          "maxLength": 2048
+        }
+      },
+      "additionalProperties": false,
+      "description": "With human only: who is asked (none for advice), the question, or an AP-4 step with its link once the callee's refusal gave it."
+    }
+  },
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "verdict": {
+            "const": "allow"
+          }
+        },
+        "required": [
+          "verdict"
+        ]
+      },
+      "then": {
+        "type": "object",
+        "required": [
+          "route",
+          "machineForm"
+        ],
+        "properties": {
+          "route": true,
+          "machineForm": true,
+          "human": false,
+          "reason": {
+            "enum": [
+              "covered"
+            ]
+          }
+        }
+      },
+      "else": {
+        "type": "object",
+        "properties": {
+          "route": false,
+          "machineForm": false
+        }
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "verdict": {
+            "const": "human"
+          }
+        },
+        "required": [
+          "verdict"
+        ]
+      },
+      "then": {
+        "type": "object",
+        "required": [
+          "human"
+        ],
+        "properties": {
+          "human": true,
+          "reason": {
+            "enum": [
+              "body-gate",
+              "kept",
+              "level-insufficient",
+              "not-covered",
+              "outside-window",
+              "evidence-unknown",
+              "evidence-stale",
+              "ground-invalid",
+              "vetoed",
+              "loop",
+              "voided",
+              "spend-limit",
+              "row-advised"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "verdict": {
+            "const": "deny"
+          }
+        },
+        "required": [
+          "verdict"
+        ]
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "human": false,
+          "reason": {
+            "enum": [
+              "forbidden",
+              "other-context",
+              "self-approval",
+              "person-denied",
+              "rejected"
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

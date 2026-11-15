@@ -166,6 +166,14 @@ authenticated as the relayer, refuses one without it `operator-decision-required
 with its exact target (for an organization's own agent, in any context, only an owner's or an administrator's level decision, never an architect's, the operator's form, the stated word or an elicitation, DEC-0162) ([source](docs/specification/source.md#handing-over), DEC-0149). A hand-over by push or by file, a package handed over, or published to a public registry from a private home, or a public release from a private home carries a source export or a package, which needs the tree check, so an agent without `fabric.source.json` takes those routes only once it has one; an organization's visibility change of its private agent, or new readers outside the organization, take the word and accept the history as it stands; for a personal agent's private home an agent does neither on its own (with the operator's explicit permission for that act it is his own act, no act of this contract); the manifest stays opt-in otherwise (an organization's private agent packed for its own private registry, readable
 only by its members, needs none).
 
+**Decision verifier**: A service (Fabric's door `decision.verify`) that applies the recorded rules and access levels to
+an act an agent is about to take and calls a person in only where the rules keep the act for one; not the entitlement
+or the membership verifier (DEC-0172).
+
+**Decision verdict**: A `decision-verdict/1` record of what a decision verifier concluded about one act (`allow`,
+`human`, `deny`), with the rule, the reason and its grounds: a receipt, never an authority; a callee never takes it as a
+decision, and a hub dispatches a call carrying its receipt only while it is a current `allow` matching the call (DEC-0172).
+
 **Mandate**: The operator's instruction for one task, carried with the task down a chain of the operator's agents
 (`mandate/1`): the task, the operator's words verbatim, when they were given, an expiry within 7 days, a scope
 (capabilities, relayed actions, an effect ceiling, a per-call spend ceiling, projects) and the chain of agents that

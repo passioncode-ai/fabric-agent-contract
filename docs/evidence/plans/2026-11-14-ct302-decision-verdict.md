@@ -1,6 +1,6 @@
 # Design 2026-11-14: the decision verdict (CT-302)
 
-**Status:** proposed design, the contract's part of the decision verifier; the decision (one DEC) follows from it.
+**Status:** proposed design, the contract's part of the decision verifier; decided by DEC-0172, accepted 2026-11-15 (the DEC is normative where the two differ).
 Rules are proposals numbered `DV-*`. It reads DEC-0162's levels (`LV-*`, [membership](../../specification/membership.md#levels))
 and DEC-0166's place profile (`AU-*`, [delegation](../../specification/delegation.md)), both on `main` since 2026-11-14
 (#305, #306), and edits neither.

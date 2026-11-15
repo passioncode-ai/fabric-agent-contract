@@ -757,6 +757,10 @@ flowchart TD
 ```mermaid
 flowchart TD
   O[Operator tells the agent] --> C[Agent calls the tool with the decision]
+  C -->|through the hub with a decision verdict's receipt, DEC-0172| VD{the hub's verdict check}
+  VD -->|a current allow matching the call| G
+  VD -->|verdict-mismatch| VM[The agent asks the decision verifier again, never the operator]
+  VM --> C
   C --> G{gate}
   G -->|human| H[human-step-required with the link; the agent hands it over]
   G -->|relayed| T{tier}

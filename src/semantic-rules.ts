@@ -20,6 +20,7 @@ import { delegationRules } from "./delegation-rules.js";
 import { deepLinkRules } from "./fabric-links.js";
 import { levelRules } from "./levels.js";
 import { mandateRules } from "./mandate.js";
+import { decisionVerdictRules } from "./decision-verdict.js";
 import { pageLinkRules } from "./page-link-rules.js";
 import { sessionHandoffRules } from "./session-handoff.js";
 import { profileRules } from "./profile-rules.js";
@@ -87,6 +88,9 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   if (pageLink) return pageLink;
   const mandate = mandateRules(kind, value);
   if (mandate) return mandate;
+  // DEC-0172: a decision verdict, alone and against the reference (FAC-SEM-179).
+  const verdict = decisionVerdictRules(kind, value);
+  if (verdict) return verdict;
   // DEC-0162: a level decision's attestation, checked without a key (FAC-SEM-170); a level mandate's is mandateRules'.
   if (kind === "decision") return levelRules(kind, value) ?? [];
   if (kind === "service-lock-outcome") return lockOutcomeRules(value);
