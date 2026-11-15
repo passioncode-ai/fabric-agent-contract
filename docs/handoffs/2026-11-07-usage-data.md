@@ -207,7 +207,7 @@ decision of 2026-11-04.
   - With DEC-0162 (CT-250, branch `agent/ct250-levels-20261112`; round 30, seam). A level decision stands as the
     operator's at every tier there, `change-policy` included; UD-4 admits only the operator's own decision or approval
     for a declined switch. The second lander makes UD-4 say that a level decision is not the person's word for a
-    declined switch unless the level holder is that person's operator, and makes DEC-0162 and membership's *Levels* cite
+    declined switch unless the level holder is that person, who is the agent's operator, and makes DEC-0162 and membership's *Levels* cite
     UD-4. Checks on the merged tree: `awk '/\*\*UD-4/,/\*\*UD-5/' docs/specification/usage-data.md | grep -c 'level'`
     and `git grep -n 'UD-4' -- docs/specification/membership.md docs/DECISIONS.md | grep -c 'DEC-0162\|LV-'` and
     `awk '/^### DEC-0162/{f=1;next} /^### DEC-/{f=0} f' docs/DECISIONS.md | grep -c 'DEC-0157 UD-4'` each print
@@ -1107,8 +1107,11 @@ not pushed for the same reason; the round entries' commits resolve only there.
   break; every place now reads "that person, who is the agent's operator,", and the conformance product and levels rows
   carry "never `operator`". Check: `git grep -n "person's operator" -- docs/DECISIONS.md docs/specification docs/ux
   docs/backlog.md CONTEXT.md` prints nothing.
+- Round 38 (on `61dcbee8`): clean on all three tiers.
+- Round 39 (on `61dcbee8`): clean on all three tiers. Landed; risks filed as CT-320.
 
 ## Next task
 
-Round 38 of the blind readings of branch `agent/ct216-usage-data-v2` (DEC-0157): unit, seam and product; two clean
-rounds in a row land it.
+None in this branch: DEC-0157 landed on 2026-11-15 after rounds 38 and 39 were clean on all three tiers. Open risks
+are in backlog CT-320; the device side of UD-2's lock limit is CT-280. The board message to the products in the
+Compatibility goes with the landing.
