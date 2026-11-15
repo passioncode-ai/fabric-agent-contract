@@ -79,9 +79,11 @@ mean "not declared", never a default.
 | `audience` | `operator`, `organization`, `public` | who the instance serves: its operator alone; others it is offered to, the members of the organization its placement's `context` names and anyone a share grant or an organization's listing offers it to (DEC-0082 item 4, DEC-0086), or a colleague or a guest a person-to-person share reaches (`fabric-peer-share/1`, DEC-0142, which is no share grant); or, on a remote placement, anyone who reaches its origin's own surface |
 | `entry` | `host-signin`, `own-signin`, `none` | how its dashboard is entered: through a host's login code ([operator login](../../specification/service.md#operator-login)), through a sign-in of its own, or with none |
 
-`audience` never widens what `peer` allows: a service with no `peer` serves its operator alone, so `organization` and
-`public` need `peer` (IF-6), and `operator` beside `peer` is a contradiction the rule refuses. `public` is a remote
-placement's (an `https` origin anyone reaches); a local placement is never `public`. `audience` describes; access still
+`audience` never widens what `peer` allows through a hub: a host routes others only to a service that declares `peer`,
+so `organization` needs `peer` (IF-6), and `operator` beside `peer` is a contradiction the rule refuses. `public` is a
+remote placement's only and needs no `peer`: it describes an `https` origin whose own surface anyone reaches with
+credentials of their own (a remote agent other agents call with their own keys, as Prowl Agent is), outside any hub's
+routing; a local placement is never `public`. `audience` describes; access still
 comes only from a share grant or an organization's listing, and `public` grants nothing through a hub. An empty
 `access` object, like an absent one, declares nothing. A service that declares `peer` before any grant or share
 reaches it leaves `audience` out rather than writing `operator`. The word is the instance's own: it is not the authority
@@ -100,7 +102,7 @@ is the only place it is said.
 |---|---|
 | `single` | one tenant: the context its placement names (`personal`, or one organization's), and no other's data |
 | `per-organization` | one of a product's copies run one per organization, this copy holding the data of the organization its placement's `context` names |
-| `shared` | one instance holding several organizations' data, kept apart by the instance (its placement names one context; the others reach it through share grants) |
+| `shared` | one instance holding several tenants' data, kept apart by the instance: several organizations reaching it through share grants, or many users each signed in on its own sign-in (a multi-user service); its placement, where it has one, names one context |
 
 A host shows the organization from the placement, and prefers DEC-0170's signed `org-instance/1` statement where it holds
 one; the extension is declared, never verified. An agent shared into an organization runs as a separate instance whose placement's
@@ -126,8 +128,8 @@ nothing more; a service that must not say so declares them in its descriptor onl
 document member by member, a member being `access`, `tenancy` or `space` as a whole.
 
 **IF-6, `FAC-SEM`, one rule.** On the extension value (kind `instance-facts`), and on the descriptor and the well-known
-document as a pair (as `FAC-SEM-009` reads them): `audience` `organization` or `public` only beside `peer`, `operator`
-never beside it, `public` never on a local placement; where the well-known document declares `surfaces.dashboard`, an
+document as a pair (as `FAC-SEM-009` reads them): `audience` `organization` only beside `peer`, `operator`
+never beside it, `public` only on a remote placement; where the well-known document declares `surfaces.dashboard`, an
 `entry` in either document is `host-signin` exactly when `login` is `true`; `space.kind` `system` never on a local
 placement; a local service's well-known document carries no `space.account`. A well-known document read alone is
 checked for what it carries; the clause on `space.account` needs the pair, since the well-known schema has no
