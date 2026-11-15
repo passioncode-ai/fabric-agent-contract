@@ -803,6 +803,20 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Status:** draft
 - **Product:** unobserved
 
+
+### ST-044: My organization reads how long its agents' turns take and which accounts its machines hold, never a person
+
+- **Story:** As P-02, the administrator of an organization, I want to read how long our agents' turns take per agent, workflow and project, and which provider plans our machines hold, so that I can see where agents wait and what we pay for, without timing or listing any one person.
+- **Traces:** JTBD-11, JRN-10/#1
+- **Acceptance criteria:**
+  - Given members whose collectors send `turn` events, when I open the summary for a day, then I see `activity-summary/2`'s turn cells per agent, workflow and project with their turn counts, buckets and model and tool time, never a cell per person, machine or session (DEC-0171 RT-4).
+  - Given a cell whose population is below the summary's `minPopulation`, when the receiver publishes the day, then it folds the rest into one other cell of its kind or suppresses it and counts it in `suppressedCells`, so one person working alone on a project is not shown (RT-4, `FAC-SEM-040`).
+  - Given machines holding the organization's provider accounts, when I open the inventory for a day, then I see `inventoryCells` per provider, plan, billing and day with machines and accounts, and nothing from a personal or unknown account (DEC-0171 SI-2, SI-5).
+  - Given a partner organization (DEC-0090), when it asks for these cells, then it is not served them (RT-4, SI-5).
+  - Given a receiver that does not read turns or inventories, when I open the summary, then the lists are empty and the page says this receiver does not collect them.
+- **Priority:** should
+- **Status:** draft
+- **Product:** unobserved
 ## Design tooling
 
 - **Figma:** disabled
