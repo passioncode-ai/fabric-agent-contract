@@ -41,7 +41,9 @@ const KINDS = [
   // An operations digest, its window, its sums and its rises (FAC-SEM-166), no credential as an operation (FAC-SEM-167, DEC-0153).
   "ops-digest-hourly", "ops-digest-daily",
   // A statement that an instance runs for an organization (DEC-0170).
-  "org-instance"
+  "org-instance",
+  // A decision verdict and its check against the reference (FAC-SEM-179, DEC-0172).
+  "decision-verdict", "decision-verdict-reference"
 ];
 const WRONG: unknown[] = [null, 7, "x", true, [], [null, 3, "y"], { a: null }];
 /** An object whose every member named in `names` holds `value`. */

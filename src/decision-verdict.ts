@@ -110,7 +110,7 @@ function verdictDocument(value: JsonObject, at = ""): Finding[] {
 }
 
 /** The routes the reference's record maps to: who decided, and how (DV-1, DV-2). */
-function routesOf(recordAs: unknown): string[] {
+export function routesOf(recordAs: unknown): string[] {
   if (recordAs === "caller") return ["own-act"];
   if (!isObject(recordAs)) return [];
   const { by, via } = recordAs;
