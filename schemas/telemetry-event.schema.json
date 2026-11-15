@@ -465,6 +465,18 @@
           "session": true,
           "project": true,
           "runtime": true,
+          "account": {
+            "type": "object",
+            "properties": {
+              "class": {
+                "enum": [
+                  "organization",
+                  "unknown"
+                ],
+                "description": "DEC-0171 RT-6: a turn of a session on a personal account never leaves the device."
+              }
+            }
+          },
           "occurred": {
             "type": "string",
             "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T00:00:00(\\.0+)?Z$"

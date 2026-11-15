@@ -283,7 +283,8 @@ requires `session`, `project` and `runtime`, may carry `skill` and `account`, an
 
 A turn adds no subject to an `activity-summary/1` cell's population, as a `session.annotation` adds none
 ([`population`](../../src/activity-rules.ts)): it carries a `session.id` and no `user`, so counting it would let one
-person's turns pass as several subjects (RT-4 counts turns in their own cells, by person). A turn carries **a day and no finer time** (RT-2): `occurred` is that day's midnight UTC, `monotonicNs` is `"0"`, its
+person's turns pass as several subjects (RT-4 counts turns in their own cells, by person). A turn of a session on a `personal` account is refused by the schema too (its `account.class` is `organization` or
+`unknown`), a backstop to RT-6. A turn carries **a day and no finer time** (RT-2): `occurred` is that day's midnight UTC, `monotonicNs` is `"0"`, its
 `eventId` is derived (`sourceKey` `sha256:` of the settings-form canonical JSON `{"ordinal", "session"}`,
 [`turnSourceKey`](../../src/activity-rules.ts), `FAC-SEM-178`, so a collector that reads a session again after a restart
 or a re-enrollment mints the same id), and the collector emits a day's turns after the day ends, as `policy.violation`
@@ -336,7 +337,11 @@ outside its stream and writes each as an event only once the receiver's latest `
 smaller of the server layer's `retention.raw_days` and the device's effective value (30 days where the server layer sets
 none), on 410 `organization-closed`, and when the device is enrolled again with a binding to a different person or from
 a person to none, what waits for its day to end included, so a day's turns and inventory never reach the new epoch. A
-session's turns are read by one method (its one writer, `FAC-SEM-100`), so one turn carries one `source` and one id. Both are activity telemetry under the organization's notice, never a product's anonymous usage data,
+session's turns are read by one method (its one writer, `FAC-SEM-100`), so one turn carries one `source` and one id. A
+turn and an inventory carry their day's midnight as `occurred`, so on the day collection starts (`collectionStart`,
+[devices](devices.md#policy)) or a purpose is acknowledged that day's turns and inventory fall before it and are not
+sent, as a `policy.violation` and a `grant.usage` of that day are not; an inventory whose tenant the receiver's policy
+dropped between the day's end and the send is refused `attribution`, which is consumed. Both are activity telemetry under the organization's notice, never a product's anonymous usage data,
 and neither travels in the other's channel ([usage data](usage-data.md) UD-6, SI-7).
 
 **`session.annotation`** — what a surface reported about a session, read by the device's collector (DEC-0068): Fabric's
@@ -459,6 +464,11 @@ A collector MUST drop content and person attributes at the source. Claude Code's
   same key. The same telemetry key hashes `git.branch`. A collector that loses its telemetry key has
   lost its stream state too, and re-enrolls. Usage lines it reads again are still counted once by
   their `dedupeKey`.
+- A `unit`, a `turn` and an `account.inventory` derive their `sourceKey` from their own fields: `sha256:` of the
+  settings-form canonical JSON named in their [kinds](#kinds) rows (`unitSourceKey`, `turnSourceKey`,
+  `inventorySourceKey`, DEC-0164, DEC-0171), so a re-read, a restart or a re-enrollment yields the same id. A collector
+  keeps a session's turn ordinals across a restart (it numbers a session's turns from its start, as it re-reads them), so
+  a turn it already sent keeps its id and a new turn never takes an old one's.
 - An event the collector originates itself — an interval it computed, an overflow — carries a ULID
   ([spec](https://github.com/ulid/spec)) and no `sourceKey`. The ULID is persisted with the event
   before the first send.

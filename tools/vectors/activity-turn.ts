@@ -86,6 +86,7 @@ function events(): Json[] {
     refused("a turn without its session", (({ session: _s, ...rest }) => rest)(turn())),
     refused("a tool's name as a tool kind", turn({ toolKinds: [{ kind: "github-mcp", calls: 3, ms: 9_800 }] })),
     refused("a turn read by process sampling", turn({ method: "process" })),
+    refused("a turn of a session on a personal account (RT-6)", turn({}, { account: { class: "personal" } })),
     refused("an empty list of tool kinds, which a collector leaves out", turn({ toolCalls: 0, toolMs: 0, toolKinds: [] })),
     // SI-1, SI-2: an organization's accounts on one machine for one day.
     valid("Switchboard's two subscription seats of one plan", inventory()),

@@ -130,7 +130,8 @@ sends, and to which organization server, is decided six ways:
   unattributed project, and a device that cannot tell sends none. The route function and its vectors are CT-297.
 - **An agent turn** (`turn`, DEC-0171 RT-6) goes as its session's events do, by `routeTarget`, and never for a session on
   a `personal` account or of a personal or unattributed project, even inside an organization's folder where that
-  session's usage lines and its `policy.violation` are sent: a person's own pace never reaches an organization.
+  session's usage lines are sent and the day's `policy.violation` reports it: a person's own pace never reaches an
+  organization.
 - **An account inventory** (`account.inventory`, DEC-0171 SI-3) carries no session or project: it goes where
   `routeInventory(tenantRef, enrollments)` answers, `enrollments` listing each enrollment's `org` and, as `tenants`, the
   `tenantRef` values of its policy's `accounts.tenants` (the policy lists objects; the collector passes their

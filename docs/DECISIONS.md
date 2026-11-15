@@ -12659,7 +12659,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (CT-318, CT-319), which rounds 4 and 5 of the blind readings (seam and product) read clean; accepted when the
   coordinator's blind readings are clean on two consecutive rounds (round 1 folded: a turn adds no subject to an
   `activity-summary/1` cell; each kind waits for its own protocol name; FAC-SEM-045's input names `tenants`; round 2
-  folded: membership's OM-7 lists account inventories; an unbound device counts as one subject). It answers the first organization server's
+  folded: membership's OM-7 lists account inventories; an unbound device counts as one subject; held day-end events
+  dropped on a rebinding; one method per session's turns; `toolKinds` never empty; round 3 clean on all three tiers,
+  its risks folded: ordinals kept across a restart, a personal account's turn refused by the schema, the first
+  collection day stated). It answers the first organization server's
   request (board message `356b6aae`, thread `1efdc2e1`, due 2026-11-22; its plan G1 and G2, fabric-workspace
   `docs/plans/2026-11-15-work-machines/README.md` at `8144e7ec`), which quotes the operator's decisions of 2026-11-15:
   activity, response time and process optimization are measured per agent, workflow and project; people appear only in
@@ -12683,7 +12686,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      `method` (`otel`, `hook`, `transcript`, `rollout`; a transcript's or a rollout's turn only when the collector
      stamped it live with monotonic readings; process sampling sends none) and optional `outcome` (`answered`,
      `failed`, `unknown`). The one writer of a session's intervals and usage lines is the one writer of its turns
-     (`FAC-SEM-100` widened).
+     (`FAC-SEM-100` widened) and reads them by one method, so a turn carries one `source` and one id; it keeps a
+     session's ordinals across a restart. A turn's `account.class` is never `personal` (schema, RT-6's backstop).
   2. **RT-2, a day and no finer time.** `occurred` is the day's midnight UTC, `monotonicNs` `"0"`, the collector emits a
      day's turns after it ends, and the `sourceKey` is `sha256:` of the settings-form canonical JSON
      `{ordinal, session}` (`turnSourceKey`; not over the stream, so a re-read after a restart or a re-enrollment mints
@@ -12769,7 +12773,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   restraint, `/2`'s cells at its `minPopulation` of five, the `tenants` check, `purpose` for a kind its notice names no
   purpose for, DEC-0100) and its notice: whether its published
   notice covers both kinds without a new `noticeVersion` is the organization's and its counsel's question (asked on the
-  board, message `6ddf439d`); until it does, the receiver answers `purpose`.
+  board, message `6ddf439d`); until it does, the receiver answers `purpose`. The first organization server answered
+  (board message `c040fbef`): no new `noticeVersion`; its receiver collects `turn` under its published purpose
+  `activity-logs` and `account.inventory` under `usage-and-cost`, with `minPopulation` 5, and words the report "agent's
+  turn time", not a person's; collecting under those purposes changes nothing in RT-3 and SI-5 (neither kind is served
+  per person under any purpose). Ports owe `population` skipping `turn` and `device-attribution`'s `tenants` too.
 - **Consequences / affects:** `schemas/telemetry-event.schema.json` (`$defs/turn`, `$defs/accountInventory`, the kinds),
   `schemas/activity-common.schema.json` (`plan`, the `sourceKey` description), `schemas/activity-summary-2.schema.json`
   (new), `src/activity-rules.ts` (`turnSourceKey`, `inventorySourceKey`, `boundPopulation`, `turnBucket`,
