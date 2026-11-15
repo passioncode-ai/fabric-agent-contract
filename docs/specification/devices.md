@@ -531,8 +531,21 @@ even after it passes: it stays on the device (`FAC-SEM-068`).
 3. otherwise, the value of the highest layer that sets it.
 
 An unlocked value above the user layer is therefore a default the person may change; a locked one is
-never overridden by a lower layer. A device MUST refuse a local change to a locked key and show the
-key as locked. The `user` layer cannot lock (schema, `FAC-SEM-042`). A `user` layer's `harness.baseline` and
+never overridden by a lower layer. A device MUST refuse a local change to a locked key and show the key as locked,
+save a product's usage data switch key held on only by locks UD-2 ignores: the device lets the person change that key,
+does not show it as locked on, and keeps reporting the lock's value as the key's `effective` value (`FAC-SEM-042`).
+A key for a product's anonymous usage data switch is limited by [usage data](usage-data.md) UD-2
+(DEC-0157): a layer MAY lock it off and MUST NOT lock it on, and the device and the product ignore a lock that would
+hold the switch on, resolving the key without any lock that would hold it on (so a lower layer's lock off still holds
+and, where no lock off holds, the person's own setting, or an earlier no, governs, never the value of a layer whose lock
+was dropped); the device shows that value as the one the product applies, never as locked on. No key name marks a
+usage switch yet: CT-280 defines one, and until then the device side of this exception binds no key, the product,
+which knows its own key, applying it. `resolvePolicy` does not
+apply this limit: it returns the locking layer's value, which the device reports as `effective`, and the product
+applies UD-2's limit after resolution, resolving the key again without any lock that would hold it on (a reference
+helper and its vectors are CT-280). Nor does `expectedDecision`, the reference decision `FAC-SEM-068` checks, apply it to a local change: it refuses
+any local change to a locked key, so a device that lets the person change a usage switch key held on only by locks UD-2
+ignores meets UD-2 and still draws that rule's finding until CT-280 changes the reference. The `user` layer cannot lock (schema, `FAC-SEM-042`). A `user` layer's `harness.baseline` and
 `repair.packages` count for nothing (DEC-0102): the resolution skips them, so a local change to either changes nothing
 (which answer a device gives such a change, and a schema that refuses them in a user layer, is CT-99). A `server`
 layer's locks also end with its enrollment when the organization closed ([a closed organization](#organization-closed), DEC-0103)

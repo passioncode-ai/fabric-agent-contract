@@ -243,7 +243,8 @@ placement requires the token here too ([Remote placement](#remote-placement)).
 - `summary` carries at most six tiles for a host card; a tile with `attention: true`
   asks for the operator.
 - `update.available` is a newer version the service knows about, or `null`.
-- `surfaces.mcp.capabilities` MAY list the capability names the MCP surface serves, so
+- `surfaces.mcp.capabilities` MAY list the capability names the MCP surface serves (a present list names at least one,
+  `FAC-SEM-176`), so
   a host can show them without the token; the manifest remains the authority
   ([interop C3.6](interop.md#c36-discovery-surface)).
 - `surfaces.usage` MAY name the path of the service's usage report
@@ -265,7 +266,8 @@ placement requires the token here too ([Remote placement](#remote-placement)).
   requires the service token ([operator channel](operator-channel.md) OC-9, DEC-0034). The
   channel's state never changes the service's `status` or `degraded` list.
 - `surfaces.a2a` SHOULD name, for a service that serves an A2A Agent Card, where it is: the card's `path` on the
-  service origin and the A2A `protocolVersion`, `1.0` ([A2A Agent Card](#a2a-agent-card), DEC-0122).
+  service origin and the A2A `protocolVersion`, `1.0` ([A2A Agent Card](#a2a-agent-card), DEC-0122); a service with a
+  `surfaces.dashboard` and no `surfaces.mcp` MUST (RP-3, DEC-0169).
 - `configuration` MAY name what the operator can configure for this agent (`slots`: `runner`, `model`) and the
   profiles that apply now (`resolved`), read-only: a change is made in Fabric and reaches the agent through its
   binding ([runners](runners.md#what-an-agent-declares), DEC-0046).
@@ -1191,7 +1193,7 @@ token, it never presents a service's own descriptor token to call that service's
 
 A service that answers A2A peers ([A2A peer profile](profiles.md#a2a-peer-profile), DEC-0002) serves an Agent Card
 as A2A `1.0` defines it. It SHOULD name the card in its well-known document, so a host finds it beside the other
-surfaces; a peer finds it at A2A's own well-known path (A2A 1.0 §8.2):
+surfaces (a service with a dashboard and no `surfaces.mcp` MUST name it there, RP-3); a peer finds it at A2A's own well-known path (A2A 1.0 §8.2):
 
 ```json
 "surfaces": {
@@ -1353,6 +1355,38 @@ Every button a person has, the person's agent has (except the operator's move of
   it, which the service's audit records with the relaying caller ([governance](governance-and-roles.md#approval-separation),
   DEC-0121). The same holds for a level holder's agent and its holder's decision (DEC-0162 LV-7).
 
+### Read parity and the design order (DEC-0169)
+
+AP-1 gives every button a tool; these rules give an agent everything a person reads, and fix which comes first. They
+answer the operator's words of 2026-11-14, relayed by fabric-agent-adapter (board request `6f1f3ec9`): «любой агент, это
+изначально все функции, это строится как для агентов, для API и MCP. И не бывает функций, которые доступны человеку
+… но они доступны агенту, ни для просмотра, ни для редактирования».
+
+- **RP-1, read parity.** Everything a service shows a person on a dashboard, an app, a page, a bot or a report (a list,
+  a record, a status, a number, a chart's series, a log, a history, a setting, an export, a preview with its diff and
+  hash) MUST be readable by an agent through a tool on the service's agent surface, or through the documented API the
+  page itself calls, with the same data, the same filters and paging, as structured values rather than rendered text
+  (DEC-0169). A view only a person can read is nonconformant, as an action only a person can take is (AP-1). Parity
+  widens no access: an agent reads what its caller's grant, level and context allow, which may be less than the
+  operator sees, and a value the person sees only as a human step stays one: a secret shown once (AP-4), and a code a
+  person reads on the page to link or confirm (the operator channel's link code, OC-3, which the page shows, or an agent without a dashboard shows in its own reply
+  (OC-11), and no read tool returns). A documented API serves RP-1's reading; RP-3 still asks for an agent surface beside a dashboard.
+- **RP-2, the design order.** Every function of a service is built for an agent first: what a person does there is a
+  capability of its agent surface, and what a person reads there is readable by RP-1's route (a tool, or the documented
+  API the page calls); a dashboard, an app, a bot, a CLI or a report is a view over them, never the only home of a
+  function (DEC-0169). A new page, button or report ships with its agent route in the same release (a button its
+  twin, AP-1; what it only shows, the tool or the documented API RP-1 names), or is not shipped. AP-1's one exception stands here
+  too: the operator's move of a board slot stays a host control until the host ships its twin
+  ([project communication](project-comms.md#the-operator-moves-a-slot) PR-2, DEC-0140).
+- **RP-3, the check.** A well-known document that serves `surfaces.dashboard` serves an agent surface beside it
+  (`surfaces.mcp`, or `surfaces.a2a`), and an MCP surface that lists its `capabilities` lists at least one; otherwise
+  it is nonconformant (`FAC-SEM-176`, kind `service-well-known`, `agentSurfaceRules` in
+  [`src/actions.ts`](../../src/actions.ts)). The rule reads the declaration only: whether each view has its tool is
+  RP-1's and AP-1's, checked by the service's own tests and a host's probe (the adapter's `dashboard.agent-surface`,
+  FAA-332). A remote agent whose MCP sits behind a gateway off its origin cannot name it in `surfaces.mcp` (an
+  `originPath`), so beside a dashboard it names its A2A card, or `FAC-SEM-176` reports it (DEC-0169, not decided
+  further).
+
 `actionDecision` in [`src/actions.ts`](../../src/actions.ts) is the reference a service's tool runs before it acts,
 after DL-13 and DL-21 and after `verifyApproval` when the call presented an approval (DEC-0121). Its inputs are the
 declared `action`, the caller's `tier`, the service's authenticated `caller`, the call's `decision` and `target`, the service's own
@@ -1414,3 +1448,4 @@ behaviour rules (AP-1, AP-2 and AP-4) bind a service at its next pin, and from t
 | <a id="fac-sem-101"></a>`FAC-SEM-101` | `service-events-page` | no string in an event's `data.value`, at either level, sits under a credential's name or has a credential's shape; a finding names the place, never the value (DEC-0070) |
 | <a id="fac-sem-143"></a>`FAC-SEM-143` | `page-link`, `interop-input-requests` | a link handed to a person is not a raw `http` or `https` address whose host is a local one as PL's [check](#links-to-a-services-pages) lists it (`127.0.0.0/8`, `[::1]`, the IPv4-mapped `[::ffff:127.x.y.z]`, `localhost` and names under it, and the unspecified `0.0.0.0` and `[::]` a wildcard bind reports), and a `fabric-dashboards:` link follows `fabric-dashboards://service/<id>.<instance>[?path=<path>]` with no other parameter, a path on the service origin and no credential (DEC-0123 PL-1) |
 | <a id="fac-sem-142"></a>`FAC-SEM-142` | `service-well-known`, `action-call` | an actions declaration is its schema's, names each `id` once, carries `humanStep` exactly when `gate` is `human` and names only tools a present `surfaces.mcp.capabilities` lists; a service answers an action call as `actionDecision` does (DEC-0121), except a source hand-over ([source](source.md#handing-over)), out of this rule until a service pins a contract revision carrying CT-181: `--kind action-call` cannot tell a hand-over and is not run on a hand-over's calls until then; and in the authority key, `extensions/authority/0.1` (`authorityExtensionRules`, DEC-0162 LV-5, LV-7), a value its schema refuses, an organization named twice in `levels`, and a level in `actionLevels` for an id that is not a relayed action of the actions declaration |
+| <a id="fac-sem-176"></a>`FAC-SEM-176` | `service-well-known` | a service that serves `surfaces.dashboard` serves `surfaces.mcp` or `surfaces.a2a` beside it, and a present `surfaces.mcp.capabilities` is not empty (DEC-0169 RP-3) |

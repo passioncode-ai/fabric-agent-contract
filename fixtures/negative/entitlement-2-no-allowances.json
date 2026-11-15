@@ -1,0 +1,34 @@
+{
+  "type": "entitlement/2",
+  "issuer": "https://platform.example",
+  "subject": "org:org-a",
+  "estate": null,
+  "order": {
+    "id": "ord-org-a-0001",
+    "revision": 3
+  },
+  "issuedAt": "2026-10-20T00:00:00Z",
+  "notBefore": "2026-10-20T00:00:00Z",
+  "expiresAt": "2026-11-24T00:00:00Z",
+  "licence": {
+    "members": 25
+  },
+  "hosting": {
+    "product": "org-cloud",
+    "size": "s-2"
+  },
+  "support": {
+    "tier": "assist"
+  },
+  "agents": [
+    {
+      "agentRef": "urn:fabric:agent:example-publisher:notes"
+    },
+    {
+      "agentRef": "urn:fabric:agent:example-publisher:triage"
+    }
+  ],
+  "alg": "EdDSA",
+  "kid": "ent-2026-10",
+  "sig": "5JbstmHqYRRtqFeM618KPfkrWt310vk_0ftXDdh-HilEm8fNV4U2YWXz7vad0WG-qylgsyx-rTXvBC2yYSslAw"
+}

@@ -133,6 +133,12 @@ agent surface with the same effect, checks and audit record, declared in its wel
 `extensions/actions/0.1` with its `gate` (`none`, `relayed` or `human`); an action offered only on a page is
 nonconformant (except the operator's move of a board slot, a host control until a host ships its twin, DEC-0140 PR-2). `FAC-SEM-142` checks the declared actions (a button whose tool the MCP surface does not serve); a host
 reports a dashboard that declares none (CT-126) ([service](docs/specification/service.md#actions) AP-1, DEC-0121).
+**Read parity** extends it to reading: everything a person reads there an agent reads, structured, within its own
+access (a human step, such as a secret shown once or the operator channel's link code, stays one), and each function
+is built for an agent first: an act a capability of the agent surface, a read through a tool or the documented API the
+page calls (except the operator's move of a board slot, a host control until the host ships its twin, DEC-0140 PR-2); a dashboard with no agent surface is
+nonconformant (`FAC-SEM-176`, [service](docs/specification/service.md#read-parity-and-the-design-order-dec-0169)
+RP-1 to RP-3, DEC-0169).
 
 **Operator's word, carried out the first time**: The rule that an agent carries out its operator's words about a task
 itself, on that word: every step inside the task is the agent's to take within the grants, mandates and limits that
@@ -194,6 +200,16 @@ never later than 7 days after sign-in (`service.md` §The session's lifetime; ti
 (`common.schema.json#/$defs/uri`). Two identifiers are the same when their normal forms are equal — RFC 3986 §6.2.2 for
 a URI, RFC 8141 §3.1 for a URN, any other string as it is; writers SHOULD emit the normal form; readers MUST compare by it
 ([identifiers](docs/specification/identifiers.md), DEC-0076).
+
+**Usage data**: Anonymous data about how a product is used and about its errors, which the product collects about
+itself to improve it and, with a shared installation id, to count one installation once across the products that share
+it (DEC-0157's reading, pending the operator's answer, OQ-0013): on by default, sent only after a notice (not a
+question) shown once where the person reads it, or, where the platform's own consent or a market's privacy review
+needs an answer first, only after that answer (UD-1), stopped by the product's own switch, which never writes the shared file's `analytics` field, an earlier shared no given before the product first sends, on an install whose own switch the person has not set on (or, for an install that already sent, before the first run of its conforming version at which the shared file is read or found absent, on an install whose own switch the person never set) kept until the person sets the product's own switch on (the switch shown as off meanwhile), an unreadable shared file then being no answer on an install whose own switch the person has not set on, the product, on an install whose own switch the person never set, showing its switch as on but not sending and saying so beside it, a product whose only installation id is the shared one keeping that display whether or not the person set its switch, until the file can be read (UD-2), with no person, credential, path or file
+name from the person's machine or data, or any content or text a person wrote or received in it. Anonymous here
+means it names no person, not that it is unlinkable: an installation id ties an install's events together, a shared one ties the products that send it, and a session id, kept in memory and renewed no later than after an idle hour, ties one session's. Data that meets UD-3 is `confidential`, being the estate's private metrics in the data classification table; joined with an account or a purchase it is no longer anonymous and is `personal`, or `regulated` where a product's privacy review finds it legally controlled (UD-1 to UD-6,
+DEC-0157). Not a usage report (a service's spend and calls), not activity telemetry (an organization's record of its
+people's sessions and units of work) and not an operations digest while it is sent to no one but the person (UD-6).
 
 **Usage report**: What a service publishes about its own spend at `surfaces.usage`, with every spending limit
 it applies, enforced or not (DEC-0021, DEC-0027), and MAY attribute its calls to projects and task runs, never
@@ -798,7 +814,9 @@ purpose `agent-host`, file names such as `docs/handoffs/2026-11-06-shared-host-p
 words they were written in.
 
 **Policy layer**: One `device-policy` document from `mdm`, `server` or `user`; precedence is in that
-order, and a locked key is never overridden by a lower layer.
+order, and a locked key is never overridden by a lower layer, save a lock that would hold a product's usage data switch
+on, which the device and the product ignore (the device once CT-280 names the key, treating it until then as any
+locked key; the product now, applying the person's own setting or an earlier no) ([usage data](docs/specification/usage-data.md) UD-2, DEC-0157).
 
 **Interop**: The `fabric-interop/0.1` extension (and `/0.2`, whose readers accept `null` usage, DEC-0087): how agents are called over MCP:
 capabilities as tools, jobs, awaiting a choice, trace context and the hub.
@@ -889,7 +907,9 @@ to its hub over the relay, or on the hub's own machine through the node's `machi
 `org:<orgId>`, or one person's estate, `personal`) for at most 38 days: a member allowance, a hosting product, a
 support tier and the paid agents, never an amount (`entitlement/1`, DEC-0085). Signed by a key the issuer's
 **Entitlement key set** lists, which a root key the verifier pins signs; it verifies in `grace` for 14 days after it
-expires ([entitlement](docs/specification/entitlement.md)).
+expires ([entitlement](docs/specification/entitlement.md)). `entitlement/2` (DEC-0168) adds `allowances`: `limited`,
+or `unlimited` when the order sets no ceiling on its own allowances; it never lifts a spend limit, a level or a human
+step ([allowances](docs/specification/entitlement.md#allowances-dec-0168)).
 
 **Entitlement key set**: The issuer's signing keys for entitlements under a rising revision, each with a window, and the
 kids it revokes (`entitlement-key-set/1`, DEC-0085), signed by the issuer's root key, which a verifier pins at
@@ -899,6 +919,11 @@ installation and which signs nothing else ([entitlement](docs/specification/enti
 enrollments or its estate: its own `device.id`, keys, kids, telemetry key, collector ids and counters, no estate record
 in its check-ins and no estate document in their answers, and in its organization's context a hub key and token issuer
 of its own (DEC-0128, [devices](docs/specification/devices.md#unlinkable-enrollments)).
+
+**Instance statement**: The organization server's signed statement that one instance runs for one organization: its
+id, product, origin, placement and `active` or `retired` status, for at most 7 days (`org-instance/1`, DEC-0170),
+signed by a key of the organization's key set and verified offline by the platform and the instance's product
+([membership](docs/specification/membership.md#instances-dec-0170)).
 
 **Membership attestation**: What an organization server states about one person's membership of one organization,
 for one reader, for at most a day: the organization, a subject pairwise to that reader, a role (`owner`, `admin`,
