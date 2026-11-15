@@ -11832,8 +11832,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      the agent, never a mandate (a `change-policy` effect, MD-3), another approver's `approval/1` or a standing rule;
      at a service given `levels`, in an organization's context (the switch declared `admin` or `owner`, never
      `operator`), only a level decision decides the switch's
-     `change-policy` action (DEC-0162 LV-7), and it is the person's word only when the level holder is that person's
-     operator or holds the organization's switch; anyone else is told the switch is in the product's settings; for a component an organization deploys on its own
+     `change-policy` action (DEC-0162 LV-7), and it is the person's word only when the level holder is that person,
+     who is the agent's operator, or holds the organization's switch; anyone else is told the switch is in the product's settings; for a component an organization deploys on its own
      server for its members that sends its own counts, the switch is the deploying organization's, and the word is that
      of whoever holds it for the organization; an agent does not decline a person who asks to turn
      their switch off (the operator's switch turned off on the word, relayed under AP-2 with the product's own checks,
@@ -12235,7 +12235,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   backlog CT-250.
 - **Annotated (2026-11-14):** LV-7 amended by DEC-0166: in an organization's context, at a service that reads levels, an act declared `owner` or `admin` takes no place's standing mandate either, its `setLevel` being the hub's statement rather than an attestation (AU-2; an attested setter's level is CT-309).
 - **Annotated (2026-11-15):** LV-7 cited by DEC-0157 UD-4: a level decision is a person's word for a usage-data switch
-  that person turned off only when the level holder is that person, the agent's operator, or holds the organization's switch for
+  that person turned off only when the level holder is that person, who is the agent's operator, or holds the organization's switch for
   a component it deploys; in an organization's context, at a service that reads levels, only a level decision decides
   the switch's `change-policy` action.
 

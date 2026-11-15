@@ -1102,8 +1102,13 @@ not pushed for the same reason; the round entries' commits resolve only there.
   so the service decides the switch only by a level decision and the bar is the agent's. "that person's operator" now
   reads "that person, the agent's operator" everywhere; SCN-043 carries the holder limit. Check:
   `grep -c "DEC-0157 UD-4, once it lands" docs/specification/conformance.md` prints 0.
+- After round 36: the switch declared `admin` or `owner`, never `operator`, in UD-4 and item 4 (`c2f85937`).
+- Round 37 (on `c2f85937`): product not clean, one break: DEC item 4 still read "that person's operator" across a line
+  break; every place now reads "that person, who is the agent's operator,", and the conformance product and levels rows
+  carry "never `operator`". Check: `git grep -n "person's operator" -- docs/DECISIONS.md docs/specification docs/ux
+  docs/backlog.md CONTEXT.md` prints nothing.
 
 ## Next task
 
-Round 37 of the blind readings of branch `agent/ct216-usage-data-v2` (DEC-0157): unit, seam and product; two clean
+Round 38 of the blind readings of branch `agent/ct216-usage-data-v2` (DEC-0157): unit, seam and product; two clean
 rounds in a row land it.
