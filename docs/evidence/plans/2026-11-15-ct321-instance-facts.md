@@ -76,7 +76,7 @@ mean "not declared", never a default.
 
 | Member | Values | Meaning |
 |---|---|---|
-| `audience` | `operator`, `organization`, `public` | who the instance serves: its operator alone; others it is offered to, the members of the organization its placement's `context` names and anyone a share grant or an organization's listing offers it to (DEC-0082 item 4, DEC-0086), or a colleague or a guest a person-to-person share reaches (`fabric-peer-share/1`, DEC-0142, which is no share grant); or, on a remote placement, anyone who reaches its origin's own surface |
+| `audience` | `operator`, `organization`, `public` | who the instance serves: its operator alone; others it is offered to, the members of the organization its placement's `context` names and anyone a share grant or an organization's listing offers it to (DEC-0082 item 4, DEC-0086), among them a colleague or a guest a share grant reaches (DEC-0039's standing grant to an external principal, [offered to others](../../specification/service.md#offered-to-others)); a peer share (DEC-0142) passes a credential's value and gives no audience to an instance; or, on a remote placement, anyone who reaches its origin's own surface |
 | `entry` | `host-signin`, `own-signin`, `none` | how its dashboard is entered: through a host's login code ([operator login](../../specification/service.md#operator-login)), through a sign-in of its own, or with none |
 
 `audience` never widens what `peer` allows through a hub: a host routes others only to a service that declares `peer`,
@@ -101,8 +101,8 @@ is the only place it is said.
 | `mode` | Meaning |
 |---|---|
 | `single` | one tenant: the context its placement names (`personal`, or one organization's), and no other's data |
-| `per-organization` | one of a product's copies run one per organization, this copy holding the data of the organization its placement's `context` names |
-| `shared` | one instance holding several tenants' data, kept apart by the instance: several organizations reaching it through share grants, or many users each signed in on its own sign-in (a multi-user service); its placement, where it has one, names one context |
+| `per-organization` | one of a product's copies the product itself runs one per organization (an organization's hosted copy), this copy holding the data of the organization its placement's `context` names; an agent the operator shares into organizations as separate instances is `single` in each (below) |
+| `shared` | one instance holding several tenants' data, kept apart by the instance: several organizations reaching it through share grants, or many users each signed in on its own sign-in (a multi-user service); a remote placement's in practice, since a local placement names one context and at most one grant (DEC-0082 item 4) |
 
 A host shows the organization from the placement, and prefers DEC-0170's signed `org-instance/1` statement where it holds
 one; the extension is declared, never verified. An agent shared into an organization runs as a separate instance whose placement's
@@ -132,8 +132,8 @@ document as a pair (as `FAC-SEM-009` reads them): `audience` `organization` only
 never beside it, `public` only on a remote placement; where the well-known document declares `surfaces.dashboard`, an
 `entry` in either document is `host-signin` exactly when `login` is `true`; `space.kind` `system` never on a local
 placement; a local service's well-known document carries no `space.account`. A well-known document read alone is
-checked for what it carries; the clause on `space.account` needs the pair, since the well-known schema has no
-`placement`. A refusal under this rule declares the member it refuses not declared (the other members stand), and
+checked for what it carries; the clauses on `peer`, on a placement and on `space.account` need the pair, since the
+well-known schema has neither `peer` nor `placement`, so a document read alone is never refused under them. A refusal under this rule declares the member it refuses not declared (the other members stand), and
 `entry` is still read from `login` where a dashboard is declared, which needs no extension; it never changes the service's
 state, unlike `FAC-SEM-009`'s `foreign`.
 
