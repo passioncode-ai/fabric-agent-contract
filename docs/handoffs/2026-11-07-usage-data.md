@@ -1092,8 +1092,12 @@ not pushed for the same reason; the round entries' commits resolve only there.
 - Round 33 (on `3b0e1fdb`): product clean; unit not clean (DEC-0162's own check fell to 0 after the link edit; folded
   in `942486a6`, with DEC-0162 annotated); seam stopped on the account's limit. Risks folded: the operator pointed to
   the setting in an organization's context, "there" read as outside that row, CT-250's row restated.
+- Round 34 (on `a6219a58`): unit, seam and product not clean, one break: the UD-4 annotation sat under DEC-0163; moved
+  under DEC-0162 in `c2e4dc15`, with a check scoped to DEC-0162's section. Risks folded: the redirect to the setting
+  in DEC item 4, the agent row and SCN-043; OW-5 names a level holder's words; UD-6's kit route goes to Observatory
+  (AE-4); the Consequences name the second-lander edits; CT-216's status.
 
 ## Next task
 
-Round 34 of the blind readings of branch `agent/ct216-usage-data-v2` (DEC-0157): unit, seam and product; two clean
+Round 35 of the blind readings of branch `agent/ct216-usage-data-v2` (DEC-0157): unit, seam and product; two clean
 rounds in a row land it.

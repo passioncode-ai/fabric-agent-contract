@@ -11836,7 +11836,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      server for its members that sends its own counts, the switch is the deploying organization's, and the word is that
      of whoever holds it for the organization; an agent does not decline a person who asks to turn
      their switch off (the operator's switch turned off on the word, relayed under AP-2 with the product's own checks,
-     anyone else pointed to the setting); it never sends around a switch that is off; where the notice is not a question,
+     or, in an organization's context at a service that reads levels with no level decision at hand, the operator
+     pointed to the setting too, anyone else pointed to the setting); it never sends around a switch that is off; where the notice is not a question,
      the switch is a `relayed` action, not AP-4's consent (a human gate); where UD-1's ask-first branch applies (the
      platform's own consent or a market's privacy review), turning it on is AP-4's consent (`gate: human`, `humanStep`
      `consent`, the agent handing the person the link to that step, AP-4, DL-26) and turning it off stays relayed,
@@ -11866,8 +11867,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      erasure under a shared id needs every sharing product's agreement; a later decision adds a well-known member when a
      host asks to show it.
   6. UD-6: activity telemetry (DEC-0030) is an organization's record of its people's sessions and, since DEC-0164, of
-     their agents' units of work, sent by an enrolled device's collector (DEC-0031) or recorded by a kit through Project
-     Observatory's capability, to that organization's receiver under its own notice and consent (DEC-0052); UD-1 to UD-5 do not
+     their agents' units of work, sent by an enrolled device's collector (DEC-0031) to that organization's receiver or
+     recorded by a kit through Project Observatory's capability (DEC-0164 AE-4) under its own notice and consent (DEC-0052); UD-1 to UD-5 do not
      govern it, and neither kind travels in the other's channel; sending a digest is sending it to anyone but the
      person (a product owner or another party), the operator reading his own machines counting as the person; an
      operations digest (DEC-0153) that is not sent (it stays on its machine, or reaches only the person) is not usage
@@ -12126,7 +12127,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   device deciding under its policy), `docs/specification/ops-digest.md` (OD-6 and Not
   decided here point to UD-6), `docs/specification/activity.md` (its purpose points to UD-6's channel separation),
   `docs/specification/openrouter-attribution.md` (its default points to UD-6), `docs/specification/devices.md`
-  ("Precedence and locks" points to UD-2's limit on a lock),
+  ("Precedence and locks" points to UD-2's limit on a lock), `docs/specification/governance-and-roles.md` (OW-1 and OW-5
+  name UD-4's switch), `docs/specification/membership.md` (LV-7 links UD-4) and DEC-0162's annotation (the second
+  lander's edits after DEC-0156 and DEC-0162),
   `docs/specification/README.md`, `docs/DOCMAP.md`, `CONTEXT.md` (usage data; Policy layer), `docs/ux/scenarios.md` (SCN-043's alt
   path for UD-4 and its Coverage; SCN-011's alt path, Expected result and Coverage for UD-2's lock limit),
   `docs/ux/flows.md` (FLW-07), `docs/ux/screens.md` (SCR-10), `docs/ux/foundation.md` (ST-008, JTBD-04, JRN-03 #2), backlog CT-216 and CT-280 (a reference for UD-2's limit on a lock); the handoff `docs/handoffs/2026-11-07-usage-data.md` and its row in
