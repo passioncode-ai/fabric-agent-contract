@@ -1014,7 +1014,7 @@ flowchart TD
 ```mermaid
 flowchart TD
   A[Screen: Turn and account cells] --> R{The summary lists turn or inventory cells?}
-  R -->|no| N[None published: empty lists, or a /1 summary; suppressedCells shown, no reason given]
+  R -->|no| N[None published: empty lists, or a /1 summary; suppressedCells shown when carried, no reason given]
   R -->|yes| S[Turn cells and inventory cells, each at or above minPopulation; the rest folded into one other cell or suppressed]
 ```
 

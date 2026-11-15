@@ -72,4 +72,13 @@ describe("decision verdicts (DEC-0172)", () => {
     const findings = evaluateSemanticRules("decision-verdict-reference", { verdict: allow, reference: { check: "mandate", input } });
     expect(findings.map((f) => f.instancePath)).toContain("/verdict/verdict");
   });
+  it("answers a reference whose members cannot be printed with findings, never by throwing (DEC-0082)", () => {
+    const c = vectors.references.find((r) => r.findings.length === 0)!;
+    const odd = { toString: 1 };
+    for (const change of [(v: Json) => { v.verdict.route = odd; }, (v: Json) => { v.verdict.asked.tier = odd; }, (v: Json) => { v.reference.input.tier = odd; }]) {
+      const value = JSON.parse(JSON.stringify({ verdict: c.verdict, reference: c.reference })) as Json;
+      change(value);
+      expect(() => evaluateSemanticRules("decision-verdict-reference", value)).not.toThrow();
+    }
+  });
 });

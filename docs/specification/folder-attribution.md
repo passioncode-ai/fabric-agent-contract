@@ -281,7 +281,7 @@ Project yet because the folder's Git facts cannot be read.
   re-clone at the path is new); its work path (`record_worked`) feeding the snapshot's `work` records through
   `attributeFolder` rather than recording a repository itself, and its `shared` and contested states replaced by the
   answer: a repository attached by work and recorded stays with the first Project when another Project's agent works
-  there later (AT-3 comes before AT-12), and only work by two Projects with nothing recorded ties, so SCN-055's
+  there later (AT-3 comes before AT-12), and only work by two Projects with nothing recorded ties, so its SCN-055's
   "it leaves the first one" ends; a worktree right under home refused at attach as at creation; recording by `record`; its snapshot's
   `containers` including Observatory's declared ones where it can read them; its CLI text on containers and its
   scenarios (its own SCN-055, SCN-063, SCN-068, numbered in that repository, not this one's) updated with them.
