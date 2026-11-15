@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0168` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0171` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -11720,6 +11720,430 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (Fabric's "Allow once" under `floor.ask-first`, OW-3), while Fabric's question `add1df7c` stays open; backlog CT-220; DEC-0156 reserved by git CAS on 2026-11-07.
 - **Annotated (2026-11-14):** OW-3's case of a step with no person present amended by DEC-0166: on a headless place a standing mandate is a mandate in force (AU-1), so it clears OW-3's first wait for a relayed act it covers; OW-3's other waits and a host's gate stay as written.
 
+### DEC-0157: anonymous usage and error data: on by default, each product's own switch
+
+- **Annotated (2026-11-15):** OW-1 and OW-5 name DEC-0157 UD-4's usage-data switch: a `change-policy` effect OW-1's
+  exception keeps for the operator's word, which no mandate from the operator's words turns back on, nor a level
+  holder's words unless the holder is that person, who is the agent's operator, or holds the organization's switch.
+- **Date:** 2026-11-07
+- **Status:** Accepted 2026-11-15, merged with this change: rounds 38 and 39 of the coordinator's blind readings (at
+  `61dcbee8`) were clean on all three tiers, after rounds 1 to 37 folded. Rules UD-1 to UD-6
+  in [usage data](specification/usage-data.md); no schema, field or rule code changes.
+- **Context:** the operator decided on 2026-11-04 that every product collects anonymous usage and error data by
+  default, shown once at the first start, switched off per product in its settings, on by default for existing installs
+  too, only to improve the product (backlog CT-216); the knowledge base records it as a notice at first start, not a
+  question, replacing the earlier answer-first rule (roadmap RM-13; plans.md item D). Board reply `cbea0b76`, a reading
+  of the operator's decision, keeps an explicit earlier decline, as the consent rules of the estate's growth and experiments service carry it.
+  The products differ today: Fabric reads an `analytics` field in the shared `PassionCode/installation.json` and sends
+  nothing before the person has answered its question (its ADR-0127), and records that the decision replaces this with
+  a switch for Fabric alone (its CO-496, not built); Fabric Switchboard keeps a switch of its own and reads the shared installation id, and the shared
+  `analytics` field only to carry over an answer given in Switchboard under its earlier rule (SB-246). CT-216
+  asked whether a service declares it, what anonymous leaves out, that a switch is honoured, and how it relates to
+  activity telemetry (DEC-0030, DEC-0031).
+- **Decision:**
+  1. UD-1: a product that collects it does so from the first start, for a new install and for an existing one, each that never answered
+     and never declined (a shared earlier no included), and sends nothing before its notice was shown once where the person reads it (the first start
+     that opens its window, or for a product without one or that starts without it its first output to the person, a
+     line only an agent's tool reads not counting; for an existing install, the first after the version that turns it
+     on); the notice names what it collects, its purposes (improving the product, and, when its id is shared, counting
+     one installation once across the products sharing it, the second DEC-0157's reading of the operator's words,
+     pending his answer, OQ-0013, so the wording that follows from it is provisional), and, when it sends an
+     installation id, that id, whether it is shared and with which products (named as of the product's version, with a
+     link to one maintained list of them, whose home is the sharing products' owners' choice: the estate's privacy page
+     on passioncode.ai would be one home for every product (the page is live; the list of sharing products on it,
+     the launcher's PC-137 in plans.md, is not yet published), and until one exists
+     each product keeps its own copy on its UD-5 page; the list and every copy name a new sharing product before it
+     first sends the shared id, the notice's link naming it until the next version re-shows the notice), that the id ties events together though no person is named
+     and that turning back on resumes a shared id, and, when it sends a session id, that it does and that the session
+     id ties one session's events together, where the data is sent (naming the organization that receives it meets
+     this, its usage data page naming the host) or a link to that page (UD-5), which says, and where the switch is, and says when data collected before it may
+     be sent at once; it is shown again, once, where the person reads it, before data is sent under the change, when what it states
+     changes (a new purpose, or a new sharing product,
+     which the notice states from the product's next version that ships the updated list), as a device policy's
+     `noticeVersion` marks a new notice; the notice is not a question: the product holds its first send until the
+     notice has been shown where the person reads it and never holds it until it is answered, an acknowledgement (an
+     OK) being offered at most with nothing waiting on it, and no answer means on; where the platform's own consent
+     (such as Firefox's built-in data consent) or the product's privacy review for a market requires an answer first,
+     the product asks there, sends nothing until it is answered and treats no answer as off in that place, which is no
+     UD-1 debt, pending the operator's ePrivacy answer (RM-13, okolos B-216); a product may collect nothing; a hosted
+     service that installs nothing on the person's machine or in an account or server of theirs is outside the page
+     (DEC-0157's reading of the operator's "every product", pending his answer, OQ-0013),
+     one that ships an installed product is under it for that product, and a component the estate ships to run on the
+     person's own server is under it for that component, the switch over its counts being that of whatever sends
+     them: the deploying organization's where the component sends its own and an organization deploys it on its own
+     server for its members, who are told by the component's notice, and an app's own switch where the person's app
+     reads the component's counts and sends them (Fabric Inbox's server, whose counts each member's app sends, so the
+     organization holds no switch over them).
+  2. UD-2: the switch is in the product's own settings and governs that product alone; off stops both kinds and drops
+     what waits, and removes nothing already sent; an installation id the product owns is deleted at off and made anew
+     at on, while a shared one is never deleted or rotated by one product, only no longer sent, a reset being the sharing
+     products' joint decision; an earlier decline stays, an off given under a prompt or in a setting that said it
+     governed this product included (RM-13, "an explicit earlier «no» stays off"; `cbea0b76`, a reading of the
+     operator's decision); an off in a shared file, written under words that governed every reader, is a decline for a
+     product only when it was given before that product first sends (an earlier no stays off), and since the shared
+     file records neither who wrote an off nor under what words, a product that can read the shared file where it runs
+     treats any shared off present before its first send, on an install whose own switch the person has not set on, as
+     that earlier no, and the person setting this product's own switch on ends it for this product without writing the
+     shared file (one that cannot read it there, such as a
+     browser build or a component on a server, owes no read of it); for an install that sent before the product's version that meets UD-2, the first
+     run of that version at which the shared file is read, or found absent, stands in for the first send, so a shared
+     off present then, on an install whose own switch the person never set, is read as the earlier no; after that
+     product's first send (or a stand-in run that read no earlier no) its own switch alone governs it (plans.md item D,
+     "one product's switch never turns another off"), an earlier no read at that run holding until the person sets the
+     product's own switch on, the product meanwhile showing its own switch as off and its notice saying where to turn it
+     on, so
+     Fabric's live "One switch for every PassionCode app on this computer" (`en.ts` line 864 at `eafcf2e4`) is a false promise for a product past its first send (or, for an install that sent before its conforming version, past a stand-in run that read no earlier no), one that cannot read the shared file, or one whose own switch the person set, and, for its on, for a product that already read an off as an earlier no, which the person reads until Fabric's switch for Fabric alone ships
+     (CO-496); a product's own switch never writes the shared file's `analytics` field, and a product whose switch
+     wrote it under words that governed every reader stops writing it from the version whose switch governs it alone,
+     and leaves an off already written there, which stays the earlier no for products that have not yet sent, or not yet had their stand-in run, unless the person set that product's own switch on; what a product collected before it read an earlier no it drops when it reads it, and
+     it keeps an earlier no it read until the person sets its own switch on, and need not keep a reading that found
+     none, only that its first send, or its stand-in run, has happened; a
+     shared file that exists but cannot be read before a product's first send (or before that stand-in run), on an install whose own switch the person has not set on, is no
+     answer, and the product sends nothing in that run, a run that sent nothing for that reason being no stand-in run, and the product, on an install whose own switch the person never set, showing its switch as on but not sending and saying beside it (for a product without a window, where its switch is read) that nothing
+     is sent until the shared file (`<root>/installation.json`) can be read, read again at each start, and offering there to set its switch on, which is the
+     person setting the product's own switch on, a product whose only installation id is the shared one offering it
+     only where, once set on, it sends without an installation id, else keeping that display until the file can be read, and after its first send too;
+     a device policy whose layer carries a key for a product's switch may lock it off and never locks it on, and
+     the device and the product ignore a lock that would hold the switch on, resolving the key without any lock that
+     would hold it on, so a lower layer's lock off still holds and, where none holds it off, the person's own setting (or an
+     earlier no) governs, never the value of a layer whose lock was dropped; the device lets the person change such a
+     key, does not show it as locked on and shows that value as the one the product applies, while its reported
+     `effective` keeps the lock's value (`FAC-SEM-042` compares it with `resolvePolicy`), once CT-280 names the key
+     (no key name marks a usage switch yet, so until then this binds the device on no key and the product applies it); the product applies this
+     after the reference resolution `resolvePolicy`, which does not (the pointer in
+     devices.md's "Precedence and locks"; a reference helper and its vectors are CT-280); nor does the reference
+     device decision `expectedDecision` (`FAC-SEM-068`) apply it to a local change, which it refuses for any locked
+     key, so a device that lets the person change a switch held on only by such locks draws that rule's finding until
+     CT-280 changes the reference, and the conformance row for a device deciding under its policy says so.
+  3. UD-3: anonymous means no person named, not unlinkable (a shared id ties the products that send it); it leaves out a
+     person (name, email, phone, account, billing or store id, an IP kept with the data, a hardware or advertising id),
+     a credential, a path or a file name from the person's machine or data, and any content or text a person wrote or
+     received; a product that creates an installation id makes it a random UUID for analytics only and the installation id
+     a product sends is such an id; a product may also send a session id, random (it may carry the session's start
+     time), never derived from another id, kept only in memory and renewed no later than after an idle hour, which is
+     no installation id, ties only one session's events and authorizes nothing (no session credential, so not the
+     `credential` class's "session"); neither id is a user identifier (unlike activity
+     telemetry's `user.id`, which names a membership or a profile and makes its events personal data), data that meets
+     UD-3 being `confidential`, the data classification table's "private metrics" (whether a stored id needs prior consent in a market is the product's privacy review,
+     RM-13's open question); neither the product, a service it sends to nor any service or agent that reads it there (a holder of a grant to read the raw events included) joins either id with an account, purchase,
+     billing or advertising record, and data so joined, or bound to an account, leaves UD-3, is `personal`, or
+     `regulated` where the product's privacy review finds it legally controlled, needs its own consent and is never called anonymous; error data names a place in the product's own code
+     and is cleared of content, paths and credentials before it leaves.
+  4. UD-4: an agent never turns a switch on that a person turned off except on that person's own word for that switch,
+     which it takes only when the person is its operator (AP-3): a decision the operator gave that names the
+     switch, or an `approval/1` the operator gave for that switch (DL-18), an elicitation the product itself sends
+     deciding the action, once the operator accepts it, on the product's own record (AP-2) with no decision relayed by
+     the agent, never a mandate (a `change-policy` effect, MD-3), another approver's `approval/1` or a standing rule;
+     at a service given `levels`, in an organization's context (the switch declared `admin` or `owner`, never
+     `operator`), only a level decision decides the switch's
+     `change-policy` action (DEC-0162 LV-7), and it is the person's word only when the level holder is that person,
+     who is the agent's operator, or holds the organization's switch; anyone else is told the switch is in the product's settings; for a component an organization deploys on its own
+     server for its members that sends its own counts, the switch is the deploying organization's, and the word is that
+     of whoever holds it for the organization; an agent does not decline a person who asks to turn
+     their switch off (the operator's switch turned off on the word, relayed under AP-2 with the product's own checks,
+     or, in an organization's context at a service that reads levels with no level decision at hand, the operator
+     pointed to the setting too, anyone else pointed to the setting); it never sends around a switch that is off; where the notice is not a question,
+     the switch is a `relayed` action, not AP-4's consent (a human gate); where UD-1's ask-first branch applies (the
+     platform's own consent or a market's privacy review), turning it on is AP-4's consent (`gate: human`, `humanStep`
+     `consent`, the agent handing the person the link to that step, AP-4, DL-26) and turning it off stays relayed,
+     through an off action of its own (one action that turns it both ways there would be `gate: human` both ways); a
+     service whose app or page offers its switch offers it on its agent surface, as AP-1 requires, and declares it
+     with a tool whose effect is `change-policy` and `gate: relayed`, or, in an ask-first place, `gate: human` with
+     `humanStep` `consent` for the action that turns it on and `gate: relayed` for a separate action that turns it off,
+     the action declared in the service's actions extension (AP-1) and the effect on its tool's manifest capability
+     (C3.1), so a service that offers its switch to agents and ships no manifest owes one for that tool, and a product
+     outside `fabric-service/0.1` that offers its switch on an agent surface (a tool an agent calls, such as an MCP
+     tool) declaring it the same way, a command line an agent runs in the person's shell (such as the launcher's
+     `analytics on|off`) being the person's own surface, which owes no action, the agent side binding the agent that
+     runs it, so a mandate or a standing rule never turns it on, a gate of `none` being nonconformant;
+     an accepted `approval/1` still decides that relayed action under AP-2 (`actionDecision`'s
+     row for a `relayed` action with an accepted approval, DL-18), save DEC-0162's organization's-context row, so the
+     agent-side limit is the only bar on that form outside that row,
+     and no product-side refusal is added (an approval is a signed approver's decision on the action's digest, DL-17,
+     and a refusal for one action would split AP-2's single table); an agent never deletes or rewrites a shared file
+     it cannot read to end a hold, reporting the hold, setting the product's own switch on through its relayed action
+     on the operator's word naming the switch, and pointing anyone else to that switch, save that for a product whose only installation id is the shared one and which, once set on, sends nothing without it, setting the switch on does not make it send, so the agent tells the operator the product sends nothing until the file can be read, where the file is and that its repair waits on OQ-0014, and points anyone else to its hold line.
+  5. UD-5: no machine declaration now; each product documents it (its privacy text and a usage data page): what, the
+     installation id when it sends one and whether it is shared, where it goes (the receiving organization and its
+     host, and every service or agent that reads the data there (a holder of a grant to read the raw events included), with its purpose, described without naming a person), the switch, how long it is kept, the
+     version that turned it on, and whether and how sent data can be erased; where erasure needs an id, the product
+     shows it beside the switch before off deletes it and keeps the route working, or says beside the switch that
+     turning off ends erasure; a product whose uninstall deletes its id says whether erasure survives the uninstall, and
+     erasure under a shared id needs every sharing product's agreement; a later decision adds a well-known member when a
+     host asks to show it.
+  6. UD-6: activity telemetry (DEC-0030) is an organization's record of its people's sessions and, since DEC-0164, of
+     their agents' units of work, sent by an enrolled device's collector (DEC-0031) to that organization's receiver or
+     recorded by a kit through Project Observatory's capability (DEC-0164 AE-4) under its own notice and consent (DEC-0052); UD-1 to UD-5 do not
+     govern it, and neither kind travels in the other's channel; sending a digest is sending it to anyone but the
+     person (a product owner or another party), the operator reading his own machines counting as the person; an
+     operations digest (DEC-0153) that is not sent (it stays on its machine, or reaches only the person) is not usage
+     data under the page, so a product's OD-9 declaration stands whatever its switch says, and a product that collects
+     no usage data may declare one; the condition sits on sending: a collector that sends a product's digests sends
+     them only for a product whose switch is on and whose notice was shown, never for a product with no switch, and
+     digests sent, by whoever sends them, are usage and error data under that switch; a collector that cannot read a
+     product's switch and notice state (UD-5 declares none) sends none of its digests, a host that wants to send asking
+     for the UD-5 member; a collector that hands digests to a store on the same machine does not send them, a store
+     that later sends them is such a collector, and a read of a product's or a component's digests by the person, or
+     by an agent acting for them, on machines or accounts of theirs, where no product owner receives the data, is not
+     sending, an encrypted backup a store makes to the person's own storage, readable only with a key the person holds,
+     being such a case; the condition binds the products under the page, and a hosted service's digests on its own
+     server are its own; OpenRouter attribution (DEC-0065), which labels a product's model requests, is not usage data
+     under the page: it is off until the product's operator sets it, and the usage data switch neither turns it on nor
+     off; a product whose operator set it sends it whatever its usage data switch says (Project Observatory does) and
+     should say so on its usage data page, and whether a person needs a switch of their own for it is not decided here;
+     a service's usage report (DEC-0021, `GET /fabric/v1/usage`), read by its host with the service token, is not usage
+     data under the page either.
+- **Why:** the operator's decision fixes the default and the per-product switch; what keeps it trustworthy across
+  products is that "anonymous" and "off" mean the same everywhere, so those two are the contract's. The operator's words
+  (quoted in Fabric Switchboard's `docs/ANALYTICS.md`, lines 19 to 23 at `405b789`) begin «Включает первый раз продукт,
+  ему показывает, чтобы подтвердить, что мы отправляем анонимные логи для юзажа и так далее.» and name one purpose
+  («чтобы мы улучшали наш продукт. Все, только для этого»); counting one installation once across the products that
+  share its id is DEC-0157's reading of that "only for this", an accurate count serving the same improvement, pending
+  the operator's answer (OQ-0013), which may narrow it, so the notice wording that follows from it is provisional. The
+  notice is not a question because the operator said to show it, on by default (the same words), and the knowledge base
+  records that this replaces Fabric's answer-first rule (roadmap RM-13, plans.md item D); «чтобы подтвердить» is read
+  under that record: an acknowledgement may be offered, and nothing waits on it beyond the notice having been shown.
+  Where a platform's own consent or a market's privacy review needs an answer first (Okolos's Firefox build, RM-13), the
+  product asks there, pending the operator's ePrivacy answer (okolos B-216). The shared-file decline follows RM-13
+  ("an explicit earlier «no» stays off") and plans.md item D ("one product's switch never turns another off"): a shared
+  off given before a product first sends is that earlier no, and after the product's first send its own switch alone
+  governs it. A product's switch that wrote the shared field would decide for every product that has not yet sent
+  and, turned on, erase an earlier no those products would read, so a product only reads it, and an off already
+  written stays. An id
+  several products share cannot be rotated by one of them without breaking the others' counts, so off stops sending it
+  and only an id the product owns is deleted. An operations digest kept on its machine is counts a product keeps about
+  itself, so the condition sits where data is sent to anyone but the person, not on the declaration a local
+  collector reads. A
+  session id kept in memory and renewed no later than after an idle hour, beside an installation id, ties no more than
+  that id; without one it ties one session's events, which the notice names (UD-1), so UD-3 admits it. Data that meets UD-3 names no person, yet its counts are the
+  estate's private metrics, which the data classification table puts in `confidential`, so it is that class rather
+  than `project-internal`; data joined with an account names a person, so it is `personal`, or `regulated` where a
+  market's law controls it. A hosted service the estate runs, which installs nothing on
+  the person's machine or in an account or server of theirs, is left out (a reading of the operator's "every product",
+  pending his answer, OQ-0013) because nothing of it runs where a switch in
+  the person's settings could stop it: what it learns from requests is its own server's record, under its privacy text
+  and terms; a product it ships to install is under the page. A component an organization deploys on its own server
+  for its members is run by that organization, so the switch is the organization's, and its members are told by the
+  notice. Where the platform's own consent or a market's review asks first, turning the switch on is the person's
+  consent, a human gate (AP-4, DL-26), not a relayed action. The
+  data's shape, its destination and the notice's words differ by product and stay theirs. A declaration nobody reads
+  would be a field to keep true with no reader to catch it drifting.
+- **Alternatives considered:** a well-known member now (no host reads it; added when one asks, UD-5); one switch for
+  several products (the operator said per product); rotating a shared id at off (it would split one installation's events
+  across every product reading the file); leaving all of it to each product (the meaning of "anonymous" and "off" would
+  drift between them, which is what the operator's decision guards).
+- **Compatibility:** nothing on the wire changes. Read on 2026-11-07 and 2026-11-08, each product's documents and code
+  at its default branch. Fabric Switchboard meets UD-3 (its `app_error` names a source-file stem, a place in its own
+  code); it owes UD-1's "nothing before the notice" (a background first start sends before the notice is shown: its test
+  `on_by_default_a_background_start_sends_from_the_first_start`, "Nothing waits for the notice"), UD-1's naming of the
+  products that share its id, the tying of events, its session id and that turning back on resumes it (its notice,
+  `src/main.ts` line 109 at `c762821`), UD-1's purpose (that line gives it as "to help PassionCode.ai improve its apps",
+  unchanged at `f6f1dc1`, every app of the organization rather than Switchboard, OQ-0013 naming the string, and its
+  "one person" counted once where UD-1 and UD-3 count one installation, a UD-1 purpose debt Fabric Inbox's notice owes too),
+  UD-2's kept decline (it reads the shared `analytics: false` only for an install that answered in Switchboard under its
+  earlier rule, `crates/switchboard-runtime/src/analytics.rs` lines 315 to 322 at `405b789`, so it sends for an install
+  whose person said no under Fabric's shared switch before Switchboard first sent, its test
+  `an_install_whose_shared_file_says_off_still_sends_when_never_answered_here`; it owes reading an earlier shared no
+  before its first send, and, at the first run of its conforming version that reads the shared file or finds it absent (UD-2), a shared off on an install whose own switch
+  was never set, though it already sent), and UD-4's forms of the word for its agent door (`switchboard_analytics`, `crates/switchboard-cli/src/mcp.rs` line 72 at `c762821`,
+  `switchboard analytics on|off`, SB-299, used "only when the operator asks" and carrying no `_meta.decision`); its `docs/ANALYTICS.md` also says it sends no error
+  event, which its own table contradicts. Fabric Inbox (its B-200, `desktop/analytics.cjs`, which sends at launch and
+  shows the notice when a window first comes forward) and Fabric Dashboards (its FD-136, sending from a hidden or
+  background first start) owe the same "nothing before the notice", and the same reading of an earlier shared no
+  before their first send (and at their conforming version's first run that reads the shared file or finds it absent, for an install that already sent): Fabric Inbox reads it only for an install that answered under its earlier rule
+  (`desktop/analytics.cjs` line 295 at `1395416`) and, when the shared file cannot be read, sends a baseline without
+  an id (lines 307 to 310), and Fabric Dashboards never reads it (`src/core/analytics.ts` lines
+  9 to 11 at `d43c94e`) and, when the shared file cannot be read, sends its events without an id (lines 59 to 60 and
+  170 to 171), where UD-2 has each send nothing in a run before its first send (or before its conforming version's
+  stand-in run) in which the shared file cannot be read, on an install whose own switch the person has not set on, and
+  UD-2's hold display (its switch on but not sending, the next-start line, and the control where UD-2 allows it); Switchboard, which holds its send then (`analytics.rs` lines 488 to 490 at `405b789`) with a
+  status carrying only `enabled`, owes the same display. Their notices owe UD-1's contents:
+  Fabric Dashboards' (`src/core/i18n.ts` lines 86 to 88 at `d43c94e`) names no installation id though every event
+  carries the shared `install_id` (`src/core/analytics.ts`), and states no purpose of counting once, so it owes the id,
+  that it is shared and with which products, that it ties events together, its session id, that turning back on resumes it, and
+  that purpose; Fabric Inbox's (`desktop/main.cjs` line 937 at `1395416`) says "an id shared by the PassionCode apps"
+  without naming them and owes naming them, the tying of events, its session id and the resume. Switchboard, Fabric
+  Inbox, Fabric Dashboards, the launcher and Fabric send a session id whose form UD-3 admits (the Aptabase SDKs' form,
+  Unix seconds times 10^8 plus 8 random digits, kept in memory). Switchboard's
+  (`crates/switchboard-runtime/src/analytics.rs` lines 417 to 426 at `405b789`) and Fabric Inbox's
+  (`desktop/analytics.cjs` lines 184 to 191 at `1395416`) are renewed after an idle hour and meet UD-3's session-id
+  rule; Fabric Dashboards' (`src/core/analytics.ts` line 128 at `d43c94e`) and Fabric's
+  (`apps/desktop/src/main/analytics.ts` line 192 at `eafcf2e4`, made once, since `createAnalytics` runs once,
+  `apps/desktop/src/main/index.ts` line 1311) last one process and are never renewed after an idle hour, so both owe
+  UD-3's renewal; the launcher's (`lib/analytics.js` line 244 at `ad978a6`) is made at each run's one send, which
+  carries that run's events in one request at its end (`after`, line 192), so no idle hour passes within it and it
+  meets UD-3's session-id rule. Fabric's notice names "a
+  session id" (`i18n/en.ts` line 864 at `eafcf2e4`), and the other four owe naming it (UD-1). Fabric Dashboards also owes UD-4:
+  its MCP `settings` tool (FD-175) lets any agent turn the switch on with no operator decision, its `change-settings`
+  action declared with gate `none` (`src/mcp/actions.ts` line 38 at `d43c94e`) and `analytics` among the settings an
+  agent may change (`AGENT_SETTINGS`, `src/core/settings.ts` line 248 at `d43c94e`); the `analytics` key becomes its own `relayed`
+  action carrying the operator's decision, which refuses `operator-decision-required` without one (AP-2) rather than
+  take the path its dispatcher keeps for other relayed calls, running one without a decision as the caller's own act
+  (`src/mcp/server.ts` lines 332 to 333 at `d43c94e`), and, since Fabric Dashboards ships no manifest, it owes a manifest
+  capability for that action's tool with the effect `change-policy` (UD-4); Switchboard, which ships no manifest and
+  declares no actions extension, owes both for its door. Fabric Inbox's desktop copy, a `fabric-service/0.1`
+  service by its descriptor (`desktop/fabric-descriptor.cjs` at `1395416`, serving no agent surface yet), offers its
+  switch in its menu (Share Usage Details, its notice at `desktop/main.cjs` line 937) with no agent twin, and Fabric
+  offers its switch only to its own window (`analyticsSetEnabled`, `apps/desktop/src/main/index.ts` line 4201 at
+  `eafcf2e4`) and declares no action for it; both owe UD-4's product side, an action for the switch whose tool's
+  effect is `change-policy`, with `gate: relayed` (Fabric at CO-496). Fabric Inbox recorded on 2026-11-08 that its
+  switch is kept without a door unless the operator asks (its B-236, `docs/agents/desktop-actions.md` line 28 at
+  `c9d9cc7`), since a door would change it for the person; UD-4's relayed action changes the switch only on the
+  operator's own decision, so the door does not change it for the person, and when to build it is the operator's. The products read, all but Project Observatory
+  (below), send to PassionCode.ai's own self-hosted analytics host, `analytics.passioncode.ai` (passioncode-platform
+  PLAT-019, live since 2026-10-17, and PLAT-132; Switchboard's `crates/switchboard-runtime/src/analytics.rs` line 30 at
+  `b99a17b`; Okolos's too, the host's `infra/analytics/README.md` line 18 at `e4d1c0e`, so the host's reader of raw
+  events reads it). Fabric Inbox's notice
+  names that receiving organization ("Fabric Inbox sends PassionCode.ai", `desktop/main.cjs` line 937), which meets
+  UD-1's "where"; the other notices read (Switchboard's, which says its counts help PassionCode.ai without saying who
+  receives them, Fabric Dashboards', Fabric's and the launcher's, cited here) neither say where the data is sent nor
+  link a usage data page, so each owes that (UD-1). The host's owner (PassionCode.ai Platform) deletes events after
+  730 days and removes installation ids from them after 400 days (PLAT-132; its `infra/analytics/README.md` line 49
+  and `infra/analytics/deploy/config.env` lines 39 to 40 at `e4d1c0e`), its backups keeping them beyond that (nightly copies 14 days
+  on disk, carried off the host by a weekly droplet backup, line 48), the retention each product's UD-5 page states;
+  it offers no erasure by installation id today (only that nightly retention pass), so each product's UD-5 page says
+  that data already sent cannot be erased, unless the host's owner files such a route; it admits a reader of the raw
+  events, the shared installation id included (PLAT-133), which as a service that reads the data there owes UD-3's
+  join rule and is named, with its purpose, on each product's UD-5 page; where the counts are read
+  there, each product's conforming version is to be marked (below). Fabric, Switchboard and Fabric Inbox's events also sit
+  in a second store, the operator's earlier analytics instance in the operator's own account: their history to
+  2026-10-17 was copied from it to PassionCode.ai's host that day (the source only read), and installs older than each
+  product's switch version (Fabric 0.3.7, Switchboard 0.6.42, Fabric Inbox 0.19.0) kept sending there until they
+  updated (passioncode-platform `infra/analytics/README.md`, "The move", lines 101 to 119 at `e4d1c0e`; PLAT-019); as
+  its owner records it, that instance keeps events 2 years and removes installation ids after 400 days, has its own
+  erasure of the installation ids the estate's growth and experiments service deleted, and keeps an off-host copy for
+  28 days, and that service still reads it, as does the operator's own estate monitor, which reads counts there;
+  Project Observatory sends its usage and error data to that store (below), so the store stays live while Observatory
+  sends there, whatever PLAT-019's remainder retires; until those three products' apps there are retired (PLAT-019's
+  remainder), each of their UD-5 pages states that store too, and Observatory's states it for as long as it sends
+  there (that it received the product's events, its retention, its erasure, its off-host copy and its readers). PassionCode.ai's public privacy page (the organization's
+  site repository `passioncode-ai.github.io`, line 60 of `privacy/index.html` and of its nine locale copies, `de`,
+  `es`, `fr`, `ja`, `ko`, `pl`, `pt-br`, `ru` and `zh-hans`, at `e7a2ed25`) names only Switchboard and
+  Fabric as sending and says the switch applies to every PassionCode.ai app on that computer: its owner owes UD-2's
+  switch for each product alone and, for every product that sends, what UD-5 asks of its privacy text. Two product
+  pages of that site say the same, each in all ten locales at `e7a2ed25`: `switchboard/index.html` line 89 ("the
+  switch applies to every PassionCode.ai tool", already false of Switchboard, whose `docs/ANALYTICS.md` line 48 at
+  `d192cfa` says its switch turns Switchboard off or on only) and `fabric/index.html` line 61 ("which applies to every
+  PassionCode.ai app on your Mac"), each with its nine locale copies; the owner owes UD-2's switch for each product
+  alone there too. Fabric owes UD-1's
+  notice, not a question: it sends nothing until the
+  person answers "Usage counts: share them?" ("Nothing more is sent until you answer", `i18n/en.ts` lines 868 to 870 at
+  `eafcf2e4`; its ADR-0127, SCN-134), where UD-1 has no answer mean on. It owes UD-2's per-product switch and UD-1's
+  purpose, naming of the sharing products, the tying of events and the resume: its live notice and settings say its
+  switch governs every PassionCode app on the computer (`i18n/en.ts` lines 864, 869 and 870, their Russian copies
+  `i18n/ru.ts` lines 2488, 2493 and 2494, and its `README.md` lines 336 to 338, all at `eafcf2e4`), a false promise for a product past its first send (or, for an install that sent before its conforming version, past a stand-in run that read no earlier no), one that cannot read the shared file, or one whose own switch the person set, and, for its on, for a product that already read an off as an earlier no (UD-2), which the person reads until CO-496 ships, and name no purpose; its own record (its on-demand sessions specification §8, read at `7dce3758`, rewriting CO-496) replaces
+  the shared switch with one for Fabric alone. Its switch also writes the shared `analytics` field both ways
+  (`writeAnalyticsSwitch`, `apps/desktop/src/main/analytics.ts` lines 88 to 96, called by `setEnabled` at lines 305 to
+  308, at `eafcf2e4`), so under UD-2's earlier-no reading its off decides for every product that has not yet sent, or not
+  yet had its stand-in run, and
+  its on erases a person's earlier no for every product that has not yet read it; CO-496 owes UD-2's rule on writing (Fabric stops writing the field from the
+  version whose switch governs Fabric alone and leaves an off already written there) and UD-2's hold display in place of
+  its hold line `analytics.noFile` (`en.ts` line 866, `ru.ts` line 2490), its set-on control only if, once set on, it
+  sends without an installation id, since it sends only with the shared id (`analytics.ts` line 223). Fabric Inbox exports a writer for
+  the shared field that nothing calls (`writeSwitch`, `desktop/analytics.cjs` lines 96 to 103 at `1395416`), so it
+  writes nothing there today, and under UD-2 it stays uncalled. Its `README.md` (lines 202 to 204 at `1395416`) says
+  its switch turns the counts off "for every PassionCode.ai app on the Mac at once", which contradicts its own notice
+  ("that turns it off for Fabric Inbox only", `desktop/main.cjs` line 937) and UD-2: a UD-2 debt, a string-only
+  correction. The consent rules of the estate's growth and experiments
+  service owe the installation id and the switch's place in the notice (UD-1), paths and received content in the
+  never-send list (UD-3), keeping a shared id at off and at re-enable rather than deleting it or making a new one (UD-2;
+  its consent rules delete the installation id at off, which breaks UD-2 for a shared id), their no-switch exception
+  (UD-2), and taking an install's id linked to a purchase in its revenue attribution out of anonymous data (UD-3). The
+  adapter's FAA-202 (open, its target 0.64.0 passed; the adapter is at v0.77.0) plans the notice and the switch in every
+  agent template, its hooks reporting error classes "under the same switch"; it owes UD-2's switch that governs one
+  product alone and UD-4 in its kits. The PassionCode launcher sends nothing before its notice and reads a shared "no"
+  at every run until it first counts (`lib/analytics.js` lines 148 to 155 and `docs/analytics-events.md` lines 57 to 64
+  at `ad978a6`, PC-123), which meets UD-1's timing and UD-2's kept decline (a shared off given before its first send);
+  it owes UD-1's notice contents (its notice, `lib/analytics.js` line 31, names neither the installation id nor its
+  sharing, its session id nor the resume) and a notice where the person reads it (its doc, `docs/analytics-events.md` line 50, lets
+  another tool show it to its agent only), and UD-2's hold display (its switch on but not sending, the next-start line, and the control where UD-2 allows it) (it prints "off for now" during a hold, `bin/passioncode.js` line 233; its 0.2.76, tagged 2026-11-09, ships it unchanged). Its switch, `analytics on|off`, is a command a person or their coding agent
+  runs (its `AGENTS.md` line 138 at `0f4b27f`), a command line and no agent surface under UD-4, so the launcher owes
+  UD-4's product side nothing; its setup skill, which points agents at that command
+  (`plugin/passioncode/skills/setting-up-passioncode/SKILL.md` lines 145 to 149 at `0f4b27f`), owes UD-4's agent side.
+  The five creators of the shared file that were read make its id a random UUID and meet UD-3's random id (Fabric's
+  `apps/desktop/src/main/analytics.ts` line 70 at `eafcf2e4`, `randomUUID`; Switchboard's
+  `crates/switchboard-runtime/src/analytics.rs` line 149 at `405b789`, `Uuid::new_v4`; Fabric Inbox's
+  `desktop/analytics.cjs` line 81 with `desktop/main.cjs` line 662 at `1395416`, `randomUUID`; Fabric Dashboards'
+  `readOrCreateInstallation`, `src/core/analytics.ts` line 62 at `d43c94e`, `randomUUID`; the launcher's
+  `lib/analytics.js` line 56 at `ad978a6`, `crypto.randomUUID`); a creator not read owes it. Okolos
+  turned it on by default on 2026-11-05 in Chrome and Edge, its Firefox build following Firefox's built-in data consent
+  (the knowledge base's roadmap RM-13, okolos ADR-0021), which UD-1 admits pending the operator's ePrivacy answer
+  (okolos B-216); the rest of its practice was not read. The estate's hosted workspace product is outside the page
+  as a hosted service; its self-hosted image, a component an organization deploys on its own server for its members,
+  is under it with that organization's switch (its owner and administrators turn the counting off or on, its ADR-0014
+  item 3) and owes UD-3's session id, random per server process per UTC day today rather than renewed after an idle
+  hour (its ADR-0014 line 24 at `43f04f15`); no self-hosted instance of it runs yet (line 37). The self-hosted image
+  also owes UD-4's product side: its switch is on its Organization page and an HTTP admin route recorded as a person's
+  act (`src/modules/analytics/routes.ts` line 36 at `855f7a37`), and its MCP server declares no actions extension, so it owes a
+  `relayed` action for the switch whose tool's effect is `change-policy`; and its design's planned well-known
+  declaration of its counting, waiting on CT-216 (`docs/design/2026-11-04-analytics-default.md` line 301 at `855f7a37`), has no
+  member to declare, since UD-5 defines none until a later decision adds one. Fabric Inbox's server is no component
+  with an organization's switch: it sends none of its own counts, and each person's Fabric Inbox app sends that
+  server's counts under the app's own switch (`desktop/analytics.cjs` lines 352 to 353 and 422 to 429 at `1395416`),
+  so a server an organization deploys for several members is counted by each member's app under that member's switch
+  (UD-1's scope). Project Observatory was read as the digest store
+  (OBS-330); it also turned anonymous usage and error data on by default in its 0.33.0 and first sent it from 0.33.1,
+  the first release build carrying its key (OBS-324, OBS-329; its `CHANGELOG.md` and `docs/COMPATIBILITY.md`,
+  "Workspace state: anonymous usage data", at `2a11b3fd`), to the second store above rather than PassionCode.ai's host
+  (`observatory/engine/usage_analytics.py` line 61 at `2a11b3fd`); its notice (lines 99 to 102) names no destination,
+  so it owes UD-1's "where", and its UD-5 page states that store; it owes UD-1's "nothing before the notice" too:
+  `record` queues an event whenever it collects (lines 437 to 442), its `flush` checks only the switch and its app key,
+  never whether the notice was shown (lines 558 to 580), and its scheduled maintenance pass flushes the queue
+  (`observatory/engine/maintenance.py` lines 1117 and 1125 to 1129 at `2a11b3fd`), while its notice reaches only a
+  person's terminal or its opened dashboard, so what an install queued before either is sent at the next pass; that notice also names neither its own, unshared
+  installation id (line 12, `install_id` at lines 288 to 300) nor its session id, so it owes naming both (UD-1), and
+  its session id is one per process (lines 401 to 409), so where a process lives past an idle hour it owes UD-3's
+  renewal; it reads only its own switch file, never the shared file (`usage_analytics.py` lines 64 and 154 at `2a11b3fd`), so it owes UD-2's kept decline (a shared off read before a new install's first send and at its conforming version's stand-in run) and UD-2's hold on an unreadable shared file; the rest of its sender, whether its MCP surface offers its switch (UD-4) included, was not read against these rules. It also sends OpenRouter attribution on every
+  request it makes to OpenRouter whatever its usage data switch says (`observatory/engine/agent/providers.py` lines 76
+  to 94), which UD-6 leaves outside the page and asks it to say on its usage data page, and that attribution carries
+  the legacy `X-Title` header too (line 93), where DEC-0065 has a product add exactly its headers and send the
+  current name. The owners of both check them against UD-1 to UD-6. Observatory's
+  encrypted workspace snapshot copies its home, the digest store included, into the person's own storage (which iCloud
+  may carry off the machine), which UD-6 counts as no sending only when its key is the person's: Observatory's to confirm. The estate's
+  hosted products in the knowledge base's plans.md item D are outside the page unless they ship an installed product
+  (pending OQ-0013),
+  and none was read. No agent rule shipped states UD-4 in full; the adapter's kits and Fabric's session rules owe it.
+  The operations digests meet UD-6 on Fabric's stdio path only: Fabric is the shipped OD-9 collector (CO-503,
+  `apps/desktop/src/shared/opsDigestCollect.ts`) and sends only its own daily lines to the local Project Observatory's
+  `ops.digest.record` (OBS-330) over local stdio, refusing every other service's (`apps/desktop/src/main/opsDigestSend.ts`
+  lines 45 to 47 at `eafcf2e4`), so it sends none of them; CO-503's planned delegated path for other services'
+  lines (the same file, lines 10 to 12, through Observatory's HTTP door for `ops.digest.record`) hands them to a store on
+  the same machine, which is no sending, and owes UD-6's condition and a test only if it ever sends them to a store or
+  party other than the person's; Observatory
+  (OBS-330) is the store and sends no digest outward; Fabric Inbox writes its OD-9 declaration whatever its switch says (B-210,
+  `desktop/fabric-descriptor.cjs`), which UD-6 allows, and its server's `get_ops_digest` tool (`GET /api/ops-digest`,
+  `docs/agents/mcp.md` line 278 at `1395416`, B-205) answers the person's own agent from the server the person deploys,
+  a read UD-6 allows since no product owner receives the data. A product's install and active counts move at the version that
+  meets UD-1 and UD-2: they drop where the product sent before its notice or past an earlier no (Switchboard, Fabric
+  Inbox, Fabric Dashboards, and Project Observatory, whose queued events are sent before its notice and past an earlier
+  no, counted in the operator's earlier analytics instance) or when the shared file could not be read (Fabric Inbox's baseline and Fabric Dashboards'
+  events without an id), and rise where it waited for an answer (Fabric, whose never-answered installs send nothing
+  today and come on after its notice at CO-496); an installation id a product owns, made anew at re-enable (UD-2),
+  counts that install again. That version is to be marked where its counts are read. Events the host already
+  received past an earlier no (from Switchboard, Fabric Inbox and Fabric Dashboards before their conforming versions)
+  cannot be told apart there, since Fabric, under whose shared switch those people declined, sent nothing for those
+  installs, and stay under the host's retention: the
+  operator chooses whether to accept that or to have those products' events from before their conforming versions
+  dropped. `contractVersion` stays `0.1.0`.
+- **Consequences / affects:** `docs/specification/usage-data.md` (new), `docs/OPEN_QUESTIONS.md` (OQ-0013, the second
+  purpose and the hosted services' scope, for the operator; OQ-0014, the repair of a shared file that stays
+  unreadable), `docs/specification/conformance.md` (a product
+  row, an agent row, the OD-9 declarer's row, the collector's row, and the rows for a device applying policy and a
+  device deciding under its policy), `docs/specification/ops-digest.md` (OD-6 and Not
+  decided here point to UD-6), `docs/specification/activity.md` (its purpose points to UD-6's channel separation),
+  `docs/specification/openrouter-attribution.md` (its default points to UD-6), `docs/specification/devices.md`
+  ("Precedence and locks" points to UD-2's limit on a lock), `docs/specification/governance-and-roles.md` (OW-1 and OW-5
+  name UD-4's switch), conformance's row for a service that reads authority levels (the switch's bar the agent's), `docs/specification/membership.md` (LV-7 links UD-4) and DEC-0162's annotation (the second
+  lander's edits after DEC-0156 and DEC-0162),
+  `docs/specification/README.md`, `docs/DOCMAP.md`, `CONTEXT.md` (usage data; Policy layer), `docs/ux/scenarios.md` (SCN-043's alt
+  path for UD-4 and its Coverage; SCN-011's alt path, Expected result and Coverage for UD-2's lock limit),
+  `docs/ux/flows.md` (FLW-07), `docs/ux/screens.md` (SCR-10), `docs/ux/foundation.md` (ST-008, JTBD-04, JRN-03 #2), backlog CT-216 and CT-280 (a reference for UD-2's limit on a lock); the handoff `docs/handoffs/2026-11-07-usage-data.md` and its row in
+  `docs/handoffs/README.md`. The notice and each product's own switch screens are the product's (Fabric's SCR-52 and SCN-134,
+  which owe UD-1 and UD-2 under its CO-496 rewrite), not this contract's UX; the contract's device-settings surface
+  (SCR-10, FLW-07) carries UD-2's lock limit.
+- **Source:** the operator's decision of 2026-11-04 (CT-216; the knowledge base's roadmap track RM-13, product analytics private by default, and plans.md item D); the reading of the operator's decision in board reply `cbea0b76`; the consent rules of the estate's growth and experiments service (board `42a41db8`); Fabric
+  ADR-0127 and `docs/ANALYTICS.md`; Fabric Switchboard `docs/ANALYTICS.md`. DEC-0157 reserved by git CAS on 2026-11-07.
+
 ### DEC-0162: authority levels: `org-membership/2`, the level decision and the level mandate
 
 - **Date:** 2026-11-12
@@ -11814,6 +12238,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   2026-11-06 as recorded in fabric-workspace `knowledge/authority.md`; board request `4a1bf8d6` (thread `8da128cf`);
   backlog CT-250.
 - **Annotated (2026-11-14):** LV-7 amended by DEC-0166: in an organization's context, at a service that reads levels, an act declared `owner` or `admin` takes no place's standing mandate either, its `setLevel` being the hub's statement rather than an attestation (AU-2; an attested setter's level is CT-309).
+- **Annotated (2026-11-15):** LV-7 cited by DEC-0157 UD-4: a level decision is a person's word for a usage-data switch
+  that person turned off only when the level holder is that person, who is the agent's operator, or holds the organization's switch for
+  a component it deploys; in an organization's context, at a service that reads levels, only a level decision decides
+  the switch's `change-policy` action.
 
 ### DEC-0163: a usage report's cost sums hold within each row's rounding
 
@@ -11929,7 +12357,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `fabric-activity/0.1`, one transport, one attribution, one person rule); `org` in the event (refused: the stream's
   attribution names the organization); `cost` as `null` (refused for the envelope's own form, `{usd: null}`, which
   `FAC-SEM-038` already reads); an id without `run.root` (refused on Observatory's answer: a second acceptance would be dropped as a repeat). Where the decision departs from the design: `evidence` any URI (narrowed to an http(s) URI without user information, a URN or a `sha256:` digest, so user information and a local path do not ride as evidence; a credential in a query string or a URN body is the writer's duty, as for any reference); `taskClassMap` "required unless unclassified" (now present exactly when classified, so an unclassified unit names no map it was not read from); no bound on `acceptedAt` (added: not after `occurred`, with 60 s of skew, an acceptance not recorded before it happened, and `acceptedAt` named the month key); `acceptedBy` in `activity-common` (kept in `$defs/unit`, its only user); one rule code carrying every conditional (the conditionals moved to the schema, one event per transition and `run.root` to `FAC-SEM-039`'s duplicate id, and `FAC-SEM-171` carries the derivation, the `acceptedAt` bound and the github, jira and mail key forms); `cost` the agent's spend on the unit (now the spend since the previous transition, summed by a reader, an attribution never added to usage totals); serving per agent, project or task class (now also only for an organization whose member list names at least 3 members, never by role or person); `occurred` the event's time (for a held unit, when its writer recorded the transition, never restamped); the key as the tracker returns it (now one form per system, so two writers of one unit derive one id).
-- **Compatibility:** additive for a receiver that lists `activity-unit/1`; an older one stores a `unit` without `evidence` as an unknown kind and refuses one with it (AE-5), which `test/activity-unit.test.ts` pins against the unknown-kind branch. A receiver keeps a `unit` event once per `eventId` within the organization, whatever device or channel wrote it (activity's *Event id*, Batch and OTLP intake amended). Activity telemetry is restated by kind and channel (activity's opening, CONTEXT.md); DEC-0157 UD-6's description of it, on branch `agent/ct216-usage-data-v2` until it lands, is restated by whichever lands second (the handoff's landing note). Owed: the route function for a unit (CT-297); the adapter kits' hand-kept `PROTOCOL_REVISIONS` gain `activity-unit` ['1'] at their next repin (their feed-protocols test checks them); Observatory's node outbox, which mints a ULID today and must derive a unit's id and carry `run` and `project`; Observatory's journal and its
+- **Compatibility:** additive for a receiver that lists `activity-unit/1`; an older one stores a `unit` without `evidence` as an unknown kind and refuses one with it (AE-5), which `test/activity-unit.test.ts` pins against the unknown-kind branch. A receiver keeps a `unit` event once per `eventId` within the organization, whatever device or channel wrote it (activity's *Event id*, Batch and OTLP intake amended). Activity telemetry is restated by kind and channel (activity's opening, CONTEXT.md); DEC-0157 UD-6's description of it, which landed after this decision (2026-11-15), is restated by whichever lands second (the handoff's landing note). Owed: the route function for a unit (CT-297); the adapter kits' hand-kept `PROTOCOL_REVISIONS` gain `activity-unit` ['1'] at their next repin (their feed-protocols test checks them); Observatory's node outbox, which mints a ULID today and must derive a unit's id and carry `run` and `project`; Observatory's journal and its
   capability `activity.unit.record` (OBS-378, after this decision); the adapter's kit writer (G1-b); the assessment's
   class map (G1-c); the join into the metric (G1-d).
 - **Consequences / affects:** `schemas/telemetry-event.schema.json` (`$defs/unit` and the kind), `src/activity-rules.ts`
