@@ -242,7 +242,7 @@
         "executed-by-holder",
         "none"
       ],
-      "description": "With allow only: how the form reaches the callee, never the form itself: caller-approval with route approval, executed-by-holder with route level, none exactly with own-act, hub-dispatch otherwise (FAC-SEM-179)."
+      "description": "With allow only: how the form reaches the callee, never the form itself: caller-approval exactly with route approval, none exactly with own-act, executed-by-holder only with route level, and hub-dispatch with any other route, level included (FAC-SEM-179)."
     },
     "grounds": {
       "type": "array",

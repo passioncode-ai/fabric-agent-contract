@@ -39,7 +39,11 @@ const KINDS = [
   // An agent's source manifest, its tree and the package beside it (FAC-SEM-156 to FAC-SEM-160, DEC-0149).
   "source-manifest", "source-tree", "source-package",
   // An operations digest, its window, its sums and its rises (FAC-SEM-166), no credential as an operation (FAC-SEM-167, DEC-0153).
-  "ops-digest-hourly", "ops-digest-daily"
+  "ops-digest-hourly", "ops-digest-daily",
+  // A statement that an instance runs for an organization (DEC-0170).
+  "org-instance",
+  // A decision verdict and its check against the reference (FAC-SEM-179, DEC-0172).
+  "decision-verdict", "decision-verdict-reference"
 ];
 const WRONG: unknown[] = [null, 7, "x", true, [], [null, 3, "y"], { a: null }];
 /** An object whose every member named in `names` holds `value`. */
@@ -214,7 +218,7 @@ describe("every rule kind tolerates {toString: 1} members (DEC-0082)", () => {
   it.each(semantic)("semantic fixture %s: each leaf and node replaced in turn", (_name, kind, input) => poisonEach(kind, input));
 
   const SCHEMA_KIND: Readonly<Record<string, string>> = {
-    "approval.schema.json": "approval-claims", "delegation-token.schema.json": "delegation-claims", "governance.schema.json": "grant",
+    "decision-verdict.schema.json": "decision-verdict", "approval.schema.json": "approval-claims", "delegation-token.schema.json": "delegation-claims", "governance.schema.json": "grant",
     "fabric-package.schema.json": "package", "versioned-setting.schema.json": "versioned-setting", "result.schema.json": "result", "interop-job.schema.json": "interop-job",
     "roles.schema.json": "roles", "coordination.schema.json": "coordination", "comms-directory.schema.json": "comms-directory",
     "comms-message.schema.json": "comms-message", "comms-submit.schema.json": "comms-submit", "fabric-proposal.schema.json": "proposal",

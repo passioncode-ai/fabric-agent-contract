@@ -391,10 +391,10 @@
 
 - **Used by:** FLW-32
 - **Purpose:** the member sees which organization, which server and which root key they admit before their passkey signs, and later the state of each membership.
-- **Elements:** the organization's id and server origin; the root key's fingerprint; "Join" (the passkey prompt); per membership: role, `active`, `suspended` or `ended`, and what leaves for the organization (OM-7's rows), with a note that an instance of the organization placed on this machine can read this machine's estate records (DEC-0146); the adaptation plan: the chosen items and their labels, the requests and each one's state (`pending`, `granted`, `refused`, `expired`) and when it was decided or closed (DEC-0138).
+- **Elements:** the organization's id and server origin; the root key's fingerprint; "Join" (the passkey prompt); per membership: role, `active`, `suspended` or `ended`, and what leaves for the organization (OM-7's rows), with a note that an instance of the organization placed on this machine can read this machine's estate records (DEC-0146); the adaptation plan: the chosen items and their labels, the requests and each one's state (`pending`, `granted`, `refused`, `expired`) and when it was decided or closed (DEC-0138); for an administrator, the organization's instances: product, origin, placement, status, revision and `expiresAt` of each signed statement, where the administrator's Fabric is given them (DEC-0170; how a statement reaches a reader is not decided, IS-4).
 - **States:** joining, the root shown; joined, the role; suspended, the attestation expired and when it was last verified; ended, when and why; ended, the passkey's signature pending; refused, the verifier's reason; no plan yet; a plan sent, a request decided or expired, a plan refused with its code, a plan withdrawn; the server takes no plans from Fabric; a plan held while the membership is suspended; a typed text at its limit, the limit shown (label 80, resource 120, note and purpose 200); leaving: the plan withdrawn first within the wait the person agrees to, and when no receipt confirmed the withdrawal, that the plan may remain with the server and, where the server offers a page for it, can be withdrawn there.
-- **Coverage:** `src/org-membership.ts` (`verifyOrgMembership`, `verifyOrgKeySet`, `FAC-SEM-145` to `FAC-SEM-147`), `test/org-membership.test.ts`, `src/org-adaptation.ts` (`decideAdaptation`, `adaptationReceipt`, `FAC-SEM-153`), `test/org-adaptation.test.ts`
-- **Scenarios:** SCN-047, SCN-048, SCN-049, SCN-050
+- **Coverage:** `src/org-membership.ts` (`verifyOrgMembership`, `verifyOrgKeySet`, `FAC-SEM-145` to `FAC-SEM-147`), `test/org-membership.test.ts`, `src/org-instance.ts` (`verifyOrgInstance`, `FAC-SEM-177`), `test/org-instance.test.ts`, `src/org-adaptation.ts` (`decideAdaptation`, `adaptationReceipt`, `FAC-SEM-153`), `test/org-adaptation.test.ts`
+- **Scenarios:** SCN-047, SCN-048, SCN-049, SCN-050, SCN-064
 - **Resources:** membership specification, The organization's keys, Ending, What leaves a person's Fabric, The adaptation plan
 - **Status:** proposed
 
@@ -418,6 +418,17 @@
 - **Coverage:** `src/local-channel.ts` (`channelStep`, `maySecretPrompt`, `secretOutcome`), `test/local-channel.test.ts`
 - **Scenarios:** SCN-053
 - **Resources:** local channel specification, Secret requests
+- **Status:** proposed
+
+### SCR-35: Turn and account cells
+
+- **Used by:** FLW-35
+- **Purpose:** show an organization's administrator how long agents' turns take and which provider plans the organization's machines hold, as summary cells only.
+- **Elements:** the day or range; turn cells (agent, workflow, project, turns, the six buckets of `turnMs`, model and tool time); inventory cells (provider, plan, billing, machines, accounts); the folded other cell and `suppressedCells`; no person, machine or session column.
+- **States:** none published (the summary's lists are empty, or it is `/1` and has none; `suppressedCells`, which counts withheld cells of every kind, shown when the summary carries it, and nothing shown when it does not; no reason given, since the summary does not say whether too few people worked or the receiver does not read these kinds); success (each list shown on its own: a list with cells, and an empty list with the same "none published" wording, never a reason; inventories two enrollments of one organization both list go to neither, SI-3, so a count may be low).
+- **Coverage:** `activity-summary-2.schema.json`, fixture `positive/activity-summary-2.json`, vectors `activity-turn.json`
+- **Scenarios:** SCN-063
+- **Resources:** activity specification, Summary (`activity-summary/2`)
 - **Status:** proposed
 
 ### SCR-32: A Project's sessions and its main one

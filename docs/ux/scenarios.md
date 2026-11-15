@@ -66,6 +66,8 @@
 | SCN-053 | An agent needs a token; I type it into my app's own window | secret prompt | P-02 | ST-040, FLW-34 | draft | not audited |
 | SCN-055 | An agent author learns that a channel-agent declaration is not read and why, or what it still owes | authoring | P-01 | ST-001, FLW-01 | draft | not audited |
 | SCN-057 | Tell my agent to do a task: it carries my word out the first time | governance | P-02 | ST-035, FLW-29 | draft | not audited |
+| SCN-063 | As my organization's administrator, read how long agents' turns take and which plans our machines hold, as cells | telemetry | P-02 | ST-044, FLW-35 | draft | not audited |
+| SCN-064 | As an administrator, I add an instance to my organization and later retire it; a reader trusts only the signed statement | membership | P-03 | ST-038, FLW-32 | draft | not audited |
 
 ## Personas
 
@@ -307,6 +309,27 @@ independent agent author and P-02 project operator.
 - **Errors & recovery:** a read without a logged entry is a receiver defect against DEC-0030; the member raises it with the organization under its notice.
 - **Status:** draft
 - **Coverage:** `access-log.schema.json`, fixtures `access-log*`
+- **Product:** unobserved
+
+### SCN-063: As my organization's administrator, read how long agents' turns take and which plans our machines hold, as cells
+
+- **Persona:** P-02
+- **Feature:** telemetry
+- **Traces:** ST-044, FLW-35 (JTBD-11, JRN-10/#1)
+- **Entry point:** the organization receiver's summary page
+- **Preconditions:** the organization's notice covers `turn` and `account.inventory` under its purposes (the first organization server chose `activity-logs` and `usage-and-cost`, DEC-0171's Compatibility; the contract names no purpose for them); seven members' collectors sent turns this week; one member works alone on a project; the machines hold two provider plans of the organization; the receiver's `minPopulation` is 5
+- **Steps:**
+  1. Administrator opens the summary for the week -> the receiver serves `activity-summary/2` for each day.
+  2. The turn cells list each agent, workflow and project with its turns, buckets and model and tool time -> the administrator sees which agent and workflow waits longest, by bucket.
+  3. The lone member's project has a population of 1 -> its turns are folded into the day's other cell or suppressed and counted in `suppressedCells`; no cell names the project with that member's turns alone.
+  4. The inventory cells list each provider, plan and billing with machines and accounts -> the administrator sees which plans the organization's machines hold (what it pays for on the platform stays the platform's licences); no personal or unknown account appears (SI-2).
+- **Expected result:** turn time and accounts are read only as cells at or above `minPopulation`, never per person, machine or session; a partner organization is never served them (DEC-0171 RT-4, SI-5); a member's access log lists none of these reads, because a cell carries no person (SCN-010).
+- **Alt paths:** the summary's lists are empty, or it is `/1` -> the page says no turn or inventory cells are published for the range and shows `suppressedCells` when the summary carries it, without a reason (too few people and a receiver that does not read these kinds look the same).
+- **UI elements:** day or range, turn cells, inventory cells, other cell, suppressed count.
+- **States covered:** none published, success
+- **Errors & recovery:** a cell below the floor, buckets that do not add up to the turns or a population above the turns are refused by `FAC-SEM-040`; the receiver republishes the day.
+- **Status:** draft
+- **Coverage:** `activity-summary-2.schema.json`, fixture `positive/activity-summary-2.json`, vectors `activity-turn.json`
 - **Product:** unobserved
 
 ### SCN-011: A locked setting is refused and shown
@@ -1220,6 +1243,27 @@ independent agent author and P-02 project operator.
 - **Errors & recovery:** a refused list -> its reason is shown to the administrator; the relay keeps the list it held until it expires or its signer leaves the key set.
 - **Status:** draft
 - **Coverage:** DEC-0129 OL-1 to OL-5, `verifyOrgAuthority` in `src/org-authority.ts`, `orgRelayAdmissionSet` in `src/org-authority.ts`, `FAC-SEM-146`, `FAC-SEM-150`, `test/org-authority.test.ts`; the relay's handshake for an organization is DEC-0134 (relay.md OR-1 to OR-5, `sessionStands`)
+- **Product:** unobserved
+
+### SCN-064: As an administrator, I add an instance to my organization and later retire it; a reader trusts only the signed statement
+
+- **Persona:** P-03
+- **Feature:** membership
+- **Traces:** ST-038, FLW-32 (JTBD-04, JRN-03/#1)
+- **Entry point:** the organization server's instance list, where an owner or an administrator records an instance
+- **Preconditions:** the organization's `org-key-set/1`, signed by the root, lists a signing key; the platform and the instance's product hold the organization's applied key set (DEC-0170)
+- **Steps:**
+  1. The administrator records an instance (`org.instance_added`: its id, product, `https://` origin and placement) -> the server signs `org-instance/1` at the next revision with `status: active`, a life of at most 7 days (IS-1, IS-4).
+  2. The platform's `instance_put` for `org:<orgId>` verifies the statement offline (`verifyOrgInstance`: the organization's key, the path's instance, the window, a revision not below the one held) -> it stores the verdict's `digest` and `revision` (IS-3).
+  3. At least a day before `expiresAt` the server re-issues the statement (IS-4) -> a reader whose held statement reads `refreshDue` fetches it and keeps serving the instance (IS-2).
+  4. The administrator retires the instance (`org.instance_retired`) -> the server issues `status: retired` at a higher revision and nothing after it; a reader that fetches it stops serving the instance, and the earlier `active` statement is then `stale-revision` (IS-2, IS-4).
+- **Expected result:** a reader accepts a stated instance for the organization only on a statement the organization's key signed for that instance (what a reader does with an instance that has no statement is still open, CT-317 (3)); a retirement is stated, never left to silence, and reaches a reader at its next fetch, at most 7 days later.
+- **Alt paths:** the statement is past `expiresAt` -> refused `expired`, no grace; signed by a revoked or unlisted key -> `key-revoked` or `unknown-key`; another organization's or another instance's statement -> `wrong-org` or `wrong-instance`; the same revision with other bytes -> `revision-conflict`; an instance reachable only at a port or at `http://127.0.0.1` on a member's machine -> not stated (DEC-0170, not decided there).
+- **UI elements:** SCR-31: per instance its product, origin, placement, status, revision and `expiresAt`.
+- **States covered:** success, error
+- **Errors & recovery:** a refused statement -> the reader shows the verifier's reason and keeps the record it held; the administrator has the server re-issue under a listed key.
+- **Status:** draft
+- **Coverage:** DEC-0170 IS-1 to IS-4, `verifyOrgInstance` in `src/org-instance.ts`, `FAC-SEM-177`, `test/org-instance.test.ts`, vectors `org-instance.json`
 - **Product:** unobserved
 
 ### SCN-050: I bring my work into an organization and ask its administrators for what it needs

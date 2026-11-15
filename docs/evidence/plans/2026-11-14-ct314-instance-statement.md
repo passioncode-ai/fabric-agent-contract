@@ -57,7 +57,7 @@ signature by the organization's applied key set; `instanceId` equal to the path 
 stores the `digest` and `revision` the verdict returns.
 
 **IS-4, the issuer's duties.** The organization server issues a statement only on a record an owner or an administrator
-made (`org.instance_added`; a level decision where the server reads levels, DEC-0162 LV-7), re-issues each active one
+made (`org.instance_added`; a level decision where the server reads levels, DEC-0162 LV-3 and LV-4), re-issues each active one
 at least a day before `expiresAt`, issues `status: "retired"` at a higher revision on `org.instance_retired` and none
 after it, and never signs one revision with other bytes.
 

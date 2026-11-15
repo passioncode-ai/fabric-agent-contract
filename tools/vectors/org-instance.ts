@@ -117,6 +117,10 @@ function verifyCases(): Json[] {
   const day7 = instance({ expiresAt: "2026-10-27T00:00:00Z" });
   const day7Plus = instance({ expiresAt: "2026-10-27T00:00:00.001Z" });
   const early = instance({ notBefore: "2026-10-25T00:00:00Z" });
+  const k2Edge = instance({ issuedAt: "2026-10-15T00:00:00Z", notBefore: "2026-10-15T00:00:00Z", expiresAt: "2026-10-16T00:00:00Z" });
+  const k2Before = instance({ issuedAt: "2026-10-14T23:59:59.999Z", notBefore: "2026-10-14T23:59:59.999Z", expiresAt: "2026-10-16T00:00:00Z" });
+  const k1Late = instance({ issuedAt: "2026-10-31T23:59:59.999Z", notBefore: "2026-10-31T23:59:59.999Z", expiresAt: "2026-11-03T00:00:00Z" }, K1);
+  const retiredAlone = instance({ status: "retired", revision: 4, issuedAt: "2026-10-21T00:00:00Z", notBefore: "2026-10-21T00:00:00Z", expiresAt: "2026-10-28T00:00:00Z" });
   return [
     c("valid: an active instance on the organization's cloud", BASE, trust(), accepted(BASE)),
     c("valid: an instance on a member's machine", machine, trust(), accepted(machine)),
@@ -142,6 +146,12 @@ function verifyCases(): Json[] {
     c("too long: notBefore before issuedAt", instance({ notBefore: "2026-10-19T23:59:59Z" }), trust(), refused("too-long-lived")),
     c("not yet valid: before notBefore", early, trust(), refused("not-yet-valid")),
     c("not yet valid: 60 s before notBefore is within the clock skew", early, trust({ now: "2026-10-24T23:59:00Z" }), accepted(early)),
+    c("not yet valid: 60.001 s before notBefore is past the clock skew", early, trust({ now: "2026-10-24T23:58:59.999Z" }), refused("not-yet-valid")),
+    c("too long: notBefore at expiresAt", instance({ notBefore: "2026-10-27T00:00:00Z" }), trust(), refused("too-long-lived")),
+    c("key window: issued at the key's notBefore is inside it", k2Edge, trust({ now: "2026-10-15T12:00:00Z" }), accepted(k2Edge, true)),
+    c("key window: issued a millisecond before the key's notBefore", k2Before, trust({ now: "2026-10-15T12:00:00Z" }), refused("key-not-valid")),
+    c("key window: issued inside the window, read after the key's notAfter while the set still lists it", k1Late, trust({ now: "2026-11-02T00:00:00Z" }), accepted(k1Late, true)),
+    c("retired: a retirement with no held record verifies and reads retired", retiredAlone, trust(), accepted(retiredAlone)),
     c("expired: at expiresAt, no grace", BASE, trust({ now: "2026-10-27T00:00:00Z" }), refused("expired")),
     c("refresh due: a day before expiresAt", BASE, trust({ now: "2026-10-26T00:00:00Z" }), accepted(BASE, true)),
     c("refresh not due: a millisecond earlier", BASE, trust({ now: "2026-10-25T23:59:59.999Z" }), accepted(BASE)),

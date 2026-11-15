@@ -1655,6 +1655,28 @@
       }
     },
     {
+      "name": "two enrollments of one organization list one tenant: ambiguous, sent to neither",
+      "tenantRef": "sha256:7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a",
+      "enrollments": [
+        {
+          "org": "org_a",
+          "tenants": [
+            "sha256:7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a"
+          ]
+        },
+        {
+          "org": "org_a",
+          "tenants": [
+            "sha256:7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a"
+          ]
+        }
+      ],
+      "answer": {
+        "route": "none",
+        "reason": "ambiguous"
+      }
+    },
+    {
       "name": "a tenant compared as written, never case-folded",
       "tenantRef": "SHA256:7A7A7A7A7A7A7A7A7A7A7A7A7A7A7A7A7A7A7A7A7A7A7A7A7A7A7A7A7A7A7A7A",
       "enrollments": [

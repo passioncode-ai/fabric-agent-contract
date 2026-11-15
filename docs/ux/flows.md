@@ -1000,3 +1000,22 @@ flowchart TD
 | BP-182, BP-185, BP-189 | applied (band) | normative language uses one glossary and separates obligations from examples |
 | BP-186..188 | applied (band) | errors name gate, consequence and recovery without exposing secrets |
 | BP-079..181 | rejected (band) | no graphical UI, forms, motion, navigation shell or public web surface ships in v0.1 |
+
+### FLW-35: An organization's administrator reads turn time and account cells
+
+- **Traces:** ST-044 (JTBD-11, JRN-10/#1)
+- **Goal:** the administrator sees where agents wait and which provider plans the organization's machines hold, with no person in sight
+- **Entry points:** the organization receiver's summary page
+- **Success exit:** the day's turn cells and inventory cells are shown, each at or above the summary's `minPopulation`; the rest of a day folded into one other cell of its kind, or suppressed and counted in `suppressedCells`
+- **Task analysis:** sign in as an administrator → choose a day or a range → the receiver serves `activity-summary/2` for it → the page shows turn cells (agent, workflow, project, turns, buckets, model and tool time) and inventory cells (provider, plan, billing, machines, accounts) → merging buckets across days shows the bucket a median or a 95th percentile falls in, never an exact value.
+- **Rejected shape:** a per-person or per-machine table of turn times or accounts, rejected because a turn's subject is a person and another person reads turns and inventories only as cells (DEC-0171 RT-3, RT-4, SI-5).
+- **Flow:**
+
+```mermaid
+flowchart TD
+  A[Screen: Turn and account cells] --> R{The summary lists turn or inventory cells?}
+  R -->|no| N[None published: empty lists, or a /1 summary; suppressedCells shown when carried, no reason given]
+  R -->|yes| S[Turn cells and inventory cells, each at or above minPopulation; the rest folded into one other cell or suppressed]
+```
+
+- **Screens traversed:** SCR-35 none published; SCR-35 success.

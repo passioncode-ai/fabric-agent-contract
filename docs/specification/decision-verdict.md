@@ -58,7 +58,9 @@ without consuming its `jti`, which only the callee consumes, DL-17; a verifier t
 only as such an inspection, DL-18; a level decision or mandate bound by `mem`; a standing mandate bound by `prof`);
 `taken`, a form `actionDecision` or `mandateCovers` takes from this caller without a signature to verify (the operator's
 words through one of AP-3's four sources, a task mandate MD-3 takes, a place's standing mandate AU-3 takes inside the
-boundary); `forwarded`, an OA-2 relay OA-3 accepts; `data`, anything else. A `grant`, a `budget` or a `check` carries no
+boundary, a task mandate relayed under OA-2 with its `source` included); `forwarded`, an OA-2 relay OA-3 accepts, as a
+`relay` ground or as the `decision` it carries (a mandate stated from it, or relayed as one, is `taken`); `data`,
+anything else. A `grant`, a `budget` or a `check` carries no
 grade: it can make an act `human`, never ground its `allow`, and a `budget` reads "read, not reserved". An entitlement
 (DEC-0168) is no ground: `allowances: unlimited` never grounds an `allow` and never clears `spend-limit`.
 
@@ -111,7 +113,7 @@ about `fabric.job.get` and is checked only with `{check: "action"}`, whose `mand
 capability (MJ-1); a mandate reference for a step is refused. A step's verdict is advice only: the step carries no
 receipt (DV-8). An `allow` is consistent only when the reference takes the call, and its route is how the reference
 took it (an accepted approval `approval`; an elicitation or the operator's words in the caller's own session `operator`;
-the operator's words carrying OA-6's `source` `forwarded`; a level command, or a mandate stated `by: level`, `level`; a
+a decision of the operator's words carrying OA-6's `source` `forwarded` (a mandate relayed so is still `mandate`); a level command, or a mandate stated `by: level`, `level`; a
 standing mandate `profile`; a task mandate `mandate`; the caller's own act `own-act`). So the check fails an `allow` of a
 `change-policy` act under any mandate, of an organization's act LV-7 keeps for a level under any other form, and of a T2
 call without its approval. A send to people outside the estate under a profile is refused because the service passes no
@@ -123,7 +125,8 @@ the verifier's own and is checked as a document.
 
 A record the verifier's journal keeps of the operator's words is a copy of what the contract already accepts, never a
 new source: in the agent's own session it is the words the agent heard (`taken`), and across sessions it grounds an act
-exactly as an OA-2 relay does when it carries OA-2's four parts from OA-3's provenance (`forwarded`, accepted without a
+exactly as an OA-2 relay does when it carries OA-2's four parts from OA-3's provenance (a decision `forwarded`, a
+relayed task mandate `taken` under route `mandate`; accepted without a
 second approval, DEC-0126). AP-1 and AP-3 are unchanged: no host-only press is added, and no record needs the person to
 confirm it (OW-2). A record read back through the door is a tool's output, which OA-3 calls data: it grounds another
 session only when the same words also arrived through OA-3's provenance. A record the operator withdrew, or whose words

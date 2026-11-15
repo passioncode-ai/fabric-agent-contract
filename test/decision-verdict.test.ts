@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { SCHEMA_PREFIX, projectRoot } from "../src/contract.js";
-import { argsDigest, askedDigest, checkVerdictDispatch, verdictId } from "../src/decision-verdict.js";
+import { argsDigest, askedDigest, checkVerdictDispatch, decisionVerdictRules, routesOf, verdictId } from "../src/decision-verdict.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
 import { createValidator, validateDocument } from "../src/validator.js";
 import { buildDecisionVerdictVectors, VECTOR_FILE } from "../tools/vectors/decision-verdict.js";
@@ -55,5 +55,30 @@ describe("decision verdicts (DEC-0172)", () => {
     for (const route of ["toString", "constructor", "__proto__"]) expect(() => codes("decision-verdict", { ...allow, route })).not.toThrow();
     expect(checkVerdictDispatch({ call: { verdict: "x" }, journal: allow, now: "2026-11-15T10:05:00Z", hostKey })).toEqual({ ok: false, code: "decision-invalid", data: { detail: "verdict-mismatch" } });
     expect(checkVerdictDispatch({ call: { ...(vectors.dispatches[0] as Json).call }, journal: { ...allow, asked: "none" }, now: "2026-11-15T10:05:00Z", hostKey })).toEqual({ ok: false, code: "decision-invalid", data: { detail: "verdict-mismatch" } });
+  });
+  // CT-323: the module's defensive branches, so the coverage set measures it whole.
+  it("reads a route only from a recordAs the reference writes", () => {
+    expect(routesOf("caller")).toEqual(["own-act"]);
+    expect(routesOf(null)).toEqual([]);
+    expect(routesOf({ by: "operator", via: "a-route-no-reference-writes" })).toEqual([]);
+    expect(routesOf({ by: "level", via: "mandate" })).toEqual(["level"]);
+    expect(routesOf({ by: "operator", via: "mandate", source: { thread: "t-1" } })).toEqual(["mandate"]);
+    expect(routesOf({ by: "operator", via: "relayed-instruction", source: { thread: "t-1" } })).toEqual(["forwarded"]);
+  });
+  it("answers no kind it does not own", () => expect(decisionVerdictRules("result", {})).toBeUndefined());
+  it("flags an allow whose reference throws instead of answering, and never throws itself", () => {
+    const allow = vectors.documents.find((c) => c.schemaValid && c.findings.length === 0 && c.verdict.verdict === "allow")!.verdict;
+    const input = Object.defineProperty({}, "mandate", { enumerable: true, get() { throw new Error("unreadable"); } });
+    const findings = evaluateSemanticRules("decision-verdict-reference", { verdict: allow, reference: { check: "mandate", input } });
+    expect(findings.map((f) => f.instancePath)).toContain("/verdict/verdict");
+  });
+  it("answers a reference whose members cannot be printed with findings, never by throwing (DEC-0082)", () => {
+    const c = vectors.references.find((r) => r.findings.length === 0)!;
+    const odd = { toString: 1 };
+    for (const change of [(v: Json) => { v.verdict.route = odd; }, (v: Json) => { v.verdict.asked.tier = odd; }, (v: Json) => { v.reference.input.tier = odd; }]) {
+      const value = JSON.parse(JSON.stringify({ verdict: c.verdict, reference: c.reference })) as Json;
+      change(value);
+      expect(() => evaluateSemanticRules("decision-verdict-reference", value)).not.toThrow();
+    }
   });
 });
