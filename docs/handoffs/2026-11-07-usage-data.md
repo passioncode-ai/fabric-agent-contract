@@ -1096,8 +1096,14 @@ not pushed for the same reason; the round entries' commits resolve only there.
   under DEC-0162 in `c2e4dc15`, with a check scoped to DEC-0162's section. Risks folded: the redirect to the setting
   in DEC item 4, the agent row and SCN-043; OW-5 names a level holder's words; UD-6's kit route goes to Observatory
   (AE-4); the Consequences name the second-lander edits; CT-216's status.
+- Round 35 (on `3f8b14d3`): clean on all three tiers.
+- Round 36 (on `3f8b14d3`): unit and seam pending; product not clean, one break: conformance's row for a service that
+  reads authority levels (from DEC-0162) put UD-4's whose-word bar on the service and said "once it lands"; rewritten
+  so the service decides the switch only by a level decision and the bar is the agent's. "that person's operator" now
+  reads "that person, the agent's operator" everywhere; SCN-043 carries the holder limit. Check:
+  `grep -c "DEC-0157 UD-4, once it lands" docs/specification/conformance.md` prints 0.
 
 ## Next task
 
-Round 35 of the blind readings of branch `agent/ct216-usage-data-v2` (DEC-0157): unit, seam and product; two clean
+Round 37 of the blind readings of branch `agent/ct216-usage-data-v2` (DEC-0157): unit, seam and product; two clean
 rounds in a row land it.

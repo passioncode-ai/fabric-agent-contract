@@ -12128,7 +12128,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   decided here point to UD-6), `docs/specification/activity.md` (its purpose points to UD-6's channel separation),
   `docs/specification/openrouter-attribution.md` (its default points to UD-6), `docs/specification/devices.md`
   ("Precedence and locks" points to UD-2's limit on a lock), `docs/specification/governance-and-roles.md` (OW-1 and OW-5
-  name UD-4's switch), `docs/specification/membership.md` (LV-7 links UD-4) and DEC-0162's annotation (the second
+  name UD-4's switch), conformance's row for a service that reads authority levels (the switch's bar the agent's), `docs/specification/membership.md` (LV-7 links UD-4) and DEC-0162's annotation (the second
   lander's edits after DEC-0156 and DEC-0162),
   `docs/specification/README.md`, `docs/DOCMAP.md`, `CONTEXT.md` (usage data; Policy layer), `docs/ux/scenarios.md` (SCN-043's alt
   path for UD-4 and its Coverage; SCN-011's alt path, Expected result and Coverage for UD-2's lock limit),
@@ -12234,7 +12234,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   backlog CT-250.
 - **Annotated (2026-11-14):** LV-7 amended by DEC-0166: in an organization's context, at a service that reads levels, an act declared `owner` or `admin` takes no place's standing mandate either, its `setLevel` being the hub's statement rather than an attestation (AU-2; an attested setter's level is CT-309).
 - **Annotated (2026-11-15):** LV-7 cited by DEC-0157 UD-4: a level decision is a person's word for a usage-data switch
-  that person turned off only when the level holder is that person's operator, or holds the organization's switch for
+  that person turned off only when the level holder is that person, the agent's operator, or holds the organization's switch for
   a component it deploys; in an organization's context, at a service that reads levels, only a level decision decides
   the switch's `change-policy` action.
 

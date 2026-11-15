@@ -152,7 +152,7 @@ The key words MUST, MUST NOT, SHOULD and MAY are used as in RFC 2119.
   the switch's action is `change-policy`, so `admin` at least, and only a level decision decides it there
   (`actionDecision`'s organization's-context row; [membership](membership.md#levels) DEC-0162 LV-7): the operator's
   decision, an accepted elicitation and an accepted `approval/1` are refused `level-insufficient`. Such a level decision
-  is the person's word for a switch that person turned off only when the level holder is that person's operator, or,
+  is the person's word for a switch that person turned off only when the level holder is that person, the agent's operator, or,
   for a component the organization deploys, holds that switch for the organization (below); otherwise the agent points
   to the setting. Any other person turns their switch on in the product's
   settings, and the agent says so. Where a component an organization deploys on its own server for its members sends
