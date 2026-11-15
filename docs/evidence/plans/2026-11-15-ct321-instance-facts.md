@@ -1,6 +1,7 @@
 # Design: where an agent runs and whose it is, three optional instance facts (CT-321)
 
-**Status:** design, 2026-11-15; to be proposed as a DEC (the DEC is normative where the two differ). Row
+**Status:** design, 2026-11-15, rounds 5 and 6 of the blind readings (seam and product) clean at `f75e1a14`; to be
+proposed as a DEC (the DEC is normative where the two differ). Row
 [CT-321](../../backlog.md); the request: Fabric Dashboards' board message `5da92f65` (thread `589abe7e`, FD-273, answer
 due 2026-11-22), relaying the operator's ask `d660cc30`; the contract's acceptance in principle `1fa97798`.
 
@@ -175,3 +176,20 @@ CONTEXT.md entries that keep `access.audience` apart from `levels[].audience` an
 `accounts.tenants`, `FAC-SEM-180` or the next free code, `instanceFacts`, the
 vectors, the service specification's section, a conformance row (a service that declares the facts, a host that shows
 them), and the answer on thread `589abe7e` with its number.
+
+## Risks the DEC decides (rounds 5 and 6)
+
+- `single` and `per-organization` for a remote copy, which has no placement `context`: the organization from
+  `org-instance/1` or Observatory's map; a local service no estate record places (read as `personal` today).
+- A remote service only one organization's members reach: `organization` without `peer` on a remote placement, or
+  `audience` left out, never `public`.
+- The unit a refusal or the well-known-first reading drops: a member (`access`) or a field (`entry`); a descriptor's
+  `entry` kept when the well-known `access` carries only `audience`; why this differs from ED-9's whole-extension rule.
+- Whose `entry` is shown when the operator enters by the host's code and others by the service's own sign-in.
+- The clauses that need the pair: also the `subscription` runner and a descriptor's `entry`.
+- `space.account`'s source in the services directory, and the shared detector applied to it (as `FAC-SEM-086` does).
+- `single` for a personal instance with `peer` that a colleague's grant reaches; `shared` refused on a local placement.
+- A vector where `org-instance/1` and the estate placement's `context` disagree; drop the IF-7 vector no rule reads.
+- The label a host shows for `audience: organization` when it reaches a colleague or guest outside any organization
+  (the details panel's scenario and CONTEXT.md); an organization named "by an id, never a name" (a device enrollment
+  carries a bare `org.id`); `public` is no offer in `service.md`'s "offered to others" sense.
