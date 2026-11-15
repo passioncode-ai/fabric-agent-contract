@@ -198,8 +198,9 @@ export function population(list: readonly JsonObject[]): number {
 /**
  * The population of a turn or inventory cell (DEC-0171 RT-4, SI-5): distinct people. Each row names the person the
  * receiver binds to its stream's epoch (`person`, from the device's binding, FAC-SEM-045) or `null` on a device bound to
- * no person, and `key`, what stands for the subject then: a turn's `session.id`, an inventory's device. One person's
- * sessions and machines are one subject; the `session.id` fallback of `population` is never used for a bound device.
+ * no person, and `key`, what stands for the subject then: the device, for a turn and an inventory alike, so one unbound
+ * device's sessions are one subject and never pass as several. One person's sessions and machines are one subject; the
+ * `session.id` fallback of `population` is never used.
  */
 export function boundPopulation(rows: readonly { person: string | null; key: string }[]): number {
   return new Set(rows.map((row) => (row.person !== null ? `person:${row.person}` : `unbound:${row.key}`))).size;

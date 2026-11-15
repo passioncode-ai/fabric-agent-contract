@@ -12658,7 +12658,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Status:** Proposed 2026-11-15 from the design `docs/evidence/plans/2026-11-15-ct318-ct319-response-time-subscriptions.md`
   (CT-318, CT-319), which rounds 4 and 5 of the blind readings (seam and product) read clean; accepted when the
   coordinator's blind readings are clean on two consecutive rounds (round 1 folded: a turn adds no subject to an
-  `activity-summary/1` cell; each kind waits for its own protocol name; FAC-SEM-045's input names `tenants`). It answers the first organization server's
+  `activity-summary/1` cell; each kind waits for its own protocol name; FAC-SEM-045's input names `tenants`; round 2
+  folded: membership's OM-7 lists account inventories; an unbound device counts as one subject). It answers the first organization server's
   request (board message `356b6aae`, thread `1efdc2e1`, due 2026-11-22; its plan G1 and G2, fabric-workspace
   `docs/plans/2026-11-15-work-machines/README.md` at `8144e7ec`), which quotes the operator's decisions of 2026-11-15:
   activity, response time and process optimization are measured per agent, workflow and project; people appear only in
@@ -12696,7 +12697,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      `population`, `turns`, `turnBuckets` (`under1s`, `under5s`, `under15s`, `under60s`, `under300s`, `from300s`,
      `turnBucket`) and the sums `modelMs` and `toolMs`; a reader finds the bucket a median or a 95th percentile falls
      in. A turn cell's population counts people (`boundPopulation`): the person the receiver binds to the stream's
-     epoch, and on a device bound to no person the session. It is published at the summary's `minPopulation` (the
+     epoch, and on a device bound to no person that device (one unbound machine's sessions are one subject). It is published at the summary's `minPopulation` (the
      organization's five is its receiver's setting, at least the contract's 3), the rest folded into one other turn cell
      or suppressed. Never per person, per machine or per session, never to a partner organization (DEC-0090), never
      exported to a backend other than the organization's own receiver. A turn adds no subject to an
@@ -12776,7 +12777,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `src/device-rules.ts` (`FAC-SEM-045`'s `tenants`), `src/session-join.ts` (`FAC-SEM-100` for turns),
   `src/protocol-revisions.ts`, `src/semantic-kinds.ts`, `tools/vectors/activity-turn.ts`,
   `fixtures/vectors/activity-turn.json`, `test/activity-turn.test.ts`, the fixtures and `fixtures/catalogue.json`;
-  `docs/specification/activity.md`, `contexts.md`, `devices.md` (attribution), `usage-data.md` (UD-6),
+  `docs/specification/activity.md`, `contexts.md`, `devices.md` (attribution, `accounts.tenants`), `membership.md`
+  (OM-7: account inventories, a turn's narrowing of a session's events), `usage-data.md` (UD-6),
   `conformance.md` (a writer and a receiver row, the receiver of activity batches, the canonical forms, the register),
   `versioning.md`, `README.md`; `CONTEXT.md`; `docs/ux/scenarios.md` (SCN-010); `docs/DOCMAP.md`; `docs/backlog.md`
   (CT-318, CT-319).

@@ -149,10 +149,10 @@ sends, and to which organization server, is decided six ways:
 | anything that is not a context id (`Personal`, `org:`, a non-string) | `{route: "none", reason: "not-a-context"}`: the collector sends nothing |
 
 `routeGrantUsage` answers as `routeTarget` with the grant's context, and `{route: "none", reason: "no-context"}` for a
-grant that states none. The reasons are `personal`, `not-a-context`, `not-enrolled`, `ambiguous` and `no-context`, and `routeInventory`'s `unlisted` (DEC-0171). Both
+grant that states none. The reasons are `personal`, `not-a-context`, `not-enrolled`, `ambiguous` and `no-context`, and `routeInventory`'s `unlisted` (DEC-0171). The
 functions are total: malformed input answers `none` and never throws, an enrollment that is not an object with an own
 string `org` is skipped, and nothing is read from an object's prototype. The shared vectors
-`fixtures/vectors/context-route.json` hold every answer and the cases a lax port gets wrong: a case-folded id, a prefix
+`fixtures/vectors/context-route.json` (and, for `routeInventory`, `activity-turn.json`'s `routes`) hold every answer and the cases a lax port gets wrong: a case-folded id, a prefix
 of an enrolled id, an enrolled id that is a prefix, `org:` with an empty or a 129-character id, `Personal`, a trailing
 newline, a bare organization id, an enrolled `org.example` no context names, non-string input, and an `org` only
 inherited through `__proto__`. The conformance row is

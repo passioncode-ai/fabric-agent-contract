@@ -1192,7 +1192,8 @@
             },
             "additionalProperties": false
           },
-          "description": "Optional: the tool calls by kind, each kind once, their calls adding up to toolCalls and their ms to toolMs (FAC-SEM-178)."
+          "description": "Optional: the tool calls by kind, each kind once, their calls adding up to toolCalls and their ms to toolMs (FAC-SEM-178).",
+          "minItems": 1
         },
         "method": {
           "enum": [

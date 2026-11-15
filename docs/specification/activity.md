@@ -289,7 +289,7 @@ person's turns pass as several subjects (RT-4 counts turns in their own cells, b
 or a re-enrollment mints the same id), and the collector emits a day's turns after the day ends, as `policy.violation`
 does: neither its fields nor its place in the stream show when it ran or the gap between two turns. A receiver that
 joins a turn to its session's intervals by `session.id` can place it roughly; the restraint below covers that. The one
-writer of a session's intervals and usage lines is the one writer of its turns (`FAC-SEM-100`). A turn is **personal
+writer of a session's intervals and usage lines is the one writer of its turns (`FAC-SEM-100`), and reads them by one method. A turn is **personal
 data all the same** (RT-3): from a device bound to a person it is collected for the notice's purposes, deleted at
 `retention.raw_days` and every raw read is logged in that person's [access log](#access-log); its `session.id` joins it to
 events that carry `user.id`, so keeping it from being read per person is the receiver's restraint, as for `result`. **No
@@ -335,7 +335,8 @@ outside its stream and writes each as an event only once the receiver's latest `
 `activity-turn/1` (turns) or `activity-inventory/1` (inventories), as it holds a `unit`; it drops what it holds past the
 smaller of the server layer's `retention.raw_days` and the device's effective value (30 days where the server layer sets
 none), on 410 `organization-closed`, and when the device is enrolled again with a binding to a different person or from
-a person to none. Both are activity telemetry under the organization's notice, never a product's anonymous usage data,
+a person to none, what waits for its day to end included, so a day's turns and inventory never reach the new epoch. A
+session's turns are read by one method (its one writer, `FAC-SEM-100`), so one turn carries one `source` and one id. Both are activity telemetry under the organization's notice, never a product's anonymous usage data,
 and neither travels in the other's channel ([usage data](usage-data.md) UD-6, SI-7).
 
 **`session.annotation`** — what a surface reported about a session, read by the device's collector (DEC-0068): Fabric's
@@ -514,7 +515,8 @@ A mismatch is refused (`FAC-SEM-045`, [devices](devices.md#attribution)). The re
   person now, under the notice they acknowledged ([notice](#notice)): a receiver answers it only when the purpose is not
   collected for that person when it answers (DEC-0102); the collector then sends no event of that kind for
   that person (save a `unit` whose `acceptedBy` is of kind `person`, whose `purpose` answer may concern the member who accepted it rather than the device's person: it is consumed and holds nothing, DEC-0164; any other `unit` holds as any kind) until the device's policy names a later `noticeVersion`, or a check-in response names an `acknowledgedNoticeVersion` other than the one it held at the rejection (the person acknowledged the notice in force, [devices](devices.md#check-in)), never on a timer (DEC-0100, DEC-0102). Only a present value that differs from the one held at the rejection resumes, absence at the rejection included (a first acknowledgement is a change, as on a managed machine whose collection started at the deadline); a value that becomes absent is no signal. `before-purpose` (DEC-0102) says the event occurred before its purpose was collected for that person (their acknowledgement of the notice naming it, or the mdm deadline where the organization collects under it; a device bound to no person collects only from that deadline, its `collectionStart`), and that purpose is collected now: a receiver may keep such an event, and when it does not (a buffered event from before that start) it answers `before-purpose`, never `purpose`; the event is consumed and the collector holds nothing. A receiver sends it to every collector, whatever its pin: a rejection is consumed whatever its reason (DEC-0100), so a collector consumes each `rejected[]` entry by its `eventId` and never refuses an acknowledgement for a reason it does not know. A held collector whose server starts stating `acknowledgedNoticeVersion` late resumes once and may be refused again: one extra round, consumed, never a stall. A device bound to no person never receives the member and resumes on a later `noticeVersion`. An event from before `collectionStart` is not this case: it is never uploaded (`FAC-SEM-068`, [devices](devices.md#collection-start)), and one that is uploaded is the device's fault. An `attribution` rejection stays what it was:
-  the event names another organization, device or user than its certificate.
+  the event names another organization, device or user than its certificate, or (an `account.inventory`) a tenant the
+  receiver's own policy does not list (DEC-0171 SI-3).
 - `acks[]` — for every stream the batch carried, `seq` and optional `held`, both computed over
   **everything the receiver holds for the stream across batches** — the same state it judges tamper
   evidence from ([`mergeStreams`](../../src/activity-rules.ts),
@@ -613,8 +615,8 @@ inventories:
 
 A turn or inventory cell's **population counts people** ([`boundPopulation`](../../src/activity-rules.ts)): a turn's or
 an inventory's subject is the person the receiver binds to its stream's epoch ([devices](devices.md#attribution),
-`FAC-SEM-045`), and only on a device bound to no person its session (a turn) or its device (an inventory); one person's
-sessions and machines are one subject, never `population`'s `session.id` fallback. Each kind is published at the
+`FAC-SEM-045`), and only on a device bound to no person that device, so one unbound machine's sessions are one subject;
+one person's sessions and machines are one subject, never `population`'s `session.id` fallback. Each kind is published at the
 summary's `minPopulation` (an organization's own floor, such as five, is its receiver's setting, at least 3), the rest of
 a day folded into one other cell of its kind or suppressed and counted in `suppressedCells`. `FAC-SEM-040` refuses a cell
 below the minimum, a population above its turns or machines, buckets that do not add up to the turns, more machines than

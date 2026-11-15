@@ -86,6 +86,7 @@ function events(): Json[] {
     refused("a turn without its session", (({ session: _s, ...rest }) => rest)(turn())),
     refused("a tool's name as a tool kind", turn({ toolKinds: [{ kind: "github-mcp", calls: 3, ms: 9_800 }] })),
     refused("a turn read by process sampling", turn({ method: "process" })),
+    refused("an empty list of tool kinds, which a collector leaves out", turn({ toolCalls: 0, toolMs: 0, toolKinds: [] })),
     // SI-1, SI-2: an organization's accounts on one machine for one day.
     valid("Switchboard's two subscription seats of one plan", inventory()),
     valid("a coding agent's own sign-in, read by the collector", inventory({ holder: "runtime", plan: "team", accounts: 1 })),
@@ -128,8 +129,9 @@ function populations(): Json[] {
   return [
     { name: "one person across five sessions is one subject", rows: five, population: 1 },
     { name: "three people, one with two machines", rows: [{ person: "m-1", key: "d-1" }, { person: "m-1", key: "d-2" }, { person: "m-2", key: "d-3" }, { person: "m-3", key: "d-4" }], population: 3 },
-    { name: "a device bound to no person counts each of its sessions", rows: [{ person: null, key: "s-1" }, { person: null, key: "s-2" }, { person: "m-1", key: "s-3" }], population: 3 },
-    { name: "a person and an unbound key that spells the same id are two subjects", rows: [{ person: "s-1", key: "s-9" }, { person: null, key: "s-1" }], population: 2 }
+    { name: "a device bound to no person is one subject, whatever its sessions", rows: [{ person: null, key: "d-9" }, { person: null, key: "d-9" }, { person: "m-1", key: "d-3" }], population: 2 },
+    { name: "two devices bound to no person are two subjects", rows: [{ person: null, key: "d-8" }, { person: null, key: "d-9" }], population: 2 },
+    { name: "a person and an unbound device that spells the same id are two subjects", rows: [{ person: "d-1", key: "d-9" }, { person: null, key: "d-1" }], population: 2 }
   ];
 }
 
@@ -175,7 +177,7 @@ function summaries(): Json[] {
 
 export function activityTurnVectors(): Json {
   return {
-    about: "Vectors for the agent turn and the account inventory (DEC-0171), written by tools/vectors/activity-turn.ts, never by hand. A turn's sourceKey is sha256: of the settings-form canonical JSON {ordinal, session} (session.id), an inventory's of {billing, day, holder, plan, provider, tenantRef} (plan null when absent), and each eventId sha256: of the settings-form canonical JSON {key: sourceKey, source}. events: schemaValid is the event against telemetry-event.schema.json; findings are the codes and paths of evaluateSemanticRules(\"telemetry-event\", event), in order. routes: routeInventory(tenantRef, enrollments). populations: boundPopulation(rows). buckets: turnBucket(turnMs). summaries: schemaValid against activity-summary-2.schema.json, findings of evaluateSemanticRules(\"activity-summary-2\", summary).",
+    about: "Vectors for the agent turn and the account inventory (DEC-0171), written by tools/vectors/activity-turn.ts, never by hand. A turn's sourceKey is sha256: of the settings-form canonical JSON {ordinal, session} (session.id), an inventory's of {billing, day, holder, plan, provider, tenantRef} (plan null when absent), and each eventId sha256: of the settings-form canonical JSON {key: sourceKey, source}. events: schemaValid is the event against telemetry-event.schema.json; findings are the codes and paths of evaluateSemanticRules(\"telemetry-event\", event), in order. routes: routeInventory(tenantRef, enrollments). populations: boundPopulation(rows), each row's key the device when it is bound to no person. buckets: turnBucket(turnMs). summaries: schemaValid against activity-summary-2.schema.json, findings of evaluateSemanticRules(\"activity-summary-2\", summary).",
     events: events(),
     routes: routes(),
     populations: populations(),

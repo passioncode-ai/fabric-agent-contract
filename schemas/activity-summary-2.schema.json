@@ -85,7 +85,7 @@
           }
         ]
       },
-      "description": "DEC-0171 RT-4: the agent turns of coding-agent runtimes; a turn cell's population counts people, each turn's subject the person bound to its stream's epoch, a turn from a device bound to no person its session."
+      "description": "DEC-0171 RT-4: the agent turns of coding-agent runtimes; a turn cell's population counts people, each turn's subject the person bound to its stream's epoch, a turn from a device bound to no person its device."
     },
     "inventoryCells": {
       "type": "array",
@@ -377,7 +377,7 @@
           "type": "integer",
           "minimum": 0,
           "maximum": 9007199254740991,
-          "description": "Distinct people the cell covers (DEC-0171 RT-4): the person bound to each turn's stream's epoch, or its session on a device bound to no person; one person's sessions are one subject."
+          "description": "Distinct people the cell covers (DEC-0171 RT-4): the person bound to each turn's stream's epoch, or its device when the device is bound to no person; one person's sessions are one subject, and so are one unbound device's."
         },
         "turns": {
           "type": "integer",
@@ -422,7 +422,7 @@
           "type": "integer",
           "minimum": 0,
           "maximum": 9007199254740991,
-          "description": "Distinct people the cell covers (DEC-0171 RT-4): the person bound to each turn's stream's epoch, or its session on a device bound to no person; one person's sessions are one subject."
+          "description": "Distinct people the cell covers (DEC-0171 RT-4): the person bound to each turn's stream's epoch, or its device when the device is bound to no person; one person's sessions are one subject, and so are one unbound device's."
         },
         "turns": {
           "type": "integer",

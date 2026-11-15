@@ -1,5 +1,5 @@
 {
-  "about": "Vectors for the agent turn and the account inventory (DEC-0171), written by tools/vectors/activity-turn.ts, never by hand. A turn's sourceKey is sha256: of the settings-form canonical JSON {ordinal, session} (session.id), an inventory's of {billing, day, holder, plan, provider, tenantRef} (plan null when absent), and each eventId sha256: of the settings-form canonical JSON {key: sourceKey, source}. events: schemaValid is the event against telemetry-event.schema.json; findings are the codes and paths of evaluateSemanticRules(\"telemetry-event\", event), in order. routes: routeInventory(tenantRef, enrollments). populations: boundPopulation(rows). buckets: turnBucket(turnMs). summaries: schemaValid against activity-summary-2.schema.json, findings of evaluateSemanticRules(\"activity-summary-2\", summary).",
+  "about": "Vectors for the agent turn and the account inventory (DEC-0171), written by tools/vectors/activity-turn.ts, never by hand. A turn's sourceKey is sha256: of the settings-form canonical JSON {ordinal, session} (session.id), an inventory's of {billing, day, holder, plan, provider, tenantRef} (plan null when absent), and each eventId sha256: of the settings-form canonical JSON {key: sourceKey, source}. events: schemaValid is the event against telemetry-event.schema.json; findings are the codes and paths of evaluateSemanticRules(\"telemetry-event\", event), in order. routes: routeInventory(tenantRef, enrollments). populations: boundPopulation(rows), each row's key the device when it is bound to no person. buckets: turnBucket(turnMs). summaries: schemaValid against activity-summary-2.schema.json, findings of evaluateSemanticRules(\"activity-summary-2\", summary).",
   "events": [
     {
       "name": "a turn read from the runtime's OpenTelemetry export",
@@ -978,6 +978,53 @@
       "findings": []
     },
     {
+      "name": "an empty list of tool kinds, which a collector leaves out",
+      "event": {
+        "protocol": "fabric-activity/0.1",
+        "eventId": "sha256:962503ddab9bf268a1ba22a2686f59b08942a6fc21b7787e536494771bf5b104",
+        "kind": "turn",
+        "source": "claude_code.otel",
+        "sourceKey": "sha256:6a4275c25dd4172897091555806c56dcaabe1a7dd9725cb362b8dbe1226aaafe",
+        "collector": {
+          "id": "observatory-node",
+          "epoch": 4
+        },
+        "seq": 1,
+        "occurred": "2026-11-14T00:00:00Z",
+        "bootId": "boot-7c41e2",
+        "monotonicNs": "0",
+        "session": {
+          "id": "s-91c2e4"
+        },
+        "project": {
+          "id": "example-project"
+        },
+        "runtime": {
+          "name": "claude_code",
+          "version": "2.4.1"
+        },
+        "skill": "task-pipeline",
+        "account": {
+          "class": "organization",
+          "tenantRef": "sha256:7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a"
+        },
+        "data": {
+          "ordinal": 3,
+          "day": "2026-11-14",
+          "turnMs": 41250,
+          "modelCalls": 4,
+          "modelMs": 30100,
+          "toolCalls": 0,
+          "toolMs": 0,
+          "toolKinds": [],
+          "method": "otel",
+          "outcome": "answered"
+        }
+      },
+      "schemaValid": false,
+      "findings": []
+    },
+    {
       "name": "Switchboard's two subscription seats of one plan",
       "event": {
         "protocol": "fabric-activity/0.1",
@@ -1639,33 +1686,47 @@
       "population": 3
     },
     {
-      "name": "a device bound to no person counts each of its sessions",
+      "name": "a device bound to no person is one subject, whatever its sessions",
       "rows": [
         {
           "person": null,
-          "key": "s-1"
+          "key": "d-9"
         },
         {
           "person": null,
-          "key": "s-2"
+          "key": "d-9"
         },
         {
           "person": "m-1",
-          "key": "s-3"
+          "key": "d-3"
         }
       ],
-      "population": 3
+      "population": 2
     },
     {
-      "name": "a person and an unbound key that spells the same id are two subjects",
+      "name": "two devices bound to no person are two subjects",
       "rows": [
         {
-          "person": "s-1",
-          "key": "s-9"
+          "person": null,
+          "key": "d-8"
         },
         {
           "person": null,
-          "key": "s-1"
+          "key": "d-9"
+        }
+      ],
+      "population": 2
+    },
+    {
+      "name": "a person and an unbound device that spells the same id are two subjects",
+      "rows": [
+        {
+          "person": "d-1",
+          "key": "d-9"
+        },
+        {
+          "person": null,
+          "key": "d-1"
         }
       ],
       "population": 2
