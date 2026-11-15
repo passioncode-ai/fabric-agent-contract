@@ -146,8 +146,15 @@ The key words MUST, MUST NOT, SHOULD and MAY are used as in RFC 2119.
   ([delegation](delegation.md#approval-approval1) DL-18); an elicitation the product itself sends, once the operator
   accepts it, decides the action on the product's own record (AP-2), and the agent relays no decision for it;
   never a mandate (the switch is a
-  `change-policy` effect, which no mandate covers, [delegation](delegation.md#the-operators-mandate) MD-3), never an
-  `approval/1` of another approver and never a standing rule. Any other person turns their switch on in the product's
+  `change-policy` effect, which no mandate covers, [delegation](delegation.md#the-operators-mandate) MD-3, and which
+  OW-1's exception keeps for the operator's word, [governance](governance-and-roles.md) OW-1), never an
+  `approval/1` of another approver and never a standing rule. At a service given `levels`, in an organization's context,
+  the switch's action is `change-policy`, so `admin` at least, and only a level decision decides it there
+  (`actionDecision`'s organization's-context row; [membership](membership.md#levels) DEC-0162 LV-7): the operator's
+  decision, an accepted elicitation and an accepted `approval/1` are refused `level-insufficient`. Such a level decision
+  is the person's word for a switch that person turned off only when the level holder is that person's operator, or,
+  for a component the organization deploys, holds that switch for the organization (below); otherwise the agent points
+  to the setting. Any other person turns their switch on in the product's
   settings, and the agent says so. Where a component an organization deploys on its own server for its members sends
   its own counts, its switch is the deploying organization's (the scope above), and the person whose word this rule
   asks for is whoever holds that switch for the organization. An agent does not decline a person who asks it to turn their switch off: the
@@ -174,12 +181,12 @@ The key words MUST, MUST NOT, SHOULD and MAY are used as in RFC 2119.
   `actionDecision` takes a relayed
   one only as its table takes a `relayed` action ([service](service.md#actions)), never under a mandate (MD-3), and a
   standing rule is never a decision (AP-3); a switch reachable through an action whose gate is `none` is nonconformant.
-  An accepted `approval/1` still decides that relayed action at any tier (AP-2; `actionDecision`'s row for a `relayed` action with an accepted approval; DL-18), so the
-  agent-side limit above is the only bar on that form: the contract adds no product-side refusal, since an approval is
+  An accepted `approval/1` still decides that relayed action at any tier (AP-2; `actionDecision`'s row for a `relayed` action with an accepted approval; DL-18), save DEC-0162's organization's-context row above, so the
+  agent-side limit above is the only bar on that form there: the contract adds no product-side refusal, since an approval is
   a signed decision of an approver the product trusts for that action's digest (DL-17, DL-18), and refusing it for one
   action would split AP-2's single table. An agent MUST NOT delete or rewrite a shared file it cannot read to end a
   hold (UD-2): it reports the hold and, on the operator's word naming the switch, sets the product's own switch on through
-  the product's relayed action as above; anyone else it points to the product's own switch. For a product whose only installation id is the shared one and which, once set on, sends nothing without it (one that offers no set-on control at its hold, UD-2), setting its switch on does not make it send: the agent tells the operator the product sends nothing until the shared file can be read, names the file's location and that its repair waits on the operator's answer to OQ-0014, and points anyone else to the product's hold line rather than to its switch.
+  the product's relayed action as above, taking that step itself ([governance](governance-and-roles.md) OW-2); anyone else it points to the product's own switch. For a product whose only installation id is the shared one and which, once set on, sends nothing without it (one that offers no set-on control at its hold, UD-2), setting its switch on does not make it send: the agent tells the operator the product sends nothing until the shared file can be read, names the file's location and that its repair waits on the operator's answer to OQ-0014, and points anyone else to the product's hold line rather than to its switch.
 - **UD-5, no machine declaration yet.** A product MUST state in its own documentation (its privacy text and a page on
   its usage data) what it collects, the installation id it sends (when it sends one) and whether it is shared, where it
   sends the data (the organization that receives it and its host, and every service or agent that reads the data there (a holder of a grant to read the raw events included), with

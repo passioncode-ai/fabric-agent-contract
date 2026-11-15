@@ -11830,7 +11830,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      switch, or an `approval/1` the operator gave for that switch (DL-18), an elicitation the product itself sends
      deciding the action, once the operator accepts it, on the product's own record (AP-2) with no decision relayed by
      the agent, never a mandate (a `change-policy` effect, MD-3), another approver's `approval/1` or a standing rule;
-     anyone else is told the switch is in the product's settings; for a component an organization deploys on its own
+     at a service given `levels`, in an organization's context, only a level decision decides the switch's
+     `change-policy` action (DEC-0162 LV-7), and it is the person's word only when the level holder is that person's
+     operator or holds the organization's switch; anyone else is told the switch is in the product's settings; for a component an organization deploys on its own
      server for its members that sends its own counts, the switch is the deploying organization's, and the word is that
      of whoever holds it for the organization; an agent does not decline a person who asks to turn
      their switch off (the operator's switch turned off on the word, relayed under AP-2 with the product's own checks,
@@ -11849,7 +11851,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      `analytics on|off`) being the person's own surface, which owes no action, the agent side binding the agent that
      runs it, so a mandate or a standing rule never turns it on, a gate of `none` being nonconformant;
      an accepted `approval/1` still decides that relayed action under AP-2 (`actionDecision`'s
-     row for a `relayed` action with an accepted approval, DL-18), so the agent-side limit is the only bar on that form,
+     row for a `relayed` action with an accepted approval, DL-18), save DEC-0162's organization's-context row, so the
+     agent-side limit is the only bar on that form there,
      and no product-side refusal is added (an approval is a signed approver's decision on the action's digest, DL-17,
      and a refusal for one action would split AP-2's single table); an agent never deletes or rewrites a shared file
      it cannot read to end a hold, reporting the hold, setting the product's own switch on through its relayed action

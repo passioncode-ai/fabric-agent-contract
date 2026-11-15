@@ -108,7 +108,7 @@ words AP-2 and OA-1 already name; the rules hold for any owner.
   ([delegation](delegation.md#the-operators-mandate) MD-1, never wider than the words) or raised under OW-3 while the
   rest of the task goes on (AP-3). A task that may outlive a decision's 24 hours (AP-2) is carried under such a mandate
   (up to 7 days, MD-1), so the operator is not asked again for a word they gave while it lasts, except for an act no
-  mandate covers (MD-3, MD-6 and PR-2: among them a change-policy effect, a source hand-over, the move of a board slot
+  mandate covers (MD-3, MD-6 and PR-2: among them a change-policy effect (such as a product's usage-data switch, [usage data](usage-data.md) UD-4), a source hand-over, the move of a board slot
   and MD-6's human steps): the word for a change-policy effect or a source hand-over is renewed by one short question
   as AP-2 says (for a source hand-over, as [source](source.md#handing-over) says: a word consumed once by the act it
   names), and the move of a board slot and a human step go to the person as OW-4 says. A task still open when the mandate expires asks once, in one line, as MD-1 says.
@@ -284,7 +284,7 @@ words AP-2 and OA-1 already name; the rules hold for any owner.
   held by reference only ([data classification](#data-classification)) and handed out only as AP-4's `secret` step;
   the separation the operator keeps between unrelated businesses of theirs (no repository, data, credential or text of
   one used for or named in the other), as the operator's own instructions record it, outside this contract; the
-  operator's word for each source hand-over ([source](source.md#handing-over), DEC-0149; for an organization's own agent, instead, only an owner's or an administrator's level decision, never the operator's, DEC-0162 LV-6); a level holder's words widening nothing beyond their level (DEC-0162 LV-7); approval separation (AP-5);
+  operator's word for each source hand-over ([source](source.md#handing-over), DEC-0149; for an organization's own agent, instead, only an owner's or an administrator's level decision, never the operator's, DEC-0162 LV-6); a level holder's words widening nothing beyond their level (DEC-0162 LV-7); a usage-data switch a person turned off, which a mandate from the operator's words never turns back on ([usage data](usage-data.md) UD-4); approval separation (AP-5);
   an effect outside a grant (above); the operator's move of a board slot, reserved to the host's operator controls
   until its twin ships (DEC-0140 PR-2); and a host's gate that holds an act until a person agrees (OW-3; on Fabric
   `floor.ask-first`, `board.read-at-start`'s stop before a production step and `ladder.no-self-close`, as DEC-0156's

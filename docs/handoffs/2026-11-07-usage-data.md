@@ -259,7 +259,7 @@ decision of 2026-11-04.
   lines 76 to 94 at `2a11b3fd`): UD-6 leaves it undecided and asks such a product to say so on its usage data page; a
   question for the operator through Observatory's owner, carried in the board message's Observatory line, not filed
   here as a contract question since DEC-0065 leaves the setting to the product's operator.
-- Parallel branches: DEC-0156, DEC-0158, DEC-0159 and DEC-0162 (CT-250) are open on their own branches. What this decision requires of
+- Parallel branches: DEC-0156 and DEC-0162 (CT-250) landed first (2026-11-14), so this branch, landing after them, made their edits below (round 32, 2026-11-15); DEC-0158 and DEC-0159 are open on their own branches. What this decision requires of
   the merged text binds whichever branch lands second, this one or the sibling: the session that lands it makes each
   edit below in that landing and runs each check on the merged tree, and copies this list with its checks into its
   pull request body (or merge message). If a sibling lands second, this list is on main in this handoff and is
