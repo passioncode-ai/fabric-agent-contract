@@ -38,8 +38,9 @@ export default defineConfig({
         "src/mandate.ts": { branches: 100 },
         // CT-317 (6): DEC-0170's statement check, held at 100 by test/org-instance.test.ts.
         "src/org-instance.ts": { branches: 100 },
-        // CT-323: DEC-0172's verdict checks, measured at 97.07 when they joined the set; the rest are one-sided ternaries.
-        "src/decision-verdict.ts": { branches: 97.07 },
+        // CT-323: DEC-0172's verdict checks, measured at 97.07 when they joined the set (the six left are one side of a
+        // ternary each), floored at 97 so a Node release that counts a branch differently does not turn the gate red.
+        "src/decision-verdict.ts": { branches: 97 },
         "src/levels.ts": { branches: 100 },
         "src/page-link-rules.ts": { branches: 100 },
         "src/agent-network.ts": { branches: 100 },
