@@ -12798,7 +12798,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 ### DEC-0172: the decision verdict `decision-verdict/1`, a receipt a decision verifier writes and a hub checks
 
 - **Date:** 2026-11-15
-- **Status:** Proposed 2026-11-15 from the design `docs/evidence/plans/2026-11-14-ct302-decision-verdict.md` (CT-302),
+- **Status:** Accepted 2026-11-15, merged to main: rounds 5 and 6 (at `1ecd626a`) of the blind readings clean on all
+  three tiers, read under the finish-line rule; their risks are CT-323. Proposed 2026-11-15 from the design
+  `docs/evidence/plans/2026-11-14-ct302-decision-verdict.md` (CT-302),
   whose rounds 11 and 12 of the blind readings (seam and product) read clean; accepted when the coordinator's blind
   readings are clean on two consecutive rounds (round 1 folded: `asked.action` read one way by the verifier and the
   hub, the decision's action else the capability; the reference check ties `asked` to the call its input names; the hub
