@@ -29,8 +29,9 @@ so this design keeps `tenancy` to how data is kept apart.
   "the four carrying objects are closed, so an older pinned copy refuses the new member").
 - Both carry `extensions`, keyed by URI; a host preserves and ignores an extension it does not know
   ([service](../../specification/service.md#descriptor)). The dashboard, connections, actions, authority, load,
-  ops-digest and channel-agent declarations all ride there, each with its own schema
-  (`schemas/service-*-extension.schema.json`).
+  ops-digest and channel-agent declarations ride there or in the manifest's `provider.extensions`, each with its own
+  schema (`schemas/service-*-extension.schema.json`); the known keys are `EXTENSION_KEYS` (`src/extensions.ts`), and an
+  author's unknown key is a `hint/extension-key` of `pnpm validate`, not a refusal.
 - The dashboard's entry is already half declared: `surfaces.dashboard.login` is `true` when the dashboard requires an
   operator session begun with a host's login code ([operator login](../../specification/service.md#operator-login)).
   It says nothing of a dashboard with a sign-in of its own, nor of one with none.
@@ -49,14 +50,18 @@ so this design keeps `tenancy` to how data is kept apart.
   service whose descriptor declares `peer` (DEC-0061, [offered to others](../../specification/service.md#offered-to-others));
   `peer` grants nothing by itself, a share grant or an organization's listing does, and its `custody` and `residency`
   are shown beside the service.
+- **An organization id already reaches a local well-known document** through DEC-0162's authority extension
+  (`levels[].org`), readable by every counted account on the computer; that is filed as CT-324, outside this design.
 - **Every local service runs under a counted OS account.** DEC-0154 counts any account that runs Fabric or an agent
   service, whatever its shell, uid or name, and a listener of an uncounted account is `foreign-user`
   ([several OS accounts](../../specification/service.md#several-os-accounts-on-one-computer)).
 
 ## The design
 
-**IF-1, an extension, not three top-level members.** The three facts ride as one extension value under
-the contract's extension key ending `extensions/instance-facts/0.1` (added to `EXTENSION_KEYS` with the DEC), in the descriptor's `extensions`, the
+**IF-1, an extension, not three top-level members.** (Inside a present object, `mode` and `kind` are required; the
+objects themselves are optional.) The three facts ride as one extension value under
+the contract's extension key ending `extensions/instance-facts/0.1` (added to `EXTENSION_KEYS` in `src/extensions.ts` and to [interop](../../specification/interop.md#extension-key) with
+the DEC), in the descriptor's `extensions`, the
 well-known document's `extensions`, or both, with its own schema `service-instance-facts-extension.schema.json`. A host
 pinned before the DEC ignores it, so no descriptor or well-known document becomes invalid anywhere; the protocol name
 `fabric-instance-facts/0.1` joins `NAMED_ONLY`. Every member is optional; an absent member, and an absent extension,
@@ -75,8 +80,9 @@ placement's (an `https` origin anyone reaches); a local placement is never `publ
 comes only from a share grant or an organization's listing.
 
 `entry` restates nothing a host can read elsewhere except one case: where the well-known document declares
-`surfaces.dashboard`, `entry` is `host-signin` exactly when `login` is `true` (a rule, IF-6), so one fact has one
-answer. Without `surfaces.dashboard` (a descriptor read before the service runs, a service with no dashboard), `entry`
+`surfaces.dashboard`, its `login` decides `host-signin` (true) against the other two (false), whichever document's
+`entry` a host would otherwise read; a declared `entry` that disagrees with that `login`, in either document, is refused
+(IF-6), so one fact has one answer. Without `surfaces.dashboard` (a descriptor read before the service runs, a service with no dashboard), `entry`
 is the only place it is said.
 
 **IF-3, `tenancy`.** `{mode}`, how the instance keeps data apart; whose instance it is stays the placement's
@@ -108,17 +114,20 @@ that document is reached by every counted OS account on the computer and by a re
 nothing more; a service that must not say so declares them in its descriptor only. A host prefers the well-known
 document member by member, a member being `access`, `tenancy` or `space` as a whole.
 
-**IF-6, `FAC-SEM`, one rule.** On the extension value (kind `instance-facts`, and inside `service-descriptor` and
-`service-well-known` where they carry it): `audience` `organization` or `public` only beside `peer`, `operator` never
-beside it, `public` never on a local placement; in a well-known document that declares `surfaces.dashboard`, `entry` is
-`host-signin` exactly when `login` is `true`; `space.kind` `system` never on a local placement; a local service's
-well-known document carries no `space.account`. Where the rule reads `peer` or `placement` it reads the descriptor
-beside the document (a well-known document alone is checked for what it carries).
+**IF-6, `FAC-SEM`, one rule.** On the extension value (kind `instance-facts`), and on the descriptor and the well-known
+document as a pair (as `FAC-SEM-009` reads them): `audience` `organization` or `public` only beside `peer`, `operator`
+never beside it, `public` never on a local placement; where the well-known document declares `surfaces.dashboard`, an
+`entry` in either document is `host-signin` exactly when `login` is `true`; `space.kind` `system` never on a local
+placement; a local service's well-known document carries no `space.account`. A well-known document read alone is
+checked for what it carries.
 
 **IF-7, vectors.** A descriptor and a well-known document with and without the extension; `audience` against `peer`
 and placement; each `mode`; `entry` against `login`; `system` on a local placement; a local well-known document
-carrying `space.account`; a label with `/`, `@` or a space (schema). The host's reading (well-known first, member by member) as a small reference function
-`instanceFacts(descriptor, wellKnown)` with its own vectors.
+carrying `space.account`; a label with `/`, `@` or a space (schema). The host's reading (well-known first, member by member, `entry` from `login` where a dashboard is
+declared) as a small reference function `instanceFacts(descriptor, wellKnown)` with its own vectors, among them a
+descriptor's `own-signin` beside a well-known `login: true` with no extension there (refused, and read `host-signin`).
+A host reads only its own account's answer: HA-2 discards a `foreign-user` listener's, so a well-known-first reading
+never takes another account's facts.
 
 ## Alternatives refused
 
@@ -130,7 +139,8 @@ carrying `space.account`; a label with `/`, `@` or a space (schema). The host's 
   (DEC-0082).
 - **Dropping `entry`** because `surfaces.dashboard.login` exists: refused, `login: false` does not tell a dashboard with
   its own sign-in from one with none, and a descriptor has no `surfaces`.
-- **A derived `space.account`** (an HMAC of the account, as the host label is, DEC-0154 HA-4): not needed for a label a
+- **A derived `space.account`** (an HMAC over the account, as the host label is one over the computer's secret and
+  `org.id`, DEC-0154 HA-4): not needed for a label a
   host only shows; a later revision can add it if two hosts must compare accounts.
 
 ## Compatibility
