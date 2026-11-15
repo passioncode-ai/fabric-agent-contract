@@ -168,6 +168,7 @@ function summaries(): Json[] {
     edit("two other inventory cells in one day", (s) => { s.inventoryCells.push(clone(s.inventoryCells[1])); }, ["FAC-SEM-040 /inventoryCells/2"]),
     edit("an inventory cell outside the range", (s) => { s.inventoryCells[0].day = "2026-11-13"; }, ["FAC-SEM-040 /inventoryCells/0/day"]),
     edit("a person's id in a turn cell", (s) => { s.turnCells[0].user = "m-7f3a91c2"; }, [], false),
+    edit("a plan on an API inventory cell", (s) => { s.inventoryCells[0].billing = "api"; }, [], false),
     edit("a turn cell with an outcome dimension", (s) => { s.turnCells[0].outcome = "answered"; }, [], false)
   ];
 }

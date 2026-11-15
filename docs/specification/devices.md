@@ -438,10 +438,9 @@ that enrollment (`org`, `device`, `user` when one was bound). For a batch or a c
 - an `account.inventory`'s `data.tenantRef` MUST be one the receiver's own policy lists in `accounts.tenants`
   (DEC-0171 SI-3): another tenant's is refused.
 
-A kind that carries no `user` (`result`, `unit`, and since DEC-0171 `turn` and `account.inventory`) is still attributed
-to the person bound to its epoch: the receiver never writes a `user.id` into it, and keeps that binding beside the event
-for the person's [access log](activity.md#access-log) and, for a turn or an inventory, for the population of a summary
-cell ([activity](activity.md#summary-2), `boundPopulation`).
+A `turn` or an `account.inventory` (DEC-0171) carries no `user`: the receiver never writes a `user.id` into it, and keeps
+the binding of its epoch beside the event for the person's [access log](activity.md#access-log) and for the population of
+a summary cell ([activity](activity.md#summary-2), `boundPopulation`), as it keeps a `unit`'s sending device (DEC-0164).
 
 So when a device is re-enrolled to another person:
 
@@ -841,7 +840,7 @@ Each kind checks one input:
 | `device-policy-resolution` | `{layers, effective}` |
 | `device-health-observation` | `{known: {deviceId, epochs, policyBaseline, streams[{collector, held, accounted, pending?, bufferedFrom?}]}, batch?, checkIn?, effective?, health}` |
 | `device-enrollment` | `{request, response, issuedEpochs?, enrolled?: {keySha256, notAfter?, revoked?, userId?, role?}, token?: {tokenId, deviceId?, userId?}, proof?: {userId?}}`; `proof` is what the `Authorization` proof names; for a renewal repeated under DEC-0148 see `FAC-SEM-044`'s row |
-| `device-attribution` | `{binding, epochs: [{epoch, binding}], batch?, checkIn?}` |
+| `device-attribution` | `{binding, epochs: [{epoch, binding}], batch?, checkIn?, tenants?}`: `tenants`, the `tenantRef` values of the receiver's own policy's `accounts.tenants` (absent: none, so every `account.inventory` is refused) |
 | `device-action` | `{layers, at, acknowledgedAt?, action: {kind, key?, occurred?}, decision}`; `kind` is `grant`, `remote-execution`, `personal-key-call`, `local-change` or `upload`, and `decision` is `allow` or `refuse` |
 | `device-root-certification` | `{pinned?: [{keyId, alg?, publicKey}], root, certification?, revocations?, at}`; `at` is the enrollment time |
 | `device-request-signature` | `{request: {method, target, headers, body}, publicBaseUrl, certificates: [{serial, notBefore, notAfter, revoked?, organizationClosedAt?, key: {alg, publicKey}}], at, clientCertificateSerial?, seen?: [{serial, nonce, keepUntil}], answer}`; `body` is the body as a UTF-8 string, `at` the receiver's clock, `clientCertificateSerial` a mutual-TLS session's client certificate, `seen` its nonce store before the request, `answer` `accepted` or a code (`src/device-transport-rules.ts`) |

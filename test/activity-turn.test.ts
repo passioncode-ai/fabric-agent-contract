@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { activityEventId, boundPopulation, inventorySourceKey, turnBucket, turnSourceKey } from "../src/activity-rules.js";
+import { activityEventId, boundPopulation, inventorySourceKey, population, turnBucket, turnSourceKey } from "../src/activity-rules.js";
 import { routeInventory } from "../src/context-route.js";
 import { SCHEMA_PREFIX, projectRoot } from "../src/contract.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
@@ -72,8 +72,16 @@ describe("turn and account.inventory events (DEC-0171)", () => {
     expect(routeInventory("t", [{ org: 7, tenants: ["t"] }, null])).toEqual({ route: "none", reason: "unlisted" });
   });
   it.each(vectors.populations.map((c) => [c.name, c] as const))("population: %s", (_name, c) => expect(boundPopulation(c.rows)).toBe(c.population));
-  it("puts each turn in its bucket", () => {
+  it("puts each turn in its bucket, and no value that is not a duration", () => {
     for (const c of vectors.buckets) expect([c.turnMs, turnBucket(c.turnMs)]).toEqual([c.turnMs, c.bucket]);
+    expect(turnBucket(Number.NaN)).toBeUndefined();
+    expect(turnBucket(-1)).toBeUndefined();
+  });
+  it("adds no subject to an activity-summary/1 cell for a turn: one person's turns never pad a cell to the minimum (RT-4)", () => {
+    const base = event("a turn read from the runtime's OpenTelemetry export");
+    const line = { kind: "usage.line", user: { id: "m-7f3a91c2" }, session: { id: "s-1" } };
+    const turns = [1, 2, 3].map((n) => ({ ...clone(base), session: { id: `s-${n + 10}` } }));
+    expect(population([line, ...turns])).toBe(1);
   });
   it.each(vectors.summaries.map((c) => [c.name, c] as const))("summary: %s", (_name, c) => {
     expect(valid("activity-summary-2", c.summary)).toBe(c.schemaValid);

@@ -12657,7 +12657,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Date:** 2026-11-15
 - **Status:** Proposed 2026-11-15 from the design `docs/evidence/plans/2026-11-15-ct318-ct319-response-time-subscriptions.md`
   (CT-318, CT-319), which rounds 4 and 5 of the blind readings (seam and product) read clean; accepted when the
-  coordinator's blind readings are clean on two consecutive rounds. It answers the first organization server's
+  coordinator's blind readings are clean on two consecutive rounds (round 1 folded: a turn adds no subject to an
+  `activity-summary/1` cell; each kind waits for its own protocol name; FAC-SEM-045's input names `tenants`). It answers the first organization server's
   request (board message `356b6aae`, thread `1efdc2e1`, due 2026-11-22; its plan G1 and G2, fabric-workspace
   `docs/plans/2026-11-15-work-machines/README.md` at `8144e7ec`), which quotes the operator's decisions of 2026-11-15:
   activity, response time and process optimization are measured per agent, workflow and project; people appear only in
@@ -12697,12 +12698,15 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      in. A turn cell's population counts people (`boundPopulation`): the person the receiver binds to the stream's
      epoch, and on a device bound to no person the session. It is published at the summary's `minPopulation` (the
      organization's five is its receiver's setting, at least the contract's 3), the rest folded into one other turn cell
-     or suppressed. Never per person, per machine or per session, never to a partner organization (DEC-0090). A Fabric
-     service's own wait and run time stays `service-load/1`'s.
+     or suppressed. Never per person, per machine or per session, never to a partner organization (DEC-0090), never
+     exported to a backend other than the organization's own receiver. A turn adds no subject to an
+     `activity-summary/1` cell's population (`population` skips it as it skips a `session.annotation`), so one person's
+     turns never pad a `/1` cell to the minimum. A Fabric service's own wait and run time stays `service-load/1`'s.
   5. **RT-5 and SI-6, the gates.** A receiver pinned before this decision stores a turn without `toolKinds` as an
      unknown kind and refuses a turn with them and every inventory (a `tenantRef` is 71 characters, over extension
-     data's 64) as that event's `schema` rejection, which is consumed. So a collector holds both outside its stream
-     until the receiver's latest `protocols` name `activity-turn/1` or `activity-inventory/1`, and drops what it holds as
+     data's 64) as that event's `schema` rejection, which is consumed. So a collector holds each outside its stream
+     until the receiver's latest `protocols` name its own (`activity-turn/1` for turns, `activity-inventory/1` for
+     inventories), and drops what it holds as
      it drops held `unit` transitions (past the smaller of the server layer's `retention.raw_days` and the device's
      effective value, 30 days where the server layer sets none; on 410; on a binding to a different person or from a
      person to none).
@@ -12718,12 +12722,14 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      `git`, `skill` or `launch` (schema); `source` `switchboard` for Switchboard's holder, `process` for the others.
   8. **SI-3, the route.** Only to the one enrollment whose policy's `accounts.tenants` names its `tenantRef`; none
      (`unlisted`) or two (`ambiguous`, even of one organization) and it is not sent (`routeInventory`); a receiver
-     refuses one whose `tenantRef` its own policy does not list as `attribution` (`FAC-SEM-045` widened).
+     refuses one whose `tenantRef` its own policy does not list as `attribution` (`FAC-SEM-045` widened; its input gains
+     `tenants`, the `tenantRef` values of the receiver's `accounts.tenants`, absent meaning none).
   9. **SI-4, one per key.** One inventory writer per device, the collector; an account two holders hold counts once,
      under the first of `switchboard`, `runtime` and `vault`, compared by the provider's identity read locally and never
      sent. The `sourceKey` is `sha256:` of the settings-form canonical JSON `{billing, day, holder, plan, provider,
-     tenantRef}` (`plan` `null` when absent, `inventorySourceKey`), so a second event for one key is a repeated id
-     (`FAC-SEM-039`).
+     tenantRef}` (`plan` `null` when absent, `inventorySourceKey`), so a second event for one key is a repeated id,
+     refused within one batch (`FAC-SEM-039`) and kept once across batches by the receiver's (`device.id`, `eventId`)
+     deduplication.
   10. **SI-5, inventory cells.** No per-machine inventory to another person: `activity-summary/2`'s `inventoryCells` per
       provider, plan, billing and UTC day, carrying `population` (people: each machine's bound person, a machine bound to
       no person counting as one), `machines` and `accounts`, at `minPopulation`, the rest folded or suppressed; never to
@@ -12759,7 +12765,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `activity-summary` `['1', '2']`, `activity-turn` `['1']` and `activity-inventory` `['1']` at their next repin. Owed:
   Project Observatory's collector (`turn`, `account.inventory`, the gates, RT-6), Switchboard's record of the accounts it
   holds by tenant (read by the collector by name, never a key), the first organization server's receiver (the
-  restraint, `/2`'s cells at its `minPopulation` of five, the `tenants` check) and its notice: whether its published
+  restraint, `/2`'s cells at its `minPopulation` of five, the `tenants` check, `purpose` for a kind its notice names no
+  purpose for, DEC-0100) and its notice: whether its published
   notice covers both kinds without a new `noticeVersion` is the organization's and its counsel's question (asked on the
   board, message `6ddf439d`); until it does, the receiver answers `purpose`.
 - **Consequences / affects:** `schemas/telemetry-event.schema.json` (`$defs/turn`, `$defs/accountInventory`, the kinds),

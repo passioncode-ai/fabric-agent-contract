@@ -76,7 +76,8 @@ by `method`; every read in the person's access log; and no scoring of persons.
   receiver takes them from the authenticated session, as enrollment takes the user from its proof. How a
   receiver stores consent records is its own business and not part of this contract.
 - A receiver serves **another person** — an owner, an administrator, support — a person's time and
-  presence (raw events, intervals, `attended`) only under a `purposeId` that person confirmed: the latest
+  presence (raw events, intervals, `attended`; never an agent turn or an account inventory, which reach another person
+  only as summary cells, [access log](#access-log), DEC-0171) only under a `purposeId` that person confirmed: the latest
   `consent` for it at the time of the read says `given`. It serves a person's **usage and cost** only as
   sums per UTC day or billing period. The access log records the read's `purposeId` and `step`, and
   `FAC-SEM-067` refuses a log entry that breaks either ([`confirmedPurposes`](../../src/activity-rules.ts)).
@@ -280,7 +281,9 @@ requires `session`, `project` and `runtime`, may carry `skill` and `account`, an
 | `method` | `otel`, `hook`, `transcript` or `rollout`; a turn read from a transcript or a rollout file, which hold only wall-clock times, is sent only when the collector stamped it live with monotonic readings, and a collector reading only by process sampling sends no turns |
 | `outcome` | optional: `answered`, `failed` or `unknown` |
 
-A turn carries **a day and no finer time** (RT-2): `occurred` is that day's midnight UTC, `monotonicNs` is `"0"`, its
+A turn adds no subject to an `activity-summary/1` cell's population, as a `session.annotation` adds none
+([`population`](../../src/activity-rules.ts)): it carries a `session.id` and no `user`, so counting it would let one
+person's turns pass as several subjects (RT-4 counts turns in their own cells, by person). A turn carries **a day and no finer time** (RT-2): `occurred` is that day's midnight UTC, `monotonicNs` is `"0"`, its
 `eventId` is derived (`sourceKey` `sha256:` of the settings-form canonical JSON `{"ordinal", "session"}`,
 [`turnSourceKey`](../../src/activity-rules.ts), `FAC-SEM-178`, so a collector that reads a session again after a restart
 or a re-enrollment mints the same id), and the collector emits a day's turns after the day ends, as `policy.violation`
@@ -316,7 +319,8 @@ writer, its collector, which counts an account two holders hold once, under the 
 `vault`, comparing accounts by the provider's identity it reads locally and never sends (SI-4). Its `sourceKey` is
 `sha256:` of the settings-form canonical JSON `{"billing", "day", "holder", "plan", "provider", "tenantRef"}` (`plan`
 `null` when absent, [`inventorySourceKey`](../../src/activity-rules.ts), `FAC-SEM-178`), so a device writes at most one
-event per key and a second is a repeated id (`FAC-SEM-039`). It goes only to the one enrollment whose policy's
+event per key: a second is a repeated id, refused within one batch (`FAC-SEM-039`) and kept once across batches by the
+receiver's (`device.id`, `eventId`) deduplication ([event id](#event-id)). It goes only to the one enrollment whose policy's
 `accounts.tenants` names its `tenantRef`, and to none when two enrollments name it, so one organization never learns
 another's seats ([`routeInventory`](../../src/context-route.ts), SI-3); a receiver refuses one whose `tenantRef` its own
 policy does not list as `attribution` (`FAC-SEM-045`). An inventory from a device bound to a person is personal data on
@@ -576,7 +580,7 @@ refuses a person key anywhere, two cells for one dimension tuple, and a day outs
 
 **Minimum cell: k = 3** (operator decision 2026-10-08). A cell's **population** is the number of
 distinct subjects among its events. An event's subject is its `user.id` when it carries one, and its
-`session.id` otherwise ([`population`](../../src/activity-rules.ts)). So a cell counts distinct
+`session.id` otherwise ([`population`](../../src/activity-rules.ts)); a `session.annotation` and a `turn` add none (DEC-0068, DEC-0171). So a cell counts distinct
 people where events name them, and distinct sessions where they do not; a population never exceeds
 the cell's sessions.
 
@@ -701,7 +705,8 @@ not an identity: the runtimes' own exports use other names (Claude Code: `input_
 | `data.tokens.cacheRead`, `.cacheWrite` | attributes `gen_ai.usage.cache_read.input_tokens`, `gen_ai.usage.cache_creation.input_tokens` |
 | `data.cost.usd`, `data.cost.basis`, `data.dedupeKey` | attributes `fabric.cost.usd`, `fabric.cost.basis`, `fabric.dedupe_key`; for a `unit`, `fabric.unit.cost.usd` and `fabric.unit.cost.basis`, so a backend summing `fabric.cost.usd` never adds a unit's attributed cost to its usage lines |
 | a `unit`'s `data.acceptedBy` of kind `person` | not exported: it stays in the organization's own journal (DEC-0164 AE-3) |
-| a `turn`'s `data.toolKinds` | attributes `fabric.data.toolKinds.<kind>.calls` and `.ms`, one pair per kind (a kind is a closed value, never a tool's name) |
+| a `turn`'s `data.toolKinds` | attributes `fabric.data.toolKinds.<kind>.calls` and `.ms`, one pair per kind (a kind is a closed value, never a tool's name), on the intake only |
+| a `turn` or an `account.inventory` | not exported to any backend other than the organization's own receiver: another reader sees them only as `activity-summary/2`'s cells (DEC-0171 RT-3, RT-4, SI-3, SI-5) |
 | other `data.*` | attributes `fabric.data.*` |
 
 ## Semantic rules

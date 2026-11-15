@@ -49,7 +49,7 @@ export const SEMANTIC_KINDS: Readonly<Record<string, SemanticKind>> = Object.fre
   "delta-freshness": wrap("at", "applied", "heartbeat", "broken", "answer"),
   "delta-reconciliation": wrap("revision", "entries"),
   "device-action": wrap("layers", "at", "action", "decision", "acknowledgedAt"),
-  "device-attribution": wrap("binding", "epochs", "batch", "checkIn"),
+  "device-attribution": wrap("binding", "epochs", "batch", "checkIn", "tenants"),
   "device-check-in": doc("device-check-in.schema.json"),
   "device-enrollment": wrap("request", "response", "issuedEpochs", "proof", "enrolled", "token"),
   "device-health-observation": wrap("known", "batch", "effective", "health", "checkIn"),

@@ -489,7 +489,28 @@
           "maximum": 9007199254740991
         }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "type": "object",
+            "properties": {
+              "billing": {
+                "const": "api"
+              }
+            },
+            "required": [
+              "billing"
+            ]
+          },
+          "then": {
+            "type": "object",
+            "properties": {
+              "plan": false
+            }
+          }
+        }
+      ]
     },
     "otherInventoryCell": {
       "type": "object",

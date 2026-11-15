@@ -182,12 +182,13 @@ export const MIN_POPULATION = 3;
 /**
  * The population of a set of events: distinct subjects, where an event's subject is its `user.id` when it carries one
  * and its `session.id` otherwise. A summary cell is published only when its population is at least MIN_POPULATION.
- * A `session.annotation` adds no subject (DEC-0068): it never counts, so it cannot pad a cell to the minimum.
+ * A `session.annotation` adds no subject (DEC-0068): it never counts, so it cannot pad a cell to the minimum. Nor does a
+ * `turn` (DEC-0171), which carries a `session.id` and no `user`: one person's turns are counted by person in their own cells.
  */
 export function population(list: readonly JsonObject[]): number {
   const subjects = new Set<string>();
   for (const event of list) {
-    if (event.kind === "session.annotation") continue;
+    if (event.kind === "session.annotation" || event.kind === "turn") continue;
     if (isObject(event.user) && typeof event.user.id === "string") subjects.add(`user:${event.user.id}`);
     else if (isObject(event.session) && typeof event.session.id === "string") subjects.add(`session:${event.session.id}`);
   }
@@ -207,9 +208,11 @@ export function boundPopulation(rows: readonly { person: string | null; key: str
 /** The fixed buckets of a turn's duration in a summary (DEC-0171 RT-4), each an upper bound in ms, the last unbounded. */
 export const TURN_BUCKETS: readonly (readonly [string, number])[] = [["under1s", 1_000], ["under5s", 5_000], ["under15s", 15_000], ["under60s", 60_000], ["under300s", 300_000], ["from300s", Infinity]];
 
-/** The bucket a turn of `turnMs` milliseconds counts in: the first whose bound it is under. */
-export function turnBucket(turnMs: number): string {
-  return (TURN_BUCKETS.find(([, bound]) => turnMs < bound) as readonly [string, number])[0];
+/** The bucket a turn of `turnMs` milliseconds counts in: the first whose bound it is under; `undefined` for a value that is
+ *  not a duration (negative, not a number), which no valid turn carries. */
+export function turnBucket(turnMs: number): string | undefined {
+  if (!(turnMs >= 0)) return undefined;
+  return TURN_BUCKETS.find(([, bound]) => turnMs < bound)?.[0];
 }
 
 /** A provider's closed list of plans (DEC-0171 SI-1); a provider not named here carries no plan. */
