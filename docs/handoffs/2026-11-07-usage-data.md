@@ -1083,7 +1083,16 @@ not pushed for the same reason; the round entries' commits resolve only there.
   the plans row's old wording checked gone; the CT-293 grep widened; the product-side refusal check; the Next free ID
   line excepted from both sides; `<merge>` a two-parent merge; Switchboard's status fields; Done's next id `DEC-0163`
   (seam). Declined: none.
+- Round 32 (on `84a236df`, merged with main: DEC-0156, DEC-0162, DEC-0164, DEC-0166, DEC-0168 to DEC-0170): unit,
+  seam and product not clean, one break: UD-4 against DEC-0162's organization's-context row. Folded in `1a6e186b` and
+  `3b0e1fdb`: in an organization's context at a service that reads levels only a level decision decides the switch's
+  action, the person's word only from that person's operator or the organization's switch holder; the second-lander
+  edits for DEC-0156 (OW-1, OW-5, OW-2), DEC-0162 (LV-7 links UD-4) and DEC-0164 (UD-6's units).
+- Round 33 (on `3b0e1fdb`): product clean; unit not clean (DEC-0162's own check fell to 0 after the link edit; folded
+  in `942486a6`, with DEC-0162 annotated); seam stopped on the account's limit. Risks folded: the operator pointed to
+  the setting in an organization's context, "there" read as outside that row, CT-250's row restated.
 
 ## Next task
 
-Round 31 of the blind readings of branch `agent/ct216-usage-data-v2` (DEC-0157): unit, seam and product.
+Round 34 of the blind readings of branch `agent/ct216-usage-data-v2` (DEC-0157): unit, seam and product; two clean
+rounds in a row land it.

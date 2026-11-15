@@ -160,7 +160,8 @@ The key words MUST, MUST NOT, SHOULD and MAY are used as in RFC 2119.
   asks for is whoever holds that switch for the organization. An agent does not decline a person who asks it to turn their switch off: the
   operator's own switch it turns off on the operator's word, relayed under AP-2 (the product's own checks still apply,
   so a T2 caller (any caller the callee cannot place in T0 or T1) brings an `approval/1`, [delegation](delegation.md#trust-tiers) DL-17, DL-18
-  and DL-25), and anyone else it points to the setting, since off only protects them. Where the notice is not a
+  and DL-25), and anyone else it points to the setting, since off only protects them; in an organization's context at a service
+  that reads levels, where no level decision is at hand, it points the operator to the setting too. Where the notice is not a
   question (UD-1), turning a product's usage data on or off is a `relayed` action under AP-2 and AP-3, not AP-4's
   consent (a human gate, DEC-0121). Where UD-1's ask-first branch applies (the platform's own consent or a market's
   privacy review needs an answer first), turning the switch on is AP-4's consent, which no agent gives: its action has
@@ -182,7 +183,7 @@ The key words MUST, MUST NOT, SHOULD and MAY are used as in RFC 2119.
   one only as its table takes a `relayed` action ([service](service.md#actions)), never under a mandate (MD-3), and a
   standing rule is never a decision (AP-3); a switch reachable through an action whose gate is `none` is nonconformant.
   An accepted `approval/1` still decides that relayed action at any tier (AP-2; `actionDecision`'s row for a `relayed` action with an accepted approval; DL-18), save DEC-0162's organization's-context row above, so the
-  agent-side limit above is the only bar on that form there: the contract adds no product-side refusal, since an approval is
+  agent-side limit above is the only bar on that form outside that row: the contract adds no product-side refusal, since an approval is
   a signed decision of an approver the product trusts for that action's digest (DL-17, DL-18), and refusing it for one
   action would split AP-2's single table. An agent MUST NOT delete or rewrite a shared file it cannot read to end a
   hold (UD-2): it reports the hold and, on the operator's word naming the switch, sets the product's own switch on through

@@ -11852,7 +11852,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      runs it, so a mandate or a standing rule never turns it on, a gate of `none` being nonconformant;
      an accepted `approval/1` still decides that relayed action under AP-2 (`actionDecision`'s
      row for a `relayed` action with an accepted approval, DL-18), save DEC-0162's organization's-context row, so the
-     agent-side limit is the only bar on that form there,
+     agent-side limit is the only bar on that form outside that row,
      and no product-side refusal is added (an approval is a signed approver's decision on the action's digest, DL-17,
      and a refusal for one action would split AP-2's single table); an agent never deletes or rewrites a shared file
      it cannot read to end a hold, reporting the hold, setting the product's own switch on through its relayed action
