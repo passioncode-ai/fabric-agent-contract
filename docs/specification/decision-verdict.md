@@ -111,7 +111,7 @@ about `fabric.job.get` and is checked only with `{check: "action"}`, whose `mand
 capability (MJ-1); a mandate reference for a step is refused. A step's verdict is advice only: the step carries no
 receipt (DV-8). An `allow` is consistent only when the reference takes the call, and its route is how the reference
 took it (an accepted approval `approval`; an elicitation or the operator's words in the caller's own session `operator`;
-the operator's words carrying OA-6's `source` `forwarded`; a level command, or a mandate stated `by: level`, `level`; a
+a decision of the operator's words carrying OA-6's `source` `forwarded` (a mandate relayed so is still `mandate`); a level command, or a mandate stated `by: level`, `level`; a
 standing mandate `profile`; a task mandate `mandate`; the caller's own act `own-act`). So the check fails an `allow` of a
 `change-policy` act under any mandate, of an organization's act LV-7 keeps for a level under any other form, and of a T2
 call without its approval. A send to people outside the estate under a profile is refused because the service passes no
