@@ -125,7 +125,7 @@ const MEMBER_OF: Readonly<Record<FactField, string>> = { audience: "access/audie
 /**
  * FAC-SEM-180 (DEC-0173 IF-6). Kind `service-descriptor`: the descriptor's own facts against its peer, placement and
  * runner. Kind `service-well-known`: a value that fails the schema, and `entry` against the same document's dashboard.
- * Kind `service-observation` (`{descriptor, wellKnown}`, the pair `FAC-SEM-009` reads): every clause, both documents.
+ * Kind `service-observation` (`{descriptor, wellKnown}`, the identity pair): every clause, both documents.
  * A finding never changes the service's state; the fact it names reads not declared.
  */
 export function instanceFactsRules(kind: string, value: JsonObject): Finding[] {

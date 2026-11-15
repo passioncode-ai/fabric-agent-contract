@@ -431,6 +431,17 @@
 - **Resources:** activity specification, Summary (`activity-summary/2`)
 - **Status:** proposed
 
+### SCR-36: An agent's details: where it runs and whose it is
+
+- **Used by:** FLW-36
+- **Purpose:** show the operator where an instance runs, whose it is, who it serves, how its dashboard is entered, how it keeps data apart and the space it runs in.
+- **Elements:** placement (local or remote, the machine) and whose instance it is (the placement's `context`, an `org-instance/1` statement, else the organization from Observatory's map); the facts with their labels, each marked "declared by the service": audience (`operator`: "its operator only"; `organization`: "offered to others: its organization and anyone a grant names"; `public`: "anyone who reaches its site, with their own sign-in"), dashboard entry, tenancy (`single`, `per-organization`, `shared`), space (kind, and the label where its descriptor gives one).
+- **States:** not declared (no fact lines, never a guess); declared (each declared fact shown, a refused one left out and the service's state unchanged).
+- **Coverage:** `src/instance-facts.ts` (`instanceFacts`, `FAC-SEM-180`), `test/instance-facts.test.ts`, vectors `instance-facts.json`
+- **Scenarios:** SCN-065
+- **Resources:** service specification, Instance facts
+- **Status:** proposed
+
 ### SCR-32: A Project's sessions and its main one
 
 - **Used by:** FLW-16

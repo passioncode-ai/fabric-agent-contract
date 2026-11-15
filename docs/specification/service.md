@@ -925,6 +925,65 @@ operator's subscription is refused. Read beside its usage report, a service offe
   whether a caller's residency requirement admits a service's, are the organization's placement policy and the
   caller's, not this descriptor's rules (DEC-0061, *Not decided*).
 
+## Instance facts
+
+<a id="instance-facts"></a>
+
+DEC-0173 (CT-321) · schema [`service-instance-facts-extension.schema.json`](../../schemas/service-instance-facts-extension.schema.json) ·
+[`src/instance-facts.ts`](../../src/instance-facts.ts) · rule `FAC-SEM-180` · vectors
+[`instance-facts.json`](../../fixtures/vectors/instance-facts.json) · protocol `fabric-instance-facts/0.1`
+
+A service may say who it serves, how it keeps data apart and the space it runs in, so a host shows where an agent runs
+and whose it is without guessing. The facts ride as one extension value under the contract's key ending
+`extensions/instance-facts/0.1`, in the descriptor's `extensions` (what the installer knows), the well-known document's
+(what the running instance knows), or both: both documents are closed, and a host pinned before DEC-0173 preserves and
+ignores the extension. Every member and every field is optional; an absent one, and an empty object, declare nothing,
+never a default. The facts are declared, never verified. **Whose instance it is** is not among them: it stays the
+estate placement's `context` (DEC-0082 item 4), for a remote instance an organization's `org-instance/1` statement
+([membership](membership.md#instances-dec-0170)), else Observatory's map.
+
+**IF-2, `access`.** `audience`: `operator` (its operator alone), `organization` (others it is offered to: beside
+`peer`, the members of the organization its placement's `context` names and anyone a share grant or an organization's
+listing names, a colleague or a guest included; on a remote placement without `peer`, an organization's members reaching
+its own surface with their own keys) or `public` (a remote placement's only: anyone who reaches its origin's own
+surface with credentials of their own, outside any hub's routing; no offer in the [sense above](#offered-to-others) and
+no grant through a hub). A service that declares `peer` before any grant reaches it leaves `audience` out. A peer share
+(DEC-0142) passes a credential's value and gives no audience to an instance. `entry`: `host-signin`, `own-signin` or
+`none`, how its dashboard is entered; where the well-known document declares `surfaces.dashboard`, its `login` decides
+(`true`: `host-signin` whatever is declared; `false`: never `host-signin`). The word `audience` here is not the
+authority extension's `levels[].audience` nor a grant's.
+
+**IF-3, `tenancy`.** `mode`: `single` (one tenant, the context the instance serves and no other's data; an agent shared
+into organizations runs one `org:` instance in each, naming its share grant, and each is `single`), `per-organization`
+(one of the copies a product itself runs one per organization) or `shared` (one instance holding several tenants' data,
+kept apart by the instance: many users each signed in on its own sign-in, or several organizations whose listings name
+it; a remote placement's only, since a local placement names one context and at most one grant).
+
+**IF-4, `space`.** `kind`: `user` (the counted OS account whose services directory declares it, DEC-0154),
+`container` or `vm` (a guest on the computer behind a forwarder its own account owns; a listener HA-2 reads as
+`foreign-user` is never read, and then only the descriptor's facts show) or `system` (a platform's service account, a
+remote placement's only). `account`: an opaque label of 1 to 64 characters of `[A-Za-z0-9._-]` the installer or the
+operator assigns, never the OS account's name, a person's name, a path or a credential; written only in a local
+service's descriptor.
+
+**IF-5, the reading.** [`instanceFacts(descriptor, wellKnown)`](../../src/instance-facts.ts) reads five facts, each on
+its own: from the well-known document where it declares a value no clause refuses, else from the descriptor's; a
+refused value is reported and never read; `entry` reads `host-signin` whenever the dashboard requires a host's login
+code. A document whose extension value fails the schema gives none of its facts (as ED-9 reads a dashboard extension),
+while a value a clause refuses costs only that field, since each fact stands alone. Nothing identifying an
+organization rides here, and the label stays out of a local well-known document, which every counted OS account on the
+computer and a relayed guest reach unauthenticated (DEC-0154); `audience` and `mode` there say only that an
+organization's instance may run on the computer, and a service that must not say so declares them in its descriptor.
+
+**IF-6, `FAC-SEM-180`.** A value fails the schema; `organization` on a local placement without `peer`; `operator`
+beside `peer`; `public` on a local placement or beside a `subscription` runner (DEC-0061 item 3); a declared `entry`
+against the dashboard's `login`; `shared` or `system` on a local placement; a label shaped like a credential (the shared
+detector, as `FAC-SEM-086` reads `runner`), or in a local well-known document. The clauses on `peer`, the placement and
+the runner read the descriptor, and the one on `login` the well-known document: kind `service-descriptor` checks a
+descriptor's own facts, `service-well-known` a document's schema and its `entry` against its own dashboard, and
+`service-observation` (`{descriptor, wellKnown}`, the pair `FAC-SEM-009` reads) every clause on both. A finding never
+changes the service's state, unlike `FAC-SEM-009`'s `foreign`: the fact it names reads not declared.
+
 ## Windows token files
 
 <a id="windows-token-files"></a>
@@ -1432,6 +1491,7 @@ behaviour rules (AP-1, AP-2 and AP-4) bind a service at its next pin, and from t
 | <a id="fac-sem-009"></a>`FAC-SEM-009` | `service-observation` | the well-known identity matches the descriptor |
 | <a id="fac-sem-010"></a>`FAC-SEM-010` | `service-directory` | no two local descriptors declare one port (an app's descriptor without an origin declares none, DEC-0069); no two descriptors declare one `id.instance` |
 | <a id="fac-sem-011"></a>`FAC-SEM-011` | `service-well-known` | `ready` carries no degraded source |
+| <a id="fac-sem-180"></a>`FAC-SEM-180` | `service-descriptor`, `service-well-known`, `service-observation` | the instance facts are their schema's and no clause of [IF-6](#instance-facts) refuses a value: `audience` against `peer`, the placement and the runner, `entry` against the dashboard's `login`, `shared` and `system` only remote, the label never credential-shaped nor in a local well-known document (DEC-0173) |
 | <a id="fac-sem-012"></a>`FAC-SEM-012` | `service-descriptor` | every command starts with an absolute or home-relative executable path in `localPath`'s grammar: `/…` or `~/…`, and on Windows `C:\…`, `C:/…` or `~\…` (DEC-0032); never a network share |
 | <a id="fac-sem-024"></a>`FAC-SEM-024` | `service-descriptor` | a remote placement lives on a public DNS name and carries no local supervisor field (`label`, `plist`, `unit`, `task`) |
 | <a id="fac-sem-025"></a>`FAC-SEM-025` | `service-usage` | a day's totals are the sums of its models, and every cost sum holds within 0.000001, plus 0.0000005 for each row with a known cost summed on either side, plus 1e-9 of the larger sum (DEC-0163); a row has no more unpriced or unmeasured calls than calls (DEC-0091); an all-unpriced row costs `null`, a priced row a number; days run forward without a repeat; every date exists and lies in the 31 UTC days ending with `generatedAt`'s date; `byProject` names each project once (by the normal form of `projectId`, DEC-0076) and each task run once within it, a project holds at least its task runs' calls and priced calls and, when its own cost is known, at least their known costs; all projects no more than the days' calls and known costs, a `null` cost counting as none, with the same unknown-cost rule (DEC-0065, CT-40; `src/usage-rules.ts`) |

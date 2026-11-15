@@ -20,7 +20,7 @@ derived) and the operator's rulings of DEC-0017 (each marked as ruled).
 path shape as the contract's `service/0.1` key; the Dashboards docs' other spelling is
 fixed in AR-1).
 
-The contract defines ten extension keys, the constants in [`src/extensions.ts`](../../src/extensions.ts):
+The contract defines eleven extension keys, the constants in [`src/extensions.ts`](../../src/extensions.ts):
 
 | Key | Page |
 |---|---|
@@ -34,6 +34,7 @@ The contract defines ten extension keys, the constants in [`src/extensions.ts`](
 | `https://fabric.passioncode.ai/agent-contract/extensions/authority/0.1` | [membership](membership.md#levels): the organizations whose levels a service reads and the level each relayed action needs, beside the actions key, which it never changes (DEC-0162) |
 | `https://fabric.passioncode.ai/agent-contract/extensions/channel-agent/0.1` | [channel agent](channel-agent.md) (DEC-0150) |
 | `https://fabric.passioncode.ai/agent-contract/extensions/ops-digest/0.1` | [operations digests](ops-digest.md#where-a-collector-reads-the-daily-digests) (DEC-0153) |
+| `https://fabric.passioncode.ai/agent-contract/extensions/instance-facts/0.1` | [service](service.md#instance-facts): who an instance serves, how it keeps data apart and the space it runs in (DEC-0173) |
 
 The documentation gate (`pnpm docs:check`) refuses any other spelling of an extension key in
 this repository's documents, schemas and fixtures (G-08). The spelling Fabric Dashboards'

@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0173` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0174` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -12885,3 +12885,64 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Source:** the design above; board messages `1f2cfb98` and `45e934f6`; the agents database's design at `1055b55` and
   its D-45; DEC-0121, DEC-0125, DEC-0126, DEC-0156, DEC-0162, DEC-0166. DEC-0172 and `FAC-SEM-179` were reserved by git
   CAS (`agent_sync.py reserve`, key `ct302-decision-verdict`).
+
+### DEC-0173: instance facts, who an instance serves, how it keeps data apart and the space it runs in
+
+- **Date:** 2026-11-16
+- **Status:** Proposed 2026-11-16 from the design `docs/evidence/plans/2026-11-15-ct321-instance-facts.md` (CT-321),
+  whose rounds 5 and 6 of the blind readings (seam and product) read clean; accepted when the coordinator's blind
+  readings are clean on two consecutive rounds. It answers Fabric Dashboards' request `5da92f65` (thread `589abe7e`,
+  FD-273, 2026-11-15), relaying the operator's ask `d660cc30` that pointing at an agent show where it runs, its
+  organization, whose instance it is, who has access and how its data is kept apart. The contract accepted it in
+  principle on the board (`1fa97798`) and named Prowl Agent the first declarer, as the operator said.
+- **Context:** a host reads placement, origin, the placement record's machine, the organization from Observatory's map,
+  the dashboard's sign-in, repository, version, `installedBy` and `installedAt`. Who an instance serves, how it keeps
+  data apart and the OS space it runs in have no field. The descriptor and the well-known document are closed, so a new
+  top-level member would be refused by every host pinned before it; both carry `extensions`, which a host preserves and
+  ignores when it does not know the key. Whose instance it is already has a field: the estate placement's `context`
+  (DEC-0082 item 4), and for an organization's remote instance its `org-instance/1` statement (DEC-0170).
+- **Decision:** [service](specification/service.md#instance-facts) *Instance facts*:
+  1. **IF-1, an extension.** The facts ride as one value under the contract's key ending `extensions/instance-facts/0.1`
+     (`EXTENSION_KEYS.instanceFacts`, schema `service-instance-facts-extension.schema.json`), in the descriptor, the
+     well-known document or both; protocol `fabric-instance-facts/0.1`, named only. Every member and field is optional;
+     an absent one, and an empty object, declare nothing. Declared, never verified.
+  2. **IF-2, `access`.** `audience` `operator`, `organization` or `public` and `entry` `host-signin`, `own-signin` or
+     `none`. `organization` needs `peer` on a local placement (a host routes others only to a service that declares it,
+     DEC-0061); on a remote one it also covers an organization's members reaching its own surface with their own keys.
+     `operator` never beside `peer`. `public` is a remote placement's only and never beside a `subscription` runner
+     (DEC-0061 item 3); it describes an origin's own reach and is no offer nor grant. A peer share (DEC-0142) gives no
+     audience. Where the well-known document declares `surfaces.dashboard`, its `login` decides `host-signin`.
+  3. **IF-3, `tenancy`.** `mode` `single`, `per-organization` (a product's own per-organization copy) or `shared` (several
+     tenants' data in one instance, a remote placement's only). No member says whose instance it is.
+  4. **IF-4, `space`.** `kind` `user`, `container`, `vm` or `system` (a remote placement's only); `account` an opaque
+     label, never an OS account's or a person's name, a path or a credential, written only in a local service's descriptor.
+  5. **IF-5, the reading.** `instanceFacts(descriptor, wellKnown)`: five facts, each from the well-known document where it
+     declares a value no clause refuses, else from the descriptor's; a refused value is reported, never read; `entry`
+     `host-signin` whenever the dashboard requires a host's login code; a document whose value fails the schema gives
+     none of its facts.
+  6. **IF-6, `FAC-SEM-180`.** The schema and the clauses above, on kinds `service-descriptor`, `service-well-known` and
+     the pair `service-observation`; a finding never changes the service's state.
+- **Why:** an extension is the one route that breaks no host pinned today; keeping whose instance it is on the placement
+  leaves one answer to that question; binding `audience` to `peer`, the placement and the runner keeps a declaration
+  from naming a reach the contract does not route; keeping the label out of a local well-known document keeps it from
+  every other account on the computer.
+- **Alternatives considered:** three top-level members as the request words them (refused: closed documents);
+  `tenancy.organization` as a name or as `org:<orgId>` (refused: a second answer to whose instance it is, and names are
+  Observatory's); dropping `entry` for `surfaces.dashboard.login` (refused: `false` does not tell an own sign-in from
+  none, and a descriptor has no `surfaces`); a derived label (an HMAC as the host label is) (not needed for a label a host
+  only shows); a whole-extension refusal on one bad clause (refused: each fact stands alone; a schema failure still
+  drops the document's value, as ED-9 does).
+- **Compatibility:** additive. A host pinned before DEC-0173 ignores the extension; a service that writes it changes
+  nothing a pinned host reads. Fabric Dashboards reads it first (FD-273) and Prowl Agent declares first; Fabric,
+  Observatory and the adapter's descriptor writer owe nothing until they show or write the facts; the adapter kits'
+  `PROTOCOL_REVISIONS` gain `fabric-instance-facts/0.1` at their next repin. CT-324 (an organization id already reaching
+  a local well-known document through the authority extension) is outside this decision.
+- **Consequences / affects:** `schemas/service-instance-facts-extension.schema.json` (new), `src/instance-facts.ts`
+  (new), `src/extensions.ts`, `src/protocol-revisions.ts`, `src/semantic-rules.ts`, `tools/vectors/instance-facts.ts`,
+  `tools/vectors/run.ts`, `fixtures/vectors/instance-facts.json`, `test/instance-facts.test.ts`, the fixtures and
+  `fixtures/catalogue.json`, `vitest.config.ts`; `docs/specification/service.md` (*Instance facts*, `FAC-SEM-180`),
+  `interop.md` (the extension keys), `versioning.md` (named protocols), `conformance.md` (a service and a host row, the
+  module, the register); `CONTEXT.md`; `docs/ux/` (ST-045, FLW-36, SCR-36, SCN-065); `docs/backlog.md` (CT-321).
+- **Source:** the design above; board messages `5da92f65`, `1fa97798` and `8601034d`; DEC-0061, DEC-0082, DEC-0086,
+  DEC-0142, DEC-0154, DEC-0170. DEC-0173 and `FAC-SEM-180` were reserved by git CAS (`agent_sync.py reserve`, key
+  `ct321-instance-facts`).

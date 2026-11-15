@@ -818,6 +818,20 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
 - **Status:** draft
 - **Product:** unobserved
 
+### ST-045: Point at an agent and see where it runs, whose it is, who reaches it and how its data is kept apart
+
+- **Story:** As P-02, I want the details above an agent's page to show where the instance runs, whose instance it is, who it serves and how it keeps data apart, so that I know what I am looking at without asking its author, and never take a service's word for more than it is.
+- **Traces:** JTBD-11, JRN-10/#1
+- **Acceptance criteria:**
+  - Given an instance whose descriptor or well-known document carries instance facts, when I open its details, then I see its audience, dashboard entry, tenancy and space, each marked as declared by the service and not verified (DEC-0173 IF-5).
+  - Given an instance placed in an organization's context, when I open its details, then whose instance it is comes from the placement's `context` or an `org-instance/1` statement, never from the facts (IF-3).
+  - Given `audience: organization`, when I read it, then the label says the instance is offered to others (the organization's members and anyone a grant names), not that only the organization's members reach it (IF-2).
+  - Given a fact a clause refuses (`FAC-SEM-180`), when I open the details, then that fact reads not declared and the service keeps running as before (IF-6).
+  - Given an instance that declares no facts, when I open its details, then those lines are left out, never filled with a guess.
+- **Priority:** should
+- **Status:** draft
+- **Product:** unobserved
+
 ## Design tooling
 
 - **Figma:** disabled

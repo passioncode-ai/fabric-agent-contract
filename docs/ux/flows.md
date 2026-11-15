@@ -1019,3 +1019,25 @@ flowchart TD
 ```
 
 - **Screens traversed:** SCR-35 none published; SCR-35 success.
+
+### FLW-36: The operator reads an instance's facts in its details
+
+- **Traces:** ST-045 (JTBD-11, JRN-10/#1)
+- **Goal:** the operator sees where an agent runs, whose it is, who reaches it and how its data is kept apart, and knows which of it the service only declared
+- **Entry points:** pointing at an agent in the host's list; the details above its page
+- **Success exit:** the details show the placement and whose instance it is (the host's own reading) beside the instance facts (`instanceFacts`), each fact marked declared
+- **Task analysis:** the host reads the descriptor and, for a running instance its account owns, the well-known document → `instanceFacts` gives the five facts, field by field, the well-known document first → the host adds the placement, its `context` or the instance's `org-instance/1` statement, and the organization's name from Observatory → the details show each fact with its label, the declared ones marked so, a refused or absent one left out.
+- **Rejected shape:** a fact for whose instance it is among the facts, rejected because it could disagree with the placement's `context` (DEC-0082 item 4); a fact filled by a guess when nothing is declared.
+- **Flow:**
+
+```mermaid
+flowchart TD
+  A[Screen: Agent details] --> R{Facts declared?}
+  R -->|none| N[Placement and whose instance only; no fact lines]
+  R -->|some| F[Each declared fact, marked declared, beside the placement and whose instance]
+  F --> X{A fact refused by FAC-SEM-180?}
+  X -->|yes| L[That fact left out; the service keeps its state]
+  X -->|no| F
+```
+
+- **Screens traversed:** SCR-36 not declared; SCR-36 declared.

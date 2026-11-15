@@ -924,6 +924,12 @@ id, product, origin, placement and `active` or `retired` status, for at most 7 d
 signed by a key of the organization's key set and verified offline by the platform and the instance's product
 ([membership](docs/specification/membership.md#instances-dec-0170)).
 
+**Instance facts**: What a service declares of one instance under `extensions/instance-facts/0.1`: its `access`
+(`audience` and dashboard `entry`), its `tenancy` (`mode`: how it keeps data apart) and its `space` (`kind` and an opaque
+`account` label). Declared, never verified, and never whose instance it is, which stays the estate placement's
+`context` or an **Instance statement**. Its `audience` is not the authority extension's `levels[].audience` nor a
+grant's audience, and `tenancy` is not a policy's `accounts.tenants` (DEC-0173).
+
 **Membership attestation**: What an organization server states about one person's membership of one organization,
 for one reader, for at most a day: the organization, a subject pairwise to that reader, a role (`owner`, `admin`,
 `member`), `active` or `ended`, and a revision (`org-membership/1`, DEC-0127; or `/2`, for a reader of levels, with

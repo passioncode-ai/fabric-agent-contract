@@ -10,7 +10,7 @@ import { ruleCodeFindings } from "../src/rule-codes.js";
 const PIN = { contract: "fabric-agent-contract", version: "0.1.0", repository: "https://github.com/passioncode-ai/fabric-agent-contract", commit: "a5a27092ba0dcc5facfbeae8b359146dfb403e9a" };
 
 describe("G-08: one spelling of every extension key", () => {
-  it("names the service, interop, memory, dashboard, connections, load, actions, authority, channel-agent and ops-digest keys on one host and path", () => {
+  it("names the service, interop, memory, dashboard, connections, load, actions, authority, channel-agent, ops-digest and instance-facts keys on one host and path", () => {
     expect(EXTENSION_KEYS).toEqual({
       service: "https://fabric.passioncode.ai/agent-contract/extensions/service/0.1",
       interop: "https://fabric.passioncode.ai/agent-contract/extensions/interop/0.1",
@@ -21,7 +21,8 @@ describe("G-08: one spelling of every extension key", () => {
       actions: "https://fabric.passioncode.ai/agent-contract/extensions/actions/0.1",
       authority: "https://fabric.passioncode.ai/agent-contract/extensions/authority/0.1",
       channelAgent: "https://fabric.passioncode.ai/agent-contract/extensions/channel-agent/0.1",
-      opsDigest: "https://fabric.passioncode.ai/agent-contract/extensions/ops-digest/0.1"
+      opsDigest: "https://fabric.passioncode.ai/agent-contract/extensions/ops-digest/0.1",
+      instanceFacts: "https://fabric.passioncode.ai/agent-contract/extensions/instance-facts/0.1"
     });
   });
 
