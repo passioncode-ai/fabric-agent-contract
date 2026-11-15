@@ -38,6 +38,7 @@ import { sessionJoinRules } from "./session-join.js";
 import { feedDataRules } from "./feed-data.js";
 import { windowLeaseRules } from "./window-lease.js";
 import { entitlementRules } from "./entitlement.js";
+import { orgInstanceRules } from "./org-instance.js";
 import { nodeEnrollmentRules } from "./node-enrollments.js";
 import { orgAuthorityRules } from "./org-authority.js";
 import { orgExchangeRules } from "./org-exchange.js";
@@ -109,6 +110,8 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   if (lease) return lease;
   const entitlement = entitlementRules(kind, value);
   if (entitlement) return entitlement;
+  const instance = orgInstanceRules(kind, value);
+  if (instance) return instance;
   const membership = orgMembershipRules(kind, value);
   if (membership) return membership;
   const authority = orgAuthorityRules(kind, value);
