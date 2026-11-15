@@ -10,13 +10,16 @@ import { strictTime } from "./rfc3339.js";
  */
 
 const COUNTED = new Set(["session.interval", "usage.line"]);
+/** What one collector writes per session (DEC-0068; DEC-0171 RT-1 adds a session's `turn` events): counted facts and turns. */
+const WRITTEN = new Set([...COUNTED, "turn"]);
 const sessionOf = (event: JsonObject): string | undefined => (isObject(event.session) && typeof event.session.id === "string" ? event.session.id : undefined);
 const collectorOf = (event: JsonObject): string | undefined => (isObject(event.collector) && typeof event.collector.id === "string" ? event.collector.id : undefined);
 const count = (value: unknown): number => (Number.isSafeInteger(value) && (value as number) >= 0 ? (value as number) : 0);
 
 /**
- * FAC-SEM-100 (kind `session-join`, `{events}`: events of one device): every counted event of one `session.id` carries
- * one `collector.id`, and the intervals of one session do not overlap, since a session is in one state at a time.
+ * FAC-SEM-100 (kind `session-join`, `{events}`: events of one device): every counted event and every `turn` (DEC-0171) of
+ * one `session.id` carries one `collector.id`, and the intervals of one session do not overlap, since a session is in one
+ * state at a time.
  */
 export function sessionJoinFindings(value: JsonObject): Finding[] {
   const events = Array.isArray(value.events) ? value.events : [];
@@ -24,13 +27,13 @@ export function sessionJoinFindings(value: JsonObject): Finding[] {
   const writer = new Map<string, string>();
   const intervals = new Map<string, Array<{ start: number; end: number; index: number }>>();
   events.forEach((event: unknown, index: number) => {
-    if (!isObject(event) || typeof event.kind !== "string" || !COUNTED.has(event.kind)) return;
+    if (!isObject(event) || typeof event.kind !== "string" || !WRITTEN.has(event.kind)) return;
     const session = sessionOf(event);
     const collector = collectorOf(event);
     if (session === undefined || collector === undefined) return;
     const first = writer.get(session);
     if (first === undefined) writer.set(session, collector);
-    else if (first !== collector) findings.push({ code: "FAC-SEM-100", instancePath: `/events/${index}/collector/id`, message: `session ${session} is written by ${first}; one collector writes a session's intervals and usage lines` });
+    else if (first !== collector) findings.push({ code: "FAC-SEM-100", instancePath: `/events/${index}/collector/id`, message: `session ${session} is written by ${first}; one collector writes a session's intervals, usage lines and turns` });
     if (event.kind === "session.interval" && isObject(event.data)) {
       const start = strictTime(event.data.start);
       const end = strictTime(event.data.end);

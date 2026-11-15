@@ -1,0 +1,2550 @@
+{
+  "about": "Vectors for the agent turn and the account inventory (DEC-0171), written by tools/vectors/activity-turn.ts, never by hand. A turn's sourceKey is sha256: of the settings-form canonical JSON {ordinal, session} (session.id), an inventory's of {billing, day, holder, plan, provider, tenantRef} (plan null when absent), and each eventId sha256: of the settings-form canonical JSON {key: sourceKey, source}. events: schemaValid is the event against telemetry-event.schema.json; findings are the codes and paths of evaluateSemanticRules(\"telemetry-event\", event), in order. routes: routeInventory(tenantRef, enrollments). populations: boundPopulation(rows). buckets: turnBucket(turnMs). summaries: schemaValid against activity-summary-2.schema.json, findings of evaluateSemanticRules(\"activity-summary-2\", summary).",
+  "events": [
+    {
+      "name": "a turn read from the runtime's OpenTelemetry export",
+      "event": {
+        "protocol": "fabric-activity/0.1",
+        "eventId": "sha256:962503ddab9bf268a1ba22a2686f59b08942a6fc21b7787e536494771bf5b104",
+        "kind": "turn",
+        "source": "claude_code.otel",
+        "sourceKey": "sha256:6a4275c25dd4172897091555806c56dcaabe1a7dd9725cb362b8dbe1226aaafe",
+        "collector": {
+          "id": "observatory-node",
+          "epoch": 4
+        },
+        "seq": 1,
+        "occurred": "2026-11-14T00:00:00Z",
+        "bootId": "boot-7c41e2",
+        "monotonicNs": "0",
+        "session": {
+          "id": "s-91c2e4"
+        },
+        "project": {
+          "id": "example-project"
+        },
+        "runtime": {
+          "name": "claude_code",
+          "version": "2.4.1"
+        },
+        "skill": "task-pipeline",
+        "account": {
+          "class": "organization",
+          "tenantRef": "sha256:7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a"
+        },
+        "data": {
+          "ordinal": 3,
+          "day": "2026-11-14",
+          "turnMs": 41250,
+          "modelCalls": 4,
+          "modelMs": 30100,
+          "toolCalls": 3,
+          "toolMs": 9800,
+          "toolKinds": [
+            {
+              "kind": "shell",
+              "calls": 2,
+              "ms": 8900
+            },
+            {
+              "kind": "file",
+              "calls": 1,
+              "ms": 900
+            }
+          ],
+          "method": "otel",
+          "outcome": "answered"
+        }
+      },
+      "schemaValid": true,
+      "findings": []
+    },
+    {
+      "name": "a turn with no tool call and no tool kinds, read from a hook",
+      "event": {
+        "protocol": "fabric-activity/0.1",
+        "eventId": "sha256:962503ddab9bf268a1ba22a2686f59b08942a6fc21b7787e536494771bf5b104",
+        "kind": "turn",
+        "source": "claude_code.otel",
+        "sourceKey": "sha256:6a4275c25dd4172897091555806c56dcaabe1a7dd9725cb362b8dbe1226aaafe",
+        "collector": {
+          "id": "observatory-node",
+          "epoch": 4
+        },
+        "seq": 1,
+        "occurred": "2026-11-14T00:00:00Z",
+        "bootId": "boot-7c41e2",
+        "monotonicNs": "0",
+        "session": {
+          "id": "s-91c2e4"
+        },
+        "project": {
+          "id": "example-project"
+        },
+        "runtime": {
+          "name": "claude_code",
+          "version": "2.4.1"
+        },
+        "skill": "task-pipeline",
+        "account": {
+          "class": "organization",
+          "tenantRef": "sha256:7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a"
+        },
+        "data": {
+          "ordinal": 3,
+          "day": "2026-11-14",
+          "turnMs": 41250,
+          "modelCalls": 4,
+          "modelMs": 30100,
+          "toolCalls": 0,
+          "toolMs": 0,
+          "method": "hook",
+          "outcome": "answered"
+        }
+      },
+      "schemaValid": true,
+      "findings": []
+    },
+    {
+      "name": "a turn read from a transcript the collector stamped live",
+      "event": {
+        "protocol": "fabric-activity/0.1",
+        "eventId": "sha256:962503ddab9bf268a1ba22a2686f59b08942a6fc21b7787e536494771bf5b104",
+        "kind": "turn",
+        "source": "claude_code.otel",
+        "sourceKey": "sha256:6a4275c25dd4172897091555806c56dcaabe1a7dd9725cb362b8dbe1226aaafe",
+        "collector": {
+          "id": "observatory-node",
+          "epoch": 4
+        },
+        "seq": 1,
+        "occurred": "2026-11-14T00:00:00Z",
+        "bootId": "boot-7c41e2",
+        "monotonicNs": "0",
+        "session": {
+          "id": "s-91c2e4"
+        },
+        "project": {
+          "id": "example-project"
+        },
+        "runtime": {
+          "name": "claude_code",
+          "version": "2.4.1"
+        },
+        "skill": "task-pipeline",
+        "account": {
+          "class": "organization",
+          "tenantRef": "sha256:7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a"
+        },
+        "data": {
+          "ordinal": 3,
+          "day": "2026-11-14",
+          "turnMs": 41250,
+          "modelCalls": 4,
+          "modelMs": 30100,
+          "toolCalls": 3,
+          "toolMs": 9800,
+          "toolKinds": [
+            {
+              "kind": "shell",
+              "calls": 2,
+              "ms": 8900
+            },
+            {
+              "kind": "file",
+              "calls": 1,
+              "ms": 900
+            }
+          ],
+          "method": "transcript",
+          "outcome": "unknown"
+        }
+      },
+      "schemaValid": true,
+      "findings": []
+    },
+    {
+      "name": "a turn in a session of the same person's second machine, with no skill and no account",
+      "event": {
+        "protocol": "fabric-activity/0.1",
+        "eventId": "sha256:41d8220ee9943b01adeea9f4b5e6b83536970d602f7687117efb3c03cb798b34",
+        "kind": "turn",
+        "source": "claude_code.otel",
+        "sourceKey": "sha256:a3ccf1d1bcb4332b906cbc3b2bf5addb46f018191b210ce1f31e53145dfce06e",
+        "collector": {
+          "id": "observatory-node",
+          "epoch": 4
+        },
+        "seq": 1,
+        "occurred": "2026-11-14T00:00:00Z",
+        "bootId": "boot-7c41e2",
+        "monotonicNs": "0",
+        "session": {
+          "id": "s-2b7d10"
+        },
+        "project": {
+          "id": "example-project"
+        },
+        "runtime": {
+          "name": "claude_code",
+          "version": "2.4.1"
+        },
+        "data": {
+          "ordinal": 1,
+          "day": "2026-11-14",
+          "turnMs": 41250,
+          "modelCalls": 4,
+          "modelMs": 30100,
+          "toolCalls": 3,
+          "toolMs": 9800,
+          "toolKinds": [
+            {
+              "kind": "shell",
+              "calls": 2,
+              "ms": 8900
+            },
+            {
+              "kind": "file",
+              "calls": 1,
+              "ms": 900
+            }
+          ],
+          "method": "otel",
+          "outcome": "answered"
+        }
+      },
+      "schemaValid": true,
+      "findings": []
+    },
+    {
+      "name": "tool kinds that count more calls than the turn made",
+      "event": {
+        "protocol": "fabric-activity/0.1",
+        "eventId": "sha256:962503ddab9bf268a1ba22a2686f59b08942a6fc21b7787e536494771bf5b104",
+        "kind": "turn",
+        "source": "claude_code.otel",
+        "sourceKey": "sha256:6a4275c25dd4172897091555806c56dcaabe1a7dd9725cb362b8dbe1226aaafe",
+        "collector": {
+          "id": "observatory-node",
+          "epoch": 4
+        },
+        "seq": 1,
+        "occurred": "2026-11-14T00:00:00Z",
+        "bootId": "boot-7c41e2",
+        "monotonicNs": "0",
+        "session": {
+          "id": "s-91c2e4"
+        },
+        "project": {
+          "id": "example-project"
+        },
+        "runtime": {
+          "name": "claude_code",
+          "version": "2.4.1"
+        },
+        "skill": "task-pipeline",
+        "account": {
+          "class": "organization",
+          "tenantRef": "sha256:7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a"
+        },
+        "data": {
+          "ordinal": 3,
+          "day": "2026-11-14",
+          "turnMs": 41250,
+          "modelCalls": 4,
+          "modelMs": 30100,
+          "toolCalls": 2,
+          "toolMs": 9800,
+          "toolKinds": [
+            {
+              "kind": "shell",
+              "calls": 2,
+              "ms": 8900
+            },
+            {
+              "kind": "file",
+              "calls": 1,
+              "ms": 900
+            }
+          ],
+          "method": "otel",
+          "outcome": "answered"
+        }
+      },
+      "schemaValid": true,
+      "findings": [
+        "FAC-SEM-178 /data/toolKinds"
+      ]
+    },
+    {
+      "name": "tool kinds that spent more time than the turn waited on tools",
+      "event": {
+        "protocol": "fabric-activity/0.1",
+        "eventId": "sha256:962503ddab9bf268a1ba22a2686f59b08942a6fc21b7787e536494771bf5b104",
+        "kind": "turn",
+        "source": "claude_code.otel",
+        "sourceKey": "sha256:6a4275c25dd4172897091555806c56dcaabe1a7dd9725cb362b8dbe1226aaafe",
+        "collector": {
+          "id": "observatory-node",
+          "epoch": 4
+        },
+        "seq": 1,
+        "occurred": "2026-11-14T00:00:00Z",
+        "bootId": "boot-7c41e2",
+        "monotonicNs": "0",
+        "session": {
+          "id": "s-91c2e4"
+        },
+        "project": {
+          "id": "example-project"
+        },
+        "runtime": {
+          "name": "claude_code",
+          "version": "2.4.1"
+        },
+        "skill": "task-pipeline",
+        "account": {
+          "class": "organization",
+          "tenantRef": "sha256:7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a"
+        },
+        "data": {
+          "ordinal": 3,
+          "day": "2026-11-14",
+          "turnMs": 41250,
+          "modelCalls": 4,
+          "modelMs": 30100,
+          "toolCalls": 3,
+          "toolMs": 9000,
+          "toolKinds": [
+            {
+              "kind": "shell",
+              "calls": 2,
+              "ms": 8900
+            },
+            {
+              "kind": "file",
+              "calls": 1,
+              "ms": 900
+            }
+          ],
+          "method": "otel",
+          "outcome": "answered"
+        }
+      },
+      "schemaValid": true,
+      "findings": [
+        "FAC-SEM-178 /data/toolKinds"
+      ]
+    },
+    {
+      "name": "a tool kind named twice",
+      "event": {
+        "protocol": "fabric-activity/0.1",
+        "eventId": "sha256:962503ddab9bf268a1ba22a2686f59b08942a6fc21b7787e536494771bf5b104",
+        "kind": "turn",
+        "source": "claude_code.otel",
+        "sourceKey": "sha256:6a4275c25dd4172897091555806c56dcaabe1a7dd9725cb362b8dbe1226aaafe",
+        "collector": {
+          "id": "observatory-node",
+          "epoch": 4
+        },
+        "seq": 1,
+        "occurred": "2026-11-14T00:00:00Z",
+        "bootId": "boot-7c41e2",
+        "monotonicNs": "0",
+        "session": {
+          "id": "s-91c2e4"
+        },
+        "project": {
+          "id": "example-project"
+        },
+        "runtime": {
+          "name": "claude_code",
+          "version": "2.4.1"
+        },
+        "skill": "task-pipeline",
+        "account": {
+          "class": "organization",
+          "tenantRef": "sha256:7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a"
+        },
+        "data": {
+          "ordinal": 3,
+          "day": "2026-11-14",
+          "turnMs": 41250,
+          "modelCalls": 4,
+          "modelMs": 30100,
+          "toolCalls": 3,
+          "toolMs": 9800,
+          "toolKinds": [
+            {
+              "kind": "shell",
+              "calls": 2,
+              "ms": 8900
+            },
+            {
+              "kind": "shell",
+              "calls": 1,
+              "ms": 900
+            }
+          ],
+          "method": "otel",
+          "outcome": "answered"
+        }
+      },
+      "schemaValid": true,
+      "findings": [
+        "FAC-SEM-178 /data/toolKinds/1/kind"
+      ]
+    },
+    {
+      "name": "a turn whose midnight is not its day",
+      "event": {
+        "protocol": "fabric-activity/0.1",
+        "eventId": "sha256:962503ddab9bf268a1ba22a2686f59b08942a6fc21b7787e536494771bf5b104",
+        "kind": "turn",
+        "source": "claude_code.otel",
+        "sourceKey": "sha256:6a4275c25dd4172897091555806c56dcaabe1a7dd9725cb362b8dbe1226aaafe",
+        "collector": {
+          "id": "observatory-node",
+          "epoch": 4
+        },
+        "seq": 1,
+        "occurred": "2026-11-13T00:00:00Z",
+        "bootId": "boot-7c41e2",
+        "monotonicNs": "0",
+        "session": {
+          "id": "s-91c2e4"
+        },
+        "project": {
+          "id": "example-project"
+        },
+        "runtime": {
+          "name": "claude_code",
+          "version": "2.4.1"
+        },
+        "skill": "task-pipeline",
+        "account": {
+          "class": "organization",
+          "tenantRef": "sha256:7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a"
+        },
+        "data": {
+          "ordinal": 3,
+          "day": "2026-11-14",
+          "turnMs": 41250,
+          "modelCalls": 4,
+          "modelMs": 30100,
+          "toolCalls": 3,
+          "toolMs": 9800,
+          "toolKinds": [
+            {
+              "kind": "shell",
+              "calls": 2,
+              "ms": 8900
+            },
+            {
+              "kind": "file",
+              "calls": 1,
+              "ms": 900
+            }
+          ],
+          "method": "otel",
+          "outcome": "answered"
+        }
+      },
+      "schemaValid": true,
+      "findings": [
+        "FAC-SEM-178 /occurred"
+      ]
+    },
+    {
+      "name": "a turn whose sourceKey names another ordinal",
+      "event": {
+        "protocol": "fabric-activity/0.1",
+        "eventId": "sha256:29d762f451bbeb94bee04ea4609334df832cef2b5c88749b1a5bc1899fba3402",
+        "kind": "turn",
+        "source": "claude_code.otel",
+        "sourceKey": "sha256:379c7decb1fcc8ba8a0fdc610540e7c377ef7a3812a3a865bcb4c4b26af7f014",
+        "collector": {
+          "id": "observatory-node",
+          "epoch": 4
+        },
+        "seq": 1,
+        "occurred": "2026-11-14T00:00:00Z",
+        "bootId": "boot-7c41e2",
+        "monotonicNs": "0",
+        "session": {
+          "id": "s-91c2e4"
+        },
+        "project": {
+          "id": "example-project"
+        },
+        "runtime": {
+          "name": "claude_code",
+          "version": "2.4.1"
+        },
+        "skill": "task-pipeline",
+        "account": {
+          "class": "organization",
+          "tenantRef": "sha256:7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a"
+        },
+        "data": {
+          "ordinal": 3,
+          "day": "2026-11-14",
+          "turnMs": 41250,
+          "modelCalls": 4,
+          "modelMs": 30100,
+          "toolCalls": 3,
+          "toolMs": 9800,
+          "toolKinds": [
+            {
+              "kind": "shell",
+              "calls": 2,
+              "ms": 8900
+            },
+            {
+              "kind": "file",
+              "calls": 1,
+              "ms": 900
+            }
+          ],
+          "method": "otel",
+          "outcome": "answered"
+        }
+      },
+      "schemaValid": true,
+      "findings": [
+        "FAC-SEM-178 /sourceKey"
+      ]
+    },
+    {
+      "name": "a turn with a time of day",
+      "event": {
+        "protocol": "fabric-activity/0.1",
+        "eventId": "sha256:962503ddab9bf268a1ba22a2686f59b08942a6fc21b7787e536494771bf5b104",
+        "kind": "turn",
+        "source": "claude_code.otel",
+        "sourceKey": "sha256:6a4275c25dd4172897091555806c56dcaabe1a7dd9725cb362b8dbe1226aaafe",
+        "collector": {
+          "id": "observatory-node",
+          "epoch": 4
+        },
+        "seq": 1,
+        "occurred": "2026-11-14T10:41:07Z",
+        "bootId": "boot-7c41e2",
+        "monotonicNs": "0",
+        "session": {
+          "id": "s-91c2e4"
+        },
+        "project": {
+          "id": "example-project"
+        },
+        "runtime": {
+          "name": "claude_code",
+          "version": "2.4.1"
+        },
+        "skill": "task-pipeline",
+        "account": {
+          "class": "organization",
+          "tenantRef": "sha256:7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a"
+        },
+        "data": {
+          "ordinal": 3,
+          "day": "2026-11-14",
+          "turnMs": 41250,
+          "modelCalls": 4,
+          "modelMs": 30100,
+          "toolCalls": 3,
+          "toolMs": 9800,
+          "toolKinds": [
+            {
+              "kind": "shell",
+              "calls": 2,
+              "ms": 8900
+            },
+            {
+              "kind": "file",
+              "calls": 1,
+              "ms": 900
+            }
+          ],
+          "method": "otel",
+          "outcome": "answered"
+        }
+      },
+      "schemaValid": false,
+      "findings": []
+    },
+    {
+      "name": "a turn with a monotonic reading",
+      "event": {
+        "protocol": "fabric-activity/0.1",
+        "eventId": "sha256:962503ddab9bf268a1ba22a2686f59b08942a6fc21b7787e536494771bf5b104",
+        "kind": "turn",
+        "source": "claude_code.otel",
+        "sourceKey": "sha256:6a4275c25dd4172897091555806c56dcaabe1a7dd9725cb362b8dbe1226aaafe",
+        "collector": {
+          "id": "observatory-node",
+          "epoch": 4
+        },
+        "seq": 1,
+        "occurred": "2026-11-14T00:00:00Z",
+        "bootId": "boot-7c41e2",
+        "monotonicNs": "8312000000000",
+        "session": {
+          "id": "s-91c2e4"
+        },
+        "project": {
+          "id": "example-project"
+        },
+        "runtime": {
+          "name": "claude_code",
+          "version": "2.4.1"
+        },
+        "skill": "task-pipeline",
+        "account": {
+          "class": "organization",
+          "tenantRef": "sha256:7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a"
+        },
+        "data": {
+          "ordinal": 3,
+          "day": "2026-11-14",
+          "turnMs": 41250,
+          "modelCalls": 4,
+          "modelMs": 30100,
+          "toolCalls": 3,
+          "toolMs": 9800,
+          "toolKinds": [
+            {
+              "kind": "shell",
+              "calls": 2,
+              "ms": 8900
+            },
+            {
+              "kind": "file",
+              "calls": 1,
+              "ms": 900
+            }
+          ],
+          "method": "otel",
+          "outcome": "answered"
+        }
+      },
+      "schemaValid": false,
+      "findings": []
+    },
+    {
+      "name": "a turn with a user",
+      "event": {
+        "protocol": "fabric-activity/0.1",
+        "eventId": "sha256:962503ddab9bf268a1ba22a2686f59b08942a6fc21b7787e536494771bf5b104",
+        "kind": "turn",
+        "source": "claude_code.otel",
+        "sourceKey": "sha256:6a4275c25dd4172897091555806c56dcaabe1a7dd9725cb362b8dbe1226aaafe",
+        "collector": {
+          "id": "observatory-node",
+          "epoch": 4
+        },
+        "seq": 1,
+        "occurred": "2026-11-14T00:00:00Z",
+        "bootId": "boot-7c41e2",
+        "monotonicNs": "0",
+        "session": {
+          "id": "s-91c2e4"
+        },
+        "project": {
+          "id": "example-project"
+        },
+        "runtime": {
+          "name": "claude_code",
+          "version": "2.4.1"
+        },
+        "skill": "task-pipeline",
+        "account": {
+          "class": "organization",
+          "tenantRef": "sha256:7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a"
+        },
+        "data": {
+          "ordinal": 3,
+          "day": "2026-11-14",
+          "turnMs": 41250,
+          "modelCalls": 4,
+          "modelMs": 30100,
+          "toolCalls": 3,
+          "toolMs": 9800,
+          "toolKinds": [
+            {
+              "kind": "shell",
+              "calls": 2,
+              "ms": 8900
+            },
+            {
+              "kind": "file",
+              "calls": 1,
+              "ms": 900
+            }
+          ],
+          "method": "otel",
+          "outcome": "answered"
+        },
+        "user": {
+          "id": "m-7f3a91c2"
+        }
+      },
+      "schemaValid": false,
+      "findings": []
+    },
+    {
+      "name": "a turn with a run, which would join it to a timed run",
+      "event": {
+        "protocol": "fabric-activity/0.1",
+        "eventId": "sha256:962503ddab9bf268a1ba22a2686f59b08942a6fc21b7787e536494771bf5b104",
+        "kind": "turn",
+        "source": "claude_code.otel",
+        "sourceKey": "sha256:6a4275c25dd4172897091555806c56dcaabe1a7dd9725cb362b8dbe1226aaafe",
+        "collector": {
+          "id": "observatory-node",
+          "epoch": 4
+        },
+        "seq": 1,
+        "occurred": "2026-11-14T00:00:00Z",
+        "bootId": "boot-7c41e2",
+        "monotonicNs": "0",
+        "session": {
+          "id": "s-91c2e4"
+        },
+        "project": {
+          "id": "example-project"
+        },
+        "runtime": {
+          "name": "claude_code",
+          "version": "2.4.1"
+        },
+        "skill": "task-pipeline",
+        "account": {
+          "class": "organization",
+          "tenantRef": "sha256:7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a"
+        },
+        "data": {
+          "ordinal": 3,
+          "day": "2026-11-14",
+          "turnMs": 41250,
+          "modelCalls": 4,
+          "modelMs": 30100,
+          "toolCalls": 3,
+          "toolMs": 9800,
+          "toolKinds": [
+            {
+              "kind": "shell",
+              "calls": 2,
+              "ms": 8900
+            },
+            {
+              "kind": "file",
+              "calls": 1,
+              "ms": 900
+            }
+          ],
+          "method": "otel",
+          "outcome": "answered"
+        },
+        "run": {
+          "root": "run-4b1d9e02"
+        }
+      },
+      "schemaValid": false,
+      "findings": []
+    },
+    {
+      "name": "a turn with a ULID and no sourceKey",
+      "event": {
+        "protocol": "fabric-activity/0.1",
+        "eventId": "01JC8ZQ7Y0M2X3A4B5C6D7E8F9",
+        "kind": "turn",
+        "source": "claude_code.otel",
+        "collector": {
+          "id": "observatory-node",
+          "epoch": 4
+        },
+        "seq": 1,
+        "occurred": "2026-11-14T00:00:00Z",
+        "bootId": "boot-7c41e2",
+        "monotonicNs": "0",
+        "session": {
+          "id": "s-91c2e4"
+        },
+        "project": {
+          "id": "example-project"
+        },
+        "runtime": {
+          "name": "claude_code",
+          "version": "2.4.1"
+        },
+        "skill": "task-pipeline",
+        "account": {
+          "class": "organization",
+          "tenantRef": "sha256:7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a"
+        },
+        "data": {
+          "ordinal": 3,
+          "day": "2026-11-14",
+          "turnMs": 41250,
+          "modelCalls": 4,
+          "modelMs": 30100,
+          "toolCalls": 3,
+          "toolMs": 9800,
+          "toolKinds": [
+            {
+              "kind": "shell",
+              "calls": 2,
+              "ms": 8900
+            },
+            {
+              "kind": "file",
+              "calls": 1,
+              "ms": 900
+            }
+          ],
+          "method": "otel",
+          "outcome": "answered"
+        }
+      },
+      "schemaValid": false,
+      "findings": []
+    },
+    {
+      "name": "a turn without its session",
+      "event": {
+        "protocol": "fabric-activity/0.1",
+        "eventId": "sha256:962503ddab9bf268a1ba22a2686f59b08942a6fc21b7787e536494771bf5b104",
+        "kind": "turn",
+        "source": "claude_code.otel",
+        "sourceKey": "sha256:6a4275c25dd4172897091555806c56dcaabe1a7dd9725cb362b8dbe1226aaafe",
+        "collector": {
+          "id": "observatory-node",
+          "epoch": 4
+        },
+        "seq": 1,
+        "occurred": "2026-11-14T00:00:00Z",
+        "bootId": "boot-7c41e2",
+        "monotonicNs": "0",
+        "project": {
+          "id": "example-project"
+        },
+        "runtime": {
+          "name": "claude_code",
+          "version": "2.4.1"
+        },
+        "skill": "task-pipeline",
+        "account": {
+          "class": "organization",
+          "tenantRef": "sha256:7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a"
+        },
+        "data": {
+          "ordinal": 3,
+          "day": "2026-11-14",
+          "turnMs": 41250,
+          "modelCalls": 4,
+          "modelMs": 30100,
+          "toolCalls": 3,
+          "toolMs": 9800,
+          "toolKinds": [
+            {
+              "kind": "shell",
+              "calls": 2,
+              "ms": 8900
+            },
+            {
+              "kind": "file",
+              "calls": 1,
+              "ms": 900
+            }
+          ],
+          "method": "otel",
+          "outcome": "answered"
+        }
+      },
+      "schemaValid": false,
+      "findings": []
+    },
+    {
+      "name": "a tool's name as a tool kind",
+      "event": {
+        "protocol": "fabric-activity/0.1",
+        "eventId": "sha256:962503ddab9bf268a1ba22a2686f59b08942a6fc21b7787e536494771bf5b104",
+        "kind": "turn",
+        "source": "claude_code.otel",
+        "sourceKey": "sha256:6a4275c25dd4172897091555806c56dcaabe1a7dd9725cb362b8dbe1226aaafe",
+        "collector": {
+          "id": "observatory-node",
+          "epoch": 4
+        },
+        "seq": 1,
+        "occurred": "2026-11-14T00:00:00Z",
+        "bootId": "boot-7c41e2",
+        "monotonicNs": "0",
+        "session": {
+          "id": "s-91c2e4"
+        },
+        "project": {
+          "id": "example-project"
+        },
+        "runtime": {
+          "name": "claude_code",
+          "version": "2.4.1"
+        },
+        "skill": "task-pipeline",
+        "account": {
+          "class": "organization",
+          "tenantRef": "sha256:7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a"
+        },
+        "data": {
+          "ordinal": 3,
+          "day": "2026-11-14",
+          "turnMs": 41250,
+          "modelCalls": 4,
+          "modelMs": 30100,
+          "toolCalls": 3,
+          "toolMs": 9800,
+          "toolKinds": [
+            {
+              "kind": "github-mcp",
+              "calls": 3,
+              "ms": 9800
+            }
+          ],
+          "method": "otel",
+          "outcome": "answered"
+        }
+      },
+      "schemaValid": false,
+      "findings": []
+    },
+    {
+      "name": "a turn read by process sampling",
+      "event": {
+        "protocol": "fabric-activity/0.1",
+        "eventId": "sha256:962503ddab9bf268a1ba22a2686f59b08942a6fc21b7787e536494771bf5b104",
+        "kind": "turn",
+        "source": "claude_code.otel",
+        "sourceKey": "sha256:6a4275c25dd4172897091555806c56dcaabe1a7dd9725cb362b8dbe1226aaafe",
+        "collector": {
+          "id": "observatory-node",
+          "epoch": 4
+        },
+        "seq": 1,
+        "occurred": "2026-11-14T00:00:00Z",
+        "bootId": "boot-7c41e2",
+        "monotonicNs": "0",
+        "session": {
+          "id": "s-91c2e4"
+        },
+        "project": {
+          "id": "example-project"
+        },
+        "runtime": {
+          "name": "claude_code",
+          "version": "2.4.1"
+        },
+        "skill": "task-pipeline",
+        "account": {
+          "class": "organization",
+          "tenantRef": "sha256:7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a"
+        },
+        "data": {
+          "ordinal": 3,
+          "day": "2026-11-14",
+          "turnMs": 41250,
+          "modelCalls": 4,
+          "modelMs": 30100,
+          "toolCalls": 3,
+          "toolMs": 9800,
+          "toolKinds": [
+            {
+              "kind": "shell",
+              "calls": 2,
+              "ms": 8900
+            },
+            {
+              "kind": "file",
+              "calls": 1,
+              "ms": 900
+            }
+          ],
+          "method": "process",
+          "outcome": "answered"
+        }
+      },
+      "schemaValid": false,
+      "findings": []
+    },
+    {
+      "name": "Switchboard's two subscription seats of one plan",
+      "event": {
+        "protocol": "fabric-activity/0.1",
+        "eventId": "sha256:84966993ddde81dd7ffe3451b420c4d4d5ad16d8a90553bef8c63ef2262aced9",
+        "kind": "account.inventory",
+        "source": "switchboard",
+        "sourceKey": "sha256:221a4e37ce2350f676bededd85b76430c55a84fef7a4ff88643180e73bc2cc67",
+        "collector": {
+          "id": "observatory-node",
+          "epoch": 4
+        },
+        "seq": 1,
+        "occurred": "2026-11-14T00:00:00Z",
+        "bootId": "boot-7c41e2",
+        "monotonicNs": "0",
+        "data": {
+          "day": "2026-11-14",
+          "provider": "anthropic",
+          "tenantRef": "sha256:7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a",
+          "billing": "subscription",
+          "plan": "max-5x",
+          "holder": "switchboard",
+          "accounts": 2
+        }
+      },
+      "schemaValid": true,
+      "findings": []
+    },
+    {
+      "name": "a coding agent's own sign-in, read by the collector",
+      "event": {
+        "protocol": "fabric-activity/0.1",
+        "eventId": "sha256:3a7a8189565af5a8c93bc0e16046ef2ef8f6c101a4a514a2a574a20d3b136cac",
+        "kind": "account.inventory",
+        "source": "process",
+        "sourceKey": "sha256:4f59cc958e9e6b9f042ce5e1bab38b7d645b87cc6392bcfdb127fe225ffe126f",
+        "collector": {
+          "id": "observatory-node",
+          "epoch": 4
+        },
+        "seq": 1,
+        "occurred": "2026-11-14T00:00:00Z",
+        "bootId": "boot-7c41e2",
+        "monotonicNs": "0",
+        "data": {
+          "day": "2026-11-14",
+          "provider": "anthropic",
+          "tenantRef": "sha256:7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a",
+          "billing": "subscription",
+          "plan": "team",
+          "holder": "runtime",
+          "accounts": 1
+        }
+      },
+      "schemaValid": true,
+      "findings": []
+    },
+    {
+      "name": "an API key held by name in the vault, with no plan",
+      "event": {
+        "protocol": "fabric-activity/0.1",
+        "eventId": "sha256:6fd405e9f470deae7fc0837d2579c547697c03d07bee5da4b7584c5b155f18d7",
+        "kind": "account.inventory",
+        "source": "process",
+        "sourceKey": "sha256:e79ee9bfa4d5aba72a26f6a632a468c5bbacb2dc73c6f1ed6d3576ab981903c6",
+        "collector": {
+          "id": "observatory-node",
+          "epoch": 4
+        },
+        "seq": 1,
+        "occurred": "2026-11-14T00:00:00Z",
+        "bootId": "boot-7c41e2",
+        "monotonicNs": "0",
+        "data": {
+          "day": "2026-11-14",
+          "provider": "openrouter",
+          "tenantRef": "sha256:7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a",
+          "billing": "api",
+          "holder": "vault",
+          "accounts": 1
+        }
+      },
+      "schemaValid": true,
+      "findings": []
+    },
+    {
+      "name": "an openai subscription",
+      "event": {
+        "protocol": "fabric-activity/0.1",
+        "eventId": "sha256:1168bc135085f595b34beb81905c45d4a4cc536f81d8992413f6f82bad0224cd",
+        "kind": "account.inventory",
+        "source": "process",
+        "sourceKey": "sha256:46d2251e18e8588cb8ef90a86d4946b54f5415476235a71a268d846bdb21cf44",
+        "collector": {
+          "id": "observatory-node",
+          "epoch": 4
+        },
+        "seq": 1,
+        "occurred": "2026-11-14T00:00:00Z",
+        "bootId": "boot-7c41e2",
+        "monotonicNs": "0",
+        "data": {
+          "day": "2026-11-14",
+          "provider": "openai",
+          "tenantRef": "sha256:7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a",
+          "billing": "subscription",
+          "plan": "business",
+          "holder": "runtime",
+          "accounts": 1
+        }
+      },
+      "schemaValid": true,
+      "findings": []
+    },
+    {
+      "name": "a plan off the provider's list",
+      "event": {
+        "protocol": "fabric-activity/0.1",
+        "eventId": "sha256:0994e93fc238393f9d3a0764c414ae38fd9eb87816390550d7b143cb1d398b12",
+        "kind": "account.inventory",
+        "source": "switchboard",
+        "sourceKey": "sha256:8b77920d37b59e602b56a7cb8e07b7d1a1303622eb89742125f7dae448e62de7",
+        "collector": {
+          "id": "observatory-node",
+          "epoch": 4
+        },
+        "seq": 1,
+        "occurred": "2026-11-14T00:00:00Z",
+        "bootId": "boot-7c41e2",
+        "monotonicNs": "0",
+        "data": {
+          "day": "2026-11-14",
+          "provider": "anthropic",
+          "tenantRef": "sha256:7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a",
+          "billing": "subscription",
+          "plan": "plus",
+          "holder": "switchboard",
+          "accounts": 2
+        }
+      },
+      "schemaValid": true,
+      "findings": [
+        "FAC-SEM-178 /data/plan"
+      ]
+    },
+    {
+      "name": "a plan for a provider with no list",
+      "event": {
+        "protocol": "fabric-activity/0.1",
+        "eventId": "sha256:10f9db897631f397822a5df12ff1d1107f4dbc6638ec9c38327d77d3efa3fb88",
+        "kind": "account.inventory",
+        "source": "switchboard",
+        "sourceKey": "sha256:0ee494014791ea1c8972df74bf4baa634230e75fd03376df4f161b9c73390354",
+        "collector": {
+          "id": "observatory-node",
+          "epoch": 4
+        },
+        "seq": 1,
+        "occurred": "2026-11-14T00:00:00Z",
+        "bootId": "boot-7c41e2",
+        "monotonicNs": "0",
+        "data": {
+          "day": "2026-11-14",
+          "provider": "moonshot",
+          "tenantRef": "sha256:7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a",
+          "billing": "subscription",
+          "plan": "pro",
+          "holder": "switchboard",
+          "accounts": 2
+        }
+      },
+      "schemaValid": true,
+      "findings": [
+        "FAC-SEM-178 /data/plan"
+      ]
+    },
+    {
+      "name": "an inventory whose midnight is not its day",
+      "event": {
+        "protocol": "fabric-activity/0.1",
+        "eventId": "sha256:84966993ddde81dd7ffe3451b420c4d4d5ad16d8a90553bef8c63ef2262aced9",
+        "kind": "account.inventory",
+        "source": "switchboard",
+        "sourceKey": "sha256:221a4e37ce2350f676bededd85b76430c55a84fef7a4ff88643180e73bc2cc67",
+        "collector": {
+          "id": "observatory-node",
+          "epoch": 4
+        },
+        "seq": 1,
+        "occurred": "2026-11-15T00:00:00Z",
+        "bootId": "boot-7c41e2",
+        "monotonicNs": "0",
+        "data": {
+          "day": "2026-11-14",
+          "provider": "anthropic",
+          "tenantRef": "sha256:7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a",
+          "billing": "subscription",
+          "plan": "max-5x",
+          "holder": "switchboard",
+          "accounts": 2
+        }
+      },
+      "schemaValid": true,
+      "findings": [
+        "FAC-SEM-178 /occurred"
+      ]
+    },
+    {
+      "name": "an inventory whose sourceKey names another holder",
+      "event": {
+        "protocol": "fabric-activity/0.1",
+        "eventId": "sha256:a0114d807a02a010be90b9b77da9f3fccaa6689a4511f706c9ace804fcdb0181",
+        "kind": "account.inventory",
+        "source": "switchboard",
+        "sourceKey": "sha256:70ef196f8ea089ad6ad7224a3e93611fea56d9192aaf819dabe3bd43de8d2cb6",
+        "collector": {
+          "id": "observatory-node",
+          "epoch": 4
+        },
+        "seq": 1,
+        "occurred": "2026-11-14T00:00:00Z",
+        "bootId": "boot-7c41e2",
+        "monotonicNs": "0",
+        "data": {
+          "day": "2026-11-14",
+          "provider": "anthropic",
+          "tenantRef": "sha256:7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a",
+          "billing": "subscription",
+          "plan": "max-5x",
+          "holder": "switchboard",
+          "accounts": 2
+        }
+      },
+      "schemaValid": true,
+      "findings": [
+        "FAC-SEM-178 /sourceKey"
+      ]
+    },
+    {
+      "name": "a plan on an API account",
+      "event": {
+        "protocol": "fabric-activity/0.1",
+        "eventId": "sha256:657487460f62765a3d09b4776c31ac278a2b7e32ecd1b4465e961949e5c8c086",
+        "kind": "account.inventory",
+        "source": "switchboard",
+        "sourceKey": "sha256:ff9fc62c0ec539733a0c7ac3884c7d652738b2ca63b64089deb8114fe7003351",
+        "collector": {
+          "id": "observatory-node",
+          "epoch": 4
+        },
+        "seq": 1,
+        "occurred": "2026-11-14T00:00:00Z",
+        "bootId": "boot-7c41e2",
+        "monotonicNs": "0",
+        "data": {
+          "day": "2026-11-14",
+          "provider": "anthropic",
+          "tenantRef": "sha256:7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a",
+          "billing": "api",
+          "plan": "max-5x",
+          "holder": "switchboard",
+          "accounts": 2
+        }
+      },
+      "schemaValid": false,
+      "findings": []
+    },
+    {
+      "name": "an inventory without a tenant: a personal account has none",
+      "event": {
+        "protocol": "fabric-activity/0.1",
+        "eventId": "sha256:84966993ddde81dd7ffe3451b420c4d4d5ad16d8a90553bef8c63ef2262aced9",
+        "kind": "account.inventory",
+        "source": "switchboard",
+        "sourceKey": "sha256:221a4e37ce2350f676bededd85b76430c55a84fef7a4ff88643180e73bc2cc67",
+        "collector": {
+          "id": "observatory-node",
+          "epoch": 4
+        },
+        "seq": 1,
+        "occurred": "2026-11-14T00:00:00Z",
+        "bootId": "boot-7c41e2",
+        "monotonicNs": "0",
+        "data": {
+          "day": "2026-11-14",
+          "provider": "anthropic",
+          "billing": "subscription",
+          "plan": "max-5x",
+          "holder": "switchboard",
+          "accounts": 2
+        }
+      },
+      "schemaValid": false,
+      "findings": []
+    },
+    {
+      "name": "an inventory with a session",
+      "event": {
+        "protocol": "fabric-activity/0.1",
+        "eventId": "sha256:84966993ddde81dd7ffe3451b420c4d4d5ad16d8a90553bef8c63ef2262aced9",
+        "kind": "account.inventory",
+        "source": "switchboard",
+        "sourceKey": "sha256:221a4e37ce2350f676bededd85b76430c55a84fef7a4ff88643180e73bc2cc67",
+        "collector": {
+          "id": "observatory-node",
+          "epoch": 4
+        },
+        "seq": 1,
+        "occurred": "2026-11-14T00:00:00Z",
+        "bootId": "boot-7c41e2",
+        "monotonicNs": "0",
+        "data": {
+          "day": "2026-11-14",
+          "provider": "anthropic",
+          "tenantRef": "sha256:7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a",
+          "billing": "subscription",
+          "plan": "max-5x",
+          "holder": "switchboard",
+          "accounts": 2
+        },
+        "session": {
+          "id": "s-91c2e4"
+        }
+      },
+      "schemaValid": false,
+      "findings": []
+    },
+    {
+      "name": "an inventory with a project",
+      "event": {
+        "protocol": "fabric-activity/0.1",
+        "eventId": "sha256:84966993ddde81dd7ffe3451b420c4d4d5ad16d8a90553bef8c63ef2262aced9",
+        "kind": "account.inventory",
+        "source": "switchboard",
+        "sourceKey": "sha256:221a4e37ce2350f676bededd85b76430c55a84fef7a4ff88643180e73bc2cc67",
+        "collector": {
+          "id": "observatory-node",
+          "epoch": 4
+        },
+        "seq": 1,
+        "occurred": "2026-11-14T00:00:00Z",
+        "bootId": "boot-7c41e2",
+        "monotonicNs": "0",
+        "data": {
+          "day": "2026-11-14",
+          "provider": "anthropic",
+          "tenantRef": "sha256:7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a",
+          "billing": "subscription",
+          "plan": "max-5x",
+          "holder": "switchboard",
+          "accounts": 2
+        },
+        "project": {
+          "id": "example-project"
+        }
+      },
+      "schemaValid": false,
+      "findings": []
+    },
+    {
+      "name": "an inventory with the envelope's account",
+      "event": {
+        "protocol": "fabric-activity/0.1",
+        "eventId": "sha256:84966993ddde81dd7ffe3451b420c4d4d5ad16d8a90553bef8c63ef2262aced9",
+        "kind": "account.inventory",
+        "source": "switchboard",
+        "sourceKey": "sha256:221a4e37ce2350f676bededd85b76430c55a84fef7a4ff88643180e73bc2cc67",
+        "collector": {
+          "id": "observatory-node",
+          "epoch": 4
+        },
+        "seq": 1,
+        "occurred": "2026-11-14T00:00:00Z",
+        "bootId": "boot-7c41e2",
+        "monotonicNs": "0",
+        "data": {
+          "day": "2026-11-14",
+          "provider": "anthropic",
+          "tenantRef": "sha256:7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a",
+          "billing": "subscription",
+          "plan": "max-5x",
+          "holder": "switchboard",
+          "accounts": 2
+        },
+        "account": {
+          "class": "organization",
+          "tenantRef": "sha256:7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a"
+        }
+      },
+      "schemaValid": false,
+      "findings": []
+    },
+    {
+      "name": "Switchboard's seats under the process source",
+      "event": {
+        "protocol": "fabric-activity/0.1",
+        "eventId": "sha256:ec39b3e4db1b19e47c010d6817bf5fe5d53954348a143333d63f3d0514c63523",
+        "kind": "account.inventory",
+        "source": "process",
+        "sourceKey": "sha256:221a4e37ce2350f676bededd85b76430c55a84fef7a4ff88643180e73bc2cc67",
+        "collector": {
+          "id": "observatory-node",
+          "epoch": 4
+        },
+        "seq": 1,
+        "occurred": "2026-11-14T00:00:00Z",
+        "bootId": "boot-7c41e2",
+        "monotonicNs": "0",
+        "data": {
+          "day": "2026-11-14",
+          "provider": "anthropic",
+          "tenantRef": "sha256:7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a",
+          "billing": "subscription",
+          "plan": "max-5x",
+          "holder": "switchboard",
+          "accounts": 2
+        }
+      },
+      "schemaValid": false,
+      "findings": []
+    },
+    {
+      "name": "a runtime's sign-in under the switchboard source",
+      "event": {
+        "protocol": "fabric-activity/0.1",
+        "eventId": "sha256:a0114d807a02a010be90b9b77da9f3fccaa6689a4511f706c9ace804fcdb0181",
+        "kind": "account.inventory",
+        "source": "switchboard",
+        "sourceKey": "sha256:70ef196f8ea089ad6ad7224a3e93611fea56d9192aaf819dabe3bd43de8d2cb6",
+        "collector": {
+          "id": "observatory-node",
+          "epoch": 4
+        },
+        "seq": 1,
+        "occurred": "2026-11-14T00:00:00Z",
+        "bootId": "boot-7c41e2",
+        "monotonicNs": "0",
+        "data": {
+          "day": "2026-11-14",
+          "provider": "anthropic",
+          "tenantRef": "sha256:7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a",
+          "billing": "subscription",
+          "plan": "max-5x",
+          "holder": "runtime",
+          "accounts": 2
+        }
+      },
+      "schemaValid": false,
+      "findings": []
+    },
+    {
+      "name": "a workspace's name as a plan",
+      "event": {
+        "protocol": "fabric-activity/0.1",
+        "eventId": "sha256:fc4e5b660fded635fdee8e3c0d3eb0c7216217a74883d7d31e66113b56eb95d6",
+        "kind": "account.inventory",
+        "source": "switchboard",
+        "sourceKey": "sha256:3846e5a69dc0b0c199e2a700f62b4cac34cc310c28cc02ed7ead868466a87b48",
+        "collector": {
+          "id": "observatory-node",
+          "epoch": 4
+        },
+        "seq": 1,
+        "occurred": "2026-11-14T00:00:00Z",
+        "bootId": "boot-7c41e2",
+        "monotonicNs": "0",
+        "data": {
+          "day": "2026-11-14",
+          "provider": "anthropic",
+          "tenantRef": "sha256:7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a",
+          "billing": "subscription",
+          "plan": "acme-design-team",
+          "holder": "switchboard",
+          "accounts": 2
+        }
+      },
+      "schemaValid": false,
+      "findings": []
+    },
+    {
+      "name": "no accounts",
+      "event": {
+        "protocol": "fabric-activity/0.1",
+        "eventId": "sha256:84966993ddde81dd7ffe3451b420c4d4d5ad16d8a90553bef8c63ef2262aced9",
+        "kind": "account.inventory",
+        "source": "switchboard",
+        "sourceKey": "sha256:221a4e37ce2350f676bededd85b76430c55a84fef7a4ff88643180e73bc2cc67",
+        "collector": {
+          "id": "observatory-node",
+          "epoch": 4
+        },
+        "seq": 1,
+        "occurred": "2026-11-14T00:00:00Z",
+        "bootId": "boot-7c41e2",
+        "monotonicNs": "0",
+        "data": {
+          "day": "2026-11-14",
+          "provider": "anthropic",
+          "tenantRef": "sha256:7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a",
+          "billing": "subscription",
+          "plan": "max-5x",
+          "holder": "switchboard",
+          "accounts": 0
+        }
+      },
+      "schemaValid": false,
+      "findings": []
+    }
+  ],
+  "routes": [
+    {
+      "name": "the one enrollment whose policy lists the tenant",
+      "tenantRef": "sha256:7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a",
+      "enrollments": [
+        {
+          "org": "org_b",
+          "tenants": [
+            "sha256:3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c"
+          ]
+        },
+        {
+          "org": "org_a",
+          "tenants": [
+            "sha256:7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a"
+          ]
+        }
+      ],
+      "answer": {
+        "route": "enrollment",
+        "org": "org_a",
+        "index": 1
+      }
+    },
+    {
+      "name": "no enrollment lists it",
+      "tenantRef": "sha256:7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a",
+      "enrollments": [
+        {
+          "org": "org_b",
+          "tenants": [
+            "sha256:3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c"
+          ]
+        }
+      ],
+      "answer": {
+        "route": "none",
+        "reason": "unlisted"
+      }
+    },
+    {
+      "name": "two organizations list one tenant: neither learns the other's seats",
+      "tenantRef": "sha256:7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a",
+      "enrollments": [
+        {
+          "org": "org_a",
+          "tenants": [
+            "sha256:7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a"
+          ]
+        },
+        {
+          "org": "org_b",
+          "tenants": [
+            "sha256:3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c",
+            "sha256:7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a"
+          ]
+        }
+      ],
+      "answer": {
+        "route": "none",
+        "reason": "ambiguous"
+      }
+    },
+    {
+      "name": "a tenant compared as written, never case-folded",
+      "tenantRef": "SHA256:7A7A7A7A7A7A7A7A7A7A7A7A7A7A7A7A7A7A7A7A7A7A7A7A7A7A7A7A7A7A7A7A",
+      "enrollments": [
+        {
+          "org": "org_a",
+          "tenants": [
+            "sha256:7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a"
+          ]
+        }
+      ],
+      "answer": {
+        "route": "none",
+        "reason": "unlisted"
+      }
+    },
+    {
+      "name": "an enrollment with no list lists nothing",
+      "tenantRef": "sha256:7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a",
+      "enrollments": [
+        {
+          "org": "org_a"
+        }
+      ],
+      "answer": {
+        "route": "none",
+        "reason": "unlisted"
+      }
+    },
+    {
+      "name": "no device enrollment",
+      "tenantRef": "sha256:7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a",
+      "enrollments": [],
+      "answer": {
+        "route": "none",
+        "reason": "unlisted"
+      }
+    }
+  ],
+  "populations": [
+    {
+      "name": "one person across five sessions is one subject",
+      "rows": [
+        {
+          "person": "m-7f3a91c2",
+          "key": "s-1"
+        },
+        {
+          "person": "m-7f3a91c2",
+          "key": "s-2"
+        },
+        {
+          "person": "m-7f3a91c2",
+          "key": "s-3"
+        },
+        {
+          "person": "m-7f3a91c2",
+          "key": "s-4"
+        },
+        {
+          "person": "m-7f3a91c2",
+          "key": "s-5"
+        }
+      ],
+      "population": 1
+    },
+    {
+      "name": "three people, one with two machines",
+      "rows": [
+        {
+          "person": "m-1",
+          "key": "d-1"
+        },
+        {
+          "person": "m-1",
+          "key": "d-2"
+        },
+        {
+          "person": "m-2",
+          "key": "d-3"
+        },
+        {
+          "person": "m-3",
+          "key": "d-4"
+        }
+      ],
+      "population": 3
+    },
+    {
+      "name": "a device bound to no person counts each of its sessions",
+      "rows": [
+        {
+          "person": null,
+          "key": "s-1"
+        },
+        {
+          "person": null,
+          "key": "s-2"
+        },
+        {
+          "person": "m-1",
+          "key": "s-3"
+        }
+      ],
+      "population": 3
+    },
+    {
+      "name": "a person and an unbound key that spells the same id are two subjects",
+      "rows": [
+        {
+          "person": "s-1",
+          "key": "s-9"
+        },
+        {
+          "person": null,
+          "key": "s-1"
+        }
+      ],
+      "population": 2
+    }
+  ],
+  "buckets": [
+    {
+      "turnMs": 0,
+      "bucket": "under1s"
+    },
+    {
+      "turnMs": 999,
+      "bucket": "under1s"
+    },
+    {
+      "turnMs": 1000,
+      "bucket": "under5s"
+    },
+    {
+      "turnMs": 4999,
+      "bucket": "under5s"
+    },
+    {
+      "turnMs": 5000,
+      "bucket": "under15s"
+    },
+    {
+      "turnMs": 14999,
+      "bucket": "under15s"
+    },
+    {
+      "turnMs": 15000,
+      "bucket": "under60s"
+    },
+    {
+      "turnMs": 59999,
+      "bucket": "under60s"
+    },
+    {
+      "turnMs": 60000,
+      "bucket": "under300s"
+    },
+    {
+      "turnMs": 299999,
+      "bucket": "under300s"
+    },
+    {
+      "turnMs": 300000,
+      "bucket": "from300s"
+    },
+    {
+      "turnMs": 86400000,
+      "bucket": "from300s"
+    }
+  ],
+  "summaries": [
+    {
+      "name": "turn and inventory cells at the organization's minimum of five",
+      "summary": {
+        "format": "activity-summary/2",
+        "generatedAt": "2026-11-15T03:00:00Z",
+        "from": "2026-11-14",
+        "to": "2026-11-14",
+        "producer": {
+          "id": "org-receiver-1"
+        },
+        "idleThresholdSeconds": 300,
+        "minPopulation": 5,
+        "cells": [],
+        "turnCells": [
+          {
+            "agent": "claude_code",
+            "skill": "task-pipeline",
+            "project": "example-project",
+            "day": "2026-11-14",
+            "population": 5,
+            "turns": 40,
+            "turnBuckets": {
+              "under1s": 0,
+              "under5s": 6,
+              "under15s": 14,
+              "under60s": 15,
+              "under300s": 4,
+              "from300s": 1
+            },
+            "modelMs": 900000,
+            "toolMs": 310000
+          },
+          {
+            "other": true,
+            "day": "2026-11-14",
+            "population": 6,
+            "turns": 12,
+            "turnBuckets": {
+              "under1s": 1,
+              "under5s": 3,
+              "under15s": 4,
+              "under60s": 3,
+              "under300s": 1,
+              "from300s": 0
+            },
+            "modelMs": 150000,
+            "toolMs": 20000
+          }
+        ],
+        "inventoryCells": [
+          {
+            "provider": "anthropic",
+            "plan": "max-5x",
+            "billing": "subscription",
+            "day": "2026-11-14",
+            "population": 5,
+            "machines": 6,
+            "accounts": 9
+          },
+          {
+            "other": true,
+            "day": "2026-11-14",
+            "population": 5,
+            "machines": 5,
+            "accounts": 5
+          }
+        ]
+      },
+      "schemaValid": true,
+      "findings": []
+    },
+    {
+      "name": "a turn cell below the minimum",
+      "summary": {
+        "format": "activity-summary/2",
+        "generatedAt": "2026-11-15T03:00:00Z",
+        "from": "2026-11-14",
+        "to": "2026-11-14",
+        "producer": {
+          "id": "org-receiver-1"
+        },
+        "idleThresholdSeconds": 300,
+        "minPopulation": 5,
+        "cells": [],
+        "turnCells": [
+          {
+            "agent": "claude_code",
+            "skill": "task-pipeline",
+            "project": "example-project",
+            "day": "2026-11-14",
+            "population": 4,
+            "turns": 40,
+            "turnBuckets": {
+              "under1s": 0,
+              "under5s": 6,
+              "under15s": 14,
+              "under60s": 15,
+              "under300s": 4,
+              "from300s": 1
+            },
+            "modelMs": 900000,
+            "toolMs": 310000
+          },
+          {
+            "other": true,
+            "day": "2026-11-14",
+            "population": 6,
+            "turns": 12,
+            "turnBuckets": {
+              "under1s": 1,
+              "under5s": 3,
+              "under15s": 4,
+              "under60s": 3,
+              "under300s": 1,
+              "from300s": 0
+            },
+            "modelMs": 150000,
+            "toolMs": 20000
+          }
+        ],
+        "inventoryCells": [
+          {
+            "provider": "anthropic",
+            "plan": "max-5x",
+            "billing": "subscription",
+            "day": "2026-11-14",
+            "population": 5,
+            "machines": 6,
+            "accounts": 9
+          },
+          {
+            "other": true,
+            "day": "2026-11-14",
+            "population": 5,
+            "machines": 5,
+            "accounts": 5
+          }
+        ]
+      },
+      "schemaValid": true,
+      "findings": [
+        "FAC-SEM-040 /turnCells/0/population"
+      ]
+    },
+    {
+      "name": "buckets that do not add up to the turns",
+      "summary": {
+        "format": "activity-summary/2",
+        "generatedAt": "2026-11-15T03:00:00Z",
+        "from": "2026-11-14",
+        "to": "2026-11-14",
+        "producer": {
+          "id": "org-receiver-1"
+        },
+        "idleThresholdSeconds": 300,
+        "minPopulation": 5,
+        "cells": [],
+        "turnCells": [
+          {
+            "agent": "claude_code",
+            "skill": "task-pipeline",
+            "project": "example-project",
+            "day": "2026-11-14",
+            "population": 5,
+            "turns": 40,
+            "turnBuckets": {
+              "under1s": 0,
+              "under5s": 6,
+              "under15s": 14,
+              "under60s": 15,
+              "under300s": 4,
+              "from300s": 2
+            },
+            "modelMs": 900000,
+            "toolMs": 310000
+          },
+          {
+            "other": true,
+            "day": "2026-11-14",
+            "population": 6,
+            "turns": 12,
+            "turnBuckets": {
+              "under1s": 1,
+              "under5s": 3,
+              "under15s": 4,
+              "under60s": 3,
+              "under300s": 1,
+              "from300s": 0
+            },
+            "modelMs": 150000,
+            "toolMs": 20000
+          }
+        ],
+        "inventoryCells": [
+          {
+            "provider": "anthropic",
+            "plan": "max-5x",
+            "billing": "subscription",
+            "day": "2026-11-14",
+            "population": 5,
+            "machines": 6,
+            "accounts": 9
+          },
+          {
+            "other": true,
+            "day": "2026-11-14",
+            "population": 5,
+            "machines": 5,
+            "accounts": 5
+          }
+        ]
+      },
+      "schemaValid": true,
+      "findings": [
+        "FAC-SEM-040 /turnCells/0/turnBuckets"
+      ]
+    },
+    {
+      "name": "more people than turns",
+      "summary": {
+        "format": "activity-summary/2",
+        "generatedAt": "2026-11-15T03:00:00Z",
+        "from": "2026-11-14",
+        "to": "2026-11-14",
+        "producer": {
+          "id": "org-receiver-1"
+        },
+        "idleThresholdSeconds": 300,
+        "minPopulation": 5,
+        "cells": [],
+        "turnCells": [
+          {
+            "agent": "claude_code",
+            "skill": "task-pipeline",
+            "project": "example-project",
+            "day": "2026-11-14",
+            "population": 5,
+            "turns": 40,
+            "turnBuckets": {
+              "under1s": 0,
+              "under5s": 6,
+              "under15s": 14,
+              "under60s": 15,
+              "under300s": 4,
+              "from300s": 1
+            },
+            "modelMs": 900000,
+            "toolMs": 310000
+          },
+          {
+            "other": true,
+            "day": "2026-11-14",
+            "population": 6,
+            "turns": 5,
+            "turnBuckets": {
+              "under1s": 1,
+              "under5s": 1,
+              "under15s": 1,
+              "under60s": 1,
+              "under300s": 1,
+              "from300s": 0
+            },
+            "modelMs": 150000,
+            "toolMs": 20000
+          }
+        ],
+        "inventoryCells": [
+          {
+            "provider": "anthropic",
+            "plan": "max-5x",
+            "billing": "subscription",
+            "day": "2026-11-14",
+            "population": 5,
+            "machines": 6,
+            "accounts": 9
+          },
+          {
+            "other": true,
+            "day": "2026-11-14",
+            "population": 5,
+            "machines": 5,
+            "accounts": 5
+          }
+        ]
+      },
+      "schemaValid": true,
+      "findings": [
+        "FAC-SEM-040 /turnCells/1/population"
+      ]
+    },
+    {
+      "name": "two turn cells for one agent, skill, project and day",
+      "summary": {
+        "format": "activity-summary/2",
+        "generatedAt": "2026-11-15T03:00:00Z",
+        "from": "2026-11-14",
+        "to": "2026-11-14",
+        "producer": {
+          "id": "org-receiver-1"
+        },
+        "idleThresholdSeconds": 300,
+        "minPopulation": 5,
+        "cells": [],
+        "turnCells": [
+          {
+            "agent": "claude_code",
+            "skill": "task-pipeline",
+            "project": "example-project",
+            "day": "2026-11-14",
+            "population": 5,
+            "turns": 40,
+            "turnBuckets": {
+              "under1s": 0,
+              "under5s": 6,
+              "under15s": 14,
+              "under60s": 15,
+              "under300s": 4,
+              "from300s": 1
+            },
+            "modelMs": 900000,
+            "toolMs": 310000
+          },
+          {
+            "other": true,
+            "day": "2026-11-14",
+            "population": 6,
+            "turns": 12,
+            "turnBuckets": {
+              "under1s": 1,
+              "under5s": 3,
+              "under15s": 4,
+              "under60s": 3,
+              "under300s": 1,
+              "from300s": 0
+            },
+            "modelMs": 150000,
+            "toolMs": 20000
+          },
+          {
+            "agent": "claude_code",
+            "skill": "task-pipeline",
+            "project": "example-project",
+            "day": "2026-11-14",
+            "population": 5,
+            "turns": 40,
+            "turnBuckets": {
+              "under1s": 0,
+              "under5s": 6,
+              "under15s": 14,
+              "under60s": 15,
+              "under300s": 4,
+              "from300s": 1
+            },
+            "modelMs": 900000,
+            "toolMs": 310000
+          }
+        ],
+        "inventoryCells": [
+          {
+            "provider": "anthropic",
+            "plan": "max-5x",
+            "billing": "subscription",
+            "day": "2026-11-14",
+            "population": 5,
+            "machines": 6,
+            "accounts": 9
+          },
+          {
+            "other": true,
+            "day": "2026-11-14",
+            "population": 5,
+            "machines": 5,
+            "accounts": 5
+          }
+        ]
+      },
+      "schemaValid": true,
+      "findings": [
+        "FAC-SEM-040 /turnCells/2"
+      ]
+    },
+    {
+      "name": "an inventory cell with more machines than accounts",
+      "summary": {
+        "format": "activity-summary/2",
+        "generatedAt": "2026-11-15T03:00:00Z",
+        "from": "2026-11-14",
+        "to": "2026-11-14",
+        "producer": {
+          "id": "org-receiver-1"
+        },
+        "idleThresholdSeconds": 300,
+        "minPopulation": 5,
+        "cells": [],
+        "turnCells": [
+          {
+            "agent": "claude_code",
+            "skill": "task-pipeline",
+            "project": "example-project",
+            "day": "2026-11-14",
+            "population": 5,
+            "turns": 40,
+            "turnBuckets": {
+              "under1s": 0,
+              "under5s": 6,
+              "under15s": 14,
+              "under60s": 15,
+              "under300s": 4,
+              "from300s": 1
+            },
+            "modelMs": 900000,
+            "toolMs": 310000
+          },
+          {
+            "other": true,
+            "day": "2026-11-14",
+            "population": 6,
+            "turns": 12,
+            "turnBuckets": {
+              "under1s": 1,
+              "under5s": 3,
+              "under15s": 4,
+              "under60s": 3,
+              "under300s": 1,
+              "from300s": 0
+            },
+            "modelMs": 150000,
+            "toolMs": 20000
+          }
+        ],
+        "inventoryCells": [
+          {
+            "provider": "anthropic",
+            "plan": "max-5x",
+            "billing": "subscription",
+            "day": "2026-11-14",
+            "population": 5,
+            "machines": 6,
+            "accounts": 5
+          },
+          {
+            "other": true,
+            "day": "2026-11-14",
+            "population": 5,
+            "machines": 5,
+            "accounts": 5
+          }
+        ]
+      },
+      "schemaValid": true,
+      "findings": [
+        "FAC-SEM-040 /inventoryCells/0/machines"
+      ]
+    },
+    {
+      "name": "an inventory cell below the minimum",
+      "summary": {
+        "format": "activity-summary/2",
+        "generatedAt": "2026-11-15T03:00:00Z",
+        "from": "2026-11-14",
+        "to": "2026-11-14",
+        "producer": {
+          "id": "org-receiver-1"
+        },
+        "idleThresholdSeconds": 300,
+        "minPopulation": 5,
+        "cells": [],
+        "turnCells": [
+          {
+            "agent": "claude_code",
+            "skill": "task-pipeline",
+            "project": "example-project",
+            "day": "2026-11-14",
+            "population": 5,
+            "turns": 40,
+            "turnBuckets": {
+              "under1s": 0,
+              "under5s": 6,
+              "under15s": 14,
+              "under60s": 15,
+              "under300s": 4,
+              "from300s": 1
+            },
+            "modelMs": 900000,
+            "toolMs": 310000
+          },
+          {
+            "other": true,
+            "day": "2026-11-14",
+            "population": 6,
+            "turns": 12,
+            "turnBuckets": {
+              "under1s": 1,
+              "under5s": 3,
+              "under15s": 4,
+              "under60s": 3,
+              "under300s": 1,
+              "from300s": 0
+            },
+            "modelMs": 150000,
+            "toolMs": 20000
+          }
+        ],
+        "inventoryCells": [
+          {
+            "provider": "anthropic",
+            "plan": "max-5x",
+            "billing": "subscription",
+            "day": "2026-11-14",
+            "population": 3,
+            "machines": 6,
+            "accounts": 9
+          },
+          {
+            "other": true,
+            "day": "2026-11-14",
+            "population": 5,
+            "machines": 5,
+            "accounts": 5
+          }
+        ]
+      },
+      "schemaValid": true,
+      "findings": [
+        "FAC-SEM-040 /inventoryCells/0/population"
+      ]
+    },
+    {
+      "name": "two other inventory cells in one day",
+      "summary": {
+        "format": "activity-summary/2",
+        "generatedAt": "2026-11-15T03:00:00Z",
+        "from": "2026-11-14",
+        "to": "2026-11-14",
+        "producer": {
+          "id": "org-receiver-1"
+        },
+        "idleThresholdSeconds": 300,
+        "minPopulation": 5,
+        "cells": [],
+        "turnCells": [
+          {
+            "agent": "claude_code",
+            "skill": "task-pipeline",
+            "project": "example-project",
+            "day": "2026-11-14",
+            "population": 5,
+            "turns": 40,
+            "turnBuckets": {
+              "under1s": 0,
+              "under5s": 6,
+              "under15s": 14,
+              "under60s": 15,
+              "under300s": 4,
+              "from300s": 1
+            },
+            "modelMs": 900000,
+            "toolMs": 310000
+          },
+          {
+            "other": true,
+            "day": "2026-11-14",
+            "population": 6,
+            "turns": 12,
+            "turnBuckets": {
+              "under1s": 1,
+              "under5s": 3,
+              "under15s": 4,
+              "under60s": 3,
+              "under300s": 1,
+              "from300s": 0
+            },
+            "modelMs": 150000,
+            "toolMs": 20000
+          }
+        ],
+        "inventoryCells": [
+          {
+            "provider": "anthropic",
+            "plan": "max-5x",
+            "billing": "subscription",
+            "day": "2026-11-14",
+            "population": 5,
+            "machines": 6,
+            "accounts": 9
+          },
+          {
+            "other": true,
+            "day": "2026-11-14",
+            "population": 5,
+            "machines": 5,
+            "accounts": 5
+          },
+          {
+            "other": true,
+            "day": "2026-11-14",
+            "population": 5,
+            "machines": 5,
+            "accounts": 5
+          }
+        ]
+      },
+      "schemaValid": true,
+      "findings": [
+        "FAC-SEM-040 /inventoryCells/2"
+      ]
+    },
+    {
+      "name": "an inventory cell outside the range",
+      "summary": {
+        "format": "activity-summary/2",
+        "generatedAt": "2026-11-15T03:00:00Z",
+        "from": "2026-11-14",
+        "to": "2026-11-14",
+        "producer": {
+          "id": "org-receiver-1"
+        },
+        "idleThresholdSeconds": 300,
+        "minPopulation": 5,
+        "cells": [],
+        "turnCells": [
+          {
+            "agent": "claude_code",
+            "skill": "task-pipeline",
+            "project": "example-project",
+            "day": "2026-11-14",
+            "population": 5,
+            "turns": 40,
+            "turnBuckets": {
+              "under1s": 0,
+              "under5s": 6,
+              "under15s": 14,
+              "under60s": 15,
+              "under300s": 4,
+              "from300s": 1
+            },
+            "modelMs": 900000,
+            "toolMs": 310000
+          },
+          {
+            "other": true,
+            "day": "2026-11-14",
+            "population": 6,
+            "turns": 12,
+            "turnBuckets": {
+              "under1s": 1,
+              "under5s": 3,
+              "under15s": 4,
+              "under60s": 3,
+              "under300s": 1,
+              "from300s": 0
+            },
+            "modelMs": 150000,
+            "toolMs": 20000
+          }
+        ],
+        "inventoryCells": [
+          {
+            "provider": "anthropic",
+            "plan": "max-5x",
+            "billing": "subscription",
+            "day": "2026-11-13",
+            "population": 5,
+            "machines": 6,
+            "accounts": 9
+          },
+          {
+            "other": true,
+            "day": "2026-11-14",
+            "population": 5,
+            "machines": 5,
+            "accounts": 5
+          }
+        ]
+      },
+      "schemaValid": true,
+      "findings": [
+        "FAC-SEM-040 /inventoryCells/0/day"
+      ]
+    },
+    {
+      "name": "a person's id in a turn cell",
+      "summary": {
+        "format": "activity-summary/2",
+        "generatedAt": "2026-11-15T03:00:00Z",
+        "from": "2026-11-14",
+        "to": "2026-11-14",
+        "producer": {
+          "id": "org-receiver-1"
+        },
+        "idleThresholdSeconds": 300,
+        "minPopulation": 5,
+        "cells": [],
+        "turnCells": [
+          {
+            "agent": "claude_code",
+            "skill": "task-pipeline",
+            "project": "example-project",
+            "day": "2026-11-14",
+            "population": 5,
+            "turns": 40,
+            "turnBuckets": {
+              "under1s": 0,
+              "under5s": 6,
+              "under15s": 14,
+              "under60s": 15,
+              "under300s": 4,
+              "from300s": 1
+            },
+            "modelMs": 900000,
+            "toolMs": 310000,
+            "user": "m-7f3a91c2"
+          },
+          {
+            "other": true,
+            "day": "2026-11-14",
+            "population": 6,
+            "turns": 12,
+            "turnBuckets": {
+              "under1s": 1,
+              "under5s": 3,
+              "under15s": 4,
+              "under60s": 3,
+              "under300s": 1,
+              "from300s": 0
+            },
+            "modelMs": 150000,
+            "toolMs": 20000
+          }
+        ],
+        "inventoryCells": [
+          {
+            "provider": "anthropic",
+            "plan": "max-5x",
+            "billing": "subscription",
+            "day": "2026-11-14",
+            "population": 5,
+            "machines": 6,
+            "accounts": 9
+          },
+          {
+            "other": true,
+            "day": "2026-11-14",
+            "population": 5,
+            "machines": 5,
+            "accounts": 5
+          }
+        ]
+      },
+      "schemaValid": false,
+      "findings": []
+    },
+    {
+      "name": "a turn cell with an outcome dimension",
+      "summary": {
+        "format": "activity-summary/2",
+        "generatedAt": "2026-11-15T03:00:00Z",
+        "from": "2026-11-14",
+        "to": "2026-11-14",
+        "producer": {
+          "id": "org-receiver-1"
+        },
+        "idleThresholdSeconds": 300,
+        "minPopulation": 5,
+        "cells": [],
+        "turnCells": [
+          {
+            "agent": "claude_code",
+            "skill": "task-pipeline",
+            "project": "example-project",
+            "day": "2026-11-14",
+            "population": 5,
+            "turns": 40,
+            "turnBuckets": {
+              "under1s": 0,
+              "under5s": 6,
+              "under15s": 14,
+              "under60s": 15,
+              "under300s": 4,
+              "from300s": 1
+            },
+            "modelMs": 900000,
+            "toolMs": 310000,
+            "outcome": "answered"
+          },
+          {
+            "other": true,
+            "day": "2026-11-14",
+            "population": 6,
+            "turns": 12,
+            "turnBuckets": {
+              "under1s": 1,
+              "under5s": 3,
+              "under15s": 4,
+              "under60s": 3,
+              "under300s": 1,
+              "from300s": 0
+            },
+            "modelMs": 150000,
+            "toolMs": 20000
+          }
+        ],
+        "inventoryCells": [
+          {
+            "provider": "anthropic",
+            "plan": "max-5x",
+            "billing": "subscription",
+            "day": "2026-11-14",
+            "population": 5,
+            "machines": 6,
+            "accounts": 9
+          },
+          {
+            "other": true,
+            "day": "2026-11-14",
+            "population": 5,
+            "machines": 5,
+            "accounts": 5
+          }
+        ]
+      },
+      "schemaValid": false,
+      "findings": []
+    }
+  ]
+}

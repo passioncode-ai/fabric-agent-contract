@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0171` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0172` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -12651,3 +12651,128 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Source:** the design above; the first organization server's board messages `270b130b` and `983f0303`; the
   platform's `f126b49d`; DEC-0127, DEC-0129, DEC-0162. DEC-0170 and `FAC-SEM-177` were reserved by git CAS
   (`agent_sync.py reserve`, keys `ct314-org-instance` and `ct314-org-instance-sem`).
+
+### DEC-0171: an agent turn's duration (`turn`) and a machine's organization accounts (`account.inventory`)
+
+- **Date:** 2026-11-15
+- **Status:** Proposed 2026-11-15 from the design `docs/evidence/plans/2026-11-15-ct318-ct319-response-time-subscriptions.md`
+  (CT-318, CT-319), which rounds 4 and 5 of the blind readings (seam and product) read clean; accepted when the
+  coordinator's blind readings are clean on two consecutive rounds. It answers the first organization server's
+  request (board message `356b6aae`, thread `1efdc2e1`, due 2026-11-22; its plan G1 and G2, fabric-workspace
+  `docs/plans/2026-11-15-work-machines/README.md` at `8144e7ec`), which quotes the operator's decisions of 2026-11-15:
+  activity, response time and process optimization are measured per agent, workflow and project; people appear only in
+  groups of five or more under the organization's employee notice; no person is ranked or timed; the scope is the agent
+  stack only. Two new core kinds inside `fabric-activity/0.1`, `activity-summary/2`, two protocol names
+  (`activity-turn/1`, `activity-inventory/1`) and one rule code (`FAC-SEM-178`); `FAC-SEM-040`, `FAC-SEM-045` and
+  `FAC-SEM-100` widened to the new kinds. No other kind changes meaning.
+- **Context:** activity telemetry recorded a session's states and each model call, but no duration of a request
+  (`session.interval` measures a session's state, and `usage.line`'s `data` is closed, so a field added to it is refused
+  by every receiver pinned today), and no record of which organization accounts a machine holds (`account.class`,
+  DEC-0052, labels the account one session ran on). The organization asked for both, per agent, workflow and project,
+  with no person timed.
+- **Decision:** [activity](specification/activity.md) *Kinds*, `turn` and `account.inventory`, and *Summary*,
+  `activity-summary/2`.
+  1. **RT-1, `turn`.** One agent turn of one session, from the input that started the agent's work to the point the
+     session awaited input again or ended; it requires `session`, `project` and `runtime`, and carries no `user`, `run`,
+     `task`, `git` or `launch` (schema). `data`: `ordinal`, `day`, `turnMs` (monotonic readings of one boot, never a
+     wall-clock difference; a turn whose span held a sleep the collector saw is not sent), `modelCalls` and `modelMs`,
+     `toolCalls` and `toolMs` (summed; parallel calls overlap), optional `toolKinds` (`{kind, calls, ms}`, `kind` from
+     the closed list `shell`, `file`, `mcp`, `web`, `agent`, `other`, each once, adding up to `toolCalls` and `toolMs`),
+     `method` (`otel`, `hook`, `transcript`, `rollout`; a transcript's or a rollout's turn only when the collector
+     stamped it live with monotonic readings; process sampling sends none) and optional `outcome` (`answered`,
+     `failed`, `unknown`). The one writer of a session's intervals and usage lines is the one writer of its turns
+     (`FAC-SEM-100` widened).
+  2. **RT-2, a day and no finer time.** `occurred` is the day's midnight UTC, `monotonicNs` `"0"`, the collector emits a
+     day's turns after it ends, and the `sourceKey` is `sha256:` of the settings-form canonical JSON
+     `{ordinal, session}` (`turnSourceKey`; not over the stream, so a re-read after a restart or a re-enrollment mints
+     the same id, kept once per (`device.id`, `eventId`)) (`FAC-SEM-178`).
+  3. **RT-3, personal data all the same.** A turn from a device bound to a person is personal data: kept for the
+     notice's purposes, deleted at `retention.raw_days`, every raw read in that person's access log. No `activity.*`
+     scope served to another person includes a turn or an inventory under any purpose; the access log names scopes,
+     not kinds, so this is the receiver's restraint, which `FAC-SEM-067` cannot check.
+  4. **RT-4, turn cells.** Another person reads turns only as `activity-summary/2`'s `turnCells`: per agent
+     (`runtime.name`), skill (the workflow; no other fallback), project and UTC day, with no outcome dimension, carrying
+     `population`, `turns`, `turnBuckets` (`under1s`, `under5s`, `under15s`, `under60s`, `under300s`, `from300s`,
+     `turnBucket`) and the sums `modelMs` and `toolMs`; a reader finds the bucket a median or a 95th percentile falls
+     in. A turn cell's population counts people (`boundPopulation`): the person the receiver binds to the stream's
+     epoch, and on a device bound to no person the session. It is published at the summary's `minPopulation` (the
+     organization's five is its receiver's setting, at least the contract's 3), the rest folded into one other turn cell
+     or suppressed. Never per person, per machine or per session, never to a partner organization (DEC-0090). A Fabric
+     service's own wait and run time stays `service-load/1`'s.
+  5. **RT-5 and SI-6, the gates.** A receiver pinned before this decision stores a turn without `toolKinds` as an
+     unknown kind and refuses a turn with them and every inventory (a `tenantRef` is 71 characters, over extension
+     data's 64) as that event's `schema` rejection, which is consumed. So a collector holds both outside its stream
+     until the receiver's latest `protocols` name `activity-turn/1` or `activity-inventory/1`, and drops what it holds as
+     it drops held `unit` transitions (past the smaller of the server layer's `retention.raw_days` and the device's
+     effective value, 30 days where the server layer sets none; on 410; on a binding to a different person or from a
+     person to none).
+  6. **RT-6, the personal context.** A turn of a session on a `personal` account, or of a personal or unattributed
+     project, never leaves the device, even inside an organization's folder where that session's usage lines and its
+     `policy.violation` are sent ([contexts](specification/contexts.md#routing)).
+  7. **SI-0 to SI-2, `account.inventory`.** The organization accounts one machine holds with one holder for one UTC day:
+     `day`, `provider`, `tenantRef` (required: only an organization tenant has one, so a personal or unknown account
+     produces none, ever), `billing` (`subscription`, `api`), optional `plan` (subscription only, from the provider's
+     closed list: `anthropic` `pro`, `max-5x`, `max-20x`, `team`, `team-premium`, `enterprise`; `openai` `plus`,
+     `pro`, `business`, `enterprise`, `edu`; another provider none), `holder` (`switchboard`, `runtime`, `vault`) and
+     `accounts`; a day and no finer time; no `project`, `runtime`, `session`, `user`, envelope `account`, `run`, `task`,
+     `git`, `skill` or `launch` (schema); `source` `switchboard` for Switchboard's holder, `process` for the others.
+  8. **SI-3, the route.** Only to the one enrollment whose policy's `accounts.tenants` names its `tenantRef`; none
+     (`unlisted`) or two (`ambiguous`, even of one organization) and it is not sent (`routeInventory`); a receiver
+     refuses one whose `tenantRef` its own policy does not list as `attribution` (`FAC-SEM-045` widened).
+  9. **SI-4, one per key.** One inventory writer per device, the collector; an account two holders hold counts once,
+     under the first of `switchboard`, `runtime` and `vault`, compared by the provider's identity read locally and never
+     sent. The `sourceKey` is `sha256:` of the settings-form canonical JSON `{billing, day, holder, plan, provider,
+     tenantRef}` (`plan` `null` when absent, `inventorySourceKey`), so a second event for one key is a repeated id
+     (`FAC-SEM-039`).
+  10. **SI-5, inventory cells.** No per-machine inventory to another person: `activity-summary/2`'s `inventoryCells` per
+      provider, plan, billing and UTC day, carrying `population` (people: each machine's bound person, a machine bound to
+      no person counting as one), `machines` and `accounts`, at `minPopulation`, the rest folded or suppressed; never to
+      a partner organization. Seats no machine holds are the platform's licences, not telemetry.
+  11. **SI-7, not usage data.** Both kinds are activity telemetry under the organization's notice, never a product's
+      anonymous usage data: Switchboard's usage-data switch does not govern them, and neither travels in the other's
+      channel ([usage data](specification/usage-data.md) UD-6 restated).
+  12. **`activity-summary/2`** keeps `/1`'s fields and cells and adds `turnCells` and `inventoryCells` (both required,
+      empty when the receiver reads neither kind). `FAC-SEM-040` (and `FAC-SEM-038` for its `/1` cells) reads it:
+      every cell kind at `minPopulation`, a population at most the turns or machines, buckets adding up to the turns,
+      no more machines than accounts, one cell per tuple and one other cell of each kind per day.
+  13. **`FAC-SEM-178`** (kinds `telemetry-event`, `activity-batch`): a turn's and an inventory's `occurred` is the day it
+      names; each `sourceKey` is its derivation, one with no canonical form refused; a turn's `toolKinds` name each kind
+      once and add up; an inventory's plan is on its provider's list.
+- **Why:** a new kind is additive where a field on `usage.line` is not; a day-grained event with a derived id is
+  idempotent across re-reads and shows no time of day; fixed buckets merge across cells and days, percentiles do not;
+  counting a cell's people by the stream's bound person keeps one person's five sessions from passing as five subjects;
+  routing an inventory by the tenant its policy lists keeps one organization from learning another's seats.
+- **Alternatives considered:** fields on `usage.line` (refused: closed `data`); response time per person or a person's
+  pace (refused: the operator's decision); percentiles in the summary (refused: they do not merge); the inventory as a
+  policy or check-in field (refused: the check-in is not a reporting channel); a tool's name in a turn (refused: it can
+  name a person's project or content); a turn's cost (left out: it would sum the session's usage lines, joined by
+  `session.id`, and count a cost twice). Where the decision departs from the design: the turn's derived id over the
+  session and the ordinal only (the design named the stream; a re-read after re-enrollment must mint the same id); the
+  inventory's id over its key fields only, the receiver's (`device.id`, `eventId`) keeping machines apart (the design
+  named the stream); the population's `user.id` fallback dropped (the binding sets it); the holder precedence and one
+  writer per device added (a seat held twice); the `transcript` and `rollout` methods bounded to live stamping; every
+  `activity.*` scope restated, not only `activity.raw`; the inventory's receiver check (`FAC-SEM-045`) added; partner
+  organizations excluded; the bucket keys named `under…` and `from300s`.
+- **Compatibility:** additive within `fabric-activity/0.1` for a receiver that lists `activity-turn/1` and
+  `activity-inventory/1`; an older receiver never meets either kind (the gates). `activity-summary/2` is a new revision
+  beside `/1` (N and N−1); a reader of `/1` is unchanged. The adapter kits' hand-kept `PROTOCOL_REVISIONS` gain
+  `activity-summary` `['1', '2']`, `activity-turn` `['1']` and `activity-inventory` `['1']` at their next repin. Owed:
+  Project Observatory's collector (`turn`, `account.inventory`, the gates, RT-6), Switchboard's record of the accounts it
+  holds by tenant (read by the collector by name, never a key), the first organization server's receiver (the
+  restraint, `/2`'s cells at its `minPopulation` of five, the `tenants` check) and its notice: whether its published
+  notice covers both kinds without a new `noticeVersion` is the organization's and its counsel's question (asked on the
+  board, message `6ddf439d`); until it does, the receiver answers `purpose`.
+- **Consequences / affects:** `schemas/telemetry-event.schema.json` (`$defs/turn`, `$defs/accountInventory`, the kinds),
+  `schemas/activity-common.schema.json` (`plan`, the `sourceKey` description), `schemas/activity-summary-2.schema.json`
+  (new), `src/activity-rules.ts` (`turnSourceKey`, `inventorySourceKey`, `boundPopulation`, `turnBucket`,
+  `PROVIDER_PLANS`, `FAC-SEM-178`, `FAC-SEM-040` for `/2`), `src/context-route.ts` (`routeInventory`),
+  `src/device-rules.ts` (`FAC-SEM-045`'s `tenants`), `src/session-join.ts` (`FAC-SEM-100` for turns),
+  `src/protocol-revisions.ts`, `src/semantic-kinds.ts`, `tools/vectors/activity-turn.ts`,
+  `fixtures/vectors/activity-turn.json`, `test/activity-turn.test.ts`, the fixtures and `fixtures/catalogue.json`;
+  `docs/specification/activity.md`, `contexts.md`, `devices.md` (attribution), `usage-data.md` (UD-6),
+  `conformance.md` (a writer and a receiver row, the receiver of activity batches, the canonical forms, the register),
+  `versioning.md`, `README.md`; `CONTEXT.md`; `docs/ux/scenarios.md` (SCN-010); `docs/DOCMAP.md`; `docs/backlog.md`
+  (CT-318, CT-319).
+- **Source:** the design above; the first organization server's board message `356b6aae` (thread `1efdc2e1`) and the
+  contract's answer `6ddf439d`; DEC-0030, DEC-0052, DEC-0068, DEC-0082, DEC-0090, DEC-0157, DEC-0164. DEC-0171 and
+  `FAC-SEM-178` were reserved by git CAS (`agent_sync.py reserve`, key `ct318-turn-inventory`).

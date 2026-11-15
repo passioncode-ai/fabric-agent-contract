@@ -1,10 +1,11 @@
 # Activity telemetry `fabric-activity/0.1`
 
-DEC-0030, amended by DEC-0052, DEC-0068, DEC-0082, DEC-0090 and DEC-0164; its transport by DEC-0056 · rule codes `FAC-SEM-037`…`FAC-SEM-040`, `FAC-SEM-067`, `FAC-SEM-100`, `FAC-SEM-123`, `FAC-SEM-171` (and `FAC-SEM-045`,
+DEC-0030, amended by DEC-0052, DEC-0068, DEC-0082, DEC-0090, DEC-0164 and DEC-0171; its transport by DEC-0056 · rule codes `FAC-SEM-037`…`FAC-SEM-040`, `FAC-SEM-067`, `FAC-SEM-100`, `FAC-SEM-123`, `FAC-SEM-171`, `FAC-SEM-178` (and `FAC-SEM-045`,
 [devices](devices.md#attribution)) · schemas [`telemetry-event`](../../schemas/telemetry-event.schema.json),
 [`activity-batch`](../../schemas/activity-batch.schema.json),
 [`activity-batch-ack`](../../schemas/activity-batch-ack.schema.json),
 [`activity-summary`](../../schemas/activity-summary.schema.json),
+[`activity-summary-2`](../../schemas/activity-summary-2.schema.json),
 [`access-log`](../../schemas/access-log.schema.json),
 [`activity-notice`](../../schemas/activity-notice.schema.json), shared definitions in
 [`activity-common`](../../schemas/activity-common.schema.json)
@@ -12,7 +13,8 @@ DEC-0030, amended by DEC-0052, DEC-0068, DEC-0082, DEC-0090 and DEC-0164; its tr
 Activity telemetry records **when an agent session worked, waited or idled, and what each model
 call used**: for debugging, for memory of how work went, and for spend reconciliation. Since DEC-0164 it also records the
 **units of work an agent did** (`unit`), which a device's collector sends or a kit records through Project
-Observatory's capability. A collector
+Observatory's capability. Since DEC-0171 it also records **how long an agent's turns took** (`turn`) and **which organization
+accounts a machine holds** (`account.inventory`), each by day and read by another person only as summary cells. A collector
 on a device reads what coding-agent runtimes already emit (OpenTelemetry exports, transcripts,
 rollout files, the desktop switchboard, process sampling). It turns that into telemetry events of
 this shape and sends them in batches to an organization server (the **receiver**). Only a receiver
@@ -38,7 +40,7 @@ flowchart LR
   R[Runtime: OTel, transcript, rollout] --> C[Collector node on the device]
   C -- activity-batch over mutual TLS, signed --> S[Receiver]
   S -- activity-batch-ack --> C
-  S --> M[activity-summary/1]
+  S --> M[activity-summary/1 and /2]
   S --> A[access-log/1]
 ```
 
@@ -111,9 +113,9 @@ policy key names).
 | Field | Meaning |
 |---|---|
 | `eventId` | The idempotency key ([below](#event-id)). |
-| `kind` | `session.interval`, `usage.line`, `session.annotation`, `buffer.overflow`, `policy.violation`, `grant.usage`, `result`, `unit` (DEC-0164), an extension `x-<namespace>.<kind>`, or a kind a later revision adds. |
+| `kind` | `session.interval`, `usage.line`, `session.annotation`, `buffer.overflow`, `policy.violation`, `grant.usage`, `result`, `unit` (DEC-0164), `turn`, `account.inventory` (DEC-0171), an extension `x-<namespace>.<kind>`, or a kind a later revision adds. |
 | `source` | Where the collector read it. Open vocabulary; known: `claude_code.otel`, `claude_code.transcript`, `codex.otel`, `codex.rollout`, `switchboard`, `process`, `unit` (DEC-0164). |
-| `sourceKey` | Present exactly when `eventId` is derived. Either the source's own id of the record (a request id, a line uuid) or, for a key derived from a file, `hmac-sha256:` under the device's telemetry key ([below](#event-id)). Never a path: the schema refuses a slash and an encoded home-directory fragment, the dashed form at the start or after any character that is not an ASCII letter or digit (DEC-0105). A `unit` event's is `sha256:` of its own fields (`unitSourceKey`, DEC-0164), with `source` `unit`. |
+| `sourceKey` | Present exactly when `eventId` is derived. Either the source's own id of the record (a request id, a line uuid) or, for a key derived from a file, `hmac-sha256:` under the device's telemetry key ([below](#event-id)). Never a path: the schema refuses a slash and an encoded home-directory fragment, the dashed form at the start or after any character that is not an ASCII letter or digit (DEC-0105). A `unit` event's is `sha256:` of its own fields (`unitSourceKey`, DEC-0164), with `source` `unit`; a `turn`'s is `sha256:` of its session and ordinal (`turnSourceKey`), an `account.inventory`'s of its key fields (`inventorySourceKey`), DEC-0171. |
 | `collector.id`, `collector.epoch`, `seq` | The stream position ([below](#streams)). |
 | `occurred` | The device's wall clock when it happened; for a `unit`, when its writer recorded the transition, which a collector holding it ([below](#kinds), `unit`) never restamps (DEC-0164). |
 | `bootId`, `monotonicNs` | A monotonic reading ([below](#clocks)). |
@@ -262,6 +264,76 @@ membership keeps it in Observatory's local journal only, its writer recording `a
 does so under a new `run.root`, with no `started` required under it, and a reader keys a repeated acceptance by the
 unit and its `run.root`.
 
+**`turn`**: one agent turn of one session (DEC-0171 RT-1, CT-318): from the input that started the agent's work (a
+message, a tool result handed back, a launched agent's task) to the point the session awaited input again or ended. It
+requires `session`, `project` and `runtime`, may carry `skill` and `account`, and carries **no `user`, `run`, `task`,
+`git` or `launch`** (schema). `data`:
+
+| Field | Rule |
+|---|---|
+| `ordinal` | the turn's place in its session, from 1; with `session.id` it derives the `sourceKey` |
+| `day` | the UTC day the turn ended |
+| `turnMs` | the turn's duration in milliseconds, from monotonic readings of one boot ([clocks](#clocks)), never a wall-clock difference; a turn whose span held a sleep the collector saw is not sent, since the monotonic clock counts sleep |
+| `modelCalls`, `modelMs` | the model calls the turn made, as the runtime counts them (not `usage.line`'s deduplicated count), and the time spent waiting on them, summed |
+| `toolCalls`, `toolMs` | the tool calls and the time spent waiting on them, summed; parallel calls overlap, so neither sum is a part of `turnMs` |
+| `toolKinds` | optional: `{kind, calls, ms}` per kind from a closed list (`shell`, `file`, `mcp`, `web`, `agent`, `other`), each kind once, the calls adding up to `toolCalls` and the time to `toolMs` (`FAC-SEM-178`); never a tool's name, input or output |
+| `method` | `otel`, `hook`, `transcript` or `rollout`; a turn read from a transcript or a rollout file, which hold only wall-clock times, is sent only when the collector stamped it live with monotonic readings, and a collector reading only by process sampling sends no turns |
+| `outcome` | optional: `answered`, `failed` or `unknown` |
+
+A turn carries **a day and no finer time** (RT-2): `occurred` is that day's midnight UTC, `monotonicNs` is `"0"`, its
+`eventId` is derived (`sourceKey` `sha256:` of the settings-form canonical JSON `{"ordinal", "session"}`,
+[`turnSourceKey`](../../src/activity-rules.ts), `FAC-SEM-178`, so a collector that reads a session again after a restart
+or a re-enrollment mints the same id), and the collector emits a day's turns after the day ends, as `policy.violation`
+does: neither its fields nor its place in the stream show when it ran or the gap between two turns. A receiver that
+joins a turn to its session's intervals by `session.id` can place it roughly; the restraint below covers that. The one
+writer of a session's intervals and usage lines is the one writer of its turns (`FAC-SEM-100`). A turn is **personal
+data all the same** (RT-3): from a device bound to a person it is collected for the notice's purposes, deleted at
+`retention.raw_days` and every raw read is logged in that person's [access log](#access-log); its `session.id` joins it to
+events that carry `user.id`, so keeping it from being read per person is the receiver's restraint, as for `result`. **No
+`activity.*` scope served to another person includes a `turn`**, under any purpose: another person reads turns only as
+`activity-summary/2`'s turn cells ([summary](#summary)), never per person, per machine or per session, and a partner
+organization (DEC-0090) never reads them (RT-4). A Fabric service's own wait and run time stays `service-load/1`'s
+([service](service.md#load)); `turn` answers for coding-agent runtimes. A turn of a session on a `personal` account, or of
+a personal or unattributed project, never leaves the device, even inside an organization's folder where that session's
+usage lines and its `policy.violation` are sent (RT-6, [contexts](contexts.md#routing)).
+
+**`account.inventory`**: the organization accounts one machine holds with one holder, for one **UTC day** (DEC-0171
+SI-1, CT-319). It carries **no `project`, `runtime`, `session`, `user`, envelope `account`, `run`, `task`, `git`,
+`skill` or `launch`** (schema, SI-0): a machine's holdings, not a session's. `data`:
+
+| Field | Rule |
+|---|---|
+| `day` | the UTC day the accounts were held |
+| `provider` | open vocabulary, as a policy violation's (`anthropic`, `openai`, …) |
+| `tenantRef` | the organization's tenant as the policy's `accounts.tenants` lists it ([devices](devices.md#policy)); only an organization tenant has one, so a personal or unknown account produces no inventory, ever (SI-2) |
+| `billing` | `subscription` or `api` |
+| `plan` | optional, only with `subscription`: the provider's product tier from its closed list (`anthropic`: `pro`, `max-5x`, `max-20x`, `team`, `team-premium`, `enterprise`; `openai`: `plus`, `pro`, `business`, `enterprise`, `edu`; another provider none, `FAC-SEM-178`), never a workspace, seat or account name |
+| `holder` | where the accounts are held: `switchboard` (Switchboard's records, `source` `switchboard`), `runtime` (a coding agent's own sign-in) or `vault` (an API key held by name), the last two `source` `process` (schema); never a key's value or an account's address |
+| `accounts` | at least 1 |
+
+It carries a day and no finer time, as a turn does, and is emitted after the day ends. A device has one inventory
+writer, its collector, which counts an account two holders hold once, under the first of `switchboard`, `runtime` and
+`vault`, comparing accounts by the provider's identity it reads locally and never sends (SI-4). Its `sourceKey` is
+`sha256:` of the settings-form canonical JSON `{"billing", "day", "holder", "plan", "provider", "tenantRef"}` (`plan`
+`null` when absent, [`inventorySourceKey`](../../src/activity-rules.ts), `FAC-SEM-178`), so a device writes at most one
+event per key and a second is a repeated id (`FAC-SEM-039`). It goes only to the one enrollment whose policy's
+`accounts.tenants` names its `tenantRef`, and to none when two enrollments name it, so one organization never learns
+another's seats ([`routeInventory`](../../src/context-route.ts), SI-3); a receiver refuses one whose `tenantRef` its own
+policy does not list as `attribution` (`FAC-SEM-045`). An inventory from a device bound to a person is personal data on
+a turn's terms: no per-machine inventory is served to another person, only `activity-summary/2`'s inventory cells, and
+never to a partner organization (SI-5). What the organization pays for on the platform stays the platform's licences;
+seats no machine holds are not telemetry.
+
+**Both are gated** (RT-5, SI-6). A receiver pinned before DEC-0171 reads them as unknown kinds: it stores and counts for
+nothing a turn without `toolKinds`, and refuses a turn with them (an array) and every inventory (a `tenantRef` is 71
+characters, over extension data's 64) as that event's `schema` rejection, which is consumed. So a collector holds both
+outside its stream and writes each as an event only once the receiver's latest `protocols` list names
+`activity-turn/1` (turns) or `activity-inventory/1` (inventories), as it holds a `unit`; it drops what it holds past the
+smaller of the server layer's `retention.raw_days` and the device's effective value (30 days where the server layer sets
+none), on 410 `organization-closed`, and when the device is enrolled again with a binding to a different person or from
+a person to none. Both are activity telemetry under the organization's notice, never a product's anonymous usage data,
+and neither travels in the other's channel ([usage data](usage-data.md) UD-6, SI-7).
+
 **`session.annotation`** — what a surface reported about a session, read by the device's collector (DEC-0068): Fabric's
 `session.ended` or `terminal.opened`, Switchboard's `journal_launch`. It requires `session` and `runtime`. `data`: `by`
 (the surface), `label` (what it reported) and `at`. It carries no start, end, tokens or cost, and no `user` (schema):
@@ -272,8 +344,8 @@ population ([`population`](../../src/activity-rules.ts)), and is a raw event ser
 <a id="one-writer-per-session"></a>
 
 **One writer per session** (DEC-0068, CON-OE-08). The runtime's `session.id` is the key that joins every event about
-a session. On one device the collector is the one writer of a session's `session.interval` and `usage.line` events:
-every counted event of one `session.id` carries one `collector.id`, and the session's intervals do not overlap, since a
+a session. On one device the collector is the one writer of a session's `session.interval` and `usage.line` events,
+and its `turn` events (DEC-0171): every counted event and every turn of one `session.id` carries one `collector.id`, and the session's intervals do not overlap, since a
 session is in one state at a time (`FAC-SEM-100`, kind `session-join`). A surface's own events about the session —
 Fabric's, Switchboard's — are annotations, never counters: when the collector reads them it writes
 `session.annotation`. A reader counts interval seconds by state and one usage line per `dedupeKey`, and nothing else
@@ -299,7 +371,9 @@ from the device certificate ([attribution](devices.md#attribution)), and a conte
 another organization's id. A collector sends a session's events only to the organization server of the one enrollment
 whose organization is the session's `org:<orgId>`, compared as written, and never an event of a `personal` session
 (`routeTarget`); it sends `grant.usage` by the grant's own context (`routeGrantUsage`), which the event carries
-(DEC-0086); it sends a `unit` to the organization that owns its project (DEC-0164 AE-4, CT-297); and the device sends each
+(DEC-0086); it sends a `unit` to the organization that owns its project (DEC-0164 AE-4, CT-297); a `turn` as its
+session's events, never for a `personal` account's session or a personal or unattributed project (DEC-0171 RT-6); an
+`account.inventory` by its tenant (`routeInventory`, SI-3); and the device sends each
 enrollment's check-ins to that enrollment's server ([devices → check-in](devices.md#check-in)). The shared vectors are
 [`fixtures/vectors/context-route.json`](../../fixtures/vectors/context-route.json) ([contexts → routing](contexts.md#routing)).
 
@@ -519,6 +593,30 @@ the cell's sessions.
 This keeps a project that one person works on alone from identifying them through the project
 dimension.
 
+<a id="summary-2"></a>
+
+**`activity-summary/2`** (DEC-0171, [`activity-summary-2.schema.json`](../../schemas/activity-summary-2.schema.json)) keeps
+`/1`'s fields and cells unchanged and adds two lists, which are the only form in which another person reads turns and
+inventories:
+
+- **`turnCells`** (RT-4): one cell per agent (`runtime.name`), skill (the workflow, where the runtime reports one; no
+  other fallback) and project and UTC day, with no outcome dimension, carrying `population`, `turns`, `turnBuckets` (the
+  turns' count per fixed bucket of `turnMs`: `under1s`, `under5s`, `under15s`, `under60s`, `under300s`, `from300s`, each
+  bound exclusive, [`turnBucket`](../../src/activity-rules.ts)), and the sums `modelMs` and `toolMs`. Buckets merge across
+  cells and days, so a reader finds the bucket a median or a 95th percentile falls in, not its exact value.
+- **`inventoryCells`** (SI-5): one cell per provider, plan, billing and UTC day, carrying `population`, `machines` and
+  `accounts`.
+
+A turn or inventory cell's **population counts people** ([`boundPopulation`](../../src/activity-rules.ts)): a turn's or
+an inventory's subject is the person the receiver binds to its stream's epoch ([devices](devices.md#attribution),
+`FAC-SEM-045`), and only on a device bound to no person its session (a turn) or its device (an inventory); one person's
+sessions and machines are one subject, never `population`'s `session.id` fallback. Each kind is published at the
+summary's `minPopulation` (an organization's own floor, such as five, is its receiver's setting, at least 3), the rest of
+a day folded into one other cell of its kind or suppressed and counted in `suppressedCells`. `FAC-SEM-040` refuses a cell
+below the minimum, a population above its turns or machines, buckets that do not add up to the turns, more machines than
+accounts, two cells for one tuple and two other cells of one kind in a day. A receiver that does not read turns or
+inventories publishes `/2` with empty lists, or `/1`.
+
 ## Access log
 
 Schema: [`access-log.schema.json`](../../schemas/access-log.schema.json), format `access-log/1`.
@@ -536,7 +634,11 @@ that the device is `logging_disabled`. Each entry records:
   refused; `activity.results` is refused, since results are read only as project or agent cells of at least 3;
   `activity.usage` only per UTC day or billing period; `activity.raw` and `activity.presence` only under a purpose the
   subject confirmed — and `activity.raw` served to another person never includes `usage.line` events or cost, which
-  reach another person only as `activity.usage` sums;
+  reach another person only as `activity.usage` sums. No `activity.*` scope served to another person (`activity.raw`,
+  `activity.presence`, `activity.usage` or `activity.results`) includes a `turn` or an `account.inventory` event or a
+  value drawn from one for a person, under any purpose: those reach another person only as `activity-summary/2`'s cells,
+  which are not logged per subject (DEC-0171 RT-3, SI-5). The access log names a scope, not kinds, so this is the
+  receiver's restraint, which `FAC-SEM-067` cannot check;
 - `device`: the device, when the read was keyed by one;
 - `range`: the time range read;
 - `purpose`: a sentence, and `purposeId`: the purpose as the notice names it (DEC-0052);
@@ -567,7 +669,7 @@ other than the organization's own receiver, so a person acceptance is never lost
   ([devices, transport](devices.md#transport), DEC-0056), attributed by certificate and epoch
   ([devices](devices.md#attribution));
 - each log record is mapped back to a telemetry event and checked against the same schema and the
-  same rules (`FAC-SEM-037`…`039`, and `FAC-SEM-171` for a `unit`, a failure of which is rejected as `schema`);
+  same rules (`FAC-SEM-037`…`039`, `FAC-SEM-171` for a `unit` and `FAC-SEM-178` for a `turn` or an `account.inventory`, a failure of which is rejected as `schema`);
 - deduplication is the same: on (`device.id`, `eventId`), a `unit` event once per `eventId` within the organization
   ([Event id](#event-id)), and on `dedupeKey` for usage lines, across both intakes;
 - an OTLP record that does not map to a valid event is refused, as in a batch.
@@ -599,6 +701,7 @@ not an identity: the runtimes' own exports use other names (Claude Code: `input_
 | `data.tokens.cacheRead`, `.cacheWrite` | attributes `gen_ai.usage.cache_read.input_tokens`, `gen_ai.usage.cache_creation.input_tokens` |
 | `data.cost.usd`, `data.cost.basis`, `data.dedupeKey` | attributes `fabric.cost.usd`, `fabric.cost.basis`, `fabric.dedupe_key`; for a `unit`, `fabric.unit.cost.usd` and `fabric.unit.cost.basis`, so a backend summing `fabric.cost.usd` never adds a unit's attributed cost to its usage lines |
 | a `unit`'s `data.acceptedBy` of kind `person` | not exported: it stays in the organization's own journal (DEC-0164 AE-3) |
+| a `turn`'s `data.toolKinds` | attributes `fabric.data.toolKinds.<kind>.calls` and `.ms`, one pair per kind (a kind is a closed value, never a tool's name) |
 | other `data.*` | attributes `fabric.data.*` |
 
 ## Semantic rules
@@ -606,13 +709,14 @@ not an identity: the runtimes' own exports use other names (Claude Code: `input_
 | Code | Kind | Rule |
 |---|---|---|
 | <a id="fac-sem-037"></a>`FAC-SEM-037` | `activity-batch`, `telemetry-event` | no key whose words name content or a person, in any spelling, at any depth, extension data included; `user` only as the event's own `/user`; no home directory, plain or encoded, in any value |
-| <a id="fac-sem-038"></a>`FAC-SEM-038` | `activity-batch`, `activity-summary`, `telemetry-event` | an unknown cost is `null`, never `0`: no zero client estimate for a call that used tokens; one `dedupeKey`, one model, tokens and cost; a summary cell's cost is `null` exactly when every line is unpriced; a `grant.usage` has no more unpriced calls than calls, and its cost is `null` exactly when every call is unpriced (DEC-0082) |
+| <a id="fac-sem-038"></a>`FAC-SEM-038` | `activity-batch`, `activity-summary`, `activity-summary-2`, `telemetry-event` | an unknown cost is `null`, never `0`: no zero client estimate for a call that used tokens; one `dedupeKey`, one model, tokens and cost; a summary cell's cost is `null` exactly when every line is unpriced; a `grant.usage` has no more unpriced calls than calls, and its cost is `null` exactly when every call is unpriced (DEC-0082) |
 | <a id="fac-sem-039"></a>`FAC-SEM-039` | `activity-ack`, `activity-batch`, `telemetry-event` | `monotonicNs` fits in 64 bits; an interval ends after it starts; a policy violation's and a `grant.usage`'s `occurred` is the day it names; one stream of a batch carries one `grant.usage` per (day, `grantId`), the ids compared by normal form (DEC-0082, DEC-0076); an overflow's ranges are disjoint, precede it and add up to its count; a `sourceKey` derives the `eventId`, and one with no canonical form is refused; each stream in a batch is consecutive with no repeated id; an ack's counts add up to the batch, it names the batch's device, each stream's ack is its highest consumed seq over all batches, and `held` names only consumed seqs above it |
-| <a id="fac-sem-040"></a>`FAC-SEM-040` | `activity-summary` | no person dimension, content key or path; no producer kind; no published cell whose population is below `minPopulation` (at least 3) or above its sessions; one cell per agent × skill × project × day × outcome, and at most one other cell per day; every day inside `from`…`to` |
+| <a id="fac-sem-040"></a>`FAC-SEM-040` | `activity-summary`, `activity-summary-2` | no person dimension, content key or path; no producer kind; no published cell whose population is below `minPopulation` (at least 3) or above its sessions; one cell per agent × skill × project × day × outcome, and at most one other cell per day; every day inside `from`…`to`; in `/2`, the same of turn and inventory cells: a population at least `minPopulation` and at most the turns or machines, a turn cell's buckets adding up to its turns, no more machines than accounts, one cell per agent × skill × project × day or provider × plan × billing × day and at most one other cell of each kind per day (DEC-0171) |
 | <a id="fac-sem-067"></a>`FAC-SEM-067` | `access-log-disclosure` | a read served to a person other than the subject shows the subject's time or presence only under a `purposeId` the subject confirmed, and the subject's usage and cost only per UTC day or billing period |
-| <a id="fac-sem-100"></a>`FAC-SEM-100` | `session-join` | every `session.interval` and `usage.line` of one `session.id` carries one `collector.id`, and the intervals of one session do not overlap; annotations are not counted (DEC-0068) |
+| <a id="fac-sem-100"></a>`FAC-SEM-100` | `session-join` | every `session.interval`, `usage.line` and `turn` (DEC-0171) of one `session.id` carries one `collector.id`, and the intervals of one session do not overlap; annotations are not counted (DEC-0068) |
 | <a id="fac-sem-123"></a>`FAC-SEM-123` | `access-log-disclosure` | an entry whose reader's `role` is `partner` is a service's read (no `user`) of `activity.usage`, per UTC day or billing period, keyed by no device ([the partner channel](partner-channel.md), DEC-0090) |
 | <a id="fac-sem-171"></a>`FAC-SEM-171` | `activity-batch`, `telemetry-event` | a `unit` event's `source` is `unit` and its `sourceKey` is `unitSourceKey`'s for its agent, unit, transition and `run.root`; its `acceptedAt` is not after its `occurred` (60 s of skew); a `github` key is lower-case `<owner>:<repo>#<number>`, a `jira` key the bare issue key, each else a lower-case 40-hex digest, and a `mail` key a lower-case 40-hex digest ([the unit row](#kinds)) (DEC-0164 AE-1, AE-2) |
+| <a id="fac-sem-178"></a>`FAC-SEM-178` | `activity-batch`, `telemetry-event` | a `turn`'s and an `account.inventory`'s `occurred` is the day it names; a turn's `sourceKey` is `turnSourceKey`'s for its `session.id` and `ordinal`, an inventory's `inventorySourceKey`'s for its day, provider, tenant, billing, plan and holder, and one with no canonical form is refused; a turn's `toolKinds` name each kind once and add up to its `toolCalls` and `toolMs`; an inventory's `plan` is on its provider's closed list (DEC-0171 RT-1, RT-2, SI-1, SI-4) |
 
 `activity-ack` checks `{known?, batch, ack}`: `known` is the receiver's stream state before the
 batch (`[{collector, held, accounted, pending?}]`; `pending`, a check-in's dropped ranges, never moves
@@ -622,7 +726,8 @@ access log and the subject's `consent` messages.
 - Fixtures: `fixtures/positive/telemetry-event-*`, `activity-*` and `access-log.json`;
   `fixtures/negative/telemetry-event-*`, `activity-*` and `access-log-*`.
 - Rule inputs: `fixtures/semantic/telemetry-event-*`, `activity-*` and `access-log-*`.
-- Tests: `test/activity-rules.test.ts`, `test/activity-unit.test.ts`; vectors `fixtures/vectors/activity-unit.json`.
+- Tests: `test/activity-rules.test.ts`, `test/activity-unit.test.ts`, `test/activity-turn.test.ts`; vectors
+  `fixtures/vectors/activity-unit.json`, `fixtures/vectors/activity-turn.json`.
 
 ## Decided after the first draft
 

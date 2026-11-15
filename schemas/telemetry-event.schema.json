@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/telemetry-event.schema.json",
   "title": "Telemetry event (fabric-activity/0.1, DEC-0030)",
-  "description": "One record of what happened in agent work: when a session worked or waited, what one model call used, and (kind unit, DEC-0164) a transition of a unit of work, without content. A session or usage record carries a person only as an opaque user.id; a unit carries none but the pairwise subject of a person who accepted it (acceptedBy) and a tracker key, and in the raw event an evidence link, that may name a tracker account. A reader ignores a kind it does not know.",
+  "description": "One record of what happened in agent work: when a session worked or waited, what one model call used, (kind unit, DEC-0164) a transition of a unit of work, and (DEC-0171) one agent turn's duration (turn) and a machine's organization accounts for one day (account.inventory), without content. A session or usage record carries a person only as an opaque user.id; a unit carries none but the pairwise subject of a person who accepted it (acceptedBy) and a tracker key, and in the raw event an evidence link, that may name a tracker account. A reader ignores a kind it does not know.",
   "type": "object",
   "required": [
     "protocol",
@@ -452,6 +452,135 @@
         "type": "object",
         "properties": {
           "kind": {
+            "const": "turn"
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "session": true,
+          "project": true,
+          "runtime": true,
+          "occurred": {
+            "type": "string",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T00:00:00(\\.0+)?Z$"
+          },
+          "monotonicNs": {
+            "const": "0"
+          },
+          "user": false,
+          "run": false,
+          "task": false,
+          "git": false,
+          "launch": false,
+          "data": {
+            "$ref": "#/$defs/turn"
+          }
+        },
+        "required": [
+          "session",
+          "project",
+          "runtime",
+          "sourceKey"
+        ]
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "const": "account.inventory"
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "occurred": {
+            "type": "string",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T00:00:00(\\.0+)?Z$"
+          },
+          "monotonicNs": {
+            "const": "0"
+          },
+          "source": {
+            "enum": [
+              "switchboard",
+              "process"
+            ]
+          },
+          "user": false,
+          "account": false,
+          "session": false,
+          "project": false,
+          "runtime": false,
+          "skill": false,
+          "launch": false,
+          "git": false,
+          "task": false,
+          "run": false,
+          "data": {
+            "$ref": "#/$defs/accountInventory"
+          }
+        },
+        "required": [
+          "sourceKey",
+          "data"
+        ],
+        "allOf": [
+          {
+            "if": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "holder": {
+                      "const": "switchboard"
+                    }
+                  },
+                  "required": [
+                    "holder"
+                  ]
+                }
+              },
+              "required": [
+                "data"
+              ]
+            },
+            "then": {
+              "type": "object",
+              "properties": {
+                "source": {
+                  "const": "switchboard"
+                }
+              }
+            },
+            "else": {
+              "type": "object",
+              "properties": {
+                "source": {
+                  "const": "process"
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "kind": {
             "enum": [
               "session.interval",
               "usage.line",
@@ -460,7 +589,9 @@
               "grant.usage",
               "result",
               "unit",
-              "session.annotation"
+              "session.annotation",
+              "turn",
+              "account.inventory"
             ]
           }
         },
@@ -972,6 +1103,187 @@
           }
         }
       ]
+    },
+    "turn": {
+      "type": "object",
+      "required": [
+        "ordinal",
+        "day",
+        "turnMs",
+        "modelCalls",
+        "modelMs",
+        "toolCalls",
+        "toolMs",
+        "method"
+      ],
+      "properties": {
+        "ordinal": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991,
+          "description": "The turn's place in its session, from 1 (DEC-0171 RT-2): with session.id it derives the event's sourceKey (turnSourceKey), so a collector that reads a session again, after a restart or a re-enrollment, mints the same id; never a time."
+        },
+        "day": {
+          "$ref": "activity-common.schema.json#/$defs/day",
+          "description": "The UTC day the turn ended, never a time (DEC-0171 RT-2): the event's occurred is that day's midnight and its monotonicNs is 0."
+        },
+        "turnMs": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991,
+          "description": "The turn's duration in milliseconds, from the input that started the agent's work to the point the session awaited input again or ended, from monotonic readings of one boot, never a wall-clock difference; a turn whose span held a sleep the collector saw is not sent (DEC-0171 RT-1)."
+        },
+        "modelCalls": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991,
+          "description": "The model calls the turn made, as the runtime counts them (not usage.line's deduplicated count)."
+        },
+        "modelMs": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991,
+          "description": "The time the turn spent waiting on model calls, summed; parallel calls overlap, so it is not a part of turnMs."
+        },
+        "toolCalls": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991,
+          "description": "The tool calls the turn made."
+        },
+        "toolMs": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991,
+          "description": "The time the turn spent waiting on tool calls, summed; parallel calls overlap, so it is not a part of turnMs."
+        },
+        "toolKinds": {
+          "type": "array",
+          "maxItems": 6,
+          "items": {
+            "type": "object",
+            "required": [
+              "kind",
+              "calls",
+              "ms"
+            ],
+            "properties": {
+              "kind": {
+                "enum": [
+                  "shell",
+                  "file",
+                  "mcp",
+                  "web",
+                  "agent",
+                  "other"
+                ],
+                "description": "A closed list: never a tool's name, input or output."
+              },
+              "calls": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 9007199254740991
+              },
+              "ms": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "additionalProperties": false
+          },
+          "description": "Optional: the tool calls by kind, each kind once, their calls adding up to toolCalls and their ms to toolMs (FAC-SEM-178)."
+        },
+        "method": {
+          "enum": [
+            "otel",
+            "hook",
+            "transcript",
+            "rollout"
+          ],
+          "description": "Where the turn was read; a turn read from a transcript or a rollout file is sent only when the collector stamped it live with monotonic readings (DEC-0171 RT-1). A collector reading only by process sampling sends no turns."
+        },
+        "outcome": {
+          "enum": [
+            "answered",
+            "failed",
+            "unknown"
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "description": "DEC-0171 RT-1: one agent turn of one session, its duration and the calls it waited on, carrying a day and no finer time; never a tool's name, an input or an output, and no user."
+    },
+    "accountInventory": {
+      "type": "object",
+      "required": [
+        "day",
+        "provider",
+        "tenantRef",
+        "billing",
+        "holder",
+        "accounts"
+      ],
+      "properties": {
+        "day": {
+          "$ref": "activity-common.schema.json#/$defs/day",
+          "description": "The UTC day the accounts were held, never a time (DEC-0171 SI-1): the event's occurred is that day's midnight and its monotonicNs is 0."
+        },
+        "provider": {
+          "$ref": "activity-common.schema.json#/$defs/name",
+          "description": "Open vocabulary, as a policy violation's (anthropic, openai, ...)."
+        },
+        "tenantRef": {
+          "$ref": "activity-common.schema.json#/$defs/tenantRef",
+          "description": "The organization's tenant, as the policy's accounts.tenants lists it (DEC-0171 SI-2): only an organization tenant has one, so a personal or unknown account produces no inventory."
+        },
+        "billing": {
+          "enum": [
+            "subscription",
+            "api"
+          ]
+        },
+        "plan": {
+          "$ref": "activity-common.schema.json#/$defs/plan",
+          "description": "Only with billing subscription; another provider than anthropic and openai carries none (FAC-SEM-178)."
+        },
+        "holder": {
+          "enum": [
+            "switchboard",
+            "runtime",
+            "vault"
+          ],
+          "description": "Where the accounts are held: Switchboard's records, a coding agent's own sign-in, or an API key held by name; an account two holders hold is counted once, under the first of switchboard, runtime and vault (DEC-0171 SI-4)."
+        },
+        "accounts": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "type": "object",
+            "properties": {
+              "billing": {
+                "const": "api"
+              }
+            },
+            "required": [
+              "billing"
+            ]
+          },
+          "then": {
+            "type": "object",
+            "properties": {
+              "plan": false
+            }
+          }
+        }
+      ],
+      "description": "DEC-0171 SI-1: the organization accounts one machine held with one holder for one UTC day, as counts; never a key's value, an account's address or a seat's name."
     }
   }
 }

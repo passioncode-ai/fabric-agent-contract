@@ -128,6 +128,15 @@ sends, and to which organization server, is decided four ways:
 - **A unit of work** (`unit`, DEC-0164, [activity](activity.md#kinds)) carries no session: it goes to the enrollment of
   the organization that owns its `project.id` as the device's folder attribution names it, never for a personal or
   unattributed project, and a device that cannot tell sends none. The route function and its vectors are CT-297.
+- **An agent turn** (`turn`, DEC-0171 RT-6) goes as its session's events do, by `routeTarget`, and never for a session on
+  a `personal` account or of a personal or unattributed project, even inside an organization's folder where that
+  session's usage lines and its `policy.violation` are sent: a person's own pace never reaches an organization. A
+  receiver's response-time report names that gap.
+- **An account inventory** (`account.inventory`, DEC-0171 SI-3) carries no session or project: it goes where
+  `routeInventory(tenantRef, enrollments)` answers, `enrollments` listing each enrollment's `org` and the `tenants` its
+  policy's `accounts.tenants` lists. One enrollment lists the tenant: that one; none: `{route: "none", reason:
+  "unlisted"}`, not sent; two, even of one organization: `ambiguous`, sent to neither, so one organization never learns
+  another's seats ([`activity-turn.json`](../../fixtures/vectors/activity-turn.json), `routes`).
 
 `routeTarget` answers:
 
