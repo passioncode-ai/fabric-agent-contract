@@ -28,12 +28,12 @@ in groups of five or more under the organization's employee notice, no ranking o
   closed (`schemas/telemetry-event.schema.json`, `$defs.usageLine`, `additionalProperties: false`), so a new field on it
   is refused by every receiver pinned today.
 - A new kind is the additive route: a receiver reads an unknown kind as extension data and never rejects a batch for it
-  ([activity](../../specification/activity.md#kinds), *Extension and unknown kinds*); `grant.usage` (DEC-0082) and
-  `unit` (DEC-0164) are each held by the collector until the receiver's `protocols` list names their protocol, so a
-  receiver pinned before them never meets them.
+  ([activity](../../specification/activity.md#kinds), *Extension and unknown kinds*); `unit` (DEC-0164) is held by the
+  collector until the receiver's `protocols` list names `activity-unit/1`, and `grant.usage` (DEC-0082) behind the
+  share registration's answer, so a receiver pinned before them never meets them.
 - `account.class` (DEC-0052) labels the account a session ran on (`organization`, `personal`, `unknown`) with an
   organization's `tenantRef` from the policy's `accounts.tenants` ([devices](../../specification/devices.md#policy));
-  `policy.violation` and `grant.usage` are day-grained kinds with no session, user, run or task (schema).
+  `grant.usage` is a day-grained kind with no session, user, run or task (schema).
 - A summary has no person dimension and publishes a cell only at `minPopulation` of at least 3
   ([activity](../../specification/activity.md#minimum-cell), the operator's decision of 2026-10-08); a receiver may raise
   it. The organization's decision of five or more is that receiver's `minPopulation`, not a contract change.
@@ -42,63 +42,73 @@ in groups of five or more under the organization's employee notice, no ranking o
 
 ## The design
 
+Every key below was run through the contract's own filters (`forbiddenKeys` in `src/activity-rules.ts`, FAC-SEM-037 and
+FAC-SEM-040): none is a content or person word. `response` is a content word there, so the fields say `turn`.
+
 ### RT, response time (CT-318)
 
-- **RT-1, the kind `turn`.** One agent turn of one session: from the input that started the agent's work (a person's
-  message, a tool result handed back, a launched agent's task) to the point the session awaited input again or ended.
-  It requires `session`, `project` and `runtime` (as `session.interval`). `data`:
-  - `start`, `end` (`end` ≥ `start`), and `responseMs`: the turn's duration from monotonic readings of one boot, never a
-    wall-clock difference (activity's clocks);
-  - `modelCalls` and `modelMs`: the model calls the turn made and the time spent waiting on them, summed;
-  - `toolCalls` and `toolMs`: the tool calls and the time spent in them, summed, with an optional `toolKinds` list of
-    `{kind, calls, ms}`, `kind` from a closed list (`shell`, `file`, `mcp`, `web`, `agent`, `other`): never a tool's
-    name, its input or its output (FAC-SEM-037 still applies);
-  - `method`: what produced the estimate (`otel`, `hook`, `transcript`, `rollout`), as for an interval;
-  - optional `outcome`: `answered`, `interrupted`, `failed` or `unknown`.
-  A turn's `responseMs` is an estimate under its `method`, as an interval's state is, and is labelled so wherever it is
-  shown. Model time and tool time may overlap (parallel calls), so they are not parts of `responseMs`.
-- **RT-2, no new identifier.** A `turn` carries the envelope `usage.line` carries (session, project, runtime, run, and
-  `user.id` only as the receiver sets it from the epoch's binding); it carries no person key, no content and no prompt
-  timing that would show a person's own pace (the time a session awaited input is `session.interval`'s, never a
-  turn's).
-- **RT-3, who reads it.** A `turn` from a device bound to a person is personal data, as an interval is: another person
-  reads raw turns only under a purpose that person confirmed, each read in the person's access log. A summary carries
-  turns only per agent, skill, project and day: a cell gains `turns` (a count) and `responseBuckets`, the turns' count
-  per fixed bucket of `responseMs` (`<1s`, `<5s`, `<15s`, `<60s`, `<300s`, `≥300s`), mergeable across cells and days, so
-  a reader derives a median or a 95th percentile without the summary carrying a person or a raw duration. This is
-  `activity-summary/2`, beside `/1`, which keeps its fields.
+- **RT-1, the kind `turn`.** One agent turn of one session: from the input that started the agent's work (a message, a
+  tool result handed back, a launched agent's task) to the point the session awaited input again or ended. It requires
+  `session`, `project` and `runtime`. `data`:
+  - `day` (the UTC day the turn ended) and `turnMs`: the turn's duration from monotonic readings of one boot, never a
+    wall-clock difference; a turn whose span held a sleep the collector saw is not sent (the monotonic clock counts
+    sleep, activity's *Clocks*);
+  - `modelCalls` and `modelMs`, `toolCalls` and `toolMs`: the calls the turn made and the time spent waiting on them,
+    summed (parallel calls overlap, so they are not parts of `turnMs`; `modelCalls` is the runtime's count, not
+    `usage.line`'s deduplicated one);
+  - optional `toolKinds`, a list of `{kind, calls, ms}` with `kind` from a closed list (`shell`, `file`, `mcp`, `web`,
+    `agent`, `other`): never a tool's name, input or output;
+  - `method` (closed: `otel`, `hook`, `transcript`, `rollout`) and optional `outcome` (`answered`, `failed`, `unknown`).
+- **RT-2, no person and no pace.** A `turn` carries a day and no finer time: `occurred` is that day's midnight UTC and
+  `monotonicNs` is `"0"`, as `grant.usage` and `policy.violation` do, so no gap between two turns (a person's time to
+  answer) can be read from them; it carries no `user` (schema, as `result` and `unit`), so a summary counts its
+  population by `session.id`. It is not personal data on its own; it is joined to nobody.
+- **RT-3, who reads it.** A receiver serves turns to another person only as summary cells: per agent (`runtime.name`),
+  skill (the workflow, where the runtime reports one, else `run.task`'s host node), project and day, at the summary's
+  `minPopulation` (the organization's five or more is its receiver's setting, at least the contract's 3). A cell gains
+  `turns` (a count) and `turnBuckets`, the turns' count per fixed bucket of `turnMs` (`<1s`, `<5s`, `<15s`, `<60s`,
+  `<300s`, `≥300s`), mergeable across cells and days, so a reader derives a median or a 95th percentile; the outcome key
+  of a turn's cell is the turn's own `outcome`; the *other* cell carries `turns` and `turnBuckets` too. This is
+  `activity-summary/2`, beside `/1`, which keeps its fields (a reader on `/1` shows no turns). A Fabric service's own
+  wait and run time stays `service-load/1`'s (p50 and p95 per service, [service](../../specification/service.md#load));
+  `turn` answers for coding-agent runtimes.
 - **RT-4, the gate.** A collector holds `turn` events outside its stream until the receiver's latest `protocols` list
-  names `activity-turn/1`, as it holds `grant.usage` and `unit`, and drops what it held past the raw retention.
-- **RT-5, the personal context.** A turn of a session whose `account.class` is `personal`, or of a personal or
-  unattributed project, never leaves the machine (the plan's isolation model, point 1; activity's attribution).
+  names `activity-turn/1`, as `unit` waits for `activity-unit/1`, and drops what it held past the raw retention.
+- **RT-5, the personal context.** A turn of a session on a `personal` account, or of a personal or unattributed
+  project, never leaves the machine (the plan's isolation point 1), so a cell's `turns` may count fewer sessions than
+  its `usageLines` where personal usage lines are sent today: intended.
 
 ### SI, the subscription inventory (CT-319)
 
-- **SI-1, the kind `account.inventory`.** One organization account held on one machine, for one **UTC day**. `data`:
-  `day`, `provider` (open vocabulary, as `policy.violation`'s), `tenantRef` (the organization's tenant, from the policy's
-  `accounts.tenants`), `billing` (`subscription` or `api`), optional `plan` (the provider's plan name as the provider
-  states it, open vocabulary, at most 64 characters, never a price), `holder` (where on the machine the account is held:
-  `switchboard`, `runtime` for a coding agent's own sign-in, `vault` for an API key held by name) and `accounts` (at
-  least 1, the number of such accounts with that holder). Like `grant.usage` it carries a day and no finer time
-  (`occurred` that day's midnight UTC, `monotonicNs` `"0"`) and no `session`, `user`, `run`, `task`, `git`, `skill` or
-  `launch` (schema).
-- **SI-2, organization only.** The schema admits only an organization account: no `accountClass` field, because a
-  `tenantRef` is required and only an organization tenant has one. A personal or unknown account produces no
-  `account.inventory`, ever.
-- **SI-3, the source.** `source` `switchboard` for what Switchboard records; `vault` and `runtime` holders are what the
-  collector reads by name (never a key's value or an account's address: an account is named by provider, tenant and
-  plan only).
-- **SI-4, who reads it.** An inventory event from a device bound to a person is personal data (it says that person's
-  machine holds an organization seat); another person reads it per machine only under a purpose the person confirmed,
-  and otherwise only as an organization's sums per provider, plan, billing and day. The organization's own billing
-  record beside it (the platform's licences) stays the platform's.
-- **SI-5, the gate.** As RT-4, under `activity-inventory/1`.
+- **SI-1, the kind `account.inventory`.** The organization accounts one machine holds with one holder, for one **UTC
+  day**. `data`: `day`, `provider` (open vocabulary, as `policy.violation`'s), `tenantRef` (the organization's tenant,
+  from the policy's `accounts.tenants`), `billing` (`subscription` or `api`), optional `plan` (the provider's product
+  tier from a closed list per provider that the DEC names, never a workspace, seat or account name), `holder` (where the
+  accounts are held: `switchboard`, `runtime` for a coding agent's own sign-in, `vault` for an API key held by name) and
+  `accounts` (at least 1). It carries a day and no finer time (`occurred` midnight UTC, `monotonicNs` `"0"`) and no
+  `session`, `user`, `run`, `task`, `git`, `skill`, `launch` or envelope `account` (schema).
+- **SI-2, organization only.** A `tenantRef` is required and only an organization tenant has one, so a personal or
+  unknown account produces no `account.inventory`, ever.
+- **SI-3, the source and the route.** `source` is `switchboard` for Switchboard's records and `process` for what the
+  collector reads by name (`runtime`, `vault`); never a key's value or an account's address. On a device enrolled with
+  two organizations, an event goes only to the enrollment whose policy's `accounts.tenants` names its `tenantRef`
+  (activity's routing by context), so one organization never learns another's seats.
+- **SI-4, idempotence.** At most one event per (stream, `day`, `provider`, `tenantRef`, `billing`, `plan`, `holder`),
+  with a derived `eventId` over that key; a receiver keeps the first and refuses a second in one batch, as for
+  `grant.usage`.
+- **SI-5, who reads it.** A receiver serves no per-machine inventory to another person; it serves sums per provider,
+  plan, billing and day at the summary's `minPopulation` of machines, the rest folded into one other row. What the
+  organization pays for on the platform stays the platform's licences.
+- **SI-6, the gate.** As RT-4, under `activity-inventory/1`.
+- **SI-7, not usage data.** Both kinds are activity telemetry under the organization's notice, never a product's
+  anonymous usage data (DEC-0157 UD-6, on its branch until it lands): Switchboard's own usage-data switch does not
+  govern them, and neither travels in the other's channel.
 
 ### Notice purposes
 
 The contract names no purpose ids (they are the organization's notice). Both kinds fit the organization's existing
-`usage-and-cost` purpose for sums; a receiver that serves raw turns or per-machine inventory to another person needs the
-person's confirmed purpose for it, as for time today. Nothing in this design widens what reaches another person.
+`usage-and-cost` purpose; neither reaches another person per person or per machine (RT-3, SI-5), which is the upper
+limit the contract sets and the requesting server's plan (its C1) asks for.
 
 ## Alternatives refused
 
