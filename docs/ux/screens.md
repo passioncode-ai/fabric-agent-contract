@@ -420,6 +420,17 @@
 - **Resources:** local channel specification, Secret requests
 - **Status:** proposed
 
+### SCR-35: Turn and account cells
+
+- **Used by:** FLW-35
+- **Purpose:** show an organization's administrator how long agents' turns take and which provider plans the organization's machines hold, as summary cells only.
+- **Elements:** the day or range; turn cells (agent, workflow, project, turns, the six buckets of `turnMs`, model and tool time); inventory cells (provider, plan, billing, machines, accounts); the folded other cell and `suppressedCells`; no person, machine or session column.
+- **States:** not collected (the receiver reads neither kind); empty (no cell at or above `minPopulation`); success.
+- **Coverage:** `activity-summary-2.schema.json`, fixture `positive/activity-summary-2.json`, vectors `activity-turn.json`
+- **Scenarios:** SCN-063
+- **Resources:** activity specification, Summary (`activity-summary/2`)
+- **Status:** proposed
+
 ### SCR-32: A Project's sessions and its main one
 
 - **Used by:** FLW-16
