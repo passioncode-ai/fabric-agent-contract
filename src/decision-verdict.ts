@@ -1,7 +1,7 @@
 import { createHash, createHmac } from "node:crypto";
 import { type ActionDecisionInput, actionDecision } from "./actions.js";
 import { rfc8785 } from "./canonical.js";
-import { type Finding, type JsonObject, isObject } from "./findings.js";
+import { type Finding, type JsonObject, isObject, show } from "./findings.js";
 import { mandateCovers } from "./mandate.js";
 import { strictTime } from "./rfc3339.js";
 import { createValidatorSync } from "./validator.js";
@@ -78,13 +78,13 @@ function verdictDocument(value: JsonObject, at = ""): Finding[] {
   if (!Number.isNaN(start) && !Number.isNaN(end)) {
     const bound = value.verdict === "allow" ? LIFETIME.allow : value.verdict === "human" ? LIFETIME.human : value.reason === "person-denied" ? LIFETIME.personDenied : LIFETIME.deny;
     if (end <= start) flag("/expiresAt", "a verdict expires after it is given");
-    else if (end - start > bound * 1000) flag("/expiresAt", `a ${value.verdict === "deny" ? String(value.reason) : String(value.verdict)} verdict stands at most ${bound / 60} minutes`);
+    else if (end - start > bound * 1000) flag("/expiresAt", `a ${value.verdict === "deny" ? show(value.reason) : show(value.verdict)} verdict stands at most ${bound / 60} minutes`);
   }
   const grounds = Array.isArray(value.grounds) ? value.grounds.filter(isObject) : [];
   if (value.verdict === "allow") {
     const route = typeof value.route === "string" && Object.hasOwn(ROUTE_GROUNDS, value.route) ? ROUTE_GROUNDS[value.route] : undefined;
     if (route !== undefined && !grounds.some((g) => route.kinds.includes(g.kind as string) && route.grades.includes(g.grade as string))) {
-      flag("/grounds", `an allow by route ${String(value.route)} stands on a ${route.kinds.join(" or ")} ground graded ${route.grades.join(" or ")}`);
+      flag("/grounds", `an allow by route ${show(value.route)} stands on a ${route.kinds.join(" or ")} ground graded ${route.grades.join(" or ")}`);
     }
     grounds.forEach((g, i) => { if (g.grade === "data") flag(`/grounds/${i}/grade`, "a ground the reference does not take from this caller never stands beside an allow"); });
     const form = value.machineForm;
@@ -161,7 +161,7 @@ function verdictAgainstReference(value: JsonObject): Finding[] {
   }
   for (const field of ["tier", "capability", "action", "effect", "context", "project", "spendUsd"]) {
     if (call[field] !== undefined && asked[field] !== call[field]) {
-      findings.push({ code: "FAC-SEM-179", instancePath: `/verdict/asked/${field}`, message: `the verdict asked about another call than the reference reads: ${field} ${String(asked[field])}, not ${String(call[field])}` });
+      findings.push({ code: "FAC-SEM-179", instancePath: `/verdict/asked/${field}`, message: `the verdict asked about another call than the reference reads: ${field} ${show(asked[field])}, not ${show(call[field])}` });
     }
   }
   const flag = (message: string) => findings.push({ code: "FAC-SEM-179", instancePath: "/verdict/verdict", message });
@@ -176,7 +176,7 @@ function verdictAgainstReference(value: JsonObject): Finding[] {
     return findings;
   }
   const routes = routesOf(answer.recordAs);
-  if (!routes.includes(verdict.route as string)) flag(`the reference took the call by route ${routes.join(" or ") || "none"}, not ${String(verdict.route)}`);
+  if (!routes.includes(verdict.route as string)) flag(`the reference took the call by route ${routes.join(" or ") || "none"}, not ${show(verdict.route)}`);
   return findings;
 }
 

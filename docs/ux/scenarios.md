@@ -324,7 +324,7 @@ independent agent author and P-02 project operator.
   3. The lone member's project has a population of 1 -> its turns are folded into the day's other cell or suppressed and counted in `suppressedCells`; no cell names the project with that member's turns alone.
   4. The inventory cells list each provider, plan and billing with machines and accounts -> the administrator sees which plans the organization's machines hold (what it pays for on the platform stays the platform's licences); no personal or unknown account appears (SI-2).
 - **Expected result:** turn time and accounts are read only as cells at or above `minPopulation`, never per person, machine or session; a partner organization is never served them (DEC-0171 RT-4, SI-5); a member's access log lists none of these reads, because a cell carries no person (SCN-010).
-- **Alt paths:** the summary's lists are empty, or it is `/1` -> the page says no turn or inventory cells are published for the range and shows `suppressedCells`, without a reason (too few people and a receiver that does not read these kinds look the same).
+- **Alt paths:** the summary's lists are empty, or it is `/1` -> the page says no turn or inventory cells are published for the range and shows `suppressedCells` when the summary carries it, without a reason (too few people and a receiver that does not read these kinds look the same).
 - **UI elements:** day or range, turn cells, inventory cells, other cell, suppressed count.
 - **States covered:** none published, success
 - **Errors & recovery:** a cell below the floor, buckets that do not add up to the turns or a population above the turns are refused by `FAC-SEM-040`; the receiver republishes the day.
