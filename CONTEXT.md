@@ -209,7 +209,7 @@ needs an answer first, only after that answer (UD-1), stopped by the product's o
 name from the person's machine or data, or any content or text a person wrote or received in it. Anonymous here
 means it names no person, not that it is unlinkable: an installation id ties an install's events together, a shared one ties the products that send it, and a session id, kept in memory and renewed no later than after an idle hour, ties one session's. Data that meets UD-3 is `confidential`, being the estate's private metrics in the data classification table; joined with an account or a purchase it is no longer anonymous and is `personal`, or `regulated` where a product's privacy review finds it legally controlled (UD-1 to UD-6,
 DEC-0157). Not a usage report (a service's spend and calls), not activity telemetry (an organization's record of its
-people's sessions) and not an operations digest while it is sent to no one but the person (UD-6).
+people's sessions and units of work) and not an operations digest while it is sent to no one but the person (UD-6).
 
 **Usage report**: What a service publishes about its own spend at `surfaces.usage`, with every spending limit
 it applies, enforced or not (DEC-0021, DEC-0027), and MAY attribute its calls to projects and task runs, never

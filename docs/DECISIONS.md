@@ -11865,8 +11865,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      turning off ends erasure; a product whose uninstall deletes its id says whether erasure survives the uninstall, and
      erasure under a shared id needs every sharing product's agreement; a later decision adds a well-known member when a
      host asks to show it.
-  6. UD-6: activity telemetry (DEC-0030) is an organization's record of its people's sessions, sent by an enrolled
-     device (DEC-0031) to that organization's receiver under its own notice and consent (DEC-0052); UD-1 to UD-5 do not
+  6. UD-6: activity telemetry (DEC-0030) is an organization's record of its people's sessions and, since DEC-0164, of
+     their agents' units of work, sent by an enrolled device's collector (DEC-0031) or recorded by a kit through Project
+     Observatory's capability, to that organization's receiver under its own notice and consent (DEC-0052); UD-1 to UD-5 do not
      govern it, and neither kind travels in the other's channel; sending a digest is sending it to anyone but the
      person (a product owner or another party), the operator reading his own machines counting as the person; an
      operations digest (DEC-0153) that is not sent (it stays on its machine, or reaches only the person) is not usage
@@ -12232,6 +12233,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 ### DEC-0163: a usage report's cost sums hold within each row's rounding
 
+- **Annotated (2026-11-15):** LV-7 cited by DEC-0157 UD-4: a level decision is a person's word for a usage-data switch
+  that person turned off only when the level holder is that person's operator, or holds the organization's switch for
+  a component it deploys; in an organization's context, at a service that reads levels, only a level decision decides
+  the switch's `change-policy` action.
 - **Date:** 2026-11-12
 - **Status:** Accepted 2026-11-12, merged with this change: rounds 5 and 6 of the coordinator's blind readings (at `4275ffff` and `43d123f2`) clean on all three tiers; rounds 1 to 4 folded.
   It loosens `FAC-SEM-025`'s cost comparisons only; no schema or field changes.
