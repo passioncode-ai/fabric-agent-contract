@@ -209,7 +209,8 @@ decision of 2026-11-04.
     for a declined switch. The second lander makes UD-4 say that a level decision is not the person's word for a
     declined switch unless the level holder is that person's operator, and makes DEC-0162 and membership's *Levels* cite
     UD-4. Checks on the merged tree: `awk '/\*\*UD-4/,/\*\*UD-5/' docs/specification/usage-data.md | grep -c 'level'`
-    and `git grep -n 'UD-4' -- docs/specification/membership.md docs/DECISIONS.md | grep -c 'DEC-0162\|LV-'` each print
+    and `git grep -n 'UD-4' -- docs/specification/membership.md docs/DECISIONS.md | grep -c 'DEC-0162\|LV-'` and
+    `awk '/^### DEC-0162/{f=1;next} /^### DEC-/{f=0} f' docs/DECISIONS.md | grep -c 'DEC-0157 UD-4'` each print
     at least 1 (relayed to CT-250's handoff).
 - Landing step, the knowledge base (AGENTS.md "After work"), in the same landing: plans.md's Contract row restates
   CT-216 as "what usage data every product shares: UD-1 to UD-6, no machine declaration" (today "what a service

@@ -12230,13 +12230,13 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   2026-11-06 as recorded in fabric-workspace `knowledge/authority.md`; board request `4a1bf8d6` (thread `8da128cf`);
   backlog CT-250.
 - **Annotated (2026-11-14):** LV-7 amended by DEC-0166: in an organization's context, at a service that reads levels, an act declared `owner` or `admin` takes no place's standing mandate either, its `setLevel` being the hub's statement rather than an attestation (AU-2; an attested setter's level is CT-309).
-
-### DEC-0163: a usage report's cost sums hold within each row's rounding
-
 - **Annotated (2026-11-15):** LV-7 cited by DEC-0157 UD-4: a level decision is a person's word for a usage-data switch
   that person turned off only when the level holder is that person's operator, or holds the organization's switch for
   a component it deploys; in an organization's context, at a service that reads levels, only a level decision decides
   the switch's `change-policy` action.
+
+### DEC-0163: a usage report's cost sums hold within each row's rounding
+
 - **Date:** 2026-11-12
 - **Status:** Accepted 2026-11-12, merged with this change: rounds 5 and 6 of the coordinator's blind readings (at `4275ffff` and `43d123f2`) clean on all three tiers; rounds 1 to 4 folded.
   It loosens `FAC-SEM-025`'s cost comparisons only; no schema or field changes.
