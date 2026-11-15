@@ -11830,7 +11830,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      switch, or an `approval/1` the operator gave for that switch (DL-18), an elicitation the product itself sends
      deciding the action, once the operator accepts it, on the product's own record (AP-2) with no decision relayed by
      the agent, never a mandate (a `change-policy` effect, MD-3), another approver's `approval/1` or a standing rule;
-     at a service given `levels`, in an organization's context, only a level decision decides the switch's
+     at a service given `levels`, in an organization's context (the switch declared `admin` or `owner`, never
+     `operator`), only a level decision decides the switch's
      `change-policy` action (DEC-0162 LV-7), and it is the person's word only when the level holder is that person's
      operator or holds the organization's switch; anyone else is told the switch is in the product's settings; for a component an organization deploys on its own
      server for its members that sends its own counts, the switch is the deploying organization's, and the word is that

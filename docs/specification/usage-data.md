@@ -149,7 +149,8 @@ The key words MUST, MUST NOT, SHOULD and MAY are used as in RFC 2119.
   `change-policy` effect, which no mandate covers, [delegation](delegation.md#the-operators-mandate) MD-3, and which
   OW-1's exception keeps for the operator's word, [governance](governance-and-roles.md) OW-1), never an
   `approval/1` of another approver and never a standing rule. At a service given `levels`, in an organization's context,
-  the switch's action is `change-policy`, so `admin` at least, and only a level decision decides it there
+  the switch's action is `change-policy`, so `admin` at least (a service declares it `admin` or `owner` in `actionLevels`,
+  never `operator`), and only a level decision decides it there
   (`actionDecision`'s organization's-context row; [membership](membership.md#levels) DEC-0162 LV-7): the operator's
   decision, an accepted elicitation and an accepted `approval/1` are refused `level-insufficient`. Such a level decision
   is the person's word for a switch that person turned off only when the level holder is that person, the agent's operator, or,
