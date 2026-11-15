@@ -1,0 +1,56 @@
+{
+  "protocol": "fabric-activity/0.1",
+  "eventId": "sha256:962503ddab9bf268a1ba22a2686f59b08942a6fc21b7787e536494771bf5b104",
+  "kind": "turn",
+  "source": "claude_code.otel",
+  "sourceKey": "sha256:6a4275c25dd4172897091555806c56dcaabe1a7dd9725cb362b8dbe1226aaafe",
+  "collector": {
+    "id": "observatory-node",
+    "epoch": 4
+  },
+  "seq": 1,
+  "occurred": "2026-11-14T00:00:00Z",
+  "bootId": "boot-7c41e2",
+  "monotonicNs": "0",
+  "session": {
+    "id": "s-91c2e4"
+  },
+  "project": {
+    "id": "example-project"
+  },
+  "runtime": {
+    "name": "claude_code",
+    "version": "2.4.1"
+  },
+  "skill": "task-pipeline",
+  "account": {
+    "class": "organization",
+    "tenantRef": "sha256:7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a"
+  },
+  "data": {
+    "ordinal": 3,
+    "day": "2026-11-14",
+    "turnMs": 41250,
+    "modelCalls": 4,
+    "modelMs": 30100,
+    "toolCalls": 3,
+    "toolMs": 9800,
+    "toolKinds": [
+      {
+        "kind": "shell",
+        "calls": 2,
+        "ms": 8900
+      },
+      {
+        "kind": "file",
+        "calls": 1,
+        "ms": 900
+      }
+    ],
+    "method": "otel",
+    "outcome": "answered"
+  },
+  "user": {
+    "id": "m-7f3a91c2"
+  }
+}

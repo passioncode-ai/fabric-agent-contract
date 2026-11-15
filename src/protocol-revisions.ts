@@ -15,7 +15,7 @@ import { type Finding, type JsonObject, isObject } from "./findings.js";
 export const PROTOCOL_REVISIONS: ReadonlyMap<string, readonly string[]> = new Map([
   ["access-log", ["1"]],
   ["approval", ["1"]],
-  ["activity-summary", ["1"]],
+  ["activity-summary", ["1", "2"]],
   ["agent-directory", ["1"]],
   ["call-record", ["1"]],
   ["channel-agent-standard", ["1"]],
@@ -85,6 +85,8 @@ export const PROTOCOL_REVISIONS: ReadonlyMap<string, readonly string[]> = new Ma
   ["standing", ["1"]],
   ["service-load", ["1"]],
   ["activity-unit", ["1"]],
+  ["activity-turn", ["1"]],
+  ["activity-inventory", ["1"]],
   ["share-registration", ["1"]],
   ["share-registration-receipt", ["1"]],
   ["support-quality-daily", ["1"]],
@@ -92,7 +94,7 @@ export const PROTOCOL_REVISIONS: ReadonlyMap<string, readonly string[]> = new Ma
 ]);
 
 /** Protocols the contract names in a specification's title but no schema pins with `const` (DEC-0067). */
-export const NAMED_ONLY: readonly string[] = ["activity-unit/1", "approval/1", "fabric-actions/0.1", "fabric-connections/0.1", "fabric-dashboard/0.1", "fabric-delegation/0.1", "fabric-interop/0.1", "fabric-interop/0.2", "fabric-load/0.1", "fabric-local-channel/0.1", "fabric-ops-digest/0.1", "fabric-peer-share/1", "levels/1", "operator-source/1", "pipeline/0.1", "standing/1"];
+export const NAMED_ONLY: readonly string[] = ["activity-inventory/1", "activity-turn/1", "activity-unit/1", "approval/1", "fabric-actions/0.1", "fabric-connections/0.1", "fabric-dashboard/0.1", "fabric-delegation/0.1", "fabric-interop/0.1", "fabric-interop/0.2", "fabric-load/0.1", "fabric-local-channel/0.1", "fabric-ops-digest/0.1", "fabric-peer-share/1", "levels/1", "operator-source/1", "pipeline/0.1", "standing/1"];
 
 /** At most this many revisions of one protocol are accepted at once: N and N−1. */
 export const MAX_REVISIONS_PER_PROTOCOL = 2;

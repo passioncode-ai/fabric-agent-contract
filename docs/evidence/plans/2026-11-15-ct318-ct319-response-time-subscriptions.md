@@ -1,6 +1,6 @@
 # Design: agent response time and an organization's subscription inventory (CT-318, CT-319)
 
-**Status:** design, 2026-11-15. Not normative until its DEC lands. Rows
+**Status:** design, 2026-11-15; proposed as DEC-0171 the same day (the DEC is normative where the two differ). Rows
 [CT-318 and CT-319](../../backlog.md); the request: the first organization server's board message `356b6aae` (thread
 `1efdc2e1`), answer due 2026-11-22, its plan G1 and G2 (fabric-workspace `docs/plans/2026-11-15-work-machines/README.md`
 at `8144e7ec`).

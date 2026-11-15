@@ -379,13 +379,15 @@ function enrollment(value: JsonObject): Finding[] {
 }
 
 /**
- * FAC-SEM-045: `{binding, epochs, batch?, checkIn?}` — a receiver attributes what a device sends by its client
+ * FAC-SEM-045: `{binding, epochs, batch?, checkIn?, tenants?}` — a receiver attributes what a device sends by its client
  * certificate and by the binding recorded for each epoch. `binding` is the certificate's (`{org, device, user?}`);
  * `epochs` lists `{epoch, binding}` for every epoch issued to the device. The body's device is the certificate's
  * device. An event's user is the user bound when its epoch was issued — so events of an earlier epoch, still in the
  * buffer after the device was re-enrolled to another person, stay with the person they belong to, and events of an
  * unassigned epoch carry no user. A `grant.usage` carries its grant's own context, which is `org:` and the
- * certificate's `org.id` as written (DEC-0086): another organization's usage is refused as `attribution`.
+ * certificate's `org.id` as written (DEC-0086): another organization's usage is refused as `attribution`. An
+ * `account.inventory` names a tenant its receiver's policy lists in `accounts.tenants` (`tenants`, absent: none), so one
+ * organization never stores another's seats (DEC-0171 SI-3).
  */
 function attribution(value: JsonObject): Finding[] {
   const findings: Finding[] = [];
@@ -420,6 +422,11 @@ function attribution(value: JsonObject): Finding[] {
   }
   const batch = isObject(value.batch) ? value.batch : {};
   (Array.isArray(batch.events) ? batch.events.filter(isObject) : []).forEach((event, i) => {
+    if (event.kind === "account.inventory") {
+      const ref = isObject(event.data) ? event.data.tenantRef : undefined;
+      const tenants = Array.isArray(value.tenants) ? value.tenants : [];
+      if (typeof ref !== "string" || !tenants.includes(ref)) flag(`/batch/events/${i}/data/tenantRef`, "an account inventory names a tenant the receiver's policy lists in accounts.tenants; another tenant's is refused as attribution");
+    }
     if (event.kind === "grant.usage") {
       const context = isObject(event.data) ? event.data.context : undefined;
       // As written: never case-folded, never by prefix; a certificate without a string org.id matches no context.

@@ -122,6 +122,28 @@ export function unitSourceKey(agent: string, unit: { system: string; key: string
 }
 
 /**
+ * The `sourceKey` of a `turn` event (DEC-0171 RT-2): `sha256:` of the settings-form canonical JSON of the session's id and
+ * the turn's ordinal in it, so a collector that reads a session again, after a restart or a re-enrollment, mints the same
+ * id, and a receiver keeps it once per (`device.id`, `eventId`). Never a time.
+ */
+export function turnSourceKey(session: string, ordinal: number): string {
+  return `sha256:${createHash("sha256").update(settingsCanonicalJson({ ordinal, session }), "utf8").digest("hex")}`;
+}
+
+/** The fields one `account.inventory` event is keyed by (DEC-0171 SI-4); `plan` is `null` when the event names none. */
+export interface InventoryKey { billing: string; day: string; holder: string; plan: string | null; provider: string; tenantRef: string }
+
+/**
+ * The `sourceKey` of an `account.inventory` event (DEC-0171 SI-4): `sha256:` of the settings-form canonical JSON of its
+ * day, provider, tenant, billing, plan (`null` when absent) and holder, so a device writes at most one event per key and
+ * a second is a repeated id (`FAC-SEM-039`), whatever its stream.
+ */
+export function inventorySourceKey(key: InventoryKey): string {
+  const fields = { billing: key.billing, day: key.day, holder: key.holder, plan: key.plan, provider: key.provider, tenantRef: key.tenantRef };
+  return `sha256:${createHash("sha256").update(settingsCanonicalJson(fields), "utf8").digest("hex")}`;
+}
+
+/**
  * The `sourceKey` of a record identified by its place in a file: `hmac-sha256:` of the canonical
  * `{offset, path}` (path relative to the runtime's own directory) under the device's telemetry key —
  * 32 random bytes the collector keeps and never sends. A plain path would carry the person's home
@@ -160,17 +182,45 @@ export const MIN_POPULATION = 3;
 /**
  * The population of a set of events: distinct subjects, where an event's subject is its `user.id` when it carries one
  * and its `session.id` otherwise. A summary cell is published only when its population is at least MIN_POPULATION.
- * A `session.annotation` adds no subject (DEC-0068): it never counts, so it cannot pad a cell to the minimum.
+ * A `session.annotation` adds no subject (DEC-0068): it never counts, so it cannot pad a cell to the minimum. Nor does a
+ * `turn` (DEC-0171), which carries a `session.id` and no `user`: one person's turns are counted by person in their own cells.
  */
 export function population(list: readonly JsonObject[]): number {
   const subjects = new Set<string>();
   for (const event of list) {
-    if (event.kind === "session.annotation") continue;
+    if (event.kind === "session.annotation" || event.kind === "turn") continue;
     if (isObject(event.user) && typeof event.user.id === "string") subjects.add(`user:${event.user.id}`);
     else if (isObject(event.session) && typeof event.session.id === "string") subjects.add(`session:${event.session.id}`);
   }
   return subjects.size;
 }
+
+/**
+ * The population of a turn or inventory cell (DEC-0171 RT-4, SI-5): distinct people. Each row names the person the
+ * receiver binds to its stream's epoch (`person`, from the device's binding, FAC-SEM-045) or `null` on a device bound to
+ * no person, and `key`, what stands for the subject then: the device, for a turn and an inventory alike, so one unbound
+ * device's sessions are one subject and never pass as several. One person's sessions and machines are one subject; the
+ * `session.id` fallback of `population` is never used.
+ */
+export function boundPopulation(rows: readonly { person: string | null; key: string }[]): number {
+  return new Set(rows.map((row) => (row.person !== null ? `person:${row.person}` : `unbound:${row.key}`))).size;
+}
+
+/** The fixed buckets of a turn's duration in a summary (DEC-0171 RT-4), each an upper bound in ms, the last unbounded. */
+export const TURN_BUCKETS: readonly (readonly [string, number])[] = [["under1s", 1_000], ["under5s", 5_000], ["under15s", 15_000], ["under60s", 60_000], ["under300s", 300_000], ["from300s", Infinity]];
+
+/** The bucket a turn of `turnMs` milliseconds counts in: the first whose bound it is under; `undefined` for a value that is
+ *  not a duration (negative, not a number), which no valid turn carries. */
+export function turnBucket(turnMs: number): string | undefined {
+  if (!(turnMs >= 0)) return undefined;
+  return TURN_BUCKETS.find(([, bound]) => turnMs < bound)?.[0];
+}
+
+/** A provider's closed list of plans (DEC-0171 SI-1); a provider not named here carries no plan. */
+export const PROVIDER_PLANS: Readonly<Record<string, readonly string[]>> = Object.freeze({
+  anthropic: ["pro", "max-5x", "max-20x", "team", "team-premium", "enterprise"],
+  openai: ["plus", "pro", "business", "enterprise", "edu"]
+});
 
 /** FAC-SEM-037: no content key, no person key and no home path at any depth, extension data included. */
 function noContentOrPerson(value: JsonObject, roots: string[]): Finding[] {
@@ -327,6 +377,52 @@ function unitEvent(event: JsonObject, at: string): Finding[] {
 }
 
 /**
+ * FAC-SEM-178 (DEC-0171) on one `turn` or `account.inventory` event: it carries its UTC day and no finer time (`occurred`
+ * is that day's midnight; the schema holds it at a midnight and `monotonicNs` at 0), and its `sourceKey` is the derived
+ * one (`turnSourceKey`, `inventorySourceKey`); a turn's tool kinds name each kind once and add up to its tool calls and
+ * time; an inventory's plan is on its provider's closed list.
+ */
+function turnOrInventoryEvent(event: JsonObject, at: string): Finding[] {
+  if (event.kind !== "turn" && event.kind !== "account.inventory") return [];
+  const findings: Finding[] = [];
+  const flag = (path: string, message: string) => findings.push({ code: "FAC-SEM-178", instancePath: `${at}${path}`, message });
+  const d = data(event);
+  if (typeof d.day === "string" && typeof event.occurred === "string" && !event.occurred.startsWith(`${d.day}T`)) {
+    flag("/occurred", `a ${event.kind} carries its UTC day and no finer time: occurred is that day's midnight (DEC-0171)`);
+  }
+  let derived: string | null = null;
+  try {
+    if (event.kind === "turn") {
+      const session = isObject(event.session) ? event.session.id : undefined;
+      if (typeof session === "string" && Number.isSafeInteger(d.ordinal)) derived = turnSourceKey(session, d.ordinal as number);
+    } else if ([d.billing, d.day, d.holder, d.provider, d.tenantRef].every((x) => typeof x === "string") && (d.plan === undefined || typeof d.plan === "string")) {
+      derived = inventorySourceKey({ billing: d.billing as string, day: d.day as string, holder: d.holder as string, plan: (d.plan as string | undefined) ?? null, provider: d.provider as string, tenantRef: d.tenantRef as string });
+    }
+  } catch { flag("/sourceKey", "a field with a lone surrogate has no canonical form, so no sourceKey derives from it"); }
+  if (derived !== null && event.sourceKey !== derived) {
+    flag("/sourceKey", event.kind === "turn" ? "a turn's sourceKey derives from its session.id and ordinal (turnSourceKey)" : "an inventory's sourceKey derives from its day, provider, tenantRef, billing, plan and holder (inventorySourceKey)");
+  }
+  if (event.kind === "turn" && Array.isArray(d.toolKinds)) {
+    const kinds = new Set<unknown>();
+    let calls = 0, ms = 0;
+    d.toolKinds.forEach((entry, i) => {
+      if (!isObject(entry)) return;
+      if (kinds.has(entry.kind)) flag(`/data/toolKinds/${i}/kind`, `the tool kind ${show(entry.kind)} is named once`);
+      kinds.add(entry.kind);
+      calls += num(entry.calls);
+      ms += num(entry.ms);
+    });
+    if (calls !== num(d.toolCalls)) flag("/data/toolKinds", `the tool kinds count ${calls} calls; the turn made ${show(d.toolCalls)}`);
+    if (ms !== num(d.toolMs)) flag("/data/toolKinds", `the tool kinds spent ${ms} ms; the turn waited ${show(d.toolMs)} on tools`);
+  }
+  if (event.kind === "account.inventory" && typeof d.plan === "string" && typeof d.provider === "string") {
+    const plans = Object.hasOwn(PROVIDER_PLANS, d.provider) ? PROVIDER_PLANS[d.provider] as readonly string[] : [];
+    if (!plans.includes(d.plan)) flag("/data/plan", plans.length ? `${d.provider}'s plans are ${plans.join(", ")}` : `a ${d.provider} account names no plan: only anthropic and openai have a closed list`);
+  }
+  return findings;
+}
+
+/**
  * FAC-SEM-039 for a batch: each stream is a contiguous slice of the collector's buffer (consecutive seqs), and no event is
  * sent twice — neither under one id nor, for a grant's daily usage, one (day, grantId) of one stream twice, the grant's id
  * compared by normal form (DEC-0082, DEC-0076).
@@ -339,7 +435,7 @@ function batchIntegrity(value: JsonObject): Finding[] {
   const device = deviceId(value);
   indexed(value.events).forEach(([event, i]) => {
     const at = `/events/${i}`;
-    findings.push(...eventIntegrity(event, at), ...unitEvent(event, at));
+    findings.push(...eventIntegrity(event, at), ...unitEvent(event, at), ...turnOrInventoryEvent(event, at));
     const id = show(event.eventId ?? "");
     if (ids.has(id)) findings.push({ code: "FAC-SEM-039", instancePath: `${at}/eventId`, message: `${id} appears twice in one batch` });
     ids.add(id);
@@ -474,6 +570,32 @@ function summaryShape(value: JsonObject): Finding[] {
     const day = show(cell.day ?? "");
     if (day < from || day > to) findings.push({ code: "FAC-SEM-040", instancePath: `/cells/${i}/day`, message: `${day} is outside ${from}…${to}` });
   });
+  // DEC-0171 RT-4 and SI-5 (`activity-summary/2`): a turn or inventory cell is published at the same minimum, its
+  // population counted in people, never more than its turns or machines; a turn cell's buckets add up to its turns, and an
+  // inventory cell holds no more machines than accounts; one cell per tuple and at most one other cell per day of each kind.
+  const kinds = [
+    { member: "turnCells", tuple: (c: JsonObject) => [c.agent, c.skill ?? null, c.project, c.day], names: "agent, skill, project and day", bound: "turns" },
+    { member: "inventoryCells", tuple: (c: JsonObject) => [c.provider, c.plan ?? null, c.billing, c.day], names: "provider, plan, billing and day", bound: "machines" }
+  ] as const;
+  for (const { member, tuple, names, bound } of kinds) {
+    const seen = new Set<string>();
+    indexed(value[member]).forEach(([cell, i]) => {
+      const at = `/${member}/${i}`;
+      const flag = (path: string, message: string) => findings.push({ code: "FAC-SEM-040", instancePath: `${at}${path}`, message });
+      if (num(cell.population) < k) flag("/population", `a cell covering ${num(cell.population)} people is below the minimum of ${k}: fold it into the day's other cell or suppress it`);
+      if (num(cell.population) > num(cell[bound])) flag("/population", `a cell covers no more people than ${bound}`);
+      if (member === "turnCells") {
+        const buckets = isObject(cell.turnBuckets) ? cell.turnBuckets : {};
+        const sum = TURN_BUCKETS.reduce((n, [name]) => n + num(buckets[name]), 0);
+        if (sum !== num(cell.turns)) flag("/turnBuckets", `the buckets count ${sum} turns; the cell has ${num(cell.turns)}`);
+      } else if (num(cell.machines) > num(cell.accounts)) flag("/machines", "a machine in a cell holds at least one account: no more machines than accounts");
+      const key = cell.other === true ? JSON.stringify(["other", cell.day]) : JSON.stringify(tuple(cell));
+      if (seen.has(key)) flag("", cell.other === true ? "a day has one other cell of each kind" : `two cells share ${names}`);
+      seen.add(key);
+      const day = show(cell.day ?? "");
+      if (day < from || day > to) flag("/day", `${day} is outside ${from}…${to}`);
+    });
+  }
   return findings;
 }
 
@@ -558,10 +680,10 @@ function accessLogDisclosure(value: JsonObject): Finding[] {
 
 export function activityRules(kind: string, value: unknown): Finding[] | undefined {
   if (!isObject(value)) return undefined;
-  if (kind === "telemetry-event") return [...noContentOrPerson(value, [""]), ...eventCost(value, ""), ...eventIntegrity(value, ""), ...unitEvent(value, "")];
+  if (kind === "telemetry-event") return [...noContentOrPerson(value, [""]), ...eventCost(value, ""), ...eventIntegrity(value, ""), ...unitEvent(value, ""), ...turnOrInventoryEvent(value, "")];
   if (kind === "activity-batch") return [...noContentOrPerson(value, indexed(value.events).map(([, i]) => `/events/${i}`)), ...batchCost(value), ...batchIntegrity(value)];
   if (kind === "activity-ack") return ackIntegrity(value);
-  if (kind === "activity-summary") return [...summaryCost(value), ...summaryShape(value)];
+  if (kind === "activity-summary" || kind === "activity-summary-2") return [...summaryCost(value), ...summaryShape(value)];
   if (kind === "access-log-disclosure") return accessLogDisclosure(value);
   return undefined;
 }

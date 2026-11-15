@@ -1,0 +1,66 @@
+{
+  "format": "activity-summary/2",
+  "generatedAt": "2026-11-15T03:00:00Z",
+  "from": "2026-11-14",
+  "to": "2026-11-14",
+  "producer": {
+    "id": "org-receiver-1"
+  },
+  "idleThresholdSeconds": 300,
+  "minPopulation": 5,
+  "cells": [],
+  "turnCells": [
+    {
+      "agent": "claude_code",
+      "skill": "task-pipeline",
+      "project": "example-project",
+      "day": "2026-11-14",
+      "population": 5,
+      "turns": 40,
+      "turnBuckets": {
+        "under1s": 0,
+        "under5s": 6,
+        "under15s": 14,
+        "under60s": 15,
+        "under300s": 4,
+        "from300s": 1
+      },
+      "modelMs": 900000,
+      "toolMs": 310000
+    },
+    {
+      "other": true,
+      "day": "2026-11-14",
+      "population": 6,
+      "turns": 12,
+      "turnBuckets": {
+        "under1s": 1,
+        "under5s": 3,
+        "under15s": 4,
+        "under60s": 3,
+        "under300s": 1,
+        "from300s": 0
+      },
+      "modelMs": 150000,
+      "toolMs": 20000
+    }
+  ],
+  "inventoryCells": [
+    {
+      "provider": "anthropic",
+      "plan": "max-5x",
+      "billing": "subscription",
+      "day": "2026-11-14",
+      "population": 5,
+      "machines": 6,
+      "accounts": 9
+    },
+    {
+      "other": true,
+      "day": "2026-11-14",
+      "population": 5,
+      "machines": 5,
+      "accounts": 5
+    }
+  ]
+}
