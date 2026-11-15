@@ -813,7 +813,7 @@ DEC-0031). Needs to know what the device reports, who read it, and which setting
   - Given a cell whose population is below the summary's `minPopulation`, when the receiver publishes the day, then it folds the rest into one other cell of its kind or suppresses it and counts it in `suppressedCells`, so one person working alone on a project is not shown (RT-4, `FAC-SEM-040`).
   - Given machines holding the organization's provider accounts, when I open the inventory for a day, then I see `inventoryCells` per provider, plan, billing and day with machines and accounts, and nothing from a personal or unknown account (DEC-0171 SI-2, SI-5).
   - Given a partner organization (DEC-0090), when it asks for these cells, then it is not served them (RT-4, SI-5).
-  - Given a receiver that does not read turns or inventories, when I open the summary, then the lists are empty and the page says this receiver does not collect them.
+  - Given a summary whose turn and inventory lists are empty, or a `/1` summary, when I open it, then the page says no turn or inventory cells are published for the range, without claiming why.
 - **Priority:** should
 - **Status:** draft
 - **Product:** unobserved

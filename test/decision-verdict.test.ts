@@ -62,6 +62,8 @@ describe("decision verdicts (DEC-0172)", () => {
     expect(routesOf(null)).toEqual([]);
     expect(routesOf({ by: "operator", via: "a-route-no-reference-writes" })).toEqual([]);
     expect(routesOf({ by: "level", via: "mandate" })).toEqual(["level"]);
+    expect(routesOf({ by: "operator", via: "mandate", source: { thread: "t-1" } })).toEqual(["mandate"]);
+    expect(routesOf({ by: "operator", via: "relayed-instruction", source: { thread: "t-1" } })).toEqual(["forwarded"]);
   });
   it("answers no kind it does not own", () => expect(decisionVerdictRules("result", {})).toBeUndefined());
   it("flags an allow whose reference throws instead of answering, and never throws itself", () => {
