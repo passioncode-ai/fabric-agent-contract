@@ -9,7 +9,7 @@ import { isObject } from "./findings.js";
  * `grant.usage` and a share registration carry their grant's own `org:<orgId>`, which the receiver checks against the
  * certificate (DEC-0086). Instead a collector routes:
  * `routeTarget` answers where an event of a session in a given context may be sent, `routeGrantUsage` where a
- * `grant.usage` goes, and the shared vectors
+ * `grant.usage` goes, `routeInventory` where an `account.inventory` goes (DEC-0171), and the shared vectors
  * `fixtures/vectors/context-route.json` are what a port runs.
  */
 
@@ -52,11 +52,12 @@ export interface Enrollment { org: string }
  *   server. `not-a-context`: the session's context is not one (the collector fails closed and sends nothing).
  *   `not-enrolled`: the device holds no enrollment in that organization. `ambiguous`: it holds two, which a device never
  *   should (a re-enrollment replaces the earlier one), so it sends to neither. `no-context`: a `grant.usage` event of a
- *   grant that states no context (`routeGrantUsage`).
+ *   grant that states no context (`routeGrantUsage`). `unlisted`: an `account.inventory` whose tenant no enrollment's
+ *   policy lists (`routeInventory`).
  */
 export type RouteAnswer =
   | { route: "enrollment"; org: string; index: number }
-  | { route: "none"; reason: "personal" | "not-a-context" | "not-enrolled" | "ambiguous" | "no-context" };
+  | { route: "none"; reason: "personal" | "not-a-context" | "not-enrolled" | "ambiguous" | "no-context" | "unlisted" };
 
 /** An object's own member, or `undefined`: an inherited one (`constructor`, a `__proto__` chain) is never read. */
 const own = (value: unknown, key: string): unknown => (isObject(value) && Object.hasOwn(value, key) ? value[key] : undefined);
@@ -85,5 +86,26 @@ export function routeTarget(sessionContext: unknown, enrollments: unknown): Rout
 export function routeGrantUsage(grantContext: unknown, enrollments: unknown): RouteAnswer {
   if (grantContext === undefined) return { route: "none", reason: "no-context" };
   return routeTarget(grantContext, enrollments);
+}
+
+/**
+ * Where a collector may send an `account.inventory` event (DEC-0171 SI-3): only to the one enrollment whose policy's
+ * `accounts.tenants` lists its `tenantRef`, compared as written. An enrollment is `{org, tenants}`, `tenants` the
+ * policy's list (an enrollment without a list of strings lists nothing). No enrollment lists it: `unlisted`, and the
+ * event is not sent (an inventory names only an organization's tenant, SI-2); two list it, even of one organization:
+ * `ambiguous`, sent to neither, so one organization never learns another's seats. Total: malformed input answers `none`.
+ */
+export function routeInventory(tenantRef: unknown, enrollments: unknown): RouteAnswer {
+  if (typeof tenantRef !== "string") return { route: "none", reason: "unlisted" };
+  const list: unknown[] = Array.isArray(enrollments) ? enrollments : [];
+  const matches = list.flatMap((entry, index) => {
+    const org = own(entry, "org");
+    const tenants = own(entry, "tenants");
+    return typeof org === "string" && Array.isArray(tenants) && tenants.includes(tenantRef) ? [index] : [];
+  });
+  if (matches.length === 0) return { route: "none", reason: "unlisted" };
+  if (matches.length > 1) return { route: "none", reason: "ambiguous" };
+  const index = matches[0] as number;
+  return { route: "enrollment", org: own(list[index], "org") as string, index };
 }
 // #endregion context-route

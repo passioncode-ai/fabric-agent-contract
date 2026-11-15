@@ -25,7 +25,7 @@
       "$comment": "The lookahead repeats HOME_PATH's dash clause (src/activity-rules.ts) over this key's alphabet; test/activity-rules.test.ts pins that the two refuse the same keys (CT-109).",
       "type": "string",
       "pattern": "^(hmac-sha256:[a-f0-9]{64}|(?![\\s\\S]*[._:~#-]-(?:[Uu]sers|home)-[A-Za-z0-9])[A-Za-z0-9][A-Za-z0-9._:~#-]{0,255})$",
-      "description": "The source's own id of a record (a request id, a line uuid), hmac-sha256: of a path-derived key under the device's telemetry key, or, for a unit (DEC-0164 AE-2), sha256: of the canonical {agent, key, run, system, transition}. Never a path: no slash, no percent-encoding, and no dash-encoded home directory such as -Users-<name> (FAC-SEM-037)."
+      "description": "The source's own id of a record (a request id, a line uuid), hmac-sha256: of a path-derived key under the device's telemetry key, or sha256: of the canonical JSON of a derived key: for a unit (DEC-0164 AE-2) {agent, key, run, system, transition}, for a turn (DEC-0171 RT-2) {ordinal, session}, for an account inventory (DEC-0171 SI-4) {billing, day, holder, plan, provider, tenantRef}. Never a path: no slash, no percent-encoding, and no dash-encoded home directory such as -Users-<name> (FAC-SEM-037)."
     },
     "seq": {
       "type": "integer",
@@ -403,6 +403,20 @@
       "type": "string",
       "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$",
       "description": "The version of the organization's notice to the people concerned (DEC-0052)."
+    },
+    "plan": {
+      "enum": [
+        "pro",
+        "max-5x",
+        "max-20x",
+        "team",
+        "team-premium",
+        "enterprise",
+        "plus",
+        "business",
+        "edu"
+      ],
+      "description": "A provider's product tier (DEC-0171 SI-1), from the provider's closed list: anthropic pro, max-5x, max-20x, team, team-premium, enterprise; openai plus, pro, business, enterprise, edu; another provider none (FAC-SEM-178). Never a workspace, seat or account name."
     }
   }
 }

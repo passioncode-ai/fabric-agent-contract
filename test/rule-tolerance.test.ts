@@ -8,7 +8,7 @@ import { evaluateSemanticRules } from "../src/semantic-rules.js";
 // answers with findings or none, never by throwing (CT-25's tolerance, DEC-0052, applied to every input shape).
 const KINDS = [
   "credential-request", "credential-request-document", "credential-decision", "credential-envelope-check", "credential-exchange", "call-record",
-  "telemetry-event", "activity-batch", "activity-ack", "activity-summary", "access-log-disclosure",
+  "telemetry-event", "activity-batch", "activity-ack", "activity-summary", "activity-summary-2", "access-log-disclosure",
   "device-policy-update", "device-policy-resolution", "device-health-observation", "device-enrollment", "device-attribution",
   "device-key-set", "device-action", "device-root-certification", "device-request-signature",
   "estate-record", "estate-record-revision", "estate-placement", "secret-envelope", "relay-frame",
@@ -226,7 +226,7 @@ describe("every rule kind tolerates {toString: 1} members (DEC-0082)", () => {
     "window-lease.schema.json": "window-lease", "entitlement.schema.json": "entitlement", "entitlement-2.schema.json": "entitlement-2", "entitlement-key-set.schema.json": "entitlement-key-set", "share-registration.schema.json": "share-registration", "revocation-delta.schema.json": "revocation-delta", "heartbeat.schema.json": "heartbeat",
     "relay-frame.schema.json": "relay-frame", "secret-envelope.schema.json": "secret-envelope", "spend-policy.schema.json": "spend-policy",
     "model-profile.schema.json": "model-profiles", "registry-models.schema.json": "model-catalogue", "runner-profile.schema.json": "runner-profile",
-    "activity-summary.schema.json": "activity-summary"
+    "activity-summary.schema.json": "activity-summary", "activity-summary-2.schema.json": "activity-summary-2"
   };
   const catalogue = JSON.parse(readFileSync(path.join(root, "fixtures/catalogue.json"), "utf8")) as Array<{ schema: string; path: string; valid: boolean }>;
   const positive = catalogue.filter((entry) => entry.valid && SCHEMA_KIND[entry.schema]).map((entry) => [entry.path, SCHEMA_KIND[entry.schema] as string] as const);

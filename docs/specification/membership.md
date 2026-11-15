@@ -237,9 +237,10 @@ list come from them (DEC-0129):
 |---|---|---|
 | the enrollment's own requests | enrollment (its `org.id`, `device.id`, platform, key description, CSR, an optional platform attestation and its proof), certificate rotation, renewal | [devices](devices.md), DEC-0031, DEC-0094, DEC-0100 |
 | check-ins | the enrollment of that organization, its streams only | [devices](devices.md#check-in), DEC-0031 |
-| a session's events | sessions whose context is that `org:<orgId>`, as `routeTarget` answers | DEC-0082 |
-| the enrollment's own activity events | events that carry no session and have no route of their own below or in [activity](activity.md), such as `policy.violation` (not `grant.usage`, routed by its `data.context`, nor `unit`, routed by its project) | [activity](activity.md), DEC-0052 |
+| a session's events | sessions whose context is that `org:<orgId>`, as `routeTarget` answers; a `turn` never of a session on a `personal` account or of a personal or unattributed project (DEC-0171 RT-6) | DEC-0082, DEC-0171 |
+| the enrollment's own activity events | events that carry no session and have no route of their own below or in [activity](activity.md), such as `policy.violation` (not `grant.usage`, routed by its `data.context`, nor `unit`, routed by its project, nor `account.inventory`, routed by its tenant) | [activity](activity.md), DEC-0052 |
 | units of work | `unit` events whose `project.id` that organization owns by the device's attribution, never a personal or unattributed project; an `acceptedBy` person subject the organization issued that person (OM-1; the audience is OQ-0017's) | [activity](activity.md#kinds), DEC-0164 AE-3, AE-4 |
+| account inventories | `account.inventory` events whose `tenantRef` that enrollment's policy lists in `accounts.tenants`, as `routeInventory` answers, never for a personal or unknown account | [activity](activity.md#kinds), DEC-0171 SI-0 to SI-3 |
 | proposals | proposals submitted to that organization's server | [proposals](proposals.md), DEC-0072 |
 | `grant.usage` and share registrations | grants whose context is that `org:<orgId>` | DEC-0086 |
 | `node-summary/1` | the enrollment's own record: what DEC-0118 lists for the machine's mode (under `C` this context only, under `A` the whole harness) | DEC-0102, DEC-0118 |

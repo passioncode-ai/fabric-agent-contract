@@ -115,7 +115,7 @@ receiver nothing it does not know ([share registration](share-registration.md#th
 `node-summary/1` record carries its enrollment's own `org:<org.id>` the same way: the receiver compares it with the
 certificate's `org.id` as written and refuses it when they differ (DEC-0102, [node summary](node-summary.md)), and so
 do its `credentialRequests` and `callRecords` (DEC-0111, compared as attribution by `FAC-SEM-045`, DEC-0114). What a device
-sends, and to which organization server, is decided four ways:
+sends, and to which organization server, is decided six ways:
 
 - **Check-ins** are the device's, not a session's. A device enrolled in several organizations holds one enrollment per
   organization and sends each enrollment's check-ins to that enrollment's own server, on that enrollment's interval,
@@ -128,6 +128,16 @@ sends, and to which organization server, is decided four ways:
 - **A unit of work** (`unit`, DEC-0164, [activity](activity.md#kinds)) carries no session: it goes to the enrollment of
   the organization that owns its `project.id` as the device's folder attribution names it, never for a personal or
   unattributed project, and a device that cannot tell sends none. The route function and its vectors are CT-297.
+- **An agent turn** (`turn`, DEC-0171 RT-6) goes as its session's events do, by `routeTarget`, and never for a session on
+  a `personal` account or of a personal or unattributed project, even inside an organization's folder where that
+  session's usage lines are sent and the day's `policy.violation` reports it: a person's own pace never reaches an
+  organization.
+- **An account inventory** (`account.inventory`, DEC-0171 SI-3) carries no session or project: it goes where
+  `routeInventory(tenantRef, enrollments)` answers, `enrollments` listing each enrollment's `org` and, as `tenants`, the
+  `tenantRef` values of its policy's `accounts.tenants` (the policy lists objects; the collector passes their
+  `tenantRef` strings). One enrollment lists the tenant: that one; none: `{route: "none", reason:
+  "unlisted"}`, not sent; two, even of one organization: `ambiguous`, sent to neither, so one organization never learns
+  another's seats ([`activity-turn.json`](../../fixtures/vectors/activity-turn.json), `routes`).
 
 `routeTarget` answers:
 
@@ -140,10 +150,10 @@ sends, and to which organization server, is decided four ways:
 | anything that is not a context id (`Personal`, `org:`, a non-string) | `{route: "none", reason: "not-a-context"}`: the collector sends nothing |
 
 `routeGrantUsage` answers as `routeTarget` with the grant's context, and `{route: "none", reason: "no-context"}` for a
-grant that states none. The reasons are `personal`, `not-a-context`, `not-enrolled`, `ambiguous` and `no-context`. Both
+grant that states none. The reasons are `personal`, `not-a-context`, `not-enrolled`, `ambiguous` and `no-context`, and `routeInventory`'s `unlisted` (DEC-0171). The
 functions are total: malformed input answers `none` and never throws, an enrollment that is not an object with an own
 string `org` is skipped, and nothing is read from an object's prototype. The shared vectors
-`fixtures/vectors/context-route.json` hold every answer and the cases a lax port gets wrong: a case-folded id, a prefix
+`fixtures/vectors/context-route.json` (and, for `routeInventory`, `activity-turn.json`'s `routes`) hold every answer and the cases a lax port gets wrong: a case-folded id, a prefix
 of an enrolled id, an enrolled id that is a prefix, `org:` with an empty or a 129-character id, `Personal`, a trailing
 newline, a bare organization id, an enrolled `org.example` no context names, non-string input, and an `org` only
 inherited through `__proto__`. The conformance row is

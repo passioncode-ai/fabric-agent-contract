@@ -743,12 +743,13 @@ login, only in its vendor's runner and unmetered; `key` is an issued key whose m
 **Activity telemetry**: The `fabric-activity/0.1` protocol (DEC-0030): records of when an
 agent session worked, waited or idled and what each model call used, sent by a collector on a
 device in batches, and the units of work an agent did (`unit`, DEC-0164), sent by a device's collector or recorded by
-a kit through Project Observatory's capability. It carries no content and no person attribute; a person appears only
+a kit through Project Observatory's capability, and since DEC-0171 an agent turn's duration (`turn`) and the organization
+accounts a machine holds (`account.inventory`), each by day, read by another person only as summary cells. It carries no content and no person attribute; a person appears only
 as an opaque `user.id`, or as a unit acceptance's pairwise subject; a unit's tracker key, or an evidence link in its raw event, may also name a tracker account (a GitHub owner that is a user), which the contract does not resolve to a member (DEC-0164).
 
 **Telemetry event**: One record of activity telemetry (`telemetry-event.schema.json`): a
 `session.interval`, a `usage.line`, a `buffer.overflow`, a `policy.violation` (by UTC day), a `result`, a `unit`
-(DEC-0164), or a kind the reader does not know, positioned in a stream by `(device.id, collector.id, collector.epoch, seq)`. It
+(DEC-0164), a `turn` or an `account.inventory` (by UTC day, DEC-0171), or a kind the reader does not know, positioned in a stream by `(device.id, collector.id, collector.epoch, seq)`. It
 may name its `account.class` and its root `run` (DEC-0052).
 
 **Account class**: The class of the account a session ran on — `organization` (one of the policy's tenants),
@@ -762,7 +763,9 @@ stream; its epoch is issued by the organization server at enrollment, so a reins
 stream rather than rewinding the old one.
 
 **Activity summary**: An `activity-summary/1` document a receiver builds from many devices' events:
-cells of agent × skill × project × UTC day × outcome, with no person dimension.
+cells of agent × skill × project × UTC day × outcome, with no person dimension; `activity-summary/2` (DEC-0171) adds turn
+cells (agent × skill × project × day, the turns per duration bucket) and inventory cells (provider × plan × billing ×
+day), each published only at the minimum population counted in people.
 
 **Access log**: An `access-log/1` document: who read which scope of one subject's data (keyed by
 their user id or by a device bound to them, and a unit of work they accepted, by the pairwise subject resolved to

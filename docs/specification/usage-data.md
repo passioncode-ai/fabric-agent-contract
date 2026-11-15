@@ -202,7 +202,8 @@ The key words MUST, MUST NOT, SHOULD and MAY are used as in RFC 2119.
   adds it.
 - **UD-6, not activity telemetry, not operations digests.** [Activity telemetry](activity.md) (`fabric-activity/0.1`,
   DEC-0030) is an organization's record of its people's agent sessions and, since DEC-0164, of the units of work an
-  agent did (`unit`), sent by an enrolled device's collector ([devices](devices.md), DEC-0031) to that organization's
+  agent did (`unit`), and since DEC-0171 of agent turns' durations (`turn`) and a machine's organization accounts
+  (`account.inventory`, whose `switchboard` holder Switchboard's own usage-data switch does not govern), sent by an enrolled device's collector ([devices](devices.md), DEC-0031) to that organization's
   receiver or recorded by a kit through Project Observatory's capability (DEC-0164 AE-4) under its own notice and consent (DEC-0030,
   DEC-0052). UD-1 to UD-5 do not govern it, and data of one kind MUST NOT travel in the other's channel. A product's
   [operations digest](ops-digest.md) (DEC-0153) is its own record of counts on the machine where it runs, read by a
