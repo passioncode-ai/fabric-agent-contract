@@ -317,16 +317,16 @@ independent agent author and P-02 project operator.
 - **Feature:** telemetry
 - **Traces:** ST-044, FLW-35 (JTBD-11, JRN-10/#1)
 - **Entry point:** the organization receiver's summary page
-- **Preconditions:** the organization's notice lists `turn` under `activity-logs` and `account.inventory` under `usage-and-cost` (DEC-0171); seven members' collectors sent turns this week; one member works alone on a project; the machines hold two provider plans of the organization; the receiver's `minPopulation` is 5
+- **Preconditions:** the organization's notice covers `turn` and `account.inventory` under its purposes (the first organization server chose `activity-logs` and `usage-and-cost`, DEC-0171's Status; the contract names no purpose for them); seven members' collectors sent turns this week; one member works alone on a project; the machines hold two provider plans of the organization; the receiver's `minPopulation` is 5
 - **Steps:**
   1. Administrator opens the summary for the week -> the receiver serves `activity-summary/2` for each day.
   2. The turn cells list each agent, workflow and project with its turns, buckets and model and tool time -> the administrator sees which agent and workflow waits longest, by bucket.
   3. The lone member's project has a population of 1 -> its turns are folded into the day's other cell or suppressed and counted in `suppressedCells`; no cell names the project with that member's turns alone.
   4. The inventory cells list each provider, plan and billing with machines and accounts -> the administrator sees what the organization pays for; no personal or unknown account appears (SI-2).
 - **Expected result:** turn time and accounts are read only as cells at or above `minPopulation`, never per person, machine or session; a partner organization is never served them (DEC-0171 RT-4, SI-5); a member's access log lists none of these reads, because a cell carries no person (SCN-010).
-- **Alt paths:** the receiver reads neither kind -> the lists are empty and the page says this receiver does not collect them; no cell reaches the floor on a day -> the empty state says so and shows `suppressedCells`.
+- **Alt paths:** the summary's lists are empty, or it is `/1` -> the page says no turn or inventory cells are published for the range; no cell reaches the floor on a day -> the empty state says so and shows `suppressedCells`.
 - **UI elements:** day or range, turn cells, inventory cells, other cell, suppressed count.
-- **States covered:** not collected, empty, success
+- **States covered:** none published, empty, success
 - **Errors & recovery:** a cell below the floor, buckets that do not add up to the turns or a population above the turns are refused by `FAC-SEM-040`; the receiver republishes the day.
 - **Status:** draft
 - **Coverage:** `activity-summary-2.schema.json`, fixture `positive/activity-summary-2.json`, vectors `activity-turn.json`
@@ -1255,9 +1255,9 @@ independent agent author and P-02 project operator.
 - **Steps:**
   1. The administrator records an instance (`org.instance_added`: its id, product, `https://` origin and placement) -> the server signs `org-instance/1` at the next revision with `status: active`, a life of at most 7 days (IS-1, IS-4).
   2. The platform's `instance_put` for `org:<orgId>` verifies the statement offline (`verifyOrgInstance`: the organization's key, the path's instance, the window, a revision not below the one held) -> it stores the verdict's `digest` and `revision` (IS-3).
-  3. A day before `expiresAt` the server re-issues the statement (`refreshDue`) -> readers fetch it and keep serving the instance (IS-4).
+  3. At least a day before `expiresAt` the server re-issues the statement (IS-4) -> a reader whose held statement reads `refreshDue` fetches it and keeps serving the instance (IS-2).
   4. The administrator retires the instance (`org.instance_retired`) -> the server issues `status: retired` at a higher revision and nothing after it; a reader that fetches it stops serving the instance, and the earlier `active` statement is then `stale-revision` (IS-2, IS-4).
-- **Expected result:** a reader serves an instance for the organization only on a statement the organization's key signed for that instance; a retirement is stated, never left to silence, and reaches a reader at its next fetch, at most 7 days later.
+- **Expected result:** a reader accepts a stated instance for the organization only on a statement the organization's key signed for that instance (what a reader does with an instance that has no statement is still open, CT-317 (3)); a retirement is stated, never left to silence, and reaches a reader at its next fetch, at most 7 days later.
 - **Alt paths:** the statement is past `expiresAt` -> refused `expired`, no grace; signed by a revoked or unlisted key -> `key-revoked` or `unknown-key`; another organization's or another instance's statement -> `wrong-org` or `wrong-instance`; the same revision with other bytes -> `revision-conflict`; an instance reachable only at a port or at `http://127.0.0.1` on a member's machine -> not stated (DEC-0170, not decided there).
 - **UI elements:** SCR-31: per instance its product, origin, placement, status, revision and `expiresAt`.
 - **States covered:** success, error

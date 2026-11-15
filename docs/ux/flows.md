@@ -1006,18 +1006,18 @@ flowchart TD
 - **Traces:** ST-044 (JTBD-11, JRN-10/#1)
 - **Goal:** the administrator sees where agents wait and which plans the organization pays for, with no person in sight
 - **Entry points:** the organization receiver's summary page
-- **Success exit:** the day's turn cells and inventory cells are shown, each above the summary's `minPopulation`, with the folded or suppressed remainder counted
+- **Success exit:** the day's turn cells and inventory cells are shown, each at or above the summary's `minPopulation`; the rest of a day folded into one other cell of its kind, or suppressed and counted in `suppressedCells`
 - **Task analysis:** sign in as an administrator → choose a day or a range → the receiver serves `activity-summary/2` for it → the page shows turn cells (agent, workflow, project, turns, buckets, model and tool time) and inventory cells (provider, plan, billing, machines, accounts) → merging buckets across days shows the bucket a median or a 95th percentile falls in, never an exact value.
 - **Rejected shape:** a per-person or per-machine table of turn times or accounts, rejected because a turn's subject is a person and another person reads turns and inventories only as cells (DEC-0171 RT-3, RT-4, SI-5).
 - **Flow:**
 
 ```mermaid
 flowchart TD
-  A[Screen: Turn and account cells] --> R{Receiver reads turns and inventories?}
-  R -->|no| N[Empty lists: this receiver does not collect them]
+  A[Screen: Turn and account cells] --> R{The summary carries turn or inventory lists with cells?}
+  R -->|no| N[None published: empty lists, or a /1 summary]
   R -->|yes| D{Cells at or above minPopulation?}
   D -->|none| E[Empty: too few people this day; suppressed cells counted]
-  D -->|some| S[Turn cells and inventory cells, the remainder folded into one other cell]
+  D -->|some| S[Turn cells and inventory cells, the rest folded into one other cell or suppressed]
 ```
 
 - **Screens traversed:** SCR-35 empty; SCR-35 success.
