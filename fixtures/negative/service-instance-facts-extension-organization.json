@@ -1,0 +1,6 @@
+{
+  "tenancy": {
+    "mode": "single",
+    "organization": "org:acme"
+  }
+}

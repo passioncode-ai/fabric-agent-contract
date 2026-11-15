@@ -1,0 +1,13 @@
+{
+  "access": {
+    "audience": "public",
+    "entry": "own-signin"
+  },
+  "tenancy": {
+    "mode": "shared"
+  },
+  "space": {
+    "kind": "system",
+    "account": "eu-pool-3"
+  }
+}

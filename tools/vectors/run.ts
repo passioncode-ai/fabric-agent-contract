@@ -20,6 +20,7 @@ import * as agentNetwork from "./agent-network.js";
 import * as channelAgent from "./channel-agent.js";
 import * as commsHold from "./comms-hold.js";
 import * as connections from "./connections.js";
+import * as instanceFacts from "./instance-facts.js";
 import * as contextRoute from "./context-route.js";
 import * as credentialEnvelope from "./credential-envelope.js";
 import * as decisionVerdict from "./decision-verdict.js";
@@ -62,6 +63,7 @@ export const GENERATORS: readonly Generator[] = [
   { source: "channel-agent.ts", build: one(channelAgent.VECTOR_FILE, channelAgent.buildChannelAgentVectors) },
   { source: "comms-hold.ts", build: one(commsHold.VECTOR_FILE, commsHold.buildCommsHoldVectors) },
   { source: "connections.ts", build: one(connections.VECTOR_FILE, connections.buildConnectionsVectors) },
+  { source: "instance-facts.ts", build: one(instanceFacts.VECTOR_FILE, instanceFacts.buildInstanceFactsVectors) },
   { source: "context-route.ts", build: one(contextRoute.VECTOR_FILE, contextRoute.buildContextRouteVectors) },
   { source: "credential-envelope.ts", build: one(credentialEnvelope.VECTOR_FILE, credentialEnvelope.buildCredentialVectors) },
   { source: "decision-verdict.ts", build: one(decisionVerdict.VECTOR_FILE, decisionVerdict.buildDecisionVerdictVectors) },
