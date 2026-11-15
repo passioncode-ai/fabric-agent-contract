@@ -19,19 +19,24 @@ declared":
 
 Where: the descriptor (install-time facts), or the well-known document when the running instance knows better; a host
 prefers well-known. Prowl Agent declares first. Of the request's facts, whose instance it is already has a field, the placement's `context` (below),
-so this design keeps `tenancy` to how data is kept apart.
+so this design keeps `tenancy` to how data is kept apart. A remote instance has no estate-record placement (placements
+live under a machine's packages), so its organization comes from `org-instance/1` where a host holds one, else from
+Observatory's map; that stays so until such an instance is stated. "Placement" below is the estate record's placement
+or the descriptor's `local` or `remote`, never `org-instance/1`'s own `placement` member.
 
 ## What the contract says today
 
 - The descriptor ([service](../../specification/service.md#descriptor), `schemas/service-descriptor.schema.json`) and
   the well-known document (`schemas/service-well-known.schema.json`) are **closed** (`additionalProperties: false`). A
-  new top-level member is refused by every host pinned before it, as `protocols` was ([versioning](../../specification/versioning.md#protocol-revisions):
-  "the four carrying objects are closed, so an older pinned copy refuses the new member").
+  new top-level member is refused by every host pinned before it, by the schema's own closedness (the same reason
+  [versioning](../../specification/versioning.md#protocol-revisions) gives for `protocols` on the four objects that
+  carry it, the well-known document among them).
 - Both carry `extensions`, keyed by URI; a host preserves and ignores an extension it does not know
   ([service](../../specification/service.md#descriptor)). The dashboard, connections, actions, authority, load,
   ops-digest and channel-agent declarations ride there or in the manifest's `provider.extensions`, each with its own
-  schema (`schemas/service-*-extension.schema.json`); the known keys are `EXTENSION_KEYS` (`src/extensions.ts`), and an
-  author's unknown key is a `hint/extension-key` of `pnpm validate`, not a refusal.
+  schema (`schemas/service-*-extension.schema.json`); the known keys are `EXTENSION_KEYS` (`src/extensions.ts`), and a
+  near miss of a contract key, or an unknown key under the contract's own extension path, is a `hint/extension-key` of
+  `pnpm validate`, and no unknown key is refused.
 - The dashboard's entry is already half declared: `surfaces.dashboard.login` is `true` when the dashboard requires an
   operator session begun with a host's login code ([operator login](../../specification/service.md#operator-login)).
   It says nothing of a dashboard with a sign-in of its own, nor of one with none.
@@ -71,13 +76,15 @@ mean "not declared", never a default.
 
 | Member | Values | Meaning |
 |---|---|---|
-| `audience` | `operator`, `organization`, `public` | who the instance serves: its operator alone, the members of the organization `tenancy` names (or of each organization a `shared` instance serves), or anyone who reaches its origin |
+| `audience` | `operator`, `organization`, `public` | who the instance serves: its operator alone; others it is offered to, the members of the organization its placement's `context` names and anyone a share grant or an organization's listing offers it to (an organization, a colleague, a guest; DEC-0082 item 4, DEC-0086); or, on a remote placement, anyone who reaches its origin's own surface |
 | `entry` | `host-signin`, `own-signin`, `none` | how its dashboard is entered: through a host's login code ([operator login](../../specification/service.md#operator-login)), through a sign-in of its own, or with none |
 
 `audience` never widens what `peer` allows: a service with no `peer` serves its operator alone, so `organization` and
 `public` need `peer` (IF-6), and `operator` beside `peer` is a contradiction the rule refuses. `public` is a remote
 placement's (an `https` origin anyone reaches); a local placement is never `public`. `audience` describes; access still
-comes only from a share grant or an organization's listing.
+comes only from a share grant or an organization's listing, and `public` grants nothing through a hub. An empty
+`access` object, like an absent one, declares nothing. The word is the instance's own: it is not the authority
+extension's `levels[].audience` (a membership reader id) nor a grant's audience.
 
 `entry` restates nothing a host can read elsewhere except one case: where the well-known document declares
 `surfaces.dashboard`, its `login` decides `host-signin` (true) against the other two (false), whichever document's
@@ -119,11 +126,13 @@ document as a pair (as `FAC-SEM-009` reads them): `audience` `organization` or `
 never beside it, `public` never on a local placement; where the well-known document declares `surfaces.dashboard`, an
 `entry` in either document is `host-signin` exactly when `login` is `true`; `space.kind` `system` never on a local
 placement; a local service's well-known document carries no `space.account`. A well-known document read alone is
-checked for what it carries.
+checked for what it carries. A refusal under this rule declares the facts not declared and never changes the service's
+state, unlike `FAC-SEM-009`'s `foreign`.
 
 **IF-7, vectors.** A descriptor and a well-known document with and without the extension; `audience` against `peer`
 and placement; each `mode`; `entry` against `login`; `system` on a local placement; a local well-known document
-carrying `space.account`; a label with `/`, `@` or a space (schema). The host's reading (well-known first, member by member, `entry` from `login` where a dashboard is
+carrying `space.account`; a personal-context instance offered through a share grant with `audience: organization`
+beside `peer` (accepted); a label with `/`, `@` or a space (schema). The host's reading (well-known first, member by member, `entry` from `login` where a dashboard is
 declared) as a small reference function `instanceFacts(descriptor, wellKnown)` with its own vectors, among them a
 descriptor's `own-signin` beside a well-known `login: true` with no extension there (refused, and read `host-signin`).
 A host reads only its own account's answer: HA-2 discards a `foreign-user` listener's, so a well-known-first reading
@@ -151,6 +160,8 @@ show or write the facts; the adapter kits' `PROTOCOL_REVISIONS` gain `fabric-ins
 
 ## Next
 
-The DEC: the extension's schema, a Fabric Dashboards scenario for the details panel (super-ux), `FAC-SEM-180` or the next free code, `instanceFacts`, the
+The DEC: the extension's schema, a Fabric Dashboards scenario for the details panel (super-ux) shipped with it,
+CONTEXT.md entries that keep `access.audience` apart from `levels[].audience` and `tenancy` apart from
+`accounts.tenants`, `FAC-SEM-180` or the next free code, `instanceFacts`, the
 vectors, the service specification's section, a conformance row (a service that declares the facts, a host that shows
 them), and the answer on thread `589abe7e` with its number.
