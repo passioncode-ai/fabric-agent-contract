@@ -65,12 +65,15 @@ FAC-SEM-040): none is a content or person word. `response` is a content word the
   `monotonicNs` is `"0"`, its `eventId` is derived (`sourceKey` `sha256:` over the stream, the session and the turn's
   ordinal in it, as `unit`'s form, never a time), and the collector emits a day's turns after the day ends, as
   `policy.violation` does, so neither its fields nor its place in the stream show when a turn ran or the gap between two
-  turns. It carries no `user` (schema, as `result` and `unit`).
+  turns, within the turn event itself (a receiver that joins a turn to its session's intervals by `session.id` can place
+  it roughly; RT-3's restraint covers that). It carries no `user` (schema, as `result` and `unit`).
 - **RT-3, personal data all the same.** A turn from a device bound to a person is personal data, as
   [activity](../../specification/activity.md#personal-data-and-purpose) says of every event from such a device: kept for
   the notice's purposes, deleted at `retention.raw_days`, every raw read in that person's access log (under
   `activity.raw`). Its `session.id` joins it to the session's other events, which carry `user.id`, so keeping it from
-  being read per person is the receiver's restraint, as for `result`.
+  being read per person is the receiver's restraint, as for `result`. `activity.raw` read by another person never
+  includes a `turn` or an `account.inventory` event, under any purpose, as it already never includes `usage.line` and
+  cost (activity's *Access log*, FAC-SEM-067): the operator ruled out timing a person, so no consent opens it.
 - **RT-4, who reads it, and how a cell counts people.** A receiver serves turns to another person only as cells of
   `activity-summary/2`, which adds `turnCells` beside `/1`'s cells (which keep their fields): one cell per agent
   (`runtime.name`), skill (the workflow, where the runtime reports one; no other fallback), project and day, with no
@@ -86,13 +89,14 @@ FAC-SEM-040): none is a content or person word. `response` is a content word the
 - **RT-5, the gate.** A collector holds `turn` events outside its stream until the receiver's latest `protocols` list
   names `activity-turn/1`, and drops what it holds as `unit`'s held transitions are dropped: past the shorter of the
   server layer's and the device's `retention.raw_days` (30 days where the server layer sets none), on 410
-  `organization-closed`, and on a binding to another person.
+  `organization-closed`, and on a binding to a different person or from a person to none.
 - **RT-6, the personal context.** A turn of a session on a `personal` account, or of a personal or unattributed
   project, never leaves the machine (the plan's isolation point 1), even inside an organization's folder where that
   session's usage lines and its `policy.violation` are sent; the receiver's response-time report names that gap.
 
 ### SI, the subscription inventory (CT-319)
 
+- **SI-0.** `account.inventory` carries no `project` or `runtime` (schema): it is a machine's holdings, not a session's.
 - **SI-1, the kind `account.inventory`.** The organization accounts one machine holds with one holder, for one **UTC
   day**. `data`: `day`, `provider` (open vocabulary, as `policy.violation`'s), `tenantRef` (the organization's tenant,
   from the policy's `accounts.tenants`), `billing` (`subscription` or `api`), optional `plan` (the provider's product
@@ -105,8 +109,8 @@ FAC-SEM-040): none is a content or person word. `response` is a content word the
 - **SI-3, the source and the route.** `source` is `switchboard` for Switchboard's records and `process` for what the
   collector reads by name (`runtime`, `vault`); never a key's value or an account's address. On a device enrolled with
   two organizations, an event goes only to the enrollment whose policy's `accounts.tenants` names its `tenantRef`; where
-  two enrollments name it, it goes to neither (as `routeTarget` answers `ambiguous`), so one organization never learns
-  another's seats.
+  two enrollments name it, it goes to neither (a route function of its own with vectors, by analogy with `routeTarget`'s
+  `ambiguous`), so one organization never learns another's seats.
 - **SI-4, idempotence.** At most one event per (stream, `day`, `provider`, `tenantRef`, `billing`, `plan`, `holder`),
   its `eventId` derived (`sourceKey` `sha256:` over that key, as `unit`'s form); a receiver keeps the first and refuses
   a second in one batch, as for `grant.usage`.
@@ -142,8 +146,8 @@ counsel's question (asked in the board reply).
 
 ## Open points for the decision
 
-1. The bucket boundaries (RT-3): chosen for interactive work; a later revision can add buckets as `/3`.
-2. Whether `turn` should also carry a turn's `cost` (it sums `usage.line`s already joined by `run.root`): left out, so a
+1. The bucket boundaries (RT-4): chosen for interactive work; a later revision can add buckets as `/3`.
+2. Whether `turn` should also carry a turn's `cost` (it would sum the session's `usage.line`s, joined by `session.id`): left out, so a
    cost is never counted twice.
 3. Seats an organization pays for that no machine holds: the platform's licences, not telemetry.
 
@@ -153,5 +157,11 @@ The DEC with `schemas/telemetry-event.schema.json` (`$defs.turn`, `$defs.account
 protocols `activity-turn/1` and `activity-inventory/1`, a rule code for the turn's monotonic duration and the
 inventory's day-only envelope, vectors, and the restatements (activity *Kinds*, *Summary*, conformance's collector and
 receiver rows, CONTEXT, versioning's register with `activity-summary` `/1` and `/2`, the OpenTelemetry mapping of
-`toolKinds`), with a vector of one person across five sessions; read under the finish-line rule; then the board reply on thread `1efdc2e1` and tells to
+`toolKinds`), activity's *Notice* and *Access log* with the FAC-SEM-067 row and SCN-010's expected result (no `turn` or
+`account.inventory` in another person's `activity.raw`), the population code for turn and inventory cells (by the
+stream's bound person, not `population()`'s `session.id` fallback) with FAC-SEM-040's cell checks for their shapes, a
+day-only rule code covering `turn` beside FAC-SEM-039's, the closed turn `method` (a collector reading only by process
+sampling sends no turns), the source of RT-6's routing of personal-account sessions in an organization's folder
+(`contexts.md`), scenarios for an administrator's response-time and inventory reports, and a vector of one person
+across five sessions; read under the finish-line rule; then the board reply on thread `1efdc2e1` and tells to
 Observatory (collector) and Switchboard (inventory record).
