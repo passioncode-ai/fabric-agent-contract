@@ -1,0 +1,3517 @@
+{
+  "about": "Vectors for the decision verdict, decision-verdict/1 (DEC-0172), written by tools/vectors/decision-verdict.ts, never by hand. askedDigest is sha256: of the RFC 8785 canonical JSON of asked, id sha256: of the RFC 8785 canonical JSON of {askedDigest, caller, policy, session}, and asked.argsDigest hmac-sha256: under the host's key (hostKey, hex) of the RFC 8785 canonical JSON of the call's input. documents: schemaValid is the verdict against decision-verdict.schema.json; findings are evaluateSemanticRules(\"decision-verdict\", verdict). references: findings of evaluateSemanticRules(\"decision-verdict-reference\", {verdict, reference}); each reference input is copied from the actionDecision or mandateCovers vectors by case name. dispatches: checkVerdictDispatch({call, journal, now, hostKey}).",
+  "hostKey": "4242424242424242424242424242424242424242424242424242424242424242",
+  "documents": [
+    {
+      "name": "an allow by the operator's word in the caller's own session",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T10:10:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "personal",
+          "tier": "T1",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "allow",
+        "rule": "AP-2",
+        "reason": "covered",
+        "route": "operator",
+        "machineForm": "hub-dispatch",
+        "grounds": [
+          {
+            "kind": "decision",
+            "ref": "sha256:d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1",
+            "grade": "taken"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        }
+      },
+      "schemaValid": true,
+      "findings": []
+    },
+    {
+      "name": "an allow by a relay OA-3 accepts",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T10:10:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "personal",
+          "tier": "T1",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "allow",
+        "rule": "AP-2",
+        "reason": "covered",
+        "route": "forwarded",
+        "machineForm": "hub-dispatch",
+        "grounds": [
+          {
+            "kind": "relay",
+            "ref": "board:1f2cfb98",
+            "grade": "forwarded"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        }
+      },
+      "schemaValid": true,
+      "findings": []
+    },
+    {
+      "name": "an allow by an administrator's bound level decision",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:ec16247819086663e6c762b3851591c37efa313394d9dce967067b56354a2ba3",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T10:10:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "org:org-a",
+          "tier": "T2",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:cbfc193a4ec20827e2216e6633a87d7975bd062c0afef178cac4b39dcdcbd1f7",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "allow",
+        "rule": "LV-7",
+        "reason": "covered",
+        "route": "level",
+        "machineForm": "hub-dispatch",
+        "grounds": [
+          {
+            "kind": "level-decision",
+            "ref": "sha256:a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+            "grade": "verified"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        },
+        "level": {
+          "required": "admin",
+          "satisfiedBy": "admin"
+        }
+      },
+      "schemaValid": true,
+      "findings": []
+    },
+    {
+      "name": "an allow a level holder's own agent executes",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:541793064812981068f4cbc005d816c9a637cc443de6abe3f856e665e6b08ce6",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T10:10:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "org:org-a",
+          "tier": "T1",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:e974b5f09b31a67003fa1b19e2b2f447b125ca4722421352c31ec5ffcbaf202c",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "allow",
+        "rule": "LV-7",
+        "reason": "covered",
+        "route": "level",
+        "machineForm": "executed-by-holder",
+        "grounds": [
+          {
+            "kind": "level-decision",
+            "ref": "sha256:a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2",
+            "grade": "verified"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        }
+      },
+      "schemaValid": true,
+      "findings": []
+    },
+    {
+      "name": "an allow under the caller's approval/1, which the hub does not hold back (DV-8)",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:e9f48c3419e2cbef6c045406d4ffb39b46e3af4c7e7655617ae559aeff9f6406",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T10:10:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "personal",
+          "tier": "T2",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:6e2bf9ce27629b273ef0125f2f5a7b909e32c874d61e757a6590e1156862f8a8",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "allow",
+        "rule": "DL-17",
+        "reason": "covered",
+        "route": "approval",
+        "machineForm": "caller-approval",
+        "grounds": [
+          {
+            "kind": "approval",
+            "ref": "sha256:a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3",
+            "grade": "verified"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        }
+      },
+      "schemaValid": true,
+      "findings": []
+    },
+    {
+      "name": "an allow of the caller's own act, with a budget read and not reserved",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:a059159a1d059654dad446e1e76b9d9e5218a9ea51d385bc012489acd8d55951",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T10:10:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "none",
+          "context": "personal",
+          "tier": "T1",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:58480a4e2a93b14ed70ccb9094952c89c57317779a1e9ff716ddb0b0c2a46605",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "allow",
+        "rule": "AP-2",
+        "reason": "covered",
+        "route": "own-act",
+        "machineForm": "none",
+        "grounds": [
+          {
+            "kind": "budget",
+            "ref": "l1:example-site"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        }
+      },
+      "schemaValid": true,
+      "findings": []
+    },
+    {
+      "name": "an allow by a bound standing mandate",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:15d8305217d95f1e493338fcb3ecb546dfb7818fd2c8801c7d4ba1a4e07d6a4f",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T10:10:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "deploy",
+          "context": "personal",
+          "tier": "T2",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:211b0c9fcedc88387516ac5ed93de363874b4351712c290f32efe755834a9341",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "allow",
+        "rule": "AU-1",
+        "reason": "covered",
+        "route": "profile",
+        "machineForm": "hub-dispatch",
+        "grounds": [
+          {
+            "kind": "standing",
+            "ref": "sha256:a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4",
+            "grade": "verified"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        }
+      },
+      "schemaValid": true,
+      "findings": []
+    },
+    {
+      "name": "advice with no addressee: a policy row against the operator's word (row-advised)",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T18:00:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "personal",
+          "tier": "T1",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "human",
+        "rule": "row:no-friday-publish",
+        "reason": "row-advised",
+        "grounds": [
+          {
+            "kind": "decision",
+            "ref": "sha256:d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1",
+            "grade": "taken"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        },
+        "human": {
+          "addressees": []
+        }
+      },
+      "schemaValid": true,
+      "findings": []
+    },
+    {
+      "name": "a question to the operator: no form the reference takes (not-covered)",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T18:00:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "personal",
+          "tier": "T1",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "human",
+        "rule": "AP-2",
+        "reason": "not-covered",
+        "grounds": [
+          {
+            "kind": "decision",
+            "ref": "sha256:d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1",
+            "grade": "taken"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        },
+        "human": {
+          "addressees": [
+            "operator"
+          ],
+          "questionId": "q-77"
+        }
+      },
+      "schemaValid": true,
+      "findings": []
+    },
+    {
+      "name": "spend above a key's ceiling, the person's step with its link once the callee gave it (DV-7)",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T18:00:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "personal",
+          "tier": "T1",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "human",
+        "rule": "spend-rule-3",
+        "reason": "spend-limit",
+        "grounds": [
+          {
+            "kind": "decision",
+            "ref": "sha256:d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1",
+            "grade": "taken"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        },
+        "human": {
+          "addressees": [
+            "operator"
+          ],
+          "humanStep": "spend-above-limit",
+          "url": "https://hub.example/steps/88"
+        }
+      },
+      "schemaValid": true,
+      "findings": []
+    },
+    {
+      "name": "rule 3's durable approval request, asking the organization's owner and administrators",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T18:00:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "personal",
+          "tier": "T1",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "human",
+        "rule": "spend-rule-3",
+        "reason": "spend-limit",
+        "grounds": [
+          {
+            "kind": "decision",
+            "ref": "sha256:d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1",
+            "grade": "taken"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        },
+        "human": {
+          "addressees": [
+            "m-owner-01",
+            "m-admin-02"
+          ]
+        },
+        "level": {
+          "required": "admin",
+          "satisfiedBy": "own-act"
+        }
+      },
+      "schemaValid": true,
+      "findings": []
+    },
+    {
+      "name": "a body gate: the person's sign-in (AP-4)",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T18:00:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "personal",
+          "tier": "T1",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "human",
+        "rule": "AP-4",
+        "reason": "body-gate",
+        "grounds": [
+          {
+            "kind": "decision",
+            "ref": "sha256:d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1",
+            "grade": "taken"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        },
+        "human": {
+          "addressees": [
+            "operator"
+          ],
+          "humanStep": "sign-in"
+        }
+      },
+      "schemaValid": true,
+      "findings": []
+    },
+    {
+      "name": "a policy row forbids it",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T10:30:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "personal",
+          "tier": "T1",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "deny",
+        "rule": "row:never-delete-prod",
+        "reason": "forbidden",
+        "grounds": [],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        }
+      },
+      "schemaValid": true,
+      "findings": []
+    },
+    {
+      "name": "the operator said no",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-16T09:00:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "personal",
+          "tier": "T1",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "deny",
+        "rule": "answer:q-77",
+        "reason": "person-denied",
+        "grounds": [],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        }
+      },
+      "schemaValid": true,
+      "findings": []
+    },
+    {
+      "name": "an approval on the caller agent's own account",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T10:30:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "personal",
+          "tier": "T1",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "deny",
+        "rule": "AP-5",
+        "reason": "self-approval",
+        "grounds": [],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        }
+      },
+      "schemaValid": true,
+      "findings": []
+    },
+    {
+      "name": "an allow beside a ground the reference does not take",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T10:10:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "personal",
+          "tier": "T1",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "allow",
+        "rule": "AP-2",
+        "reason": "covered",
+        "route": "operator",
+        "machineForm": "hub-dispatch",
+        "grounds": [
+          {
+            "kind": "decision",
+            "ref": "sha256:d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1",
+            "grade": "taken"
+          },
+          {
+            "kind": "relay",
+            "ref": "chat:paste",
+            "grade": "data"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        }
+      },
+      "schemaValid": true,
+      "findings": [
+        "FAC-SEM-179 /grounds/1/grade"
+      ]
+    },
+    {
+      "name": "an allow by the operator's word with no decision ground",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T10:10:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "personal",
+          "tier": "T1",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "allow",
+        "rule": "AP-2",
+        "reason": "covered",
+        "route": "operator",
+        "machineForm": "hub-dispatch",
+        "grounds": [
+          {
+            "kind": "grant",
+            "ref": "grant:7"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        }
+      },
+      "schemaValid": true,
+      "findings": [
+        "FAC-SEM-179 /grounds"
+      ]
+    },
+    {
+      "name": "an allow by a level decision graded taken",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T10:10:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "personal",
+          "tier": "T1",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "allow",
+        "rule": "AP-2",
+        "reason": "covered",
+        "route": "level",
+        "machineForm": "hub-dispatch",
+        "grounds": [
+          {
+            "kind": "level-decision",
+            "ref": "sha256:a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+            "grade": "taken"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        }
+      },
+      "schemaValid": true,
+      "findings": [
+        "FAC-SEM-179 /grounds"
+      ]
+    },
+    {
+      "name": "an approval carried by the hub",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T10:10:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "personal",
+          "tier": "T1",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "allow",
+        "rule": "AP-2",
+        "reason": "covered",
+        "route": "approval",
+        "machineForm": "hub-dispatch",
+        "grounds": [
+          {
+            "kind": "approval",
+            "ref": "sha256:a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3",
+            "grade": "verified"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        }
+      },
+      "schemaValid": true,
+      "findings": [
+        "FAC-SEM-179 /machineForm"
+      ]
+    },
+    {
+      "name": "an own act by a form",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T10:10:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "personal",
+          "tier": "T1",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "allow",
+        "rule": "AP-2",
+        "reason": "covered",
+        "route": "own-act",
+        "machineForm": "hub-dispatch",
+        "grounds": [],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        }
+      },
+      "schemaValid": true,
+      "findings": [
+        "FAC-SEM-179 /machineForm"
+      ]
+    },
+    {
+      "name": "a holder's execution under the operator's word",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T10:10:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "personal",
+          "tier": "T1",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "allow",
+        "rule": "AP-2",
+        "reason": "covered",
+        "route": "operator",
+        "machineForm": "executed-by-holder",
+        "grounds": [
+          {
+            "kind": "decision",
+            "ref": "sha256:d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1",
+            "grade": "taken"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        }
+      },
+      "schemaValid": true,
+      "findings": [
+        "FAC-SEM-179 /machineForm"
+      ]
+    },
+    {
+      "name": "an allow standing longer than 15 minutes",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T10:15:01Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "personal",
+          "tier": "T1",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "allow",
+        "rule": "AP-2",
+        "reason": "covered",
+        "route": "operator",
+        "machineForm": "hub-dispatch",
+        "grounds": [
+          {
+            "kind": "decision",
+            "ref": "sha256:d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1",
+            "grade": "taken"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        }
+      },
+      "schemaValid": true,
+      "findings": [
+        "FAC-SEM-179 /expiresAt"
+      ]
+    },
+    {
+      "name": "a denial standing longer than an hour",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T11:00:01Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "personal",
+          "tier": "T1",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "deny",
+        "rule": "row:never-delete-prod",
+        "reason": "forbidden",
+        "grounds": [],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        }
+      },
+      "schemaValid": true,
+      "findings": [
+        "FAC-SEM-179 /expiresAt"
+      ]
+    },
+    {
+      "name": "a verdict that expires when it is given",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T10:00:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "personal",
+          "tier": "T1",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "allow",
+        "rule": "AP-2",
+        "reason": "covered",
+        "route": "operator",
+        "machineForm": "hub-dispatch",
+        "grounds": [
+          {
+            "kind": "decision",
+            "ref": "sha256:d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1",
+            "grade": "taken"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        }
+      },
+      "schemaValid": true,
+      "findings": [
+        "FAC-SEM-179 /expiresAt"
+      ]
+    },
+    {
+      "name": "a question with no one to ask",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T18:00:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "personal",
+          "tier": "T1",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "human",
+        "rule": "AP-2",
+        "reason": "not-covered",
+        "grounds": [
+          {
+            "kind": "decision",
+            "ref": "sha256:d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1",
+            "grade": "taken"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        },
+        "human": {
+          "addressees": [],
+          "questionId": "q-77"
+        }
+      },
+      "schemaValid": true,
+      "findings": [
+        "FAC-SEM-179 /human/questionId"
+      ]
+    },
+    {
+      "name": "a body gate without its step",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T18:00:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "personal",
+          "tier": "T1",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "human",
+        "rule": "AP-4",
+        "reason": "body-gate",
+        "grounds": [
+          {
+            "kind": "decision",
+            "ref": "sha256:d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1",
+            "grade": "taken"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        },
+        "human": {
+          "addressees": [
+            "operator"
+          ]
+        }
+      },
+      "schemaValid": true,
+      "findings": [
+        "FAC-SEM-179 /human/humanStep"
+      ]
+    },
+    {
+      "name": "a link without a step",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T18:00:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "personal",
+          "tier": "T1",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "human",
+        "rule": "AP-2",
+        "reason": "not-covered",
+        "grounds": [
+          {
+            "kind": "decision",
+            "ref": "sha256:d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1",
+            "grade": "taken"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        },
+        "human": {
+          "addressees": [
+            "operator"
+          ],
+          "url": "https://hub.example/steps/88"
+        }
+      },
+      "schemaValid": true,
+      "findings": [
+        "FAC-SEM-179 /human/url"
+      ]
+    },
+    {
+      "name": "a sign-in step on a spend limit",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T18:00:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "personal",
+          "tier": "T1",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "human",
+        "rule": "spend-rule-3",
+        "reason": "spend-limit",
+        "grounds": [
+          {
+            "kind": "decision",
+            "ref": "sha256:d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1",
+            "grade": "taken"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        },
+        "human": {
+          "addressees": [
+            "operator"
+          ],
+          "humanStep": "sign-in"
+        }
+      },
+      "schemaValid": true,
+      "findings": [
+        "FAC-SEM-179 /human/humanStep"
+      ]
+    },
+    {
+      "name": "a person's denial that names no answer",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T10:30:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "personal",
+          "tier": "T1",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "deny",
+        "rule": "AP-2",
+        "reason": "person-denied",
+        "grounds": [],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        }
+      },
+      "schemaValid": true,
+      "findings": [
+        "FAC-SEM-179 /rule"
+      ]
+    },
+    {
+      "name": "a self-approval refused by another rule",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T10:30:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "personal",
+          "tier": "T1",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "deny",
+        "rule": "AP-2",
+        "reason": "self-approval",
+        "grounds": [],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        }
+      },
+      "schemaValid": true,
+      "findings": [
+        "FAC-SEM-179 /rule"
+      ]
+    },
+    {
+      "name": "an id that is not its derivation",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:d9298a10d1b0735837dc4bd85dac641b0f3cef27a47e5d53a54f2f3f5b2fcffa",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T10:10:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "personal",
+          "tier": "T1",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "allow",
+        "rule": "AP-2",
+        "reason": "covered",
+        "route": "operator",
+        "machineForm": "hub-dispatch",
+        "grounds": [
+          {
+            "kind": "decision",
+            "ref": "sha256:d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1",
+            "grade": "taken"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        }
+      },
+      "schemaValid": true,
+      "findings": [
+        "FAC-SEM-179 /id"
+      ]
+    },
+    {
+      "name": "an asked changed after its digest",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T10:10:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "delete",
+          "context": "personal",
+          "tier": "T1",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "allow",
+        "rule": "AP-2",
+        "reason": "covered",
+        "route": "operator",
+        "machineForm": "hub-dispatch",
+        "grounds": [
+          {
+            "kind": "decision",
+            "ref": "sha256:d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1",
+            "grade": "taken"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        }
+      },
+      "schemaValid": true,
+      "findings": [
+        "FAC-SEM-179 /askedDigest"
+      ]
+    },
+    {
+      "name": "an allow that asks a person",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T10:10:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "personal",
+          "tier": "T1",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "allow",
+        "rule": "AP-2",
+        "reason": "covered",
+        "route": "operator",
+        "machineForm": "hub-dispatch",
+        "grounds": [
+          {
+            "kind": "decision",
+            "ref": "sha256:d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1",
+            "grade": "taken"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        },
+        "human": {
+          "addressees": [
+            "operator"
+          ]
+        }
+      },
+      "schemaValid": false,
+      "findings": []
+    },
+    {
+      "name": "a human verdict with a route",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T18:00:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "personal",
+          "tier": "T1",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "human",
+        "rule": "AP-2",
+        "reason": "not-covered",
+        "grounds": [
+          {
+            "kind": "decision",
+            "ref": "sha256:d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1",
+            "grade": "taken"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        },
+        "human": {
+          "addressees": [
+            "operator"
+          ]
+        },
+        "route": "operator"
+      },
+      "schemaValid": false,
+      "findings": []
+    },
+    {
+      "name": "an allow without its route",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T10:10:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "personal",
+          "tier": "T1",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "allow",
+        "rule": "AP-2",
+        "reason": "covered",
+        "machineForm": "hub-dispatch",
+        "grounds": [
+          {
+            "kind": "decision",
+            "ref": "sha256:d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1",
+            "grade": "taken"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        }
+      },
+      "schemaValid": false,
+      "findings": []
+    },
+    {
+      "name": "a deny for want of a person (a human reason)",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T10:30:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "personal",
+          "tier": "T1",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "deny",
+        "rule": "AP-2",
+        "reason": "not-covered",
+        "grounds": [],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        }
+      },
+      "schemaValid": false,
+      "findings": []
+    },
+    {
+      "name": "a requirement graded as an authority",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T10:10:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "personal",
+          "tier": "T1",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "allow",
+        "rule": "AP-2",
+        "reason": "covered",
+        "route": "operator",
+        "machineForm": "hub-dispatch",
+        "grounds": [
+          {
+            "kind": "decision",
+            "ref": "sha256:d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1",
+            "grade": "taken"
+          },
+          {
+            "kind": "budget",
+            "ref": "l1",
+            "grade": "taken"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        }
+      },
+      "schemaValid": false,
+      "findings": []
+    },
+    {
+      "name": "an entitlement as a ground (DEC-0168)",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T10:10:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "personal",
+          "tier": "T1",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "allow",
+        "rule": "AP-2",
+        "reason": "covered",
+        "route": "operator",
+        "machineForm": "hub-dispatch",
+        "grounds": [
+          {
+            "kind": "entitlement",
+            "ref": "ent:1",
+            "grade": "verified"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        }
+      },
+      "schemaValid": false,
+      "findings": []
+    },
+    {
+      "name": "the arguments themselves in asked",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:c41f02053e1c8e3dfac3b2d6bc3dfa3c6af1b0ec0691ad11f193a96cb7b3f179",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T10:10:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "personal",
+          "tier": "T1",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5",
+          "input": {
+            "reviewId": "r-412",
+            "reply": "draft-7"
+          }
+        },
+        "askedDigest": "sha256:40756bc6178db038581c2650d277a07e97c69eeb81c60394123b62aa6f1b9465",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "allow",
+        "rule": "AP-2",
+        "reason": "covered",
+        "route": "operator",
+        "machineForm": "hub-dispatch",
+        "grounds": [
+          {
+            "kind": "decision",
+            "ref": "sha256:d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1",
+            "grade": "taken"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        }
+      },
+      "schemaValid": false,
+      "findings": []
+    },
+    {
+      "name": "a plain hash of the arguments",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:fcef745611a4e8b18a6e27dd09faaedb8a3e3631294803f1b3d9010199a56b85",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T10:10:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "personal",
+          "tier": "T1",
+          "argsDigest": "sha256:26b5a68f4ab2dc1d05796c2505be702ec8a09b3be95f422ece6e23d2ab4ab7bd"
+        },
+        "askedDigest": "sha256:38cbeaca6d570634145e7fd104129d621c15fe1577b0549c6506a81e18f32fe3",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "allow",
+        "rule": "AP-2",
+        "reason": "covered",
+        "route": "operator",
+        "machineForm": "hub-dispatch",
+        "grounds": [
+          {
+            "kind": "decision",
+            "ref": "sha256:d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1",
+            "grade": "taken"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        }
+      },
+      "schemaValid": false,
+      "findings": []
+    },
+    {
+      "name": "the operator's words on the wire",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T10:10:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "personal",
+          "tier": "T1",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "allow",
+        "rule": "AP-2",
+        "reason": "covered",
+        "route": "operator",
+        "machineForm": "hub-dispatch",
+        "grounds": [
+          {
+            "kind": "decision",
+            "ref": "sha256:d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1",
+            "grade": "taken"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        },
+        "instruction": "approve the reply"
+      },
+      "schemaValid": false,
+      "findings": []
+    }
+  ],
+  "references": [
+    {
+      "name": "the operator's word from T1, which the reference takes",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T10:10:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "personal",
+          "tier": "T1",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "allow",
+        "rule": "AP-2",
+        "reason": "covered",
+        "route": "operator",
+        "machineForm": "hub-dispatch",
+        "grounds": [
+          {
+            "kind": "decision",
+            "ref": "sha256:d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1",
+            "grade": "taken"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        }
+      },
+      "reference": {
+        "check": "action",
+        "input": {
+          "action": {
+            "id": "approve-reply",
+            "title": "Approve the reply",
+            "tool": "reviews.approve",
+            "gate": "relayed"
+          },
+          "caller": "agent:claude-code",
+          "now": "2026-10-24T09:30:00Z",
+          "tier": "T1",
+          "decision": {
+            "by": "operator",
+            "via": "relayed-instruction",
+            "action": "approve-reply",
+            "instruction": "approve the reply to the review from Anna",
+            "at": "2026-10-24T09:30:00Z"
+          }
+        }
+      },
+      "findings": []
+    },
+    {
+      "name": "the service's own accepted elicitation, the operator's word",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T10:10:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "personal",
+          "tier": "T1",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "allow",
+        "rule": "AP-2",
+        "reason": "covered",
+        "route": "operator",
+        "machineForm": "hub-dispatch",
+        "grounds": [
+          {
+            "kind": "decision",
+            "ref": "sha256:d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1",
+            "grade": "taken"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        }
+      },
+      "reference": {
+        "check": "action",
+        "input": {
+          "action": {
+            "id": "approve-reply",
+            "title": "Approve the reply",
+            "tool": "reviews.approve",
+            "gate": "relayed"
+          },
+          "caller": "agent:claude-code",
+          "now": "2026-10-24T09:30:00Z",
+          "tier": "T0",
+          "elicited": true
+        }
+      },
+      "findings": []
+    },
+    {
+      "name": "an OA-2 relay, taken by route forwarded in either context",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T10:10:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "personal",
+          "tier": "T1",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "allow",
+        "rule": "AP-2",
+        "reason": "covered",
+        "route": "forwarded",
+        "machineForm": "hub-dispatch",
+        "grounds": [
+          {
+            "kind": "relay",
+            "ref": "board:1f2cfb98",
+            "grade": "forwarded"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        }
+      },
+      "reference": {
+        "check": "action",
+        "input": {
+          "action": {
+            "id": "approve-reply",
+            "title": "Approve the reply",
+            "tool": "reviews.approve",
+            "gate": "relayed"
+          },
+          "caller": "agent:claude-code",
+          "now": "2026-10-24T09:30:00Z",
+          "tier": "T1",
+          "decision": {
+            "by": "operator",
+            "via": "relayed-instruction",
+            "action": "approve-reply",
+            "instruction": "approve the reply to the review from Anna",
+            "at": "2026-10-24T09:30:00Z",
+            "source": {
+              "project": "example-analyst",
+              "thread": "example-thread-3"
+            }
+          }
+        }
+      },
+      "findings": []
+    },
+    {
+      "name": "the same relay named as the operator's own word",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T10:10:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "personal",
+          "tier": "T1",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "allow",
+        "rule": "AP-2",
+        "reason": "covered",
+        "route": "operator",
+        "machineForm": "hub-dispatch",
+        "grounds": [
+          {
+            "kind": "decision",
+            "ref": "sha256:d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1",
+            "grade": "taken"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        }
+      },
+      "reference": {
+        "check": "action",
+        "input": {
+          "action": {
+            "id": "approve-reply",
+            "title": "Approve the reply",
+            "tool": "reviews.approve",
+            "gate": "relayed"
+          },
+          "caller": "agent:claude-code",
+          "now": "2026-10-24T09:30:00Z",
+          "tier": "T1",
+          "decision": {
+            "by": "operator",
+            "via": "relayed-instruction",
+            "action": "approve-reply",
+            "instruction": "approve the reply to the review from Anna",
+            "at": "2026-10-24T09:30:00Z",
+            "source": {
+              "project": "example-analyst",
+              "thread": "example-thread-3"
+            }
+          }
+        }
+      },
+      "findings": [
+        "FAC-SEM-179 /verdict/verdict"
+      ]
+    },
+    {
+      "name": "an own act under gate none",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:a059159a1d059654dad446e1e76b9d9e5218a9ea51d385bc012489acd8d55951",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T10:10:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "none",
+          "context": "personal",
+          "tier": "T1",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:58480a4e2a93b14ed70ccb9094952c89c57317779a1e9ff716ddb0b0c2a46605",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "allow",
+        "rule": "AP-2",
+        "reason": "covered",
+        "route": "own-act",
+        "machineForm": "none",
+        "grounds": [],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        }
+      },
+      "reference": {
+        "check": "action",
+        "input": {
+          "action": {
+            "id": "retry-job",
+            "title": "Retry",
+            "tool": "jobs.retry",
+            "gate": "none"
+          },
+          "tier": "T2"
+        }
+      },
+      "findings": []
+    },
+    {
+      "name": "an accepted approval from T2",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:e9f48c3419e2cbef6c045406d4ffb39b46e3af4c7e7655617ae559aeff9f6406",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T10:10:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "personal",
+          "tier": "T2",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:6e2bf9ce27629b273ef0125f2f5a7b909e32c874d61e757a6590e1156862f8a8",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "allow",
+        "rule": "DL-17",
+        "reason": "covered",
+        "route": "approval",
+        "machineForm": "caller-approval",
+        "grounds": [
+          {
+            "kind": "approval",
+            "ref": "sha256:a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3",
+            "grade": "verified"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        }
+      },
+      "reference": {
+        "check": "action",
+        "input": {
+          "action": {
+            "id": "approve-reply",
+            "title": "Approve the reply",
+            "tool": "reviews.approve",
+            "gate": "relayed"
+          },
+          "caller": "agent:claude-code",
+          "now": "2026-10-24T09:30:00Z",
+          "tier": "T2",
+          "approval": {
+            "ok": true,
+            "approver": "person:anna"
+          }
+        }
+      },
+      "findings": []
+    },
+    {
+      "name": "a T2 call without its approval, allowed on the operator's word",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:e9f48c3419e2cbef6c045406d4ffb39b46e3af4c7e7655617ae559aeff9f6406",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T10:10:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "personal",
+          "tier": "T2",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:6e2bf9ce27629b273ef0125f2f5a7b909e32c874d61e757a6590e1156862f8a8",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "allow",
+        "rule": "AP-2",
+        "reason": "covered",
+        "route": "operator",
+        "machineForm": "hub-dispatch",
+        "grounds": [
+          {
+            "kind": "decision",
+            "ref": "sha256:d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1",
+            "grade": "taken"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        }
+      },
+      "reference": {
+        "check": "action",
+        "input": {
+          "action": {
+            "id": "approve-reply",
+            "title": "Approve the reply",
+            "tool": "reviews.approve",
+            "gate": "relayed"
+          },
+          "caller": "agent:claude-code",
+          "now": "2026-10-24T09:30:00Z",
+          "tier": "T2",
+          "decision": {
+            "by": "operator",
+            "via": "relayed-instruction",
+            "action": "approve-reply",
+            "instruction": "approve the reply to the review from Anna",
+            "at": "2026-10-24T09:30:00Z"
+          },
+          "actionDigest": "sha256:abababababababababababababababababababababababababababababababab"
+        }
+      },
+      "findings": [
+        "FAC-SEM-179 /verdict/verdict"
+      ]
+    },
+    {
+      "name": "the owner's bound level decision from T2",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:ec16247819086663e6c762b3851591c37efa313394d9dce967067b56354a2ba3",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T10:10:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "org:org-a",
+          "tier": "T2",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:cbfc193a4ec20827e2216e6633a87d7975bd062c0afef178cac4b39dcdcbd1f7",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "allow",
+        "rule": "LV-7",
+        "reason": "covered",
+        "route": "level",
+        "machineForm": "hub-dispatch",
+        "grounds": [
+          {
+            "kind": "level-decision",
+            "ref": "sha256:a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+            "grade": "verified"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        }
+      },
+      "reference": {
+        "check": "action",
+        "input": {
+          "action": {
+            "id": "approve-reply",
+            "title": "Approve the reply",
+            "tool": "reviews.approve",
+            "gate": "relayed"
+          },
+          "tier": "T2",
+          "caller": "agent:claude-code",
+          "decision": {
+            "by": "level",
+            "via": "level-command",
+            "level": "owner",
+            "org": "org:org-a",
+            "action": "approve-reply",
+            "instruction": "approve the reply to the review from Anna",
+            "at": "2026-10-25T11:20:00Z",
+            "membership": {
+              "type": "org-membership/2",
+              "issuer": "https://orgs.example",
+              "org": "org:org-a",
+              "audience": "reviews-service-a1",
+              "subject": "m-owner-01",
+              "role": "owner",
+              "projects": [],
+              "external": false,
+              "status": "active",
+              "revision": 3,
+              "membershipEndsAt": null,
+              "issuedAt": "2026-10-25T11:00:00Z",
+              "notBefore": "2026-10-25T11:00:00Z",
+              "expiresAt": "2026-10-25T12:00:00Z",
+              "extensions": {},
+              "alg": "EdDSA",
+              "kid": "mem-2026-10",
+              "sig": "DWXhTb1wl4-GuoOEi148WMcPzY-rWvxeCnECywHvCNsQLsSO3n0TlMlsybW3anYPQ8fdK_VD4DauMmC42sxXBw"
+            }
+          },
+          "effect": "reply",
+          "now": "2026-10-25T11:30:00Z",
+          "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
+          "levels": {
+            "org:org-a": {
+              "audience": "reviews-service-a1",
+              "keySet": {
+                "type": "org-key-set/1",
+                "issuer": "https://orgs.example",
+                "org": "org:org-a",
+                "revision": 1,
+                "issuedAt": "2026-10-15T00:00:00Z",
+                "keys": [
+                  {
+                    "kid": "mem-2026-10",
+                    "alg": "EdDSA",
+                    "x": "YxEDJVK86TVti3mnfdU9cSSlKdjXDJM9A3eKVqIxr7U",
+                    "notBefore": "2026-10-15T00:00:00Z",
+                    "notAfter": "2027-01-01T00:00:00Z"
+                  }
+                ],
+                "revoked": [],
+                "administrators": [],
+                "alg": "EdDSA",
+                "kid": "root-org-a-1",
+                "sig": "vufCXJ4roCUAM3MEuAikBXHXZ8mdhK7hyiZkkFzc14MuJ8fvPq6zYxOOOH8KtIuBEIUcXesvsy1NXXs9rYqIBw"
+              }
+            }
+          },
+          "context": "org:org-a",
+          "tokenMem": "sha256:614fc6f0c76021eb1a4a6de48c6a4c674992936d83d94d33630d956224d997a0"
+        }
+      },
+      "findings": []
+    },
+    {
+      "name": "an organization's act LV-7 keeps for a level, allowed on the operator's word",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:541793064812981068f4cbc005d816c9a637cc443de6abe3f856e665e6b08ce6",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T10:10:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "org:org-a",
+          "tier": "T1",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:e974b5f09b31a67003fa1b19e2b2f447b125ca4722421352c31ec5ffcbaf202c",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "allow",
+        "rule": "AP-2",
+        "reason": "covered",
+        "route": "operator",
+        "machineForm": "hub-dispatch",
+        "grounds": [
+          {
+            "kind": "decision",
+            "ref": "sha256:d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1",
+            "grade": "taken"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        }
+      },
+      "reference": {
+        "check": "action",
+        "input": {
+          "action": {
+            "id": "change-plan",
+            "title": "Change the plan",
+            "tool": "billing.plan",
+            "gate": "relayed"
+          },
+          "tier": "T1",
+          "caller": "agent:claude-code",
+          "decision": {
+            "by": "operator",
+            "via": "relayed-instruction",
+            "action": "change-plan",
+            "instruction": "Move to the larger plan",
+            "at": "2026-10-25T11:29:00Z"
+          },
+          "effect": "reply",
+          "now": "2026-10-25T11:30:00Z",
+          "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
+          "levels": {
+            "org:org-a": {
+              "audience": "reviews-service-a1",
+              "keySet": {
+                "type": "org-key-set/1",
+                "issuer": "https://orgs.example",
+                "org": "org:org-a",
+                "revision": 1,
+                "issuedAt": "2026-10-15T00:00:00Z",
+                "keys": [
+                  {
+                    "kid": "mem-2026-10",
+                    "alg": "EdDSA",
+                    "x": "YxEDJVK86TVti3mnfdU9cSSlKdjXDJM9A3eKVqIxr7U",
+                    "notBefore": "2026-10-15T00:00:00Z",
+                    "notAfter": "2027-01-01T00:00:00Z"
+                  }
+                ],
+                "revoked": [],
+                "administrators": [],
+                "alg": "EdDSA",
+                "kid": "root-org-a-1",
+                "sig": "vufCXJ4roCUAM3MEuAikBXHXZ8mdhK7hyiZkkFzc14MuJ8fvPq6zYxOOOH8KtIuBEIUcXesvsy1NXXs9rYqIBw"
+              }
+            }
+          },
+          "context": "org:org-a",
+          "actionLevel": "owner"
+        }
+      },
+      "findings": [
+        "FAC-SEM-179 /verdict/verdict"
+      ]
+    },
+    {
+      "name": "an architect outside its projects",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:ec16247819086663e6c762b3851591c37efa313394d9dce967067b56354a2ba3",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T10:10:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "org:org-a",
+          "tier": "T2",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:cbfc193a4ec20827e2216e6633a87d7975bd062c0afef178cac4b39dcdcbd1f7",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "allow",
+        "rule": "LV-7",
+        "reason": "covered",
+        "route": "level",
+        "machineForm": "hub-dispatch",
+        "grounds": [
+          {
+            "kind": "level-decision",
+            "ref": "sha256:a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+            "grade": "verified"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        }
+      },
+      "reference": {
+        "check": "action",
+        "input": {
+          "action": {
+            "id": "approve-reply",
+            "title": "Approve the reply",
+            "tool": "reviews.approve",
+            "gate": "relayed"
+          },
+          "tier": "T2",
+          "caller": "agent:claude-code",
+          "decision": {
+            "by": "level",
+            "via": "level-command",
+            "level": "architect",
+            "org": "org:org-a",
+            "action": "approve-reply",
+            "instruction": "approve the reply to the review from Anna",
+            "at": "2026-10-25T11:20:00Z",
+            "membership": {
+              "type": "org-membership/2",
+              "issuer": "https://orgs.example",
+              "org": "org:org-a",
+              "audience": "reviews-service-a1",
+              "subject": "m-arch-03",
+              "role": "architect",
+              "projects": [
+                "alpha",
+                "beta"
+              ],
+              "external": false,
+              "status": "active",
+              "revision": 3,
+              "membershipEndsAt": null,
+              "issuedAt": "2026-10-25T11:00:00Z",
+              "notBefore": "2026-10-25T11:00:00Z",
+              "expiresAt": "2026-10-25T12:00:00Z",
+              "extensions": {},
+              "alg": "EdDSA",
+              "kid": "mem-2026-10",
+              "sig": "RrABkwV8ubdv_gWsjle26Lj5uG4Q4FeAc2qFy7ENRhxw3m8ioGjcxYd3QIiUM-lGgV4jUatmUi2BtWBFGdO-Aw"
+            },
+            "project": "gamma"
+          },
+          "effect": "reply",
+          "now": "2026-10-25T11:30:00Z",
+          "actionDigest": "sha256:abababababababababababababababababababababababababababababababab",
+          "levels": {
+            "org:org-a": {
+              "audience": "reviews-service-a1",
+              "keySet": {
+                "type": "org-key-set/1",
+                "issuer": "https://orgs.example",
+                "org": "org:org-a",
+                "revision": 1,
+                "issuedAt": "2026-10-15T00:00:00Z",
+                "keys": [
+                  {
+                    "kid": "mem-2026-10",
+                    "alg": "EdDSA",
+                    "x": "YxEDJVK86TVti3mnfdU9cSSlKdjXDJM9A3eKVqIxr7U",
+                    "notBefore": "2026-10-15T00:00:00Z",
+                    "notAfter": "2027-01-01T00:00:00Z"
+                  }
+                ],
+                "revoked": [],
+                "administrators": [],
+                "alg": "EdDSA",
+                "kid": "root-org-a-1",
+                "sig": "vufCXJ4roCUAM3MEuAikBXHXZ8mdhK7hyiZkkFzc14MuJ8fvPq6zYxOOOH8KtIuBEIUcXesvsy1NXXs9rYqIBw"
+              }
+            }
+          },
+          "context": "org:org-a",
+          "tokenMem": "sha256:3fd5ef20ba24c7a1382e32a720bf915827c2b2f93741802eaf8720157e9f9d8d",
+          "project": "gamma"
+        }
+      },
+      "findings": [
+        "FAC-SEM-179 /verdict/verdict"
+      ]
+    },
+    {
+      "name": "a headless profile bound by the token from T2",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:15d8305217d95f1e493338fcb3ecb546dfb7818fd2c8801c7d4ba1a4e07d6a4f",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T10:10:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "deploy",
+          "context": "personal",
+          "tier": "T2",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:211b0c9fcedc88387516ac5ed93de363874b4351712c290f32efe755834a9341",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "allow",
+        "rule": "AU-1",
+        "reason": "covered",
+        "route": "profile",
+        "machineForm": "hub-dispatch",
+        "grounds": [
+          {
+            "kind": "standing",
+            "ref": "sha256:a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4",
+            "grade": "verified"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        }
+      },
+      "reference": {
+        "check": "action",
+        "input": {
+          "action": {
+            "id": "deploy-site",
+            "title": "Deploy the site",
+            "tool": "site.deploy",
+            "gate": "relayed"
+          },
+          "tier": "T2",
+          "caller": "agent:example-runner",
+          "callerAgent": "example-runner",
+          "self": "example-deployer",
+          "mandate": {
+            "kind": "mandate/1",
+            "by": "operator",
+            "standing": {
+              "place": "studio-space-1",
+              "placeKind": "headless",
+              "revision": 3,
+              "context": "personal"
+            },
+            "task": "assignment:alpha-0412",
+            "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
+            "at": "2026-11-12T09:00:00Z",
+            "expiresAt": "2026-11-13T08:00:00Z",
+            "scope": {
+              "capabilities": [
+                "site.deploy"
+              ],
+              "effects": [
+                "deploy"
+              ]
+            },
+            "chain": [
+              {
+                "agent": "example-runner",
+                "at": "2026-11-12T09:00:05Z"
+              },
+              {
+                "agent": "example-deployer",
+                "at": "2026-11-12T09:30:00Z"
+              }
+            ]
+          },
+          "effect": "deploy",
+          "now": "2026-11-12T10:00:00Z",
+          "context": "personal",
+          "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
+          "standing": true,
+          "tokenProf": "sha256:c81ee1d484706f5f6ac3f536c17323ad0591228231732c9bce68b581d74bb5f3"
+        }
+      },
+      "findings": []
+    },
+    {
+      "name": "a profile from T2 without its prof",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:e9f48c3419e2cbef6c045406d4ffb39b46e3af4c7e7655617ae559aeff9f6406",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T10:10:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "personal",
+          "tier": "T2",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:6e2bf9ce27629b273ef0125f2f5a7b909e32c874d61e757a6590e1156862f8a8",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "allow",
+        "rule": "AU-1",
+        "reason": "covered",
+        "route": "profile",
+        "machineForm": "hub-dispatch",
+        "grounds": [
+          {
+            "kind": "standing",
+            "ref": "sha256:a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4",
+            "grade": "verified"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        }
+      },
+      "reference": {
+        "check": "action",
+        "input": {
+          "action": {
+            "id": "deploy-site",
+            "title": "Deploy the site",
+            "tool": "site.deploy",
+            "gate": "relayed"
+          },
+          "tier": "T2",
+          "caller": "agent:example-runner",
+          "callerAgent": "example-runner",
+          "self": "example-deployer",
+          "mandate": {
+            "kind": "mandate/1",
+            "by": "operator",
+            "standing": {
+              "place": "studio-space-1",
+              "placeKind": "headless",
+              "revision": 3,
+              "context": "personal"
+            },
+            "task": "assignment:alpha-0412",
+            "instruction": "По дефолту вообще все, что работает на студии, должно как бы доводиться до конца автономно.",
+            "at": "2026-11-12T09:00:00Z",
+            "expiresAt": "2026-11-13T08:00:00Z",
+            "scope": {
+              "capabilities": [
+                "site.deploy"
+              ],
+              "effects": [
+                "deploy"
+              ]
+            },
+            "chain": [
+              {
+                "agent": "example-runner",
+                "at": "2026-11-12T09:00:05Z"
+              },
+              {
+                "agent": "example-deployer",
+                "at": "2026-11-12T09:30:00Z"
+              }
+            ]
+          },
+          "effect": "deploy",
+          "now": "2026-11-12T10:00:00Z",
+          "context": "personal",
+          "actionDigest": "sha256:9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a9a",
+          "standing": true
+        }
+      },
+      "findings": [
+        "FAC-SEM-179 /verdict/verdict"
+      ]
+    },
+    {
+      "name": "a task mandate that covers the research",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:c01ccc78aaf618f8ebc81c344a663de9d50c3c07b7194e80b66b4fa824afaa35",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T10:10:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "research.run",
+          "action": "research.run",
+          "effect": "none",
+          "context": "personal",
+          "tier": "T0",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:dd7b331132d7965d8c2982b13e4abe09ebd93b8c5eda503fef60e593eeb5e0a7",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "allow",
+        "rule": "MD-3",
+        "reason": "covered",
+        "route": "mandate",
+        "machineForm": "hub-dispatch",
+        "grounds": [
+          {
+            "kind": "mandate",
+            "ref": "sha256:a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+            "grade": "taken"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        }
+      },
+      "reference": {
+        "check": "mandate",
+        "input": {
+          "mandate": {
+            "kind": "mandate/1",
+            "by": "operator",
+            "task": "research the eSIM market for the pricing page",
+            "instruction": "run the research on eSIM competitors' prices",
+            "at": "2026-10-26T10:00:00Z",
+            "expiresAt": "2026-10-27T10:00:00Z",
+            "scope": {
+              "capabilities": [
+                "research.run",
+                "research.ask",
+                "page.update"
+              ],
+              "effects": [
+                "charge",
+                "draft"
+              ],
+              "projects": [
+                "example-site"
+              ]
+            },
+            "chain": [
+              {
+                "agent": "example-developer",
+                "at": "2026-10-26T10:01:00Z"
+              },
+              {
+                "agent": "example-researcher",
+                "at": "2026-10-26T10:05:00Z"
+              }
+            ]
+          },
+          "tier": "T0",
+          "now": "2026-10-26T12:00:00Z",
+          "self": "example-researcher",
+          "callerAgent": "example-developer",
+          "call": {
+            "capability": "research.run",
+            "effect": "charge",
+            "spendUsd": 12,
+            "project": "example-site"
+          }
+        }
+      },
+      "findings": []
+    },
+    {
+      "name": "a policy change under a mandate, which no mandate covers (AP-5)",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:19cd7612d20e9abac3a3dc7ab5297ee40d0f50f11088dad2b393747c50f0ebda",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T10:10:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "page.update",
+          "action": "page.update",
+          "effect": "change-policy",
+          "context": "personal",
+          "tier": "T0",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:dcac2ba9c14423538c9610cce42194ec7143d77bea9716443767abff92ad5199",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "allow",
+        "rule": "MD-3",
+        "reason": "covered",
+        "route": "mandate",
+        "machineForm": "hub-dispatch",
+        "grounds": [
+          {
+            "kind": "mandate",
+            "ref": "sha256:a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+            "grade": "taken"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        }
+      },
+      "reference": {
+        "check": "mandate",
+        "input": {
+          "mandate": {
+            "kind": "mandate/1",
+            "by": "operator",
+            "task": "research the eSIM market for the pricing page",
+            "instruction": "run the research on eSIM competitors' prices",
+            "at": "2026-10-26T10:00:00Z",
+            "expiresAt": "2026-10-27T10:00:00Z",
+            "scope": {
+              "capabilities": [
+                "research.run",
+                "research.ask",
+                "page.update"
+              ],
+              "effects": [
+                "change-policy"
+              ],
+              "projects": [
+                "example-site"
+              ]
+            },
+            "chain": [
+              {
+                "agent": "example-developer",
+                "at": "2026-10-26T10:01:00Z"
+              },
+              {
+                "agent": "example-researcher",
+                "at": "2026-10-26T10:05:00Z"
+              }
+            ]
+          },
+          "tier": "T0",
+          "now": "2026-10-26T12:00:00Z",
+          "self": "example-researcher",
+          "callerAgent": "example-developer",
+          "call": {
+            "capability": "page.update",
+            "effect": "change-policy",
+            "project": "example-site"
+          }
+        }
+      },
+      "findings": [
+        "FAC-SEM-179 /verdict/verdict"
+      ]
+    },
+    {
+      "name": "a human verdict is the verifier's own: advice beside a form the reference takes",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T18:00:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "personal",
+          "tier": "T1",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "human",
+        "rule": "row:no-friday-publish",
+        "reason": "row-advised",
+        "grounds": [
+          {
+            "kind": "decision",
+            "ref": "sha256:d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1",
+            "grade": "taken"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        },
+        "human": {
+          "addressees": []
+        }
+      },
+      "reference": {
+        "check": "action",
+        "input": {
+          "action": {
+            "id": "approve-reply",
+            "title": "Approve the reply",
+            "tool": "reviews.approve",
+            "gate": "relayed"
+          },
+          "caller": "agent:claude-code",
+          "now": "2026-10-24T09:30:00Z",
+          "tier": "T1",
+          "decision": {
+            "by": "operator",
+            "via": "relayed-instruction",
+            "action": "approve-reply",
+            "instruction": "approve the reply to the review from Anna",
+            "at": "2026-10-24T09:30:00Z"
+          }
+        }
+      },
+      "findings": []
+    },
+    {
+      "name": "a denial is the verifier's own",
+      "verdict": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T10:30:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "personal",
+          "tier": "T1",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "deny",
+        "rule": "row:never-delete-prod",
+        "reason": "forbidden",
+        "grounds": [],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        }
+      },
+      "reference": {
+        "check": "action",
+        "input": {
+          "action": {
+            "id": "approve-reply",
+            "title": "Approve the reply",
+            "tool": "reviews.approve",
+            "gate": "relayed"
+          },
+          "caller": "agent:claude-code",
+          "now": "2026-10-24T09:30:00Z",
+          "tier": "T1",
+          "decision": {
+            "by": "operator",
+            "via": "relayed-instruction",
+            "action": "approve-reply",
+            "instruction": "approve the reply to the review from Anna",
+            "at": "2026-10-24T09:30:00Z"
+          }
+        }
+      },
+      "findings": []
+    }
+  ],
+  "dispatches": [
+    {
+      "name": "a current allow that matches the call",
+      "call": {
+        "agentId": "reviews-service",
+        "capability": "reviews.approve",
+        "input": {
+          "reviewId": "r-412",
+          "reply": "draft-7"
+        },
+        "decision": {
+          "by": "operator",
+          "via": "relayed-instruction",
+          "action": "approve-reply",
+          "instruction": "approve the reply to the review from Anna",
+          "at": "2026-11-15T09:59:00Z"
+        },
+        "verdict": {
+          "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+          "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e"
+        }
+      },
+      "journal": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T10:10:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "personal",
+          "tier": "T1",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "allow",
+        "rule": "AP-2",
+        "reason": "covered",
+        "route": "operator",
+        "machineForm": "hub-dispatch",
+        "grounds": [
+          {
+            "kind": "decision",
+            "ref": "sha256:d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1",
+            "grade": "taken"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        }
+      },
+      "now": "2026-11-15T10:05:00Z",
+      "answer": {
+        "dispatch": "verified"
+      }
+    },
+    {
+      "name": "a call without a verdict is forwarded as C3.5 says",
+      "call": {
+        "agentId": "reviews-service",
+        "capability": "reviews.approve",
+        "input": {
+          "reviewId": "r-412",
+          "reply": "draft-7"
+        },
+        "decision": {
+          "by": "operator",
+          "via": "relayed-instruction",
+          "action": "approve-reply",
+          "instruction": "approve the reply to the review from Anna",
+          "at": "2026-11-15T09:59:00Z"
+        }
+      },
+      "journal": null,
+      "now": "2026-11-15T10:05:00Z",
+      "answer": {
+        "dispatch": "forward"
+      }
+    },
+    {
+      "name": "an expired allow",
+      "call": {
+        "agentId": "reviews-service",
+        "capability": "reviews.approve",
+        "input": {
+          "reviewId": "r-412",
+          "reply": "draft-7"
+        },
+        "decision": {
+          "by": "operator",
+          "via": "relayed-instruction",
+          "action": "approve-reply",
+          "instruction": "approve the reply to the review from Anna",
+          "at": "2026-11-15T09:59:00Z"
+        },
+        "verdict": {
+          "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+          "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e"
+        }
+      },
+      "journal": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T10:10:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "personal",
+          "tier": "T1",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "allow",
+        "rule": "AP-2",
+        "reason": "covered",
+        "route": "operator",
+        "machineForm": "hub-dispatch",
+        "grounds": [
+          {
+            "kind": "decision",
+            "ref": "sha256:d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1",
+            "grade": "taken"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        }
+      },
+      "now": "2026-11-15T10:10:00Z",
+      "answer": {
+        "ok": false,
+        "code": "decision-invalid",
+        "data": {
+          "detail": "verdict-mismatch"
+        }
+      }
+    },
+    {
+      "name": "before the verdict was given",
+      "call": {
+        "agentId": "reviews-service",
+        "capability": "reviews.approve",
+        "input": {
+          "reviewId": "r-412",
+          "reply": "draft-7"
+        },
+        "decision": {
+          "by": "operator",
+          "via": "relayed-instruction",
+          "action": "approve-reply",
+          "instruction": "approve the reply to the review from Anna",
+          "at": "2026-11-15T09:59:00Z"
+        },
+        "verdict": {
+          "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+          "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e"
+        }
+      },
+      "journal": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T10:10:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "personal",
+          "tier": "T1",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "allow",
+        "rule": "AP-2",
+        "reason": "covered",
+        "route": "operator",
+        "machineForm": "hub-dispatch",
+        "grounds": [
+          {
+            "kind": "decision",
+            "ref": "sha256:d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1",
+            "grade": "taken"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        }
+      },
+      "now": "2026-11-15T09:59:59Z",
+      "answer": {
+        "ok": false,
+        "code": "decision-invalid",
+        "data": {
+          "detail": "verdict-mismatch"
+        }
+      }
+    },
+    {
+      "name": "no verdict in the journal",
+      "call": {
+        "agentId": "reviews-service",
+        "capability": "reviews.approve",
+        "input": {
+          "reviewId": "r-412",
+          "reply": "draft-7"
+        },
+        "decision": {
+          "by": "operator",
+          "via": "relayed-instruction",
+          "action": "approve-reply",
+          "instruction": "approve the reply to the review from Anna",
+          "at": "2026-11-15T09:59:00Z"
+        },
+        "verdict": {
+          "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+          "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e"
+        }
+      },
+      "journal": null,
+      "now": "2026-11-15T10:05:00Z",
+      "answer": {
+        "ok": false,
+        "code": "decision-invalid",
+        "data": {
+          "detail": "verdict-mismatch"
+        }
+      }
+    },
+    {
+      "name": "another input than the one asked",
+      "call": {
+        "agentId": "reviews-service",
+        "capability": "reviews.approve",
+        "input": {
+          "reviewId": "r-413",
+          "reply": "draft-7"
+        },
+        "decision": {
+          "by": "operator",
+          "via": "relayed-instruction",
+          "action": "approve-reply",
+          "instruction": "approve the reply to the review from Anna",
+          "at": "2026-11-15T09:59:00Z"
+        },
+        "verdict": {
+          "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+          "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e"
+        }
+      },
+      "journal": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T10:10:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "personal",
+          "tier": "T1",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "allow",
+        "rule": "AP-2",
+        "reason": "covered",
+        "route": "operator",
+        "machineForm": "hub-dispatch",
+        "grounds": [
+          {
+            "kind": "decision",
+            "ref": "sha256:d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1",
+            "grade": "taken"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        }
+      },
+      "now": "2026-11-15T10:05:00Z",
+      "answer": {
+        "ok": false,
+        "code": "decision-invalid",
+        "data": {
+          "detail": "verdict-mismatch"
+        }
+      }
+    },
+    {
+      "name": "another callee",
+      "call": {
+        "agentId": "billing-service",
+        "capability": "reviews.approve",
+        "input": {
+          "reviewId": "r-412",
+          "reply": "draft-7"
+        },
+        "decision": {
+          "by": "operator",
+          "via": "relayed-instruction",
+          "action": "approve-reply",
+          "instruction": "approve the reply to the review from Anna",
+          "at": "2026-11-15T09:59:00Z"
+        },
+        "verdict": {
+          "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+          "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e"
+        }
+      },
+      "journal": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T10:10:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "personal",
+          "tier": "T1",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "allow",
+        "rule": "AP-2",
+        "reason": "covered",
+        "route": "operator",
+        "machineForm": "hub-dispatch",
+        "grounds": [
+          {
+            "kind": "decision",
+            "ref": "sha256:d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1",
+            "grade": "taken"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        }
+      },
+      "now": "2026-11-15T10:05:00Z",
+      "answer": {
+        "ok": false,
+        "code": "decision-invalid",
+        "data": {
+          "detail": "verdict-mismatch"
+        }
+      }
+    },
+    {
+      "name": "another capability",
+      "call": {
+        "agentId": "reviews-service",
+        "capability": "reviews.delete",
+        "input": {
+          "reviewId": "r-412",
+          "reply": "draft-7"
+        },
+        "decision": {
+          "by": "operator",
+          "via": "relayed-instruction",
+          "action": "approve-reply",
+          "instruction": "approve the reply to the review from Anna",
+          "at": "2026-11-15T09:59:00Z"
+        },
+        "verdict": {
+          "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+          "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e"
+        }
+      },
+      "journal": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T10:10:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "personal",
+          "tier": "T1",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "allow",
+        "rule": "AP-2",
+        "reason": "covered",
+        "route": "operator",
+        "machineForm": "hub-dispatch",
+        "grounds": [
+          {
+            "kind": "decision",
+            "ref": "sha256:d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1",
+            "grade": "taken"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        }
+      },
+      "now": "2026-11-15T10:05:00Z",
+      "answer": {
+        "ok": false,
+        "code": "decision-invalid",
+        "data": {
+          "detail": "verdict-mismatch"
+        }
+      }
+    },
+    {
+      "name": "another action in the decision",
+      "call": {
+        "agentId": "reviews-service",
+        "capability": "reviews.approve",
+        "input": {
+          "reviewId": "r-412",
+          "reply": "draft-7"
+        },
+        "decision": {
+          "by": "operator",
+          "via": "relayed-instruction",
+          "action": "delete-reply",
+          "instruction": "delete it",
+          "at": "2026-11-15T09:59:00Z"
+        },
+        "verdict": {
+          "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+          "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e"
+        }
+      },
+      "journal": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T10:10:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "personal",
+          "tier": "T1",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "allow",
+        "rule": "AP-2",
+        "reason": "covered",
+        "route": "operator",
+        "machineForm": "hub-dispatch",
+        "grounds": [
+          {
+            "kind": "decision",
+            "ref": "sha256:d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1",
+            "grade": "taken"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        }
+      },
+      "now": "2026-11-15T10:05:00Z",
+      "answer": {
+        "ok": false,
+        "code": "decision-invalid",
+        "data": {
+          "detail": "verdict-mismatch"
+        }
+      }
+    },
+    {
+      "name": "a receipt naming another asked",
+      "call": {
+        "agentId": "reviews-service",
+        "capability": "reviews.approve",
+        "input": {
+          "reviewId": "r-412",
+          "reply": "draft-7"
+        },
+        "decision": {
+          "by": "operator",
+          "via": "relayed-instruction",
+          "action": "approve-reply",
+          "instruction": "approve the reply to the review from Anna",
+          "at": "2026-11-15T09:59:00Z"
+        },
+        "verdict": {
+          "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+          "askedDigest": "sha256:d9298a10d1b0735837dc4bd85dac641b0f3cef27a47e5d53a54f2f3f5b2fcffa"
+        }
+      },
+      "journal": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T10:10:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "personal",
+          "tier": "T1",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "allow",
+        "rule": "AP-2",
+        "reason": "covered",
+        "route": "operator",
+        "machineForm": "hub-dispatch",
+        "grounds": [
+          {
+            "kind": "decision",
+            "ref": "sha256:d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1",
+            "grade": "taken"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        }
+      },
+      "now": "2026-11-15T10:05:00Z",
+      "answer": {
+        "ok": false,
+        "code": "decision-invalid",
+        "data": {
+          "detail": "verdict-mismatch"
+        }
+      }
+    },
+    {
+      "name": "a human verdict is no receipt to dispatch on",
+      "call": {
+        "agentId": "reviews-service",
+        "capability": "reviews.approve",
+        "input": {
+          "reviewId": "r-412",
+          "reply": "draft-7"
+        },
+        "decision": {
+          "by": "operator",
+          "via": "relayed-instruction",
+          "action": "approve-reply",
+          "instruction": "approve the reply to the review from Anna",
+          "at": "2026-11-15T09:59:00Z"
+        },
+        "verdict": {
+          "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+          "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e"
+        }
+      },
+      "journal": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T10:10:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "personal",
+          "tier": "T1",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "human",
+        "rule": "AP-2",
+        "reason": "covered",
+        "route": "operator",
+        "machineForm": "hub-dispatch",
+        "grounds": [
+          {
+            "kind": "decision",
+            "ref": "sha256:d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1",
+            "grade": "taken"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        }
+      },
+      "now": "2026-11-15T10:05:00Z",
+      "answer": {
+        "ok": false,
+        "code": "decision-invalid",
+        "data": {
+          "detail": "verdict-mismatch"
+        }
+      }
+    },
+    {
+      "name": "a journal entry whose id is not its derivation",
+      "call": {
+        "agentId": "reviews-service",
+        "capability": "reviews.approve",
+        "input": {
+          "reviewId": "r-412",
+          "reply": "draft-7"
+        },
+        "decision": {
+          "by": "operator",
+          "via": "relayed-instruction",
+          "action": "approve-reply",
+          "instruction": "approve the reply to the review from Anna",
+          "at": "2026-11-15T09:59:00Z"
+        },
+        "verdict": {
+          "id": "sha256:ccdd35168ab474fa5764a526cfb83621351e23682c5075b2e18d56bddf96aa30",
+          "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e"
+        }
+      },
+      "journal": {
+        "kind": "decision-verdict/1",
+        "id": "sha256:ccdd35168ab474fa5764a526cfb83621351e23682c5075b2e18d56bddf96aa30",
+        "at": "2026-11-15T10:00:00Z",
+        "expiresAt": "2026-11-15T10:10:00Z",
+        "asked": {
+          "callee": "reviews-service",
+          "capability": "reviews.approve",
+          "action": "approve-reply",
+          "effect": "publish",
+          "context": "personal",
+          "tier": "T1",
+          "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5"
+        },
+        "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e",
+        "caller": "agent-claude-code",
+        "session": "s-7f3a91",
+        "verdict": "allow",
+        "rule": "AP-2",
+        "reason": "covered",
+        "route": "operator",
+        "machineForm": "hub-dispatch",
+        "grounds": [
+          {
+            "kind": "decision",
+            "ref": "sha256:d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1",
+            "grade": "taken"
+          }
+        ],
+        "policy": {
+          "version": "2026-11-15.1",
+          "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+        }
+      },
+      "now": "2026-11-15T10:05:00Z",
+      "answer": {
+        "ok": false,
+        "code": "decision-invalid",
+        "data": {
+          "detail": "verdict-mismatch"
+        }
+      }
+    }
+  ]
+}

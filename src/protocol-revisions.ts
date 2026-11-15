@@ -22,6 +22,7 @@ export const PROTOCOL_REVISIONS: ReadonlyMap<string, readonly string[]> = new Ma
   ["coding-agents", ["1"]],
   ["credential-decision", ["1"]],
   ["credential-request", ["1"]],
+  ["decision-verdict", ["1"]],
   ["credential-revocation", ["1"]],
   ["enroll-token", ["1"]],
   ["entitlement", ["1", "2"]],

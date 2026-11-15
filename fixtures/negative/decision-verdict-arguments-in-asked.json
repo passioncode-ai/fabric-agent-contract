@@ -1,0 +1,38 @@
+{
+  "kind": "decision-verdict/1",
+  "id": "sha256:c41f02053e1c8e3dfac3b2d6bc3dfa3c6af1b0ec0691ad11f193a96cb7b3f179",
+  "at": "2026-11-15T10:00:00Z",
+  "expiresAt": "2026-11-15T10:10:00Z",
+  "asked": {
+    "callee": "reviews-service",
+    "capability": "reviews.approve",
+    "action": "approve-reply",
+    "effect": "publish",
+    "context": "personal",
+    "tier": "T1",
+    "argsDigest": "hmac-sha256:4ca94a305319b485a01d0b68273d567e32529bd5397ce8caf0353b1382325bf5",
+    "input": {
+      "reviewId": "r-412",
+      "reply": "draft-7"
+    }
+  },
+  "askedDigest": "sha256:40756bc6178db038581c2650d277a07e97c69eeb81c60394123b62aa6f1b9465",
+  "caller": "agent-claude-code",
+  "session": "s-7f3a91",
+  "verdict": "allow",
+  "rule": "AP-2",
+  "reason": "covered",
+  "route": "operator",
+  "machineForm": "hub-dispatch",
+  "grounds": [
+    {
+      "kind": "decision",
+      "ref": "sha256:d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1",
+      "grade": "taken"
+    }
+  ],
+  "policy": {
+    "version": "2026-11-15.1",
+    "digest": "sha256:5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e"
+  }
+}

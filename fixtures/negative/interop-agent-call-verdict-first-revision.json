@@ -1,0 +1,19 @@
+{
+  "agentId": "reviews-service",
+  "capability": "reviews.approve",
+  "input": {
+    "reviewId": "r-412",
+    "reply": "draft-7"
+  },
+  "decision": {
+    "by": "operator",
+    "via": "relayed-instruction",
+    "action": "approve-reply",
+    "instruction": "approve the reply to the review from Anna",
+    "at": "2026-11-15T09:59:00Z"
+  },
+  "verdict": {
+    "id": "sha256:617ff6144df707cd9a4f66b4ddab259b2a1e7c23916ebf1afeb3edae9c404ea9",
+    "askedDigest": "sha256:f5843b20735e3700b4197de4234bd704c4babbabe748b6d416c6bf96615ccb9e"
+  }
+}

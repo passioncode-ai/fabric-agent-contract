@@ -377,7 +377,12 @@ one estate the same arguments travel over the relay inside a sealed `fabric-agen
 ([machine calls](machine-calls.md#the-sealed-call), DEC-0106).
 `agentId` is a registry id — a provider id, or a service `id` optionally followed by
 `.instance`. The schema admits no field beyond these, `decision` and `mandate`, so a credential cannot ride in
-the arguments. `decision` is the operator's decision on a `relayed` action ([service](service.md#actions) AP-2): the hub
+the arguments; its second revision, [`interop-agent-call-2.schema.json`](../../schemas/interop-agent-call-2.schema.json)
+(DEC-0172 DV-8), admits one more, `verdict` `{id, askedDigest}`, the receipt of a [decision verdict](decision-verdict.md)
+that allowed the act, which an origin sends only to a hub whose `protocols` list `decision-verdict/1`: the hub
+dispatches such a call only while that verdict is a current `allow` matching it (`checkVerdictDispatch`), refuses a
+mismatch `decision-invalid` with detail `verdict-mismatch` itself, drops `verdict` before it forwards or seals the call,
+and forwards a call without one as below. `decision` is the operator's decision on a `relayed` action ([service](service.md#actions) AP-2): the hub
 forwards a T0 or T1 origin's to the callee as the hop's `_meta.decision`, unchanged, and drops a T2 origin's operator decision, which would change nothing there, while it forwards a level decision (`by: "level"`) from any origin unchanged with the origin's delegation token, whose `mem` binds it (DEC-0162 LV-5, LV-6); it passes the callee's DL-19 refusals (`operator-decision-required`, `decision-invalid`,
 `human-step-required` with their `data`) back unchanged, never as a product error, and never answers a resend that
 carries a decision from what it remembered of the same call without one; the callee records the hub and the origin its

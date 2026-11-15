@@ -121,6 +121,7 @@ and recorded as DEC-0001.
 | What is left until the North Star, the contract's open rows against its gaps, in waves to 2026-11-21 (2026-11-07) | `docs/evidence/plans/2026-11-07-north-star.md` |
 | The design of authority levels and approve by level, which DEC-0162 decides (2026-11-12) | `docs/evidence/plans/2026-11-12-ct250-authority-levels.md` |
 | The design of an autonomy profile per place, the decision CT-285 owes (2026-11-12) | `docs/evidence/plans/2026-11-12-ct285-autonomy-profile.md` |
+| The decision verdict `decision-verdict/1`, a decision verifier's receipt, its reduction to `actionDecision` and `mandateCovers`, the hub's receipt check; `FAC-SEM-179` | `docs/specification/decision-verdict.md`, `schemas/decision-verdict.schema.json`, `schemas/interop-agent-call-2.schema.json`, `src/decision-verdict.ts`, `fixtures/vectors/decision-verdict.json` (DEC-0172; the design `docs/evidence/plans/2026-11-14-ct302-decision-verdict.md`) |
 | The design of an estate-scoped manager on the wire, the decision CT-252 owes (2026-11-12) | `docs/evidence/plans/2026-11-12-ct252-estate-manager.md` |
 | The design of the activity event of a unit of work, proposed as DEC-0164 (CT-259) with Observatory's OBS-378 (2026-11-12) | `docs/evidence/plans/2026-11-12-ct259-activity-unit.md` |
 | The design of the context of a task, settled before an agent acts on another organization's resources, the decision CT-292 owes (2026-11-12) | `docs/evidence/plans/2026-11-12-ct292-task-context.md` |

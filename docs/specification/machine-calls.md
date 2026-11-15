@@ -103,7 +103,9 @@ reads neither ([`agent-call-sealed.schema.json`](../../schemas/agent-call-sealed
   relay message body's own. A sealed call copied into another body does not open.
 - **Plaintext.** The RFC 8785 form of an
   [`agent-call-message`](../../schemas/agent-call-message.schema.json): a `call` carries `call` (the hub's `agent.call`
-  arguments, [interop C3.5](interop.md#c35-the-hub)) and optionally `delegation` (the hub's token, its one
+  arguments, [interop C3.5](interop.md#c35-the-hub), in their first revision: the sending machine's hub checks a decision
+  verdict's receipt (`verdict`, DEC-0172 DV-8) and drops it before it seals, so the receiving node never reads another
+  machine's journal) and optionally `delegation` (the hub's token, its one
   place on the relay, DL-11) and `traceparent`, and the operator's decision a T1 caller relays for a `relayed` action
   rides in `call.decision`, its one place in the sealed call, sent only to a target whose `protocols` lists
   `fabric-actions/0.1`, since an older reader refuses the member ([service](service.md#actions) AP-2, DEC-0121); the
