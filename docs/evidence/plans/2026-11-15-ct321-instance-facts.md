@@ -69,7 +69,7 @@ the contract's extension key ending `extensions/instance-facts/0.1` (added to `E
 the DEC), in the descriptor's `extensions`, the
 well-known document's `extensions`, or both, with its own schema `service-instance-facts-extension.schema.json`. A host
 pinned before the DEC ignores it, so no descriptor or well-known document becomes invalid anywhere; the protocol name
-`fabric-instance-facts/0.1` joins `NAMED_ONLY`. Every member is optional; an absent member, and an absent extension,
+`fabric-instance-facts/0.1` joins `NAMED_ONLY` and the register `PROTOCOL_REVISIONS`. Every member is optional; an absent member, and an absent extension,
 mean "not declared", never a default.
 
 **IF-2, `access`.** `{audience?, entry?}`:
@@ -83,7 +83,8 @@ mean "not declared", never a default.
 so `organization` needs `peer` (IF-6), and `operator` beside `peer` is a contradiction the rule refuses. `public` is a
 remote placement's only and needs no `peer`: it describes an `https` origin whose own surface anyone reaches with
 credentials of their own (a remote agent other agents call with their own keys, as Prowl Agent is), outside any hub's
-routing; a local placement is never `public`. `audience` describes; access still
+routing; a local placement is never `public`. A remote service only its organization's members reach with their own
+keys has no exact value without `peer`; it writes `public` for its origin's reach, or leaves `audience` out. `audience` describes; access still
 comes only from a share grant or an organization's listing, and `public` grants nothing through a hub. An empty
 `access` object, like an absent one, declares nothing. A service that declares `peer` before any grant or share
 reaches it leaves `audience` out rather than writing `operator`. The word is the instance's own: it is not the authority
@@ -102,7 +103,7 @@ is the only place it is said.
 |---|---|
 | `single` | one tenant: the context its placement names (`personal`, or one organization's), and no other's data |
 | `per-organization` | one of a product's copies the product itself runs one per organization (an organization's hosted copy), this copy holding the data of the organization its placement's `context` names; an agent the operator shares into organizations as separate instances is `single` in each (below) |
-| `shared` | one instance holding several tenants' data, kept apart by the instance: several organizations reaching it through share grants, or many users each signed in on its own sign-in (a multi-user service); a remote placement's in practice, since a local placement names one context and at most one grant (DEC-0082 item 4) |
+| `shared` | one instance holding several tenants' data, kept apart by the instance: many users each signed in on its own sign-in, or several organizations whose listings name it (a remote service; a local placement names one context and at most one grant, DEC-0082 item 4, so an agent shared into several organizations runs one `single` instance in each) |
 
 A host shows the organization from the placement, and prefers DEC-0170's signed `org-instance/1` statement where it holds
 one; the extension is declared, never verified. An agent shared into an organization runs as a separate instance whose placement's
@@ -129,7 +130,8 @@ document member by member, a member being `access`, `tenancy` or `space` as a wh
 
 **IF-6, `FAC-SEM`, one rule.** On the extension value (kind `instance-facts`), and on the descriptor and the well-known
 document as a pair (as `FAC-SEM-009` reads them): `audience` `organization` only beside `peer`, `operator`
-never beside it, `public` only on a remote placement; where the well-known document declares `surfaces.dashboard`, an
+never beside it, `public` only on a remote placement and never beside a `subscription` runner (DEC-0061 item 3, which
+the schema enforces only beside `peer`); where the well-known document declares `surfaces.dashboard`, an
 `entry` in either document is `host-signin` exactly when `login` is `true`; `space.kind` `system` never on a local
 placement; a local service's well-known document carries no `space.account`. A well-known document read alone is
 checked for what it carries; the clauses on `peer`, on a placement and on `space.account` need the pair, since the
