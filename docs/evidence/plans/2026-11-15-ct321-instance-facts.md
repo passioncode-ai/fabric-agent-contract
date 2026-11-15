@@ -76,14 +76,15 @@ mean "not declared", never a default.
 
 | Member | Values | Meaning |
 |---|---|---|
-| `audience` | `operator`, `organization`, `public` | who the instance serves: its operator alone; others it is offered to, the members of the organization its placement's `context` names and anyone a share grant or an organization's listing offers it to (an organization, a colleague, a guest; DEC-0082 item 4, DEC-0086); or, on a remote placement, anyone who reaches its origin's own surface |
+| `audience` | `operator`, `organization`, `public` | who the instance serves: its operator alone; others it is offered to, the members of the organization its placement's `context` names and anyone a share grant or an organization's listing offers it to (DEC-0082 item 4, DEC-0086), or a colleague or a guest a person-to-person share reaches (`fabric-peer-share/1`, DEC-0142, which is no share grant); or, on a remote placement, anyone who reaches its origin's own surface |
 | `entry` | `host-signin`, `own-signin`, `none` | how its dashboard is entered: through a host's login code ([operator login](../../specification/service.md#operator-login)), through a sign-in of its own, or with none |
 
 `audience` never widens what `peer` allows: a service with no `peer` serves its operator alone, so `organization` and
 `public` need `peer` (IF-6), and `operator` beside `peer` is a contradiction the rule refuses. `public` is a remote
 placement's (an `https` origin anyone reaches); a local placement is never `public`. `audience` describes; access still
 comes only from a share grant or an organization's listing, and `public` grants nothing through a hub. An empty
-`access` object, like an absent one, declares nothing. The word is the instance's own: it is not the authority
+`access` object, like an absent one, declares nothing. A service that declares `peer` before any grant or share
+reaches it leaves `audience` out rather than writing `operator`. The word is the instance's own: it is not the authority
 extension's `levels[].audience` (a membership reader id) nor a grant's audience.
 
 `entry` restates nothing a host can read elsewhere except one case: where the well-known document declares
@@ -102,11 +103,14 @@ is the only place it is said.
 | `shared` | one instance holding several organizations' data, kept apart by the instance (its placement names one context; the others reach it through share grants) |
 
 A host shows the organization from the placement, and prefers DEC-0170's signed `org-instance/1` statement where it holds
-one; the extension is declared, never verified. A personal instance offered to an organization through a share grant
-(DEC-0086) stays `single`: the grant lets the organization call it, its data stays the operator's.
+one; the extension is declared, never verified. An agent shared into an organization runs as a separate instance whose placement's
+`context` is that `org:<orgId>` and which names its share grant (DEC-0082 item 4, DEC-0086 item 3); a personal instance
+names no grant (`FAC-SEM-111`). That organization instance is `single`: it holds the organization's data only, as the
+row says for the context its placement names.
 
 **IF-4, `space`.** `{kind, account?}`: on a local placement `kind` is `user` (the counted OS account whose services
-directory declares it, DEC-0154), `container` or `vm` (a guest on the computer, its traffic relayed); `system` (a
+directory declares it, DEC-0154), `container` or `vm` (a guest on the computer, its traffic relayed through a forwarder its own account owns, since a
+listener HA-2 reads as `foreign-user`, a rootful proxy's, is never read, and then only the descriptor's copy shows); `system` (a
 platform's service account) is a remote placement's only (IF-6). `account` is an opaque label of 1 to 64 characters of
 `[A-Za-z0-9._-]`, starting with a letter or digit, that the installer or the operator assigns in the services
 directory, never the OS account's name, a person's name or a path; the pattern cannot tell a given name from a label, so
@@ -126,13 +130,15 @@ document as a pair (as `FAC-SEM-009` reads them): `audience` `organization` or `
 never beside it, `public` never on a local placement; where the well-known document declares `surfaces.dashboard`, an
 `entry` in either document is `host-signin` exactly when `login` is `true`; `space.kind` `system` never on a local
 placement; a local service's well-known document carries no `space.account`. A well-known document read alone is
-checked for what it carries. A refusal under this rule declares the facts not declared and never changes the service's
+checked for what it carries; the clause on `space.account` needs the pair, since the well-known schema has no
+`placement`. A refusal under this rule declares the member it refuses not declared (the other members stand), and
+`entry` is still read from `login` where a dashboard is declared, which needs no extension; it never changes the service's
 state, unlike `FAC-SEM-009`'s `foreign`.
 
 **IF-7, vectors.** A descriptor and a well-known document with and without the extension; `audience` against `peer`
 and placement; each `mode`; `entry` against `login`; `system` on a local placement; a local well-known document
-carrying `space.account`; a personal-context instance offered through a share grant with `audience: organization`
-beside `peer` (accepted); a label with `/`, `@` or a space (schema). The host's reading (well-known first, member by member, `entry` from `login` where a dashboard is
+carrying `space.account`; an `org:` placement that names its share grant, with `audience: organization` beside
+`peer` and `mode: single` (accepted); a label with `/`, `@` or a space (schema). The host's reading (well-known first, member by member, `entry` from `login` where a dashboard is
 declared) as a small reference function `instanceFacts(descriptor, wellKnown)` with its own vectors, among them a
 descriptor's `own-signin` beside a well-known `login: true` with no extension there (refused, and read `host-signin`).
 A host reads only its own account's answer: HA-2 discards a `foreign-user` listener's, so a well-known-first reading
