@@ -118,6 +118,7 @@ function routes(): Json[] {
     { name: "the one enrollment whose policy lists the tenant", tenantRef: TENANT, enrollments: [b, a], answer: { route: "enrollment", org: "org_a", index: 1 } },
     { name: "no enrollment lists it", tenantRef: TENANT, enrollments: [b], answer: { route: "none", reason: "unlisted" } },
     { name: "two organizations list one tenant: neither learns the other's seats", tenantRef: TENANT, enrollments: [a, { org: "org_b", tenants: [OTHER_TENANT, TENANT] }], answer: { route: "none", reason: "ambiguous" } },
+    { name: "two enrollments of one organization list one tenant: ambiguous, sent to neither", tenantRef: TENANT, enrollments: [a, { org: "org_a", tenants: [TENANT] }], answer: { route: "none", reason: "ambiguous" } },
     { name: "a tenant compared as written, never case-folded", tenantRef: TENANT.toUpperCase(), enrollments: [a], answer: { route: "none", reason: "unlisted" } },
     { name: "an enrollment with no list lists nothing", tenantRef: TENANT, enrollments: [{ org: "org_a" }], answer: { route: "none", reason: "unlisted" } },
     { name: "no device enrollment", tenantRef: TENANT, enrollments: [], answer: { route: "none", reason: "unlisted" } }
