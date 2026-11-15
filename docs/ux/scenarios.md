@@ -67,6 +67,7 @@
 | SCN-055 | An agent author learns that a channel-agent declaration is not read and why, or what it still owes | authoring | P-01 | ST-001, FLW-01 | draft | not audited |
 | SCN-057 | Tell my agent to do a task: it carries my word out the first time | governance | P-02 | ST-035, FLW-29 | draft | not audited |
 | SCN-063 | As my organization's administrator, read how long agents' turns take and which plans our machines hold, as cells | telemetry | P-02 | ST-044, FLW-35 | draft | not audited |
+| SCN-064 | As an administrator, I add an instance to my organization and later retire it; a reader trusts only the signed statement | membership | P-03 | ST-038, FLW-32 | draft | not audited |
 
 ## Personas
 
@@ -1242,6 +1243,27 @@ independent agent author and P-02 project operator.
 - **Errors & recovery:** a refused list -> its reason is shown to the administrator; the relay keeps the list it held until it expires or its signer leaves the key set.
 - **Status:** draft
 - **Coverage:** DEC-0129 OL-1 to OL-5, `verifyOrgAuthority` in `src/org-authority.ts`, `orgRelayAdmissionSet` in `src/org-authority.ts`, `FAC-SEM-146`, `FAC-SEM-150`, `test/org-authority.test.ts`; the relay's handshake for an organization is DEC-0134 (relay.md OR-1 to OR-5, `sessionStands`)
+- **Product:** unobserved
+
+### SCN-064: As an administrator, I add an instance to my organization and later retire it; a reader trusts only the signed statement
+
+- **Persona:** P-03
+- **Feature:** membership
+- **Traces:** ST-038, FLW-32 (JTBD-04, JRN-03/#1)
+- **Entry point:** the organization server's instance list, where an owner or an administrator records an instance
+- **Preconditions:** the organization's `org-key-set/1`, signed by the root, lists a signing key; the platform and the instance's product hold the organization's applied key set (DEC-0170)
+- **Steps:**
+  1. The administrator records an instance (`org.instance_added`: its id, product, `https://` origin and placement) -> the server signs `org-instance/1` at the next revision with `status: active`, a life of at most 7 days (IS-1, IS-4).
+  2. The platform's `instance_put` for `org:<orgId>` verifies the statement offline (`verifyOrgInstance`: the organization's key, the path's instance, the window, a revision not below the one held) -> it stores the verdict's `digest` and `revision` (IS-3).
+  3. A day before `expiresAt` the server re-issues the statement (`refreshDue`) -> readers fetch it and keep serving the instance (IS-4).
+  4. The administrator retires the instance (`org.instance_retired`) -> the server issues `status: retired` at a higher revision and nothing after it; a reader that fetches it stops serving the instance, and the earlier `active` statement is then `stale-revision` (IS-2, IS-4).
+- **Expected result:** a reader serves an instance for the organization only on a statement the organization's key signed for that instance; a retirement is stated, never left to silence, and reaches a reader at its next fetch, at most 7 days later.
+- **Alt paths:** the statement is past `expiresAt` -> refused `expired`, no grace; signed by a revoked or unlisted key -> `key-revoked` or `unknown-key`; another organization's or another instance's statement -> `wrong-org` or `wrong-instance`; the same revision with other bytes -> `revision-conflict`; an instance reachable only at a port or at `http://127.0.0.1` on a member's machine -> not stated (DEC-0170, not decided there).
+- **UI elements:** SCR-31: per instance its product, origin, placement, status, revision and `expiresAt`.
+- **States covered:** success, error
+- **Errors & recovery:** a refused statement -> the reader shows the verifier's reason and keeps the record it held; the administrator has the server re-issue under a listed key.
+- **Status:** draft
+- **Coverage:** DEC-0170 IS-1 to IS-4, `verifyOrgInstance` in `src/org-instance.ts`, `FAC-SEM-177`, `test/org-instance.test.ts`, vectors `org-instance.json`
 - **Product:** unobserved
 
 ### SCN-050: I bring my work into an organization and ask its administrators for what it needs
