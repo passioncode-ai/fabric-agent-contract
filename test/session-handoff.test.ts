@@ -91,7 +91,9 @@ describe("FAC-SEM-054 and FAC-SEM-055: the folder", () => {
     ["session-handoff-folder-digest-mismatch", "FAC-SEM-054"],
     ["session-handoff-folder-foreign-config", "FAC-SEM-054"],
     ["session-handoff-folder-secret-in-context", "FAC-SEM-055"],
-    ["session-handoff-folder-stdio-with-token", "FAC-SEM-055"]
+    ["session-handoff-folder-stdio-with-token", "FAC-SEM-055"],
+    ["session-handoff-folder-url-token-user", "FAC-SEM-055"],
+    ["session-handoff-folder-url-token-param", "FAC-SEM-055"]
   ])("%s is refused with %s", (name, code) => {
     expect([...new Set(codes("session-handoff-folder", name))]).toEqual([code]);
   });

@@ -10,6 +10,7 @@ import {
   credentialName,
   readSessionHandoff,
   secretArgument,
+  secretUrl,
   secretValue,
   sessionHandoffFolderFindings,
   sessionHandoffManifestFindings,
@@ -113,6 +114,8 @@ const cases: Array<[string, () => string[], string]> = [
   ["SH-9 credential env in a no-secret folder", () => onFolder("folder-stdio-ok", (f) => { const servers = f.entries["mcp.json"].json.mcpServers; servers[Object.keys(servers)[0] as string].env = { API_TOKEN: "abc" }; }), "a handoff with no secret carries no credential in a server's environment"],
   ["SH-9 standing key in a server's environment", () => onFolder("folder-ok", (f) => { f.entries["mcp.json"].json.mcpServers.fabric.env = { API_TOKEN: "abc" }; }), "a credential in a server's environment is a delegation token"],
   ["SH-9 credential in a URL", () => onFolder("folder-ok", (f) => { f.entries["mcp.json"].json.mcpServers.fabric.url = "http://127.0.0.1:47070/mcp?t=eyJhbGciOiJFZERTQSJ9.eyJzdWIiOiJ4In0.c2ln"; }), "a server's url never carries a credential"],
+  ["SH-9 credential in a server's command", () => onFolder("folder-stdio-ok", (f) => { const servers = f.entries["mcp.json"].json.mcpServers; servers[Object.keys(servers)[0] as string].command = ["/opt/mcp --key=sk-", "aB3cD4eF5gH6", "jK7mN8pQ9rS2"].join(""); }), "a server's command never carries a credential"],
+  ["SH-9 a token as a URL's user name (DEC-0178)", () => onFolder("folder-ok", (f) => { f.entries["mcp.json"].json.mcpServers.fabric.url = `http://${"0123456789abcdef".repeat(3).slice(0, 40)}@127.0.0.1:47070/mcp`; }), "a server's url never carries a credential"],
   ["SH-9 credential in a server's arguments", () => onFolder("folder-stdio-ok", (f) => { const servers = f.entries["mcp.json"].json.mcpServers; servers[Object.keys(servers)[0] as string].args = ["--key", ["sk-", "aB3cD4eF5gH6", "jK7mN8pQ9rS2"].join("")]; }), "a server's arguments never carry a credential"],
   ["SH-13 credential repeated", () => onFolder("folder-ok", (f) => { f.entries["context.md"].text += "\nToken: tok-0f9b6d1e3c2a4b8e\n"; }), "context.md repeats a credential from mcp.json"]
 ];
@@ -205,6 +208,14 @@ describe("the review's fixes", () => {
       "--mcp-config=/tmp/handoff/mcp.json"
     ];
     for (const arg of args) expect(secretArgument(arg), arg).toBe(shape.secretArgument(arg));
+    // A server's URL (DEC-0178): the copy of secretUrl answers as the shared one.
+    const hex40 = "0123456789abcdef".repeat(3).slice(0, 40);
+    const urls = [
+      "http://127.0.0.1:47070/mcp", `http://${hex40}@127.0.0.1:47070/mcp`, `http://${hex40.slice(1)}@127.0.0.1/mcp`, "https://u:p@agents.example/mcp",
+      "https://agents.example/mcp?api_key=x", "https://agents.example/mcp?key=", "https://agents.example/mcp?sort=key", "https://agents.example/mcp#access_token=x",
+      `https://agents.example/mcp?q=${"QrStUvWxYz0123456789abcdefGHIJKLmnopQRSTuv"}`, "https://agents.example/mcp?q=%zz", "not a url", "https://git@agents.example/mcp", "https://agents.example/mcp?flag&&a=1&a=2", "https://%zz@agents.example/mcp", "https://agents.example/mcp?=x"
+    ];
+    for (const url of urls) expect(secretUrl(url), url).toBe(shape.secretUrl(url));
   });
 
   it("holds the shared detector's patterns character for character (its vendors take this file alone)", () => {
