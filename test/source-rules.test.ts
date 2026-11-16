@@ -43,8 +43,7 @@ import {
   sourcePackageFindings,
   sourceRules,
   sourceTreeProblems,
-  stripHfsIgnorable
-} from "../src/source-rules.js";
+  stripHfsIgnorable, ASSIGNED_HEAD, PASSWORD_NAME } from "../src/source-rules.js";
 import { createValidator, validateDocument } from "../src/validator.js";
 import { buildSourceTreeVectors } from "../tools/vectors/source-tree.js";
 import { PACKAGE_FILE, checkPackageFolder, sha256Of } from "../src/package-rules.js";
@@ -111,6 +110,8 @@ describe("the source-tree vectors (DEC-0149)", () => {
     expect(vectors.constants.TOKEN_FILE).toEqual(pattern(TOKEN_FILE));
     expect(vectors.constants.KEY_SHAPE_SOURCES).toEqual([...KEY_SHAPE_SOURCES]);
     expect(vectors.constants.URL_SECRET_VALUE).toEqual(pattern(URL_SECRET_VALUE));
+    expect(vectors.constants.ASSIGNED_HEAD).toEqual(pattern(ASSIGNED_HEAD));
+    expect(vectors.constants.PASSWORD_NAME).toEqual(pattern(PASSWORD_NAME));
   });
 
   it("keep the tree check's own provider-key shapes, unbounded, written out and apart from the shared detector", () => {
@@ -618,6 +619,13 @@ describe("FAC-SEM-158 and FAC-SEM-159: the tree check", () => {
   it("checks a 1 MB line of trailing punctuation or repeated query parameters in linear time", () => {
     const check = (text: string) => sourceTreeProblems(tree([{ path: "src/long.txt", text }]));
     for (const [make, count] of [[(n: number) => `http://a${".".repeat(n)}x`, 1_000_000], [(n: number) => `http://a/${")".repeat(n)}q`, 1_000_000], [(n: number) => `http://a/?${"a=b&".repeat(n)}`, 250_000], [(n: number) => JSON.stringify(`http://a/?${"a=b&".repeat(n)}`).replace(/\//g, "\\/"), 250_000]] as const) {
+      expect(growth(make, count, check), make(2)).toBeLessThan(64);
+    }
+  }, 180_000);
+
+  it("checks a long line of a query value with many commas under a long name in linear time (DEC-0175)", () => {
+    const check = (text: string) => sourceTreeProblems(tree([{ path: "src/long.txt", text }]));
+    for (const [make, count] of [[(n: number) => `https://h.io/p?${"x_".repeat(n)}=${"a,".repeat(n)}`, 100_000], [(n: number) => `https://h.io/p?${"db_".repeat(n)}password=${"a,".repeat(n)}`, 100_000]] as const) {
       expect(growth(make, count, check), make(2)).toBeLessThan(64);
     }
   }, 180_000);

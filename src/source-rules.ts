@@ -699,7 +699,8 @@ export const URL_SECRET_VALUE = new RegExp(`(^bearer\\s.+|${KEY_SHAPE_SOURCES.jo
 /** The same key shapes without the whole-value bearer branch: what a piece of a comma-separated value is read by (DEC-0175). */
 const KEY_SHAPE_IN_PIECE = new RegExp(`(${KEY_SHAPE_SOURCES.join("|")})`, "i");
 /** A password of 8 or more characters mixing letters and digits, not synthetic: in the user information or under a password's name. */
-const passwordShaped = (value: string): boolean => value.length >= 8 && /[0-9]/.test(value) && /[A-Za-z]/.test(value) && real(unquote(value));
+const passwordShaped = (value: string, decoded = false): boolean =>
+  value.length >= 8 && /[0-9]/.test(value) && /[A-Za-z]/.test(value) && real(decoded ? value : unquote(value));
 /** A query or fragment parameter that names a password (`password`, `passwd`, with a prefix such as `db_`); `pwd` is often a working directory, so it is none. */
 export const PASSWORD_NAME = /(?:^|[_.-])(?:password|passwd)$/i;
 /**
@@ -715,7 +716,7 @@ function urlSecret(url: string, depth = 0): boolean {
   if (!/^[A-Za-z][A-Za-z0-9+.-]*:/.test(trimmed)) return false;
   const [password, query, fragment, user] = urlParts(trimmed);
   if (passwordShaped(password)) return true;
-  // A user with no password that is a token, not a name (a git remote's `https://<token>@host`, CT-325).
+  // A user that is a token, not a name, with a password or without one (`https://<token>@host`, DEC-0175).
   if (tokenUser(unquote(user))) return true;
   // A key behind a percent-encoded separator in the path or a parameter's name starts a word once decoded (CT-325);
   // read only when the URL as written shows none, so a raw key keeps its own column.
@@ -729,11 +730,14 @@ function urlSecret(url: string, depth = 0): boolean {
         // Judged whole and piece by piece: a synthetic word after a `,` does not hide the value before it (CT-325). A
         // value under a password's name is read as a password in the user information is. The whole-value bearer
         // branch reads only the whole value: a piece saying `bearer tokens` names no token.
+        // The name is judged once: per piece it would cost the name's length times the commas (DEC-0175's readings).
+        const passwordName = PASSWORD_NAME.test(name);
+        const credential = credentialName(name);
         const pieces = value.includes(",") ? value.split(",") : [];
         for (const piece of [value, ...pieces]) {
-          if (PASSWORD_NAME.test(name) && passwordShaped(piece)) return true;
+          if (passwordName && passwordShaped(piece, true)) return true;
           if (!real(piece)) continue;
-          if ((credentialName(name) && longRunSecret(piece)) || hasJwt(piece)) return true;
+          if ((credential && longRunSecret(piece)) || hasJwt(piece)) return true;
           if (piece === value ? URL_SECRET_VALUE.test(piece) : KEY_SHAPE_IN_PIECE.test(piece)) return true;
         }
       }

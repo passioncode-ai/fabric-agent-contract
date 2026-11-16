@@ -13051,11 +13051,13 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   3. **Decoded once.** A provider key anywhere in a URL once percent-decoded is a credential, so an encoded separator in
      its path or a parameter's name hides none (`a%2Ftask-…` stays clean: no key shape); read only when the URL as
      written shows none, so a raw key keeps its own column.
-  4. **Assignment heads.** Beside `NAME = value`, `NAME: value` and `"name": "value"`, the head reads a name after `--`
-     or `:` or closed by a subscript's `]` (`ENV['NAME']`, `config["name"]`, `settings[NAME]`), before `=`, `:`, `:=`,
+  4. **Assignment heads.** Beside `NAME = value`, `NAME: value` and `"name": "value"`, the head reads a name, plain or
+     after `-`, `--` or `:` (no word character before them) or closed by a subscript's `]` (`ENV['NAME']`, `config["name"]`, `settings[NAME]`), before `=`, `:`, `:=`,
      `=>` (with or without a leading `:`), `||=`, `??=`, `?=`, `+=` or `<-`; a hyphen inside a word still starts no
      name. `ASSIGNED_HEAD` and `PASSWORD_NAME` join the vectors' `constants` block, the head written with two
-     fixed-width look-behinds a Python port takes as they are.
+     fixed-width look-behinds a Python port takes as they are; a Python port reads `PASSWORD_NAME`'s `$` as `\Z` and
+     its `i` flag with `re.ASCII`, as JavaScript does. A value's name is judged once, never per piece, so a long line
+     stays linear.
   5. **A password in a query.** A value under a password's name (`password` or `passwd`, with a prefix such as `db_`;
      not `pwd`, often a working directory) is read by the user information's rule: 8 or more characters mixing letters
      and digits, not synthetic.
