@@ -9,8 +9,8 @@ import type { Finding } from "./findings.js";
  * the folder lives, the manifest against its schema, and the rules no schema can state (FAC-SEM-053…055).
  *
  * It depends on nothing but Node's built-ins, and its one import of this kit is a type, so a consumer can copy
- * it byte for byte and run it under `node --experimental-strip-types` against a folder it wrote (Fabric does:
- * `apps/desktop/test/session-handoff-conformance.test.mjs`). Such a consumer passes its own compiled schema
+ * it byte for byte and run it under `node --experimental-strip-types` against a folder it wrote (Fabric Dashboards
+ * vendors it as `test/contract/session-handoff.ts`). Such a consumer passes its own compiled schema
  * check; inside this kit the schema check defaults to the contract's own validator.
  */
 
@@ -107,6 +107,54 @@ const pathLike = (piece: string): boolean =>
 export const secretArgument = (value: string): boolean =>
   JWT_SHAPE.test(value) || SECRET_VALUE.test(value) || BEARER_INSIDE.test(value) ||
   value.split(/[\s=]/).some((piece) => (pathLike(piece) ? piece.split(/[\\/]/).some((part) => longSecret(part)) : longSecret(piece)));
+/** Percent-decode and keep `+` as `+`: `URLSearchParams` turns a raw `+` into a space, which would split a base64 run. */
+const decodeKeepingPlus = (raw: string): string => {
+  try {
+    return decodeURIComponent(raw);
+  } catch {
+    return raw;
+  }
+};
+/** Each query or fragment piece's raw value, by its decoded name: what `URLSearchParams` hands over, with `+` kept. */
+function rawValues(query: string): Map<string, string[]> {
+  const values = new Map<string, string[]>();
+  for (const piece of query.split("&")) {
+    if (piece === "") continue;
+    const at = piece.indexOf("=");
+    const name = [...new URLSearchParams(at < 0 ? piece : piece.slice(0, at)).keys()][0] ?? "";
+    const value = at < 0 ? "" : decodeKeepingPlus(piece.slice(at + 1));
+    const list = values.get(name);
+    // Appended in place: a query of many pieces under one name costs one pass, not a copy per piece.
+    if (list === undefined) values.set(name, [value]);
+    else list.push(value);
+  }
+  return values;
+}
+/** A URL's user name read as a token (DEC-0177): 40 or more of `[A-Za-z0-9_-]` holding a letter and a digit. */
+const tokenUserName = (user: string): boolean => /^[A-Za-z0-9_-]{40,}$/.test(user) && /[0-9]/.test(user) && /[A-Za-z]/.test(user);
+/**
+ * Whether a server's URL carries a credential (LC-21, DEC-0178): anything `secretArgument` finds in it, a password
+ * in its user information, a user name that is a token, or a query or fragment parameter whose name can only carry a
+ * credential and has a value, or whose value is shaped like one. A string that is not an absolute URL is checked as
+ * an argument only.
+ */
+export function secretUrl(value: string): boolean {
+  if (secretArgument(value)) return true;
+  let url: URL;
+  try {
+    url = new URL(value);
+  } catch {
+    return false;
+  }
+  if (url.password !== "") return true;
+  if (tokenUserName(decodeKeepingPlus(url.username))) return true;
+  for (const part of [url.search, url.hash]) {
+    for (const [name, values] of rawValues(part.slice(1))) {
+      if (values.some((raw) => (raw !== "" && credentialName(name)) || secretValue(raw))) return true;
+    }
+  }
+  return false;
+}
 /**
  * A delegation token minted for this session (DEC-0039): exactly a JWS compact serialisation whose header says
  * `typ: fabric-delegation+jwt` and whose payload carries a numeric `exp`. The kit checks this shape only; the token's
@@ -522,10 +570,9 @@ function mcpFindings(manifest: Json, text: (name: string) => string | undefined)
       if (credential && mcp.auth === "none") findings.push(sem055(`/mcp.json/mcpServers/${name}/env/${variable}`, "a handoff with no secret carries no credential in a server's environment"));
       if (credential && mcp.auth === "bearer" && !delegationTokenShape(envValue)) findings.push(sem055(`/mcp.json/mcpServers/${name}/env/${variable}`, "a credential in a server's environment is a delegation token minted for this session (DEC-0039), never a standing key"));
     }
-    for (const field of ["url", "command"] as const) {
-      const value2 = value[field];
-      if (typeof value2 === "string" && secretArgument(value2)) findings.push(sem055(`/mcp.json/mcpServers/${name}/${field}`, `a server's ${field} never carries a credential`));
-    }
+    // A server's URL is read as a URL (DEC-0178): a password, a token as its user name or a credential-named parameter.
+    if (typeof value.url === "string" && secretUrl(value.url)) findings.push(sem055(`/mcp.json/mcpServers/${name}/url`, "a server's url never carries a credential"));
+    if (typeof value.command === "string" && secretArgument(value.command)) findings.push(sem055(`/mcp.json/mcpServers/${name}/command`, "a server's command never carries a credential"));
     for (const [index, arg] of strings(value.args).entries()) if (secretArgument(arg)) findings.push(sem055(`/mcp.json/mcpServers/${name}/args/${index}`, "a server's arguments never carry a credential: a process listing shows them"));
   }
   // SH-13 — a secret lives in mcp.json and nowhere else in the folder.

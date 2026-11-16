@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0178` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0179` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -13240,3 +13240,40 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/DOCMAP.md`; `docs/backlog.md` (CT-329, CT-333).
 - **Source:** DEC-0175's readings (round 1 seam), CT-329; DEC-0177's own readings (rounds 1 to 5). DEC-0177 was reserved by git CAS (`agent_sync.py reserve`,
   key `ct329-token-user`).
+
+### DEC-0178: session handoff reads a server's URL as a URL
+
+- **Date:** 2026-11-16
+- **Status:** Accepted 2026-11-16 (CT-333, filed from DEC-0177's readings): the coordinator's blind readings folded
+  rounds 1 and 2 and read rounds 3 and 4 clean on all three tiers at `de861e6f`.
+- **Context:** `FAC-SEM-055` (SH-9) reads an `mcp.json` server's `url` with the argument reading (`secretArgument`) of
+  the detector `src/session-handoff.ts` copies, so a password in its user information, a token as its user name or a
+  credential-named query parameter passes there, while `FAC-SEM-057` refuses the same URL in a manifest. The copy
+  stays standalone because its vendors take that file alone (DEC-0044, DEC-0151), so it held no URL reading.
+- **Decision:** [session handoff](specification/session-handoff.md) SH-9:
+  1. `src/session-handoff.ts` copies the shared detector's URL reading (`decodeKeepingPlus`, `rawValues`,
+     `tokenUserName` and `secretUrl` of `src/secret-shape.ts`, DEC-0177), exported as `secretUrl`, still with no import
+     of the kit; `test/session-handoff-review.test.ts` holds its answers to the shared one's.
+  2. `FAC-SEM-055` reads a server's `url` with it: a password, a token as the user name, a parameter named for a
+     credential with a value, or a value shaped like one, is refused with the same message as before. A server's
+     `command` and `args` stay read as arguments (SH-10).
+- **Why:** a server's URL is a URL; the handoff's own record (`mcp.json`) should refuse what a manifest's MCP URL
+  refuses, and the session bearer travels in a header (SH-9), never in the URL.
+- **Alternatives considered:** importing `src/secret-shape.ts` (refused: the file's vendors take it alone); leaving it
+  (refused: the two rules answer one URL differently).
+- **Compatibility:** widens `FAC-SEM-055`: a handoff folder whose server `url` carries a credential in its user
+  information or its query now fails, and so does a harmless single-word parameter with a value (`?auth=oauth`,
+  `?code=1`, `?session=1`), as `FAC-SEM-057` refuses it in a manifest. No known writer's folder changes: Fabric Dashboards
+  writes stdio servers only, with no `url` (its `src/core/handoff.ts`); the agents database's agent-host template
+  declares `mcp.auth: none` and writes no `mcp.json`; the MCP config Fabric gives a session carries loopback and gateway URLs with their keys in
+  headers (its `sessionBundle.ts`); the positive fixtures are unchanged. Fabric Dashboards, which vendors `src/session-handoff.ts` as
+  `test/contract/session-handoff.ts`, takes it at its next pin. No released vector changes its answer; two semantic
+  fixtures are added. Still read as an argument: a URL in a launch argument (SH-11's Codex `-c mcp_servers.<name>.url=`),
+  filed on CT-333.
+- **Consequences / affects:** `src/session-handoff.ts` (`secretUrl` and its helpers, `mcpFindings`),
+  `fixtures/semantic/session-handoff-folder-url-token-user.json`, `fixtures/semantic/session-handoff-folder-url-token-param.json`,
+  `test/session-handoff.test.ts`, `test/session-handoff-review.test.ts` (answers and the copied text);
+  `docs/specification/session-handoff.md` (SH-9), `docs/specification/conformance.md`, `docs/DOCMAP.md`;
+  `docs/backlog.md` (CT-333, CT-335).
+- **Source:** CT-333 (DEC-0177's readings, round 3 seam); DEC-0178's own readings (rounds 1 and 2). DEC-0178 was reserved by git CAS (`agent_sync.py reserve`,
+  key `ct333-handoff-url`).
