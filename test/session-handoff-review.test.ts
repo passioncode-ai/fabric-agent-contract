@@ -235,6 +235,7 @@ describe("the review's fixes", () => {
     expect(expression(copy), "tokenUserName").toBeDefined();
     expect(expression(copy), "tokenUserName").toBe(expression(original));
     const body = (text: string, name: string) => new RegExp(`function ${name}\\([^)]*\\): [^{]+\\{\\n([\\s\\S]*?)\\n\\}\\n`).exec(text)?.[1];
+    expect(/const decodeKeepingPlus = [\s\S]*?\n\};/.exec(copy)?.[0], "decodeKeepingPlus").toBe(/const decodeKeepingPlus = [\s\S]*?\n\};/.exec(original)?.[0]);
     for (const name of ["rawValues", "secretUrl"]) {
       expect(body(copy, name), name).toBeDefined();
       expect(body(copy, name), name).toBe(body(original, name));

@@ -10,7 +10,7 @@ import type { Finding } from "./findings.js";
  *
  * It depends on nothing but Node's built-ins, and its one import of this kit is a type, so a consumer can copy
  * it byte for byte and run it under `node --experimental-strip-types` against a folder it wrote (Fabric Dashboards
- * vendors it as `test/contract/session-handoff.ts`; Fabric writes no session-handoff/1, its ADR-0182). Such a consumer passes its own compiled schema
+ * vendors it as `test/contract/session-handoff.ts`). Such a consumer passes its own compiled schema
  * check; inside this kit the schema check defaults to the contract's own validator.
  */
 
