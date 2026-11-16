@@ -137,7 +137,8 @@ segment are refused although harmless, and so is a user name of 40 or more of `[
 that is a name (AWS CodeCommit's `<user>-at-<account>`, a long Azure DevOps organisation); a token user name after
 another `@` in the user information, or holding `.`, an encoded `@` or a malformed escape (`%zz`), is not found, nor
 is a URL inside a launch argument (`args`, a runner's `argv`, a descriptor's `commands`, `mcp-remote <url>`), which is
-read as an argument: its token user name or user-information password passes. The shared detector has no synthetic
+read as an argument: its token user name or user-information password passes; nor is a URL nested in a query value
+(`?u=https://<token>@host`), which the source tree check reads two levels deep. The shared detector has no synthetic
 words: a token-shaped user name holding `example` is refused here though the source tree check passes it. [Session handoff](session-handoff.md) SH-10 applies the
 same detector to a launch's arguments.
 

@@ -184,8 +184,10 @@ loses its user information, any URL its password, query and fragment, the scp fo
 cannot be read reliably) and when what is left still has the shape of a secret (`secretUrl`). Since DEC-0151 the
 shared detector takes a provider prefix only at a word start and an `sk-` key only with its strength, so a remote
 holding a weak `sk-` slug now records its origin (the AT-15 cases of `fixtures/vectors/folder-attribution.json`).
-Since DEC-0177 a remote whose user name is a token records none (`ssh://<40 hex>@host/…`; an `http` or `https` one
-drops its user first, and the scp form `<token>@host:path` is not read as a URL, so it keeps it). A record whose path is
+Since DEC-0177 a remote whose user name is a token records none (`ssh://<40 hex>@host/…`, and the scp form
+`<token>@host:path`, whose user `recordOrigin` reads itself since the detector reads no URL there); an `http` or
+`https` one drops its user first. Such a repository then has no origin in its records, so a second clone of it joins by
+its path, not by work. A record whose path is
 broad (a declared container at the matched place) is `null`, as an explicit attach of a broad folder is. An explicit
 attach that moves a folder (or its place in the repository, in this checkout or another of the same common dir) from
 another Project lasts only when the product also removes that Project's folder at the place from its own store (D5);

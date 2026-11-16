@@ -1,5 +1,5 @@
 import { type Finding, type JsonObject, isObject, jsonEqual } from "./findings.js";
-import { secretUrl } from "./secret-shape.js";
+import { secretUrl, tokenUserName } from "./secret-shape.js";
 
 // #region folder-attribution, docs: docs/specification/folder-attribution.md
 /**
@@ -102,7 +102,8 @@ export function normalizeOrigin(raw: unknown): string | undefined {
  * The origin a record keeps (*Recording the answer*): the raw remote without what can carry a credential, so no
  * product's store holds a token from a remote URL. An `http`/`https` URL loses its user information, any URL its
  * password, query and fragment, the scp form `user:secret@host:path` its `:secret` and its query; a local path is kept.
- * Its identity is the raw remote's. `null` when what is left still has the shape of a secret.
+ * Its identity is the raw remote's. `null` when what is left still has the shape of a secret, or when the scp form's
+ * user is a token (`tokenUserName`, DEC-0177), which `secretUrl` does not read since the scp form is no URL.
  */
 export function recordOrigin(origin: string | null): string | null {
   if (origin === null) return null;
@@ -126,6 +127,8 @@ export function recordOrigin(origin: string | null): string | null {
     const host = String(scp?.[2]);
     // A remote that is not a local path and has no identity cannot be read reliably: nothing of it is kept.
     if (!scp || normalizeOrigin(value) === undefined) return null;
+    // The scp form is no URL, so the detector reads no user name in it: a token user is read here (DEC-0177).
+    if (scp[1] !== undefined && tokenUserName(userOf(scp[1]))) return null;
     value = `${scp[1] === undefined ? "" : `${userOf(scp[1])}@`}${host.slice(host.lastIndexOf("@") + 1)}:${String(String(scp[3]).split(/[?#]/)[0])}`;
   }
   // The kept origin names the same repository as the raw one, by construction: a rebuilt form whose identity differs
