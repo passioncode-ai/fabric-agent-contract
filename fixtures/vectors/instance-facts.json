@@ -1501,7 +1501,7 @@
       }
     },
     {
-      "name": "organization beside a subscription runner is refused (DEC-0174)",
+      "name": "organization and per-organization beside a subscription runner are both refused (DEC-0174)",
       "descriptor": {
         "protocol": "fabric-service/0.1",
         "id": "research",
@@ -1529,15 +1529,18 @@
         }
       },
       "read": {
-        "declared": true,
-        "facts": {
-          "mode": "per-organization"
-        },
+        "declared": false,
+        "facts": {},
         "refused": [
           {
             "document": "descriptor",
             "field": "audience",
-            "reason": "organization beside a subscription runner: a subscription serves only its owner's own sessions, never an organization's members (DEC-0046, DEC-0174)"
+            "reason": "organization beside a subscription runner: a subscription serves only its owner's own sessions, never an organization's members (DEC-0061, DEC-0174)"
+          },
+          {
+            "document": "descriptor",
+            "field": "mode",
+            "reason": "per-organization beside a subscription runner: an instance holding others' data serves more than its owner's own sessions (DEC-0061, DEC-0174)"
           }
         ],
         "foreign": false,
@@ -1545,14 +1548,66 @@
       },
       "findings": {
         "descriptor": [
-          "FAC-SEM-180 /extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1instance-facts~10.1/access/audience"
+          "FAC-SEM-180 /extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1instance-facts~10.1/access/audience",
+          "FAC-SEM-180 /extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1instance-facts~10.1/tenancy/mode"
         ],
         "wellKnown": [],
         "pair": []
       }
     },
     {
-      "name": "a well-known document that lists the facts' protocol in what it reads (DEC-0174)",
+      "name": "shared beside a subscription runner is refused; the audience stands (DEC-0174)",
+      "descriptor": {
+        "protocol": "fabric-service/0.1",
+        "id": "research",
+        "instance": "default",
+        "placement": "remote",
+        "origin": "https://research.example",
+        "runner": {
+          "credentialKind": "subscription"
+        },
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/instance-facts/0.1": {
+            "access": {
+              "audience": "operator"
+            },
+            "tenancy": {
+              "mode": "shared"
+            }
+          }
+        }
+      },
+      "wellKnown": {
+        "service": {
+          "id": "research",
+          "instance": "default"
+        }
+      },
+      "read": {
+        "declared": true,
+        "facts": {
+          "audience": "operator"
+        },
+        "refused": [
+          {
+            "document": "descriptor",
+            "field": "mode",
+            "reason": "shared beside a subscription runner: an instance holding others' data serves more than its owner's own sessions (DEC-0061, DEC-0174)"
+          }
+        ],
+        "foreign": false,
+        "invalid": []
+      },
+      "findings": {
+        "descriptor": [
+          "FAC-SEM-180 /extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1instance-facts~10.1/tenancy/mode"
+        ],
+        "wellKnown": [],
+        "pair": []
+      }
+    },
+    {
+      "name": "a well-known document may list the facts' protocol: no finding, the facts read from the key (DEC-0174)",
       "descriptor": {
         "protocol": "fabric-service/0.1",
         "id": "research",
@@ -1588,9 +1643,7 @@
       },
       "findings": {
         "descriptor": [],
-        "wellKnown": [
-          "FAC-SEM-180 /protocols/1"
-        ],
+        "wellKnown": [],
         "pair": []
       }
     },

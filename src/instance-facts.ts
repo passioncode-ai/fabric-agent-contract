@@ -37,7 +37,7 @@ function answersAsAnother(descriptor: unknown, wellKnown: unknown): boolean {
   return serviceKey(descriptor) !== serviceKey(isObject(wellKnown.service) ? wellKnown.service : {});
 }
 
-/** The protocol the facts ride under (IF-1), named only: a service declares it by the extension key, never in `protocols` (DEC-0174). */
+/** The protocol the facts ride under (IF-1), named only. A host reads the facts by the extension key, never from a `protocols` listing (DEC-0174). */
 export const INSTANCE_FACTS_PROTOCOL = "fabric-instance-facts/0.1";
 
 const FIELDS: ReadonlyArray<[FactField, "access" | "tenancy" | "space", string]> = [
@@ -93,11 +93,12 @@ function refusal(field: FactField, value: unknown, document: FactsDocument, sett
     if (value === "public" && setting.subscription === true) return "public beside a subscription runner: a service others reach never runs on the operator's subscription (DEC-0046, DEC-0061 item 3)";
     // DEC-0174: an organization's members reaching a remote surface with their own keys still run on its runner, and
     // a subscription serves only its owner's own sessions. Beside peer the descriptor's schema already refuses one.
-    if (value === "organization" && setting.subscription === true) return "organization beside a subscription runner: a subscription serves only its owner's own sessions, never an organization's members (DEC-0046, DEC-0174)";
+    if (value === "organization" && setting.subscription === true) return "organization beside a subscription runner: a subscription serves only its owner's own sessions, never an organization's members (DEC-0061, DEC-0174)";
   }
   if (field === "entry" && setting.login !== undefined && (value === "host-signin") !== setting.login) {
     return setting.login ? "the dashboard requires a host's login code (surfaces.dashboard.login)" : "the dashboard takes no host's login code (surfaces.dashboard.login is false)";
   }
+  if (field === "mode" && (value === "shared" || value === "per-organization") && setting.subscription === true) return `${value} beside a subscription runner: an instance holding others' data serves more than its owner's own sessions (DEC-0061, DEC-0174)`;
   if (field === "mode" && value === "shared" && setting.local === true) return "shared is a remote service's: a local placement names one context and at most one grant (DEC-0082 item 4)";
   if (field === "kind" && value === "system" && setting.local === true) return "system is a remote placement's: a local service runs under a counted OS account (DEC-0154)";
   if (field === "account") {
@@ -171,11 +172,7 @@ export function instanceFactsRules(kind: string, value: JsonObject): Finding[] {
     prefix = (document) => document;
   }
   else return [];
-  // DEC-0174: the facts are declared, never read, so their protocol has no place in what a service says it reads.
-  const listed = kind === "service-well-known" && Array.isArray(value.protocols) ? value.protocols : [];
-  const misplaced = listed.flatMap((entry, index) => (entry === INSTANCE_FACTS_PROTOCOL ? [index] : []));
   return [
-    ...misplaced.map((index) => ({ code: "FAC-SEM-180", instancePath: `/protocols/${index}`, message: `${INSTANCE_FACTS_PROTOCOL} names facts a service declares, not a revision it reads; a service lists it in no protocols (DEC-0174)` })),
     ...view.invalid.map((document) => ({ code: "FAC-SEM-180", instancePath: at(prefix(document)), message: "the instance facts fail their schema; a host reads none of them from this document (DEC-0173)" })),
     ...view.refused.map((refused) => ({ code: "FAC-SEM-180", instancePath: at(prefix(refused.document), refused.field), message: `${refused.reason}; a host reads this fact as not declared (DEC-0173 IF-6)` }))
   ];

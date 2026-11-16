@@ -12890,8 +12890,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-11-16
 - **Status:** Accepted 2026-11-16: the coordinator's blind readings (unit, seam, product) read clean on rounds 5 and 6
-  at the same head. IF-2 and IF-6 extended by DEC-0174 (`organization` beside a subscription runner; the protocol
-  listed in no `protocols`). Proposed 2026-11-16 from the design `docs/evidence/plans/2026-11-15-ct321-instance-facts.md`
+  at the same head. IF-1, IF-2, IF-3 and IF-6 extended by DEC-0174 (facts that serve others refused beside a
+  subscription runner; the protocol in a `protocols` list). Proposed 2026-11-16 from the design `docs/evidence/plans/2026-11-15-ct321-instance-facts.md`
   (CT-321), whose rounds 5 and 6 of the blind readings (seam and product) read clean (round 1 folded: `mode` and `kind` required inside their objects; the
   label's rule by placement and its grammar; the pair reports only cross-document findings; a refused value never read,
   the other document's shown; round 2: a dashboard's login names `entry` only for a service that declares a fact, labels
@@ -12969,41 +12969,47 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   owner), FAC-SEM-009 (the identity pair). DEC-0173 and `FAC-SEM-180` were reserved by git CAS (`agent_sync.py reserve`, key
   `ct321-instance-facts`).
 
-### DEC-0174: instance facts, `organization` beside a subscription runner and the protocol in no `protocols` list
+### DEC-0174: instance facts, serving others beside a subscription runner, and the protocol in a `protocols` list
 
 - **Date:** 2026-11-16
 - **Status:** Proposed 2026-11-16 (CT-327, the two normative points DEC-0173's readings left); accepted when the
-  coordinator's blind readings are clean on two consecutive rounds.
-- **Context:** DEC-0173 IF-2 refuses `public` beside a `subscription` runner (DEC-0046, DEC-0061 item 3) and lets
-  `organization` stand on a remote placement without `peer`, read as an organization's members reaching its surface
-  with their own keys. Their keys sign them in; the work still runs on the instance's runner, and a subscription serves
-  only its owner's own sessions (DEC-0046). Beside `peer` the descriptor's schema already refuses a subscription runner
-  (DEC-0061), so only a remote placement without `peer` was open. Separately, IF-1 names the protocol
-  `fabric-instance-facts/0.1`, and nothing said whether a service lists it in its well-known `protocols`, which names
-  the revisions a party reads ([versioning](specification/versioning.md)); a reader pinned before DEC-0173 flags an
-  unknown revision there (`FAC-SEM-099`).
+  coordinator's blind readings are clean on two consecutive rounds (round 1 folded: the listing is allowed, not refused;
+  the clause covers every fact that serves others).
+- **Context:** DEC-0173 IF-2 refuses `public` beside a `subscription` runner and lets `organization` stand on a remote
+  placement without `peer`, read as an organization's members reaching its surface with their own keys. Their keys sign
+  them in; the work still runs on the instance's runner, and a subscription is the operator's own login (DEC-0046 item
+  3) that serves only its owner's own sessions (DEC-0061 item 3). Beside `peer` the descriptor's schema already refuses
+  a subscription runner, so only a remote placement without `peer` was open; `tenancy` `shared` and `per-organization`
+  name others' data the same way. Separately, IF-1 names the protocol `fabric-instance-facts/0.1`, and nothing said
+  whether a service lists it in its well-known `protocols`. A declaration's protocol is already listed there
+  (`channel-agent-standard/1`, [channel agent](specification/channel-agent.md)), and a reader ignores a name its
+  register lacks (`FAC-SEM-099` checks only a name it knows).
 - **Decision:** [service](specification/service.md#instance-facts) *Instance facts*:
-  1. **IF-2 gains a clause.** `organization` is refused beside a `subscription` runner, as `public` is: a service an
-     organization's members reach runs on a runner of the operator's keys or of its own, never the operator's
-     subscription. A refused `organization` reads not declared, field by field, as every refusal does (IF-5).
-  2. **IF-1 gains a sentence.** The protocol names facts a service declares, not a revision it reads: a service
-     declares them by the extension key and lists `fabric-instance-facts/0.1` in no `protocols`. Kind
-     `service-well-known` reports a listing at its place (`/protocols/<index>`); a host ignores it, as it ignores any
-     revision it does not read.
-  3. **IF-6** names both under `FAC-SEM-180`; no new rule code.
-- **Why:** one reading of DEC-0046 for every audience a declaration names; a protocol list that says only what a party
-  reads keeps DEC-0067's negotiation sound and spares a pinned reader a finding.
+  1. **IF-2 and IF-3 gain a clause.** Beside a `subscription` runner, every fact that says the instance serves others
+     is refused: `audience` `organization` (as `public` already is) and `tenancy` `shared` or `per-organization`. A
+     service others reach runs on a runner of the operator's keys or of its own, never the operator's subscription.
+     Each refused value reads not declared, field by field (IF-5).
+  2. **IF-1 gains a sentence.** A service may list `fabric-instance-facts/0.1` in its `protocols` or not; a host reads
+     the facts by the extension key and never from a listing, which `FAC-SEM-099` checks as it checks any registered
+     revision.
+  3. **IF-6** names the new refusals under `FAC-SEM-180`; no new rule code.
+- **Why:** one reading of DEC-0046 and DEC-0061 for every fact a declaration names about serving others; the listing
+  follows the precedent of the other declarations' protocols and costs a pinned reader nothing.
 - **Alternatives considered:** read "with their own keys" as excluding the subscription and leave `organization`
-  standing (refused: the runner, not the sign-in, decides whose subscription serves the call); let a service list the
-  protocol to announce the facts (refused: the extension key already announces them, and `protocols` is what a party
-  reads); a rule code of its own for the listing (not needed: it is a clause of the same declaration).
+  standing (refused: the runner, not the sign-in, decides whose subscription serves the call); refuse the listing, as
+  round 1 of this decision proposed (refused: a declaration's protocol is listed elsewhere, and a pinned reader ignores
+  a name it does not know); refuse `organization` but leave `shared` and `per-organization` (refused: SCR-36 would show
+  "one organization's own copy" for an instance on the operator's subscription).
 - **Compatibility:** narrows DEC-0173, released in `v0.1.0+2026-11-16`, where no service declares the facts yet (Prowl
-  Agent declares first, a remote service with a key runner); a declaration DEC-0174 refuses reads one fact less, the
-  service's state unchanged. Hosts run the regenerated vectors at their next pin (Fabric Dashboards, FD-273).
-- **Consequences / affects:** `src/instance-facts.ts` (the clause, `INSTANCE_FACTS_PROTOCOL`, the listing check),
+  Agent declares first); a declaration DEC-0174 refuses reads those facts as not declared, the service's state unchanged.
+  The vectors gain cases and change none; hosts run them at their next pin (Fabric Dashboards, FD-273, adopted
+  DEC-0173 in 0.8.130). The node's runner check (`FAC-SEM-087`) still reads only `peer`; a service that declares no
+  such fact is not affected.
+- **Consequences / affects:** `src/instance-facts.ts` (the clauses, `INSTANCE_FACTS_PROTOCOL`),
   `tools/vectors/instance-facts.ts`, `fixtures/vectors/instance-facts.json`, `test/instance-facts.test.ts`, the schema's
-  `audience` description; `docs/specification/service.md` (IF-1, IF-2, IF-6, the `FAC-SEM-180` row),
-  `conformance.md` (the service row); `docs/backlog.md` (CT-327).
+  `audience` and `mode` descriptions; `docs/specification/service.md` (IF-1, IF-2, IF-3, IF-6, the `FAC-SEM-180` row),
+  `conformance.md` (the service row), the specification index row; `docs/ux/scenarios.md` (SCN-065's alt path);
+  `docs/backlog.md` (CT-327).
 - **Source:** DEC-0173's readings (CT-327, rounds 3 to 6 of 2026-11-16: the seam and product tiers named both points);
-  DEC-0046, DEC-0061 item 3, DEC-0067. DEC-0174 was reserved by git CAS (`agent_sync.py reserve`, key
+  DEC-0046 item 3, DEC-0061 item 3, DEC-0067, DEC-0150. DEC-0174 was reserved by git CAS (`agent_sync.py reserve`, key
   `ct327-instance-facts-subscription`).
