@@ -713,7 +713,7 @@ export const PREFIX_FLOORS: ReadonlyArray<readonly [RegExp, number]> = [[/gh[pou
  * the end of the string; after an `sk-` away from a boundary, up to SK_FLOOR; after another provider prefix, its floor;
  * for each maximal run of base64 characters shorter than LONG_RUN_FLOOR (40), min(length, 39) per character. For a
  * string `readAsUrl` admits and that parses as a URL, on the names and values a WHATWG URL parse yields (tab, line feed and carriage return
- * removed, percent-decoded, as `rawValues` hands them over), for every query or fragment piece: PIECE_COST, its name's
+ * removed, percent-decoded, as `rawValues` hands them over): the user name's UTF-16 units as the parse writes it (DEC-0177), and for every query or fragment piece: PIECE_COST, its name's
  * and value's UTF-16 units, the value's JWT and `sk-` terms, provider-prefix floors and long-run term, and, when the value is not empty and the name holds an
  * upper-case letter, the triangular number n(n+1)/2 of the name's length (splitting a name into words may backtrack over it).
  * For every string, ARG_PIECE_COST for each white space, `=`, `/` and `\\` (the argument reading's pieces). For every
@@ -734,6 +734,8 @@ export function detectorCost(whole: string, isHead = false): number {
   } catch {
     return cost;
   }
+  // The user name, read once as a token (DEC-0177): as the parse writes it, a bound on its decoded length.
+  cost += url.username.length;
   for (const part of [url.search, url.hash]) {
     // Each `&` makes a piece, an empty one included, which rawValues still reads.
     cost += ARG_PIECE_COST * (part.split("&").length - 1);

@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0177` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0178` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -13182,3 +13182,61 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Source:** the adapter's message `47713284` (its items 7, 8, 9, 11, 13, 32, 37, 43), DEC-0175's readings (rounds 1
   to 6) and DEC-0176's own (rounds 1 to 3); RFC 2606, WebAuthn's assertion signature (DER ECDSA). DEC-0176 was reserved by git CAS
   (`agent_sync.py reserve`, key `ct328-false-findings`).
+
+### DEC-0177: the shared detector reads a URL's user name that is a token
+
+- **Date:** 2026-11-16
+- **Status:** Accepted 2026-11-16 (CT-329, filed from DEC-0175's readings): the coordinator's blind readings folded
+  rounds 1 to 5 and read rounds 6 and 7 clean on all three tiers at `b2e6b4e9`.
+- **Context:** the shared detector's `secretUrl` (`src/secret-shape.ts`, LC-21) refuses a URL with a password in its
+  user information but passes one whose user name alone is a token, the form a git remote takes
+  (`https://<token>@github.com/o/r.git`): [profiles](specification/profiles.md#no-secret-in-a-command-line) lists it as
+  a known limit. A provider key or a JWT there is found already, by the argument reading of the whole string; a classic
+  token's 40 hex is not, since the long-run term needs upper case, lower case and digits. The source tree check reads
+  it since DEC-0175 (`tokenUser`), so the two detectors answered the same URL differently.
+- **Decision:** [profiles](specification/profiles.md#no-secret-in-a-command-line):
+  1. `secretUrl` refuses a URL whose user name, percent-decoded, is a token: a run of 40 or more of `[A-Za-z0-9_-]`
+     holding a letter and a digit (`tokenUserName`, exported from `src/secret-shape.ts`). A name such as `git`,
+     `deploy-bot` or 40 letters is none.
+  2. The source tree check's token user (DEC-0175) reads the same function for the shape, so one shape holds both; the
+     tree check keeps its own exemptions beside it (a synthetic word, DEC-0149, and a placeholder, DEC-0176), which the
+     shared detector has none of.
+  3. `detectorCost` (DEC-0150 CA-5, [channel agent](specification/channel-agent.md)) counts the user name's UTF-16
+     units, as the parse writes it, for a string read as a URL: a bound on the read, so a document's budget still
+     covers what the detector does.
+  4. Known limits, written in [profiles](specification/profiles.md#no-secret-in-a-command-line): a long user name with
+     a digit that is a name (AWS CodeCommit's `<user>-at-<account>`, a long Azure DevOps organisation) is refused; a
+     token user name after another `@`, or holding `.`, an encoded `@` or a malformed escape, is not found; nor is one
+     in a URL inside a launch argument (`args`, a runner's `argv`, a descriptor's `commands`, `mcp-remote <url>`),
+     which is read as an argument, nor in a URL nested in a query value, nor in a remote's scp form (`<token>@host:path`,
+     no URL), which folder attribution's `recordOrigin` reads itself and records no origin for.
+  5. A recorded origin whose scp user, or whose URL user between its raw `@`, is a token records none (`recordOrigin`),
+     so no new record holds a token written as a remote's user name in these forms; a user whose `@` is
+     percent-encoded (`ssh://x%40<token>@host`) is kept, a known limit.
+- **Why:** the user name is where a git remote carries its token; a detector that refuses a password beside it and
+  not the token alone misses the commoner form, and the tree check already reads it.
+- **Alternatives considered:** reading any 40-character user name (refused: a long service-account name of letters
+  is a name); leaving the limit (refused: the same URL then passes FAC-SEM-057 and blocks FAC-SEM-158).
+- **Compatibility:** widens `FAC-SEM-057` where it reads a URL (a manifest's MCP `connection.url` and `executableRef`,
+  a local runner's `executableRef`, a provider entry's `run.mcp.url`; a launch argument, a runner's `argv` and a
+  descriptor's `commands` are read as arguments, so a URL in one is not), `FAC-SEM-101` (feed data), `FAC-SEM-103` (a proposal), `FAC-SEM-127` (a well-known document's
+  connections), `FAC-SEM-165` (a channel agent declaration) and the folder attribution's origin (an `ssh://` remote
+  whose user is a token records none; an `http` or `https` one drops its user first), wherever `secretUrl` reads: a
+  document that passed with a token as a URL's user name now fails. No released vector changes its answer; three
+  folder attribution cases are added, and the channel agent vectors' `about` names the new cost term. The
+  Fabric Agent Adapter's twins (`fabric-secrets.mjs`, `fabric_secrets.py`) and Fabric Dashboards' copy port it at
+  their next pin; until then they pass such a URL. A port that copies `fixtures/vectors/folder-attribution.json`
+  (Fabric Switchboard's and Project Observatory's folder-attribution ports, Fabric's sha256-pinned copy) re-syncs it
+  only together with the detector and `recordOrigin`, since the three new AT-15 cases fail under the earlier ones. A
+  record written before DEC-0177 keeps the origin it stored; a product that holds such records records them again
+  (re-runs `recordOrigin`) at its next pin.
+- **Consequences / affects:** `src/secret-shape.ts` (`tokenUserName`, `secretUrl`), `src/source-rules.ts` (`tokenUser`
+  reads it), `src/channel-agent.ts` (`detectorCost`), `tools/vectors/channel-agent.ts` (`about`),
+  `src/folder-attribution.ts` (`recordOrigin`'s scp user), `tools/vectors/folder-attribution.ts` (three AT-15 cases), `fixtures/semantic/command-line-token-user-in-manifest-url.json`,
+  `test/service-hygiene.test.ts`, `test/channel-agent.test.ts`, `src/secret-shape.ts`'s list of vendors;
+  `docs/specification/profiles.md` (the rule and its known limits), `docs/specification/channel-agent.md` (CA-5's cost
+  terms and its gap), `docs/specification/folder-attribution.md` (the origin), `docs/specification/conformance.md`,
+  `docs/specification/connections.md`, `docs/ux/scenarios.md` (SCN-032's recovery),
+  `docs/DOCMAP.md`; `docs/backlog.md` (CT-329, CT-333).
+- **Source:** DEC-0175's readings (round 1 seam), CT-329; DEC-0177's own readings (rounds 1 to 5). DEC-0177 was reserved by git CAS (`agent_sync.py reserve`,
+  key `ct329-token-user`).

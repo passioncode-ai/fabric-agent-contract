@@ -35,6 +35,7 @@ describe("semantic fixtures of DEC-0044", () => {
       "command-line-key-in-manifest-url.json",
       "command-line-key-in-runner-argv.json",
       "command-line-secret-in-descriptor-command.json",
+      "command-line-token-user-in-manifest-url.json",
       "stdio-scope-session-in-manifest.json",
       "stdio-scope-session-in-provider-entry.json"
     ]);
@@ -201,6 +202,14 @@ describe("the shared detector (src/secret-shape.ts)", () => {
     expect(secretUrl(`https://user:${"pa" + "ss"}@agents.example/mcp`)).toBe(true);
     expect(secretUrl("https://agents.example/mcp?api_key=x")).toBe(true);
     expect(secretUrl("https://agents.example/mcp#access_token=x")).toBe(true);
+    // A user name that is a token (DEC-0177): 40 or more of [A-Za-z0-9_-] with a letter and a digit, raw or percent-encoded.
+    const hex40 = "0123456789abcdef".repeat(3).slice(0, 40);
+    expect(secretUrl(`https://${hex40}@git.example.org/o/r.git`)).toBe(true);
+    expect(secretUrl(`https://${encodeURIComponent(hex40.slice(0, 20))}%2D${hex40.slice(20)}@git.example.org/o`)).toBe(true);
+    expect(secretUrl(`https://${hex40.slice(1)}@git.example.org/o/r.git`)).toBe(false);
+    expect(secretUrl(`https://${"a".repeat(40)}@git.example.org/o`)).toBe(false);
+    expect(secretUrl("https://git@git.example.org/o/r.git")).toBe(false);
+    expect(secretUrl("https://deploy-bot@git.example.org/o/r.git")).toBe(false);
     expect(secretUrl(`https://agents.example/mcp?state=${fake.long}`)).toBe(true);
     expect(secretUrl(`https://agents.example/mcp?q=${encodeURIComponent(fake.jwt)}`)).toBe(true);
   });

@@ -46,7 +46,7 @@ before it builds the snapshot. A branch is read by no rule: a branch is the same
 - **`origin` is the raw `remote.origin.url`.** A stored identity (`host/owner/name`) is not a URL and has no identity
   here, so a product that kept only its own key re-reads the remote or keeps the URL beside it. What a product stores is
   the URL without credentials (`recordOrigin`, [recording the answer](#recording-the-answer)): it names the same
-  repository, and no product's store holds a token from a remote.
+  repository, and no product's store holds a token from a remote but for the known limits that section names.
 - **A worktree of a bare repository** has no working tree of its own: its `mainCheckout` is the bare repository's folder
   (the common dir), and the container and tombstone rows read that folder.
 - **Every Project folder in Git carries its `commonDir` and `toplevel`.** A folder without a common dir is read only by
@@ -61,8 +61,9 @@ before it builds the snapshot. A branch is read by no rule: a branch is the same
   at `pkg`. AT-6 and AT-7 read it, so a worktree or a clone of the outer of two nested Projects joins the outer one and
   a folder inside the inner one the inner one. A folder in Git without it counts as at the top: a nested Project without
   it ties with the outer one.
-- **Work records** carry the repository's common dir and, when it has one, its `origin` without credentials, so a second clone of a
-  repository a Project's agent worked in joins by work too.
+- **Work records** carry the repository's common dir and, when it has one, its `origin` as `recordOrigin` writes it
+  (without credentials; `null` for a remote whose user is a token, DEC-0177), so a second clone of a repository a
+  Project's agent worked in joins by work too.
 
 ## The repository identity
 
@@ -183,7 +184,14 @@ loses its user information, any URL its password, query and fragment, the scp fo
 `:secret` up to the host's last `@`; a local path (absolute, a drive path, or starting with `.`) is kept; `null` for any other remote with no repository identity (its authority
 cannot be read reliably) and when what is left still has the shape of a secret (`secretUrl`). Since DEC-0151 the
 shared detector takes a provider prefix only at a word start and an `sk-` key only with its strength, so a remote
-holding a weak `sk-` slug now records its origin (the AT-15 cases of `fixtures/vectors/folder-attribution.json`). A record whose path is
+holding a weak `sk-` slug now records its origin (the AT-15 cases of `fixtures/vectors/folder-attribution.json`).
+Since DEC-0177 a remote whose user name is a token records none (`ssh://<40 hex>@host/…`, `ssh://x@<40 hex>@host/…`
+and the scp form `<token>@host:path`, whose users `recordOrigin` reads itself where the detector reads no token); an
+`http` or `https` one drops its user first. Such a repository then has no origin in its records, so a second clone of
+it is no longer matched by repository identity (AT-7) or by work (AT-12): it joins by path (AT-3) or by owner (AT-10),
+else it is a new Project (AT-15). A record written before DEC-0177 keeps the origin it stored until the product records it
+again, which each product does at its next pin of this contract. An `ssh://` user whose `@` is percent-encoded
+(`x%40<token>@host`) is kept as written: neither `recordOrigin` nor the detector splits it (a known limit). A record whose path is
 broad (a declared container at the matched place) is `null`, as an explicit attach of a broad folder is. An explicit
 attach that moves a folder (or its place in the repository, in this checkout or another of the same common dir) from
 another Project lasts only when the product also removes that Project's folder at the place from its own store (D5);
@@ -327,6 +335,7 @@ The board row is CT-57.
   still answer differently in two products; Fabric and Switchboard read Observatory's declared containers where they
   can reach them.
 - Decided limits, not open questions: an origin that is a local path has no identity, so such a clone joins by work or
-  as a new Project; an unknown bare repository's Project starts at the bare folder, and each product names it.
+  as a new Project; a remote whose user is a token records no origin (DEC-0177), so its second clone joins by path or
+  owner, or as a new Project; an unknown bare repository's Project starts at the bare folder, and each product names it.
 - A user-facing scenario: the contract has no interface here; each product's scenarios own how a session's Project,
   a tie, a refusal or a pending answer is shown.

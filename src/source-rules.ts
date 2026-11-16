@@ -1,5 +1,5 @@
 import { type Finding, type JsonObject, indexed, isObject, show } from "./findings.js";
-import { BEARER_INSIDE, credentialName, hasJwt, jwtSpans, rawValues, secretValue } from "./secret-shape.js";
+import { BEARER_INSIDE, credentialName, hasJwt, jwtSpans, rawValues, secretValue, tokenUserName } from "./secret-shape.js";
 
 // #region source-rules (docs: docs/specification/source.md#semantic-rules)
 /**
@@ -751,8 +751,6 @@ const passwordShaped = (value: string, decoded = false): boolean => {
  * characters. A documented example is a word (`secret123`, `Summer2024x`); a generated secret is this long or longer.
  */
 export const GENERATED_LENGTH = 24;
-/** A run of 40 or more of `[A-Za-z0-9_-]` holding a letter and a digit: a classic token's shape (40 hex), read as a token as a URL's user. */
-const tokenRun = (text: string): boolean => /^[A-Za-z0-9_-]{40,}$/.test(text) && /[0-9]/.test(text) && /[A-Za-z]/.test(text);
 /** A query or fragment parameter that names a password (`password`, `passwd`, with a prefix such as `db_`); `pwd` is often a working directory, so it is none. */
 export const PASSWORD_NAME = /(?:^|[_.-])(?:password|passwd)$/i;
 /**
@@ -760,7 +758,7 @@ export const PASSWORD_NAME = /(?:^|[_.-])(?:password|passwd)$/i;
  * holding a letter and a digit (a classic token's 40 hex), not synthetic. A name such as `git` or `deploy-bot` is not one.
  */
 const tokenUser = (user: string): boolean =>
-  real(user) && !PLACEHOLDER.test(user) && (providerKeys(user).length > 0 || hasJwt(user) || tokenRun(user));
+  real(user) && !PLACEHOLDER.test(user) && (providerKeys(user).length > 0 || hasJwt(user) || tokenUserName(user));
 /** Whether a URL in a source tree carries a credential (the adapter's `_url_secret`), an inner URL read two levels deep. */
 function urlSecret(url: string, depth = 0): boolean {
   const trimmed = rstrip(url, ".,;)]}");

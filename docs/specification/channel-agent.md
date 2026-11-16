@@ -267,8 +267,8 @@ Statically, on a manifest (kind `manifest`) or a well-known answer (kind `servic
    special scheme such as `http:` takes a host even without `//`), whose cost grows with the square of a long label.
    The gap this leaves: every other string, including a sentence that holds a URL (`Please write to
    https://u:p@help.example/`, a vector pins it as not found), one holding text outside ASCII and one with a non-ASCII
-   percent-escape, is read for key shapes only, so a password in a URL's user information or a credential-named query
-   parameter (`?api_key=...`) there is not found. Three places read
+   percent-escape, is read for key shapes only, so a password in a URL's user information, a user name that is a token
+   (DEC-0177) or a credential-named query parameter (`?api_key=...`) there is not found. Three places read
    narrower, each only when the value matches its own grammar, and anything else is read whole: a project's
    `tickets.token_slot` of the slot's grammar is read segment by segment, so a provider key in any of its three segments
    is found; a project's `evals.suite` and `tickets.outbox` of the relative path grammar are read by the detector's
@@ -294,7 +294,7 @@ Statically, on a manifest (kind `manifest`) or a well-known answer (kind `servic
    non-boundary, up to 16, so a port that decodes such a form before a boundary-bound `sk-` reading is outside this
    bound (DEC-0151 lists them as knowingly not found). Every string read as a URL pays 128 (`PIECE_COST`) once for its two URL parses (the cost's and `secretUrl`'s), whether it parses or the parser throws (`ws:` costs 3, 3 x 4 and 128: 143). For a string read as a URL that parses, the URL terms are counted
    on the names and values a WHATWG URL parse yields (tab, line feed and carriage return removed, percent-decoded), not on
-   the raw text: for every query or fragment piece, 128, and 4 (`ARG_PIECE_COST`) for each `&` of the search and the hash, an empty piece included; its name's and its value's UTF-16 units, the value's `eyJ` term, `sk-` term, provider-prefix floors and long-run term and, when the value is not empty and the name holds an upper-case letter, the triangular number of the
+   the raw text: the user name's UTF-16 units as the parse writes it, read once as a token (DEC-0177; counting this term's own share, as the other examples do, `https://bot@a.example/` costs 4 for `bot@` and 3 for the user name more than `https://a.example/`); for every query or fragment piece, 128, and 4 (`ARG_PIECE_COST`) for each `&` of the search and the hash, an empty piece included; its name's and its value's UTF-16 units, the value's `eyJ` term, `sk-` term, provider-prefix floors and long-run term and, when the value is not empty and the name holds an upper-case letter, the triangular number of the
    name's length, n(n+1)/2 (`https://a.example/?aBC=x` costs 24, 128, 3, 1, 3 for `x`'s long-run term and 6; the value `ghp_ab,cd` costs 9, a `ghp_` floor of 5 and a long-run term of 3 x (36 + 4): 134). A member's name is read before its place is written; once the budget is spent nothing more is read and every further member collapses its place. Past the
    budget, one finding says, once per document, that reading the declarations for credentials takes more than 1 000 000
    UTF-16 units of reading; it stands at the copy where

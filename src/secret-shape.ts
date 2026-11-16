@@ -16,7 +16,8 @@
  * encoded `%1A`; it is rebuilt with a boundary before `AKIA`, from pieces) and any template or agent that copies the kit; a port that copies
  * `fixtures/vectors/folder-attribution.json` re-syncs it only together with the detector, since six of its nine new AT-15 cases fail under the earlier detector (three did before DEC-0151's round 14), and the percent-escape case fails under a port that takes the boundary without its escapes. Project Observatory's folder-attribution port (with its attribution-vectors pin) and its estate-record
  * port (FAC-SEM-075) re-sync together with that file. Whole-file vendors that pin this file by hash take DEC-0151 at
- * their next re-pin, with their vectors. Fabric vendors this file twice, one copy under a sha256 `pin.json` together with
+ * their next re-pin, with their vectors. DEC-0177 (a URL's token user name) re-syncs the same ports and the same
+ * `folder-attribution.json`, whose three new AT-15 cases fail under the earlier detector and `recordOrigin`. Fabric vendors this file twice, one copy under a sha256 `pin.json` together with
  * `fixtures/vectors/folder-attribution.json`; Fabric Dashboards vendors `src/session-handoff.ts` and
  * `src/fabric-links.ts`, and its service host's connections hold a port; Fabric Dashboards' sample-service kit copies
  * hold the earlier pattern. Every port drops its case-insensitive flag (`re.I`, `(?i)`) and reads digits as ASCII (`re.ASCII`, `[0-9]` or `(?-u:\d)`): Project Observatory's folder-attribution and estate-record ports and Fabric Switchboard's folder-attribution port compile it case-insensitively today. A port derives the files whose answers change by patching SECRET_VALUE in its twins and
@@ -181,10 +182,17 @@ export function rawValues(query: string): Map<string, string[]> {
   return values;
 }
 /**
+ * A URL's user name read as a token (DEC-0177, as the source tree check reads one since DEC-0175): a run of 40 or more
+ * of `[A-Za-z0-9_-]` holding a letter and a digit, a classic token's 40 hex (`https://<token>@github.com/o/r.git`). A
+ * provider key or a JWT there is found by the argument reading already; a name such as `git` or `deploy-bot` is none.
+ */
+export const tokenUserName = (user: string): boolean => /^[A-Za-z0-9_-]{40,}$/.test(user) && /[0-9]/.test(user) && /[A-Za-z]/.test(user);
+/**
  * Whether a URL an MCP entry or a launch names carries a credential (LC-21): anything `secretArgument` finds in it,
- * a password in its user information, or a query or fragment parameter whose name can only carry a credential and
- * has a value, or whose value is shaped like one. `?api_key=…` is refused whatever the value, `?key=` left empty
- * and `?sort=key` are not. A string that is not an absolute URL is checked as an argument only.
+ * a password in its user information, a user name that is a token (`tokenUserName`, DEC-0177), or a query or fragment
+ * parameter whose name can only carry a credential and has a value, or whose value is shaped like one. `?api_key=…` is
+ * refused whatever the value, `?key=` left empty and `?sort=key` are not. A string that is not an absolute URL is
+ * checked as an argument only.
  */
 export function secretUrl(value: string): boolean {
   if (secretArgument(value)) return true;
@@ -195,6 +203,7 @@ export function secretUrl(value: string): boolean {
     return false;
   }
   if (url.password !== "") return true;
+  if (tokenUserName(decodeKeepingPlus(url.username))) return true;
   for (const part of [url.search, url.hash]) {
     for (const [name, values] of rawValues(part.slice(1))) {
       if (values.some((raw) => (raw !== "" && credentialName(name)) || secretValue(raw))) return true;
