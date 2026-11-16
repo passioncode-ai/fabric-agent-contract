@@ -12913,7 +12913,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      `none`. `organization` needs `peer` on a local placement (a host routes others only to a service that declares it,
      DEC-0061); on a remote one it also covers an organization's members reaching its own surface with their own keys.
      `operator` never beside `peer`. `public` is a remote placement's only and never beside a `subscription` runner
-     (DEC-0061 item 3); it describes an origin's own reach and is no offer nor grant. A peer share (DEC-0142) gives no
+     (DEC-0046, DEC-0061 item 3); it describes an origin's own reach and is no offer nor grant. A peer share (DEC-0142) gives no
      audience. Where the well-known document declares `surfaces.dashboard`, its `login` decides `host-signin`.
   3. **IF-3, `tenancy`.** `mode` `single`, `per-organization` (a product's own per-organization copy) or `shared` (several
      tenants' data in one instance, a remote placement's only). No member says whose instance it is.
@@ -12923,14 +12923,15 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      `container` and `vm` may be either placement's.
   5. **IF-5, the reading.** `instanceFacts(descriptor, wellKnown)`: five facts, each from the well-known document where it
      declares a value no clause refuses, else from the descriptor's; a refused value is reported, never read; `entry`
-     `host-signin` whenever the dashboard requires a host's login code; a document whose value fails the schema gives
-     none of its facts.
-  6. **IF-6, `FAC-SEM-180`.** The schema and the clauses above: kind `service-descriptor` checks a descriptor's own facts,
+     `host-signin` whenever the dashboard requires a host's login code and either document declares a fact (a service
+     that declares none reads none, `declared` false); a document whose value fails the schema gives none of its facts.
+  6. **IF-6, `FAC-SEM-180`.** The schema and the clauses above: kind `service-descriptor` checks a descriptor's schema and own facts,
      `service-well-known` a document's schema, its `entry` against its own dashboard and its label's shape, and the pair
      `service-observation` only what neither document alone shows, so each problem is reported once; a finding never
      changes the service's state.
   7. **IF-7, whose instance and the rest.** A placed instance's organization is its placement's `context`, a remote one's
-     its `org-instance/1` statement where a host holds one; a local service no estate record places reads `personal`, as
+     its `org-instance/1` statement where a host holds one, else Observatory's map; a local service no estate record
+     places reads `personal`, as
      an absent `context` does (DEC-0082). A personal instance with `peer` that a colleague's grant reaches keeps `single`:
      the grant lets the colleague call it, its data stays the operator's.
 - **Why:** an extension is the one route that breaks no host pinned today; keeping whose instance it is on the placement

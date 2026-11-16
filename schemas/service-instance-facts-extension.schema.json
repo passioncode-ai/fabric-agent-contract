@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/service-instance-facts-extension.schema.json",
   "title": "extensions/instance-facts/0.1: who an instance serves, how it keeps data apart and the space it runs in (fabric-instance-facts/0.1, DEC-0173)",
-  "description": "The value of the instance-facts extension key in a service's descriptor, its well-known document, or both. Every member and every field is optional; an absent one declares nothing, never a default. Declared by the service, never verified; FAC-SEM-180 reads it against the descriptor's peer, placement and runner and the well-known document's dashboard sign-in. Whose instance it is stays the estate placement's context (DEC-0082 item 4), never a member here.",
+  "description": "The value of the instance-facts extension key in a service's descriptor, its well-known document, or both. Every member and every field is optional, save that a present tenancy names its mode and a present space its kind; an absent one, and an empty access, declare nothing, never a default. Declared by the service, never verified; FAC-SEM-180 reads it against the descriptor's peer, placement and runner and the well-known document's dashboard sign-in. Whose instance it is stays the estate placement's context (DEC-0082 item 4), never a member here.",
   "type": "object",
   "properties": {
     "access": {
@@ -14,7 +14,7 @@
         },
         "entry": {
           "enum": ["host-signin", "own-signin", "none"],
-          "description": "How its dashboard is entered: a host's login code, a sign-in of its own, or none. Where the well-known document declares surfaces.dashboard, its login decides host-signin against the other two (DEC-0173 IF-2)."
+          "description": "How its dashboard is entered: a host's login code, a sign-in of its own, or none. Where the well-known document declares surfaces.dashboard, its login decides host-signin against the other two; a dashboard that requires a host's login code reads host-signin for a service that declares any fact (DEC-0173 IF-2, IF-5)."
         }
       },
       "additionalProperties": false

@@ -153,6 +153,9 @@ DEC-0154). An app's descriptor without an origin declares no port for `FAC-SEM-0
   `https://fabric.passioncode.ai/agent-contract/extensions/ops-digest/0.1`: 1 to 8 `{dir, source}`, `dir` a folder
   inside `paths.data` and `source` the label sent with its lines ([operations digests](ops-digest.md#where-a-collector-reads-the-daily-digests),
   OD-9, DEC-0153; the same OS account per DEC-0154; `FAC-SEM-168`). A remote descriptor carries none.
+- A descriptor MAY declare its instance's facts (who it serves, how it keeps data apart, the space it runs in) under
+  `https://fabric.passioncode.ai/agent-contract/extensions/instance-facts/0.1` ([Instance facts](#instance-facts),
+  DEC-0173, `FAC-SEM-180`).
 - `installedBy` says who installed the instance (DEC-0061): the installer and its version as a string, as before, or
   `{by, role?, tool}`. `by` is `person` — a person ran the installer or had their coding agent run it — with `role`
   `operator` (the person who uses this machine) or `administrator` (an organization's administrator); `node` — Project
@@ -261,7 +264,8 @@ placement requires the token here too ([Remote placement](#remote-placement)).
   `https://fabric.passioncode.ai/agent-contract/extensions/authority/0.1` ([membership](membership.md#levels) LV-5,
   DEC-0162), and, for a channel agent with no manifest, its declaration under
   `https://fabric.passioncode.ai/agent-contract/extensions/channel-agent/0.1` ([channel agent](channel-agent.md),
-  DEC-0150).
+  DEC-0150), and its instance's facts under `https://fabric.passioncode.ai/agent-contract/extensions/instance-facts/0.1`
+  ([Instance facts](#instance-facts), DEC-0173; no space label on a local placement).
 - `surfaces.operatorChannel` MAY name the path of the service's operator-channel status, which
   requires the service token ([operator channel](operator-channel.md) OC-9, DEC-0034). The
   channel's state never changes the service's `status` or `degraded` list.
@@ -971,18 +975,19 @@ on a local placement written only in the descriptor, never the well-known docume
 **IF-5, the reading.** [`instanceFacts(descriptor, wellKnown)`](../../src/instance-facts.ts) reads five facts, each on
 its own: from the well-known document where it declares a value no clause refuses, else from the descriptor's; a
 refused value is reported and never read; `entry` reads `host-signin` whenever the dashboard requires a host's login
-code. A document whose extension value fails the schema gives none of its facts (as ED-9 reads a dashboard extension),
+code and either document declares a fact, refused or not (a service that declares none reads none: a login alone
+declares nothing). A document whose extension value fails the schema gives none of its facts (as ED-9 reads a dashboard extension),
 while a value a clause refuses costs only that field, since each fact stands alone. Nothing identifying an
 organization rides here, and the label stays out of a local well-known document, which every counted OS account on the
 computer and a relayed guest reach unauthenticated (DEC-0154); `audience` and `mode` there say only that an
 organization's instance may run on the computer, and a service that must not say so declares them in its descriptor.
 
 **IF-6, `FAC-SEM-180`.** A value fails the schema; `organization` on a local placement without `peer`; `operator`
-beside `peer`; `public` on a local placement or beside a `subscription` runner (DEC-0061 item 3); a declared `entry`
+beside `peer`; `public` on a local placement or beside a `subscription` runner (DEC-0046, DEC-0061 item 3); a declared `entry`
 against the dashboard's `login`; `shared` or `system` on a local placement; a label shaped like a credential (the shared
 detector, as `FAC-SEM-086` reads `runner`), or in a local well-known document. The clauses on `peer`, the placement and
 the runner read the descriptor, and the one on `login` the well-known document: kind `service-descriptor` checks a
-descriptor's own facts and its label's shape, `service-well-known` a document's schema, its `entry` against its own
+descriptor's schema, its own facts and its label's shape, `service-well-known` a document's schema, its `entry` against its own
 dashboard and its label's shape, and `service-observation` (`{descriptor, wellKnown}`, the pair `FAC-SEM-009` reads)
 only what neither document alone shows, so `pnpm validate` prints each problem once. A finding never changes the
 service's state, unlike `FAC-SEM-009`'s `foreign`: the refused value reads not declared in that document, and the fact

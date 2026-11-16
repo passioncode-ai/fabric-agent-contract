@@ -345,10 +345,10 @@ independent agent author and P-02 project operator.
   2. The operator points at the notes agent's organization instance -> whose instance it is reads the organization the placement's `context` names; audience reads "who may reach it: the people of <the organization> and those granted access".
   3. The operator points at the third agent -> the details show its placement and whose it is, and no fact lines.
 - **Expected result:** every fact shown is the service's declaration, marked so, read as `instanceFacts` answers; whose instance it is never comes from the facts; nothing is guessed (DEC-0173 IF-2, IF-3, IF-5).
-- **Alt paths:** a value `FAC-SEM-180` refuses (`public` on a local agent or beside a subscription runner, `organization` on a local agent without `peer`, `shared` on a local placement, a label in a local well-known document) -> that value is never shown, the line shows the other document's value where one stands (the descriptor's label, say) and is left out when neither does, and the agent keeps running; a dashboard that requires a host's login code -> entry reads "through the host's sign-in" whatever the service declared.
+- **Alt paths:** a value `FAC-SEM-180` refuses (`public` on a local agent or beside a subscription runner, `organization` on a local agent without `peer`, `shared` on a local placement, a label in a local well-known document) -> that value is never shown, the line shows the other document's value where one stands (the descriptor's label, say) and is left out when neither does, and the agent keeps running; a dashboard that requires a host's login code -> entry reads "through the host's sign-in" whatever the service declared for it, for an agent that declares any fact (the third agent, which declares none, still shows no fact lines).
 - **UI elements:** SCR-36: placement, whose instance, audience, entry, tenancy, space.
 - **States covered:** not declared, declared
-- **Errors & recovery:** a value that fails the schema -> none of that document's facts shows; the host reports the finding to the service's author, and the agent's state is unchanged.
+- **Errors & recovery:** a value that fails the schema -> none of that document's facts shows (the other document's still do), and the agent's state is unchanged.
 - **Status:** draft
 - **Coverage:** `service-instance-facts-extension.schema.json`, `src/instance-facts.ts`, vectors `instance-facts.json`
 - **Product:** unobserved

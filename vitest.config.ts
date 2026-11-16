@@ -41,6 +41,8 @@ export default defineConfig({
         // CT-323: DEC-0172's verdict checks, measured at 97.07 (199 of 205 branches) when they joined the set; the six
         // left are one side of a ternary each. The floor sits just under the measurement and leaves no branch of slack.
         "src/decision-verdict.ts": { branches: 97 },
+        // DEC-0173: the instance-facts reading and FAC-SEM-180, held at 100 by test/instance-facts.test.ts.
+        "src/instance-facts.ts": { branches: 100 },
         "src/levels.ts": { branches: 100 },
         "src/page-link-rules.ts": { branches: 100 },
         "src/agent-network.ts": { branches: 100 },

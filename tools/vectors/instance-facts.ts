@@ -50,14 +50,19 @@ function cases(): Array<[string, Json | null, Json | null]> {
     ["a descriptor read alone: no clause on the dashboard applies", local(facts({ access: { entry: "host-signin" } })), null],
     ["a tenancy without its mode fails the schema: none of that document's facts is read", local(facts({ access: { audience: "operator" }, tenancy: {} })), wellKnown()],
     ["a remote descriptor may carry the label", remote(facts({ space: { kind: "system", account: "eu-pool-3" } })), wellKnown()],
-    ["a dashboard that requires a host's login code reads host-signin even when the well-known extension fails its schema", local(), wellKnown({ access: { audience: "everyone" } }, true)],
-    ["a remote container", remote(facts({ space: { kind: "container" } })), wellKnown()]
+    ["a dashboard login beside a well-known extension that fails its schema and no other fact declares nothing", local(), wellKnown({ access: { audience: "everyone" } }, true)],
+    ["a remote container", remote(facts({ space: { kind: "container" } })), wellKnown()],
+    ["a dashboard that requires a host's login code alone declares nothing", local(), wellKnown(undefined, true)],
+    ["a dashboard login names the entry of a service that declares another fact", local(facts({ tenancy: { mode: "single" } })), wellKnown(undefined, true)],
+    ["the well-known document's value wins over a differing descriptor value", remote(facts({ access: { audience: "organization" }, space: { kind: "vm" } })), wellKnown({ access: { audience: "public" } })],
+    ["a well-known audience the local descriptor's setting refuses: the descriptor's own value is read", local(facts({ access: { audience: "operator" } })), wellKnown({ access: { audience: "organization" } })],
+    ["a local virtual machine", local(facts({ space: { kind: "vm", account: "vm-1" } })), wellKnown()]
   ];
 }
 
 export function instanceFactsVectors(): Json {
   return {
-    about: "Vectors for extensions/instance-facts/0.1 (DEC-0173), written by tools/vectors/instance-facts.ts, never by hand. Each case gives a descriptor and a well-known document (null: not read). `read` is instanceFacts(descriptor, wellKnown): the five facts, field by field, the well-known document first; a refused value is never read, the field then read from the other document; a dashboard that requires a host's login code reads host-signin. `findings` are FAC-SEM-180's as code and path, per kind: `descriptor` (kind service-descriptor), `wellKnown` (service-well-known) and `pair` (service-observation, `{descriptor, wellKnown}`, only what neither document alone shows), null where a document is not given.",
+    about: "Vectors for extensions/instance-facts/0.1 (DEC-0173), written by tools/vectors/instance-facts.ts, never by hand. Each case gives a descriptor and a well-known document (null: not read). `read` is instanceFacts(descriptor, wellKnown): the five facts, field by field, the well-known document first; a refused value is never read, the field then read from the other document; a dashboard that requires a host's login code reads host-signin for a service that declares any fact. `findings` are FAC-SEM-180's as code and path, per kind: `descriptor` (kind service-descriptor), `wellKnown` (service-well-known) and `pair` (service-observation, `{descriptor, wellKnown}`, only what neither document alone shows), null where a document is not given.",
     key: KEY,
     cases: cases().map(([name, descriptor, wk]) => {
       const codes = (kind: string, input: Json) => instanceFactsRules(kind, input).map((finding) => `${finding.code} ${finding.instancePath}`);

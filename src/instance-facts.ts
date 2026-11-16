@@ -21,7 +21,7 @@ export type FactField = keyof InstanceFacts;
 /** A declared value a clause of IF-6 refuses: never read; the field is read from the other document, the other fields stand. */
 export interface RefusedFact { document: FactsDocument; field: FactField; reason: string }
 export interface InstanceFactsView {
-  /** At least one fact is read. */
+  /** At least one fact is read; a dashboard's login alone never makes one (IF-5). */
   declared: boolean;
   facts: InstanceFacts;
   refused: RefusedFact[];
@@ -79,7 +79,7 @@ function refusal(field: FactField, value: unknown, document: FactsDocument, sett
     if (value === "operator" && setting.peer === true) return "operator beside peer: a service offered to others serves more than its operator";
     if (value === "organization" && setting.peer === false && setting.local === true) return "organization on a local placement needs peer: a host routes others only to a service that declares it (DEC-0061)";
     if (value === "public" && setting.local === true) return "public is a remote placement's: a local origin is reached by no one outside the computer";
-    if (value === "public" && setting.subscription === true) return "public beside a subscription runner: a service others reach never runs on the operator's subscription (DEC-0061 item 3)";
+    if (value === "public" && setting.subscription === true) return "public beside a subscription runner: a service others reach never runs on the operator's subscription (DEC-0046, DEC-0061 item 3)";
   }
   if (field === "entry" && setting.login !== undefined && (value === "host-signin") !== setting.login) {
     return setting.login ? "the dashboard requires a host's login code (surfaces.dashboard.login)" : "the dashboard takes no host's login code (surfaces.dashboard.login is false)";
@@ -95,14 +95,18 @@ function refusal(field: FactField, value: unknown, document: FactsDocument, sett
 
 /**
  * The reference reading of an instance's facts (DEC-0173 IF-5): each field from the well-known document where it
- * declares a value no clause refuses, else from the descriptor's; a refused value is reported and never read, and `entry` reads `host-signin` whenever the well-known document's dashboard
- * requires a host's login code, whatever either document declares. Either document may be absent. It never throws.
+ * declares a value no clause refuses, else from the descriptor's; a refused value is reported and never read, and `entry`
+ * reads `host-signin` whenever the well-known document's dashboard requires a host's login code and either document
+ * declares a fact (refused or not), whatever is declared for `entry`; a service that declares none reads none. Either
+ * document may be absent. It never throws.
  * Ports run `fixtures/vectors/instance-facts.json`.
  */
 export function instanceFacts(descriptor: unknown, wellKnown: unknown): InstanceFactsView {
   const setting = settingOf(descriptor, wellKnown);
   const sources: Array<[FactsDocument, ReturnType<typeof declaredIn>]> = [["wellKnown", declaredIn(wellKnown)], ["descriptor", declaredIn(descriptor)]];
   const view: InstanceFactsView = { declared: false, facts: {}, refused: [], invalid: sources.filter(([, read]) => !read.valid).map(([document]) => document) };
+  // A dashboard's login names the entry only for a service that declares instance facts: one that declares none shows none.
+  const declaresAny = sources.some(([, read]) => Object.keys(read.values).length > 0);
   for (const [field] of FIELDS) {
     let decided = false;
     for (const [document, read] of sources) {
@@ -114,7 +118,7 @@ export function instanceFacts(descriptor: unknown, wellKnown: unknown): Instance
       decided = true;
     }
   }
-  if (setting.login === true) view.facts.entry = "host-signin";
+  if (setting.login === true && declaresAny) view.facts.entry = "host-signin";
   view.declared = Object.keys(view.facts).length > 0;
   return view;
 }
@@ -123,8 +127,8 @@ const pointerToken = (token: string) => token.replace(/~/g, "~0").replace(/\//g,
 const MEMBER_OF: Readonly<Record<FactField, string>> = { audience: "access/audience", entry: "access/entry", mode: "tenancy/mode", kind: "space/kind", account: "space/account" };
 
 /**
- * FAC-SEM-180 (DEC-0173 IF-6). Kind `service-descriptor`: the descriptor's own facts against its peer, placement and
- * runner, and its label's shape. Kind `service-well-known`: a value that fails the schema, `entry` against the same
+ * FAC-SEM-180 (DEC-0173 IF-6). Kind `service-descriptor`: the descriptor's schema, its own facts against its peer,
+ * placement and runner, and its label's shape. Kind `service-well-known`: a value that fails the schema, `entry` against the same
  * document's dashboard, and its label's shape. Kind `service-observation` (`{descriptor, wellKnown}`, the identity
  * pair): only what neither document alone shows (a well-known value against the descriptor, a descriptor's `entry`
  * against the dashboard), so each problem is reported once.
