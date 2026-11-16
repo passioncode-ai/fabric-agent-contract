@@ -7246,7 +7246,7 @@
       }
     },
     {
-      "name": "AT-15: an ssh remote whose user is a token, 40 hex with no password, records no origin; a named user is kept (DEC-0177)",
+      "name": "AT-15: an ssh remote whose user is a token, 40 hex with no password, records no origin (DEC-0177)",
       "snapshot": {
         "folder": "/u/ana/work/app",
         "home": "/u/ana",

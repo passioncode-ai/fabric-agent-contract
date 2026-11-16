@@ -16,7 +16,8 @@
  * encoded `%1A`; it is rebuilt with a boundary before `AKIA`, from pieces) and any template or agent that copies the kit; a port that copies
  * `fixtures/vectors/folder-attribution.json` re-syncs it only together with the detector, since six of its nine new AT-15 cases fail under the earlier detector (three did before DEC-0151's round 14), and the percent-escape case fails under a port that takes the boundary without its escapes. Project Observatory's folder-attribution port (with its attribution-vectors pin) and its estate-record
  * port (FAC-SEM-075) re-sync together with that file. Whole-file vendors that pin this file by hash take DEC-0151 at
- * their next re-pin, with their vectors. Fabric vendors this file twice, one copy under a sha256 `pin.json` together with
+ * their next re-pin, with their vectors. DEC-0177 (a URL's token user name) re-syncs the same ports and the same
+ * `folder-attribution.json`, whose new AT-15 case fails under the earlier detector. Fabric vendors this file twice, one copy under a sha256 `pin.json` together with
  * `fixtures/vectors/folder-attribution.json`; Fabric Dashboards vendors `src/session-handoff.ts` and
  * `src/fabric-links.ts`, and its service host's connections hold a port; Fabric Dashboards' sample-service kit copies
  * hold the earlier pattern. Every port drops its case-insensitive flag (`re.I`, `(?i)`) and reads digits as ASCII (`re.ASCII`, `[0-9]` or `(?-u:\d)`): Project Observatory's folder-attribution and estate-record ports and Fabric Switchboard's folder-attribution port compile it case-insensitively today. A port derives the files whose answers change by patching SECRET_VALUE in its twins and
