@@ -9193,6 +9193,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (`FAC-SEM-156` to `FAC-SEM-160`; `FAC-SEM-161`, reserved with them, is not used) and a new vector file; no existing
   schema's validation, kind, code or vector changes (`device-common.schema.json`'s `$defs.detail.$comment`, count-free,
   is DEC-0153's line, on main byte for byte, so DEC-0149 leaves that file unchanged).
+- **Annotated (2026-11-16):** item 8's credential forms widened by DEC-0175 (a token as a URL's user, a value judged
+  piece by piece, a key behind an encoded separator, more assignment heads, a password in a query, an escaped quote).
 - **Context:** the operator asked that agents can be handed over as source and that a transfer happens only by their
   wish (CT-194, relayed by Fabric `2af39c53` and a personal agent's request `99221f81`). The research report
   [agent portability](reports/2026-10-27-agent-portability/README.md) set out the options (§5) and twelve questions (§6);
@@ -13038,24 +13040,33 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   user information is read at 8; a JSON key written with escaped quotes inside a JSON string. Each lets a secret
   through an export, which the tree check exists to stop.
 - **Decision:** [source](specification/source.md#the-tree-check) *the tree check*, the `credential` row:
-  1. **A URL's user.** With no password, a user that is a provider key, a JWT, or a run of 40 or more of
-     `[A-Za-z0-9_-]` holding a letter and a digit (a classic token's 40 hex) is a credential; a name such as `git` or
-     `deploy-bot` is not, and neither is a commit hash in a path.
-  2. **Piece by piece.** A query or fragment value is judged whole and in each piece between commas, so a synthetic word
-     after a `,` hides nothing before it, encoded or not.
+  1. **A URL's user.** A user that is a provider key, a JWT, or a run of 40 or more of `[A-Za-z0-9_-]` holding a
+     letter and a digit (a classic token's 40 hex) is a credential, with a password or without one
+     (`https://<token>:x-oauth-basic@host`); a name such as `git` or `deploy-bot` is not, and neither is a commit hash
+     in a path.
+  2. **Piece by piece.** A query or fragment value is judged whole and in each piece between commas by every rule that
+     reads a value (a key, a JWT, a long run under a credential's name, a password under a password's name), so a
+     synthetic word after a `,` hides nothing before it, encoded or not; the whole-value `bearer` branch reads only the
+     whole value, so a piece saying `bearer tokens` names no token.
   3. **Decoded once.** A provider key anywhere in a URL once percent-decoded is a credential, so an encoded separator in
-     its path or a parameter's name hides none (`a%2Ftask-…` stays clean: no key shape).
-  4. **Assignment heads.** Beside `NAME = value`, `NAME: value` and `"name": "value"`, the head reads `--name=value`,
-     `NAME := value`, `:name => value`, `@name ||= value`, `name ?= value`, `name ??= value`, `name += value`,
-     `name <- value` and `ENV['NAME'] = value`; a hyphen inside a word still starts no name.
-  5. **A password in a query.** A value under a password's name (`password`, `passwd`, `pwd`, with a prefix such as
-     `db_`) is read by the user information's rule: 8 or more characters mixing letters and digits, not synthetic.
+     its path or a parameter's name hides none (`a%2Ftask-…` stays clean: no key shape); read only when the URL as
+     written shows none, so a raw key keeps its own column.
+  4. **Assignment heads.** Beside `NAME = value`, `NAME: value` and `"name": "value"`, the head reads a name after `--`
+     or `:` or closed by a subscript's `]` (`ENV['NAME']`, `config["name"]`, `settings[NAME]`), before `=`, `:`, `:=`,
+     `=>` (with or without a leading `:`), `||=`, `??=`, `?=`, `+=` or `<-`; a hyphen inside a word still starts no
+     name. `ASSIGNED_HEAD` and `PASSWORD_NAME` join the vectors' `constants` block, the head written with two
+     fixed-width look-behinds a Python port takes as they are.
+  5. **A password in a query.** A value under a password's name (`password` or `passwd`, with a prefix such as `db_`;
+     not `pwd`, often a working directory) is read by the user information's rule: 8 or more characters mixing letters
+     and digits, not synthetic.
   6. **An escaped quote.** The unescaping pass that undoes `&`, `=` and `\/` undoes `\"` too, so
      `{\"api_key\": \"…\"}` inside a JSON string is read; it still runs only when the line shows nothing as written.
 - **Why:** each form is a real secret leaving through an export; the neighbours the vectors carry (a commit hash, a
   synthetic piece alone, a word holding `sk-`, a non-credential name, a short password, another parameter name) keep
   the widening from adding a false finding.
-- **Alternatives considered:** recording any of the six as out of scope (refused: each passes a real secret); a
+- **Alternatives considered:** reading `pwd` as a password's name (refused: `?pwd=project1/src` names a folder);
+  limiting `=>` to a Ruby symbol (refused: a hash's `"name" =>` is as common; an arrow function whose parameter is a
+  credential's name returning a 40-unit mixed identifier fails closed, as `=` already did); recording any of the six as out of scope (refused: each passes a real secret); a
   credential-shaped user under the 8-character password rule (refused: `deploy-bot1` would block); decoding a URL
   whole before every rule (refused: a value is already decoded once, and twice reads a doubly encoded key, which the
   adapter records as failing closed).
@@ -13065,9 +13076,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   contract blocks may pass the adapter's check. The adapter's own false positives of the existing forms (`47713284`)
   are CT-328, outside this decision.
 - **Consequences / affects:** `src/source-rules.ts` (`urlParts`, `urlSecret`, `passwordShaped`, `PASSWORD_NAME`,
-  `tokenUser`, `ASSIGNED_HEAD`, the assignment guard, `JSON_ESCAPES`), `tools/vectors/source-tree.ts`,
-  `fixtures/vectors/source-tree.json`; `docs/specification/source.md` (the `credential` row); `docs/backlog.md` (CT-325,
-  CT-328).
+  `tokenUser`, `ASSIGNED_HEAD`, `KEY_SHAPE_IN_PIECE`, the assignment guard, `JSON_ESCAPES`), `tools/vectors/source-tree.ts`,
+  `fixtures/vectors/source-tree.json` (cases and the `constants` block); `docs/specification/source.md` (the
+  `credential` row), `conformance.md` (the source check's row); DEC-0149 annotated; `docs/backlog.md` (CT-325, CT-328,
+  CT-329).
 - **Source:** the adapter's request `827ea813` and its triage (FAA-190 items 14, 31, 34, 38, 77, measured at
   `4f1a66d7`), the contract's acceptance `b63a1c30`; DEC-0149, DEC-0151. DEC-0175 was reserved by git CAS
   (`agent_sync.py reserve`, key `ct325-secret-shapes`).

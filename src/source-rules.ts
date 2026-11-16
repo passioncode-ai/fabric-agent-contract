@@ -450,8 +450,8 @@ const credentialFile = (path: string): boolean => {
 };
 
 /**
- * The credential shapes a source tree holds, as the Fabric Agent Adapter's check reads them (`fabric_source_check.py`
- * `_secret_in`, `v0.58.0`; DEC-0149 item 8), each a value that does not say it is synthetic (`SYNTHETIC`):
+ * The credential shapes a source tree holds: the Fabric Agent Adapter's check's (`fabric_source_check.py` `_secret_in`,
+ * `v0.58.0`; DEC-0149 item 8) and the six DEC-0175 added, which the adapter ports at its next pin; each a value that does not say it is synthetic (`SYNTHETIC`):
  *
  * - a private key block (PEM, OpenSSH, PGP), whatever follows it;
  * - a JWK's private `d` (JSON, escaped JSON, a Python dict);
@@ -506,11 +506,13 @@ const URL_IN_LINE = /[A-Za-z][A-Za-z0-9+.-]{0,63}:\/\/[^\t\n\v\f\r \x1c-\x1f\x85
 /** Spaces or tabs and a colon, read where a quoted member name ends (sticky: no copy of the rest of the line). */
 const COLON_AFTER = /[ \t]*:/y;
 /**
- * A name assigned a value (`NAME = value`, `NAME: value`, `"name": "value"`): the head only. The value, at least 40
- * units of `[A-Za-z0-9+/_-]` or `%HH` and up to two `=`, is read by hand (`assignedValueEnd`): a backtracking group
- * over a run of millions of characters overflows V8's regex stack.
+ * A name assigned a value: the head only (`NAME = value`, `NAME: value`, `"name": "value"`, and since DEC-0175 a name
+ * after `--` or `:`, closed by a subscript's `]` (`ENV['NAME']`, `config["name"]`, `settings[NAME]`), before `:=`,
+ * `=>`, `||=`, `??=`, `?=`, `+=` or `<-`). A hyphen inside a word starts no name: two fixed-width look-behinds, which
+ * a Python port writes the same. The value, at least 40 units of `[A-Za-z0-9+/_-]` or `%HH` and up to two `=`, is read
+ * by hand (`assignedValueEnd`): a backtracking group over a run of millions of characters overflows V8's regex stack.
  */
-const ASSIGNED_HEAD = /(?<![A-Za-z0-9_.]|[A-Za-z0-9_.]-)([A-Za-z_][A-Za-z0-9_.-]{0,63})(?:["']\]?|\])?[ \t]{0,8}(?::=|=>|\|\|=|\?\?=|\?=|\+=|<-|[:=])[ \t]{0,8}["']?/g;
+export const ASSIGNED_HEAD = /(?<![A-Za-z0-9_.])(?<![A-Za-z0-9_.]-)([A-Za-z_][A-Za-z0-9_.-]{0,63})(?:["']\]?|\])?[ \t]{0,8}(?::=|=>|\|\|=|\?\?=|\?=|\+=|<-|[:=])[ \t]{0,8}["']?/g;
 const isValueUnit = (code: number): boolean =>
   (code >= 0x41 && code <= 0x5a) || (code >= 0x61 && code <= 0x7a) || (code >= 0x30 && code <= 0x39) || code === 0x2b || code === 0x2f || code === 0x5f || code === 0x2d;
 const isHex = (code: number): boolean => (code >= 0x30 && code <= 0x39) || (code >= 0x41 && code <= 0x46) || (code >= 0x61 && code <= 0x66);
@@ -694,12 +696,14 @@ function lstrip(text: string, characters: string): string {
  * detector's.
  */
 export const URL_SECRET_VALUE = new RegExp(`(^bearer\\s.+|${KEY_SHAPE_SOURCES.join("|")})`, "i");
+/** The same key shapes without the whole-value bearer branch: what a piece of a comma-separated value is read by (DEC-0175). */
+const KEY_SHAPE_IN_PIECE = new RegExp(`(${KEY_SHAPE_SOURCES.join("|")})`, "i");
 /** A password of 8 or more characters mixing letters and digits, not synthetic: in the user information or under a password's name. */
 const passwordShaped = (value: string): boolean => value.length >= 8 && /[0-9]/.test(value) && /[A-Za-z]/.test(value) && real(unquote(value));
-/** A query or fragment parameter that names a password (`password`, `passwd`, `pwd`, with a prefix such as `db_`). */
-const PASSWORD_NAME = /(?:^|[_.-])(?:password|passwd|pwd)$/i;
+/** A query or fragment parameter that names a password (`password`, `passwd`, with a prefix such as `db_`); `pwd` is often a working directory, so it is none. */
+export const PASSWORD_NAME = /(?:^|[_.-])(?:password|passwd)$/i;
 /**
- * A URL's user with no password read as a token: a provider key or a JWT, or a run of 40 or more of `[A-Za-z0-9_-]`
+ * A URL's user read as a token, with a password or without one (`https://<token>:x-oauth-basic@host`): a provider key or a JWT, or a run of 40 or more of `[A-Za-z0-9_-]`
  * holding a letter and a digit (a classic token's 40 hex), not synthetic. A name such as `git` or `deploy-bot` is not one.
  */
 const tokenUser = (user: string): boolean =>
@@ -712,21 +716,25 @@ function urlSecret(url: string, depth = 0): boolean {
   const [password, query, fragment, user] = urlParts(trimmed);
   if (passwordShaped(password)) return true;
   // A user with no password that is a token, not a name (a git remote's `https://<token>@host`, CT-325).
-  if (password === "" && tokenUser(unquote(user))) return true;
-  // A key behind a percent-encoded separator in the path or a parameter's name starts a word once decoded (CT-325).
-  if (trimmed.includes("%") && providerKeys(unquote(trimmed)).length > 0) return true;
+  if (tokenUser(unquote(user))) return true;
+  // A key behind a percent-encoded separator in the path or a parameter's name starts a word once decoded (CT-325);
+  // read only when the URL as written shows none, so a raw key keeps its own column.
+  if (trimmed.includes("%") && providerKeys(trimmed).length === 0 && providerKeys(unquote(trimmed)).length > 0) return true;
   for (const part of [query, fragment]) {
     for (const [name, raws] of rawValues(part)) {
       for (const raw of raws) {
         const value = unquote(raw);
         if (depth < 2 && value.includes("://") && urlSecret(value, depth + 1)) return true;
         if (providerKeys(value).length > 0) return true;
-        // A value under a password's name is read as a password in the user information is (CT-325).
-        if (PASSWORD_NAME.test(name) && passwordShaped(value)) return true;
-        // Judged piece by piece: a synthetic word after a `,` does not hide the value before it (CT-325).
-        for (const piece of value.includes(",") ? [value, ...value.split(",")] : [value]) {
+        // Judged whole and piece by piece: a synthetic word after a `,` does not hide the value before it (CT-325). A
+        // value under a password's name is read as a password in the user information is. The whole-value bearer
+        // branch reads only the whole value: a piece saying `bearer tokens` names no token.
+        const pieces = value.includes(",") ? value.split(",") : [];
+        for (const piece of [value, ...pieces]) {
+          if (PASSWORD_NAME.test(name) && passwordShaped(piece)) return true;
           if (!real(piece)) continue;
-          if ((credentialName(name) && longRunSecret(piece)) || hasJwt(piece) || URL_SECRET_VALUE.test(piece)) return true;
+          if ((credentialName(name) && longRunSecret(piece)) || hasJwt(piece)) return true;
+          if (piece === value ? URL_SECRET_VALUE.test(piece) : KEY_SHAPE_IN_PIECE.test(piece)) return true;
         }
       }
     }
@@ -739,7 +747,7 @@ const secretUrls = (line: string): Array<[number, number]> =>
   !line.includes("://") ? [] : [...line.matchAll(URL_IN_LINE)].filter((match) => urlSecret(match[0])).map((match) => [match.index as number, (match.index as number) + match[0].length]);
 
 /**
- * A line with its JSON escapes of `&`, `=` and `/` undone, and for each character of it the index in the line where it
+ * A line with its JSON escapes of `&`, `=`, `/` and `"` undone, and for each character of it the index in the line where it
  * was written; undefined when the line holds none.
  */
 function unescapedJson(line: string): { text: string; origin: number[] } | undefined {
