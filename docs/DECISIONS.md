@@ -1760,6 +1760,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   computes the pinned digest (`apps/desktop/src/main/boardService.ts` `commsDigest`); the adapter's kit ports run
   the shared vectors (ask (c), CT-18).
 - **Annotated (2026-10-12):** its *Not decided here* on lone surrogates is decided by DEC-0052 item 9 (CT-25): the settings form refuses one in any string or key.
+- **Annotated (2026-11-16):** its consumer adoption changed outside this repository: Fabric does not write
+  `session-handoff/1` (Fabric's ADR-0182, accepted 2026-10-25, superseding in part its ADR-0140 and withdrawing the
+  symmetry for Fabric's side), so the format's writer is Fabric Dashboards' console pack; the profile's Fabric notes stay
+  as the worked bearer example (CT-335).
 - **Decision:**
   1. The contract has exactly two canonical JSON forms, both in `src/canonical.ts`, and every signed or hashed JSON
      document names one of them in the register

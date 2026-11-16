@@ -9,9 +9,15 @@ DEC-0042 is normative. It implements Fabric
 A **session handoff** is the folder a host writes for one coding-agent session before the session's first turn:
 what the agent is working on (`context.md`), how it reaches the host's MCP server (`mcp.json`), optionally its
 brief (`brief.md`) and its task (`task.md`), and a manifest (`handoff.json`) that says how all of it is carried
-to the runtime. Fabric writes one for each session it launches; Fabric Dashboards writes one for each console it
-opens on an agent; Switchboard carries the arguments in place. A Fabric agent opened in Dashboards' console and a
-Dashboards agent opened from Fabric carry the same format.
+to the runtime. Fabric Dashboards writes one for each console it opens on an agent; Switchboard carries the arguments
+in place.
+
+**Fabric writes none.** Since 2026-10-25 Fabric does not write `session-handoff/1` and does not claim to conform to it
+(Fabric's [ADR-0182](https://github.com/passioncode-ai/fabric/blob/c83af249/docs/adr/0182-fabric-does-not-write-session-handoff-1.md), which supersedes in part its ADR-0140 and narrows its REQ-06 to Dashboards' pack): a session Fabric
+starts keeps Fabric's own per-session bundle, with `execution-packet/1` as its integrity layer. The Fabric notes below
+(SH-1, SH-5, SH-7, SH-9, SH-11's Fabric cells, SH-12, `mcp.strict`) record the bearer writer ADR-0140 designed and its
+measurements; they stay as the worked example of a bearer folder (the positive fixtures `session-handoff-fabric-*`), not
+as a writer that conforms today.
 
 The manifest's schema is
 [`session-handoff.schema.json`](../../schemas/session-handoff.schema.json). The kit's checker is
@@ -163,10 +169,10 @@ variable the handoff sets; a value that carries a credential, or a document hold
 
 | Runtime | MCP | `strict` | Brief | Today |
 |---|---|---|---|---|
-| `claude-code` | exactly one `--mcp-config=<folder>/mcp.json`, joined: the spaced `--mcp-config <path>` is refused, because the option takes several values and the next bare value is read as one more config (measured by Switchboard, SB-94, Switchboard #141; Dashboards #68) | `--strict-mcp-config` exactly when `true` | inline: `--append-system-prompt <text>`; file: `--append-system-prompt-file <folder>/brief.md` | Fabric (`mcp-config-flag`), Dashboards |
-| `codex` | `-c mcp_servers.<server>.command=…` (and `args`, `env`) for `none`; `-c mcp_servers.<server>.url=…` and `-c mcp_servers.<server>.bearer_token_env_var=<VAR>`, the variable set and recorded as `null`, for `bearer` | `false`: no switch measured | the first prompt, a positional argument | Dashboards (`none`); Fabric does not hand Codex a session yet (not connected) |
-| `kilo` | `KILO_CONFIG_CONTENT`, recorded as `null`: Kilo's own config document with the server as `remote` and its header; no argument | `false`: no switch measured | file: the config's `instructions` names `brief.md` | Fabric (`config-content-env`, Kilo 7.4.17) |
-| `hermes` | sent in ACP `session/new` by the host's ACP client (HTTP, or the host's stdio bridge); no argument | `HERMES_ACP_SKIP_CONFIGURED_MCP=1` exactly when `true` | the session's first ACP prompt | Fabric (`acp-session`, Hermes 0.21.4) |
+| `claude-code` | exactly one `--mcp-config=<folder>/mcp.json`, joined: the spaced `--mcp-config <path>` is refused, because the option takes several values and the next bare value is read as one more config (measured by Switchboard, SB-94, Switchboard #141; Dashboards #68) | `--strict-mcp-config` exactly when `true` | inline: `--append-system-prompt <text>`; file: `--append-system-prompt-file <folder>/brief.md` | Dashboards; Fabric's `mcp-config-flag` measured for ADR-0140's design, no handoff written (ADR-0182) |
+| `codex` | `-c mcp_servers.<server>.command=…` (and `args`, `env`) for `none`; `-c mcp_servers.<server>.url=…` and `-c mcp_servers.<server>.bearer_token_env_var=<VAR>`, the variable set and recorded as `null`, for `bearer` | `false`: no switch measured | the first prompt, a positional argument | Dashboards (`none`) |
+| `kilo` | `KILO_CONFIG_CONTENT`, recorded as `null`: Kilo's own config document with the server as `remote` and its header; no argument | `false`: no switch measured | file: the config's `instructions` names `brief.md` | no writer: measured by Fabric (`config-content-env`, Kilo 7.4.17) for ADR-0140's design (ADR-0182) |
+| `hermes` | sent in ACP `session/new` by the host's ACP client (HTTP, or the host's stdio bridge); no argument | `HERMES_ACP_SKIP_CONFIGURED_MCP=1` exactly when `true` | the session's first ACP prompt | no writer: measured by Fabric (`acp-session`, Hermes 0.21.4) for ADR-0140's design (ADR-0182) |
 | `kimi-code` | ACP, as `hermes` | `false`: no switch measured | the first ACP prompt | not connected yet |
 | `cline` | ACP, as `hermes` | `false`: no switch measured | the first ACP prompt | not connected yet |
 | `pi` | not measured: pi reads `mcp.json`, in the `mcpServers` dialect, from its agent directory (`PI_CODING_AGENT_DIR`), so a host points that at a directory of its own, never the user's (DEC-0046) | `false`: no switch measured | not measured | not connected yet |
@@ -195,10 +201,11 @@ server's environment — appears in no other file of the folder: not in `context
 
 ## Symmetry
 
-A host that opens an agent of another product hands it the same format. A Fabric agent opened in Dashboards'
-console gets Dashboards' folder (`service_context`, `mcp.auth: none`, per agent key); a Dashboards agent opened
-from Fabric gets Fabric's (`fabric_whoami`, `mcp.auth: bearer`, per session). Both are checked by the same
-`validateSessionHandoff`.
+A host that writes this format hands it to an agent of another product the same way, and every such folder is checked
+by the same `validateSessionHandoff`. A Fabric agent opened in Dashboards' console gets Dashboards' folder
+(`service_context`, `mcp.auth: none`, per agent key). The other direction, a Dashboards agent opened from Fabric with a
+bearer folder (`fabric_whoami`, `mcp.auth: bearer`, per session), was ADR-0140's design; Fabric withdrew it (its
+ADR-0182, decision 4) and starts such a session with its own bundle.
 
 ## The kit's checker
 
@@ -208,6 +215,8 @@ readSessionHandoff(dir): HandoffSnapshot           // reads without following li
 checkSessionHandoff(snapshot, schema)              // the same, on a snapshot
 sessionHandoffManifestFindings(manifest)           // FAC-SEM-053 only, pure but for the host's path rules (SH-11's names)
 samePath(a, b, platform?)                          // SH-4 and SH-11: bytes off win32; either separator, any case on win32
+secretArgument(value)                              // the shared detector's argument reading, copied (SH-10)
+secretUrl(value)                                   // its URL reading, copied (SH-9, DEC-0178)
 ```
 
 `schema` is a compiled check of `session-handoff.schema.json`; omitted, the kit's own validator is loaded. The
