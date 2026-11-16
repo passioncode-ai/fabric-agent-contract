@@ -13003,8 +13003,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   his subscription, serving only him, declares `single`.
 - **Compatibility:** narrows DEC-0173, released in `v0.1.0+2026-11-16`, where no service declares the facts yet (Prowl
   Agent declares first); a declaration DEC-0174 refuses reads those facts as not declared, the service's state unchanged.
-  The vectors gain cases and change none; hosts run them at their next pin (Fabric Dashboards, FD-273, ports
-  DEC-0173 in its open PR #580, 0.8.130 unreleased, and is told of DEC-0174 on the board). The node's runner check (`FAC-SEM-087`) still reads only `peer`; a service that declares no
+  The vectors gain cases and change none; hosts run them at their next pin (Fabric Dashboards, FD-273, adopted
+  DEC-0173 in PR #580, merged 2026-11-16 for 0.8.130 and pinned at contract `4aff124a`, before the release's CT-327
+  vectors; it is told of DEC-0174 on the board). The node's runner check (`FAC-SEM-087`) still reads only `peer`; a service that declares no
   such fact is not affected.
 - **Consequences / affects:** `src/instance-facts.ts` (the clauses, `INSTANCE_FACTS_PROTOCOL`),
   `tools/vectors/instance-facts.ts`, `fixtures/vectors/instance-facts.json`, `test/instance-facts.test.ts`, the schema's
