@@ -13317,7 +13317,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      `<product>:<check id>@<YYYY-MM-DD>`, the UTC day of the opening reading, so a check id is stable.
   7. HL-7: a surface of its own (MCP `<product>_health`, CLI `<product> health --json`), not a member of the
      well-known answer; for a service that answers both, a degraded source or a `degraded` status makes the health
-     report not `ok`, and a `setup: true` source is a `warn` check, never a `fail`. The well-known declaration of a
+     report not `ok` (checked), and a `setup: true` source is a `warn` check, never a `fail` (the product's duty, not
+     checked: a reading links no source to a check). The well-known declaration of a
      service's health path, as `load` is declared (DEC-0104), is CT-337.
   8. Privacy: counts, kinds and codes only (DEC-0157); `FAC-SEM-181` refuses a product, check id, fix tool or fix
      capability shaped like a credential or holding a home folder, and names it only by its place.
@@ -13331,8 +13332,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   needs no time-zone reading; a reader converts); an open `area` string (refused: a watcher routes by area, and an
   open list drifts); `unknown` between `warn` and `fail` (refused: a product that cannot measure a check is not broken
   by that alone, and an outage alert for every unmeasured check would page for nothing).
-- **Compatibility:** new; no earlier document changes its answer. Switchboard 0.7.102's draft fits HL-1 to HL-4 as
-  the request quotes it (its `fix: null` included); a check it omits `count` from fails the schema, so it writes `0`.
+- **Compatibility:** new; no earlier document changes its answer. Switchboard 0.7.102's draft, as the request quotes
+  it, fits HL-1 to HL-4 (its `fix: null` included; `count` is required, so a check that counts nothing writes `0`);
+  no reading of 0.7.102 was validated in this run.
   `agent-health/1` is added to the protocol register (`src/protocol-revisions.ts`).
 - **Consequences / affects:** `schemas/agent-health.schema.json`, `src/agent-health.ts`, `src/semantic-kinds.ts`
   (`agent-health`, `agent-health-service`), `src/semantic-rules.ts`, `src/protocol-revisions.ts`,

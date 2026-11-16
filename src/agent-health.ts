@@ -34,8 +34,10 @@ export function worstState(states: readonly unknown[]): HealthState {
 }
 
 /** A name a finding may print: one the schema's grammars let in and no detector refuses; otherwise its place. */
+/** A check id as the schema writes it; the agent-health-service pair is not schema-checked, so a message tests it. */
+const CHECK_ID = /^[a-z][a-z0-9_]{0,63}$/;
 const named = (value: unknown, instead: string): string =>
-  typeof value === "string" && /^[A-Za-z0-9_.-]{1,128}$/.test(value) && !secretValue(value) && !hasHomePath(value) ? value : instead;
+  typeof value === "string" && CHECK_ID.test(value) && !secretValue(value) && !hasHomePath(value) ? value : instead;
 
 /** FAC-SEM-181 over one report already valid by `agent-health.schema.json`. */
 function reportFindings(value: JsonObject, base = ""): Finding[] {
@@ -109,7 +111,10 @@ export function readHealth(answer: unknown): { state: HealthState; reason?: "no-
   return { state: (answer as JsonObject).state as HealthState };
 }
 
-/** HL-6: the key a watcher keeps one episode under: `<product>:<check id>@<UTC day of at>`. */
+/**
+ * HL-6: the key a watcher keeps one episode under: `<product>:<check id>@<UTC day of at>`. `at` comes from a report valid
+ * by the schema (at most 253402300799); a value beyond what `Date` holds throws.
+ */
 export function episodeKey(product: string, checkId: string, at: number): string {
   return `${product}:${checkId}@${new Date(at * 1000).toISOString().slice(0, 10)}`;
 }

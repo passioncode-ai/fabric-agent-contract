@@ -10,7 +10,7 @@ DEC-0179 · rule code `FAC-SEM-181` · schema [`agent-health.schema.json`](../..
 answers it the same way, so one watcher on a machine can read them all and keep episodes over them. It was asked for by
 fabric-switchboard (SB-393, the board request `3173118b` of 2026-11-16, proposal
 [`docs/research/2026-11-16-agent-health-estate.md` at `c634e9e`](https://github.com/passioncode-ai/fabric-switchboard/blob/c634e9e55b98038c77891bed7b14b4359946af87/docs/research/2026-11-16-agent-health-estate.md),
-AH-1); Switchboard 0.7.102 answers its draft.
+AH-1); the request says Switchboard 0.7.102 answers its draft (`switchboard health`, `crates/switchboard-runtime/src/health.rs`); no reading of it was validated here.
 
 ## The reading
 
@@ -63,9 +63,11 @@ It is a surface of its own, not a member of the well-known answer:
   (`errors`), but a digest is never read as a health reading.
 
 - **HL-7. One truth for a service that answers both.** When the well-known answer lists a degraded source, or says
-  `degraded`, the health report beside it is not `ok`. A `setup: true` entry (a source waiting for a person,
-  `FAC-SEM-011`, DEC-0044) is a `warn` check whose `fix` names the tool that answers `human-step-required`, never a
-  `fail`, so a watcher opens no outage episode for it. A well-known answer that is `ready` with no degraded source puts
+  `degraded`, the health report beside it is not `ok` (`FAC-SEM-181` checks this). A `setup: true` entry (a source
+  waiting for a person, `FAC-SEM-011`, DEC-0044) is a `warn` check whose `fix` names the tool that answers
+  `human-step-required` (DEC-0121), never a `fail`, so a watcher opens no outage episode for it. That is the
+  product's duty and is not checked: a reading carries no link from a well-known source to a check, so a `fail`
+  beside a setup entry may be another check's. A well-known answer that is `ready` with no degraded source puts
   no bound on the health report: an update or a leaked key is a `warn` while the service serves. `FAC-SEM-181` checks
   the pair as the kind `agent-health-service` (`{wellKnown, health}`).
 
@@ -79,7 +81,10 @@ It is a surface of its own, not a member of the well-known answer:
   readings, closing it after two good ones and sending one message per episode is the watcher's rule (fabric-dashboards
   AH-2, the agents base's `alert-episodes` pattern). A watcher that keys episodes the estate's way uses
   `<product>:<check id>@<YYYY-MM-DD>`, the UTC day of the reading that opened the episode (`episodeKey`), so a check's
-  `id` never changes between readings or versions.
+  `id` never changes between readings or versions. Which states count as bad (whether `unknown` or `warn` opens an
+  episode) is the watcher's rule too; a watcher that also derives `down` from the well-known answer, and gets no
+  health answer from a service that is down (`unknown`, HL-5), sends one message for that outage, not one for each.
+  `episodeKey` takes `at` from a valid report (at most 9999-12-31T23:59:59Z).
 
 ## Semantic rules
 

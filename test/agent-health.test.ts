@@ -47,6 +47,12 @@ describe("agent-health/1 (DEC-0179)", () => {
     const notWorst = evaluateSemanticRules("agent-health", fixture("semantic/agent-health-not-worst.json").input);
     expect(notWorst).toEqual([expect.objectContaining({ instancePath: "/state", message: expect.stringContaining("here fail") })]);
   });
+  it("a check id the schema refuses is named only by its place, in the pair the schema does not check", () => {
+    const health = { ...fixture("positive/agent-health.json"), state: "ok", checks: [{ id: "john.smith", area: "accounts", state: "ok", count: 0 }, { id: "john.smith", area: "accounts", state: "ok", count: 0 }] };
+    const findings = evaluateSemanticRules("agent-health-service", { wellKnown: { status: "ready", degraded: [] }, health });
+    expect(findings.map((f) => f.instancePath)).toEqual(["/health/checks/1/id"]);
+    for (const f of findings) expect(f.message).not.toContain("john.smith");
+  });
   it("a well-known answer that is ready with no degraded source puts no bound on the health report (HL-7)", () => {
     const health = fixture("positive/agent-health.json");
     expect(evaluateSemanticRules("agent-health-service", { wellKnown: { status: "ready", degraded: [] }, health })).toEqual([]);

@@ -227,8 +227,10 @@ placement requires the token here too ([Remote placement](#remote-placement)).
   with its supervisor's to detect a second copy.
 - `status` is `starting`, `ready`, `degraded` or `stopping`. A process that cannot
   serve does not answer; the host derives `down`.
-- `degraded` MUST always be present. An empty list asserts full health. `status: ready`
-  with a non-empty list is inconsistent (`FAC-SEM-011`).
+- `degraded` MUST always be present. An empty list asserts full health of the service's sources: every source
+  works. It is not a reading of what else is wrong (an update, a leaked key), which is
+  [`agent-health/1`](agent-health.md) (DEC-0179 HL-7). `status: ready` with a non-empty list is inconsistent
+  (`FAC-SEM-011`).
 - A `degraded` entry with `setup: true` is a **setup state**: the source waits for a person to finish setting it
   up — a key not entered, a model not chosen — and is not an outage (DEC-0044). It still names `source` and
   `reason`, the reason says what the person does, and it still makes the service `degraded`. A watcher MUST NOT open
