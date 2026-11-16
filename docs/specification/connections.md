@@ -65,7 +65,8 @@ No string member carries a credential or a URL with one. What counts is defined 
   are CT-73's.
 
 A URL written without a scheme (`api.example.com/?api_key=…`) is not read as one. A name that matches a shape, such as
-a store `sk-Prod-eu-west-1-db` or a URL path segment of 40 or more mixed
+a store `sk-Prod-eu-west-1-db`, a URL's user name of 40 or more of `[A-Za-z0-9_-]` holding a letter and a digit (a long
+service-account name, DEC-0177; its author drops the user name from the URL) or a URL path segment of 40 or more mixed
 characters (a Google Docs document id, or a Notion link whose segment joins the page title and its id; a bare Notion
 id is lower-case hex), hides the whole declaration; its author removes a model id from the text or declares it as a
 model connection of its own whose `target` is the id, drops the link, or renames a target that is the author's own

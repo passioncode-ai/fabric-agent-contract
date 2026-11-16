@@ -13210,8 +13210,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      in a URL inside a launch argument (`args`, a runner's `argv`, a descriptor's `commands`, `mcp-remote <url>`),
      which is read as an argument, nor in a URL nested in a query value, nor in a remote's scp form (`<token>@host:path`,
      no URL), which folder attribution's `recordOrigin` reads itself and records no origin for.
-  5. A recorded origin whose scp user, or whose URL user between its `@`, is a token records none (`recordOrigin`), so
-     no new record holds a token from a remote's user name.
+  5. A recorded origin whose scp user, or whose URL user between its raw `@`, is a token records none (`recordOrigin`),
+     so no new record holds a token written as a remote's user name in these forms; a user whose `@` is
+     percent-encoded (`ssh://x%40<token>@host`) is kept, a known limit.
 - **Why:** the user name is where a git remote carries its token; a detector that refuses a password beside it and
   not the token alone misses the commoner form, and the tree check already reads it.
 - **Alternatives considered:** reading any 40-character user name (refused: a long service-account name of letters
