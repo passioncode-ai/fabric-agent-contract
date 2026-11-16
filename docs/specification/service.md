@@ -943,7 +943,9 @@ and whose it is without guessing. The facts ride as one extension value under th
 (what the running instance knows), or both: both documents are closed, and a host pinned before DEC-0173 preserves and
 ignores the extension. Every member and every field is optional, save that a present `tenancy` names its `mode` and a present
 `space` its `kind` (a document whose value lacks them fails the schema and gives none of its facts); an absent one, and
-an empty `access`, declare nothing, never a default. The facts are declared, never verified. **Whose instance it is** is not among them: it stays the
+an empty `access`, declare nothing, never a default. The facts are declared, never verified. A service need not
+list their protocol `fabric-instance-facts/0.1` in its `protocols`, and a listing changes nothing: a host reads the
+facts by the extension key and never from a listing (DEC-0174). **Whose instance it is** is not among them: it stays the
 estate placement's `context` (DEC-0082 item 4), first; for a remote instance with no placement record an organization's
 `org-instance/1` statement ([membership](membership.md#instances-dec-0170)), else Observatory's map (IF-7).
 
@@ -952,7 +954,8 @@ estate placement's `context` (DEC-0082 item 4), first; for a remote instance wit
 listing names, a colleague or a guest included; on a remote placement without `peer`, an organization's members reaching
 its own surface with their own keys) or `public` (a remote placement's only: anyone who reaches its origin's own
 surface with credentials of their own, outside any hub's routing; no offer in the [sense above](#offered-to-others) and
-no grant through a hub). A service that declares `peer` before any grant reaches it may leave `audience` out rather
+no grant through a hub). `organization` and `public` are never beside a `subscription` runner, which serves only its
+owner's own sessions (DEC-0061 item 3, DEC-0174). A service that declares `peer` before any grant reaches it may leave `audience` out rather
 than write `operator`, which `peer` refuses; `organization` there stands. A peer share
 (DEC-0142) passes a credential's value and gives no audience to an instance. `entry`: `host-signin`, `own-signin` or
 `none`, how its dashboard is entered; where the well-known document declares `surfaces.dashboard`, its `login` decides
@@ -964,7 +967,8 @@ authority extension's `levels[].audience` nor a grant's.
 into organizations runs one `org:` instance in each, naming its share grant, and each is `single`), `per-organization`
 (one of the copies a product itself runs one per organization) or `shared` (one instance holding several tenants' data,
 kept apart by the instance: many users each signed in on its own sign-in, or several organizations whose listings name
-it; a remote placement's only, since a local placement names one context and at most one grant).
+it; a remote placement's only, since a local placement names one context and at most one grant). Neither
+`per-organization` nor `shared` stands beside a `subscription` runner (DEC-0174).
 
 **IF-4, `space`.** `kind`: `user` (the counted OS account whose services directory declares it, DEC-0154),
 `container` or `vm` (on a local placement a guest on the computer behind a forwarder its own account owns, a listener
@@ -987,7 +991,8 @@ computer and a relayed guest reach unauthenticated (DEC-0154); `audience` and `m
 organization's instance may run on the computer, and a service that must not say so declares them in its descriptor.
 
 **IF-6, `FAC-SEM-180`.** A value fails the schema; `organization` on a local placement without `peer`; `operator`
-beside `peer`; `public` on a local placement or beside a `subscription` runner (DEC-0046, DEC-0061 item 3); a declared `entry`
+beside `peer`; `public` on a local placement or beside a `subscription` runner (DEC-0046, DEC-0061 item 3);
+`organization`, `per-organization` or `shared` beside a `subscription` runner (DEC-0174); a declared `entry`
 against the dashboard's `login`; `shared` or `system` on a local placement; a label shaped like a credential (the shared
 detector, as `FAC-SEM-086` reads `runner`), or in a local well-known document. The clauses on `peer`, the placement and
 the runner read the descriptor, and the one on `login` the well-known document: kind `service-descriptor` checks a
@@ -1527,4 +1532,4 @@ behaviour rules (AP-1, AP-2 and AP-4) bind a service at its next pin, and from t
 | <a id="fac-sem-143"></a>`FAC-SEM-143` | `page-link`, `interop-input-requests` | a link handed to a person is not a raw `http` or `https` address whose host is a local one as PL's [check](#links-to-a-services-pages) lists it (`127.0.0.0/8`, `[::1]`, the IPv4-mapped `[::ffff:127.x.y.z]`, `localhost` and names under it, and the unspecified `0.0.0.0` and `[::]` a wildcard bind reports), and a `fabric-dashboards:` link follows `fabric-dashboards://service/<id>.<instance>[?path=<path>]` with no other parameter, a path on the service origin and no credential (DEC-0123 PL-1) |
 | <a id="fac-sem-142"></a>`FAC-SEM-142` | `service-well-known`, `action-call` | an actions declaration is its schema's, names each `id` once, carries `humanStep` exactly when `gate` is `human` and names only tools a present `surfaces.mcp.capabilities` lists; a service answers an action call as `actionDecision` does (DEC-0121), except a source hand-over ([source](source.md#handing-over)), out of this rule until a service pins a contract revision carrying CT-181: `--kind action-call` cannot tell a hand-over and is not run on a hand-over's calls until then; and in the authority key, `extensions/authority/0.1` (`authorityExtensionRules`, DEC-0162 LV-5, LV-7), a value its schema refuses, an organization named twice in `levels`, and a level in `actionLevels` for an id that is not a relayed action of the actions declaration |
 | <a id="fac-sem-176"></a>`FAC-SEM-176` | `service-well-known` | a service that serves `surfaces.dashboard` serves `surfaces.mcp` or `surfaces.a2a` beside it, and a present `surfaces.mcp.capabilities` is not empty (DEC-0169 RP-3) |
-| <a id="fac-sem-180"></a>`FAC-SEM-180` | `service-descriptor`, `service-well-known`, `service-observation` | the instance facts are their schema's and no clause of [IF-6](#instance-facts) refuses a value: `audience` against `peer`, the placement and the runner, `entry` against the dashboard's `login`, `shared` and `system` only remote, the label never credential-shaped nor in a local well-known document (DEC-0173) |
+| <a id="fac-sem-180"></a>`FAC-SEM-180` | `service-descriptor`, `service-well-known`, `service-observation` | the instance facts are their schema's and no clause of [IF-6](#instance-facts) refuses a value: `audience` against `peer`, the placement and the runner, `entry` against the dashboard's `login`, `shared` and `system` only remote, the label never credential-shaped nor in a local well-known document, no fact that serves others beside a `subscription` runner (DEC-0173, DEC-0174) |

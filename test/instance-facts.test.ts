@@ -3,7 +3,8 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { projectRoot } from "../src/contract.js";
 import { EXTENSION_KEYS } from "../src/extensions.js";
-import { instanceFacts, instanceFactsRules } from "../src/instance-facts.js";
+import { INSTANCE_FACTS_PROTOCOL, instanceFacts, instanceFactsRules } from "../src/instance-facts.js";
+import { NAMED_ONLY } from "../src/protocol-revisions.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
 import { buildInstanceFactsVectors, VECTOR_FILE } from "../tools/vectors/instance-facts.js";
 
@@ -43,6 +44,11 @@ describe("extensions/instance-facts/0.1 (DEC-0173)", () => {
       const identity = evaluateSemanticRules("service-observation", { descriptor, wellKnown: { service } }).some((f) => f.code === "FAC-SEM-009");
       expect(instanceFacts(descriptor, { service }).foreign, JSON.stringify([descriptor, service])).toBe(identity);
     }
+  });
+  it("names the protocol the register names, and a listing of it is no finding (IF-1, DEC-0174)", () => {
+    expect(NAMED_ONLY).toContain(INSTANCE_FACTS_PROTOCOL);
+    expect(evaluateSemanticRules("service-well-known", { protocols: ["fabric-service/0.1", INSTANCE_FACTS_PROTOCOL] }).filter((f) => f.code === "FAC-SEM-099")).toEqual([]);
+    expect(evaluateSemanticRules("service-well-known", { protocols: ["fabric-instance-facts/0.2"] }).some((f) => f.code === "FAC-SEM-099")).toBe(true);
   });
   it("answers a fresh object each time", () => {
     const one = instanceFacts(undefined, undefined);

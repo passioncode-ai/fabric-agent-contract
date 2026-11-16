@@ -929,7 +929,7 @@ signed by a key of the organization's key set and verified offline by the platfo
 `account` label). Declared, never verified, and never whose instance it is, which stays the estate placement's
 `context` first, then an **Instance statement**, else Observatory's map; a local service no estate record places reads
 `personal`. Its `audience` is not the authority extension's `levels[].audience` nor a
-grant's audience, and `tenancy` is not a policy's `accounts.tenants` (DEC-0173).
+grant's audience, and `tenancy` is not a policy's `accounts.tenants` (DEC-0173, DEC-0174).
 
 **Membership attestation**: What an organization server states about one person's membership of one organization,
 for one reader, for at most a day: the organization, a subject pairwise to that reader, a role (`owner`, `admin`,

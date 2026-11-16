@@ -1,5 +1,5 @@
 /**
- * Vectors for extensions/instance-facts/0.1 (DEC-0173): what a host reads of an instance's facts from its descriptor and
+ * Vectors for extensions/instance-facts/0.1 (DEC-0173, DEC-0174): what a host reads of an instance's facts from its descriptor and
  * its well-known document (`instanceFacts`, IF-5), and what FAC-SEM-180 reports on the pair (IF-6). Every value is
  * synthetic. Run with `--write` to regenerate; `vectors:check` compares the committed file with this generator.
  */
@@ -59,6 +59,9 @@ function cases(): Array<[string, Json | null, Json | null]> {
     ["a local virtual machine", local(facts({ space: { kind: "vm", account: "vm-1" } })), wellKnown()],
     ["a well-known document that answers as another service gives nothing; the descriptor is read alone", local(facts({ access: { entry: "own-signin" } })), { ...wellKnown({ access: { audience: "public" } }, true), service: { id: "other", instance: "default" } }],
     ["a dashboard login beside a well-known extension that fails its schema and a declared descriptor fact reads host-signin", local(facts({ tenancy: { mode: "single" } })), wellKnown({ access: { audience: "everyone" } }, true)],
+    ["organization and per-organization beside a subscription runner are both refused (DEC-0174)", remote({ runner: { credentialKind: "subscription" }, ...facts({ access: { audience: "organization" }, tenancy: { mode: "per-organization" } }) }), wellKnown()],
+    ["shared beside a subscription runner is refused; the audience stands (DEC-0174)", remote({ runner: { credentialKind: "subscription" }, ...facts({ access: { audience: "operator" }, tenancy: { mode: "shared" } }) }), wellKnown()],
+    ["a well-known document may list the facts' protocol: no finding, the facts read from the key (DEC-0174)", remote(facts({ access: { audience: "public" } })), { ...wellKnown(), protocols: ["fabric-service/0.1", "fabric-instance-facts/0.1"] }],
     ["a credential-shaped label in a local well-known document: each reading reports its own problem", local(), wellKnown({ space: { kind: "user", account: ["ghp", "_", "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8"].join("") } })]
   ];
 }
@@ -72,7 +75,7 @@ function paired(descriptor: Json | null, wk: Json | null): Json | null {
 
 export function instanceFactsVectors(): Json {
   return {
-    about: "Vectors for extensions/instance-facts/0.1 (DEC-0173), written by tools/vectors/instance-facts.ts, never by hand. Each case gives a descriptor and a well-known document (null: not read). Every well-known document answers as its descriptor's service (FAC-SEM-009 reads the pair as one) unless the case names another. `read` is instanceFacts(descriptor, wellKnown): the five facts, field by field, the well-known document first; a refused value is never read, the field then read from the other document; a dashboard that requires a host's login code reads host-signin for a service that declares any fact. `findings` are FAC-SEM-180's as code and path, per kind: `descriptor` (kind service-descriptor), `wellKnown` (service-well-known) and `pair` (service-observation, `{descriptor, wellKnown}`, only what neither document alone shows), null where a document is not given.",
+    about: "Vectors for extensions/instance-facts/0.1 (DEC-0173, DEC-0174), written by tools/vectors/instance-facts.ts, never by hand. Each case gives a descriptor and a well-known document (null: not read). Every well-known document answers as its descriptor's service (FAC-SEM-009 reads the pair as one) unless the case names another. `read` is instanceFacts(descriptor, wellKnown): the five facts, field by field, the well-known document first; a refused value is never read, the field then read from the other document; a dashboard that requires a host's login code reads host-signin for a service that declares any fact. `findings` are FAC-SEM-180's as code and path, per kind: `descriptor` (kind service-descriptor), `wellKnown` (service-well-known) and `pair` (service-observation, `{descriptor, wellKnown}`, only what neither document alone shows), null where a document is not given.",
     key: KEY,
     cases: cases().map(([name, descriptor, given]) => {
       const wk = paired(descriptor, given);
