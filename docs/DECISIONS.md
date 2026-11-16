@@ -13037,7 +13037,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `b9e5668d`).
 - **Annotated (2026-11-16):** items 1, 2 and 5 refined by DEC-0176: a token user that is a placeholder is none, a key
   in a piece is read at a word's start, as on a line, and item 5's password is not read on a documentation host
-  (unless it has a token's shape) nor when it is a placeholder.
+  (when shorter than 24 characters) nor when it is a placeholder.
 - **Context:** the tree check (DEC-0149, `FAC-SEM-158`) reads a credential in the forms the adapter's source check
   reads, and the adapter's port `fabric_source_tree.py` is held to the contract's vectors, so it cannot widen a form
   alone. The adapter measured six forms of a real secret that pass both, and the contract reproduced each one through
@@ -13120,9 +13120,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      unchanged where it reads a slot's text and a path (DEC-0149, unbounded there on purpose).
   3. **A password is not read on a documentation host** (`DOCUMENTATION_HOST`: RFC 2606's `example.com`, `example.net`
      and `example.org` and names under them, and a name under `.example` or `.invalid`), in the user information or
-     under a password's name, unless it has a token's shape (40 or more of `[A-Za-z0-9_-]` with a letter and a digit,
-     as DEC-0175 reads a token user), since a pasted real token there is still a leak; a token user, a provider key, a
-     JWT and a long run under a credential's name there are still read. `localhost`, a name under `.test` and a host of
+     under a password's name, when it is shorter than 24 characters once percent-decoded (`GENERATED_LENGTH`,
+     `openssl rand -base64 16`'s length): a documented example is a word, a generated secret is this long or longer,
+     and a pasted real one there is still a leak; a token user, a provider key, a JWT and a long run under a
+     credential's name there are still read. `localhost`, a name under `.test` and a host of
      one label (`test`, `example`) are not one: a tunnel or a proxy brings a production database to `localhost`, a
      local development host (Laravel Valet, Herd) lives under `.test`, and `test` names a service as often as a
      reserved name.
@@ -13138,20 +13139,23 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      member, `ME` and `Q`, `U` or `Y` and 94 to 96 base64url characters in all; both are public after a Ruby hash's
      `=>` as after `:`, in double or single quotes or none, with or without the closing one, when no base64 character
      (`+`, `/`, `=` included) and no `.` follows. One pattern (`PUBLIC_SIGNATURE`) blanks it before any rule reads the
-     line; the assignment rule's own exemption is gone.
-  6. **Known limits, kept.** These fail closed on purpose, since a real secret or a real home takes the same form, and
-     the author rewrites the example with a synthetic word, renames it or leaves the file out with `exclude`: a web
+     line; the assignment rule's own exemption is gone. The member's name is read without regard to ASCII case, the
+     value in its own case (`me…` is no DER signature).
+  6. **Known limits, kept.** These fail closed on purpose, since a real secret or a real home takes the same form; the
+     author rewrites a home form's name to a neutral one (`NEUTRAL_HOMES`: `example`, `user`, `alice`), a credential
+     form's value with a synthetic word, renames it, or leaves the file out with `exclude`: a web
      route `/a/Users/<name>` (Git Bash's `/c/Users/<name>`); a flag or a BEM block `-v-Users-<name>`, `b--Users-<name>`,
      `a--users-<name>` (the dashed homes a tool writes); a dotenv vault URL (its key decrypts the vault); a passkey's
      `credentialId` under a credential's name; a 40-character service-account name with a digit as a URL's user; an
      arrow function whose parameter is a credential's name returning a 40-unit identifier; a Markdown reference link
      or a CSS custom property named as a credential before a 40-unit run; a mixed-case percent-encoded path under a
      secret's name. Kept the other way, open: a password shaped as a placeholder's name (`{secret2024}`, `$PGPASS2024`,
-     `${dbPassword2}`) or a short password on a documentation host is not read. Kept as they are: a raw key as a URL's
-     user is reported at the URL's first column, not the key's; `FAC-SEM-156`'s prose rule reads a key at a word's
-     start but not the URL forms; a URL whose password the rule does not read (a placeholder, a documentation host's,
-     or any short one, as on `adae54ad`) shows its `user:password@host` as the accepted `email` warning.
-  7. `URL_BEARER_VALUE`, `PLACEHOLDER`, `DOCUMENTATION_HOST` and `LETTER_OR_DIGIT` join the vectors' `constants` block; a
+     `${dbPassword2}`) or one under 24 characters on a documentation host is not read, and no other rule names it: the
+     `email` rule reads no address at an RFC 2606 name and none in braces, so only a `$NAME` or `%(name)s` password, or
+     a short one, on another host shows its `password@host` as the accepted `email` warning (as on `adae54ad` for a
+     short one). Kept as they are: a raw key as a URL's user is reported at the URL's first column, not the key's;
+     `FAC-SEM-156`'s prose rule reads a key at a word's start but not the URL forms.
+  7. `URL_BEARER_VALUE`, `PLACEHOLDER`, `DOCUMENTATION_HOST`, `LETTER_OR_DIGIT` and `GENERATED_LENGTH` join the vectors' `constants` block; a
      Python port reads each end anchor `$` as `\Z`, writes a JavaScript `\uXXXX` as the character and reads an `i` flag
      with `re.ASCII` (JavaScript's `i` maps no other character onto an ASCII letter).
 - **Why:** each narrowing makes a rule match its own reasoning (a key starts a word wherever it is read; a bearer
@@ -13170,9 +13174,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   next pin.
 - **Consequences / affects:** `src/source-rules.ts` (`LETTER_OR_DIGIT`, `urlParts`' host, `URL_BEARER_VALUE`,
   `PLACEHOLDER`, `DOCUMENTATION_HOST`, `passwordShaped`, `tokenUser`, `urlSecret`, `PUBLIC_SIGNATURE`, the assignment
-  rule's signature exemption removed),
+  rule's signature exemption removed, `GENERATED_LENGTH`),
   `tools/vectors/source-tree.ts`, `fixtures/vectors/source-tree.json` (cases and `constants`), `test/source-rules.test.ts`;
-  `docs/specification/source.md` (the `credential` row); DEC-0149 and DEC-0175 annotated; `docs/backlog.md` (CT-328).
+  `docs/specification/source.md` (the `credential` row and the known limits), `README.md` and `conformance.md` (the
+  adapter's parity), `docs/ux/scenarios.md` (SCN-054), `docs/evidence/sources.md` (RFC 2606), `docs/DOCMAP.md`;
+  DEC-0149 and DEC-0175 annotated; `docs/backlog.md` (CT-328, CT-330).
 - **Source:** the adapter's message `47713284` (its items 7, 8, 9, 11, 13, 32, 37, 43), DEC-0175's readings (rounds 1
   to 6) and DEC-0176's own (rounds 1 and 2); RFC 2606, WebAuthn's assertion signature (DER ECDSA). DEC-0176 was reserved by git CAS
   (`agent_sync.py reserve`, key `ct328-false-findings`).

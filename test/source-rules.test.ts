@@ -43,7 +43,7 @@ import {
   sourcePackageFindings,
   sourceRules,
   sourceTreeProblems,
-  stripHfsIgnorable, ASSIGNED_HEAD, PASSWORD_NAME, URL_BEARER_VALUE, PLACEHOLDER, DOCUMENTATION_HOST, LETTER_OR_DIGIT } from "../src/source-rules.js";
+  stripHfsIgnorable, ASSIGNED_HEAD, PASSWORD_NAME, URL_BEARER_VALUE, PLACEHOLDER, DOCUMENTATION_HOST, LETTER_OR_DIGIT, GENERATED_LENGTH } from "../src/source-rules.js";
 import { createValidator, validateDocument } from "../src/validator.js";
 import { buildSourceTreeVectors } from "../tools/vectors/source-tree.js";
 import { PACKAGE_FILE, checkPackageFolder, sha256Of } from "../src/package-rules.js";
@@ -116,6 +116,7 @@ describe("the source-tree vectors (DEC-0149)", () => {
     expect(vectors.constants.PLACEHOLDER).toEqual(pattern(PLACEHOLDER));
     expect(vectors.constants.DOCUMENTATION_HOST).toEqual(pattern(DOCUMENTATION_HOST));
     expect(vectors.constants.LETTER_OR_DIGIT).toEqual(pattern(LETTER_OR_DIGIT));
+    expect(vectors.constants.GENERATED_LENGTH).toBe(GENERATED_LENGTH);
   });
 
   it("keep the tree check's own provider-key shapes, unbounded, written out and apart from the shared detector", () => {

@@ -567,6 +567,8 @@ export function longRunSecret(text: string): boolean {
  * place a signature is exempt.
  */
 const PUBLIC_SIGNATURE = /("(?:sig|signature|signatures)"[ \t]*(?::|=>)[ \t]*["']?)([A-Za-z0-9_-]{86}|ME[QUY][A-Za-z0-9_-]{91,93})(["']|(?![A-Za-z0-9_+/=.-]))/gi;
+/** A signature's value as `PUBLIC_SIGNATURE` reads it, in its case: the `i` flag is the member's name's, never `ME`'s. */
+const SIGNATURE_VALUE = /^(?:[A-Za-z0-9_-]{86}|ME[QUY][A-Za-z0-9_-]{91,93})$/;
 const JSON_ESCAPES = /\\(?:u0026|u003[dD]|\/|")/g;
 const UNESCAPED: Readonly<Record<string, string>> = { "\\u0026": "&", "\\u003d": "=", "\\u003D": "=", "\\/": "/", '\\"': '"' };
 
@@ -735,8 +737,8 @@ export const PLACEHOLDER = new RegExp(`^(?=.{2,72}$)(?:\\$\\{_?(?:${PLACEHOLDER_
  * or a name under `.example` or `.invalid`. A single label such as `example` is a host's own name, `localhost` is where
  * a tunnel or a proxy brings a production database, and a name under `.test` is a local development host (Laravel
  * Valet, Herd), so none is one. A password there, in the user information or under a password's name, is an example
- * unless it has a token's shape (`tokenRun`); a token user, a provider key, a JWT or a long run under a credential's
- * name is still read (DEC-0176).
+ * when it is shorter than `GENERATED_LENGTH`; a generated one is read, as a token user, a provider key, a JWT or a long
+ * run under a credential's name is (DEC-0176).
  */
 export const DOCUMENTATION_HOST = /^(?:(?:[a-z0-9-]+\.)*example\.(?:com|net|org)|(?:[a-z0-9-]+\.)+(?:example|invalid))$/;
 /** A password of 8 or more characters mixing letters and digits, not synthetic nor a placeholder: in the user information or under a password's name. */
@@ -744,7 +746,12 @@ const passwordShaped = (value: string, decoded = false): boolean => {
   const text = decoded ? value : unquote(value);
   return value.length >= 8 && /[0-9]/.test(value) && /[A-Za-z]/.test(value) && real(text) && !PLACEHOLDER.test(text);
 };
-/** A run of 40 or more of `[A-Za-z0-9_-]` holding a letter and a digit: a classic token's shape (40 hex), read as a token as a URL's user, and as a password on a documentation host. */
+/**
+ * The length from which a password on a documentation host is read (DEC-0176): `openssl rand -base64 16`'s 24
+ * characters. A documented example is a word (`secret123`, `Summer2024x`); a generated secret is this long or longer.
+ */
+export const GENERATED_LENGTH = 24;
+/** A run of 40 or more of `[A-Za-z0-9_-]` holding a letter and a digit: a classic token's shape (40 hex), read as a token as a URL's user. */
 const tokenRun = (text: string): boolean => /^[A-Za-z0-9_-]{40,}$/.test(text) && /[0-9]/.test(text) && /[A-Za-z]/.test(text);
 /** A query or fragment parameter that names a password (`password`, `passwd`, with a prefix such as `db_`); `pwd` is often a working directory, so it is none. */
 export const PASSWORD_NAME = /(?:^|[_.-])(?:password|passwd)$/i;
@@ -760,9 +767,9 @@ function urlSecret(url: string, depth = 0): boolean {
   // Only an absolute URL is read as one: a parameter that holds `://` after other text is a value (the adapter's guard).
   if (!/^[A-Za-z][A-Za-z0-9+.-]*:/.test(trimmed)) return false;
   const [password, query, fragment, user, host] = urlParts(trimmed);
-  // A documentation host's password is an example unless it has a token's shape; its token user, keys and JWTs are read (DEC-0176).
+  // A documentation host's short password is an example; a generated one, its token user, keys and JWTs are read (DEC-0176).
   const documentation = DOCUMENTATION_HOST.test(host);
-  if (passwordShaped(password) && (!documentation || tokenRun(unquote(password)))) return true;
+  if (passwordShaped(password) && (!documentation || unquote(password).length >= GENERATED_LENGTH)) return true;
   // A user that is a token, not a name, with a password or without one (`https://<token>@host`, DEC-0175).
   if (tokenUser(unquote(user))) return true;
   // A key behind a percent-encoded separator in the path or a parameter's name starts a word once decoded (CT-325);
@@ -782,7 +789,7 @@ function urlSecret(url: string, depth = 0): boolean {
         const credential = credentialName(name);
         const pieces = value.includes(",") ? value.split(",") : [];
         for (const piece of [value, ...pieces]) {
-          if (passwordName && passwordShaped(piece, true) && (!documentation || tokenRun(piece))) return true;
+          if (passwordName && passwordShaped(piece, true) && (!documentation || piece.length >= GENERATED_LENGTH)) return true;
           if (!real(piece)) continue;
           if ((credential && longRunSecret(piece)) || hasJwt(piece)) return true;
           // A key in a piece is `providerKeys(value)`'s above, at a word's start; the bearer branch reads only the whole value.
@@ -832,7 +839,7 @@ function credentialUrlSpans(line: string): Array<[number, number]> {
 /** The 0-based index where a line, as written, first shows a credential, or -1. */
 function credentialIn(written: string): number {
   // A whole public signature is blanked, keeping every other index.
-  const line = written.includes('"') ? written.replace(PUBLIC_SIGNATURE, (_all, open: string, value: string, close: string) => `${open}${" ".repeat(value.length)}${close}`) : written;
+  const line = written.includes('"') ? written.replace(PUBLIC_SIGNATURE, (all: string, open: string, value: string, close: string) => (SIGNATURE_VALUE.test(value) ? `${open}${" ".repeat(value.length)}${close}` : all)) : written;
   const found: number[] = [];
   const block = PRIVATE_KEY.exec(line);
   if (block) found.push(block.index);
