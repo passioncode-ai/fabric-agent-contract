@@ -13052,7 +13052,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      its path or a parameter's name hides none (`a%2Ftask-…` stays clean: no key shape); read only when the URL as
      written shows none, so a raw key keeps its own column.
   4. **Assignment heads.** Beside `NAME = value`, `NAME: value` and `"name": "value"`, the head reads a name, plain or
-     after `-`, `--` or `:` (no word character before them) or closed by a subscript's `]` (`ENV['NAME']`, `config["name"]`, `settings[NAME]`), before `=`, `:`, `:=`,
+     after `-`, `--` or `:` or closed by a subscript's `]` (the character just before the name is no letter, digit, `_`
+     or `.`, and a single `-` there does not follow one; `ASSIGNED_HEAD` in the vectors decides) (`ENV['NAME']`, `config["name"]`, `settings[NAME]`), before `=`, `:`, `:=`,
      `=>` (with or without a leading `:`), `||=`, `??=`, `?=`, `+=` or `<-`; a hyphen inside a word still starts no
      name. `ASSIGNED_HEAD` and `PASSWORD_NAME` join the vectors' `constants` block, the head written with two
      fixed-width look-behinds a Python port takes as they are; a Python port reads `PASSWORD_NAME`'s `$` as `\Z` and
@@ -13073,8 +13074,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   whole before every rule (refused: a value is already decoded once, and twice reads a doubly encoded key, which the
   adapter records as failing closed).
 - **Compatibility:** widens `FAC-SEM-158`, so a source tree that passed may now block, only where one of the six forms
-  holds a value the rule reads as real. The adapter's `fabric_source_check.py` and `fabric_source_tree.py` and their
-  JavaScript twins port the six at their next pin and match `fixtures/vectors/source-tree.json`; until then a tree the
+  holds a value the rule reads as real. The adapter's `fabric_source_check.py` and `fabric_source_tree.py` port the six at their next pin and match `fixtures/vectors/source-tree.json`; until then a tree the
   contract blocks may pass the adapter's check. The adapter's own false positives of the existing forms (`47713284`)
   are CT-328, outside this decision.
 - **Consequences / affects:** `src/source-rules.ts` (`urlParts`, `urlSecret`, `passwordShaped`, `PASSWORD_NAME`,
