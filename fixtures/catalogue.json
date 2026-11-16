@@ -1169,5 +1169,15 @@
   {"name": "service-instance-facts-extension", "schema": "service-instance-facts-extension.schema.json", "path": "positive/service-instance-facts-extension.json", "valid": true},
   {"name": "service-instance-facts-extension-organization", "schema": "service-instance-facts-extension.schema.json", "path": "negative/service-instance-facts-extension-organization.json", "valid": false, "keyword": "additionalProperties"},
   {"name": "service-instance-facts-extension-label-path", "schema": "service-instance-facts-extension.schema.json", "path": "negative/service-instance-facts-extension-label-path.json", "valid": false, "keyword": "pattern"},
-  {"name": "service-instance-facts-extension-no-mode", "schema": "service-instance-facts-extension.schema.json", "path": "negative/service-instance-facts-extension-no-mode.json", "valid": false, "keyword": "required"}
+  {"name": "service-instance-facts-extension-no-mode", "schema": "service-instance-facts-extension.schema.json", "path": "negative/service-instance-facts-extension-no-mode.json", "valid": false, "keyword": "required"},
+  {"name": "agent-health", "schema": "agent-health.schema.json", "path": "positive/agent-health.json", "valid": true},
+  {"name": "agent-health-empty", "schema": "agent-health.schema.json", "path": "positive/agent-health-empty.json", "valid": true},
+  {"name": "agent-health-free-text", "schema": "agent-health.schema.json", "path": "negative/agent-health-free-text.json", "valid": false, "keyword": "additionalProperties"},
+  {"name": "agent-health-path", "schema": "agent-health.schema.json", "path": "negative/agent-health-path.json", "valid": false, "keyword": "pattern"},
+  {"name": "agent-health-area", "schema": "agent-health.schema.json", "path": "negative/agent-health-area.json", "valid": false, "keyword": "enum"},
+  {"name": "agent-health-state-healthy", "schema": "agent-health.schema.json", "path": "negative/agent-health-state-healthy.json", "valid": false, "keyword": "enum"},
+  {"name": "agent-health-fix-both", "schema": "agent-health.schema.json", "path": "negative/agent-health-fix-both.json", "valid": false, "keyword": "oneOf"},
+  {"name": "agent-health-at-iso", "schema": "agent-health.schema.json", "path": "negative/agent-health-at-iso.json", "valid": false, "keyword": "type"},
+  {"name": "agent-health-count-negative", "schema": "agent-health.schema.json", "path": "negative/agent-health-count-negative.json", "valid": false, "keyword": "minimum"},
+  {"name": "agent-health-check-id-camel", "schema": "agent-health.schema.json", "path": "negative/agent-health-check-id-camel.json", "valid": false, "keyword": "pattern"}
 ]

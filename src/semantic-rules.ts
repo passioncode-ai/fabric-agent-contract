@@ -45,6 +45,7 @@ import { orgAuthorityRules } from "./org-authority.js";
 import { orgExchangeRules } from "./org-exchange.js";
 import { orgAdaptationRules } from "./org-adaptation.js";
 import { digestFoldersRules, opsDigestRules } from "./ops-digest.js";
+import { agentHealthRules } from "./agent-health.js";
 import { orgMembershipRules } from "./org-membership.js";
 import { shareRegistrationRules } from "./share-registration.js";
 import { nodeSummaryRules } from "./node-summary.js";
@@ -127,6 +128,9 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   if (adaptation) return adaptation;
   const opsDigest = opsDigestRules(kind, value);
   if (opsDigest) return opsDigest;
+  // DEC-0179: one health reading, and a service's well-known answer read beside it (FAC-SEM-181).
+  const health = agentHealthRules(kind, value);
+  if (health) return health;
   const enrollments = nodeEnrollmentRules(kind, value);
   if (enrollments) return enrollments;
   const folderAttribution = folderAttributionRules(kind, value);

@@ -27,6 +27,8 @@ export const SEMANTIC_KINDS: Readonly<Record<string, SemanticKind>> = Object.fre
   "activity-batch": doc("activity-batch.schema.json"),
   "activity-summary": doc("activity-summary.schema.json"),
   "activity-summary-2": doc("activity-summary-2.schema.json"),
+  "agent-health": doc("agent-health.schema.json"),
+  "agent-health-service": wrap("wellKnown", "health"),
   "agent-directory-view": wrap("source", "record", "orgId", "held", "own", "unlisted", "viewer", "at", "directory"),
   "approval-claims": doc("approval.schema.json"),
   "binding-bundle": wrap("binding", "admission"),
