@@ -13021,3 +13021,53 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Source:** DEC-0173's readings (CT-327, rounds 3 to 6 of 2026-11-16: the seam and product tiers named both points);
   DEC-0046 item 3, DEC-0061 item 3, DEC-0067, DEC-0150. DEC-0174 was reserved by git CAS (`agent_sync.py reserve`, key
   `ct327-instance-facts-subscription`).
+
+### DEC-0175: the source tree check reads six secret forms it missed
+
+- **Date:** 2026-11-16
+- **Status:** Proposed 2026-11-16 (CT-325, the Fabric Agent Adapter's FAA-190 items 14, 31, 34, 38 and 77 and an escaped
+  JSON key, request `827ea813` on thread `b9e5668d`); accepted when the coordinator's blind readings are clean on two
+  consecutive rounds.
+- **Context:** the tree check (DEC-0149, `FAC-SEM-158`) reads a credential in the forms the adapter's source check
+  reads, and the adapter's port `fabric_source_tree.py` is held to the contract's vectors, so it cannot widen a form
+  alone. The adapter measured six forms of a real secret that pass both, and the contract reproduced each one through
+  `checkSourceTree` (2026-11-16): a token as a URL's user with no password; a long run under a credential's name in a
+  query before an encoded `,` and a synthetic word, where the raw `,` is found; a provider key behind a percent-encoded
+  separator in a URL's path or a parameter's name; a long run under a credential's name after `--name=`, `:=`, `=>`,
+  `||=`, `<-` or `ENV['NAME'] =`; a password in a URL's query held to the 40-character rule while the same value as
+  user information is read at 8; a JSON key written with escaped quotes inside a JSON string. Each lets a secret
+  through an export, which the tree check exists to stop.
+- **Decision:** [source](specification/source.md#the-tree-check) *the tree check*, the `credential` row:
+  1. **A URL's user.** With no password, a user that is a provider key, a JWT, or a run of 40 or more of
+     `[A-Za-z0-9_-]` holding a letter and a digit (a classic token's 40 hex) is a credential; a name such as `git` or
+     `deploy-bot` is not, and neither is a commit hash in a path.
+  2. **Piece by piece.** A query or fragment value is judged whole and in each piece between commas, so a synthetic word
+     after a `,` hides nothing before it, encoded or not.
+  3. **Decoded once.** A provider key anywhere in a URL once percent-decoded is a credential, so an encoded separator in
+     its path or a parameter's name hides none (`a%2Ftask-…` stays clean: no key shape).
+  4. **Assignment heads.** Beside `NAME = value`, `NAME: value` and `"name": "value"`, the head reads `--name=value`,
+     `NAME := value`, `:name => value`, `@name ||= value`, `name ?= value`, `name ??= value`, `name += value`,
+     `name <- value` and `ENV['NAME'] = value`; a hyphen inside a word still starts no name.
+  5. **A password in a query.** A value under a password's name (`password`, `passwd`, `pwd`, with a prefix such as
+     `db_`) is read by the user information's rule: 8 or more characters mixing letters and digits, not synthetic.
+  6. **An escaped quote.** The unescaping pass that undoes `&`, `=` and `\/` undoes `\"` too, so
+     `{\"api_key\": \"…\"}` inside a JSON string is read; it still runs only when the line shows nothing as written.
+- **Why:** each form is a real secret leaving through an export; the neighbours the vectors carry (a commit hash, a
+  synthetic piece alone, a word holding `sk-`, a non-credential name, a short password, another parameter name) keep
+  the widening from adding a false finding.
+- **Alternatives considered:** recording any of the six as out of scope (refused: each passes a real secret); a
+  credential-shaped user under the 8-character password rule (refused: `deploy-bot1` would block); decoding a URL
+  whole before every rule (refused: a value is already decoded once, and twice reads a doubly encoded key, which the
+  adapter records as failing closed).
+- **Compatibility:** widens `FAC-SEM-158`, so a source tree that passed may now block, only where one of the six forms
+  holds a value the rule reads as real. The adapter's `fabric_source_check.py` and `fabric_source_tree.py` and their
+  JavaScript twins port the six at their next pin and match `fixtures/vectors/source-tree.json`; until then a tree the
+  contract blocks may pass the adapter's check. The adapter's own false positives of the existing forms (`47713284`)
+  are CT-328, outside this decision.
+- **Consequences / affects:** `src/source-rules.ts` (`urlParts`, `urlSecret`, `passwordShaped`, `PASSWORD_NAME`,
+  `tokenUser`, `ASSIGNED_HEAD`, the assignment guard, `JSON_ESCAPES`), `tools/vectors/source-tree.ts`,
+  `fixtures/vectors/source-tree.json`; `docs/specification/source.md` (the `credential` row); `docs/backlog.md` (CT-325,
+  CT-328).
+- **Source:** the adapter's request `827ea813` and its triage (FAA-190 items 14, 31, 34, 38, 77, measured at
+  `4f1a66d7`), the contract's acceptance `b63a1c30`; DEC-0149, DEC-0151. DEC-0175 was reserved by git CAS
+  (`agent_sync.py reserve`, key `ct325-secret-shapes`).
