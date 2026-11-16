@@ -460,17 +460,19 @@ const credentialFile = (path: string): boolean => {
  *   branch, which would take a line of prose that starts with the word), starting a word: no letter or digit before it,
  *   so `task-…` holds no `sk-` key;
  * - a bearer token inside a line (`BEARER_INSIDE`);
- * - an absolute URL with a password of 8 or more characters mixing letters and digits, or a query or fragment value
+ * - an absolute URL with a password of 8 or more characters mixing letters and digits, a user with no password that
+ *   is a token, a provider key anywhere in it once percent-decoded, a value under a password's name by the same
+ *   8-character rule (DEC-0175), or a query or fragment value
  *   that, percent-decoded, is a provider key, a JWT, a value `URL_SECRET_VALUE` reads (the tree check's own shapes,
  *   unbounded, after a whole-value bearer branch), or a long run under a credential's name, an inner
  *   URL in a parameter read the same way two levels deep;
  * - a long run mixing upper case, lower case and digits (`longSecret`), percent-decoded, assigned to a name that can
- *   only carry a credential (`credentialName`): `NAME = value`, `NAME: value`, `"name": "value"`, so an integrity hash
- *   is not one.
+ *   only carry a credential (`credentialName`): `NAME = value`, `NAME: value`, `"name": "value"`, and since DEC-0175
+ *   `--name=value`, `:=`, `=>`, `||=`, `?=`, `??=`, `+=`, `<-` and `ENV['NAME'] =`, so an integrity hash is not one.
  *
  * A whole Ed25519 signature under a JSON `sig`, `signature` or `signatures` member is public and read by no rule. A line
- * holding a JSON escape of `&`, `=` or `/` (`&`, `=`, `\/`) is read again unescaped when it shows nothing as
- * written.
+ * holding a JSON escape of `&`, `=`, `/` or `"` (`&`, `=`, `\/`, `\"`) is read again unescaped when it shows
+ * nothing as written.
  */
 const PRIVATE_KEY = /-----BEGIN (?:[A-Z0-9]+ )*PRIVATE KEY(?: BLOCK)?-----/;
 const JWK_PRIVATE = /\\?["']d\\?["'][ \t]*:[ \t]*\\?["']([A-Za-z0-9_-]{43,})/g;
@@ -508,7 +510,7 @@ const COLON_AFTER = /[ \t]*:/y;
  * units of `[A-Za-z0-9+/_-]` or `%HH` and up to two `=`, is read by hand (`assignedValueEnd`): a backtracking group
  * over a run of millions of characters overflows V8's regex stack.
  */
-const ASSIGNED_HEAD = /(?<![A-Za-z0-9_.-])([A-Za-z_][A-Za-z0-9_.-]{0,63})["']?[ \t]{0,8}[:=][ \t]{0,8}["']?/g;
+const ASSIGNED_HEAD = /(?<![A-Za-z0-9_.]|[A-Za-z0-9_.]-)([A-Za-z_][A-Za-z0-9_.-]{0,63})(?:["']\]?|\])?[ \t]{0,8}(?::=|=>|\|\|=|\?\?=|\?=|\+=|<-|[:=])[ \t]{0,8}["']?/g;
 const isValueUnit = (code: number): boolean =>
   (code >= 0x41 && code <= 0x5a) || (code >= 0x61 && code <= 0x7a) || (code >= 0x30 && code <= 0x39) || code === 0x2b || code === 0x2f || code === 0x5f || code === 0x2d;
 const isHex = (code: number): boolean => (code >= 0x30 && code <= 0x39) || (code >= 0x41 && code <= 0x46) || (code >= 0x61 && code <= 0x66);
@@ -553,8 +555,8 @@ export function longRunSecret(text: string): boolean {
 }
 /** A whole Ed25519 signature as a JSON member: public, blanked before any rule reads the line. */
 const PUBLIC_SIGNATURE = /("(?:sig|signature|signatures)"[ \t]*:[ \t]*")([A-Za-z0-9_-]{86})(")/gi;
-const JSON_ESCAPES = /\\(?:u0026|u003[dD]|\/)/g;
-const UNESCAPED: Readonly<Record<string, string>> = { "\\u0026": "&", "\\u003d": "=", "\\u003D": "=", "\\/": "/" };
+const JSON_ESCAPES = /\\(?:u0026|u003[dD]|\/|")/g;
+const UNESCAPED: Readonly<Record<string, string>> = { "\\u0026": "&", "\\u003d": "=", "\\u003D": "=", "\\/": "/", '\\"': '"' };
 
 /**
  * Words a documented or synthetic credential carries (`...EXAMPLE`, `sk-test-not-a-key`); a random key does not. Its
@@ -656,7 +658,7 @@ const SPECIAL_SCHEMES = ["ftp", "http", "https", "ws", "wss"];
  * special scheme's authority starts after every slash or backslash after `scheme:`, another scheme's only after `//`,
  * `file` has none; the user information ends at the authority's last `@`, the password follows its first `:`.
  */
-function urlParts(value: string): [string, string, string] {
+function urlParts(value: string): [string, string, string, string] {
   const colon = value.indexOf(":");
   const scheme = value.slice(0, colon).toLowerCase();
   let rest = value.slice(colon + 1);
@@ -671,7 +673,8 @@ function urlParts(value: string): [string, string, string] {
   const at = authority.lastIndexOf("@");
   const userinfo = at < 0 ? "" : authority.slice(0, at);
   const password = userinfo.includes(":") ? userinfo.slice(userinfo.indexOf(":") + 1) : "";
-  return [password, query, fragment];
+  const user = userinfo.includes(":") ? userinfo.slice(0, userinfo.indexOf(":")) : userinfo;
+  return [password, query, fragment, user];
 }
 /** A text without the run of the given characters at its end (Python's `rstrip`), read backward in one pass. */
 function rstrip(text: string, characters: string): string {
@@ -691,21 +694,40 @@ function lstrip(text: string, characters: string): string {
  * detector's.
  */
 export const URL_SECRET_VALUE = new RegExp(`(^bearer\\s.+|${KEY_SHAPE_SOURCES.join("|")})`, "i");
+/** A password of 8 or more characters mixing letters and digits, not synthetic: in the user information or under a password's name. */
+const passwordShaped = (value: string): boolean => value.length >= 8 && /[0-9]/.test(value) && /[A-Za-z]/.test(value) && real(unquote(value));
+/** A query or fragment parameter that names a password (`password`, `passwd`, `pwd`, with a prefix such as `db_`). */
+const PASSWORD_NAME = /(?:^|[_.-])(?:password|passwd|pwd)$/i;
+/**
+ * A URL's user with no password read as a token: a provider key or a JWT, or a run of 40 or more of `[A-Za-z0-9_-]`
+ * holding a letter and a digit (a classic token's 40 hex), not synthetic. A name such as `git` or `deploy-bot` is not one.
+ */
+const tokenUser = (user: string): boolean =>
+  real(user) && (providerKeys(user).length > 0 || hasJwt(user) || (/^[A-Za-z0-9_-]{40,}$/.test(user) && /[0-9]/.test(user) && /[A-Za-z]/.test(user)));
 /** Whether a URL in a source tree carries a credential (the adapter's `_url_secret`), an inner URL read two levels deep. */
 function urlSecret(url: string, depth = 0): boolean {
   const trimmed = rstrip(url, ".,;)]}");
   // Only an absolute URL is read as one: a parameter that holds `://` after other text is a value (the adapter's guard).
   if (!/^[A-Za-z][A-Za-z0-9+.-]*:/.test(trimmed)) return false;
-  const [password, query, fragment] = urlParts(trimmed);
-  if (password.length >= 8 && /[0-9]/.test(password) && /[A-Za-z]/.test(password) && real(unquote(password))) return true;
+  const [password, query, fragment, user] = urlParts(trimmed);
+  if (passwordShaped(password)) return true;
+  // A user with no password that is a token, not a name (a git remote's `https://<token>@host`, CT-325).
+  if (password === "" && tokenUser(unquote(user))) return true;
+  // A key behind a percent-encoded separator in the path or a parameter's name starts a word once decoded (CT-325).
+  if (trimmed.includes("%") && providerKeys(unquote(trimmed)).length > 0) return true;
   for (const part of [query, fragment]) {
     for (const [name, raws] of rawValues(part)) {
       for (const raw of raws) {
         const value = unquote(raw);
         if (depth < 2 && value.includes("://") && urlSecret(value, depth + 1)) return true;
         if (providerKeys(value).length > 0) return true;
-        if (!real(value)) continue;
-        if ((credentialName(name) && longRunSecret(value)) || hasJwt(value) || URL_SECRET_VALUE.test(value)) return true;
+        // A value under a password's name is read as a password in the user information is (CT-325).
+        if (PASSWORD_NAME.test(name) && passwordShaped(value)) return true;
+        // Judged piece by piece: a synthetic word after a `,` does not hide the value before it (CT-325).
+        for (const piece of value.includes(",") ? [value, ...value.split(",")] : [value]) {
+          if (!real(piece)) continue;
+          if ((credentialName(name) && longRunSecret(piece)) || hasJwt(piece) || URL_SECRET_VALUE.test(piece)) return true;
+        }
       }
     }
   }
@@ -768,8 +790,8 @@ function credentialIn(written: string): number {
   }
   const url = secretUrls(line)[0];
   if (url !== undefined) found.push(url[0]);
-  // Each search starts again inside the last value: `id=<run>/TOKEN=<value>` reads both. Only a line with `:` or `=` has one.
-  const assigns = line.includes(":") || line.includes("=");
+  // Each search starts again inside the last value: `id=<run>/TOKEN=<value>` reads both. Only a line with `:`, `=` or `<-` has one.
+  const assigns = line.includes(":") || line.includes("=") || line.includes("<-");
   for (let at = 0; assigns; ) {
     ASSIGNED_HEAD.lastIndex = at;
     const match = ASSIGNED_HEAD.exec(line);

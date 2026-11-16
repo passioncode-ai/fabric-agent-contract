@@ -25,6 +25,8 @@ export const VECTOR_FILE = "fixtures/vectors/source-tree.json";
 const PROVIDER_KEY = ["sk", "-", "A1".repeat(12)].join("");
 const JWT = ["eyJ", "hbGciOiJFZERTQSJ9", ".", "eyJzdWIiOiJleGFtcGxlIn0", ".", "c2lnbmF0dXJl"].join("");
 const LONG_RUN = "Ab1".repeat(14);
+/** A classic token's shape, 40 hex characters, synthetic. */
+const HEX40 = "0123456789abcdef".repeat(3).slice(0, 40);
 const SIGNATURE = `${"Ab1Cd2".repeat(14)}Ab`;
 const PRIVATE_KEY = ["-----BEGIN ", "PRIVATE KEY-----"].join("");
 const BEARER = ["Authorization: Bearer ", "abc123def456ghi789"].join("");
@@ -387,7 +389,18 @@ const cases: Array<[string, Json, Json[]]> = [
   ["a file whose path NFD lengthens past 256 code points is not source and is never read", tree([{ path: `src/${"e\u0301".repeat(130)}.md`, text: "/home/jdoe" }]), []],
   ["a file under a segment made only of dots, spaces and code points HFS+ ignores is not source and is never read", tree([{ path: "src/.\u200c./x.md", text: "/home/jdoe" }, { path: "src/.../y.md", text: "/home/jdoe" }]), []],
   ["an exclude entry with a segment made only of a dot and a space fails closed: the folder before that segment is never read", { ...tree([{ path: "src/secrets/key.md", text: "/home/jdoe" }]), manifest: { ...manifest, exclude: ["src/secrets/. /"] } }, []],
-  ["a .git folder in another letter case or with a trailing space is not read", tree([{ path: "src/.GIT/config", binary: true }, { path: "src/.git /config", binary: true }]), []]
+  ["a .git folder in another letter case or with a trailing space is not read", tree([{ path: "src/.GIT/config", binary: true }, { path: "src/.git /config", binary: true }]), []],
+  // CT-325 (the adapter's FAA-190 items 14, 31, 34, 38, 77 and an escaped JSON key): each form blocks, its neighbour does not.
+  ["a git remote whose user is a bare token blocks; a commit hash in a path does not", tree([{ path: "src/remote.txt", text: `url = https://${HEX40}@git.example.org/o/r.git\nhttps://github.com/o/r/commit/${HEX40}` }]), [{ kind: "credential", file: 4, line: 1, column: 7 }]],
+  ["a long run under a credential's name in a query, before an encoded comma and a synthetic word, is judged piece by piece", tree([{ path: "docs/q.md", text: `https://h.io/p?token=${LONG_RUN}%2Cexample\nhttps://h.io/p?token=${LONG_RUN}-example` }]), [{ kind: "credential", file: 4, line: 1, column: 1 }]],
+  ["a key after a percent-encoded separator in a URL's path or a parameter's name blocks", tree([{ path: "docs/u.md", text: `https://h.io/a%2F${PROVIDER_KEY}\nhttps://h.io/p?x%3D${PROVIDER_KEY}=1\nhttps://h.io/a%2Ftask-processing-pipeline-v2` }]), [{ kind: "credential", file: 4, line: 1, column: 1 }, { kind: "credential", file: 4, line: 2, column: 1 }]],
+  [
+    "a long run under a credential's name after --name=, :=, =>, ||=, <- or ENV['NAME'] = blocks; under another name it does not",
+    tree([{ path: "src/assign.txt", text: [`run --api-token=${LONG_RUN}`, `apiToken := "${LONG_RUN}"`, `:api_token => "${LONG_RUN}"`, `@api_token ||= "${LONG_RUN}"`, `api_token <- "${LONG_RUN}"`, `ENV['API_TOKEN'] = "${LONG_RUN}"`, `x => "${LONG_RUN}"`].join("\n") }]),
+    [{ kind: "credential", file: 4, line: 1, column: 17 }, { kind: "credential", file: 4, line: 2, column: 14 }, { kind: "credential", file: 4, line: 3, column: 16 }, { kind: "credential", file: 4, line: 4, column: 17 }, { kind: "credential", file: 4, line: 5, column: 15 }, { kind: "credential", file: 4, line: 6, column: 21 }]
+  ],
+  ["a password in a URL's query is read as one in its user information is; a short one or another name is not", tree([{ path: "docs/db.md", text: `https://h.io/db?password=${PASSWORD}\nhttps://h.io/db?password=ab12\nhttps://h.io/db?pwd_hint=${PASSWORD}` }]), [{ kind: "credential", file: 4, line: 1, column: 1 }]],
+  ["a JSON key written with escaped quotes inside a JSON string", tree([{ path: "src/s.ts", text: `const s = "{\\"api_key\\": \\"${LONG_RUN}\\"}";` }]), [{ kind: "credential", file: 4, line: 1, column: 28 }]],
 ];
 
 /**
