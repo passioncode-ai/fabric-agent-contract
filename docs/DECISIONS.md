@@ -12889,9 +12889,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 ### DEC-0173: instance facts, who an instance serves, how it keeps data apart and the space it runs in
 
 - **Date:** 2026-11-16
-- **Status:** Proposed 2026-11-16 from the design `docs/evidence/plans/2026-11-15-ct321-instance-facts.md` (CT-321),
-  whose rounds 5 and 6 of the blind readings (seam and product) read clean; accepted when the coordinator's blind
-  readings are clean on two consecutive rounds (round 1 folded: `mode` and `kind` required inside their objects; the
+- **Status:** Accepted 2026-11-16: the coordinator's blind readings (unit, seam, product) read clean on rounds 5 and 6
+  at the same head. Proposed 2026-11-16 from the design `docs/evidence/plans/2026-11-15-ct321-instance-facts.md`
+  (CT-321), whose rounds 5 and 6 of the blind readings (seam and product) read clean (round 1 folded: `mode` and `kind` required inside their objects; the
   label's rule by placement and its grammar; the pair reports only cross-document findings; a refused value never read,
   the other document's shown; round 2: a dashboard's login names `entry` only for a service that declares a fact, labels
   for every value; round 3 clean, its risks folded: the placement's `context` first; round 4: a well-known document that
