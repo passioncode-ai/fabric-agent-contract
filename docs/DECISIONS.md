@@ -13262,14 +13262,18 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Alternatives considered:** importing `src/secret-shape.ts` (refused: the file's vendors take it alone); leaving it
   (refused: the two rules answer one URL differently).
 - **Compatibility:** widens `FAC-SEM-055`: a handoff folder whose server `url` carries a credential in its user
-  information or its query now fails. The URLs Fabric (`sessionBundle.ts`: the agent surface's loopback endpoint and
-  the gateway's URLs, with their keys in headers) and Fabric Dashboards write carry none, so their folders pass as
-  before (the positive fixtures are unchanged). Fabric Dashboards, which vendors `src/session-handoff.ts`, and any
-  consumer that copies it byte for byte (Fabric's conformance test) take it at their next pin. No released vector
-  changes its answer; two semantic fixtures are added.
+  information or its query now fails, and so does a harmless single-word parameter with a value (`?auth=oauth`,
+  `?code=1`, `?session=1`), as `FAC-SEM-057` refuses it in a manifest. No known writer's folder changes: Fabric Dashboards
+  writes stdio servers only, with no `url` (its `src/core/handoff.ts`), and Fabric writes no `session-handoff/1` (its
+  ADR-0182; the MCP config it gives a session carries loopback and gateway URLs with their keys in headers); the
+  positive fixtures are unchanged. Fabric Dashboards, which vendors `src/session-handoff.ts` as
+  `test/contract/session-handoff.ts`, takes it at its next pin. No released vector changes its answer; two semantic
+  fixtures are added. Still read as an argument: a URL in a launch argument (SH-11's Codex `-c mcp_servers.<name>.url=`),
+  filed on CT-333.
 - **Consequences / affects:** `src/session-handoff.ts` (`secretUrl` and its helpers, `mcpFindings`),
   `fixtures/semantic/session-handoff-folder-url-token-user.json`, `fixtures/semantic/session-handoff-folder-url-token-param.json`,
-  `test/session-handoff.test.ts`, `test/session-handoff-review.test.ts`; `docs/specification/session-handoff.md` (SH-9);
+  `test/session-handoff.test.ts`, `test/session-handoff-review.test.ts` (answers and the copied text);
+  `docs/specification/session-handoff.md` (SH-9), `docs/specification/conformance.md`, `docs/DOCMAP.md`;
   `docs/backlog.md` (CT-333).
 - **Source:** CT-333 (DEC-0177's readings, round 3 seam). DEC-0178 was reserved by git CAS (`agent_sync.py reserve`,
   key `ct333-handoff-url`).

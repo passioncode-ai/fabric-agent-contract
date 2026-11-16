@@ -134,9 +134,10 @@ checks a delegation token's shape — a JWS whose header is `{"alg": "EdDSA", "t
 whose payload has a numeric `exp` — and the server that receives it verifies the rest (DL-13: signature, audience,
 expiry). A secret in this folder is materialised for the session from a reference and removed with it (DEC-0013). A
 server's `url` carries no credential: the kit reads it as a URL, as the shared detector's `secretUrl` does, so a
-password in its user information, a token as its user name (DEC-0177) or a query or fragment parameter named for a
-credential with a value is refused, as well as what a launch argument's reading finds (DEC-0178); its `command` and
-`args` are read as arguments (SH-10). A runtime that does
+password in its user information, a token as its user name (DEC-0177), a query or fragment parameter named for a
+credential with a value (so `?auth=oauth`, `?code=1` and `?session=1` too) or one whose decoded value is shaped like a
+credential is refused, as well as what a launch argument's reading finds (DEC-0178); its `command` and `args` are read
+as arguments (SH-10). A runtime that does
 not read this dialect is given the same servers in its own (SH-11); `mcp.json` stays the record.
 Before it writes `mcp.json` for a local server, the host checks that server's listener belongs to its own OS account
 ([service](service.md#ha-2) HA-2, DEC-0154).

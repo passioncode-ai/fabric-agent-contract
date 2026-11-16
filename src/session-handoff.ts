@@ -9,8 +9,8 @@ import type { Finding } from "./findings.js";
  * the folder lives, the manifest against its schema, and the rules no schema can state (FAC-SEM-053…055).
  *
  * It depends on nothing but Node's built-ins, and its one import of this kit is a type, so a consumer can copy
- * it byte for byte and run it under `node --experimental-strip-types` against a folder it wrote (Fabric does:
- * `apps/desktop/test/session-handoff-conformance.test.mjs`). Such a consumer passes its own compiled schema
+ * it byte for byte and run it under `node --experimental-strip-types` against a folder it wrote (Fabric Dashboards
+ * vendors it as `test/contract/session-handoff.ts`; Fabric writes no session-handoff/1, its ADR-0182). Such a consumer passes its own compiled schema
  * check; inside this kit the schema check defaults to the contract's own validator.
  */
 
@@ -124,6 +124,7 @@ function rawValues(query: string): Map<string, string[]> {
     const name = [...new URLSearchParams(at < 0 ? piece : piece.slice(0, at)).keys()][0] ?? "";
     const value = at < 0 ? "" : decodeKeepingPlus(piece.slice(at + 1));
     const list = values.get(name);
+    // Appended in place: a query of many pieces under one name costs one pass, not a copy per piece.
     if (list === undefined) values.set(name, [value]);
     else list.push(value);
   }

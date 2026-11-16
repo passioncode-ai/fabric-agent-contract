@@ -230,6 +230,15 @@ describe("the review's fixes", () => {
     expect(words(copy, "CREDENTIAL_WORDS")).toBe(words(original, "CREDENTIAL_WORDS"));
     const pairs = (text: string) => /CREDENTIAL_PAIRS[^{]+\{([^}]+)\}/.exec(text)?.[1]?.replace(/\s+/g, " ");
     expect(pairs(copy)).toBe(pairs(original));
+    // The URL reading (DEC-0178): tokenUserName's expression and the bodies of rawValues and secretUrl, as written.
+    const expression = (text: string) => /tokenUserName = (\(user: string\): boolean => [^\n]+)/.exec(text)?.[1];
+    expect(expression(copy), "tokenUserName").toBeDefined();
+    expect(expression(copy), "tokenUserName").toBe(expression(original));
+    const body = (text: string, name: string) => new RegExp(`function ${name}\\([^)]*\\): [^{]+\\{\\n([\\s\\S]*?)\\n\\}\\n`).exec(text)?.[1];
+    for (const name of ["rawValues", "secretUrl"]) {
+      expect(body(copy, name), name).toBeDefined();
+      expect(body(copy, name), name).toBe(body(original, name));
+    }
   });
 
   it.skipIf(process.platform === "win32")("finds the folder's repository along its real path", () => {
