@@ -9195,7 +9195,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   is DEC-0153's line, on main byte for byte, so DEC-0149 leaves that file unchanged).
 - **Annotated (2026-11-16):** item 8's credential forms widened by DEC-0175 (a token as a URL's user, a value judged
   piece by piece, a key behind an encoded separator, more assignment heads, a password in a query, an escaped quote),
-  then narrowed and widened by DEC-0176 (a key's word start is ASCII; a URL's parameter reads a key at a word's start
+  then narrowed and widened by DEC-0176 (a key's word start is a Latin letter or an ASCII digit; a URL's parameter reads a key at a word's start
   and a bearer token in its shape; a documentation host's or a placeholder's password is none; a DER ECDSA signature
   is public).
 - **Context:** the operator asked that agents can be handed over as source and that a transfer happens only by their
@@ -13109,22 +13109,29 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   signature is as public as the Ed25519 one already exempt. The rest are forms a real secret or a real home folder also
   takes.
 - **Decision:** [source](specification/source.md#the-tree-check) *the tree check*, the `credential` row:
-  1. **A key's word start is ASCII.** A provider key is read when no ASCII letter or digit is before it; a letter of
-     another script no longer stops it, so a key glued to one is read (the adapter's item 32, a missed secret).
+  1. **A key's word start is Latin.** A provider key is read when no Latin letter or ASCII digit is before it
+     (`LETTER_OR_DIGIT`: ASCII, Latin-1, Latin Extended-A and -B and Latin Extended Additional letters, `×` and `÷`
+     aside, written as code-point ranges); a letter of another script no longer stops it, so a key glued to one is read
+     (the adapter's item 32, a missed secret), while `gdańsk-…` still holds no `sk-` key.
   2. **A URL's parameter reads a key as a line does**, at a word's start (`providerKeys`), so `desk-lamp` and
      `task-processing` in a value or a piece name none; and its whole-value branch reads a bearer token only in a token's
-     shape (`URL_BEARER_VALUE`: `bearer`, white space, 12 or more token characters with a digit). `URL_SECRET_VALUE` is
+     shape (`URL_BEARER_VALUE`: `bearer`, spaces or tabs, 12 or more token characters with a digit). `URL_SECRET_VALUE` is
      unchanged where it reads a slot's text and a path (DEC-0149, unbounded there on purpose).
-  3. **A password is not read on a documentation host** (`DOCUMENTATION_HOST`: `example.com`, `example.net`,
-     `example.org`, a name under `.example`, `.test`, `.invalid` or `.localhost`, `localhost`), in the user information
-     or under a password's name; a token user, a provider key, a JWT and a long run under a credential's name there are
-     still read.
+  3. **A password is not read on a documentation host** (`DOCUMENTATION_HOST`: RFC 2606's `example.com`, `example.net`
+     and `example.org` and names under them, and a name under `.example`, `.test` or `.invalid`, the names an e-mail
+     address there is an example at), in the user information or under a password's name; a token user, a provider key,
+     a JWT and a long run under a credential's name there are still read. `localhost` and a host of one label (`test`,
+     `example`) are not one: a tunnel or a proxy brings a production database to `localhost`, and `test` names a
+     service as often as a reserved name.
   4. **A placeholder is no value.** A password or a token user that is wholly a template's placeholder (`PLACEHOLDER`:
-     `${NAME}`, `$NAME`, `{{name}}`, `{name}`, `<name>`, `%(name)s`, a closing brace a URL's end cut allowed) is not
-     read.
+     `${NAME}`, `{{name}}`, an environment variable `$NAME` in upper case, digits and `_`, and `{name}` or `%(name)s`
+     whose name is all lower case or all upper case; a closing brace a URL's end cut allowed) is not read. A mixed-case
+     run (`$Summer2024x`, `{Secret123x}`) is a password. A URL in a line ends at `<` or a space, so `<name>` never
+     reaches a URL's password.
   5. **A DER ECDSA signature is public** beside the Ed25519 one: under a quoted `sig`, `signature` or `signatures`
-     member, `ME` and `Q`, `U` or `Y` and 94 to 96 base64url characters in all; and both are public after a Ruby
-     hash's `=>` as after `:`.
+     member, `ME` and `Q`, `U` or `Y` and 94 to 96 base64url characters in all; both are public after a Ruby hash's
+     `=>` as after `:`, quoted or not, with or without the closing quote, when no base64url character follows. One
+     pattern (`PUBLIC_SIGNATURE`) blanks it before any rule reads the line; the assignment rule's own exemption is gone.
   6. **Known limits, kept.** These fail closed on purpose, since a real secret or a real home takes the same form, and
      the author rewrites the example with a synthetic word, renames it or leaves the file out with `exclude`: a web
      route `/a/Users/<name>` (Git Bash's `/c/Users/<name>`); a flag or a BEM block `-v-Users-<name>`, `b--Users-<name>`,
@@ -13132,9 +13139,14 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      `credentialId` under a credential's name; a 40-character service-account name with a digit as a URL's user; an
      arrow function whose parameter is a credential's name returning a 40-unit identifier; a Markdown reference link
      or a CSS custom property named as a credential before a 40-unit run; a mixed-case percent-encoded path under a
-     secret's name.
-  7. `URL_BEARER_VALUE`, `PLACEHOLDER` and `DOCUMENTATION_HOST` join the vectors' `constants` block; a Python port reads
-     each `$` as `\Z`.
+     secret's name; a lower- or upper-case name with a digit in braces (`{secret2024}`) read as a placeholder; a raw key
+     as a URL's user reported at the URL's first column, not the key's; `FAC-SEM-156`'s prose rule, which reads a key at
+     a word's start but not the URL forms; and a URL whose password is a placeholder or a documentation host's, whose
+     `user:password@host` then shows the accepted `email` warning as on `adae54ad` for any password the rule does not
+     read (the warning, not a block).
+  7. `URL_BEARER_VALUE`, `PLACEHOLDER`, `DOCUMENTATION_HOST` and `LETTER_OR_DIGIT` join the vectors' `constants` block; a
+     Python port reads each end anchor `$` as `\Z`, writes a JavaScript `\uXXXX` as the character and reads an `i` flag
+     with `re.ASCII` (JavaScript's `i` maps no other character onto an ASCII letter).
 - **Why:** each narrowing makes a rule match its own reasoning (a key starts a word wherever it is read; a bearer
   token has a token's shape; a reserved host and a placeholder hold no live secret; a signature is public whatever
   its curve) without unblocking a form a real secret takes; the limits kept are forms where the check cannot tell an
@@ -13145,13 +13157,14 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `URL_SECRET_VALUE` unbounded in a parameter (refused: a search URL is common, a key glued to a letter is not, and a
   line already reads it so).
 - **Compatibility:** narrows and widens `FAC-SEM-158` (and `FAC-SEM-156`, which reads through it); two released vector
-  cases change their answer (the folding case gains a finding after `é`; the parameter case after a letter loses
-  one, beside a new clean search and a key at a word's start), four are added. The adapter ports it with DEC-0175 at its
+  cases change their answer (the folding case gains a finding after `ж` and keeps none after `é` or in `gdańsk-`; the
+  parameter case after a letter loses one, beside a new clean search and a key at a word's start), seven are added. The adapter ports it with DEC-0175 at its
   next pin.
 - **Consequences / affects:** `src/source-rules.ts` (`LETTER_OR_DIGIT`, `urlParts`' host, `URL_BEARER_VALUE`,
-  `PLACEHOLDER`, `DOCUMENTATION_HOST`, `passwordShaped`, `tokenUser`, `urlSecret`, `PUBLIC_SIGNATURE`),
+  `PLACEHOLDER`, `DOCUMENTATION_HOST`, `passwordShaped`, `tokenUser`, `urlSecret`, `PUBLIC_SIGNATURE`, the assignment
+  rule's signature exemption removed),
   `tools/vectors/source-tree.ts`, `fixtures/vectors/source-tree.json` (cases and `constants`), `test/source-rules.test.ts`;
   `docs/specification/source.md` (the `credential` row); DEC-0149 and DEC-0175 annotated; `docs/backlog.md` (CT-328).
 - **Source:** the adapter's message `47713284` (its items 7, 8, 9, 11, 13, 32, 37, 43), DEC-0175's readings (rounds 1
-  to 6); RFC 2606, RFC 6761, WebAuthn's assertion signature (DER ECDSA). DEC-0176 was reserved by git CAS
+  to 6) and DEC-0176's own (round 1); RFC 2606, WebAuthn's assertion signature (DER ECDSA). DEC-0176 was reserved by git CAS
   (`agent_sync.py reserve`, key `ct328-false-findings`).
