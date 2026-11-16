@@ -13027,9 +13027,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 ### DEC-0175: the source tree check reads six secret forms it missed
 
 - **Date:** 2026-11-16
-- **Status:** Proposed 2026-11-16 (CT-325, the Fabric Agent Adapter's FAA-190 items 14, 31, 34, 38 and 77 and an escaped
-  JSON key, request `827ea813` on thread `b9e5668d`); accepted when the coordinator's blind readings are clean on two
-  consecutive rounds.
+- **Status:** Accepted 2026-11-16: the coordinator's blind readings (unit, seam, product) read clean on rounds 5 and 6
+  at the same head (rounds 1, 3 and 4 folded: the conformance row, the piece rule's reach, the heads written as the
+  pattern reads them, a quadratic line from judging a name per comma piece; round 2 clean). Proposed 2026-11-16 (CT-325,
+  the Fabric Agent Adapter's FAA-190 items 14, 31, 34, 38 and 77 and an escaped JSON key, request `827ea813` on thread
+  `b9e5668d`).
 - **Context:** the tree check (DEC-0149, `FAC-SEM-158`) reads a credential in the forms the adapter's source check
   reads, and the adapter's port `fabric_source_tree.py` is held to the contract's vectors, so it cannot widen a form
   alone. The adapter measured six forms of a real secret that pass both, and the contract reproduced each one through
