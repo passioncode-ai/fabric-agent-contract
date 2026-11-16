@@ -133,7 +133,10 @@ or fragment parameter whose name can only carry a credential (DEC-0041's whole-w
 has a value. An argument is also refused for its name: `--token=…`, `API_KEY=…`, or a credential-named flag followed
 by a value (`--api-key x`). The finding names the place, never the value. Known limits: DEC-0041's single words
 alone in a query (`?code={code}`, `?session=1`, `?key=v`) and a mixed-case id of 40 or more characters in a path
-segment are refused although harmless. [Session handoff](session-handoff.md) SH-10 applies the
+segment are refused although harmless, and so is a user name of 40 or more of `[A-Za-z0-9_-]` holding a digit
+that is a name (AWS CodeCommit's `<user>-at-<account>`, a long Azure DevOps organisation); a token user name after
+another `@` in the user information, or holding `.`, an encoded `@` or a malformed escape (`%zz`), is not found. The shared detector has no synthetic
+words: a token-shaped user name holding `example` is refused here though the source tree check passes it. [Session handoff](session-handoff.md) SH-10 applies the
 same detector to a launch's arguments.
 
 ## Profile selection

@@ -13198,22 +13198,31 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   1. `secretUrl` refuses a URL whose user name, percent-decoded, is a token: a run of 40 or more of `[A-Za-z0-9_-]`
      holding a letter and a digit (`tokenUserName`, exported from `src/secret-shape.ts`). A name such as `git`,
      `deploy-bot` or 40 letters is none.
-  2. The source tree check's token user (DEC-0175) reads the same function, so one rule holds both.
-  3. `detectorCost` (DEC-0150 CA-5) counts the user name's UTF-16 units, as the parse writes it, for a string read as a
-     URL: a bound on the read, so a document's budget still covers what the detector does.
+  2. The source tree check's token user (DEC-0175) reads the same function for the shape, so one shape holds both; the
+     tree check keeps its own exemptions beside it (a synthetic word, DEC-0149, and a placeholder, DEC-0176), which the
+     shared detector has none of.
+  3. `detectorCost` (DEC-0150 CA-5, [channel agent](specification/channel-agent.md)) counts the user name's UTF-16
+     units, as the parse writes it, for a string read as a URL: a bound on the read, so a document's budget still
+     covers what the detector does.
+  4. Known limits, written in [profiles](specification/profiles.md#no-secret-in-a-command-line): a long user name with
+     a digit that is a name (AWS CodeCommit's `<user>-at-<account>`, a long Azure DevOps organisation) is refused; a
+     token user name after another `@`, or holding `.`, an encoded `@` or a malformed escape, is not found.
 - **Why:** the user name is where a git remote carries its token; a detector that refuses a password beside it and
   not the token alone misses the commoner form, and the tree check already reads it.
 - **Alternatives considered:** reading any 40-character user name (refused: a long service-account name of letters
   is a name); leaving the limit (refused: the same URL then passes FAC-SEM-057 and blocks FAC-SEM-158).
 - **Compatibility:** widens `FAC-SEM-057` (MCP URLs of a manifest, a provider entry, a runner and a service
-  descriptor), `FAC-SEM-101` (feed data), `FAC-SEM-103` (a proposal), `FAC-SEM-165` (a channel agent declaration) and
-  the folder attribution's origin, wherever `secretUrl` reads: a document that passed with a token as a URL's user
-  name now fails. No vector file changes its answers; the channel agent vectors' `about` names the new cost term. The
+  descriptor), `FAC-SEM-101` (feed data), `FAC-SEM-103` (a proposal), `FAC-SEM-127` (a well-known document's
+  connections), `FAC-SEM-165` (a channel agent declaration) and the folder attribution's origin (an `ssh://` remote
+  whose user is a token records none; an `http` or `https` one drops its user first), wherever `secretUrl` reads: a
+  document that passed with a token as a URL's user name now fails. No released vector changes its answer; one
+  folder attribution case is added, and the channel agent vectors' `about` names the new cost term. The
   Fabric Agent Adapter's twins (`fabric-secrets.mjs`, `fabric_secrets.py`) and Fabric Dashboards' copy port it at
   their next pin; until then they pass such a URL.
 - **Consequences / affects:** `src/secret-shape.ts` (`tokenUserName`, `secretUrl`), `src/source-rules.ts` (`tokenUser`
   reads it), `src/channel-agent.ts` (`detectorCost`), `tools/vectors/channel-agent.ts` (`about`),
-  `fixtures/semantic/command-line-token-user-in-manifest-url.json`, `test/service-hygiene.test.ts`,
-  `test/channel-agent.test.ts`; `docs/specification/profiles.md`; `docs/backlog.md` (CT-329).
+  `tools/vectors/folder-attribution.ts` (one AT-15 case), `fixtures/semantic/command-line-token-user-in-manifest-url.json`,
+  `test/service-hygiene.test.ts`, `test/channel-agent.test.ts`; `docs/specification/profiles.md` (the rule and its known
+  limits), `docs/specification/channel-agent.md` (CA-5's cost terms and its gap); `docs/backlog.md` (CT-329).
 - **Source:** DEC-0175's readings (round 1 seam), CT-329. DEC-0177 was reserved by git CAS (`agent_sync.py reserve`,
   key `ct329-token-user`).

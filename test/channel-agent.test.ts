@@ -1055,6 +1055,9 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
       expect(bare(text), text).toBe(cost);
     }
     expect(bare("https://a.example/?aBC=x&api_key=abc123")).toBe(318);
+    // The user name's term (DEC-0177), as the page words it.
+    expect(page.replace(/\s+/g, " ")).toContain("`https://bot@a.example/` costs 4 for `bot@` and 3 for the user name more than `https://a.example/`");
+    expect(bare("https://bot@a.example/") - bare("https://a.example/")).toBe(4 + 3);
     // A URL value holding short runs and a near-miss prefix pays its own prefix floor and long-run term.
     expect(page.replace(/\s+/g, " ")).toContain("the value `ghp_ab,cd` costs 9, a `ghp_` floor of 5 and a long-run term of 3 x (36 + 4): 134");
     // Against a value of the same runs and no prefix, the `ghp_` floor is charged twice: in the string and in the value.
