@@ -470,7 +470,8 @@ const credentialFile = (path: string): boolean => {
  *   only carry a credential (`credentialName`): `NAME = value`, `NAME: value`, `"name": "value"`, and since DEC-0175
  *   `--name=value`, `:=`, `=>`, `||=`, `?=`, `??=`, `+=`, `<-` and `ENV['NAME'] =`, so an integrity hash is not one.
  *
- * A whole Ed25519 signature under a JSON `sig`, `signature` or `signatures` member is public and read by no rule. A line
+ * A whole Ed25519 signature, or a DER ECDSA one as WebAuthn writes it (DEC-0176), under a quoted `sig`, `signature` or
+ * `signatures` member after `:` or `=>` is public and read by no rule. A line
  * holding a JSON escape of `&`, `=`, `/` or `"` (`&`, `=`, `\/`, `\"`) is read again unescaped when it shows
  * nothing as written.
  */
@@ -495,8 +496,11 @@ export const KEY_SHAPES: readonly KeyShape[] = KEY_SHAPE_SOURCES.map((source) =>
   if (open !== null) return { prefix: new RegExp(open[1] as string, "gi"), run: new RegExp(`${open[2] as string}+`, "g"), least: Number(open[3]) };
   return { prefix: new RegExp((/^[A-Za-z]+/.exec(source) as RegExpExecArray)[0], "gi"), whole: new RegExp(source, "iy") };
 });
-/** A letter or a digit in any script: a key that follows one starts no word (Python's `str.isalnum`). */
-const LETTER_OR_DIGIT = /^[\p{L}\p{N}]$/u;
+/**
+ * An ASCII letter or digit: a key that follows one starts no word. A letter of another script does not stop a key, so
+ * a key glued to one is read (DEC-0176; before it, any script's letter did, Python's `str.isalnum`).
+ */
+const LETTER_OR_DIGIT = /^[A-Za-z0-9]$/;
 const BEARER_ALL = new RegExp(BEARER_INSIDE.source, "gi");
 /**
  * An absolute URL in a line. Its end is Python's `\s` spelled out (U+001C to U+001F and U+0085 are white space there,
@@ -555,8 +559,12 @@ export function longRunSecret(text: string): boolean {
   }
   return false;
 }
-/** A whole Ed25519 signature as a JSON member: public, blanked before any rule reads the line. */
-const PUBLIC_SIGNATURE = /("(?:sig|signature|signatures)"[ \t]*:[ \t]*")([A-Za-z0-9_-]{86})(")/gi;
+/**
+ * A whole signature as a quoted member, after `:` or a Ruby hash's `=>`: Ed25519 (86 base64url characters) or a DER
+ * ECDSA P-256 signature (`ME` and `Q`, `U` or `Y`, 94 to 96 base64url characters, DEC-0176). Public, blanked before
+ * any rule reads the line.
+ */
+const PUBLIC_SIGNATURE = /("(?:sig|signature|signatures)"[ \t]*(?::|=>)[ \t]*")([A-Za-z0-9_-]{86}|ME[QUY][A-Za-z0-9_-]{91,93})(")/gi;
 const JSON_ESCAPES = /\\(?:u0026|u003[dD]|\/|")/g;
 const UNESCAPED: Readonly<Record<string, string>> = { "\\u0026": "&", "\\u003d": "=", "\\u003D": "=", "\\/": "/", '\\"': '"' };
 
@@ -656,11 +664,11 @@ function providerKeys(text: string): number[] {
 
 const SPECIAL_SCHEMES = ["ftp", "http", "https", "ws", "wss"];
 /**
- * A URL's password, query and fragment as WHATWG URL parsing splits them, read by hand (the adapter's `_url_parts`): a
+ * A URL's password, query, fragment, user and host (lower case, no port) as WHATWG URL parsing splits them, read by hand (the adapter's `_url_parts`): a
  * special scheme's authority starts after every slash or backslash after `scheme:`, another scheme's only after `//`,
  * `file` has none; the user information ends at the authority's last `@`, the password follows its first `:`.
  */
-function urlParts(value: string): [string, string, string, string] {
+function urlParts(value: string): [string, string, string, string, string] {
   const colon = value.indexOf(":");
   const scheme = value.slice(0, colon).toLowerCase();
   let rest = value.slice(colon + 1);
@@ -676,7 +684,8 @@ function urlParts(value: string): [string, string, string, string] {
   const userinfo = at < 0 ? "" : authority.slice(0, at);
   const password = userinfo.includes(":") ? userinfo.slice(userinfo.indexOf(":") + 1) : "";
   const user = userinfo.includes(":") ? userinfo.slice(0, userinfo.indexOf(":")) : userinfo;
-  return [password, query, fragment, user];
+  const host = authority.slice(at + 1).replace(/:[0-9]*$/, "").toLowerCase();
+  return [password, query, fragment, user, host];
 }
 /** A text without the run of the given characters at its end (Python's `rstrip`), read backward in one pass. */
 function rstrip(text: string, characters: string): string {
@@ -696,11 +705,30 @@ function lstrip(text: string, characters: string): string {
  * detector's.
  */
 export const URL_SECRET_VALUE = new RegExp(`(^bearer\\s.+|${KEY_SHAPE_SOURCES.join("|")})`, "i");
-/** The same key shapes without the whole-value bearer branch: what a piece of a comma-separated value is read by (DEC-0175). */
-const KEY_SHAPE_IN_PIECE = new RegExp(`(${KEY_SHAPE_SOURCES.join("|")})`, "i");
-/** A password of 8 or more characters mixing letters and digits, not synthetic: in the user information or under a password's name. */
-const passwordShaped = (value: string, decoded = false): boolean =>
-  value.length >= 8 && /[0-9]/.test(value) && /[A-Za-z]/.test(value) && real(decoded ? value : unquote(value));
+/**
+ * What a URL's whole parameter value reads as a bearer token (DEC-0176): `bearer`, white space and a token shaped as
+ * `BEARER_INSIDE` reads one (12 or more of its characters, a digit among them), so `bearer bonds` names none. A key in
+ * a value is read by `providerKeys`, at a word's start, as on a line.
+ */
+export const URL_BEARER_VALUE = /^bearer\s+(?=[A-Za-z0-9._~+/-]*\d)[A-Za-z0-9._~+/-]{12,}=*$/i;
+/**
+ * A value that is wholly a template's placeholder (`${NAME}`, `$NAME`, `{{name}}`, `{name}`, `<name>`, `%(name)s`):
+ * it names where a secret goes, never holds one (DEC-0176). A closing brace may be missing: a URL's trailing `}` is
+ * cut before its parts are read.
+ */
+export const PLACEHOLDER = /^(?:\$\{[^{}]{1,64}\}?|\$[A-Za-z_][A-Za-z0-9_]{0,63}|\{\{[^{}]{1,64}\}{0,2}|\{[A-Za-z_][A-Za-z0-9_.-]{0,63}\}?|<[A-Za-z_][A-Za-z0-9_ .-]{0,63}>|%\([A-Za-z_][A-Za-z0-9_]{0,63}\)s)$/;
+/**
+ * A host reserved for documentation (RFC 2606, RFC 6761): `example`, `example.com`, `example.net`, `example.org`, a name
+ * under `.example`, `.test`, `.invalid` or `.localhost`, or `localhost`. A password there, in the user information or
+ * under a password's name, is an example; a token user, a provider key, a JWT or a long run under a credential's name
+ * is still read (DEC-0176).
+ */
+export const DOCUMENTATION_HOST = /^(?:(?:[a-z0-9-]+\.)*(?:example\.(?:com|net|org)|example|test|invalid|localhost))$/;
+/** A password of 8 or more characters mixing letters and digits, not synthetic nor a placeholder: in the user information or under a password's name. */
+const passwordShaped = (value: string, decoded = false): boolean => {
+  const text = decoded ? value : unquote(value);
+  return value.length >= 8 && /[0-9]/.test(value) && /[A-Za-z]/.test(value) && real(text) && !PLACEHOLDER.test(text);
+};
 /** A query or fragment parameter that names a password (`password`, `passwd`, with a prefix such as `db_`); `pwd` is often a working directory, so it is none. */
 export const PASSWORD_NAME = /(?:^|[_.-])(?:password|passwd)$/i;
 /**
@@ -708,14 +736,16 @@ export const PASSWORD_NAME = /(?:^|[_.-])(?:password|passwd)$/i;
  * holding a letter and a digit (a classic token's 40 hex), not synthetic. A name such as `git` or `deploy-bot` is not one.
  */
 const tokenUser = (user: string): boolean =>
-  real(user) && (providerKeys(user).length > 0 || hasJwt(user) || (/^[A-Za-z0-9_-]{40,}$/.test(user) && /[0-9]/.test(user) && /[A-Za-z]/.test(user)));
+  real(user) && !PLACEHOLDER.test(user) && (providerKeys(user).length > 0 || hasJwt(user) || (/^[A-Za-z0-9_-]{40,}$/.test(user) && /[0-9]/.test(user) && /[A-Za-z]/.test(user)));
 /** Whether a URL in a source tree carries a credential (the adapter's `_url_secret`), an inner URL read two levels deep. */
 function urlSecret(url: string, depth = 0): boolean {
   const trimmed = rstrip(url, ".,;)]}");
   // Only an absolute URL is read as one: a parameter that holds `://` after other text is a value (the adapter's guard).
   if (!/^[A-Za-z][A-Za-z0-9+.-]*:/.test(trimmed)) return false;
-  const [password, query, fragment, user] = urlParts(trimmed);
-  if (passwordShaped(password)) return true;
+  const [password, query, fragment, user, host] = urlParts(trimmed);
+  // A documentation host's password is an example: not read; its token user, keys and JWTs are (DEC-0176).
+  const documentation = DOCUMENTATION_HOST.test(host);
+  if (!documentation && passwordShaped(password)) return true;
   // A user that is a token, not a name, with a password or without one (`https://<token>@host`, DEC-0175).
   if (tokenUser(unquote(user))) return true;
   // A key behind a percent-encoded separator in the path or a parameter's name starts a word once decoded (CT-325);
@@ -735,10 +765,11 @@ function urlSecret(url: string, depth = 0): boolean {
         const credential = credentialName(name);
         const pieces = value.includes(",") ? value.split(",") : [];
         for (const piece of [value, ...pieces]) {
-          if (passwordName && passwordShaped(piece, true)) return true;
+          if (passwordName && !documentation && passwordShaped(piece, true)) return true;
           if (!real(piece)) continue;
           if ((credential && longRunSecret(piece)) || hasJwt(piece)) return true;
-          if (piece === value ? URL_SECRET_VALUE.test(piece) : KEY_SHAPE_IN_PIECE.test(piece)) return true;
+          // A key in a piece is `providerKeys(value)`'s above, at a word's start; the bearer branch reads only the whole value.
+          if (piece === value && URL_BEARER_VALUE.test(piece)) return true;
         }
       }
     }
@@ -783,7 +814,7 @@ function credentialUrlSpans(line: string): Array<[number, number]> {
 
 /** The 0-based index where a line, as written, first shows a credential, or -1. */
 function credentialIn(written: string): number {
-  // A whole Ed25519 signature is blanked, keeping every other index.
+  // A whole public signature is blanked, keeping every other index.
   const line = written.includes('"') ? written.replace(PUBLIC_SIGNATURE, (_all, open: string, value: string, close: string) => `${open}${" ".repeat(value.length)}${close}`) : written;
   const found: number[] = [];
   const block = PRIVATE_KEY.exec(line);

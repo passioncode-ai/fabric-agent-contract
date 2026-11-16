@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0176` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0177` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -9194,7 +9194,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   schema's validation, kind, code or vector changes (`device-common.schema.json`'s `$defs.detail.$comment`, count-free,
   is DEC-0153's line, on main byte for byte, so DEC-0149 leaves that file unchanged).
 - **Annotated (2026-11-16):** item 8's credential forms widened by DEC-0175 (a token as a URL's user, a value judged
-  piece by piece, a key behind an encoded separator, more assignment heads, a password in a query, an escaped quote).
+  piece by piece, a key behind an encoded separator, more assignment heads, a password in a query, an escaped quote),
+  then narrowed and widened by DEC-0176 (a key's word start is ASCII; a URL's parameter reads a key at a word's start
+  and a bearer token in its shape; a documentation host's or a placeholder's password is none; a DER ECDSA signature
+  is public).
 - **Context:** the operator asked that agents can be handed over as source and that a transfer happens only by their
   wish (CT-194, relayed by Fabric `2af39c53` and a personal agent's request `99221f81`). The research report
   [agent portability](reports/2026-10-27-agent-portability/README.md) set out the options (§5) and twelve questions (§6);
@@ -13032,6 +13035,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   pattern reads them, a quadratic line from judging a name per comma piece; round 2 clean). Proposed 2026-11-16 (CT-325,
   the Fabric Agent Adapter's FAA-190 items 14, 31, 34, 38 and 77 and an escaped JSON key, request `827ea813` on thread
   `b9e5668d`).
+- **Annotated (2026-11-16):** item 2 refined by DEC-0176: a key in a piece is read at a word's start, as on a line,
+  and item 5's password is not read on a documentation host nor when it is a placeholder.
 - **Context:** the tree check (DEC-0149, `FAC-SEM-158`) reads a credential in the forms the adapter's source check
   reads, and the adapter's port `fabric_source_tree.py` is held to the contract's vectors, so it cannot widen a form
   alone. The adapter measured six forms of a real secret that pass both, and the contract reproduced each one through
@@ -13087,3 +13092,66 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Source:** the adapter's request `827ea813` and its triage (FAA-190 items 14, 31, 34, 38, 77, measured at
   `4f1a66d7`), the contract's acceptance `b63a1c30`; DEC-0149, DEC-0151. DEC-0175 was reserved by git CAS
   (`agent_sync.py reserve`, key `ct325-secret-shapes`).
+
+### DEC-0176: the source tree check's false findings, narrowed by rule, and a key after another script's letter
+
+- **Date:** 2026-11-16
+- **Status:** Proposed 2026-11-16 (CT-328: the Fabric Agent Adapter's eight false findings, message `47713284` on
+  thread `b9e5668d`, and those DEC-0175's readings accepted); accepted when the coordinator's blind readings are clean
+  on two consecutive rounds.
+- **Context:** the tree check (DEC-0149, `FAC-SEM-158`) fails closed: a false finding blocks an export until the author
+  rewrites the line or leaves the file out. The adapter measured eight forms where the existing rules find what holds no
+  secret, and one where a key is missed; DEC-0175's readings added more. Each was reproduced through `checkSourceTree`
+  on `adae54ad` (2026-11-16). Some come from a rule broader than its own reasoning: a URL's parameter read the key
+  shapes with no word start where a line reads them at one (`?q=desk-lamp-…` blocks, `desk-lamp` on a line does not);
+  its whole-value branch read any `bearer …` (`?q=bearer%20bonds`); a password on a host RFC 2606 reserves for
+  documentation, or one that is a template's placeholder, was read as a real one; a WebAuthn assertion's DER ECDSA
+  signature is as public as the Ed25519 one already exempt. The rest are forms a real secret or a real home folder also
+  takes.
+- **Decision:** [source](specification/source.md#the-tree-check) *the tree check*, the `credential` row:
+  1. **A key's word start is ASCII.** A provider key is read when no ASCII letter or digit is before it; a letter of
+     another script no longer stops it, so a key glued to one is read (the adapter's item 32, a missed secret).
+  2. **A URL's parameter reads a key as a line does**, at a word's start (`providerKeys`), so `desk-lamp` and
+     `task-processing` in a value or a piece name none; and its whole-value branch reads a bearer token only in a token's
+     shape (`URL_BEARER_VALUE`: `bearer`, white space, 12 or more token characters with a digit). `URL_SECRET_VALUE` is
+     unchanged where it reads a slot's text and a path (DEC-0149, unbounded there on purpose).
+  3. **A password is not read on a documentation host** (`DOCUMENTATION_HOST`: `example.com`, `example.net`,
+     `example.org`, a name under `.example`, `.test`, `.invalid` or `.localhost`, `localhost`), in the user information
+     or under a password's name; a token user, a provider key, a JWT and a long run under a credential's name there are
+     still read.
+  4. **A placeholder is no value.** A password or a token user that is wholly a template's placeholder (`PLACEHOLDER`:
+     `${NAME}`, `$NAME`, `{{name}}`, `{name}`, `<name>`, `%(name)s`, a closing brace a URL's end cut allowed) is not
+     read.
+  5. **A DER ECDSA signature is public** beside the Ed25519 one: under a quoted `sig`, `signature` or `signatures`
+     member, `ME` and `Q`, `U` or `Y` and 94 to 96 base64url characters in all; and both are public after a Ruby
+     hash's `=>` as after `:`.
+  6. **Known limits, kept.** These fail closed on purpose, since a real secret or a real home takes the same form, and
+     the author rewrites the example with a synthetic word, renames it or leaves the file out with `exclude`: a web
+     route `/a/Users/<name>` (Git Bash's `/c/Users/<name>`); a flag or a BEM block `-v-Users-<name>`, `b--Users-<name>`,
+     `a--users-<name>` (the dashed homes a tool writes); a dotenv vault URL (its key decrypts the vault); a passkey's
+     `credentialId` under a credential's name; a 40-character service-account name with a digit as a URL's user; an
+     arrow function whose parameter is a credential's name returning a 40-unit identifier; a Markdown reference link
+     or a CSS custom property named as a credential before a 40-unit run; a mixed-case percent-encoded path under a
+     secret's name.
+  7. `URL_BEARER_VALUE`, `PLACEHOLDER` and `DOCUMENTATION_HOST` join the vectors' `constants` block; a Python port reads
+     each `$` as `\Z`.
+- **Why:** each narrowing makes a rule match its own reasoning (a key starts a word wherever it is read; a bearer
+  token has a token's shape; a reserved host and a placeholder hold no live secret; a signature is public whatever
+  its curve) without unblocking a form a real secret takes; the limits kept are forms where the check cannot tell an
+  example from a secret, and fail closed.
+- **Alternatives considered:** reading nothing on a documentation host (refused: a pasted real key there is still a
+  leak); exempting `credentialId` (refused: `credential` is a credential's word everywhere the shared detector reads,
+  DEC-0151); dropping the dashed home forms (refused: they are how a tool names a person's folder); keeping
+  `URL_SECRET_VALUE` unbounded in a parameter (refused: a search URL is common, a key glued to a letter is not, and a
+  line already reads it so).
+- **Compatibility:** narrows and widens `FAC-SEM-158` (and `FAC-SEM-156`, which reads through it); two released vector
+  cases change their answer (the folding case gains a finding after `é`; the parameter case after a letter loses
+  one, beside a new clean search and a key at a word's start), four are added. The adapter ports it with DEC-0175 at its
+  next pin.
+- **Consequences / affects:** `src/source-rules.ts` (`LETTER_OR_DIGIT`, `urlParts`' host, `URL_BEARER_VALUE`,
+  `PLACEHOLDER`, `DOCUMENTATION_HOST`, `passwordShaped`, `tokenUser`, `urlSecret`, `PUBLIC_SIGNATURE`),
+  `tools/vectors/source-tree.ts`, `fixtures/vectors/source-tree.json` (cases and `constants`), `test/source-rules.test.ts`;
+  `docs/specification/source.md` (the `credential` row); DEC-0149 and DEC-0175 annotated; `docs/backlog.md` (CT-328).
+- **Source:** the adapter's message `47713284` (its items 7, 8, 9, 11, 13, 32, 37, 43), DEC-0175's readings (rounds 1
+  to 6); RFC 2606, RFC 6761, WebAuthn's assertion signature (DER ECDSA). DEC-0176 was reserved by git CAS
+  (`agent_sync.py reserve`, key `ct328-false-findings`).
