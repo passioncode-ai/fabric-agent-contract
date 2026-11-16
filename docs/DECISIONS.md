@@ -12893,7 +12893,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   whose rounds 5 and 6 of the blind readings (seam and product) read clean; accepted when the coordinator's blind
   readings are clean on two consecutive rounds (round 1 folded: `mode` and `kind` required inside their objects; the
   label's rule by placement and its grammar; the pair reports only cross-document findings; a refused value never read,
-  the other document's shown). It answers Fabric Dashboards' request `5da92f65` (thread `589abe7e`,
+  the other document's shown; round 2: a dashboard's login names `entry` only for a service that declares a fact, labels
+  for every value; round 3 clean, its risks folded: the placement's `context` first; round 4: a well-known document that
+  answers as another service gives nothing and its pair no `FAC-SEM-180` finding, the vectors' pairs one service, a
+  label in a local well-known document reported by the pair even when shaped like a credential). It answers Fabric Dashboards' request `5da92f65` (thread `589abe7e`,
   FD-273, 2026-11-15), relaying the operator's ask `d660cc30` that pointing at an agent show where it runs, its
   organization, whose instance it is, who has access and how its data is kept apart. The contract accepted it in
   principle on the board (`1fa97798`) and named Prowl Agent the first declarer, as the operator said.
@@ -12929,7 +12932,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      the pair as the same service (a `foreign` answer gives no facts).
   6. **IF-6, `FAC-SEM-180`.** The schema and the clauses above: kind `service-descriptor` checks a descriptor's schema and own facts,
      `service-well-known` a document's schema, its `entry` against its own dashboard and its label's shape, and the pair
-     `service-observation` only what neither document alone shows, so each problem is reported once; a finding never
+     `service-observation` only what neither document alone shows, and nothing on a pair `FAC-SEM-009` reads as
+     `foreign`, so each problem is reported once; a finding never
      changes the service's state.
   7. **IF-7, whose instance and the rest.** A placed instance's organization is its placement's `context`, first; a
      remote one with no placement record its `org-instance/1` statement where a host holds one, else Observatory's map; a local service no estate record
@@ -12955,7 +12959,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (new), `src/extensions.ts`, `src/protocol-revisions.ts`, `src/semantic-rules.ts`, `tools/vectors/instance-facts.ts`,
   `tools/vectors/run.ts`, `fixtures/vectors/instance-facts.json`, `test/instance-facts.test.ts`, `test/consistency.test.ts`,
   `test/positive-sweep.test.ts`, `test/schema-compilation.test.ts`, the fixtures and `fixtures/catalogue.json`,
-  `vitest.config.ts`; `docs/specification/service.md` (*Instance facts*, `FAC-SEM-180`),
+  `vitest.config.ts`, `src/validate-cli.ts` (a declaration-only hint); `docs/specification/README.md` (the index row),
+  `docs/specification/service.md` (*Instance facts*, `FAC-SEM-180`),
   `interop.md` (the extension keys), `versioning.md` (named protocols), `conformance.md` (a service and a host row, the
   module, the register); `CONTEXT.md`; `docs/ux/` (ST-045, FLW-36, SCR-36, SCN-065); `docs/DOCMAP.md`; `docs/backlog.md` (CT-321); the design's status note.
 - **Source:** the design above; board messages `5da92f65`, `1fa97798`, `8601034d` and Fabric Dashboards' acceptance `b62f8db9`; DEC-0061, DEC-0082, DEC-0086,

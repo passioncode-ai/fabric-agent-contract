@@ -27,6 +27,15 @@ export interface InstanceFactsView {
   refused: RefusedFact[];
   /** A document whose extension value fails the schema: none of its facts is read (as ED-9 reads a dashboard extension). */
   invalid: FactsDocument[];
+  /** The well-known document answers as another service than the descriptor (the identity rule of the pair, read in semantic-rules): it gives nothing, the descriptor is read alone (IF-5). */
+  foreign: boolean;
+}
+
+/** The identity rule's comparison (semantic-rules `serviceIdentity`): the descriptor's id and instance against the well-known document's `service`. */
+function answersAsAnother(descriptor: unknown, wellKnown: unknown): boolean {
+  if (!isObject(descriptor) || !isObject(wellKnown)) return false;
+  const answered = isObject(wellKnown.service) ? wellKnown.service : {};
+  return descriptor.id !== answered.id || (descriptor.instance ?? "default") !== (answered.instance ?? "default");
 }
 
 const FIELDS: ReadonlyArray<[FactField, "access" | "tenancy" | "space", string]> = [
@@ -87,8 +96,10 @@ function refusal(field: FactField, value: unknown, document: FactsDocument, sett
   if (field === "mode" && value === "shared" && setting.local === true) return "shared is a remote service's: a local placement names one context and at most one grant (DEC-0082 item 4)";
   if (field === "kind" && value === "system" && setting.local === true) return "system is a remote placement's: a local service runs under a counted OS account (DEC-0154)";
   if (field === "account") {
-    if (typeof value === "string" && secretArgument(value)) return "the label is shaped like a credential; it names a space, never a credential";
+    // Where it is written comes first: a label in a local well-known document is a pair problem the document alone
+    // cannot show, so a credential-shaped one there is still reported by each reading (IF-6).
     if (document === "wellKnown" && setting.local === true) return "a local service's well-known document is read by every counted OS account on the computer; the label stays in its descriptor (IF-5)";
+    if (typeof value === "string" && secretArgument(value)) return "the label is shaped like a credential; it names a space, never a credential";
   }
   return undefined;
 }
@@ -97,14 +108,17 @@ function refusal(field: FactField, value: unknown, document: FactsDocument, sett
  * The reference reading of an instance's facts (DEC-0173 IF-5): each field from the well-known document where it
  * declares a value no clause refuses, else from the descriptor's; a refused value is reported and never read, and `entry`
  * reads `host-signin` whenever the well-known document's dashboard requires a host's login code and either document
- * declares a fact (refused or not), whatever is declared for `entry`; a service that declares none reads none. Either
- * document may be absent. It never throws.
+ * declares a fact (refused or not), whatever is declared for `entry`; a service that declares none reads none. A
+ * well-known document that answers as another service (the identity rule of the pair, read in semantic-rules) gives nothing (`foreign`), the descriptor read
+ * alone. Either document may be absent. It never throws.
  * Ports run `fixtures/vectors/instance-facts.json`.
  */
-export function instanceFacts(descriptor: unknown, wellKnown: unknown): InstanceFactsView {
+export function instanceFacts(descriptor: unknown, given: unknown): InstanceFactsView {
+  const foreign = answersAsAnother(descriptor, given);
+  const wellKnown = foreign ? undefined : given;
   const setting = settingOf(descriptor, wellKnown);
   const sources: Array<[FactsDocument, ReturnType<typeof declaredIn>]> = [["wellKnown", declaredIn(wellKnown)], ["descriptor", declaredIn(descriptor)]];
-  const view: InstanceFactsView = { declared: false, facts: {}, refused: [], invalid: sources.filter(([, read]) => !read.valid).map(([document]) => document) };
+  const view: InstanceFactsView = { declared: false, facts: {}, refused: [], foreign, invalid: sources.filter(([, read]) => !read.valid).map(([document]) => document) };
   // A dashboard's login names the entry only for a service that declares instance facts: one that declares none shows none.
   const declaresAny = sources.some(([, read]) => Object.keys(read.values).length > 0);
   for (const [field] of FIELDS) {
@@ -144,8 +158,10 @@ export function instanceFactsRules(kind: string, value: JsonObject): Finding[] {
   else if (kind === "service-observation") {
     // The pair reports only what neither document read alone shows, so `pnpm validate` prints each problem once.
     const pair = instanceFacts(value.descriptor, value.wellKnown);
+    // A foreign pair is the identity rule's: its well-known document gives nothing here, and each document alone is checked by its own kind.
+    if (pair.foreign) return [];
     const alone = [...instanceFacts(value.descriptor, undefined).refused, ...instanceFacts(undefined, value.wellKnown).refused];
-    const seen = (refused: RefusedFact) => alone.some((other) => other.document === refused.document && other.field === refused.field);
+    const seen = (refused: RefusedFact) => alone.some((other) => other.document === refused.document && other.field === refused.field && other.reason === refused.reason);
     view = { ...pair, invalid: [], refused: pair.refused.filter((refused) => !seen(refused)) };
     prefix = (document) => document;
   }

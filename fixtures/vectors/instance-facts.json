@@ -1,5 +1,5 @@
 {
-  "about": "Vectors for extensions/instance-facts/0.1 (DEC-0173), written by tools/vectors/instance-facts.ts, never by hand. Each case gives a descriptor and a well-known document (null: not read). `read` is instanceFacts(descriptor, wellKnown): the five facts, field by field, the well-known document first; a refused value is never read, the field then read from the other document; a dashboard that requires a host's login code reads host-signin for a service that declares any fact. `findings` are FAC-SEM-180's as code and path, per kind: `descriptor` (kind service-descriptor), `wellKnown` (service-well-known) and `pair` (service-observation, `{descriptor, wellKnown}`, only what neither document alone shows), null where a document is not given.",
+  "about": "Vectors for extensions/instance-facts/0.1 (DEC-0173), written by tools/vectors/instance-facts.ts, never by hand. Each case gives a descriptor and a well-known document (null: not read). Every well-known document answers as its descriptor's service (FAC-SEM-009 reads the pair as one) unless the case names another. `read` is instanceFacts(descriptor, wellKnown): the five facts, field by field, the well-known document first; a refused value is never read, the field then read from the other document; a dashboard that requires a host's login code reads host-signin for a service that declares any fact. `findings` are FAC-SEM-180's as code and path, per kind: `descriptor` (kind service-descriptor), `wellKnown` (service-well-known) and `pair` (service-observation, `{descriptor, wellKnown}`, only what neither document alone shows), null where a document is not given.",
   "key": "https://fabric.passioncode.ai/agent-contract/extensions/instance-facts/0.1",
   "cases": [
     {
@@ -10,11 +10,17 @@
         "instance": "default",
         "origin": "http://127.0.0.1:47910"
       },
-      "wellKnown": {},
+      "wellKnown": {
+        "service": {
+          "id": "notes",
+          "instance": "default"
+        }
+      },
       "read": {
         "declared": false,
         "facts": {},
         "refused": [],
+        "foreign": false,
         "invalid": []
       },
       "findings": {
@@ -46,7 +52,12 @@
           }
         }
       },
-      "wellKnown": {},
+      "wellKnown": {
+        "service": {
+          "id": "notes",
+          "instance": "default"
+        }
+      },
       "read": {
         "declared": true,
         "facts": {
@@ -57,6 +68,7 @@
           "account": "agents-1"
         },
         "refused": [],
+        "foreign": false,
         "invalid": []
       },
       "findings": {
@@ -83,6 +95,7 @@
         "declared": false,
         "facts": {},
         "refused": [],
+        "foreign": false,
         "invalid": []
       },
       "findings": {
@@ -111,6 +124,10 @@
         }
       },
       "wellKnown": {
+        "service": {
+          "id": "notes",
+          "instance": "default"
+        },
         "extensions": {
           "https://fabric.passioncode.ai/agent-contract/extensions/instance-facts/0.1": {
             "access": {
@@ -127,6 +144,7 @@
           "mode": "single"
         },
         "refused": [],
+        "foreign": false,
         "invalid": []
       },
       "findings": {
@@ -151,6 +169,10 @@
         }
       },
       "wellKnown": {
+        "service": {
+          "id": "notes",
+          "instance": "default"
+        },
         "surfaces": {
           "dashboard": {
             "path": "/dashboard",
@@ -173,6 +195,7 @@
             "reason": "the dashboard requires a host's login code (surfaces.dashboard.login)"
           }
         ],
+        "foreign": false,
         "invalid": []
       },
       "findings": {
@@ -199,6 +222,10 @@
         }
       },
       "wellKnown": {
+        "service": {
+          "id": "notes",
+          "instance": "default"
+        },
         "extensions": {
           "https://fabric.passioncode.ai/agent-contract/extensions/instance-facts/0.1": {
             "access": {
@@ -228,6 +255,7 @@
             "reason": "the dashboard takes no host's login code (surfaces.dashboard.login is false)"
           }
         ],
+        "foreign": false,
         "invalid": []
       },
       "findings": {
@@ -265,7 +293,12 @@
           }
         }
       },
-      "wellKnown": {},
+      "wellKnown": {
+        "service": {
+          "id": "notes",
+          "instance": "default"
+        }
+      },
       "read": {
         "declared": true,
         "facts": {
@@ -273,6 +306,7 @@
           "mode": "single"
         },
         "refused": [],
+        "foreign": false,
         "invalid": []
       },
       "findings": {
@@ -296,7 +330,12 @@
           }
         }
       },
-      "wellKnown": {},
+      "wellKnown": {
+        "service": {
+          "id": "notes",
+          "instance": "default"
+        }
+      },
       "read": {
         "declared": false,
         "facts": {},
@@ -307,6 +346,7 @@
             "reason": "organization on a local placement needs peer: a host routes others only to a service that declares it (DEC-0061)"
           }
         ],
+        "foreign": false,
         "invalid": []
       },
       "findings": {
@@ -341,7 +381,12 @@
           }
         }
       },
-      "wellKnown": {},
+      "wellKnown": {
+        "service": {
+          "id": "notes",
+          "instance": "default"
+        }
+      },
       "read": {
         "declared": false,
         "facts": {},
@@ -352,6 +397,7 @@
             "reason": "operator beside peer: a service offered to others serves more than its operator"
           }
         ],
+        "foreign": false,
         "invalid": []
       },
       "findings": {
@@ -386,13 +432,19 @@
           }
         }
       },
-      "wellKnown": {},
+      "wellKnown": {
+        "service": {
+          "id": "notes",
+          "instance": "default"
+        }
+      },
       "read": {
         "declared": true,
         "facts": {
           "mode": "single"
         },
         "refused": [],
+        "foreign": false,
         "invalid": []
       },
       "findings": {
@@ -425,6 +477,10 @@
         }
       },
       "wellKnown": {
+        "service": {
+          "id": "research",
+          "instance": "default"
+        },
         "surfaces": {
           "dashboard": {
             "path": "/dashboard",
@@ -444,6 +500,7 @@
           "kind": "system"
         },
         "refused": [],
+        "foreign": false,
         "invalid": []
       },
       "findings": {
@@ -471,7 +528,12 @@
           }
         }
       },
-      "wellKnown": {},
+      "wellKnown": {
+        "service": {
+          "id": "research",
+          "instance": "default"
+        }
+      },
       "read": {
         "declared": true,
         "facts": {
@@ -479,6 +541,7 @@
           "mode": "per-organization"
         },
         "refused": [],
+        "foreign": false,
         "invalid": []
       },
       "findings": {
@@ -502,7 +565,12 @@
           }
         }
       },
-      "wellKnown": {},
+      "wellKnown": {
+        "service": {
+          "id": "notes",
+          "instance": "default"
+        }
+      },
       "read": {
         "declared": false,
         "facts": {},
@@ -513,6 +581,7 @@
             "reason": "public is a remote placement's: a local origin is reached from outside the computer only through peer, which no hub routes to anyone at large"
           }
         ],
+        "foreign": false,
         "invalid": []
       },
       "findings": {
@@ -542,7 +611,12 @@
           }
         }
       },
-      "wellKnown": {},
+      "wellKnown": {
+        "service": {
+          "id": "research",
+          "instance": "default"
+        }
+      },
       "read": {
         "declared": false,
         "facts": {},
@@ -553,6 +627,7 @@
             "reason": "public beside a subscription runner: a service others reach never runs on the operator's subscription (DEC-0046, DEC-0061 item 3)"
           }
         ],
+        "foreign": false,
         "invalid": []
       },
       "findings": {
@@ -578,7 +653,12 @@
           }
         }
       },
-      "wellKnown": {},
+      "wellKnown": {
+        "service": {
+          "id": "notes",
+          "instance": "default"
+        }
+      },
       "read": {
         "declared": false,
         "facts": {},
@@ -589,6 +669,7 @@
             "reason": "shared is a remote service's: a local placement names one context and at most one grant (DEC-0082 item 4)"
           }
         ],
+        "foreign": false,
         "invalid": []
       },
       "findings": {
@@ -614,7 +695,12 @@
           }
         }
       },
-      "wellKnown": {},
+      "wellKnown": {
+        "service": {
+          "id": "notes",
+          "instance": "default"
+        }
+      },
       "read": {
         "declared": false,
         "facts": {},
@@ -625,6 +711,7 @@
             "reason": "system is a remote placement's: a local service runs under a counted OS account (DEC-0154)"
           }
         ],
+        "foreign": false,
         "invalid": []
       },
       "findings": {
@@ -650,13 +737,19 @@
           }
         }
       },
-      "wellKnown": {},
+      "wellKnown": {
+        "service": {
+          "id": "notes",
+          "instance": "default"
+        }
+      },
       "read": {
         "declared": true,
         "facts": {
           "kind": "container"
         },
         "refused": [],
+        "foreign": false,
         "invalid": []
       },
       "findings": {
@@ -682,6 +775,10 @@
         }
       },
       "wellKnown": {
+        "service": {
+          "id": "notes",
+          "instance": "default"
+        },
         "extensions": {
           "https://fabric.passioncode.ai/agent-contract/extensions/instance-facts/0.1": {
             "space": {
@@ -704,6 +801,7 @@
             "reason": "a local service's well-known document is read by every counted OS account on the computer; the label stays in its descriptor (IF-5)"
           }
         ],
+        "foreign": false,
         "invalid": []
       },
       "findings": {
@@ -724,6 +822,10 @@
         "origin": "https://research.example"
       },
       "wellKnown": {
+        "service": {
+          "id": "research",
+          "instance": "default"
+        },
         "extensions": {
           "https://fabric.passioncode.ai/agent-contract/extensions/instance-facts/0.1": {
             "space": {
@@ -740,6 +842,7 @@
           "account": "eu-pool-3"
         },
         "refused": [],
+        "foreign": false,
         "invalid": []
       },
       "findings": {
@@ -777,6 +880,7 @@
             "reason": "the label is shaped like a credential; it names a space, never a credential"
           }
         ],
+        "foreign": false,
         "invalid": []
       },
       "findings": {
@@ -803,6 +907,10 @@
         }
       },
       "wellKnown": {
+        "service": {
+          "id": "notes",
+          "instance": "default"
+        },
         "extensions": {
           "https://fabric.passioncode.ai/agent-contract/extensions/instance-facts/0.1": {
             "tenancy": {
@@ -817,6 +925,7 @@
           "mode": "single"
         },
         "refused": [],
+        "foreign": false,
         "invalid": [
           "descriptor"
         ]
@@ -833,6 +942,10 @@
       "name": "a well-known document read alone: no clause on peer or placement applies",
       "descriptor": null,
       "wellKnown": {
+        "service": {
+          "id": "notes",
+          "instance": "default"
+        },
         "extensions": {
           "https://fabric.passioncode.ai/agent-contract/extensions/instance-facts/0.1": {
             "access": {
@@ -857,6 +970,7 @@
           "account": "agents-2"
         },
         "refused": [],
+        "foreign": false,
         "invalid": []
       },
       "findings": {
@@ -887,6 +1001,7 @@
           "entry": "host-signin"
         },
         "refused": [],
+        "foreign": false,
         "invalid": []
       },
       "findings": {
@@ -911,11 +1026,17 @@
           }
         }
       },
-      "wellKnown": {},
+      "wellKnown": {
+        "service": {
+          "id": "notes",
+          "instance": "default"
+        }
+      },
       "read": {
         "declared": false,
         "facts": {},
         "refused": [],
+        "foreign": false,
         "invalid": [
           "descriptor"
         ]
@@ -945,7 +1066,12 @@
           }
         }
       },
-      "wellKnown": {},
+      "wellKnown": {
+        "service": {
+          "id": "research",
+          "instance": "default"
+        }
+      },
       "read": {
         "declared": true,
         "facts": {
@@ -953,6 +1079,7 @@
           "account": "eu-pool-3"
         },
         "refused": [],
+        "foreign": false,
         "invalid": []
       },
       "findings": {
@@ -970,6 +1097,10 @@
         "origin": "http://127.0.0.1:47910"
       },
       "wellKnown": {
+        "service": {
+          "id": "notes",
+          "instance": "default"
+        },
         "extensions": {
           "https://fabric.passioncode.ai/agent-contract/extensions/instance-facts/0.1": {
             "access": {
@@ -991,6 +1122,7 @@
         "declared": false,
         "facts": {},
         "refused": [],
+        "foreign": false,
         "invalid": [
           "wellKnown"
         ]
@@ -1019,13 +1151,19 @@
           }
         }
       },
-      "wellKnown": {},
+      "wellKnown": {
+        "service": {
+          "id": "research",
+          "instance": "default"
+        }
+      },
       "read": {
         "declared": true,
         "facts": {
           "kind": "container"
         },
         "refused": [],
+        "foreign": false,
         "invalid": []
       },
       "findings": {
@@ -1043,6 +1181,10 @@
         "origin": "http://127.0.0.1:47910"
       },
       "wellKnown": {
+        "service": {
+          "id": "notes",
+          "instance": "default"
+        },
         "surfaces": {
           "dashboard": {
             "path": "/dashboard",
@@ -1057,6 +1199,7 @@
         "declared": false,
         "facts": {},
         "refused": [],
+        "foreign": false,
         "invalid": []
       },
       "findings": {
@@ -1081,6 +1224,10 @@
         }
       },
       "wellKnown": {
+        "service": {
+          "id": "notes",
+          "instance": "default"
+        },
         "surfaces": {
           "dashboard": {
             "path": "/dashboard",
@@ -1098,6 +1245,7 @@
           "entry": "host-signin"
         },
         "refused": [],
+        "foreign": false,
         "invalid": []
       },
       "findings": {
@@ -1126,6 +1274,10 @@
         }
       },
       "wellKnown": {
+        "service": {
+          "id": "research",
+          "instance": "default"
+        },
         "extensions": {
           "https://fabric.passioncode.ai/agent-contract/extensions/instance-facts/0.1": {
             "access": {
@@ -1141,6 +1293,7 @@
           "kind": "vm"
         },
         "refused": [],
+        "foreign": false,
         "invalid": []
       },
       "findings": {
@@ -1165,6 +1318,10 @@
         }
       },
       "wellKnown": {
+        "service": {
+          "id": "notes",
+          "instance": "default"
+        },
         "extensions": {
           "https://fabric.passioncode.ai/agent-contract/extensions/instance-facts/0.1": {
             "access": {
@@ -1185,6 +1342,7 @@
             "reason": "organization on a local placement needs peer: a host routes others only to a service that declares it (DEC-0061)"
           }
         ],
+        "foreign": false,
         "invalid": []
       },
       "findings": {
@@ -1211,7 +1369,12 @@
           }
         }
       },
-      "wellKnown": {},
+      "wellKnown": {
+        "service": {
+          "id": "notes",
+          "instance": "default"
+        }
+      },
       "read": {
         "declared": true,
         "facts": {
@@ -1219,12 +1382,112 @@
           "account": "vm-1"
         },
         "refused": [],
+        "foreign": false,
         "invalid": []
       },
       "findings": {
         "descriptor": [],
         "wellKnown": [],
         "pair": []
+      }
+    },
+    {
+      "name": "a well-known document that answers as another service gives nothing; the descriptor is read alone",
+      "descriptor": {
+        "protocol": "fabric-service/0.1",
+        "id": "notes",
+        "instance": "default",
+        "origin": "http://127.0.0.1:47910",
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/instance-facts/0.1": {
+            "access": {
+              "entry": "own-signin"
+            }
+          }
+        }
+      },
+      "wellKnown": {
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/instance-facts/0.1": {
+            "access": {
+              "audience": "public"
+            }
+          }
+        },
+        "surfaces": {
+          "dashboard": {
+            "path": "/dashboard",
+            "login": true
+          },
+          "events": {
+            "path": "/events"
+          }
+        },
+        "service": {
+          "id": "other",
+          "instance": "default"
+        }
+      },
+      "read": {
+        "declared": true,
+        "facts": {
+          "entry": "own-signin"
+        },
+        "refused": [],
+        "foreign": true,
+        "invalid": []
+      },
+      "findings": {
+        "descriptor": [],
+        "wellKnown": [],
+        "pair": []
+      }
+    },
+    {
+      "name": "a credential-shaped label in a local well-known document: each reading reports its own problem",
+      "descriptor": {
+        "protocol": "fabric-service/0.1",
+        "id": "notes",
+        "instance": "default",
+        "origin": "http://127.0.0.1:47910"
+      },
+      "wellKnown": {
+        "service": {
+          "id": "notes",
+          "instance": "default"
+        },
+        "extensions": {
+          "https://fabric.passioncode.ai/agent-contract/extensions/instance-facts/0.1": {
+            "space": {
+              "kind": "user",
+              "account": "ghp_a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8"
+            }
+          }
+        }
+      },
+      "read": {
+        "declared": true,
+        "facts": {
+          "kind": "user"
+        },
+        "refused": [
+          {
+            "document": "wellKnown",
+            "field": "account",
+            "reason": "a local service's well-known document is read by every counted OS account on the computer; the label stays in its descriptor (IF-5)"
+          }
+        ],
+        "foreign": false,
+        "invalid": []
+      },
+      "findings": {
+        "descriptor": [],
+        "wellKnown": [
+          "FAC-SEM-180 /extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1instance-facts~10.1/space/account"
+        ],
+        "pair": [
+          "FAC-SEM-180 /wellKnown/extensions/https:~1~1fabric.passioncode.ai~1agent-contract~1extensions~1instance-facts~10.1/space/account"
+        ]
       }
     }
   ]

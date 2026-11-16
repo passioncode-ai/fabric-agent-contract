@@ -991,7 +991,8 @@ detector, as `FAC-SEM-086` reads `runner`), or in a local well-known document. T
 the runner read the descriptor, and the one on `login` the well-known document: kind `service-descriptor` checks a
 descriptor's schema, its own facts and its label's shape, `service-well-known` a document's schema, its `entry` against its own
 dashboard and its label's shape, and `service-observation` (`{descriptor, wellKnown}`, the pair `FAC-SEM-009` reads)
-only what neither document alone shows, so `pnpm validate` prints each problem once. A finding never changes the
+only what neither document alone shows and nothing on a pair `FAC-SEM-009` reads as `foreign` (whose well-known
+document gives no facts), so `pnpm validate` prints each problem once. A finding never changes the
 service's state, unlike `FAC-SEM-009`'s `foreign`: the refused value reads not declared in that document, and the fact
 is read from the other document where a value there stands.
 

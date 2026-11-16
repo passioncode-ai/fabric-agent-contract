@@ -56,15 +56,25 @@ function cases(): Array<[string, Json | null, Json | null]> {
     ["a dashboard login names the entry of a service that declares another fact", local(facts({ tenancy: { mode: "single" } })), wellKnown(undefined, true)],
     ["the well-known document's value wins over a differing descriptor value", remote(facts({ access: { audience: "organization" }, space: { kind: "vm" } })), wellKnown({ access: { audience: "public" } })],
     ["a well-known audience the local descriptor's setting refuses: the descriptor's own value is read", local(facts({ access: { audience: "operator" } })), wellKnown({ access: { audience: "organization" } })],
-    ["a local virtual machine", local(facts({ space: { kind: "vm", account: "vm-1" } })), wellKnown()]
+    ["a local virtual machine", local(facts({ space: { kind: "vm", account: "vm-1" } })), wellKnown()],
+    ["a well-known document that answers as another service gives nothing; the descriptor is read alone", local(facts({ access: { entry: "own-signin" } })), { ...wellKnown({ access: { audience: "public" } }, true), service: { id: "other", instance: "default" } }],
+    ["a credential-shaped label in a local well-known document: each reading reports its own problem", local(), wellKnown({ space: { kind: "user", account: ["ghp", "_", "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8"].join("") } })]
   ];
+}
+
+/** Every well-known document answers as its case's descriptor (FAC-SEM-009 reads the pair as one service), unless it names its own service. */
+function paired(descriptor: Json | null, wk: Json | null): Json | null {
+  if (wk === null || Object.hasOwn(wk, "service")) return wk;
+  const of = descriptor ?? local();
+  return { service: { id: of.id, instance: of.instance }, ...wk };
 }
 
 export function instanceFactsVectors(): Json {
   return {
-    about: "Vectors for extensions/instance-facts/0.1 (DEC-0173), written by tools/vectors/instance-facts.ts, never by hand. Each case gives a descriptor and a well-known document (null: not read). `read` is instanceFacts(descriptor, wellKnown): the five facts, field by field, the well-known document first; a refused value is never read, the field then read from the other document; a dashboard that requires a host's login code reads host-signin for a service that declares any fact. `findings` are FAC-SEM-180's as code and path, per kind: `descriptor` (kind service-descriptor), `wellKnown` (service-well-known) and `pair` (service-observation, `{descriptor, wellKnown}`, only what neither document alone shows), null where a document is not given.",
+    about: "Vectors for extensions/instance-facts/0.1 (DEC-0173), written by tools/vectors/instance-facts.ts, never by hand. Each case gives a descriptor and a well-known document (null: not read). Every well-known document answers as its descriptor's service (FAC-SEM-009 reads the pair as one) unless the case names another. `read` is instanceFacts(descriptor, wellKnown): the five facts, field by field, the well-known document first; a refused value is never read, the field then read from the other document; a dashboard that requires a host's login code reads host-signin for a service that declares any fact. `findings` are FAC-SEM-180's as code and path, per kind: `descriptor` (kind service-descriptor), `wellKnown` (service-well-known) and `pair` (service-observation, `{descriptor, wellKnown}`, only what neither document alone shows), null where a document is not given.",
     key: KEY,
-    cases: cases().map(([name, descriptor, wk]) => {
+    cases: cases().map(([name, descriptor, given]) => {
+      const wk = paired(descriptor, given);
       const codes = (kind: string, input: Json) => instanceFactsRules(kind, input).map((finding) => `${finding.code} ${finding.instancePath}`);
       return {
         name,

@@ -1026,7 +1026,7 @@ flowchart TD
 - **Goal:** the operator sees where an agent runs, whose it is, who reaches it and how its data is kept apart, and knows which of it the service only declared
 - **Entry points:** pointing at an agent in the host's list; the details above its page
 - **Success exit:** the details show the placement and whose instance it is (the host's own reading) beside the instance facts (`instanceFacts`), each fact marked declared
-- **Task analysis:** the host reads the descriptor and, for a running instance its account owns, the well-known document → `instanceFacts` gives the five facts, field by field, the well-known document first → the host adds the placement, its `context` or the instance's `org-instance/1` statement, and the organization's name from Observatory → the details show each fact with its label, marked declared; a refused value is never shown, the line taking the other document's value where one stands and left out only when neither does.
+- **Task analysis:** the host reads the descriptor and, for a running instance its account owns, the well-known document when it answers as the same service (`FAC-SEM-009`; a foreign one gives no facts) → `instanceFacts` gives the five facts, field by field, the well-known document first → the host adds the placement, its `context` or the instance's `org-instance/1` statement, and the organization's name from Observatory → the details show each fact with its label, marked declared; a refused value is never shown, the line taking the other document's value where one stands and left out only when neither does, save the entry line, which reads host-signin while the dashboard requires a host's login code (IF-5).
 - **Rejected shape:** a fact for whose instance it is among the facts, rejected because it could disagree with the placement's `context` (DEC-0082 item 4); a fact filled by a guess when nothing is declared.
 - **Flow:**
 
@@ -1036,7 +1036,7 @@ flowchart TD
   R -->|none| N[Placement and whose instance only; no fact lines]
   R -->|some| F[Each declared fact, marked declared, beside the placement and whose instance]
   F --> X{A value refused by FAC-SEM-180?}
-  X -->|yes| L[That value never shown: the other document's value if it stands, else the line left out; the service keeps its state]
+  X -->|yes| L[That value never shown: the other document's value if it stands, else the line left out, save entry under a host login; the service keeps its state]
   X -->|no| F
 ```
 
