@@ -69,7 +69,8 @@ It is a surface of its own, not a member of the well-known answer:
   product's duty and is not checked: a reading carries no link from a well-known source to a check, so a `fail`
   beside a setup entry may be another check's. A well-known answer that is `ready` with no degraded source puts
   no bound on the health report: an update or a leaked key is a `warn` while the service serves. `FAC-SEM-181` checks
-  the pair as the kind `agent-health-service` (`{wellKnown, health}`).
+  the pair as the kind `agent-health-service` (`{wellKnown, health}`), only when asked with `pnpm validate --kind
+  agent-health-service`: a folder run does not pair a well-known document with a health report.
 
 ## Reading it
 

@@ -53,6 +53,15 @@ describe("agent-health/1 (DEC-0179)", () => {
     expect(findings.map((f) => f.instancePath)).toEqual(["/health/checks/1/id"]);
     for (const f of findings) expect(f.message).not.toContain("john.smith");
   });
+  it("covers a home folder in a name, a check that is no object, and a pair without a well-known answer", () => {
+    const base = fixture("positive/agent-health.json");
+    const home = evaluateSemanticRules("agent-health", { ...base, checks: [{ id: "owner", area: "lifecycle", state: "ok", count: 0, fix: { tool: "home/alex" } }], state: "ok" });
+    expect(home).toEqual([expect.objectContaining({ instancePath: "/checks/0/fix/tool", message: expect.stringContaining("home folder") })]);
+    expect(agentHealthRules("agent-health", { ...base, state: "unknown", checks: [null, "x", { area: "update", state: "ok" }] })).toEqual([]);
+    expect(agentHealthRules("agent-health", { ...base, state: "unknown", checks: "none" })).toEqual([]);
+    expect(agentHealthRules("agent-health-service", { health: { ...base, state: "fail" } })).toEqual([]);
+    expect(agentHealthRules("agent-health-service", { wellKnown: { status: "degraded" }, health: { ...base, state: "ok", checks: [{ id: "a", area: "update", state: "ok", count: 0 }] } })?.map((f) => f.instancePath)).toEqual(["/health/state"]);
+  });
   it("a well-known answer that is ready with no degraded source puts no bound on the health report (HL-7)", () => {
     const health = fixture("positive/agent-health.json");
     expect(evaluateSemanticRules("agent-health-service", { wellKnown: { status: "ready", degraded: [] }, health })).toEqual([]);
