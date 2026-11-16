@@ -9196,7 +9196,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Annotated (2026-11-16):** item 8's credential forms widened by DEC-0175 (a token as a URL's user, a value judged
   piece by piece, a key behind an encoded separator, more assignment heads, a password in a query, an escaped quote),
   then narrowed and widened by DEC-0176 (a key's word start is a Latin letter or an ASCII digit; a URL's parameter reads a key at a word's start
-  and a bearer token in its shape; a documentation host's or a placeholder's password is none; a DER ECDSA signature
+  and a bearer token in its shape; a documentation host's password under 24 characters or a placeholder's is none; a DER ECDSA signature
   is public).
 - **Context:** the operator asked that agents can be handed over as source and that a transfer happens only by their
   wish (CT-194, relayed by Fabric `2af39c53` and a personal agent's request `99221f81`). The research report
@@ -13097,9 +13097,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 ### DEC-0176: the source tree check's false findings, narrowed by rule, and a key after another script's letter
 
 - **Date:** 2026-11-16
-- **Status:** Proposed 2026-11-16 (CT-328: the Fabric Agent Adapter's eight false findings, message `47713284` on
-  thread `b9e5668d`, and those DEC-0175's readings accepted); accepted when the coordinator's blind readings are clean
-  on two consecutive rounds.
+- **Status:** Accepted 2026-11-16 (CT-328: the Fabric Agent Adapter's eight false findings, message `47713284` on
+  thread `b9e5668d`, and those DEC-0175's readings accepted): the coordinator's blind readings folded rounds 1 to 3 and
+  read rounds 4 and 5 clean on all three tiers at `fba63f30`.
 - **Context:** the tree check (DEC-0149, `FAC-SEM-158`) fails closed: a false finding blocks an export until the author
   rewrites the line or leaves the file out. The adapter measured eight forms where the existing rules find what holds no
   secret, and one where a key is missed; DEC-0175's readings added more. Each was reproduced through `checkSourceTree`
@@ -13180,5 +13180,5 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   adapter's parity), `docs/ux/scenarios.md` (SCN-054), `docs/evidence/sources.md` (RFC 2606), `docs/DOCMAP.md`;
   DEC-0149 and DEC-0175 annotated; `docs/backlog.md` (CT-328, CT-330).
 - **Source:** the adapter's message `47713284` (its items 7, 8, 9, 11, 13, 32, 37, 43), DEC-0175's readings (rounds 1
-  to 6) and DEC-0176's own (rounds 1 and 2); RFC 2606, WebAuthn's assertion signature (DER ECDSA). DEC-0176 was reserved by git CAS
+  to 6) and DEC-0176's own (rounds 1 to 3); RFC 2606, WebAuthn's assertion signature (DER ECDSA). DEC-0176 was reserved by git CAS
   (`agent_sync.py reserve`, key `ct328-false-findings`).
