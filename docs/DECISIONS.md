@@ -12890,8 +12890,7 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 - **Date:** 2026-11-16
 - **Status:** Accepted 2026-11-16: the coordinator's blind readings (unit, seam, product) read clean on rounds 5 and 6
-  at the same head. IF-1, IF-2, IF-3 and IF-6 extended by DEC-0174 (facts that serve others refused beside a
-  subscription runner; the protocol in a `protocols` list). Proposed 2026-11-16 from the design `docs/evidence/plans/2026-11-15-ct321-instance-facts.md`
+  at the same head. Proposed 2026-11-16 from the design `docs/evidence/plans/2026-11-15-ct321-instance-facts.md`
   (CT-321), whose rounds 5 and 6 of the blind readings (seam and product) read clean (round 1 folded: `mode` and `kind` required inside their objects; the
   label's rule by placement and its grammar; the pair reports only cross-document findings; a refused value never read,
   the other document's shown; round 2: a dashboard's login names `entry` only for a service that declares a fact, labels
@@ -12981,17 +12980,18 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   3) that serves only its owner's own sessions (DEC-0061 item 3). Beside `peer` the descriptor's schema already refuses
   a subscription runner, so only a remote placement without `peer` was open; `tenancy` `shared` and `per-organization`
   name others' data the same way. Separately, IF-1 names the protocol `fabric-instance-facts/0.1`, and nothing said
-  whether a service lists it in its well-known `protocols`. A declaration's protocol is already listed there
-  (`channel-agent-standard/1`, [channel agent](specification/channel-agent.md)), and a reader ignores a name its
-  register lacks (`FAC-SEM-099` checks only a name it knows).
+  whether a service lists it in its well-known `protocols`, which names the revisions a party accepts (DEC-0067). A
+  declaration's protocol is already listed there (`channel-agent-standard/1`, [channel agent](specification/channel-agent.md)),
+  but only once its readers have re-pinned, since a reader acts on that listing; a host acts on no listing of this one,
+  and a reader ignores a name its register lacks (`FAC-SEM-099`'s published-revision check reads only a name it knows).
 - **Decision:** [service](specification/service.md#instance-facts) *Instance facts*:
   1. **IF-2 and IF-3 gain a clause.** Beside a `subscription` runner, every fact that says the instance serves others
      is refused: `audience` `organization` (as `public` already is) and `tenancy` `shared` or `per-organization`. A
      service others reach runs on a runner of the operator's keys or of its own, never the operator's subscription.
      Each refused value reads not declared, field by field (IF-5).
-  2. **IF-1 gains a sentence.** A service may list `fabric-instance-facts/0.1` in its `protocols` or not; a host reads
-     the facts by the extension key and never from a listing, which `FAC-SEM-099` checks as it checks any registered
-     revision.
+  2. **IF-1 gains a sentence.** A service need not list `fabric-instance-facts/0.1` in its `protocols`, and a listing
+     changes nothing: a host reads the facts by the extension key and never from a listing, which `FAC-SEM-099` checks
+     as it checks any registered revision. Since nothing reads the listing, no re-pin condition applies to it.
   3. **IF-6** names the new refusals under `FAC-SEM-180`; no new rule code.
 - **Why:** one reading of DEC-0046 and DEC-0061 for every fact a declaration names about serving others; the listing
   follows the precedent of the other declarations' protocols and costs a pinned reader nothing.
@@ -12999,11 +12999,12 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   standing (refused: the runner, not the sign-in, decides whose subscription serves the call); refuse the listing, as
   round 1 of this decision proposed (refused: a declaration's protocol is listed elsewhere, and a pinned reader ignores
   a name it does not know); refuse `organization` but leave `shared` and `per-organization` (refused: SCR-36 would show
-  "one organization's own copy" for an instance on the operator's subscription).
+  "one organization's own copy" for an instance on the operator's subscription). An operator's own `org:` instance on
+  his subscription, serving only him, declares `single`.
 - **Compatibility:** narrows DEC-0173, released in `v0.1.0+2026-11-16`, where no service declares the facts yet (Prowl
   Agent declares first); a declaration DEC-0174 refuses reads those facts as not declared, the service's state unchanged.
-  The vectors gain cases and change none; hosts run them at their next pin (Fabric Dashboards, FD-273, adopted
-  DEC-0173 in 0.8.130). The node's runner check (`FAC-SEM-087`) still reads only `peer`; a service that declares no
+  The vectors gain cases and change none; hosts run them at their next pin (Fabric Dashboards, FD-273, ports
+  DEC-0173 in its open PR #580, 0.8.130 unreleased, and is told of DEC-0174 on the board). The node's runner check (`FAC-SEM-087`) still reads only `peer`; a service that declares no
   such fact is not affected.
 - **Consequences / affects:** `src/instance-facts.ts` (the clauses, `INSTANCE_FACTS_PROTOCOL`),
   `tools/vectors/instance-facts.ts`, `fixtures/vectors/instance-facts.json`, `test/instance-facts.test.ts`, the schema's

@@ -98,8 +98,8 @@ function refusal(field: FactField, value: unknown, document: FactsDocument, sett
   if (field === "entry" && setting.login !== undefined && (value === "host-signin") !== setting.login) {
     return setting.login ? "the dashboard requires a host's login code (surfaces.dashboard.login)" : "the dashboard takes no host's login code (surfaces.dashboard.login is false)";
   }
-  if (field === "mode" && (value === "shared" || value === "per-organization") && setting.subscription === true) return `${value} beside a subscription runner: an instance holding others' data serves more than its owner's own sessions (DEC-0061, DEC-0174)`;
   if (field === "mode" && value === "shared" && setting.local === true) return "shared is a remote service's: a local placement names one context and at most one grant (DEC-0082 item 4)";
+  if (field === "mode" && (value === "shared" || value === "per-organization") && setting.subscription === true) return `${value} beside a subscription runner: an instance holding others' data serves more than its owner's own sessions (DEC-0061, DEC-0174)`;
   if (field === "kind" && value === "system" && setting.local === true) return "system is a remote placement's: a local service runs under a counted OS account (DEC-0154)";
   if (field === "account") {
     // Where it is written comes first: a label in a local well-known document is a pair problem the document alone

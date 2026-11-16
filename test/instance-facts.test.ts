@@ -45,7 +45,11 @@ describe("extensions/instance-facts/0.1 (DEC-0173)", () => {
       expect(instanceFacts(descriptor, { service }).foreign, JSON.stringify([descriptor, service])).toBe(identity);
     }
   });
-  it("names the protocol the register names (IF-1, DEC-0174)", () => expect(NAMED_ONLY).toContain(INSTANCE_FACTS_PROTOCOL));
+  it("names the protocol the register names, and a listing of it is no finding (IF-1, DEC-0174)", () => {
+    expect(NAMED_ONLY).toContain(INSTANCE_FACTS_PROTOCOL);
+    expect(evaluateSemanticRules("service-well-known", { protocols: ["fabric-service/0.1", INSTANCE_FACTS_PROTOCOL] }).filter((f) => f.code === "FAC-SEM-099")).toEqual([]);
+    expect(evaluateSemanticRules("service-well-known", { protocols: ["fabric-instance-facts/0.2"] }).some((f) => f.code === "FAC-SEM-099")).toBe(true);
+  });
   it("answers a fresh object each time", () => {
     const one = instanceFacts(undefined, undefined);
     one.facts.audience = "public";

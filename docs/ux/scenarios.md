@@ -339,7 +339,7 @@ independent agent author and P-02 project operator.
 - **Feature:** service
 - **Traces:** ST-045, FLW-36 (JTBD-11, JRN-10/#1)
 - **Entry point:** the host's list of agents; the details above an agent's page
-- **Preconditions:** a remote research agent with no placement record, others calling it with their own keys, declares `audience: public`, `entry: own-signin`, `mode: shared`, `kind: system` (DEC-0173); a local notes agent shared into an organization runs an `org:` instance beside `peer` and declares `audience: organization`, `mode: single`; a third agent declares nothing
+- **Preconditions:** a remote research agent with no placement record, others calling it with their own keys on a runner of its own keys, declares `audience: public`, `entry: own-signin`, `mode: shared`, `kind: system` (DEC-0173); a local notes agent shared into an organization runs an `org:` instance beside `peer` and declares `audience: organization`, `mode: single`; a third agent declares nothing
 - **Steps:**
   1. The operator points at the research agent -> the details show "remote" (no machine, since no placement record names one), "anyone who reaches its site with credentials of their own", "its own sign-in", "several tenants' data in one instance, kept apart by it", "a platform's account", each marked declared by the service; whose instance it is comes from its `org-instance/1` statement if the host holds one, else Observatory's map.
   2. The operator points at the notes agent's organization instance -> whose instance it is reads the organization the placement's `context` names; audience reads "who may reach it: the people of <the organization> and those granted access".

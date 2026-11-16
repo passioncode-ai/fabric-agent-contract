@@ -1,5 +1,5 @@
 /**
- * Vectors for extensions/instance-facts/0.1 (DEC-0173): what a host reads of an instance's facts from its descriptor and
+ * Vectors for extensions/instance-facts/0.1 (DEC-0173, DEC-0174): what a host reads of an instance's facts from its descriptor and
  * its well-known document (`instanceFacts`, IF-5), and what FAC-SEM-180 reports on the pair (IF-6). Every value is
  * synthetic. Run with `--write` to regenerate; `vectors:check` compares the committed file with this generator.
  */
@@ -75,7 +75,7 @@ function paired(descriptor: Json | null, wk: Json | null): Json | null {
 
 export function instanceFactsVectors(): Json {
   return {
-    about: "Vectors for extensions/instance-facts/0.1 (DEC-0173), written by tools/vectors/instance-facts.ts, never by hand. Each case gives a descriptor and a well-known document (null: not read). Every well-known document answers as its descriptor's service (FAC-SEM-009 reads the pair as one) unless the case names another. `read` is instanceFacts(descriptor, wellKnown): the five facts, field by field, the well-known document first; a refused value is never read, the field then read from the other document; a dashboard that requires a host's login code reads host-signin for a service that declares any fact. `findings` are FAC-SEM-180's as code and path, per kind: `descriptor` (kind service-descriptor), `wellKnown` (service-well-known) and `pair` (service-observation, `{descriptor, wellKnown}`, only what neither document alone shows), null where a document is not given.",
+    about: "Vectors for extensions/instance-facts/0.1 (DEC-0173, DEC-0174), written by tools/vectors/instance-facts.ts, never by hand. Each case gives a descriptor and a well-known document (null: not read). Every well-known document answers as its descriptor's service (FAC-SEM-009 reads the pair as one) unless the case names another. `read` is instanceFacts(descriptor, wellKnown): the five facts, field by field, the well-known document first; a refused value is never read, the field then read from the other document; a dashboard that requires a host's login code reads host-signin for a service that declares any fact. `findings` are FAC-SEM-180's as code and path, per kind: `descriptor` (kind service-descriptor), `wellKnown` (service-well-known) and `pair` (service-observation, `{descriptor, wellKnown}`, only what neither document alone shows), null where a document is not given.",
     key: KEY,
     cases: cases().map(([name, descriptor, given]) => {
       const wk = paired(descriptor, given);

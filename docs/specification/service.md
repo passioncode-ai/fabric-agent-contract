@@ -943,9 +943,9 @@ and whose it is without guessing. The facts ride as one extension value under th
 (what the running instance knows), or both: both documents are closed, and a host pinned before DEC-0173 preserves and
 ignores the extension. Every member and every field is optional, save that a present `tenancy` names its `mode` and a present
 `space` its `kind` (a document whose value lacks them fails the schema and gives none of its facts); an absent one, and
-an empty `access`, declare nothing, never a default. The facts are declared, never verified. A service may list
-their protocol `fabric-instance-facts/0.1` in its `protocols` or not; a host reads the facts by the extension key and
-never from a listing (DEC-0174). **Whose instance it is** is not among them: it stays the
+an empty `access`, declare nothing, never a default. The facts are declared, never verified. A service need not
+list their protocol `fabric-instance-facts/0.1` in its `protocols`, and a listing changes nothing: a host reads the
+facts by the extension key and never from a listing (DEC-0174). **Whose instance it is** is not among them: it stays the
 estate placement's `context` (DEC-0082 item 4), first; for a remote instance with no placement record an organization's
 `org-instance/1` statement ([membership](membership.md#instances-dec-0170)), else Observatory's map (IF-7).
 
