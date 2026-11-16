@@ -4,6 +4,7 @@ Each run leaves a handoff naming its objective, what it did, what is open and th
 
 | Handoff | Decisions | Merge |
 |---|---|---|
+| [2026-11-16 DEC-0175, six secret forms](2026-11-16-dec0175.md) | DEC-0175 (CT-325; CT-328, CT-329 filed); rounds 1, 3 and 4 folded, 2, 5 and 6 clean on all three tiers | accepted 2026-11-16; merged |
 | [2026-11-16 DEC-0174, facts beside a subscription runner](2026-11-16-dec0174.md) | DEC-0174 (CT-327); rounds 1, 2 and 4 folded, 3, 5 and 6 clean on all three tiers | accepted 2026-11-16; merged |
 | [2026-11-16 the fixes after DEC-0173](2026-11-16-ct327-fixes.md) | CT-327 (its non-normative items); rounds 1 and 2 clean | merged |
 | [2026-11-16 DEC-0173, instance facts](2026-11-16-instance-facts.md) | DEC-0173 (CT-321; CT-327 filed); rounds 1, 2 and 4 folded, 3, 5 and 6 clean on all three tiers | accepted 2026-11-16; merged |
