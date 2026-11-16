@@ -976,7 +976,9 @@ on a local placement written only in the descriptor, never the well-known docume
 its own: from the well-known document where it declares a value no clause refuses, else from the descriptor's; a
 refused value is reported and never read; `entry` reads `host-signin` whenever the dashboard requires a host's login
 code and either document declares a fact, refused or not (a service that declares none reads none: a login alone
-declares nothing). A document whose extension value fails the schema gives none of its facts (as ED-9 reads a dashboard extension),
+declares nothing). A host passes the descriptor it runs the instance by, since the clauses on `peer`, the placement and
+the runner read it, and passes the well-known document only when `FAC-SEM-009` reads the pair as the same service:
+a `foreign` answer is another program's and gives no facts, the descriptor's then read alone. A document whose extension value fails the schema gives none of its facts (as ED-9 reads a dashboard extension),
 while a value a clause refuses costs only that field, since each fact stands alone. Nothing identifying an
 organization rides here, and the label stays out of a local well-known document, which every counted OS account on the
 computer and a relayed guest reach unauthenticated (DEC-0154); `audience` and `mode` there say only that an
@@ -993,8 +995,8 @@ only what neither document alone shows, so `pnpm validate` prints each problem o
 service's state, unlike `FAC-SEM-009`'s `foreign`: the refused value reads not declared in that document, and the fact
 is read from the other document where a value there stands.
 
-**IF-7, whose instance.** A placed instance's organization is its placement's `context`, a remote one's its
-`org-instance/1` statement where a host holds one, else Observatory's map; a local service no estate record places reads
+**IF-7, whose instance.** A placed instance's organization is its placement's `context`, first; a remote one with no
+placement record its `org-instance/1` statement where a host holds one, else Observatory's map; a local service no estate record places reads
 `personal`, as an absent `context` does. A personal instance with `peer` that a colleague's grant reaches keeps
 `single`: the grant lets the colleague call it, and its data stays the operator's.
 

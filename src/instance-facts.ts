@@ -78,7 +78,7 @@ function refusal(field: FactField, value: unknown, document: FactsDocument, sett
   if (field === "audience") {
     if (value === "operator" && setting.peer === true) return "operator beside peer: a service offered to others serves more than its operator";
     if (value === "organization" && setting.peer === false && setting.local === true) return "organization on a local placement needs peer: a host routes others only to a service that declares it (DEC-0061)";
-    if (value === "public" && setting.local === true) return "public is a remote placement's: a local origin is reached by no one outside the computer";
+    if (value === "public" && setting.local === true) return "public is a remote placement's: a local origin is reached from outside the computer only through peer, which no hub routes to anyone at large";
     if (value === "public" && setting.subscription === true) return "public beside a subscription runner: a service others reach never runs on the operator's subscription (DEC-0046, DEC-0061 item 3)";
   }
   if (field === "entry" && setting.login !== undefined && (value === "host-signin") !== setting.login) {

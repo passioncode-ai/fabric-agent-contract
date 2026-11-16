@@ -41,7 +41,7 @@
         "account": {
           "type": "string",
           "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$",
-          "description": "An opaque label the installer or the operator assigns in the services directory, never the OS account's name, a person's name, a path or a credential; on a local placement written only in the descriptor, never the well-known document (DEC-0173 IF-4, IF-5)."
+          "description": "An opaque label the installer or the operator assigns, never the OS account's name, a person's name, a path or a credential; on a local placement written only in the descriptor, never the well-known document (DEC-0173 IF-4, IF-5)."
         }
       },
       "additionalProperties": false

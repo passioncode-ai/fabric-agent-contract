@@ -12925,12 +12925,14 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      declares a value no clause refuses, else from the descriptor's; a refused value is reported, never read; `entry`
      `host-signin` whenever the dashboard requires a host's login code and either document declares a fact (a service
      that declares none reads none, `declared` false); a document whose value fails the schema gives none of its facts.
+     A host passes the descriptor it runs the instance by, and the well-known document only when `FAC-SEM-009` reads
+     the pair as the same service (a `foreign` answer gives no facts).
   6. **IF-6, `FAC-SEM-180`.** The schema and the clauses above: kind `service-descriptor` checks a descriptor's schema and own facts,
      `service-well-known` a document's schema, its `entry` against its own dashboard and its label's shape, and the pair
      `service-observation` only what neither document alone shows, so each problem is reported once; a finding never
      changes the service's state.
-  7. **IF-7, whose instance and the rest.** A placed instance's organization is its placement's `context`, a remote one's
-     its `org-instance/1` statement where a host holds one, else Observatory's map; a local service no estate record
+  7. **IF-7, whose instance and the rest.** A placed instance's organization is its placement's `context`, first; a
+     remote one with no placement record its `org-instance/1` statement where a host holds one, else Observatory's map; a local service no estate record
      places reads `personal`, as
      an absent `context` does (DEC-0082). A personal instance with `peer` that a colleague's grant reaches keeps `single`:
      the grant lets the colleague call it, its data stays the operator's.
@@ -12957,5 +12959,6 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `interop.md` (the extension keys), `versioning.md` (named protocols), `conformance.md` (a service and a host row, the
   module, the register); `CONTEXT.md`; `docs/ux/` (ST-045, FLW-36, SCR-36, SCN-065); `docs/DOCMAP.md`; `docs/backlog.md` (CT-321); the design's status note.
 - **Source:** the design above; board messages `5da92f65`, `1fa97798`, `8601034d` and Fabric Dashboards' acceptance `b62f8db9`; DEC-0061, DEC-0082, DEC-0086,
-  DEC-0142, DEC-0154, DEC-0170. DEC-0173 and `FAC-SEM-180` were reserved by git CAS (`agent_sync.py reserve`, key
+  DEC-0142, DEC-0154, DEC-0170, DEC-0019 (an absent placement is local), DEC-0046 (a subscription serves only its
+  owner), FAC-SEM-009 (the identity pair). DEC-0173 and `FAC-SEM-180` were reserved by git CAS (`agent_sync.py reserve`, key
   `ct321-instance-facts`).

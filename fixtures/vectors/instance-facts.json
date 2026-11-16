@@ -510,7 +510,7 @@
           {
             "document": "descriptor",
             "field": "audience",
-            "reason": "public is a remote placement's: a local origin is reached by no one outside the computer"
+            "reason": "public is a remote placement's: a local origin is reached from outside the computer only through peer, which no hub routes to anyone at large"
           }
         ],
         "invalid": []
