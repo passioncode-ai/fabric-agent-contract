@@ -57,6 +57,7 @@ import { checkInCredentialFindings, credentialRules } from "./credentials.js";
 import { jobLimitRules, usageFindings } from "./job-limits.js";
 import { folderAttributionRules } from "./folder-attribution.js";
 import { connectionsRules } from "./connections.js";
+import { instanceFactsRules } from "./instance-facts.js";
 import { dashboardDeclarationRules } from "./dashboard-declaration.js";
 import { RESERVED_HOST, descriptorBundleRules, descriptorPeerRules } from "./descriptor-rules.js";
 import { credentialName, secretArgument, secretUrl } from "./secret-shape.js";
@@ -211,6 +212,8 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   findings.push(...(coreRules(kind, value) ?? []));
 
   if (kind === "service-observation") findings.push(...serviceIdentity(value));
+  // DEC-0173: the instance facts, against the descriptor's peer, placement and runner and the dashboard's sign-in.
+  if (kind === "service-observation" || kind === "service-well-known" || kind === "service-descriptor") findings.push(...instanceFactsRules(kind, value));
   if (kind === "service-directory") findings.push(...serviceClaims(value));
   if (kind === "service-well-known" && value.status === "ready" && Array.isArray(value.degraded) && value.degraded.length > 0) {
     findings.push({ code: "FAC-SEM-011", instancePath: "/status", message: "a ready service cannot report degraded sources" });

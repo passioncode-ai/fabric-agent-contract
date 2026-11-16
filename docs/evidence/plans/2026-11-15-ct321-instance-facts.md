@@ -4,6 +4,9 @@
 proposed as a DEC (the DEC is normative where the two differ). Row
 [CT-321](../../backlog.md); the request: Fabric Dashboards' board message `5da92f65` (thread `589abe7e`, FD-273, answer
 due 2026-11-22), relaying the operator's ask `d660cc30`; the contract's acceptance in principle `1fa97798`.
+Decided by DEC-0173, which reads the facts field by field (a refused value costs only its field, the other document's
+value read where it stands) where this design said member by member, and checks the three service kinds rather than a
+kind of its own; the DEC is normative.
 
 ## What is asked
 

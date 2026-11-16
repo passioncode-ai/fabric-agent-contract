@@ -1165,5 +1165,9 @@
   {"name": "service-ops-digest-extension-home-dir", "schema": "service-ops-digest-extension.schema.json", "path": "negative/service-ops-digest-extension-home-dir.json", "valid": false, "keyword": "pattern"},
   {"name": "service-ops-digest-extension-upper-source", "schema": "service-ops-digest-extension.schema.json", "path": "negative/service-ops-digest-extension-upper-source.json", "valid": false, "keyword": "pattern"},
   {"name": "service-ops-digest-extension-empty", "schema": "service-ops-digest-extension.schema.json", "path": "negative/service-ops-digest-extension-empty.json", "valid": false, "keyword": "minItems"},
-  {"name": "service-ops-digest-extension-extra-member", "schema": "service-ops-digest-extension.schema.json", "path": "negative/service-ops-digest-extension-extra-member.json", "valid": false, "keyword": "additionalProperties"}
+  {"name": "service-ops-digest-extension-extra-member", "schema": "service-ops-digest-extension.schema.json", "path": "negative/service-ops-digest-extension-extra-member.json", "valid": false, "keyword": "additionalProperties"},
+  {"name": "service-instance-facts-extension", "schema": "service-instance-facts-extension.schema.json", "path": "positive/service-instance-facts-extension.json", "valid": true},
+  {"name": "service-instance-facts-extension-organization", "schema": "service-instance-facts-extension.schema.json", "path": "negative/service-instance-facts-extension-organization.json", "valid": false, "keyword": "additionalProperties"},
+  {"name": "service-instance-facts-extension-label-path", "schema": "service-instance-facts-extension.schema.json", "path": "negative/service-instance-facts-extension-label-path.json", "valid": false, "keyword": "pattern"},
+  {"name": "service-instance-facts-extension-no-mode", "schema": "service-instance-facts-extension.schema.json", "path": "negative/service-instance-facts-extension-no-mode.json", "valid": false, "keyword": "required"}
 ]

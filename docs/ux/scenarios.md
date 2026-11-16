@@ -68,6 +68,7 @@
 | SCN-057 | Tell my agent to do a task: it carries my word out the first time | governance | P-02 | ST-035, FLW-29 | draft | not audited |
 | SCN-063 | As my organization's administrator, read how long agents' turns take and which plans our machines hold, as cells | telemetry | P-02 | ST-044, FLW-35 | draft | not audited |
 | SCN-064 | As an administrator, I add an instance to my organization and later retire it; a reader trusts only the signed statement | membership | P-03 | ST-038, FLW-32 | draft | not audited |
+| SCN-065 | Point at an agent and see where it runs, whose it is, who reaches it and how its data is kept apart | service | P-02 | ST-045, FLW-36 | draft | not audited |
 
 ## Personas
 
@@ -330,6 +331,26 @@ independent agent author and P-02 project operator.
 - **Errors & recovery:** a cell below the floor, buckets that do not add up to the turns or a population above the turns are refused by `FAC-SEM-040`; the receiver republishes the day.
 - **Status:** draft
 - **Coverage:** `activity-summary-2.schema.json`, fixture `positive/activity-summary-2.json`, vectors `activity-turn.json`
+- **Product:** unobserved
+
+### SCN-065: Point at an agent and see where it runs, whose it is, who reaches it and how its data is kept apart
+
+- **Persona:** P-02
+- **Feature:** service
+- **Traces:** ST-045, FLW-36 (JTBD-11, JRN-10/#1)
+- **Entry point:** the host's list of agents; the details above an agent's page
+- **Preconditions:** a remote research agent others call with their own keys declares `audience: public`, `entry: own-signin`, `mode: shared`, `kind: system` (DEC-0173); a local notes agent shared into an organization runs an `org:` instance beside `peer` and declares `audience: organization`, `mode: single`; a third agent declares nothing
+- **Steps:**
+  1. The operator points at the research agent -> the details show "remote", "anyone who reaches its site with credentials of their own", "its own sign-in", "shared", "a platform's account", each marked declared by the service; whose instance it is comes from its `org-instance/1` statement if the host holds one, else Observatory's map.
+  2. The operator points at the notes agent's organization instance -> whose instance it is reads the organization the placement's `context` names; audience reads "who may reach it: the people of <the organization> and those granted access".
+  3. The operator points at the third agent -> the details show its placement and whose it is, and no fact lines.
+- **Expected result:** every fact shown is the service's declaration, marked so, read as `instanceFacts` answers; whose instance it is never comes from the facts; nothing is guessed (DEC-0173 IF-2, IF-3, IF-5).
+- **Alt paths:** a value `FAC-SEM-180` refuses (`public` on a local agent or beside a subscription runner, `organization` on a local agent without `peer`, `shared` on a local placement, a label in a local well-known document) -> that value is never shown, the line shows the other document's value where one stands (the descriptor's label, say) and is left out when neither does, and the agent keeps running; a dashboard that requires a host's login code -> entry reads "through the host's sign-in" whatever the service declared for it, for an agent that declares any fact (the third agent, which declares none, still shows no fact lines).
+- **UI elements:** SCR-36: placement, whose instance, audience, entry, tenancy, space.
+- **States covered:** not declared, declared
+- **Errors & recovery:** a value that fails the schema -> none of that document's facts shows (the other document's still do), and the agent's state is unchanged.
+- **Status:** draft
+- **Coverage:** `service-instance-facts-extension.schema.json`, `src/instance-facts.ts`, vectors `instance-facts.json`
 - **Product:** unobserved
 
 ### SCN-011: A locked setting is refused and shown

@@ -12,7 +12,8 @@ export const EXTENSION_KEYS = {
   actions: `${EXTENSION_BASE}actions/0.1`,
   authority: `${EXTENSION_BASE}authority/0.1`,
   channelAgent: `${EXTENSION_BASE}channel-agent/0.1`,
-  opsDigest: `${EXTENSION_BASE}ops-digest/0.1`
+  opsDigest: `${EXTENSION_BASE}ops-digest/0.1`,
+  instanceFacts: `${EXTENSION_BASE}instance-facts/0.1`
 } as const;
 
 const KNOWN = new Set<string>(Object.values(EXTENSION_KEYS));

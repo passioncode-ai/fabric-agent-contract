@@ -431,6 +431,17 @@
 - **Resources:** activity specification, Summary (`activity-summary/2`)
 - **Status:** proposed
 
+### SCR-36: An agent's details: where it runs and whose it is
+
+- **Used by:** FLW-36
+- **Purpose:** show the operator where an instance runs, whose it is, who it serves, how its dashboard is entered, how it keeps data apart and the space it runs in.
+- **Elements:** placement (local or remote, the machine) and whose instance it is (the placement's `context`, an `org-instance/1` statement, else the organization from Observatory's map); the facts with their labels, each marked "declared by the service": audience (`operator`: "its operator only"; `organization` beside `peer`: "who may reach it: the people of <the organization's name from Observatory's map> and those granted access", and "you use it by a grant" when this machine reaches it through one; `organization` on a remote instance without `peer`: "the people of <the organization> with their own keys"; `public`: "anyone who reaches its site with credentials of their own"), dashboard entry (`host-signin`: "through the host's sign-in", with "others may enter another way" beside it; `own-signin`: "its own sign-in"; `none`: "no sign-in"), tenancy and space with their labels (`single`: "one tenant: its data is its context's alone"; `per-organization`: "one organization's own copy"; `shared`: "several tenants' data in one instance, kept apart by it"; `user`: "an account on this computer" or, remote, "an account on its machine"; `container`: "a container"; `vm`: "a virtual machine"; `system`: "a platform's account"), the space's label where `instanceFacts` reads one (on a local placement only the descriptor's). `organization` beside `peer` on an instance whose context is personal reads "who may reach it: those granted access", since no organization is named.
+- **States:** not declared (no fact lines, never a guess); declared (each fact shown; a refused value never shown, the line taking the other document's value where one stands and left out when neither does, save the entry line, which reads "through the host's sign-in" while the dashboard requires a host's login code; the service's state unchanged).
+- **Coverage:** `src/instance-facts.ts` (`instanceFacts`, `FAC-SEM-180`), `test/instance-facts.test.ts`, vectors `instance-facts.json`
+- **Scenarios:** SCN-065
+- **Resources:** service specification, Instance facts
+- **Status:** proposed
+
 ### SCR-32: A Project's sessions and its main one
 
 - **Used by:** FLW-16
