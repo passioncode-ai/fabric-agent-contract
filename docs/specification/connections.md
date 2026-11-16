@@ -57,7 +57,7 @@ No string member carries a credential or a URL with one. What counts is defined 
   that holds a URL, the text before its first scheme's `://` is read for a long run (whatever is glued to the scheme), and the URL
   as below;
 - any URL in the member, at its start or inside prose, that carries a credential as the shared `secretUrl` reads it
-  (DEC-0044's detector: a password, a parameter such as `api_key` with a value, and its own shapes, which since
+  (DEC-0044's detector: a password, a user name that is a token (DEC-0177), a parameter such as `api_key` with a value, and its own shapes, which since
   DEC-0151 take a word start with escapes, canonical-case prefixes and the `sk-` strength), plus the Telegram shape, which keeps its word start there. A URL runs from each scheme in a
   piece to the next space (any whitespace: a tab or a no-break space ends it too); it is read without the brackets, quotes and punctuation that close a sentence, and with
   one of them put back, since `]` closes an IPv6 host. Inside a URL nothing is promised beyond what `secretUrl`

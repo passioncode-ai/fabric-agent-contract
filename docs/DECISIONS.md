@@ -13210,8 +13210,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      in a URL inside a launch argument (`args`, a runner's `argv`, a descriptor's `commands`, `mcp-remote <url>`),
      which is read as an argument, nor in a URL nested in a query value, nor in a remote's scp form (`<token>@host:path`,
      no URL), which folder attribution's `recordOrigin` reads itself and records no origin for.
-  5. A recorded origin's scp form whose user is a token records none (`recordOrigin`), so no store holds a token from a
-     remote's user name.
+  5. A recorded origin whose scp user, or whose URL user between its `@`, is a token records none (`recordOrigin`), so
+     no new record holds a token from a remote's user name.
 - **Why:** the user name is where a git remote carries its token; a detector that refuses a password beside it and
   not the token alone misses the commoner form, and the tree check already reads it.
 - **Alternatives considered:** reading any 40-character user name (refused: a long service-account name of letters
@@ -13221,18 +13221,21 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   descriptor's `commands` are read as arguments, so a URL in one is not), `FAC-SEM-101` (feed data), `FAC-SEM-103` (a proposal), `FAC-SEM-127` (a well-known document's
   connections), `FAC-SEM-165` (a channel agent declaration) and the folder attribution's origin (an `ssh://` remote
   whose user is a token records none; an `http` or `https` one drops its user first), wherever `secretUrl` reads: a
-  document that passed with a token as a URL's user name now fails. No released vector changes its answer; two
+  document that passed with a token as a URL's user name now fails. No released vector changes its answer; three
   folder attribution cases are added, and the channel agent vectors' `about` names the new cost term. The
   Fabric Agent Adapter's twins (`fabric-secrets.mjs`, `fabric_secrets.py`) and Fabric Dashboards' copy port it at
   their next pin; until then they pass such a URL. A port that copies `fixtures/vectors/folder-attribution.json`
   (Fabric Switchboard's and Project Observatory's folder-attribution ports, Fabric's sha256-pinned copy) re-syncs it
-  only together with the detector, since the new AT-15 case fails under the earlier one.
+  only together with the detector and `recordOrigin`, since the three new AT-15 cases fail under the earlier ones. A
+  record written before DEC-0177 keeps the origin it stored; a product that holds such records records them again
+  (re-runs `recordOrigin`) at its next pin.
 - **Consequences / affects:** `src/secret-shape.ts` (`tokenUserName`, `secretUrl`), `src/source-rules.ts` (`tokenUser`
   reads it), `src/channel-agent.ts` (`detectorCost`), `tools/vectors/channel-agent.ts` (`about`),
-  `src/folder-attribution.ts` (`recordOrigin`'s scp user), `tools/vectors/folder-attribution.ts` (two AT-15 cases), `fixtures/semantic/command-line-token-user-in-manifest-url.json`,
+  `src/folder-attribution.ts` (`recordOrigin`'s scp user), `tools/vectors/folder-attribution.ts` (three AT-15 cases), `fixtures/semantic/command-line-token-user-in-manifest-url.json`,
   `test/service-hygiene.test.ts`, `test/channel-agent.test.ts`, `src/secret-shape.ts`'s list of vendors;
   `docs/specification/profiles.md` (the rule and its known limits), `docs/specification/channel-agent.md` (CA-5's cost
   terms and its gap), `docs/specification/folder-attribution.md` (the origin), `docs/specification/conformance.md`,
+  `docs/specification/connections.md`, `docs/ux/scenarios.md` (SCN-032's recovery),
   `docs/DOCMAP.md`; `docs/backlog.md` (CT-329, CT-333).
 - **Source:** DEC-0175's readings (round 1 seam), CT-329. DEC-0177 was reserved by git CAS (`agent_sync.py reserve`,
   key `ct329-token-user`).

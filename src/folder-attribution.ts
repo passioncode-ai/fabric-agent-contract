@@ -103,7 +103,8 @@ export function normalizeOrigin(raw: unknown): string | undefined {
  * product's store holds a token from a remote URL. An `http`/`https` URL loses its user information, any URL its
  * password, query and fragment, the scp form `user:secret@host:path` its `:secret` and its query; a local path is kept.
  * Its identity is the raw remote's. `null` when what is left still has the shape of a secret, or when the scp form's
- * user is a token (`tokenUserName`, DEC-0177), which `secretUrl` does not read since the scp form is no URL.
+ * user, or a part of a kept URL user between `@`, is a token (`tokenUserName`, DEC-0177), which `secretUrl` does not
+ * read: the scp form is no URL, and a URL's user name after another `@` is no token's shape.
  */
 export function recordOrigin(origin: string | null): string | null {
   if (origin === null) return null;
@@ -120,6 +121,8 @@ export function recordOrigin(origin: string | null): string | null {
     const authority = rest.slice(0, slash);
     const at = authority.lastIndexOf("@");
     const user = at < 0 || /http/i.test(String(scheme[1])) ? "" : userOf(authority.slice(0, at));
+    // A kept user up to the last `@` may hold a token after another `@`, which the detector reads as no token (DEC-0177).
+    if (user.split("@").some(tokenUserName)) return null;
     value = `${scheme[0]}${user === "" ? "" : `${user}@`}${authority.slice(at + 1)}${rest.slice(slash)}`;
   } else if (!(value.startsWith("/") || /^[A-Za-z]:[\\/]/.test(value) || value.startsWith("."))) {
     const scp = /^(?:([^@/\s]+)@)?([^:/\s]+):([^\s]+)$/.exec(value);
