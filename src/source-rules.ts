@@ -460,17 +460,19 @@ const credentialFile = (path: string): boolean => {
  *   branch, which would take a line of prose that starts with the word), starting a word: no letter or digit before it,
  *   so `task-…` holds no `sk-` key;
  * - a bearer token inside a line (`BEARER_INSIDE`);
- * - an absolute URL with a password of 8 or more characters mixing letters and digits, a user with no password that
- *   is a token, a provider key anywhere in it once percent-decoded, a value under a password's name by the same
- *   8-character rule (DEC-0175), or a query or fragment value
- *   that, percent-decoded, is a provider key, a JWT, a value `URL_SECRET_VALUE` reads (the tree check's own shapes,
- *   unbounded, after a whole-value bearer branch), or a long run under a credential's name, an inner
- *   URL in a parameter read the same way two levels deep;
+ * - an absolute URL with a password of 8 or more characters mixing letters and digits, a user that is a token, a
+ *   provider key anywhere in it once percent-decoded, a value under a password's name by the same 8-character rule
+ *   (DEC-0175), or a query or fragment value that, percent-decoded, is a provider key at a word's start, a JWT, a whole
+ *   value that is a bearer token (`URL_BEARER_VALUE`), or a long run under a credential's name, an inner URL in a
+ *   parameter read the same way two levels deep; a password, in the user information or under a password's name, is
+ *   not read on a documentation host (`DOCUMENTATION_HOST`) nor when it is wholly a placeholder (`PLACEHOLDER`), and a
+ *   token user that is a placeholder is none (DEC-0176);
  * - a long run mixing upper case, lower case and digits (`longSecret`), percent-decoded, assigned to a name that can
  *   only carry a credential (`credentialName`): `NAME = value`, `NAME: value`, `"name": "value"`, and since DEC-0175
  *   `--name=value`, `:=`, `=>`, `||=`, `?=`, `??=`, `+=`, `<-` and `ENV['NAME'] =`, so an integrity hash is not one.
  *
- * A whole Ed25519 signature under a JSON `sig`, `signature` or `signatures` member is public and read by no rule. A line
+ * A whole Ed25519 signature, or a DER ECDSA one as WebAuthn writes it (DEC-0176), under a quoted `sig`, `signature` or
+ * `signatures` member after `:` or `=>` is public and read by no rule. A line
  * holding a JSON escape of `&`, `=`, `/` or `"` (`&`, `=`, `\/`, `\"`) is read again unescaped when it shows
  * nothing as written.
  */
@@ -495,16 +497,18 @@ export const KEY_SHAPES: readonly KeyShape[] = KEY_SHAPE_SOURCES.map((source) =>
   if (open !== null) return { prefix: new RegExp(open[1] as string, "gi"), run: new RegExp(`${open[2] as string}+`, "g"), least: Number(open[3]) };
   return { prefix: new RegExp((/^[A-Za-z]+/.exec(source) as RegExpExecArray)[0], "gi"), whole: new RegExp(source, "iy") };
 });
-/** A letter or a digit in any script: a key that follows one starts no word (Python's `str.isalnum`). */
-const LETTER_OR_DIGIT = /^[\p{L}\p{N}]$/u;
+/**
+ * A Latin letter or an ASCII digit (`A-Z`, `a-z`, `0-9`, U+00C0 to U+024F but `×` and `÷`, and U+1E00 to U+1EFF): a key that follows one starts no word, so `gdańsk-…` holds no `sk-` key. A letter of
+ * another script does not stop a key, so a key glued to one is read (DEC-0176; before it, any script's letter did,
+ * Python's `str.isalnum`). Written as code-point ranges, so a port needs no script property.
+ */
+export const LETTER_OR_DIGIT = /^[A-Za-z0-9\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u024F\u1E00-\u1EFF]$/;
 const BEARER_ALL = new RegExp(BEARER_INSIDE.source, "gi");
 /**
  * An absolute URL in a line. Its end is Python's `\s` spelled out (U+001C to U+001F and U+0085 are white space there,
  * U+FEFF is not), so the two ports cut a URL at the same character.
  */
 const URL_IN_LINE = /[A-Za-z][A-Za-z0-9+.-]{0,63}:\/\/[^\t\n\v\f\r \x1c-\x1f\x85\xa0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000"'<>`]+/g;
-/** Spaces or tabs and a colon, read where a quoted member name ends (sticky: no copy of the rest of the line). */
-const COLON_AFTER = /[ \t]*:/y;
 /**
  * A name assigned a value: the head only (`NAME = value`, `NAME: value`, `"name": "value"`, and since DEC-0175 a name
  * after `--` or `:`, closed by a subscript's `]` (`ENV['NAME']`, `config["name"]`, `settings[NAME]`), before `:=`,
@@ -555,8 +559,16 @@ export function longRunSecret(text: string): boolean {
   }
   return false;
 }
-/** A whole Ed25519 signature as a JSON member: public, blanked before any rule reads the line. */
-const PUBLIC_SIGNATURE = /("(?:sig|signature|signatures)"[ \t]*:[ \t]*")([A-Za-z0-9_-]{86})(")/gi;
+/**
+ * A whole signature under a quoted `sig`, `signature` or `signatures` member, after `:` or a Ruby hash's `=>`, in double
+ * or single quotes or none, with or without its closing quote: Ed25519 (86 base64url characters) or a DER ECDSA P-256
+ * signature (`ME` and `Q`, `U` or `Y`, 94 to 96 base64url characters, DEC-0176), followed by no base64 character
+ * (`A-Z`, `a-z`, `0-9`, `_`, `-`, `+`, `/`, `=`) and no `.`. Public, blanked before any rule reads the line; the one
+ * place a signature is exempt.
+ */
+const PUBLIC_SIGNATURE = /("(?:sig|signature|signatures)"[ \t]*(?::|=>)[ \t]*["']?)([A-Za-z0-9_-]{86}|ME[QUY][A-Za-z0-9_-]{91,93})(["']|(?![A-Za-z0-9_+/=.-]))/gi;
+/** A signature's value as `PUBLIC_SIGNATURE` reads it, in its case: the `i` flag is the member's name's, never `ME`'s. */
+const SIGNATURE_VALUE = /^(?:[A-Za-z0-9_-]{86}|ME[QUY][A-Za-z0-9_-]{91,93})$/;
 const JSON_ESCAPES = /\\(?:u0026|u003[dD]|\/|")/g;
 const UNESCAPED: Readonly<Record<string, string>> = { "\\u0026": "&", "\\u003d": "=", "\\u003D": "=", "\\/": "/", '\\"': '"' };
 
@@ -611,7 +623,7 @@ function bisectLeft(sorted: readonly number[], value: number): number {
  * The provider keys of a text that start a word and are not synthetic, by their index (the adapter's `_provider_keys`):
  * every start of each shape is read with the run of the shape's characters it opens, found once per text and looked
  * up by bisection, so a synthetic key's run never hides a real key that starts inside it and a long line costs
- * O(n log n). A start after a letter or a digit of any script starts no word. A synthetic word counts when it lies
+ * O(n log n). A start after a Latin letter or an ASCII digit (`LETTER_OR_DIGIT`) starts no word. A synthetic word counts when it lies
  * wholly inside the key's span, matched on the text's ASCII letters lowered.
  */
 function providerKeys(text: string): number[] {
@@ -656,11 +668,11 @@ function providerKeys(text: string): number[] {
 
 const SPECIAL_SCHEMES = ["ftp", "http", "https", "ws", "wss"];
 /**
- * A URL's password, query and fragment as WHATWG URL parsing splits them, read by hand (the adapter's `_url_parts`): a
+ * A URL's password, query, fragment, user and host (lower case, no port) as WHATWG URL parsing splits them, read by hand (the adapter's `_url_parts`): a
  * special scheme's authority starts after every slash or backslash after `scheme:`, another scheme's only after `//`,
  * `file` has none; the user information ends at the authority's last `@`, the password follows its first `:`.
  */
-function urlParts(value: string): [string, string, string, string] {
+function urlParts(value: string): [string, string, string, string, string] {
   const colon = value.indexOf(":");
   const scheme = value.slice(0, colon).toLowerCase();
   let rest = value.slice(colon + 1);
@@ -676,7 +688,8 @@ function urlParts(value: string): [string, string, string, string] {
   const userinfo = at < 0 ? "" : authority.slice(0, at);
   const password = userinfo.includes(":") ? userinfo.slice(userinfo.indexOf(":") + 1) : "";
   const user = userinfo.includes(":") ? userinfo.slice(0, userinfo.indexOf(":")) : userinfo;
-  return [password, query, fragment, user];
+  const host = authority.slice(at + 1).replace(/:[0-9]*$/, "").toLowerCase();
+  return [password, query, fragment, user, host];
 }
 /** A text without the run of the given characters at its end (Python's `rstrip`), read backward in one pass. */
 function rstrip(text: string, characters: string): string {
@@ -691,16 +704,55 @@ function lstrip(text: string, characters: string): string {
   return text.slice(start);
 }
 /**
- * What the tree check reads as a credential in a URL's parameter value: a whole-value bearer branch and its own key
- * shapes, unbounded, built from `KEY_SHAPE_SOURCES` and carried in the vectors' `constants` block, never the shared
- * detector's.
+ * A value shaped like a credential anywhere in it: a whole-value bearer branch and the tree check's own key shapes,
+ * unbounded, built from `KEY_SHAPE_SOURCES` and carried in the vectors' `constants` block, never the shared detector's.
+ * Masking and a path's check read it (`ownSecretValue`, `pathHoldsFinding`); since DEC-0176 a URL's parameter value is
+ * read by `providerKeys` and `URL_BEARER_VALUE` instead, so masking reads more than the tree check reports.
  */
 export const URL_SECRET_VALUE = new RegExp(`(^bearer\\s.+|${KEY_SHAPE_SOURCES.join("|")})`, "i");
-/** The same key shapes without the whole-value bearer branch: what a piece of a comma-separated value is read by (DEC-0175). */
-const KEY_SHAPE_IN_PIECE = new RegExp(`(${KEY_SHAPE_SOURCES.join("|")})`, "i");
-/** A password of 8 or more characters mixing letters and digits, not synthetic: in the user information or under a password's name. */
-const passwordShaped = (value: string, decoded = false): boolean =>
-  value.length >= 8 && /[0-9]/.test(value) && /[A-Za-z]/.test(value) && real(decoded ? value : unquote(value));
+/**
+ * What a URL's whole parameter value reads as a bearer token (DEC-0176): `bearer`, spaces or tabs (written out, so a
+ * port's white space cannot differ) and a token shaped as `BEARER_INSIDE` reads one (12 or more of its characters, a
+ * digit among them), whatever follows it, so `bearer bonds` names none. A key in a value is read by `providerKeys`, at a
+ * word's start, as on a line.
+ */
+export const URL_BEARER_VALUE = /^bearer[ \t]+(?=[A-Za-z0-9._~+/-]*\d)[A-Za-z0-9._~+/-]{12,}/i;
+/** A placeholder's name in upper case, in lower case, in lowerCamelCase: each word letters and then digits or none. */
+const PLACEHOLDER_UPPER = "[A-Z]+[0-9]*(?:_+(?:[A-Z]+[0-9]*|[0-9]+))*";
+const PLACEHOLDER_LOWER = "[a-z]+[0-9]*(?:[_.-]+(?:[a-z]+[0-9]*|[0-9]+))*";
+const PLACEHOLDER_CAMEL = "[a-z]+[0-9]*(?:[A-Z][a-z]*[0-9]*)+";
+/**
+ * A value that is wholly a template's placeholder (DEC-0176): `${name}`, `{{name}}` (a leading `.` allowed, or a Go template's path such as `.Values.db.password`, each segment a letter,
+ * lower case and digits), `$NAME`,
+ * `{name}` or `%(name)s`, a name being words of letters each followed by digits or none: all lower case joined by `_`,
+ * `.` or `-`, or all upper case joined by `_` (a word of digits allowed after one), and in `${…}` and `{{…}}` also
+ * lowerCamelCase; `$NAME` takes upper case only. A digit followed by a letter of the same word ends a name, so
+ * `$S3CR3TP4SS`, `$Summer2024x` and `{Secret123x}` are passwords, and `${DB_PASS:-default}` is a value. It names where a
+ * secret goes, never holds one. A closing brace may be missing: a URL's trailing `}` is cut before its parts are read.
+ * A URL in a line ends at `<` or a space, so `<name>` and `{{ name }}` never reach a URL's password.
+ */
+export const PLACEHOLDER = new RegExp(`^(?=.{2,72}$)(?:\\$\\{_?(?:${PLACEHOLDER_UPPER}|${PLACEHOLDER_LOWER}|${PLACEHOLDER_CAMEL})\\}?|\\$_?${PLACEHOLDER_UPPER}|\\{\\{(?:\\.?_?(?:${PLACEHOLDER_UPPER}|${PLACEHOLDER_LOWER}|${PLACEHOLDER_CAMEL})|(?:\\.[A-Za-z][a-z]*[0-9]*)+)\\}{0,2}|\\{_?(?:${PLACEHOLDER_UPPER}|${PLACEHOLDER_LOWER})\\}?|%\\(_?(?:${PLACEHOLDER_UPPER}|${PLACEHOLDER_LOWER})\\)s)$`);
+/**
+ * A host reserved for documentation by RFC 2606: `example.com`, `example.net` or `example.org` and a name under them,
+ * or a name under `.example` or `.invalid`. A single label such as `example` is a host's own name, `localhost` is where
+ * a tunnel or a proxy brings a production database, and a name under `.test` is a local development host (Laravel
+ * Valet, Herd), so none is one. A password there, in the user information or under a password's name, is an example
+ * when it is shorter than `GENERATED_LENGTH`; a generated one is read, as a token user, a provider key, a JWT or a long
+ * run under a credential's name is (DEC-0176).
+ */
+export const DOCUMENTATION_HOST = /^(?:(?:[a-z0-9-]+\.)*example\.(?:com|net|org)|(?:[a-z0-9-]+\.)+(?:example|invalid))$/;
+/** A password of 8 or more characters mixing letters and digits, not synthetic nor a placeholder: in the user information or under a password's name. */
+const passwordShaped = (value: string, decoded = false): boolean => {
+  const text = decoded ? value : unquote(value);
+  return value.length >= 8 && /[0-9]/.test(value) && /[A-Za-z]/.test(value) && real(text) && !PLACEHOLDER.test(text);
+};
+/**
+ * The length from which a password on a documentation host is read (DEC-0176): `openssl rand -base64 16`'s 24
+ * characters. A documented example is a word (`secret123`, `Summer2024x`); a generated secret is this long or longer.
+ */
+export const GENERATED_LENGTH = 24;
+/** A run of 40 or more of `[A-Za-z0-9_-]` holding a letter and a digit: a classic token's shape (40 hex), read as a token as a URL's user. */
+const tokenRun = (text: string): boolean => /^[A-Za-z0-9_-]{40,}$/.test(text) && /[0-9]/.test(text) && /[A-Za-z]/.test(text);
 /** A query or fragment parameter that names a password (`password`, `passwd`, with a prefix such as `db_`); `pwd` is often a working directory, so it is none. */
 export const PASSWORD_NAME = /(?:^|[_.-])(?:password|passwd)$/i;
 /**
@@ -708,14 +760,16 @@ export const PASSWORD_NAME = /(?:^|[_.-])(?:password|passwd)$/i;
  * holding a letter and a digit (a classic token's 40 hex), not synthetic. A name such as `git` or `deploy-bot` is not one.
  */
 const tokenUser = (user: string): boolean =>
-  real(user) && (providerKeys(user).length > 0 || hasJwt(user) || (/^[A-Za-z0-9_-]{40,}$/.test(user) && /[0-9]/.test(user) && /[A-Za-z]/.test(user)));
+  real(user) && !PLACEHOLDER.test(user) && (providerKeys(user).length > 0 || hasJwt(user) || tokenRun(user));
 /** Whether a URL in a source tree carries a credential (the adapter's `_url_secret`), an inner URL read two levels deep. */
 function urlSecret(url: string, depth = 0): boolean {
   const trimmed = rstrip(url, ".,;)]}");
   // Only an absolute URL is read as one: a parameter that holds `://` after other text is a value (the adapter's guard).
   if (!/^[A-Za-z][A-Za-z0-9+.-]*:/.test(trimmed)) return false;
-  const [password, query, fragment, user] = urlParts(trimmed);
-  if (passwordShaped(password)) return true;
+  const [password, query, fragment, user, host] = urlParts(trimmed);
+  // A documentation host's short password is an example; a generated one, its token user, keys and JWTs are read (DEC-0176).
+  const documentation = DOCUMENTATION_HOST.test(host);
+  if (passwordShaped(password) && (!documentation || unquote(password).length >= GENERATED_LENGTH)) return true;
   // A user that is a token, not a name, with a password or without one (`https://<token>@host`, DEC-0175).
   if (tokenUser(unquote(user))) return true;
   // A key behind a percent-encoded separator in the path or a parameter's name starts a word once decoded (CT-325);
@@ -735,10 +789,11 @@ function urlSecret(url: string, depth = 0): boolean {
         const credential = credentialName(name);
         const pieces = value.includes(",") ? value.split(",") : [];
         for (const piece of [value, ...pieces]) {
-          if (passwordName && passwordShaped(piece, true)) return true;
+          if (passwordName && passwordShaped(piece, true) && (!documentation || piece.length >= GENERATED_LENGTH)) return true;
           if (!real(piece)) continue;
           if ((credential && longRunSecret(piece)) || hasJwt(piece)) return true;
-          if (piece === value ? URL_SECRET_VALUE.test(piece) : KEY_SHAPE_IN_PIECE.test(piece)) return true;
+          // A key in a piece is `providerKeys(value)`'s above, at a word's start; the bearer branch reads only the whole value.
+          if (piece === value && URL_BEARER_VALUE.test(piece)) return true;
         }
       }
     }
@@ -783,8 +838,8 @@ function credentialUrlSpans(line: string): Array<[number, number]> {
 
 /** The 0-based index where a line, as written, first shows a credential, or -1. */
 function credentialIn(written: string): number {
-  // A whole Ed25519 signature is blanked, keeping every other index.
-  const line = written.includes('"') ? written.replace(PUBLIC_SIGNATURE, (_all, open: string, value: string, close: string) => `${open}${" ".repeat(value.length)}${close}`) : written;
+  // A whole public signature is blanked, keeping every other index.
+  const line = written.includes('"') ? written.replace(PUBLIC_SIGNATURE, (all: string, open: string, value: string, close: string) => (SIGNATURE_VALUE.test(value) ? `${open}${" ".repeat(value.length)}${close}` : all)) : written;
   const found: number[] = [];
   const block = PRIVATE_KEY.exec(line);
   if (block) found.push(block.index);
@@ -814,11 +869,8 @@ function credentialIn(written: string): number {
     // A value under 40 units is no match here: the search goes on from the next character, as a regex's would.
     if (valueEnd < 0) { at = match.index + 1; continue; }
     const value = line.slice(valueAt, valueEnd);
-    // A whole Ed25519 signature under a quoted `sig`, `signature` or `signatures` member is public (the adapter's `_credential`).
-    COLON_AFTER.lastIndex = match.index + name.length + 1;
-    const quoted = line[match.index - 1] === '"' && line[match.index + name.length] === '"' && COLON_AFTER.test(line);
-    const signature = quoted && ["sig", "signature", "signatures"].includes(name.toLowerCase()) && /^[A-Za-z0-9_-]{86}$/.test(value);
-    if (!signature && credentialName(name) && longRunSecret(unquote(value)) && real(unquote(value))) found.push(valueAt);
+    // A public signature was blanked above (`PUBLIC_SIGNATURE`): no value of one reaches here.
+    if (credentialName(name) && longRunSecret(unquote(value)) && real(unquote(value))) found.push(valueAt);
     // The value starts after the name, so the next search starts later.
     at = valueAt;
   }

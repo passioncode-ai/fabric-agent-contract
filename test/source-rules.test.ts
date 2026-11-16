@@ -43,7 +43,7 @@ import {
   sourcePackageFindings,
   sourceRules,
   sourceTreeProblems,
-  stripHfsIgnorable, ASSIGNED_HEAD, PASSWORD_NAME } from "../src/source-rules.js";
+  stripHfsIgnorable, ASSIGNED_HEAD, PASSWORD_NAME, URL_BEARER_VALUE, PLACEHOLDER, DOCUMENTATION_HOST, LETTER_OR_DIGIT, GENERATED_LENGTH } from "../src/source-rules.js";
 import { createValidator, validateDocument } from "../src/validator.js";
 import { buildSourceTreeVectors } from "../tools/vectors/source-tree.js";
 import { PACKAGE_FILE, checkPackageFolder, sha256Of } from "../src/package-rules.js";
@@ -112,6 +112,11 @@ describe("the source-tree vectors (DEC-0149)", () => {
     expect(vectors.constants.URL_SECRET_VALUE).toEqual(pattern(URL_SECRET_VALUE));
     expect(vectors.constants.ASSIGNED_HEAD).toEqual(pattern(ASSIGNED_HEAD));
     expect(vectors.constants.PASSWORD_NAME).toEqual(pattern(PASSWORD_NAME));
+    expect(vectors.constants.URL_BEARER_VALUE).toEqual(pattern(URL_BEARER_VALUE));
+    expect(vectors.constants.PLACEHOLDER).toEqual(pattern(PLACEHOLDER));
+    expect(vectors.constants.DOCUMENTATION_HOST).toEqual(pattern(DOCUMENTATION_HOST));
+    expect(vectors.constants.LETTER_OR_DIGIT).toEqual(pattern(LETTER_OR_DIGIT));
+    expect(vectors.constants.GENERATED_LENGTH).toBe(GENERATED_LENGTH);
   });
 
   it("keep the tree check's own provider-key shapes, unbounded, written out and apart from the shared detector", () => {
@@ -661,10 +666,11 @@ describe("FAC-SEM-158 and FAC-SEM-159: the tree check", () => {
     }
   }, 180_000);
 
-  it("reads the character before a key as a code point: a letter outside the BMP starts no word, a lone surrogate is none", () => {
+  it("reads the character before a key as a code point: only an ASCII letter or digit stops a key, so one after a letter outside the BMP is read, and a lone surrogate is none (DEC-0176)", () => {
     const keys = (text: string) => sourceTreeProblems(tree([{ path: "src/k.ts", text }])).map((problem) => problem.kind);
     const run = "A1b2C3d4".repeat(3);
-    expect(keys(`\u{1d400}sk-${run}`)).toEqual([]);
+    expect(keys(`\u{1d400}sk-${run}`)).toEqual(["credential"]);
+    expect(keys(`a${"sk-"}${run}`)).toEqual([]);
     expect(keys(`\udc00sk-${run}`)).toEqual(["credential"]);
     expect(keys(`x\udc00sk-${run}`)).toEqual(["credential"]);
   });
