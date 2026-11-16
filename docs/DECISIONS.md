@@ -13035,8 +13035,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   pattern reads them, a quadratic line from judging a name per comma piece; round 2 clean). Proposed 2026-11-16 (CT-325,
   the Fabric Agent Adapter's FAA-190 items 14, 31, 34, 38 and 77 and an escaped JSON key, request `827ea813` on thread
   `b9e5668d`).
-- **Annotated (2026-11-16):** item 2 refined by DEC-0176: a key in a piece is read at a word's start, as on a line,
-  and item 5's password is not read on a documentation host nor when it is a placeholder.
+- **Annotated (2026-11-16):** items 1, 2 and 5 refined by DEC-0176: a token user that is a placeholder is none, a key
+  in a piece is read at a word's start, as on a line, and item 5's password is not read on a documentation host
+  (unless it has a token's shape) nor when it is a placeholder.
 - **Context:** the tree check (DEC-0149, `FAC-SEM-158`) reads a credential in the forms the adapter's source check
   reads, and the adapter's port `fabric_source_tree.py` is held to the contract's vectors, so it cannot widen a form
   alone. The adapter measured six forms of a real secret that pass both, and the contract reproduced each one through
@@ -13110,28 +13111,34 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   takes.
 - **Decision:** [source](specification/source.md#the-tree-check) *the tree check*, the `credential` row:
   1. **A key's word start is Latin.** A provider key is read when no Latin letter or ASCII digit is before it
-     (`LETTER_OR_DIGIT`: ASCII, Latin-1, Latin Extended-A and -B and Latin Extended Additional letters, `×` and `÷`
-     aside, written as code-point ranges); a letter of another script no longer stops it, so a key glued to one is read
+     (`LETTER_OR_DIGIT`: `A-Z`, `a-z`, `0-9`, U+00C0 to U+024F but `×` and `÷`, and U+1E00 to U+1EFF, written as
+     code-point ranges); a letter of another script no longer stops it, so a key glued to one is read
      (the adapter's item 32, a missed secret), while `gdańsk-…` still holds no `sk-` key.
   2. **A URL's parameter reads a key as a line does**, at a word's start (`providerKeys`), so `desk-lamp` and
      `task-processing` in a value or a piece name none; and its whole-value branch reads a bearer token only in a token's
-     shape (`URL_BEARER_VALUE`: `bearer`, spaces or tabs, 12 or more token characters with a digit). `URL_SECRET_VALUE` is
+     shape (`URL_BEARER_VALUE`: `bearer`, spaces or tabs, 12 or more token characters with a digit, whatever follows). `URL_SECRET_VALUE` is
      unchanged where it reads a slot's text and a path (DEC-0149, unbounded there on purpose).
   3. **A password is not read on a documentation host** (`DOCUMENTATION_HOST`: RFC 2606's `example.com`, `example.net`
-     and `example.org` and names under them, and a name under `.example`, `.test` or `.invalid`, the names an e-mail
-     address there is an example at), in the user information or under a password's name; a token user, a provider key,
-     a JWT and a long run under a credential's name there are still read. `localhost` and a host of one label (`test`,
-     `example`) are not one: a tunnel or a proxy brings a production database to `localhost`, and `test` names a
-     service as often as a reserved name.
-  4. **A placeholder is no value.** A password or a token user that is wholly a template's placeholder (`PLACEHOLDER`:
-     `${NAME}`, `{{name}}`, an environment variable `$NAME` in upper case, digits and `_`, and `{name}` or `%(name)s`
-     whose name is all lower case or all upper case; a closing brace a URL's end cut allowed) is not read. A mixed-case
-     run (`$Summer2024x`, `{Secret123x}`) is a password. A URL in a line ends at `<` or a space, so `<name>` never
-     reaches a URL's password.
+     and `example.org` and names under them, and a name under `.example` or `.invalid`), in the user information or
+     under a password's name, unless it has a token's shape (40 or more of `[A-Za-z0-9_-]` with a letter and a digit,
+     as DEC-0175 reads a token user), since a pasted real token there is still a leak; a token user, a provider key, a
+     JWT and a long run under a credential's name there are still read. `localhost`, a name under `.test` and a host of
+     one label (`test`, `example`) are not one: a tunnel or a proxy brings a production database to `localhost`, a
+     local development host (Laravel Valet, Herd) lives under `.test`, and `test` names a service as often as a
+     reserved name.
+  4. **A placeholder is no value.** A password or a token user that is wholly a template's placeholder is not read
+     (`PLACEHOLDER`, at most 72 characters): `${name}`, `{{name}}` (a leading `.`, or a Go template's path such as
+     `.Values.db.password`), `$NAME`, `{name}` or `%(name)s`, a name being words of letters each followed by digits or
+     none, all lower case joined by `_`, `.` or `-`, or all upper case joined by `_`, and in `${…}` and `{{…}}` also
+     lowerCamelCase; `$NAME` takes upper case only; a closing brace may be missing, since a URL's trailing `}` is cut
+     before its parts are read. A digit followed by a letter of the same word ends a name, so `$S3CR3TP4SS`,
+     `$Summer2024x` and `{Secret123x}` are passwords, and a shell default (`${DB_PASS:-…}`) is a value. A URL in a line
+     ends at `<` or a space, so `<name>` and `{{ name }}` never reach a URL's password.
   5. **A DER ECDSA signature is public** beside the Ed25519 one: under a quoted `sig`, `signature` or `signatures`
      member, `ME` and `Q`, `U` or `Y` and 94 to 96 base64url characters in all; both are public after a Ruby hash's
-     `=>` as after `:`, quoted or not, with or without the closing quote, when no base64url character follows. One
-     pattern (`PUBLIC_SIGNATURE`) blanks it before any rule reads the line; the assignment rule's own exemption is gone.
+     `=>` as after `:`, in double or single quotes or none, with or without the closing one, when no base64 character
+     (`+`, `/`, `=` included) and no `.` follows. One pattern (`PUBLIC_SIGNATURE`) blanks it before any rule reads the
+     line; the assignment rule's own exemption is gone.
   6. **Known limits, kept.** These fail closed on purpose, since a real secret or a real home takes the same form, and
      the author rewrites the example with a synthetic word, renames it or leaves the file out with `exclude`: a web
      route `/a/Users/<name>` (Git Bash's `/c/Users/<name>`); a flag or a BEM block `-v-Users-<name>`, `b--Users-<name>`,
@@ -13139,11 +13146,11 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
      `credentialId` under a credential's name; a 40-character service-account name with a digit as a URL's user; an
      arrow function whose parameter is a credential's name returning a 40-unit identifier; a Markdown reference link
      or a CSS custom property named as a credential before a 40-unit run; a mixed-case percent-encoded path under a
-     secret's name; a lower- or upper-case name with a digit in braces (`{secret2024}`) read as a placeholder; a raw key
-     as a URL's user reported at the URL's first column, not the key's; `FAC-SEM-156`'s prose rule, which reads a key at
-     a word's start but not the URL forms; and a URL whose password is a placeholder or a documentation host's, whose
-     `user:password@host` then shows the accepted `email` warning as on `adae54ad` for any password the rule does not
-     read (the warning, not a block).
+     secret's name. Kept the other way, open: a password shaped as a placeholder's name (`{secret2024}`, `$PGPASS2024`,
+     `${dbPassword2}`) or a short password on a documentation host is not read. Kept as they are: a raw key as a URL's
+     user is reported at the URL's first column, not the key's; `FAC-SEM-156`'s prose rule reads a key at a word's
+     start but not the URL forms; a URL whose password the rule does not read (a placeholder, a documentation host's,
+     or any short one, as on `adae54ad`) shows its `user:password@host` as the accepted `email` warning.
   7. `URL_BEARER_VALUE`, `PLACEHOLDER`, `DOCUMENTATION_HOST` and `LETTER_OR_DIGIT` join the vectors' `constants` block; a
      Python port reads each end anchor `$` as `\Z`, writes a JavaScript `\uXXXX` as the character and reads an `i` flag
      with `re.ASCII` (JavaScript's `i` maps no other character onto an ASCII letter).
@@ -13158,7 +13165,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   line already reads it so).
 - **Compatibility:** narrows and widens `FAC-SEM-158` (and `FAC-SEM-156`, which reads through it); two released vector
   cases change their answer (the folding case gains a finding after `ж` and keeps none after `é` or in `gdańsk-`; the
-  parameter case after a letter loses one, beside a new clean search and a key at a word's start), seven are added. The adapter ports it with DEC-0175 at its
+  parameter case after a letter loses one, beside a new clean search and a key at a word's start), eight are added; a
+  single-quoted Ed25519 signature stays public, as the assignment rule's exemption read it on `adae54ad`. The adapter ports it with DEC-0175 at its
   next pin.
 - **Consequences / affects:** `src/source-rules.ts` (`LETTER_OR_DIGIT`, `urlParts`' host, `URL_BEARER_VALUE`,
   `PLACEHOLDER`, `DOCUMENTATION_HOST`, `passwordShaped`, `tokenUser`, `urlSecret`, `PUBLIC_SIGNATURE`, the assignment
@@ -13166,5 +13174,5 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `tools/vectors/source-tree.ts`, `fixtures/vectors/source-tree.json` (cases and `constants`), `test/source-rules.test.ts`;
   `docs/specification/source.md` (the `credential` row); DEC-0149 and DEC-0175 annotated; `docs/backlog.md` (CT-328).
 - **Source:** the adapter's message `47713284` (its items 7, 8, 9, 11, 13, 32, 37, 43), DEC-0175's readings (rounds 1
-  to 6) and DEC-0176's own (round 1); RFC 2606, WebAuthn's assertion signature (DER ECDSA). DEC-0176 was reserved by git CAS
+  to 6) and DEC-0176's own (rounds 1 and 2); RFC 2606, WebAuthn's assertion signature (DER ECDSA). DEC-0176 was reserved by git CAS
   (`agent_sync.py reserve`, key `ct328-false-findings`).

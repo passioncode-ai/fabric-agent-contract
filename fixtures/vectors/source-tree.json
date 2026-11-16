@@ -117,15 +117,15 @@
       "flags": "i"
     },
     "URL_BEARER_VALUE": {
-      "source": "^bearer[ \\t]+(?=[A-Za-z0-9._~+/-]*\\d)[A-Za-z0-9._~+/-]{12,}=*$",
+      "source": "^bearer[ \\t]+(?=[A-Za-z0-9._~+/-]*\\d)[A-Za-z0-9._~+/-]{12,}",
       "flags": "i"
     },
     "PLACEHOLDER": {
-      "source": "^(?:\\$\\{[^{}]{1,64}\\}?|\\$[A-Z_][A-Z0-9_]{0,63}|\\{\\{[^{}]{1,64}\\}{0,2}|\\{(?:[a-z_][a-z0-9_.-]{0,63}|[A-Z_][A-Z0-9_.-]{0,63})\\}?|%\\((?:[a-z_][a-z0-9_]{0,63}|[A-Z_][A-Z0-9_]{0,63})\\)s)$",
+      "source": "^(?=.{2,72}$)(?:\\$\\{_?(?:[A-Z]+[0-9]*(?:_+(?:[A-Z]+[0-9]*|[0-9]+))*|[a-z]+[0-9]*(?:[_.-]+(?:[a-z]+[0-9]*|[0-9]+))*|[a-z]+[0-9]*(?:[A-Z][a-z]*[0-9]*)+)\\}?|\\$_?[A-Z]+[0-9]*(?:_+(?:[A-Z]+[0-9]*|[0-9]+))*|\\{\\{(?:\\.?_?(?:[A-Z]+[0-9]*(?:_+(?:[A-Z]+[0-9]*|[0-9]+))*|[a-z]+[0-9]*(?:[_.-]+(?:[a-z]+[0-9]*|[0-9]+))*|[a-z]+[0-9]*(?:[A-Z][a-z]*[0-9]*)+)|(?:\\.[A-Za-z][a-z]*[0-9]*)+)\\}{0,2}|\\{_?(?:[A-Z]+[0-9]*(?:_+(?:[A-Z]+[0-9]*|[0-9]+))*|[a-z]+[0-9]*(?:[_.-]+(?:[a-z]+[0-9]*|[0-9]+))*)\\}?|%\\(_?(?:[A-Z]+[0-9]*(?:_+(?:[A-Z]+[0-9]*|[0-9]+))*|[a-z]+[0-9]*(?:[_.-]+(?:[a-z]+[0-9]*|[0-9]+))*)\\)s)$",
       "flags": ""
     },
     "DOCUMENTATION_HOST": {
-      "source": "^(?:(?:[a-z0-9-]+\\.)*example\\.(?:com|net|org)|(?:[a-z0-9-]+\\.)+(?:example|test|invalid))$",
+      "source": "^(?:(?:[a-z0-9-]+\\.)*example\\.(?:com|net|org)|(?:[a-z0-9-]+\\.)+(?:example|invalid))$",
       "flags": ""
     },
     "LETTER_OR_DIGIT": {
@@ -5285,7 +5285,7 @@
           },
           {
             "path": "docs/db.md",
-            "text": "postgres://app:Ab3dE5gH7k@db.example.com/app\nhttps://h.test/db?password=Ab3dE5gH7k\npostgres://app:Ab3dE5gH7k@db.example.internal/app\nhttps://db.invalid/x?password=Ab3dE5gH7k\npostgres://app:Ab3dE5gH7k@ci.example:5432/app"
+            "text": "postgres://app:Ab3dE5gH7k@db.example.com/app\nhttps://h.example.org/db?password=Ab3dE5gH7k\npostgres://app:Ab3dE5gH7k@db.example.internal/app\nhttps://db.invalid/x?password=Ab3dE5gH7k\npostgres://app:Ab3dE5gH7k@ci.example:5432/app"
           }
         ]
       },
@@ -5294,6 +5294,65 @@
           "kind": "credential",
           "file": 4,
           "line": 3,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "name": "a password with a token's shape is read on a documentation host too (DEC-0176)",
+      "input": {
+        "manifest": {
+          "format": "fabric-source/1",
+          "include": [
+            "src/",
+            "docs/",
+            "README.md",
+            "LICENSE"
+          ],
+          "exclude": [
+            "src/generated/"
+          ],
+          "binaries": [
+            "docs/icon.png"
+          ],
+          "publicAddresses": [
+            "support@inbox-digest.example"
+          ]
+        },
+        "files": [
+          {
+            "path": "LICENSE",
+            "text": "Licensed under the terms in this file."
+          },
+          {
+            "path": "README.md",
+            "text": "# Inbox digest\n\nSee [the guide](docs/guide.md)."
+          },
+          {
+            "path": "docs/guide.md",
+            "text": "# Guide\n\nBack to the [readme](../README.md)."
+          },
+          {
+            "path": "src/main.ts",
+            "text": "export const name = \"inbox-digest\";"
+          },
+          {
+            "path": "docs/clone.md",
+            "text": "https://u:0123456789abcdef0123456789abcdef01234567@git.example.com/o/r.git\nhttps://h.example.org/db?password=0123456789abcdef0123456789abcdef01234567"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "kind": "credential",
+          "file": 4,
+          "line": 1,
+          "column": 1
+        },
+        {
+          "kind": "credential",
+          "file": 4,
+          "line": 2,
           "column": 1
         }
       ]
@@ -5338,7 +5397,7 @@
           },
           {
             "path": "docs/db.md",
-            "text": "postgres://app:Ab3dE5gH7k@localhost:5433/prod\npostgres://app:Ab3dE5gH7k@db.localhost/app\npostgres://app:Ab3dE5gH7k@test:5432/app\nhttps://example/db?password=Ab3dE5gH7k"
+            "text": "postgres://app:Ab3dE5gH7k@localhost:5433/prod\npostgres://app:Ab3dE5gH7k@db.localhost/app\npostgres://app:Ab3dE5gH7k@test:5432/app\nhttps://example/db?password=Ab3dE5gH7k\nhttps://h.test/db?password=Ab3dE5gH7k"
           }
         ]
       },
@@ -5365,6 +5424,12 @@
           "kind": "credential",
           "file": 4,
           "line": 4,
+          "column": 1
+        },
+        {
+          "kind": "credential",
+          "file": 4,
+          "line": 5,
           "column": 1
         }
       ]
@@ -5409,14 +5474,14 @@
           },
           {
             "path": "docs/db.md",
-            "text": "https://h.io/db?password=${DB_PASSWORD_1}\npostgres://app:{{db_password1}}@db.example.internal/app\nhttps://h.io/db?password=%(db_pass1)s\nhttps://h.io/db?password=<your password 1>\nhttps://h.io/db?password=$DB_PASSWORD_1\nhttps://h.io/db?password={DB_PASSWORD_1}"
+            "text": "https://h.io/db?password=${DB_PASSWORD_1}\npostgres://app:{{db_password1}}@db.example.internal/app\nhttps://h.io/db?password=%(db_pass1)s\nhttps://h.io/db?password=<your password 1>\nhttps://h.io/db?password=$DB_PASSWORD_1\nhttps://h.io/db?password={DB_PASSWORD_1}\nhttps://h.io/db?password=$PGPASS2\nhttps://h.io/db?password={{.Values.db.password}}\nhttps://h.io/db?password=${dbPassword2}"
           }
         ]
       },
       "expected": []
     },
     {
-      "name": "a mixed-case run after $ or in braces is a password, not a placeholder (DEC-0176)",
+      "name": "a run whose digits run into letters, a mixed-case run or a shell default is a password, not a placeholder (DEC-0176)",
       "input": {
         "manifest": {
           "format": "fabric-source/1",
@@ -5455,7 +5520,7 @@
           },
           {
             "path": "docs/db.md",
-            "text": "postgres://app:$Summer2024x@db.example.internal/app\nhttps://h.io/db?password=$Summer2024x\nhttps://h.io/db?password={Secret123x}\nhttps://h.io/db?password=%(Secret123x)s"
+            "text": "postgres://app:$Summer2024x@db.example.internal/app\nhttps://h.io/db?password=$Summer2024x\nhttps://h.io/db?password={Secret123x}\nhttps://h.io/db?password=%(Secret123x)s\nhttps://h.io/db?password=$S3CR3TP4SS\npostgres://app:${DB_PASS:-Sup3rS3cretPw}@db.example.internal/app\nhttps://h.io/db?password=${Rq7vPz2mXw"
           }
         ]
       },
@@ -5483,11 +5548,29 @@
           "file": 4,
           "line": 4,
           "column": 1
+        },
+        {
+          "kind": "credential",
+          "file": 4,
+          "line": 5,
+          "column": 1
+        },
+        {
+          "kind": "credential",
+          "file": 4,
+          "line": 6,
+          "column": 1
+        },
+        {
+          "kind": "credential",
+          "file": 4,
+          "line": 7,
+          "column": 1
         }
       ]
     },
     {
-      "name": "a whole query value saying bearer reads a token only in a token's shape (DEC-0176)",
+      "name": "a whole query value saying bearer reads a token only in a token's shape, whatever follows it (DEC-0176)",
       "input": {
         "manifest": {
           "format": "fabric-source/1",
@@ -5526,7 +5609,7 @@
           },
           {
             "path": "docs/s.md",
-            "text": "https://h.io/s?q=bearer%20bonds\nhttps://h.io/s?auth=bearer%20Ab1Cd2Ef3Gh4Ij5"
+            "text": "https://h.io/s?q=bearer%20bonds\nhttps://h.io/s?auth=bearer%20Ab1Cd2Ef3Gh4Ij5\nhttps://h.io/s?auth=Bearer%20Ab1Cd2Ef3Gh4Ij5%0A"
           }
         ]
       },
@@ -5535,6 +5618,12 @@
           "kind": "credential",
           "file": 4,
           "line": 2,
+          "column": 1
+        },
+        {
+          "kind": "credential",
+          "file": 4,
+          "line": 3,
           "column": 1
         }
       ]
@@ -5593,7 +5682,7 @@
       ]
     },
     {
-      "name": "a whole signature is public with or without its quotes, after : or =>; one more base64url character makes it a run (DEC-0176)",
+      "name": "a whole signature is public in double or single quotes or none, with or without the closing one, after : or =>; one more base64 character makes it a run (DEC-0176)",
       "input": {
         "manifest": {
           "format": "fabric-source/1",
@@ -5632,7 +5721,7 @@
           },
           {
             "path": "src/assertion.rb",
-            "text": "{\"signature\": \"MEUCIQAb3dE5gH7jK9mN1pQ3sT5vW7yZ9bD1fH3kM5pR7tV9xZ1Ab3dE5gH7jK9mN1pQ3sT5vW7yZ9bD1fH3kM5pR7tV9x\n\"signature\" => \"Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab\n\"sig\" => Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab,\n{\"signature\": \"Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2AbZ\"}"
+            "text": "{\"signature\": \"MEUCIQAb3dE5gH7jK9mN1pQ3sT5vW7yZ9bD1fH3kM5pR7tV9xZ1Ab3dE5gH7jK9mN1pQ3sT5vW7yZ9bD1fH3kM5pR7tV9x\n\"signature\" => \"Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab\n\"sig\" => Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab,\n{\"signature\": \"Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2AbZ\"}\n{\"signature\": 'Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab'}\n\"sig\": 'Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab',\n{\"signature\": \"Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab==\"}\n{\"token\": 'Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab1Cd2Ab'}"
           }
         ]
       },
@@ -5642,6 +5731,18 @@
           "file": 4,
           "line": 4,
           "column": 16
+        },
+        {
+          "kind": "credential",
+          "file": 4,
+          "line": 7,
+          "column": 16
+        },
+        {
+          "kind": "credential",
+          "file": 4,
+          "line": 8,
+          "column": 12
         }
       ]
     },
