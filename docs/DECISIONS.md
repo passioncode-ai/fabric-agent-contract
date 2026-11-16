@@ -13186,8 +13186,8 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 ### DEC-0177: the shared detector reads a URL's user name that is a token
 
 - **Date:** 2026-11-16
-- **Status:** Proposed 2026-11-16 (CT-329, filed from DEC-0175's readings); accepted when the coordinator's blind
-  readings are clean on two consecutive rounds.
+- **Status:** Accepted 2026-11-16 (CT-329, filed from DEC-0175's readings): the coordinator's blind readings folded
+  rounds 1 to 5 and read rounds 6 and 7 clean on all three tiers at `b2e6b4e9`.
 - **Context:** the shared detector's `secretUrl` (`src/secret-shape.ts`, LC-21) refuses a URL with a password in its
   user information but passes one whose user name alone is a token, the form a git remote takes
   (`https://<token>@github.com/o/r.git`): [profiles](specification/profiles.md#no-secret-in-a-command-line) lists it as
@@ -13238,5 +13238,5 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   terms and its gap), `docs/specification/folder-attribution.md` (the origin), `docs/specification/conformance.md`,
   `docs/specification/connections.md`, `docs/ux/scenarios.md` (SCN-032's recovery),
   `docs/DOCMAP.md`; `docs/backlog.md` (CT-329, CT-333).
-- **Source:** DEC-0175's readings (round 1 seam), CT-329. DEC-0177 was reserved by git CAS (`agent_sync.py reserve`,
+- **Source:** DEC-0175's readings (round 1 seam), CT-329; DEC-0177's own readings (rounds 1 to 5). DEC-0177 was reserved by git CAS (`agent_sync.py reserve`,
   key `ct329-token-user`).
