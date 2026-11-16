@@ -58,6 +58,7 @@ function cases(): Array<[string, Json | null, Json | null]> {
     ["a well-known audience the local descriptor's setting refuses: the descriptor's own value is read", local(facts({ access: { audience: "operator" } })), wellKnown({ access: { audience: "organization" } })],
     ["a local virtual machine", local(facts({ space: { kind: "vm", account: "vm-1" } })), wellKnown()],
     ["a well-known document that answers as another service gives nothing; the descriptor is read alone", local(facts({ access: { entry: "own-signin" } })), { ...wellKnown({ access: { audience: "public" } }, true), service: { id: "other", instance: "default" } }],
+    ["a dashboard login beside a well-known extension that fails its schema and a declared descriptor fact reads host-signin", local(facts({ tenancy: { mode: "single" } })), wellKnown({ access: { audience: "everyone" } }, true)],
     ["a credential-shaped label in a local well-known document: each reading reports its own problem", local(), wellKnown({ space: { kind: "user", account: ["ghp", "_", "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8"].join("") } })]
   ];
 }

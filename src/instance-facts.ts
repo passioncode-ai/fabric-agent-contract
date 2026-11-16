@@ -1,7 +1,7 @@
 import type { ValidateFunction } from "ajv/dist/2020.js";
 import { SCHEMA_PREFIX } from "./contract.js";
 import { EXTENSION_KEYS } from "./extensions.js";
-import { type Finding, type JsonObject, isObject } from "./findings.js";
+import { type Finding, type JsonObject, isObject, serviceKey } from "./findings.js";
 import { secretArgument } from "./secret-shape.js";
 import { createValidatorSync } from "./validator.js";
 
@@ -31,11 +31,10 @@ export interface InstanceFactsView {
   foreign: boolean;
 }
 
-/** The identity rule's comparison (semantic-rules `serviceIdentity`): the descriptor's id and instance against the well-known document's `service`. */
+/** The identity rule's comparison, through the same `serviceKey`: the descriptor's id and instance against the well-known document's `service`. */
 function answersAsAnother(descriptor: unknown, wellKnown: unknown): boolean {
   if (!isObject(descriptor) || !isObject(wellKnown)) return false;
-  const answered = isObject(wellKnown.service) ? wellKnown.service : {};
-  return descriptor.id !== answered.id || (descriptor.instance ?? "default") !== (answered.instance ?? "default");
+  return serviceKey(descriptor) !== serviceKey(isObject(wellKnown.service) ? wellKnown.service : {});
 }
 
 const FIELDS: ReadonlyArray<[FactField, "access" | "tenancy" | "space", string]> = [
@@ -98,7 +97,7 @@ function refusal(field: FactField, value: unknown, document: FactsDocument, sett
   if (field === "account") {
     // Where it is written comes first: a label in a local well-known document is a pair problem the document alone
     // cannot show, so a credential-shaped one there is still reported by each reading (IF-6).
-    if (document === "wellKnown" && setting.local === true) return "a local service's well-known document is read by every counted OS account on the computer; the label stays in its descriptor (IF-5)";
+    if (document === "wellKnown" && setting.local === true) return "a local service's well-known document is read by every counted OS account on the computer; the label stays in its descriptor (IF-4)";
     if (typeof value === "string" && secretArgument(value)) return "the label is shaped like a credential; it names a space, never a credential";
   }
   return undefined;

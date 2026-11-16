@@ -64,6 +64,34 @@ describe("every positive fixture passes", () => {
     expect(json.out).toContain("docs/specification/channel-agent.md#what-is-checked");
   });
 
+  it("a bare instance-facts declaration gets the declaration-only hint with its help page (DEC-0173)", () => {
+    const result = run(fixture("positive/service-instance-facts-extension.json"), "--schema", "service-instance-facts-extension.schema.json");
+    expect(result.code).toBe(0);
+    expect(result.out).toMatch(/ {2}\/ {2}hint\/declaration-only/);
+    expect(result.out).toContain("FAC-SEM-180 runs only on the facts inside");
+    expect(result.out).toContain("docs/specification/service.md#instance-facts");
+  });
+
+  it("a folder's pair prints FAC-SEM-180 once per problem, each under the document it reads (DEC-0173 IF-6)", () => {
+    const key = "https://fabric.passioncode.ai/agent-contract/extensions/instance-facts/0.1";
+    const descriptor = { ...json("positive/service-descriptor.json"), extensions: { [key]: { access: { entry: "own-signin" } } } };
+    const wellKnown: Record<string, any> = { ...json("positive/service-well-known.json"), extensions: { [key]: { access: { audience: "public" } } } };
+    const dir = folder({ "example-agent.default.json": descriptor, "example-agent.default.well-known.json": wellKnown });
+    const result = run(dir);
+    expect(result.code).toBe(1);
+    const lines = result.out.split("\n").filter((line) => line.includes("FAC-SEM-180"));
+    // The descriptor's entry against the dashboard's login and the well-known audience against the local placement:
+    // both pair findings, filed under the well-known file with the document each reads in its path.
+    expect(lines).toHaveLength(2);
+    expect(lines.some((line) => line.includes("/descriptor/extensions/") && line.includes("/access/entry"))).toBe(true);
+    expect(lines.some((line) => line.includes("/wellKnown/extensions/") && line.includes("/access/audience"))).toBe(true);
+    // A well-known document that answers as another service gives no FAC-SEM-180 line, only FAC-SEM-009.
+    const foreign = folder({ "example-agent.default.json": descriptor, "example-agent.default.well-known.json": { ...wellKnown, service: { ...wellKnown.service, id: "other-agent" } } });
+    const other = run(foreign);
+    expect(other.out).toContain("FAC-SEM-009");
+    expect(other.out).not.toContain("FAC-SEM-180");
+  });
+
   it("a bare channel-agent declaration names a map key in its place and hints so (DEC-0150, DEC-0149's instance-free lines)", () => {
     const declaration = json("positive/service-channel-agent-extension.json");
     declaration.projects[0].channels[0].texts.final["sk-Latn-150-u-ca-gregory"] = 5;

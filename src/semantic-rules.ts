@@ -1,4 +1,4 @@
-import { type Finding, type JsonObject, isObject, show } from "./findings.js";
+import { type Finding, type JsonObject, isObject, serviceKey, show } from "./findings.js";
 import { coreRules } from "./core-rules.js";
 import { normalIdentifier, sameIdentifier } from "./identifiers.js";
 import { usageRules } from "./usage-rules.js";
@@ -240,8 +240,6 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
 
   return findings;
 }
-
-const serviceKey = (value: JsonObject) => `${show(value.id)}.${show(value.instance ?? "default")}`;
 
 function serviceIdentity(value: JsonObject): Finding[] {
   const descriptor = isObject(value.descriptor) ? value.descriptor : {};
