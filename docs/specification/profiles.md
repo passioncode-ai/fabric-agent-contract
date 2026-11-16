@@ -126,12 +126,14 @@ only, so `SK-` is none, at the start or after no ASCII letter or digit, or after
 `sk-` key with a digit and an upper-case letter with 16 or more characters, or a digit with 32 or more),
 `Bearer <token>` anywhere in it, or a run of 40
 or more base64 characters mixing upper case, lower case and digits; a path's separators split such a run, so a folder
-named by a session id passes. A URL is refused for the same, for a password in its user information, and for a query
+named by a session id passes. A URL is refused for the same, for a password in its user information, for a user name
+that is a token (40 or more of `[A-Za-z0-9_-]` with a letter and a digit, as a git remote's `https://<token>@host`
+carries one; DEC-0177), and for a query
 or fragment parameter whose name can only carry a credential (DEC-0041's whole-word names: `api_key`, `token`) and
 has a value. An argument is also refused for its name: `--token=…`, `API_KEY=…`, or a credential-named flag followed
 by a value (`--api-key x`). The finding names the place, never the value. Known limits: DEC-0041's single words
 alone in a query (`?code={code}`, `?session=1`, `?key=v`) and a mixed-case id of 40 or more characters in a path
-segment are refused although harmless; a token in a URL's user name alone is not found. [Session handoff](session-handoff.md) SH-10 applies the
+segment are refused although harmless. [Session handoff](session-handoff.md) SH-10 applies the
 same detector to a launch's arguments.
 
 ## Profile selection

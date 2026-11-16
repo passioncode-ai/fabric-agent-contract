@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0177` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0178` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -13182,3 +13182,38 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 - **Source:** the adapter's message `47713284` (its items 7, 8, 9, 11, 13, 32, 37, 43), DEC-0175's readings (rounds 1
   to 6) and DEC-0176's own (rounds 1 to 3); RFC 2606, WebAuthn's assertion signature (DER ECDSA). DEC-0176 was reserved by git CAS
   (`agent_sync.py reserve`, key `ct328-false-findings`).
+
+### DEC-0177: the shared detector reads a URL's user name that is a token
+
+- **Date:** 2026-11-16
+- **Status:** Proposed 2026-11-16 (CT-329, filed from DEC-0175's readings); accepted when the coordinator's blind
+  readings are clean on two consecutive rounds.
+- **Context:** the shared detector's `secretUrl` (`src/secret-shape.ts`, LC-21) refuses a URL with a password in its
+  user information but passes one whose user name alone is a token, the form a git remote takes
+  (`https://<token>@github.com/o/r.git`): [profiles](specification/profiles.md#no-secret-in-a-command-line) lists it as
+  a known limit. A provider key or a JWT there is found already, by the argument reading of the whole string; a classic
+  token's 40 hex is not, since the long-run term needs upper case, lower case and digits. The source tree check reads
+  it since DEC-0175 (`tokenUser`), so the two detectors answered the same URL differently.
+- **Decision:** [profiles](specification/profiles.md#no-secret-in-a-command-line):
+  1. `secretUrl` refuses a URL whose user name, percent-decoded, is a token: a run of 40 or more of `[A-Za-z0-9_-]`
+     holding a letter and a digit (`tokenUserName`, exported from `src/secret-shape.ts`). A name such as `git`,
+     `deploy-bot` or 40 letters is none.
+  2. The source tree check's token user (DEC-0175) reads the same function, so one rule holds both.
+  3. `detectorCost` (DEC-0150 CA-5) counts the user name's UTF-16 units, as the parse writes it, for a string read as a
+     URL: a bound on the read, so a document's budget still covers what the detector does.
+- **Why:** the user name is where a git remote carries its token; a detector that refuses a password beside it and
+  not the token alone misses the commoner form, and the tree check already reads it.
+- **Alternatives considered:** reading any 40-character user name (refused: a long service-account name of letters
+  is a name); leaving the limit (refused: the same URL then passes FAC-SEM-057 and blocks FAC-SEM-158).
+- **Compatibility:** widens `FAC-SEM-057` (MCP URLs of a manifest, a provider entry, a runner and a service
+  descriptor), `FAC-SEM-101` (feed data), `FAC-SEM-103` (a proposal), `FAC-SEM-165` (a channel agent declaration) and
+  the folder attribution's origin, wherever `secretUrl` reads: a document that passed with a token as a URL's user
+  name now fails. No vector file changes its answers; the channel agent vectors' `about` names the new cost term. The
+  Fabric Agent Adapter's twins (`fabric-secrets.mjs`, `fabric_secrets.py`) and Fabric Dashboards' copy port it at
+  their next pin; until then they pass such a URL.
+- **Consequences / affects:** `src/secret-shape.ts` (`tokenUserName`, `secretUrl`), `src/source-rules.ts` (`tokenUser`
+  reads it), `src/channel-agent.ts` (`detectorCost`), `tools/vectors/channel-agent.ts` (`about`),
+  `fixtures/semantic/command-line-token-user-in-manifest-url.json`, `test/service-hygiene.test.ts`,
+  `test/channel-agent.test.ts`; `docs/specification/profiles.md`; `docs/backlog.md` (CT-329).
+- **Source:** DEC-0175's readings (round 1 seam), CT-329. DEC-0177 was reserved by git CAS (`agent_sync.py reserve`,
+  key `ct329-token-user`).

@@ -562,6 +562,8 @@ describe("extensions/channel-agent/0.1 (DEC-0150)", () => {
     expect(detectorCost(`https://a.example/?${"%41".repeat(n)}=x`)).toBeGreaterThanOrEqual(square);
     expect(detectorCost(`https://a.example/#a${"Q".repeat(n)}=x`)).toBeGreaterThanOrEqual(square);
     expect(bare("https://a.example/?q=a%20b")).toBe(26 + PIECE_COST + 1 + 3);
+    // The user name is read once as a token (DEC-0177), as the parse writes it.
+    expect(bare("https://bot@a.example/")).toBe(bare("https://a.example/") + "bot@".length + "bot".length);
     // A value that does not decode (a lone %) is read raw.
     expect(bare("https://a.example/?q=a%zz")).toBe(25 + PIECE_COST + 1 + 4);
     const shapes = [`https://a.example/?a${"Q".repeat(4000)}=x`, `https://a.example/?${"%41".repeat(1350)}=x`, `https://a.example/#a${"Q".repeat(4000)}=x`];

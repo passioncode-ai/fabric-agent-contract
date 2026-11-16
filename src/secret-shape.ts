@@ -181,10 +181,17 @@ export function rawValues(query: string): Map<string, string[]> {
   return values;
 }
 /**
+ * A URL's user name read as a token (DEC-0177, as the source tree check reads one since DEC-0175): a run of 40 or more
+ * of `[A-Za-z0-9_-]` holding a letter and a digit, a classic token's 40 hex (`https://<token>@github.com/o/r.git`). A
+ * provider key or a JWT there is found by the argument reading already; a name such as `git` or `deploy-bot` is none.
+ */
+export const tokenUserName = (user: string): boolean => /^[A-Za-z0-9_-]{40,}$/.test(user) && /[0-9]/.test(user) && /[A-Za-z]/.test(user);
+/**
  * Whether a URL an MCP entry or a launch names carries a credential (LC-21): anything `secretArgument` finds in it,
- * a password in its user information, or a query or fragment parameter whose name can only carry a credential and
- * has a value, or whose value is shaped like one. `?api_key=…` is refused whatever the value, `?key=` left empty
- * and `?sort=key` are not. A string that is not an absolute URL is checked as an argument only.
+ * a password in its user information, a user name that is a token (`tokenUserName`, DEC-0177), or a query or fragment
+ * parameter whose name can only carry a credential and has a value, or whose value is shaped like one. `?api_key=…` is
+ * refused whatever the value, `?key=` left empty and `?sort=key` are not. A string that is not an absolute URL is
+ * checked as an argument only.
  */
 export function secretUrl(value: string): boolean {
   if (secretArgument(value)) return true;
@@ -195,6 +202,7 @@ export function secretUrl(value: string): boolean {
     return false;
   }
   if (url.password !== "") return true;
+  if (tokenUserName(decodeKeepingPlus(url.username))) return true;
   for (const part of [url.search, url.hash]) {
     for (const [name, values] of rawValues(part.slice(1))) {
       if (values.some((raw) => (raw !== "" && credentialName(name)) || secretValue(raw))) return true;
