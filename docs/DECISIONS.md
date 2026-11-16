@@ -11727,6 +11727,17 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 
 ### DEC-0157: anonymous usage and error data: on by default, each product's own switch
 
+- **Annotated (2026-11-16):** Okolos's own reading against UD-1 to UD-6, sent by its agent on the board (`122e9e4f`,
+  thread `b17c2f28`, at okolos `aa5dc1d`) and not read here, fills *Compatibility*'s "the rest of its practice was not
+  read": it owes UD-1's "nothing before the notice" (its first start opens its tab and queues `extension_installed` at
+  once, `apps/extension/src/background/index.ts` lines 322 to 324, and its six-hourly feed alarm sends without checking
+  that the notice was shown, line 1399, so the order rests on time, not on a check) and UD-1's notice contents (that the
+  installation id ties events together, and where the data is sent); it meets UD-2 as a browser build that cannot read
+  the shared file (its own switch, its own id deleted at off), UD-3 (a random id tied to no account), and owes UD-4
+  nothing, having no agent door (its ADR-0018); its id written before the notice is the operator's ePrivacy question
+  (okolos B-216). Okolos ships no install yet (0.0.1 unpublished, its B-137; a build without its key sends nothing), so
+  these debts are its board task `ea4e4a0b`, due before its first store upload. It sends no shared installation id, so
+  no list of sharing products names it.
 - **Annotated (2026-11-15):** OW-1 and OW-5 name DEC-0157 UD-4's usage-data switch: a `change-policy` effect OW-1's
   exception keeps for the operator's word, which no mandate from the operator's words turns back on, nor a level
   holder's words unless the holder is that person, who is the agent's operator, or holds the organization's switch.
