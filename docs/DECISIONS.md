@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0175` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0176` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -12900,6 +12900,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   FD-273, 2026-11-15), relaying the operator's ask `d660cc30` that pointing at an agent show where it runs, its
   organization, whose instance it is, who has access and how its data is kept apart. The contract accepted it in
   principle on the board (`1fa97798`) and named Prowl Agent the first declarer, as the operator said.
+- **Annotated (2026-11-16):** narrowed by DEC-0174: beside a `subscription` runner, `organization` (IF-2) and
+  `per-organization` and `shared` (IF-3) are refused too; IF-1 says a `protocols` listing of the protocol is optional
+  and never read.
 - **Context:** a host reads placement, origin, the placement record's machine, the organization from Observatory's map,
   the dashboard's sign-in, repository, version, `installedBy` and `installedAt`. Who an instance serves, how it keeps
   data apart and the OS space it runs in have no field. The descriptor and the well-known document are closed, so a new
@@ -12971,9 +12974,9 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
 ### DEC-0174: instance facts, serving others beside a subscription runner, and the protocol in a `protocols` list
 
 - **Date:** 2026-11-16
-- **Status:** Proposed 2026-11-16 (CT-327, the two normative points DEC-0173's readings left); accepted when the
-  coordinator's blind readings are clean on two consecutive rounds (round 1 folded: the listing is allowed, not refused;
-  the clause covers every fact that serves others).
+- **Status:** Accepted 2026-11-16: the coordinator's blind readings (unit, seam, product) read clean on rounds 5 and 6
+  at the same head. Proposed 2026-11-16 (CT-327, the two normative points DEC-0173's readings left) (round 1 folded: the listing is allowed, not refused;
+  the clause covers every fact that serves others; rounds 2 and 4 folded: adoption claims; round 3 clean).
 - **Context:** DEC-0173 IF-2 refuses `public` beside a `subscription` runner and lets `organization` stand on a remote
   placement without `peer`, read as an organization's members reaching its surface with their own keys. Their keys sign
   them in; the work still runs on the instance's runner, and a subscription is the operator's own login (DEC-0046 item
@@ -13005,7 +13008,10 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   Agent declares first); a declaration DEC-0174 refuses reads those facts as not declared, the service's state unchanged.
   The vectors gain cases and change none; hosts run them at their next pin (Fabric Dashboards, FD-273, adopted
   DEC-0173 in PR #580, merged 2026-11-16 for 0.8.130 and pinned at contract `4aff124a`, before the release's CT-327
-  vectors; it is told of DEC-0174 on the board). The node's runner check (`FAC-SEM-087`) still reads only `peer`; a service that declares no
+  vectors; it is told of DEC-0174 on the board, message `de741ee7`). The narrowing under the same name is DEC-0135's
+  exception: no party serves the revision (no service declares the facts: every repository of the estate searched
+  2026-11-16, Prowl Agent's included), so no reader of a released server sees an answer change; the next release's
+  notes list it as narrowing.. The node's runner check (`FAC-SEM-087`) still reads only `peer`; a service that declares no
   such fact is not affected.
 - **Consequences / affects:** `src/instance-facts.ts` (the clauses, `INSTANCE_FACTS_PROTOCOL`),
   `tools/vectors/instance-facts.ts`, `fixtures/vectors/instance-facts.json`, `test/instance-facts.test.ts`, the schema's
