@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0179` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0180` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -13288,3 +13288,60 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/backlog.md` (CT-333, CT-335).
 - **Source:** CT-333 (DEC-0177's readings, round 3 seam); DEC-0178's own readings (rounds 1 and 2). DEC-0178 was reserved by git CAS (`agent_sync.py reserve`,
   key `ct333-handoff-url`).
+
+### DEC-0179: agent-health/1, one reading of what is wrong now
+
+- **Date:** 2026-11-16
+- **Status:** Accepted 2026-11-16 (CT-336): the gate `pnpm run check` green and one round of blind readings on three
+  tiers folded in the run that answered the board request `3173118b`; further readings are CT-338.
+- **Context:** fabric-switchboard asked on the board (SB-393, announcement `dcb2239f`, request `3173118b`, 2026-11-16)
+  for one health answer every product and agent of the estate gives, so one watcher per machine can keep episodes
+  over all of them (proposal AH-1 to AH-8 at fabric-switchboard `c634e9e`). Switchboard 0.7.102 already answers the
+  draft; passioncode PC-230, project-observatory OBS-577, fabric-agents-database B-75 and fabric-agent-adapter FAA-346
+  wait for the schema on `main`. The contract already says three nearby things: the well-known `status` and
+  `degraded`, with its setup state that opens no outage alert (`FAC-SEM-011`, DEC-0044); the operations digests, what
+  happened in an hour (DEC-0153); and what usage data may hold (DEC-0157).
+- **Decision:** [agent health](specification/agent-health.md), HL-1 to HL-7, schema `agent-health.schema.json`, rule
+  `FAC-SEM-181`, reference `src/agent-health.ts`, vectors `fixtures/vectors/agent-health.json`:
+  1. HL-1: `{schema: "agent-health/1", product, version, at, state, checks: [{id, area, state, count, fix?}]}`, every
+     object closed, `at` whole Unix seconds as Switchboard's draft writes it.
+  2. HL-2: states `ok`, `warn`, `fail`, `unknown`; the report's state is the worst of its checks in the order
+     `ok < unknown < warn < fail`, and `unknown` with no checks; `unknown` never reads as `ok`.
+  3. HL-3: the closed list of areas of the draft (lifecycle, sessions, accounts, crash, errors, update, environment,
+     security, connection); a new area is a new revision.
+  4. HL-4: `fix` absent, `null`, one `tool` or one `capability`; a person's step is a tool that answers
+     `human-step-required`.
+  5. HL-5: a reader counts `state` only from a report valid by the schema and `FAC-SEM-181`; no answer, another
+     revision or a failing report is `unknown`.
+  6. HL-6: episodes stay the watcher's (fabric-dashboards AH-2, `alert-episodes`); the estate's key is
+     `<product>:<check id>@<YYYY-MM-DD>`, the UTC day of the opening reading, so a check id is stable.
+  7. HL-7: a surface of its own (MCP `<product>_health`, CLI `<product> health --json`), not a member of the
+     well-known answer; for a service that answers both, a degraded source or a `degraded` status makes the health
+     report not `ok` (checked), and a `setup: true` source is a `warn` check, never a `fail` (the product's duty, not
+     checked: a reading links no source to a check). The well-known declaration of a
+     service's health path, as `load` is declared (DEC-0104), is CT-337.
+  8. Privacy: counts, kinds and codes only (DEC-0157); `FAC-SEM-181` refuses a product, check id, fix tool or fix
+     capability shaped like a credential or holding a home folder, and names it only by its place.
+- **Why:** one shape lets one watcher read every product; the worst-state rule and `unknown` below `warn` keep an
+  unmeasured product from reading healthy; a surface of its own keeps the well-known answer cheap and read every few
+  seconds, while HL-7 keeps the two from telling different truths; episodes depend on a watcher's interval and
+  channels, so the contract fixes only what one reading means.
+- **Alternatives considered:** a member of the well-known answer (refused: the well-known answer is read every few
+  seconds and derives `down`; health checks may be costly, and products with no service, a CLI or a launcher, answer
+  health too); RFC 3339 `at` as most of the contract writes time (refused: Switchboard ships Unix seconds and a number
+  needs no time-zone reading; a reader converts); an open `area` string (refused: a watcher routes by area, and an
+  open list drifts); `unknown` between `warn` and `fail` (refused: a product that cannot measure a check is not broken
+  by that alone, and an outage alert for every unmeasured check would page for nothing).
+- **Compatibility:** new; no earlier document changes its answer. Switchboard 0.7.102's draft, as the request quotes
+  it, fits HL-1 to HL-4 (its `fix: null` included; `count` is required, so a check that counts nothing writes `0`);
+  no reading of 0.7.102 was validated in this run.
+  `agent-health/1` is added to the protocol register (`src/protocol-revisions.ts`).
+- **Consequences / affects:** `schemas/agent-health.schema.json`, `src/agent-health.ts`, `src/semantic-kinds.ts`
+  (`agent-health`, `agent-health-service`), `src/semantic-rules.ts`, `src/protocol-revisions.ts`,
+  `tools/vectors/agent-health.ts`, `tools/vectors/run.ts`, `fixtures/vectors/agent-health.json`, the fixtures
+  `fixtures/{positive,negative,semantic}/agent-health*`, `fixtures/catalogue.json`, `test/agent-health.test.ts`,
+  `test/capability-names.test.ts`, `test/positive-sweep.test.ts`, `test/schema-compilation.test.ts`;
+  `docs/specification/agent-health.md`, `docs/specification/conformance.md`, `docs/specification/README.md`,
+  `docs/DOCMAP.md`, `docs/backlog.md` (CT-336 done, CT-337 and CT-338 filed), `docs/handoffs/2026-11-16-agent-health.md`.
+- **Source:** CT-336; the board request `3173118b` (thread `d9622c6f`). DEC-0179 and `FAC-SEM-181` were reserved by git
+  CAS (`agent_sync.py reserve`, key `ct336-agent-health`).

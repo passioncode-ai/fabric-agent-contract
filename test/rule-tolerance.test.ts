@@ -218,7 +218,7 @@ describe("every rule kind tolerates {toString: 1} members (DEC-0082)", () => {
   it.each(semantic)("semantic fixture %s: each leaf and node replaced in turn", (_name, kind, input) => poisonEach(kind, input));
 
   const SCHEMA_KIND: Readonly<Record<string, string>> = {
-    "decision-verdict.schema.json": "decision-verdict", "approval.schema.json": "approval-claims", "delegation-token.schema.json": "delegation-claims", "governance.schema.json": "grant",
+    "agent-health.schema.json": "agent-health", "decision-verdict.schema.json": "decision-verdict", "approval.schema.json": "approval-claims", "delegation-token.schema.json": "delegation-claims", "governance.schema.json": "grant",
     "fabric-package.schema.json": "package", "versioned-setting.schema.json": "versioned-setting", "result.schema.json": "result", "interop-job.schema.json": "interop-job",
     "roles.schema.json": "roles", "coordination.schema.json": "coordination", "comms-directory.schema.json": "comms-directory",
     "comms-message.schema.json": "comms-message", "comms-submit.schema.json": "comms-submit", "fabric-proposal.schema.json": "proposal",

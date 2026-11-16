@@ -4,6 +4,7 @@ Each run leaves a handoff naming its objective, what it did, what is open and th
 
 | Handoff | Decisions | Merge |
 |---|---|---|
+| [2026-11-16 DEC-0179, agent health](2026-11-16-agent-health.md) | DEC-0179 (CT-336; CT-337, CT-338 filed); one round of blind readings folded | accepted 2026-11-16; merged |
 | [2026-11-16 DEC-0178, a handoff server's URL](2026-11-16-dec0178.md) | DEC-0178 (CT-333's first item; CT-335 filed); rounds 1 and 2 folded, 3 and 4 clean on all three tiers | accepted 2026-11-16; merged |
 | [2026-11-16 DEC-0177, a URL's token user name](2026-11-16-dec0177.md) | DEC-0177 (CT-329; CT-333, CT-334 filed); rounds 1 to 5 folded, 6 and 7 clean on all three tiers | accepted 2026-11-16; merged |
 | [2026-11-16 DEC-0176, false findings narrowed by rule](2026-11-16-dec0176.md) | DEC-0176 (CT-328; CT-331, CT-332 filed); rounds 1 to 3 folded, 4 and 5 clean on all three tiers | accepted 2026-11-16; merged |

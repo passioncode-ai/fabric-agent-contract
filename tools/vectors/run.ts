@@ -33,6 +33,7 @@ import * as orgMembership from "./org-membership.js";
 import * as orgExchange from "./org-exchange.js";
 import * as orgAdaptation from "./org-adaptation.js";
 import * as opsDigest from "./ops-digest.js";
+import * as agentHealth from "./agent-health.js";
 import * as folderAttribution from "./folder-attribution.js";
 import * as hostLabel from "./host-label.js";
 import * as hubMove from "./hub-move.js";
@@ -59,6 +60,7 @@ export const GENERATORS: readonly Generator[] = [
   { source: "actions.ts", build: one(actions.VECTOR_FILE, actions.buildActionsVectors) },
   { source: "activity-turn.ts", build: one(activityTurn.VECTOR_FILE, activityTurn.buildActivityTurnVectors) },
   { source: "activity-unit.ts", build: one(activityUnit.VECTOR_FILE, activityUnit.buildActivityUnitVectors) },
+  { source: "agent-health.ts", build: one(agentHealth.VECTOR_FILE, agentHealth.buildAgentHealthVectors) },
   { source: "agent-network.ts", build: one(agentNetwork.VECTOR_FILE, agentNetwork.buildAgentNetworkVectors) },
   { source: "channel-agent.ts", build: one(channelAgent.VECTOR_FILE, channelAgent.buildChannelAgentVectors) },
   { source: "comms-hold.ts", build: one(commsHold.VECTOR_FILE, commsHold.buildCommsHoldVectors) },

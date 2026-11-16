@@ -19,6 +19,7 @@ export const PROTOCOL_REVISIONS: ReadonlyMap<string, readonly string[]> = new Ma
   ["activity-turn", ["1"]],
   ["activity-unit", ["1"]],
   ["agent-directory", ["1"]],
+  ["agent-health", ["1"]],
   ["approval", ["1"]],
   ["call-record", ["1"]],
   ["channel-agent-standard", ["1"]],

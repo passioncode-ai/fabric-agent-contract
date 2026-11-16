@@ -50,6 +50,7 @@ it("every name-bearing schema surface references the shared definition", async (
   };
   for (const schema of await loadSchemas()) visit(schema, schema.$id.split("/").at(-1)!);
   expect(uses.sort()).toEqual([
+    "agent-health.schema.json/$defs/check/properties/fix/oneOf/2/properties/capability",
     "call-record.schema.json/properties/capability",
     "comms-claim.schema.json/properties/capability",
     "comms-directory-args.schema.json/properties/capability",
