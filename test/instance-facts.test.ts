@@ -30,6 +30,20 @@ describe("extensions/instance-facts/0.1 (DEC-0173)", () => {
       for (const kind of ["service-descriptor", "service-well-known", "service-observation"]) expect(() => instanceFactsRules(kind, { descriptor: value, wellKnown: value, ...(typeof value === "object" && value !== null ? value : {}) })).not.toThrow();
     }
   });
+  it("reads a pair as foreign exactly when FAC-SEM-009 does, the one serviceKey (IF-5)", () => {
+    const pairs: Array<[Record<string, unknown>, Record<string, unknown>]> = [
+      [{ id: "a.b", instance: "c" }, { id: "a", instance: "b.c" }],
+      [{ id: 1 }, { id: "1" }],
+      [{ id: {} }, { id: {} }],
+      [{ id: "notes" }, { id: "notes", instance: "default" }],
+      [{ id: "notes", instance: "x" }, { id: "notes" }],
+      [{ id: "notes" }, {}]
+    ];
+    for (const [descriptor, service] of pairs) {
+      const identity = evaluateSemanticRules("service-observation", { descriptor, wellKnown: { service } }).some((f) => f.code === "FAC-SEM-009");
+      expect(instanceFacts(descriptor, { service }).foreign, JSON.stringify([descriptor, service])).toBe(identity);
+    }
+  });
   it("answers a fresh object each time", () => {
     const one = instanceFacts(undefined, undefined);
     one.facts.audience = "public";

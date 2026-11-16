@@ -41,6 +41,18 @@ export function show(value: unknown): string {
   }
 }
 
+/**
+ * A service's key, `<id>.<instance>` with an absent instance read as `default` (DEC-0019): the one comparison of a
+ * descriptor with a well-known document's `service`, shared by the identity rule of the pair and the claims of a
+ * services directory (semantic-rules `serviceIdentity`, `serviceClaims`) and DEC-0173's foreign answer
+ * (`instanceFacts`), so they never disagree. The folder pairing in validate-cli keeps its own key, whose `show` prints
+ * an absent value as `(none)` for its notes, and registry-rules its own; on every id and instance the schemas accept
+ * (lower-case strings without a dot) all three agree.
+ */
+export function serviceKey(value: JsonObject): string {
+  return `${show(value.id)}.${show(value.instance ?? "default")}`;
+}
+
 /** A number as `Number()` reads it, without its throw on an object such as `{"toString": 1}`, which reads as no number. */
 export function toNumber(value: unknown): number {
   try {

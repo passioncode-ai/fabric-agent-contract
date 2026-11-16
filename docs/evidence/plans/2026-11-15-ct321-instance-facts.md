@@ -6,7 +6,8 @@ proposed as a DEC (the DEC is normative where the two differ). Row
 due 2026-11-22), relaying the operator's ask `d660cc30`; the contract's acceptance in principle `1fa97798`.
 Decided by DEC-0173, which reads the facts field by field (a refused value costs only its field, the other document's
 value read where it stands) where this design said member by member, and checks the three service kinds rather than a
-kind of its own; the DEC is normative.
+kind of its own, lets a remote service reached only by an organization's members declare `organization` without `peer`,
+and lets a service with `peer` before any grant declare `organization` or leave `audience` out; the DEC is normative.
 
 ## What is asked
 

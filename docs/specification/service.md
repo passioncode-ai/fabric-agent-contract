@@ -944,18 +944,20 @@ and whose it is without guessing. The facts ride as one extension value under th
 ignores the extension. Every member and every field is optional, save that a present `tenancy` names its `mode` and a present
 `space` its `kind` (a document whose value lacks them fails the schema and gives none of its facts); an absent one, and
 an empty `access`, declare nothing, never a default. The facts are declared, never verified. **Whose instance it is** is not among them: it stays the
-estate placement's `context` (DEC-0082 item 4), for a remote instance an organization's `org-instance/1` statement
-([membership](membership.md#instances-dec-0170)), else Observatory's map.
+estate placement's `context` (DEC-0082 item 4), first; for a remote instance with no placement record an organization's
+`org-instance/1` statement ([membership](membership.md#instances-dec-0170)), else Observatory's map (IF-7).
 
 **IF-2, `access`.** `audience`: `operator` (its operator alone), `organization` (others it is offered to: beside
 `peer`, the members of the organization its placement's `context` names and anyone a share grant or an organization's
 listing names, a colleague or a guest included; on a remote placement without `peer`, an organization's members reaching
 its own surface with their own keys) or `public` (a remote placement's only: anyone who reaches its origin's own
 surface with credentials of their own, outside any hub's routing; no offer in the [sense above](#offered-to-others) and
-no grant through a hub). A service that declares `peer` before any grant reaches it leaves `audience` out. A peer share
+no grant through a hub). A service that declares `peer` before any grant reaches it may leave `audience` out rather
+than write `operator`, which `peer` refuses; `organization` there stands. A peer share
 (DEC-0142) passes a credential's value and gives no audience to an instance. `entry`: `host-signin`, `own-signin` or
 `none`, how its dashboard is entered; where the well-known document declares `surfaces.dashboard`, its `login` decides
-(`true`: `host-signin` whatever is declared; `false`: never `host-signin`). The word `audience` here is not the
+(`true`: `host-signin` whatever is declared for `entry`, for a service that declares any fact (IF-5); `false`: never
+`host-signin`, the entry then the service's own declaration). The word `audience` here is not the
 authority extension's `levels[].audience` nor a grant's.
 
 **IF-3, `tenancy`.** `mode`: `single` (one tenant, the context the instance serves and no other's data; an agent shared
@@ -976,7 +978,7 @@ on a local placement written only in the descriptor, never the well-known docume
 its own: from the well-known document where it declares a value no clause refuses, else from the descriptor's; a
 refused value is reported and never read; `entry` reads `host-signin` whenever the dashboard requires a host's login
 code and either document declares a fact, refused or not (a service that declares none reads none: a login alone
-declares nothing). A host passes the descriptor it runs the instance by, since the clauses on `peer`, the placement and
+declares nothing, nor does a document whose value fails the schema). A host passes the descriptor it runs the instance by, since the clauses on `peer`, the placement and
 the runner read it, and passes the well-known document only when `FAC-SEM-009` reads the pair as the same service:
 a `foreign` answer is another program's and gives no facts, the descriptor's then read alone. A document whose extension value fails the schema gives none of its facts (as ED-9 reads a dashboard extension),
 while a value a clause refuses costs only that field, since each fact stands alone. Nothing identifying an
