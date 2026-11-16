@@ -3,7 +3,8 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { projectRoot } from "../src/contract.js";
 import { EXTENSION_KEYS } from "../src/extensions.js";
-import { instanceFacts, instanceFactsRules } from "../src/instance-facts.js";
+import { INSTANCE_FACTS_PROTOCOL, instanceFacts, instanceFactsRules } from "../src/instance-facts.js";
+import { NAMED_ONLY } from "../src/protocol-revisions.js";
 import { evaluateSemanticRules } from "../src/semantic-rules.js";
 import { buildInstanceFactsVectors, VECTOR_FILE } from "../tools/vectors/instance-facts.js";
 
@@ -44,6 +45,7 @@ describe("extensions/instance-facts/0.1 (DEC-0173)", () => {
       expect(instanceFacts(descriptor, { service }).foreign, JSON.stringify([descriptor, service])).toBe(identity);
     }
   });
+  it("names the protocol the register names (IF-1, DEC-0174)", () => expect(NAMED_ONLY).toContain(INSTANCE_FACTS_PROTOCOL));
   it("answers a fresh object each time", () => {
     const one = instanceFacts(undefined, undefined);
     one.facts.audience = "public";
