@@ -1,6 +1,6 @@
 # Design: the organization a key-issuing door proves (CT-339)
 
-**Status:** draft, 2026-11-17, no blind reading yet; to be read on three tiers until two consecutive rounds are clean,
+**Status:** draft, 2026-11-17 (DC-7 added the same day for board request `6a1c4b6f`), no blind reading yet; to be read on three tiers until two consecutive rounds are clean,
 then proposed as a DEC (the DEC is normative where the two differ). Row [CT-339](../../backlog.md); the request:
 fabric-agents-database's board message `80429475` (thread `92e6c78a`, answer due 2026-11-24), relaying the operator's
 rule from board request `c612a3e2` (thread `4a5879bd`, session `a1c9849b`, 2026-11-17).
@@ -89,6 +89,19 @@ in two contexts read for each.
 `org-instance/1`), the vectors; no existing schema, rule or verifier changes. `org-instance/1` and the estate record are
 read as they stand.
 
+**DC-7, the door's own side.** Asked by an organization's PM agent (board request `6a1c4b6f`, thread `a4f07b9c`,
+2026-11-17, the same operator rule from session `a1c9849b`): the door itself refuses an issue call from another
+organization, so a misplaced key fails at the door and not only at a careful caller. An organization's door that offers
+`*.keys.issue` issues the key carrying scope `issue` only on a level decision of its own organization (`owner` or
+`admin`, under the `org-membership/2` attestation and key set its authority extension declares, LV-7 and CF-3), binds
+that key to its own context at issue, and on every `*.keys.issue` call compares the calling key's bound context with its
+own verified context (the one its `org-instance/1` statement names): a key bound to another context, the personal one
+included, is refused `issuer-organization-mismatch` before any provider call. A key with no bound context (issued before
+the rule) is refused the same way until it is reissued. Vectors add: an issue key of the same organization (accepted),
+of another organization, of the personal context, and unbound. A semantic rule on the door's authority extension reads
+that `*.keys.issue` declares `admin` at least in an organization's context. Open for the reading: whether CF-3's
+member-key door (membership.md *Not decided here*) and this issue key are one door or two.
+
 ## Limits
 
 - **A local door is the person's own word.** The estate record is signed by the person's passkeys, not by the
@@ -108,6 +121,7 @@ read as they stand.
 
 ## Owed after the DEC
 
-Fabric Dashboards and Observatory read DC-4's extension where they show a door; fabric-agents-database plugs
+an organization's PM agent is told the DEC number on thread `a4f07b9c` (request `6a1c4b6f`, completed 2026-11-17 with this
+date). Fabric Dashboards and Observatory read DC-4's extension where they show a door; fabric-agents-database plugs
 `doorContext` into `org-key-doors` as `prove` and raises the pattern; the organizations' PM agents get it through the
 `org-administrator` template; a board message to each.
