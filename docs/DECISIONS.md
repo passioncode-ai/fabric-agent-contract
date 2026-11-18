@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0180` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0182` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -13413,3 +13413,44 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   The adapter's kits and probe take the mode at their next pin (its parallel request from the agents base).
 - **Source:** CT-340; the board request `b95b1335` (thread `516d7625`). DEC-0180 and `FAC-SEM-182` were reserved by
   git CAS (`agent_sync.py reserve`, key `b95b1335-compact-mcp`).
+
+### DEC-0181: a responder's message says which operation wrote it (`via`)
+
+- **Date:** 2026-11-18
+- **Status:** Accepted 2026-11-18 (CT-341): the gate `pnpm run check` green in the run that answered the board request
+  `db3d2ba1`; no blind reading ran in that run, so further readings are CT-341's open part.
+- **Context:** Fabric asked on the board (request `db3d2ba1`, thread `5941dbaf`, 2026-11-18). Every message a responder
+  posts on a request's thread is read as kind `reply` (DEC-0135 DR-3): its fenced `com.reply`, a `com.progress` note,
+  the summary of `com.effect_begin` and the summary of a replacement's transfer checkpoint (`com.responder_replace`).
+  A reader cannot tell the answer from a note. On 2026-11-18 at 05:56 UTC a transfer checkpoint landed in a thread as
+  a reply and Fabric's people.ask bridge judged it a person's answer. Fabric's journal records the operation, but
+  `comms-message.schema.json` is closed (`additionalProperties: false`), so a host could not give it to a reader
+  without a contract change. Fabric proposed an optional `via` and offered to
+  follow another form (a separate kind, or `note: true`).
+- **Decision:**
+  1. **VIA-1.** A message as read gains the optional `via` (`comms-common.schema.json#/$defs/responderVia`): `reply`,
+     `progress`, `effect` or `checkpoint`, the responder operation that wrote it. A host puts it on every responder
+     message it can attribute; a participant's message carries none.
+  2. **VIA-2, the schema.** `via` is allowed only on kind `reply` with a `replyTo`, and never beside `deliverTo` or
+     `reaction` (a responder's message takes no `deliverTo`, DR-3, and answers a request, not an announcement).
+  3. **VIA-3, what an answer is.** A reader that looks for the answer to a request reads only a message without `via`
+     or with `via: reply`. A note (`progress`, `effect`, `checkpoint`) is never an answer. The board's own `answered`
+     rule (DEC-0098, DEC-0102: never a responder's fenced message or progress note) is unchanged; `via` lets a reader
+     apply the same line.
+  4. **VIA-4, staging.** As with `deliverTo` (DEC-0135 DR-4), a host sends `via` only to a reader pinned at or after
+     DEC-0181 and omits it for an older one. For a message stored before it adopted this decision a host may derive it
+     from the operation its journal records; where the journal does not tell, it omits it.
+- **Why this form:** a new kind would change what `kind: reply` means to every pinned reader and to DR-3's delivery
+  and the `answered` rule that read it; `note: true` cannot tell a fenced answer from a participant's, nor a progress
+  note from a checkpoint. One added optional member keeps every existing field and reader, and names the four
+  operations the journal already records. It is additive under the compatibility policy, staged by the reader's pin
+  like DEC-0135's `deliverTo`, so no new protocol revision is needed.
+- **Evidence:** `schemas/comms-message.schema.json` (`via`, the `allOf` clause), `schemas/comms-common.schema.json`
+  (`responderVia`); fixtures `comms-message-via-progress`, `comms-message-via-reply`, `comms-message-via-on-message`,
+  `comms-message-via-with-deliver`, `comms-message-via-unknown`, `comms-message-via-without-reply-to`
+  (`test/fixtures.test.ts`); `docs/specification/project-comms.md` (the DEC-0181 amendment and DR-3),
+  `docs/specification/conformance.md` (the board's row), `docs/backlog.md` (CT-341).
+- **Consequences:** Fabric fills `via` in `board_message_json` from the journal's operation, with its contract tests
+  (Fabric task `fcb6bb8f`); the adapter's readers (people.ask bridges, on-demand sessions) take it at their next pin.
+- **Source:** CT-341; the board request `db3d2ba1` (thread `5941dbaf`). DEC-0181 was reserved by git CAS
+  (`agent_sync.py reserve DEC`, run `r-358912ea50f4`).

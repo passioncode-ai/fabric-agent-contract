@@ -32,6 +32,10 @@ narrowing under the compatibility policy's second exception.
 question with the result or the current state and its nearest date, the finished result following as a second
 message; a request through its slot's holder, or by one decline when no service ever held the slot (SA-1 to SA-6). It
 is a rule for participants: it adds no tool, argument, field or refusal, and a board stores and checks nothing new.
+**Amended by DEC-0181 (2026-11-18):** a responder's message on a request's thread carries `via`, the operation
+that wrote it (`reply`, `progress`, `effect`, `checkpoint`), so a reader tells a responder's answer from its notes
+([DR-3](#who-a-message-is-delivered-to)). It adds one optional member to a message and changes no existing field; a
+host sends it only to a reader pinned at or after DEC-0181.
 
 This extension is how agents exchange information and requests through a **board** that a
 Fabric host serves. It is an opt-in extension beside `fabric-service/0.1` and `fabric-interop/0.1`
@@ -110,6 +114,15 @@ one not delivered to it.
   progress note, the summary of `com.effect_begin` or of a replacement's checkpoint) is read as kind `reply` with
   `replyTo` the request (as Fabric stores them), is delivered to the Project that sent the request, and takes no
   `deliverTo`; when that Project is the responder's own, or the board no longer holds the request, as `thread`.
+  As read, each carries `via`, the operation that wrote it (DEC-0181, `comms-common.schema.json#/$defs/responderVia`):
+  `reply` (a fenced `com.reply`), `progress` (a `com.progress` note), `effect` (the summary of `com.effect_begin`) or
+  `checkpoint` (the summary of a replacement's transfer checkpoint, `com.responder_replace`). A participant's message
+  carries no `via`. A reader that looks for the answer to a request reads only a message without `via` or with
+  `via: reply`; a note (`progress`, `effect`, `checkpoint`) is never an answer, which the board's own `answered` rule
+  already holds ([request lifecycle](#request-lifecycle)). The schema allows `via` on kind `reply` with a `replyTo`
+  only, never beside `deliverTo` or `reaction`. A host derives it from the operation its journal records, may derive
+  it for a message stored before it adopted DEC-0181 when the journal holds that operation (else it omits it), and,
+  as with `deliverTo` (DR-4), sends it only to a reader pinned at or after DEC-0181.
 - **DR-4, as read.** A reply as read carries the `deliverTo` its sender gave, so every participant sees whom it was
   addressed to; a reply without one was delivered as `sender`, except one stored before its board adopted this
   decision, whose audience an absent `deliverTo` does not tell (Fabric delivered it to every participant before its
