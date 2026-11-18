@@ -383,6 +383,37 @@ export function agentSurfaceRules(wellKnown: JsonObject): Finding[] {
   if (Array.isArray(mcp.capabilities) && mcp.capabilities.length === 0) {
     findings.push({ code: "FAC-SEM-176", instancePath: "/surfaces/mcp/capabilities", message: "an MCP surface serves at least one tool: an empty list is an agent surface an agent cannot use (DEC-0169 RP-3)" });
   }
+  return findings.concat(compactSurfaceRules(mcp));
+}
+
+/** The most tools a compact MCP surface lists: three direct capabilities, search and execute (DEC-0180 CM-1). */
+export const COMPACT_MAX_TOOLS = 5;
+
+/**
+ * FAC-SEM-182 on a well-known document (kind `service-well-known`, DEC-0180 CM-2): a compact MCP surface names its
+ * full list beside the compact mode (`capabilities`), its search and execute tools are two names that are not
+ * capabilities of that list, and each direct capability is one of that list. Its schema already holds `direct` to
+ * three; the rule reads only what one document says (whether tools/list matches is the host's probe, CM-6).
+ */
+export function compactSurfaceRules(mcp: JsonObject): Finding[] {
+  if (!isObject(mcp.compact)) return [];
+  const compact = mcp.compact;
+  const at = "/surfaces/mcp/compact";
+  const findings: Finding[] = [];
+  const add = (instancePath: string, message: string) => findings.push({ code: "FAC-SEM-182", instancePath, message });
+  const capabilities = Array.isArray(mcp.capabilities) ? (mcp.capabilities as unknown[]) : undefined;
+  if (capabilities === undefined) add("/surfaces/mcp", "a compact MCP surface names every capability it serves in capabilities, so a host shows them without the token (DEC-0180 CM-2)");
+  if (typeof compact.search === "string" && compact.search === compact.execute) add(`${at}/execute`, "search and execute are two tools: one name cannot answer both (DEC-0180 CM-2)");
+  for (const member of ["search", "execute"] as const) {
+    const name = compact[member];
+    if (typeof name === "string" && capabilities?.includes(name)) add(`${at}/${member}`, `${name} is the surface's ${member} tool, not one of its capabilities: capabilities names what search answers (DEC-0180 CM-2)`);
+  }
+  const direct = Array.isArray(compact.direct) ? (compact.direct as unknown[]) : [];
+  direct.forEach((name, i) => {
+    if (typeof name !== "string") return;
+    if (name === compact.search || name === compact.execute) add(`${at}/direct/${i}`, `${name} is the search or execute tool, not a direct capability (DEC-0180 CM-2)`);
+    else if (capabilities !== undefined && !capabilities.includes(name)) add(`${at}/direct/${i}`, `${name} is not in capabilities: a direct tool is one of the capabilities the surface serves (DEC-0180 CM-2)`);
+  });
   return findings;
 }
 

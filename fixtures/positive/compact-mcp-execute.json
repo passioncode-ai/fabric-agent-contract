@@ -1,0 +1,7 @@
+{
+  "operation": "records.delete",
+  "arguments": {
+    "id": "rec-17"
+  },
+  "idempotencyKey": "delete-rec-17-1"
+}

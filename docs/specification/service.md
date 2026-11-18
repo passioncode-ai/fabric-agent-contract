@@ -1510,6 +1510,61 @@ behaviour rules (AP-1, AP-2 and AP-4) bind a service at its next pin, and from t
 `relayed` action without a decision is refused `operator-decision-required` until its kit relays decisions (CT-124)
 (DEC-0121). A source hand-over departs from this table as [source](source.md#handing-over) specifies (DEC-0149).
 
+### Compact MCP surface (DEC-0180)
+
+DEC-0180 · rule code `FAC-SEM-182` · schemas [`compact-mcp-search.schema.json`](../../schemas/compact-mcp-search.schema.json),
+[`compact-mcp-execute.schema.json`](../../schemas/compact-mcp-execute.schema.json) and `surfaces.mcp.compact` in
+[`service-well-known.schema.json`](../../schemas/service-well-known.schema.json) · reference `compactSurfaceRules` in
+[`src/actions.ts`](../../src/actions.ts)
+
+An MCP surface with many capabilities may list few tools and answer the rest through a search tool and an execute tool.
+It answers the operator's rule of 2026-11-18 (the agents database's R33 O13, decision D-66, relayed in board request
+`b95b1335`, his words in its session `b590fc74`: «Должен быть MCP супер простой ... до 5 команд в mcp. Если команд
+больше, то нужно делать поиск. И это правило для всех mcp, которые у нас есть, которые мы строим.»).
+
+- **CM-1, the compact mode.** A compact MCP surface's `tools/list` names at most five tools (`COMPACT_MAX_TOOLS`): up
+  to three direct capabilities, then its search tool and its execute tool (conventionally `<domain>.search` and
+  `<domain>.execute`). The direct ones are the most called (a service picks them by its own counts, `calls` in CM-3,
+  or pins them). A surface that serves five capabilities or fewer lists them all and declares no compact mode. The
+  contract permits the mode for every service and requires it of none: the estate's rule that every MCP surface of
+  more than five capabilities is compact is the agents base's (R33 O13), audited there, not a finding here (DEC-0180).
+- **CM-2, the declaration.** A compact surface says so in its well-known document: `surfaces.mcp.compact` of
+  `{search, execute, direct?}`, the two tool names and the direct capabilities (at most three, by the schema).
+  `surfaces.mcp.capabilities` stays and keeps naming every capability the surface serves, so a host shows them
+  without the token, and the manifest keeps declaring each one; the compact mode changes the listing, never what is
+  declared. `FAC-SEM-182` refuses a compact surface without `capabilities`, one name for search and execute, a search
+  or execute name among `capabilities` (they are tools of the surface, not capabilities it declares) and a direct
+  capability `capabilities` does not name (DEC-0180).
+- **CM-3, the search answer.** The search tool takes `{query?, limit?}` (`query` at most 200 characters, `limit`
+  1 to 200) and answers, as `structuredContent`, `compact-mcp-search/1`: `{schema, query?, total, matched,
+  operations[]}`, each operation `{name, purpose, inputSchema, gate, example?, direct, calls?}`. With no `query` it
+  answers every capability the surface serves, the direct ones included; with one, those whose name or one-line purpose
+  holds every word of it, case-insensitively, in the declared order. `total` is every capability, `matched` those the
+  query matched, `operations` at most `limit` of them. `gate` is the action gate the capability runs under
+  ([actions](#actions)), `none` for a capability no action declares; `calls` the calls the service counted over its
+  own window, when it counts them (DEC-0180).
+- **CM-4, the execute input.** The execute tool takes `{operation, arguments?, idempotencyKey?}`
+  ([`compact-mcp-execute.schema.json`](../../schemas/compact-mcp-execute.schema.json)): `operation` a name search
+  answers, `arguments` (absent is `{}`) valid against its `inputSchema`, and the key its own tool takes. It answers
+  what a call by the capability's own name answers. A name the surface does not serve is refused `unknown-operation`,
+  arguments the input schema refuses `invalid-arguments` (with the schema in `data.inputSchema`), each an `isError`
+  result carrying `{error: {code, message, data?}}` as the shared error shape; nothing ran and nothing was stored
+  (DEC-0180).
+- **CM-5, parity.** `execute` runs a capability through its own path: the same authorization level, the same action
+  gate (`actionDecision`, AP-1 to AP-4: a relayed act still needs `_meta.decision` on the execute call, a human step
+  still answers `human-step-required`), the same idempotency and the same audit record, which names the capability and
+  that it came through `execute`; it never runs an act wider than the capability's own tool would. A call by a
+  capability's own name keeps answering on a compact surface, listed or not, so a caller pinned before the mode is not
+  broken. AP-1's twin and RP-1's read tool may each be reached through `execute`: `FAC-SEM-142` still reads an
+  action's `tool` against `capabilities`, which a compact surface keeps whole (DEC-0121, DEC-0169, DEC-0180).
+- **CM-6, what a host reads.** A host or a probe that compares a surface with its declaration (the adapter's
+  `interop.tools-match` and `interop.action-tools`) reads a compact surface's capabilities from its search answer
+  with no query, not from `tools/list`: `tools/list` names the direct capabilities, search and execute and no other
+  tool; the search answer's names equal `surfaces.mcp.capabilities` and the manifest's capabilities, `total` their
+  count; and each action's `tool` is among them. A host shows the full list from `capabilities` without the token and
+  calls through `execute` or by the capability's own name (DEC-0180). Whether tools/list and search match is the
+  host's probe; `FAC-SEM-182` reads only the declaration.
+
 ## Semantic rules
 
 | Code | Kind | Rule |
@@ -1534,4 +1589,5 @@ behaviour rules (AP-1, AP-2 and AP-4) bind a service at its next pin, and from t
 | <a id="fac-sem-143"></a>`FAC-SEM-143` | `page-link`, `interop-input-requests` | a link handed to a person is not a raw `http` or `https` address whose host is a local one as PL's [check](#links-to-a-services-pages) lists it (`127.0.0.0/8`, `[::1]`, the IPv4-mapped `[::ffff:127.x.y.z]`, `localhost` and names under it, and the unspecified `0.0.0.0` and `[::]` a wildcard bind reports), and a `fabric-dashboards:` link follows `fabric-dashboards://service/<id>.<instance>[?path=<path>]` with no other parameter, a path on the service origin and no credential (DEC-0123 PL-1) |
 | <a id="fac-sem-142"></a>`FAC-SEM-142` | `service-well-known`, `action-call` | an actions declaration is its schema's, names each `id` once, carries `humanStep` exactly when `gate` is `human` and names only tools a present `surfaces.mcp.capabilities` lists; a service answers an action call as `actionDecision` does (DEC-0121), except a source hand-over ([source](source.md#handing-over)), out of this rule until a service pins a contract revision carrying CT-181: `--kind action-call` cannot tell a hand-over and is not run on a hand-over's calls until then; and in the authority key, `extensions/authority/0.1` (`authorityExtensionRules`, DEC-0162 LV-5, LV-7), a value its schema refuses, an organization named twice in `levels`, and a level in `actionLevels` for an id that is not a relayed action of the actions declaration |
 | <a id="fac-sem-176"></a>`FAC-SEM-176` | `service-well-known` | a service that serves `surfaces.dashboard` serves `surfaces.mcp` or `surfaces.a2a` beside it, and a present `surfaces.mcp.capabilities` is not empty (DEC-0169 RP-3) |
+| <a id="fac-sem-182"></a>`FAC-SEM-182` | `service-well-known` | a present `surfaces.mcp.compact` stands beside `capabilities`, names two different tools for search and execute, neither of them among `capabilities`, and only direct capabilities `capabilities` names (DEC-0180 CM-2) |
 | <a id="fac-sem-180"></a>`FAC-SEM-180` | `service-descriptor`, `service-well-known`, `service-observation` | the instance facts are their schema's and no clause of [IF-6](#instance-facts) refuses a value: `audience` against `peer`, the placement and the runner, `entry` against the dashboard's `login`, `shared` and `system` only remote, the label never credential-shaped nor in a local well-known document, no fact that serves others beside a `subscription` runner (DEC-0173, DEC-0174) |

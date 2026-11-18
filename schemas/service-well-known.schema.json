@@ -247,10 +247,38 @@
                 "own",
                 "delegation"
               ]
+            },
+            "compact": {
+              "type": "object",
+              "required": [
+                "search",
+                "execute"
+              ],
+              "properties": {
+                "search": {
+                  "$ref": "common.schema.json#/$defs/capabilityName",
+                  "description": "The tool that answers every capability of the surface, compact-mcp-search/1 (DEC-0180 CM-3)."
+                },
+                "execute": {
+                  "$ref": "common.schema.json#/$defs/capabilityName",
+                  "description": "The tool that runs one capability by name, its input compact-mcp-execute.schema.json (DEC-0180 CM-4)."
+                },
+                "direct": {
+                  "type": "array",
+                  "maxItems": 3,
+                  "uniqueItems": true,
+                  "items": {
+                    "$ref": "common.schema.json#/$defs/capabilityName"
+                  },
+                  "description": "The capabilities tools/list names directly, at most three; absent is none (DEC-0180 CM-1)."
+                }
+              },
+              "additionalProperties": false,
+              "description": "DEC-0180, the compact mode: tools/list names at most five tools, the direct capabilities, search and execute; capabilities keeps naming every capability the surface serves, and FAC-SEM-182 requires it beside compact (docs/specification/service.md#compact-mcp-surface-dec-0180)."
             }
           },
           "additionalProperties": false,
-          "description": "The MCP surface: its path, its transport, the capabilities it serves and the credential it takes (docs/specification/service.md#surfaces, docs/specification/service.md#mcp-credentials)."
+          "description": "The MCP surface: its path, its transport, the capabilities it serves, the credential it takes and, compact, where its full list is (DEC-0180) (docs/specification/service.md#surfaces, docs/specification/service.md#mcp-credentials)."
         },
         "events": {
           "type": "object",

@@ -1179,5 +1179,14 @@
   {"name": "agent-health-fix-both", "schema": "agent-health.schema.json", "path": "negative/agent-health-fix-both.json", "valid": false, "keyword": "oneOf"},
   {"name": "agent-health-at-iso", "schema": "agent-health.schema.json", "path": "negative/agent-health-at-iso.json", "valid": false, "keyword": "type"},
   {"name": "agent-health-count-negative", "schema": "agent-health.schema.json", "path": "negative/agent-health-count-negative.json", "valid": false, "keyword": "minimum"},
-  {"name": "agent-health-check-id-camel", "schema": "agent-health.schema.json", "path": "negative/agent-health-check-id-camel.json", "valid": false, "keyword": "pattern"}
+  {"name": "agent-health-check-id-camel", "schema": "agent-health.schema.json", "path": "negative/agent-health-check-id-camel.json", "valid": false, "keyword": "pattern"},
+  {"name": "service-well-known-compact-mcp", "schema": "service-well-known.schema.json", "path": "positive/service-well-known-compact-mcp.json", "valid": true},
+  {"name": "service-well-known-compact-mcp-four-direct", "schema": "service-well-known.schema.json", "path": "negative/service-well-known-compact-mcp-four-direct.json", "valid": false, "keyword": "maxItems"},
+  {"name": "compact-mcp-search", "schema": "compact-mcp-search.schema.json", "path": "positive/compact-mcp-search.json", "valid": true},
+  {"name": "compact-mcp-search-gate", "schema": "compact-mcp-search.schema.json", "path": "negative/compact-mcp-search-gate.json", "valid": false, "keyword": "enum"},
+  {"name": "compact-mcp-search-no-input-schema", "schema": "compact-mcp-search.schema.json", "path": "negative/compact-mcp-search-no-input-schema.json", "valid": false, "keyword": "required"},
+  {"name": "compact-mcp-search-purpose-lines", "schema": "compact-mcp-search.schema.json", "path": "negative/compact-mcp-search-purpose-lines.json", "valid": false, "keyword": "pattern"},
+  {"name": "compact-mcp-execute", "schema": "compact-mcp-execute.schema.json", "path": "positive/compact-mcp-execute.json", "valid": true},
+  {"name": "compact-mcp-execute-no-operation", "schema": "compact-mcp-execute.schema.json", "path": "negative/compact-mcp-execute-no-operation.json", "valid": false, "keyword": "required"},
+  {"name": "compact-mcp-execute-extra", "schema": "compact-mcp-execute.schema.json", "path": "negative/compact-mcp-execute-extra.json", "valid": false, "keyword": "additionalProperties"}
 ]

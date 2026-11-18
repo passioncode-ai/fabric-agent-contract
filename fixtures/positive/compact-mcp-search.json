@@ -1,0 +1,32 @@
+{
+  "schema": "compact-mcp-search/1",
+  "query": "export",
+  "total": 7,
+  "matched": 1,
+  "operations": [
+    {
+      "name": "records.export",
+      "purpose": "Export the records a filter selects as CSV or JSON.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "format": {
+            "enum": [
+              "csv",
+              "json"
+            ]
+          }
+        },
+        "required": [
+          "format"
+        ]
+      },
+      "gate": "none",
+      "example": {
+        "format": "csv"
+      },
+      "direct": false,
+      "calls": 12
+    }
+  ]
+}
