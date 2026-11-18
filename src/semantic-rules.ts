@@ -313,7 +313,7 @@ function remoteShape(value: JsonObject): Finding[] {
 }
 
 // #region usage-limits — docs: docs/specification/service.md#limits
-/** FAC-SEM-031 (DEC-0027): every limit in `budgets[]` is readable on its own — a unique id, a subject
+/** FAC-SEM-031 (DEC-0027, DEC-0183): every limit in `budgets[]` is readable on its own — a unique id, a subject
  *  exactly when the scope names one, one window that agrees with its kind, no spend against a
  *  per-order limit, and a legacy `budget` that repeats one enforced machine limit, so a reader of
  *  `budget` and a reader of `budgets[]` never disagree. A breach is not a finding: a report may
@@ -345,6 +345,8 @@ function usageLimits(value: JsonObject): Finding[] {
       if (limit.spentUsd !== null) flag(`${at}/spentUsd`, `${kind} bounds one order, so nothing is spent against it (null)`);
     } else if (kind === "daily") {
       if (!(limit.period === "day" || seconds === 86400)) flag(`${at}/period`, "a daily limit counts the UTC day (period day) or the last 24 hours (windowSeconds 86400)");
+    } else if (kind === "weekly") {
+      if (!(limit.period === "week" || seconds === 7 * 86400)) flag(`${at}/period`, "a weekly limit counts the ISO week from Monday 00:00 UTC (period week) or the last 7 days (windowSeconds 604800)");
     } else if (kind === "monthly") {
       if (!(limit.period === "month" || (seconds !== null && seconds >= MONTH_SECONDS[0] && seconds <= MONTH_SECONDS[1]))) {
         flag(`${at}/period`, "a monthly limit counts the UTC month (period month) or a rolling 28–31 days (windowSeconds)");
@@ -354,9 +356,46 @@ function usageLimits(value: JsonObject): Finding[] {
     } else if (kind === "pool" || kind === "emergency") {
       if (!windows.length) flag(`${at}/period`, `a ${kind} limit names the window it counts (period, windowSeconds or since)`);
     }
-    const known = PER_ORDER_KINDS.has(kind) || ["daily", "monthly", "pool", "emergency"].includes(kind);
+    const known = PER_ORDER_KINDS.has(kind) || ["daily", "weekly", "monthly", "pool", "emergency"].includes(kind);
     if (known && limit.limitUsd === null) flag(`${at}/limitUsd`, `a ${kind} limit is a dollar amount; only a relative limit (velocity) may leave it null`);
     if (limit.tripped === true && limit.enforced !== true) flag(`${at}/tripped`, "a limit that is not enforced cannot have stopped work");
+    // DEC-0183 SL-3: bounds belong to an editable limit, and the lower is not above the upper.
+    for (const bound of ["minUsd", "maxUsd"] as const) {
+      if (limit[bound] !== undefined && limit.editable !== true) flag(`${at}/${bound}`, `${bound} bounds an edit, so it is only on a limit with editable: true`);
+    }
+    if (typeof limit.minUsd === "number" && typeof limit.maxUsd === "number" && limit.minUsd > limit.maxUsd) flag(`${at}/minUsd`, "minUsd is not above maxUsd");
+  });
+
+  // DEC-0183 SL-4: the change history names known limits' ids once, newest first, none after the report.
+  const generated = typeof value.generatedAt === "string" ? Date.parse(value.generatedAt) : NaN;
+  const changes = Array.isArray(value.limitChanges) ? value.limitChanges.filter(isObject) : [];
+  const changeIds = new Set<string>();
+  let previous = Infinity;
+  changes.forEach((change, i) => {
+    const at = `/limitChanges/${i}`;
+    const id = show(change.id ?? "");
+    if (changeIds.has(id)) flag(`${at}/id`, `change id ${id} appears twice`);
+    changeIds.add(id);
+    const when = typeof change.at === "string" ? Date.parse(change.at) : NaN;
+    if (!Number.isNaN(when)) {
+      if (when > previous) flag(`${at}/at`, "limitChanges lists the newest change first");
+      if (!Number.isNaN(generated) && when > generated) flag(`${at}/at`, "a change is not after the report's generatedAt");
+      previous = when;
+    }
+  });
+
+  // DEC-0183 SL-6: one row per month, oldest first, the last at most the report's month and 11 months back at most.
+  const months = Array.isArray(value.months) ? value.months.filter(isObject) : [];
+  const monthIndex = (m: unknown) => (typeof m === "string" && /^[0-9]{4}-[0-9]{2}$/.test(m) ? Number(m.slice(0, 4)) * 12 + Number(m.slice(5, 7)) - 1 : NaN);
+  const current = Number.isNaN(generated) ? NaN : new Date(generated).getUTCFullYear() * 12 + new Date(generated).getUTCMonth();
+  let last = -Infinity;
+  months.forEach((row, i) => {
+    const at = `/months/${i}/month`;
+    const index = monthIndex(row.month);
+    if (Number.isNaN(index)) return;
+    if (index <= last) flag(at, "months lists each month once, oldest first");
+    if (!Number.isNaN(current) && (index > current || index < current - 11)) flag(at, "a month is the report's UTC month or one of the 11 before it");
+    last = index;
   });
 
   if (isObject(value.budget) && limits.length) {

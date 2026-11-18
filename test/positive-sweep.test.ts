@@ -128,7 +128,9 @@ export const NOT_SWEPT: readonly string[] = [
   "service-channel-agent-extension.schema.json",
   // Where a collector reads the daily operations digests (DEC-0153 OD-9): checked inside a descriptor (FAC-SEM-168, kind
   // `service-descriptor`), whose positive fixture with the key is swept.
-  "service-ops-digest-extension.schema.json"
+  "service-ops-digest-extension.schema.json",
+  // spend.limits.set (DEC-0183) has no rule kind: its schema carries the input's whole shape.
+  "spend-limits-set.schema.json"
 ];
 
 describe("every positive fixture passes the semantic rules", () => {

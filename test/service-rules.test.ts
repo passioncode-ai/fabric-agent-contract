@@ -237,6 +237,58 @@ describe("fabric-service/0.1 semantic rules", () => {
     expect(codes("service-usage", w)).toEqual([]);
   });
 
+  // DEC-0183: the week, editable limits, the change history and the months.
+  const edit = () => JSON.parse(readFileSync(path.join(projectRoot(), "fixtures/positive/service-usage-limits-edit.json"), "utf8")) as { budgets: Record<string, unknown>[]; limitChanges: Record<string, unknown>[]; months: Record<string, unknown>[] };
+
+  it("FAC-SEM-031 accepts weekly, editable and emergency limits with their history and months (DEC-0183)", () => {
+    expect(codes("service-usage", edit())).toEqual([]);
+  });
+
+  it("FAC-SEM-031 reads a weekly limit's window as the ISO week or the last 7 days (DEC-0183 SL-1)", () => {
+    const u = edit();
+    u.budgets[1]!.period = "month";
+    expect(paths(u)).toContain("FAC-SEM-031 /budgets/1/period");
+    const v = edit();
+    v.budgets[5]!.windowSeconds = 86400;
+    expect(paths(v)).toContain("FAC-SEM-031 /budgets/5/period");
+    const w = edit();
+    w.budgets[1]!.limitUsd = null;
+    expect(paths(w)).toContain("FAC-SEM-031 /budgets/1/limitUsd");
+  });
+
+  it("FAC-SEM-031 keeps bounds on an editable limit, the lower not above the upper (DEC-0183 SL-3)", () => {
+    const u = edit();
+    delete u.budgets[0]!.editable;
+    expect(paths(u)).toEqual(expect.arrayContaining(["FAC-SEM-031 /budgets/0/minUsd", "FAC-SEM-031 /budgets/0/maxUsd"]));
+    const v = edit();
+    v.budgets[0]!.minUsd = 300;
+    expect(paths(v)).toContain("FAC-SEM-031 /budgets/0/minUsd");
+  });
+
+  it("FAC-SEM-031 lists changes once, newest first, none after the report (DEC-0183 SL-4)", () => {
+    const u = edit();
+    u.limitChanges[1]!.id = u.limitChanges[0]!.id;
+    expect(paths(u)).toContain("FAC-SEM-031 /limitChanges/1/id");
+    const v = edit();
+    v.limitChanges[2]!.at = "2026-10-03T00:00:00Z";
+    expect(paths(v)).toContain("FAC-SEM-031 /limitChanges/2/at");
+    const w = edit();
+    w.limitChanges[0]!.at = "2026-10-05T00:00:00Z";
+    expect(paths(w)).toContain("FAC-SEM-031 /limitChanges/0/at");
+  });
+
+  it("FAC-SEM-031 lists months once, oldest first, within the report's last 12 (DEC-0183 SL-6)", () => {
+    const u = edit();
+    u.months[1]!.month = "2026-08";
+    expect(paths(u)).toContain("FAC-SEM-031 /months/1/month");
+    const v = edit();
+    v.months[2]!.month = "2026-11";
+    expect(paths(v)).toContain("FAC-SEM-031 /months/2/month");
+    const w = edit();
+    w.months[0]!.month = "2025-10";
+    expect(paths(w)).toContain("FAC-SEM-031 /months/0/month");
+  });
+
   it("FAC-SEM-031 does not treat a breach as invalid", () => {
     const u = budgets();
     u.budgets[2]!.spentUsd = 7.5;

@@ -1,0 +1,6 @@
+{
+  "limitId": "machine.daily",
+  "limitUsd": 0,
+  "reason": "Stop it.",
+  "idempotencyKey": "limits-2026-10-04-03"
+}
