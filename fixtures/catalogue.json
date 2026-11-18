@@ -1188,5 +1188,11 @@
   {"name": "compact-mcp-search-purpose-lines", "schema": "compact-mcp-search.schema.json", "path": "negative/compact-mcp-search-purpose-lines.json", "valid": false, "keyword": "pattern"},
   {"name": "compact-mcp-execute", "schema": "compact-mcp-execute.schema.json", "path": "positive/compact-mcp-execute.json", "valid": true},
   {"name": "compact-mcp-execute-no-operation", "schema": "compact-mcp-execute.schema.json", "path": "negative/compact-mcp-execute-no-operation.json", "valid": false, "keyword": "required"},
-  {"name": "compact-mcp-execute-extra", "schema": "compact-mcp-execute.schema.json", "path": "negative/compact-mcp-execute-extra.json", "valid": false, "keyword": "additionalProperties"}
+  {"name": "compact-mcp-execute-extra", "schema": "compact-mcp-execute.schema.json", "path": "negative/compact-mcp-execute-extra.json", "valid": false, "keyword": "additionalProperties"},
+  {"name": "comms-message-via-progress", "schema": "comms-message.schema.json", "path": "positive/comms-message-via-progress.json", "valid": true},
+  {"name": "comms-message-via-reply", "schema": "comms-message.schema.json", "path": "positive/comms-message-via-reply.json", "valid": true},
+  {"name": "comms-message-via-on-message", "schema": "comms-message.schema.json", "path": "negative/comms-message-via-on-message.json", "valid": false, "keyword": "const"},
+  {"name": "comms-message-via-with-deliver", "schema": "comms-message.schema.json", "path": "negative/comms-message-via-with-deliver.json", "valid": false, "keyword": "false schema"},
+  {"name": "comms-message-via-unknown", "schema": "comms-message.schema.json", "path": "negative/comms-message-via-unknown.json", "valid": false, "keyword": "enum"},
+  {"name": "comms-message-via-without-reply-to", "schema": "comms-message.schema.json", "path": "negative/comms-message-via-without-reply-to.json", "valid": false, "keyword": "required"}
 ]
