@@ -13454,3 +13454,63 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   (Fabric task `fcb6bb8f`); the adapter's readers (people.ask bridges, on-demand sessions) take it at their next pin.
 - **Source:** CT-341; the board request `db3d2ba1` (thread `5941dbaf`). DEC-0181 was reserved by git CAS
   (`agent_sync.py reserve DEC`, run `r-358912ea50f4`).
+
+### DEC-0182: a two-door MCP surface is a compact one, and the tools probe reads its catalogue
+
+- **Date:** 2026-11-18
+- **Status:** Accepted 2026-11-18 (CT-342): the gate `pnpm run check` green in the run that answered the board request
+  `ae5f6132`; no blind reading ran in that run, so further readings are CT-342's open part.
+- **Context:** an organization's data agent asked on the board (request `ae5f6132`, thread `45f885f5`, 2026-11-18). The
+  operator's rule of 2026-11-18 (relayed by sshlg-skills, announcement `b641cdd9`, thread `a53c3048`; canon agent-stack
+  0.33 `agent-interop/references/mcp-two-doors.md`) makes every MCP server the estate builds answer `tools/list` with
+  `search` and `execute` only, every capability an operation of the search catalogue with the same name and schemas,
+  the catalogue paged (`cursor`, `nextCursor`) and filtered by the caller's scope. `FAC-SEM-017` (the adapter's
+  `interop.tools-match`) compares a served tool with the manifest's capability, so a two-door provider fails it
+  although every capability is served. DEC-0180 CM-6 already sends a probe to the search answer, but it said that a
+  surface of five capabilities or fewer lists them all, it compared names only, it had no paging and no scope, and a
+  service pinned before DEC-0180 cannot declare the mode.
+- **Decision:** [service, CM-1, CM-3 and CM-7](specification/service.md#compact-mcp-surface-dec-0180),
+  [interop, FAC-SEM-017](specification/interop.md#c31-capabilities); `nextCursor` and an operation's `outputSchema` in
+  `compact-mcp-search.schema.json`; the member `operation` of kind `interop-tool` (`operationFindings` in
+  `src/interop-rules.ts`):
+  1. **TD-1.** Any surface may be compact whatever its count; a two-door surface is the compact mode with no direct
+     tool. CM-1's "five or fewer lists them all" becomes "may list them all". Which surfaces must be two-door stays the
+     estate's rule (the canon and the agents base), not a finding here, as in DEC-0180 CM-1.
+  2. **TD-2, paging.** Search may take `cursor` and answer `nextCursor` when a page carries fewer than the matched
+     operations, absent on the last page; `total` and `matched` count across pages.
+  3. **TD-3, scope.** Search may list to a caller only the capabilities its credential may run (execute refuses the
+     rest `unknown-operation`); `total` and `matched` then count what it lists to that caller.
+  4. **TD-4, FAC-SEM-017 on an operation.** A capability `tools/list` lists is compared as a tool, as before. Any other
+     capability of a compact surface is compared as the search operation of its name: the same name, an input schema
+     structurally equal to the manifest's, and, when the operation carries `outputSchema`, the output schema the tool
+     would serve (a job capability: the DEC-0017 union; an object root, `FAC-SEM-023`). Annotations are not compared:
+     an operation carries none.
+  5. **TD-5, what the probe reads.** The whole catalogue (no query, every page, a credential holding every scope the
+     manifest's capabilities need), and of it only `name`, `inputSchema`, `outputSchema` and `nextCursor`; whether the
+     answer is `compact-mcp-search/1` is a check of its own. A surface is compact by `surfaces.mcp.compact`; a service
+     pinned before DEC-0180, which cannot declare it, is read as compact when its `tools/list` holds exactly one tool
+     named `search` or ending in `.search`, exactly one named `execute` or ending in `.execute`, neither a declared
+     capability, and at most three other tools, each a declared capability. Otherwise `tools/list` is compared as
+     before.
+- **Not taken:** the ask's "the description equals `purpose`". `FAC-SEM-017` has never compared a tool's description
+  with anything, and the manifest carries no one-line purpose to compare against; a changed `purpose` is a contract
+  change of the server in the canon's snapshot diff, not a conformance finding. Folding `fabric.job.*` into execute is
+  sshlg-skills' separate request (`e6e13934`), not this decision.
+- **Why:** the operations already carry the capability's schemas, so comparing them keeps `FAC-SEM-017`'s guarantee
+  (what is served is what is declared) without a listed tool; paging and scope are the canon's own shape, and reading
+  them whole under a full credential is the canon's snapshot rule. Recognising an undeclared two-door surface by its
+  two tool names lets a provider pinned before DEC-0180 pass without a re-pin, and falls back to the old comparison
+  for anything else, so no surface that passed before fails now.
+- **Compatibility:** additive within `fabric-service/0.1` and `compact-mcp-search/1`: `nextCursor` and an operation's
+  `outputSchema` are optional (an answer without them reads as before; a checker pinned before this decision refuses
+  an answer carrying them, the operation and the answer being closed, so a service sends them at a pin carrying
+  DEC-0182, as with DEC-0181's `via`). A `interop-tool` document without `operation` reads as before.
+- **Evidence:** `test/interop-rules.test.ts` ("a two-door surface serves a capability as a search operation"); fixtures
+  `positive/compact-mcp-search-page.json`, `negative/compact-mcp-search-empty-cursor.json` (`fixtures/catalogue.json`);
+  `docs/specification/service.md` (CM-1, CM-3, CM-7), `docs/specification/interop.md` (FAC-SEM-017),
+  `docs/specification/conformance.md` (the probe's row), `docs/backlog.md` (CT-342).
+- **Consequences:** the adapter's `interop.tools-match` takes TD-4 and TD-5 at its next pin (asked on the board); the
+  canon's search answer and `compact-mcp-search/1` differ (`schema`, `direct`, the one-line `purpose`, `effect`,
+  `idempotent`, `degraded`), which is sshlg-skills' to align or to bring here as a request.
+- **Source:** CT-342; the board request `ae5f6132` (thread `45f885f5`). DEC-0182 was reserved by git CAS
+  (`agent_sync.py reserve DEC`, key `ae5f6132-two-door-probe`).

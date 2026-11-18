@@ -74,6 +74,7 @@ function toolFindings(value: JsonObject): Finding[] {
   const name = show(capability.name);
   const tool = value.tool;
   const out = (instancePath: string, message: string): Finding => ({ code: "FAC-SEM-017", instancePath, message });
+  if (tool === undefined && isObject(value.operation)) return operationFindings(capability, schemas, value.operation);
   if (!isObject(tool) || tool.name !== name) return [out("/tool", `capability ${name} is not served as an MCP tool named ${name}`)];
   const findings: Finding[] = [];
   if (!jsonEqual(tool.inputSchema, schemas.input)) findings.push(out("/tool/inputSchema", `tool ${name} serves an inputSchema that differs from the manifest's`));
@@ -84,6 +85,27 @@ function toolFindings(value: JsonObject): Finding[] {
   const annotations = isObject(tool.annotations) ? tool.annotations : {};
   for (const [hint, expected] of Object.entries(expectedAnnotations(capability.effect, capability.idempotency))) {
     if (annotations[hint] !== expected) findings.push(out(`/tool/annotations/${hint}`, `effect ${show(capability.effect)} / idempotency ${show(capability.idempotency)} requires ${hint}: true`));
+  }
+  return findings;
+}
+
+/**
+ * FAC-SEM-017 for a capability a compact (two-door) surface serves as an operation of its search catalogue, not as a
+ * listed tool (DEC-0182 TD-4): the operation has the capability's name and its input schema, and an output schema
+ * when it carries one (a job capability: the DEC-0017 union). An operation carries no annotations, so none are
+ * compared; a description is compared for no tool, so `purpose` is not compared either.
+ */
+function operationFindings(capability: JsonObject, schemas: JsonObject, operation: JsonObject): Finding[] {
+  const name = show(capability.name);
+  const out = (instancePath: string, message: string): Finding => ({ code: "FAC-SEM-017", instancePath, message });
+  if (operation.name !== capability.name) return [out("/operation", `capability ${name} is not served as a search operation named ${name} (DEC-0182 TD-4)`)];
+  const findings: Finding[] = [];
+  if (!jsonEqual(operation.inputSchema, schemas.input)) findings.push(out("/operation/inputSchema", `operation ${name} answers an inputSchema that differs from the manifest's (DEC-0182 TD-4)`));
+  if (operation.outputSchema !== undefined) {
+    const expectedOutput = isJobCapability(capability) ? jobToolOutputSchema(schemas.output) : schemas.output;
+    if (!jsonEqual(operation.outputSchema, expectedOutput)) findings.push(out("/operation/outputSchema", isJobCapability(capability) ? `job operation ${name} must answer oneOf[result envelope, job handle] around the manifest's outputSchema (DEC-0182 TD-4)` : `operation ${name} answers an outputSchema that differs from the manifest's (DEC-0182 TD-4)`));
+    const root = objectRootFinding(operation, "/operation");
+    if (root) findings.push(root);
   }
   return findings;
 }

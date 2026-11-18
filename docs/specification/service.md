@@ -1525,7 +1525,9 @@ It answers the operator's rule of 2026-11-18 (the agents database's R33 O13, dec
 - **CM-1, the compact mode.** A compact MCP surface's `tools/list` names at most five tools (`COMPACT_MAX_TOOLS`): up
   to three direct capabilities, then its search tool and its execute tool (conventionally `<domain>.search` and
   `<domain>.execute`). The direct ones are the most called (a service picks them by its own counts, `calls` in CM-3,
-  or pins them). A surface that serves five capabilities or fewer lists them all and declares no compact mode. The
+  or pins them). A surface that serves five capabilities or fewer may list them all; it may also be compact, and a
+  two-door surface (`tools/list` is the search and execute tools only, the estate's rule of 2026-11-18) is the compact
+  mode with no direct tool, whatever its count (DEC-0182 TD-1). The
   contract permits the mode for every service and requires it of none: the estate's rule that every MCP surface of
   more than five capabilities is compact is the agents base's (R33 O13), audited there, not a finding here (DEC-0180).
 - **CM-2, the declaration.** A compact surface says so in its well-known document: `surfaces.mcp.compact` of
@@ -1542,7 +1544,11 @@ It answers the operator's rule of 2026-11-18 (the agents database's R33 O13, dec
   holds every word of it, case-insensitively, in the declared order. `total` is every capability, `matched` those the
   query matched, `operations` at most `limit` of them. `gate` is the action gate the capability runs under
   ([actions](#actions)), `none` for a capability no action declares; `calls` the calls the service counted over its
-  own window, when it counts them (DEC-0180).
+  own window, when it counts them (DEC-0180). Search may page: it takes a `cursor` and answers `nextCursor` when the
+  page carries fewer than the matched operations, absent on the last page; `total` and `matched` count across pages.
+  It may list to a caller only the capabilities that caller's credential may run (execute refuses the rest
+  `unknown-operation`), and then `total` and `matched` count what it lists to that caller. An operation may carry
+  `outputSchema`, the one the capability's own tool serves (DEC-0182 TD-2, TD-3).
 - **CM-4, the execute input.** The execute tool takes `{operation, arguments?, idempotencyKey?}`
   ([`compact-mcp-execute.schema.json`](../../schemas/compact-mcp-execute.schema.json)): `operation` a name search
   answers, `arguments` (absent is `{}`) valid against its `inputSchema`, and the key its own tool takes. It answers
@@ -1564,6 +1570,20 @@ It answers the operator's rule of 2026-11-18 (the agents database's R33 O13, dec
   count; and each action's `tool` is among them. A host shows the full list from `capabilities` without the token and
   calls through `execute` or by the capability's own name (DEC-0180). Whether tools/list and search match is the
   host's probe; `FAC-SEM-182` reads only the declaration.
+- **CM-7, the tools probe on a compact surface (DEC-0182).** The probe reads the whole catalogue: search with no
+  `query`, every page (following `nextCursor` until it is absent), under a credential holding every scope the
+  manifest's capabilities need (TD-2, TD-3). It then holds each manifest capability to
+  [`FAC-SEM-017`](interop.md#c31-capabilities): a capability `tools/list` lists is compared as a tool, as before; any
+  other is compared as the search operation of its name, which has the capability's name, its input schema
+  structurally equal to the manifest's and, when the operation carries one, its output schema as the tool would serve
+  it (a job capability: the DEC-0017 union). An operation carries no annotations and FAC-SEM-017 compares no tool's
+  description, so neither annotations nor `purpose` are compared (TD-4). The probe reads only `name`, `inputSchema`,
+  `outputSchema` and `nextCursor` of the answer for this; whether the answer is `compact-mcp-search/1` is a check of
+  its own. A surface is compact by its declaration `surfaces.mcp.compact`; a service pinned before DEC-0180, which
+  cannot declare it, is read as compact when its `tools/list` holds exactly one tool named `search` or ending in
+  `.search`, exactly one named `execute` or ending in `.execute`, neither of them a capability the manifest declares,
+  and at most three other tools, each a declared capability; otherwise the probe compares `tools/list` as before
+  (TD-5).
 
 ## Semantic rules
 

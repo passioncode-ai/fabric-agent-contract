@@ -14,6 +14,38 @@ const capability = (effect = "draft", idempotency = "supported") => ({ name: "co
 const tool = (extra: Record<string, unknown> = {}) => ({ name: "copy.write", inputSchema: input, outputSchema: output, annotations: {}, ...extra });
 const served = (cap: Record<string, unknown>, served: Record<string, unknown> | undefined) => ({ capability: cap, schemas: { input, output }, tool: served });
 
+describe("a two-door surface serves a capability as a search operation (FAC-SEM-017, DEC-0182 TD-4)", () => {
+  const operation = (extra: Record<string, unknown> = {}) => ({ name: "copy.write", purpose: "Write a draft.", inputSchema: input, gate: "none", direct: false, ...extra });
+  const asOperation = (cap: Record<string, unknown>, op: Record<string, unknown>) => ({ capability: cap, schemas: { input, output }, operation: op });
+
+  it("accepts an operation with the capability's name and input schema, with or without an output schema", () => {
+    const reordered = { required: ["topic"], properties: { topic: { type: "string" } }, type: "object" };
+    expect(codes("interop-tool", asOperation(capability(), operation({ inputSchema: reordered })))).toEqual([]);
+    expect(codes("interop-tool", asOperation(capability(), operation({ outputSchema: output })))).toEqual([]);
+  });
+
+  it("compares no annotations and no purpose on an operation", () => {
+    expect(codes("interop-tool", asOperation(capability("delete", "required"), operation({ purpose: "Anything at all." })))).toEqual([]);
+  });
+
+  it("refuses another name, another input schema, another output schema and a non-object output root", () => {
+    expect(codes("interop-tool", asOperation(capability(), operation({ name: "copy.draft" })))).toEqual(["FAC-SEM-017"]);
+    expect(codes("interop-tool", asOperation(capability(), operation({ inputSchema: { type: "object" } })))).toEqual(["FAC-SEM-017"]);
+    expect(codes("interop-tool", asOperation(capability(), operation({ outputSchema: { type: "object" } })))).toEqual(["FAC-SEM-017"]);
+    expect(codes("interop-tool", asOperation(capability(), operation({ outputSchema: { type: "array" } })))).toEqual(["FAC-SEM-017", "FAC-SEM-023"]);
+  });
+
+  it("holds a job capability's operation output to the DEC-0017 union", () => {
+    const jobCap = { ...capability(), extensions: { "https://fabric.passioncode.ai/agent-contract/extensions/interop/0.1": { job: true } } };
+    expect(codes("interop-tool", asOperation(jobCap, operation({ outputSchema: jobToolOutputSchema(output) })))).toEqual([]);
+    expect(codes("interop-tool", asOperation(jobCap, operation({ outputSchema: output })))).toEqual(["FAC-SEM-017"]);
+  });
+
+  it("reads a listed tool, not the operation, when both are given", () => {
+    expect(codes("interop-tool", { capability: capability(), schemas: { input, output }, tool: tool(), operation: operation({ name: "other.name" }) })).toEqual([]);
+  });
+});
+
 describe("C3.1 capabilities are served as MCP tools (FAC-SEM-017)", () => {
   it("accepts a tool whose name, schemas and annotations match the manifest", () => {
     const reordered = { required: ["title"], properties: { body: { type: "string" }, title: { type: "string" } }, type: "object" };

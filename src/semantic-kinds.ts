@@ -91,7 +91,7 @@ export const SEMANTIC_KINDS: Readonly<Record<string, SemanticKind>> = Object.fre
   "interop-job": doc("interop-job.schema.json"),
   "interop-job-trace": wrap("job", "meta"),
   "interop-result-trace": wrap("result", "meta"),
-  "interop-tool": wrap("capability", "schemas", "tool"),
+  "interop-tool": wrap("capability", "schemas", "tool", "operation"),
   "interop-tool-list": wrap("tools"),
   "job-caller": wrap("answer", "now", "action"),
   learning: doc(),
