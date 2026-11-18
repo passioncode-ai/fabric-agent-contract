@@ -57,6 +57,10 @@ served as an MCP tool whose `name` equals the capability `name`, whose `inputSch
 declared effect: `effect: none` → `readOnlyHint: true`; `effect` ∈ `delete | merge | deploy |
 change-policy` → `destructiveHint: true`; `idempotency: required` → `idempotentHint: true`.
 **FAC-SEM-017** a served tool's schemas equal the manifest's (a probe compares them).
+On a compact (two-door) surface a capability that `tools/list` does not list is served as an operation of the search
+catalogue, and the rule compares that operation: its name, its input schema and, when it carries one, its output
+schema; no annotations ([service, CM-7](service.md#compact-mcp-surface-dec-0180), DEC-0182 TD-4). The reference rule
+takes it as `operation` beside `capability` and `schemas` (`--kind interop-tool`).
 
 The reference rule compares the served tool with the manifest capability after the
 manifest's schema URIs are resolved: same name, structurally equal schemas (key order
@@ -423,7 +427,7 @@ The field is in [`service-well-known.schema.json`](../../schemas/service-well-kn
 
 | Code | Kind | Rule |
 |---|---|---|
-| <a id="fac-sem-017"></a>`FAC-SEM-017` | `interop-tool` | the served tool has the capability's name, schemas (a job tool: the DEC-0017 union) and derived annotations |
+| <a id="fac-sem-017"></a>`FAC-SEM-017` | `interop-tool` | the served tool has the capability's name, schemas (a job tool: the DEC-0017 union) and derived annotations; a capability a compact surface serves only through search: the operation has its name, its input schema and, when it carries one, its output schema (DEC-0182 TD-4) |
 | <a id="fac-sem-023"></a>`FAC-SEM-023` | `interop-tool-list`, `interop-tool` | every served tool's `outputSchema`, when present, has root `type: "object"` |
 | <a id="fac-sem-018"></a>`FAC-SEM-018` | `interop-input-requests` | a form-mode request asks for no secret |
 | <a id="fac-sem-019"></a>`FAC-SEM-019` | `interop-job-trace`, `interop-result-trace` | a result whose envelope carries no trace is accepted; its span is `incomplete` |

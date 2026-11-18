@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/compact-mcp-search.schema.json",
   "title": "compact-mcp-search/1 (DEC-0180): what a compact MCP surface's search tool answers",
-  "description": "The structuredContent of the search tool a compact MCP surface names in surfaces.mcp.compact.search: every capability the surface serves (or those whose name or purpose holds every word of the call's query), each with its name, a one-line purpose, its input schema, its gate and an example of arguments, and the calls the service counted when it counts them. total is the number of capabilities the surface serves; matched the number the query matched, of which operations carries at most the call's limit. docs/specification/service.md#compact-mcp-surface-dec-0180.",
+  "description": "The structuredContent of the search tool a compact MCP surface names in surfaces.mcp.compact.search: every capability the surface serves (or those whose name or purpose holds every word of the call's query), each with its name, a one-line purpose, its input schema, its gate and an example of arguments, and the calls the service counted when it counts them. total is the number of capabilities the surface serves; matched the number the query matched, of which operations carries at most the call's limit. A page that does not carry every matched operation names the next in nextCursor (DEC-0182). docs/specification/service.md#compact-mcp-surface-dec-0180.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -39,6 +39,12 @@
       "items": {
         "$ref": "#/$defs/operation"
       }
+    },
+    "nextCursor": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512,
+      "description": "Present when more operations matched than this page carries: the call's cursor for the next page; absent on the last page. A reader that wants the whole catalogue follows it until it is absent (DEC-0182 TD-2)."
     }
   },
   "$defs": {
@@ -67,6 +73,10 @@
         "inputSchema": {
           "type": "object",
           "description": "The capability's input schema, the one its own tool takes (CM-3)."
+        },
+        "outputSchema": {
+          "type": "object",
+          "description": "The capability's output schema as its own tool serves it (a job capability: the DEC-0017 union), when the surface answers it (DEC-0182 TD-4)."
         },
         "gate": {
           "enum": [

@@ -1,0 +1,36 @@
+{
+  "schema": "compact-mcp-search/1",
+  "total": 3,
+  "matched": 3,
+  "operations": [
+    {
+      "name": "facts.answer",
+      "purpose": "Answer a product question from the fact base, with the facts it used.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "question"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "answer": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "answer"
+        ]
+      },
+      "gate": "none",
+      "direct": false
+    }
+  ],
+  "nextCursor": "page-2"
+}
