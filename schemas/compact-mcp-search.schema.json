@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/compact-mcp-search.schema.json",
+  "title": "compact-mcp-search/1 (DEC-0180): what a compact MCP surface's search tool answers",
+  "description": "The structuredContent of the search tool a compact MCP surface names in surfaces.mcp.compact.search: every capability the surface serves (or those whose name or purpose holds every word of the call's query), each with its name, a one-line purpose, its input schema, its gate and an example of arguments, and the calls the service counted when it counts them. total is the number of capabilities the surface serves; matched the number the query matched, of which operations carries at most the call's limit. docs/specification/service.md#compact-mcp-surface-dec-0180.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "total",
+    "matched",
+    "operations"
+  ],
+  "properties": {
+    "schema": {
+      "const": "compact-mcp-search/1"
+    },
+    "query": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 200,
+      "description": "The words the call filtered by, as the call sent them; null or absent: no filter (CM-3)."
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Every capability the surface serves, the direct ones included (CM-3)."
+    },
+    "matched": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "The capabilities the query matched; operations carries at most the call's limit of them (CM-3)."
+    },
+    "operations": {
+      "type": "array",
+      "maxItems": 256,
+      "items": {
+        "$ref": "#/$defs/operation"
+      }
+    }
+  },
+  "$defs": {
+    "operation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "purpose",
+        "inputSchema",
+        "gate",
+        "direct"
+      ],
+      "properties": {
+        "name": {
+          "$ref": "common.schema.json#/$defs/capabilityName",
+          "description": "The capability's name, as the manifest declares it and execute takes it (CM-3)."
+        },
+        "purpose": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "pattern": "^[^\\n\\r]+$",
+          "description": "One line on what the capability does (CM-3)."
+        },
+        "inputSchema": {
+          "type": "object",
+          "description": "The capability's input schema, the one its own tool takes (CM-3)."
+        },
+        "gate": {
+          "enum": [
+            "none",
+            "relayed",
+            "human"
+          ],
+          "description": "The action gate the capability runs under (DEC-0121): the actions declaration's gate when it declares one for this tool, else none (CM-3, CM-5)."
+        },
+        "example": {
+          "type": "object",
+          "description": "Arguments valid against inputSchema, for a caller to start from (CM-3)."
+        },
+        "direct": {
+          "type": "boolean",
+          "description": "True exactly when surfaces.mcp.compact.direct names it (CM-3)."
+        },
+        "calls": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "The calls of this capability the service counted over its own window, when it counts them; it ranks the direct choice (CM-1, CM-3)."
+        }
+      }
+    }
+  }
+}

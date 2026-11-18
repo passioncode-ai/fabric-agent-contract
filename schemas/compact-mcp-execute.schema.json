@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/compact-mcp-execute.schema.json",
+  "title": "The input of a compact MCP surface's execute tool (DEC-0180 CM-4)",
+  "description": "The arguments of the execute tool a compact MCP surface names in surfaces.mcp.compact.execute: the capability to run, its arguments (valid against the input schema search answers for it) and an idempotency key. The service runs the capability as a call by its own name: the same authorization, action gate, idempotency and audit (CM-5); a relayed decision travels in the call's _meta.decision as for the capability's own tool (DEC-0121 AP-2). A name the surface does not serve is refused unknown-operation, arguments its input schema refuses invalid-arguments (CM-4). docs/specification/service.md#compact-mcp-surface-dec-0180.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "operation"
+  ],
+  "properties": {
+    "operation": {
+      "$ref": "common.schema.json#/$defs/capabilityName",
+      "description": "The capability to run, a name search answers (CM-4)."
+    },
+    "arguments": {
+      "type": "object",
+      "description": "The capability's arguments; absent is {} (CM-4)."
+    },
+    "idempotencyKey": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "description": "The key the capability's own tool takes; a retry with the same key and arguments answers the first result (CM-4, CM-5)."
+    }
+  }
+}

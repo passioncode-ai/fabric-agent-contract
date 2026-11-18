@@ -13345,3 +13345,71 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `docs/DOCMAP.md`, `docs/backlog.md` (CT-336 done, CT-337 and CT-338 filed), `docs/handoffs/2026-11-16-agent-health.md`.
 - **Source:** CT-336; the board request `3173118b` (thread `d9622c6f`). DEC-0179 and `FAC-SEM-181` were reserved by git
   CAS (`agent_sync.py reserve`, key `ct336-agent-health`).
+
+### DEC-0180: a compact MCP surface lists at most five tools, the rest through search and execute
+
+- **Date:** 2026-11-18
+- **Status:** Accepted 2026-11-18 (CT-340): the gate `pnpm run check` green in the run that answered the board request
+  `b95b1335`; no blind reading ran in that run, so further readings on three tiers are CT-340's open part.
+- **Context:** fabric-agents-database asked on the board (request `b95b1335`, thread `516d7625`, 2026-11-18) for the
+  contract wording of the operator's rule of 2026-11-18, its R33 O13 and decision D-66, his words in its session
+  `b590fc74`: «Должен быть MCP супер простой ... до 5 команд в mcp. Если команд больше, то нужно делать поиск. И это
+  правило для всех mcp, которые у нас есть, которые мы строим.». Its pattern `compact-mcp` 1.0.0 already serves the
+  mode (`/mcp` compact, `/mcp?surface=capabilities` full). The contract said: `surfaces.mcp.capabilities` names the
+  capabilities a surface serves and the manifest stays the authority (service.md, Well-known document); every button
+  has a tool (DEC-0121 AP-1, `FAC-SEM-142` reads an action's `tool` against `capabilities`); everything a person reads
+  is readable by an agent (DEC-0169 RP-1, `FAC-SEM-176`); and a host's probe compares a surface with its declaration
+  (the adapter's `interop.tools-match`, `interop.action-tools`).
+- **Decision:** [compact MCP surface](specification/service.md#compact-mcp-surface-dec-0180), CM-1 to CM-6, the
+  member `surfaces.mcp.compact` of `service-well-known.schema.json`, schemas `compact-mcp-search.schema.json`
+  (`compact-mcp-search/1`) and `compact-mcp-execute.schema.json`, rule `FAC-SEM-182` (`compactSurfaceRules` in
+  `src/actions.ts`):
+  1. CM-1: a compact surface's `tools/list` names at most five tools (`COMPACT_MAX_TOOLS`): up to three direct
+     capabilities, the most called or pinned, then its search and its execute tool. A surface of five capabilities or
+     fewer lists them all. The contract permits the mode and requires it of no service; the estate's rule that every
+     surface above five is compact is the agents base's R33 O13.
+  2. CM-2: the declaration `surfaces.mcp.compact: {search, execute, direct?}`, `direct` at most three; `capabilities`
+     stays beside it and names every capability served, the manifest every one declared. `FAC-SEM-182` refuses a
+     compact surface without `capabilities`, one name for both tools, a search or execute name among `capabilities`,
+     and a direct capability `capabilities` does not name.
+  3. CM-3: search takes `{query?, limit?}` and answers `compact-mcp-search/1`, `{schema, query?, total, matched,
+     operations[{name, purpose, inputSchema, gate, example?, direct, calls?}]}`; no query is every capability; a query
+     keeps those whose name or one-line purpose holds every word, case-insensitively, in the declared order.
+  4. CM-4: execute takes `{operation, arguments?, idempotencyKey?}` and answers what the capability's own tool
+     answers; typed refusals `unknown-operation` and `invalid-arguments` (with `data.inputSchema`), `isError` results
+     carrying `{error: {code, message, data?}}`, nothing run and nothing stored.
+  5. CM-5, parity: execute runs a capability through its own authorization level, action gate (`actionDecision`;
+     `_meta.decision` on the execute call), idempotency and audit, never wider; a call by a capability's own name
+     keeps answering, listed or not.
+  6. CM-6: a host or probe (`interop.tools-match`, `interop.action-tools`) reads a compact surface's capabilities from
+     search with no query, not from `tools/list`; their names equal `capabilities` and the manifest's, and each
+     action's `tool` is among them.
+- **Why:** a model reads every listed tool's schema on every turn, so a surface of many tools costs context and picks
+  worse; three direct tools keep the common calls one step away and search keeps the rest findable with their schema
+  and gate. Keeping `capabilities` whole keeps the declaration, `FAC-SEM-142` and a host's tokenless view unchanged,
+  so the mode changes only what `tools/list` shows. Running execute through the capability's own path keeps AP-1 and
+  RP-1 honest: a compact surface reaches no act and no reading its full surface would not.
+- **Alternatives considered:** a new revision of `fabric-service` (refused: the member is optional and additive,
+  DEC-0016; a document without it answers as before); `capabilities` listing only what `tools/list` lists (refused:
+  a host would lose the tokenless view and `FAC-SEM-142` would report every action reached through execute); a
+  nonconformance finding for a surface above five tools without the mode (refused here: the contract stands on its
+  own for any host, and the five is the estate's choice, audited by the agents base); search and execute as
+  capabilities in the manifest (refused: they are a listing of the capabilities, not acts of their own, and counting
+  them would make `capabilities` and the search answer disagree).
+- **Compatibility:** additive within `fabric-service/0.1`: a well-known document without `compact` reads as before.
+  A checker pinned before this decision refuses a document carrying `surfaces.mcp.compact` (the surface object is
+  closed), so a service declares the mode only at a pin that carries DEC-0180; until then it serves the mode and
+  declares none, as the agents base's service does. `compact-mcp-search/1` joins the protocol register
+  (`src/protocol-revisions.ts`); its shape is the agents base's `SEARCH_ANSWER_SCHEMA` of `compact-mcp` 1.0.0 with
+  `purpose` held to one line of at most 200 characters and `operations` to 256, both of which the pattern already
+  writes.
+- **Consequences / affects:** `schemas/service-well-known.schema.json`, `schemas/compact-mcp-search.schema.json`,
+  `schemas/compact-mcp-execute.schema.json`, `src/actions.ts`, `src/protocol-revisions.ts`; fixtures
+  `fixtures/{positive,negative}/compact-mcp-*`, `fixtures/positive/service-well-known-compact-mcp.json`,
+  `fixtures/negative/service-well-known-compact-mcp-four-direct.json`,
+  `fixtures/semantic/service-well-known-compact-mcp-*`, `fixtures/catalogue.json`; `test/compact-mcp.test.ts`,
+  `test/capability-names.test.ts`, `test/positive-sweep.test.ts`, `test/schema-compilation.test.ts`;
+  `docs/specification/service.md`, `docs/specification/conformance.md`, `docs/DOCMAP.md`, `docs/backlog.md` (CT-340).
+  The adapter's kits and probe take the mode at their next pin (its parallel request from the agents base).
+- **Source:** CT-340; the board request `b95b1335` (thread `516d7625`). DEC-0180 and `FAC-SEM-182` were reserved by
+  git CAS (`agent_sync.py reserve`, key `b95b1335-compact-mcp`).

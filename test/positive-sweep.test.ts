@@ -50,6 +50,8 @@ export const NOT_SWEPT: readonly string[] = [
   "comms-status.schema.json",
   // The coding-agent catalogue (DEC-0093) has no rule kind; test/coding-agents.test.ts reads the real catalogue.
   "coding-agents.schema.json",
+  "compact-mcp-execute.schema.json",
+  "compact-mcp-search.schema.json",
   "conformance-report.schema.json",
   "contract-pin.schema.json",
   // A credential decision, envelope and revocation are read against their request, context and keys (DEC-0111).

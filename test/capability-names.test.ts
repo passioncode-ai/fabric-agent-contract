@@ -62,6 +62,8 @@ it("every name-bearing schema surface references the shared definition", async (
     "comms-responder-replace.schema.json/properties/capability",
     "comms-status.schema.json/properties/responders/items/properties/capability",
     "comms-submit.schema.json/properties/request/properties/capability",
+    "compact-mcp-execute.schema.json/properties/operation",
+    "compact-mcp-search.schema.json/$defs/operation/properties/name",
     "decision-verdict.schema.json/properties/asked/properties/action/anyOf/1",
     "decision-verdict.schema.json/properties/asked/properties/capability",
     "governance.schema.json/$defs/grant/properties/capabilities/items",
@@ -75,6 +77,9 @@ it("every name-bearing schema surface references the shared definition", async (
     "service-actions-extension.schema.json/$defs/action/properties/tool",
     "service-connections-extension.schema.json/$defs/connection/properties/capability",
     "service-well-known.schema.json/properties/surfaces/properties/mcp/properties/capabilities/items",
+    "service-well-known.schema.json/properties/surfaces/properties/mcp/properties/compact/properties/direct/items",
+    "service-well-known.schema.json/properties/surfaces/properties/mcp/properties/compact/properties/execute",
+    "service-well-known.schema.json/properties/surfaces/properties/mcp/properties/compact/properties/search",
     "spend-policy.schema.json/properties/credentialSources/items/oneOf/1/properties/capability"
   ]);
 });
