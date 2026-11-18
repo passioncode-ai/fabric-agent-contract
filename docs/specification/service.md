@@ -401,7 +401,7 @@ provider.
 
 `budgets` (DEC-0027) lists every spending limit the service applies — up to 64 entries, each
 `{id, scope, subject?, kind, period? | windowSeconds? | since?, limitUsd, spentUsd, enforced,
-tripped?}` — so a host can show all of them, not one. The service enforces its limits; the host
+tripped?, editable?, minUsd?, maxUsd?}` ([changing a limit](#changing-a-limit-dec-0183)) — so a host can show all of them, not one. The service enforces its limits; the host
 only shows them.
 
 - `id` is unique in the report (`FAC-SEM-031`) and stable across reports, so a host can follow
@@ -416,6 +416,7 @@ only shows them.
   | `per_job` | the cost of one order | none — `spentUsd` is `null` |
   | `approval` | a threshold above which an order waits for a person; **not a ceiling** | none — `spentUsd` is `null` |
   | `daily` | spend in a day | `period: "day"` (the current UTC day) or `windowSeconds: 86400` (the last 24 hours) |
+  | `weekly` | spend in a week (DEC-0183) | `period: "week"` (the current ISO week, from Monday 00:00 UTC) or `windowSeconds: 604800` (the last 7 days) |
   | `monthly` | spend in a month | `period: "month"` (the current UTC month) or a rolling `windowSeconds` of 28–31 days |
   | `velocity` | spend rate in a short rolling window | `windowSeconds`, required; `limitUsd` MAY be `null` when the line is relative (for example a multiple of the recent rate) |
   | `pool` | a named allowance shared by several projects | one of `period`, `windowSeconds`, `since` |
@@ -424,7 +425,7 @@ only shows them.
   A host shows an unknown `kind` generically — limit, spent, window, enforced — and never
   rejects the report for it. A limit across every project is `scope: "machine"`, not a kind of
   its own; a cumulative allowance counts from `since`.
-- A limit has at most one window: `period` is a calendar UTC day or month, `windowSeconds` a
+- A limit has at most one window: `period` is a calendar UTC day, ISO week (DEC-0183) or month, `windowSeconds` a
   rolling window ending at `generatedAt`, `since` a cumulative count from that instant. The window
   agrees with the kind as in the table (`FAC-SEM-031`).
 - `limitUsd` is a positive dollar amount; only a relative limit (`velocity`, or an unknown kind)
@@ -441,6 +442,53 @@ only shows them.
   `budgets` entry with `scope: "machine"`, `enforced: true`, kind `daily` or `monthly`, the same
   `period`, `limitUsd` and `spentUsd` (`FAC-SEM-031`). A service whose machine limit counts a
   rolling window, not a calendar period, omits `budget`.
+
+### Changing a limit (DEC-0183)
+
+A person changes a service's limits from a host's Costs section without a code change or a release, and an agent does
+the same through the service's agent surface (AP-1). Schemas: the input and answer of `spend.limits.set` in
+[`spend-limits-set.schema.json`](../../schemas/spend-limits-set.schema.json); `editable`, `minUsd`, `maxUsd`,
+`limitChanges` and `months` in [`service-usage.schema.json`](../../schemas/service-usage.schema.json).
+
+- **SL-1, the week.** `period: "week"` is the current ISO week, from Monday 00:00 UTC; the known kind `weekly` counts it
+  or the last 7 days (`windowSeconds: 604800`), and is a dollar amount like `daily` and `monthly` (`FAC-SEM-031`). A
+  report pinned before DEC-0183 states a weekly limit as kind `weekly` with `since` the week's Monday 00:00 UTC, a
+  cumulative window that stays true.
+- **SL-2, one change action.** A service that lets a person change a limit serves the capability `spend.limits.set`,
+  declared as the action `spend.limits.set` (`tool: "spend.limits.set"`, `gate: "relayed"`, [Actions](#actions) AP-1).
+  Its input is `{limitId, limitUsd?, enforced?, reason, idempotencyKey}` with at least one of `limitUsd` (a positive
+  amount, or `null` to clear a relative limit) and `enforced`; absent means unchanged. Its answer is `{change,
+  repeated?}`, `change` being the `limitChanges[]` entry it recorded (`before`, `after` and the change's `id`); a retry
+  with the same key and input answers the first result with `repeated: true`. A change that only tightens (a lower
+  `limitUsd`, or `enforced` turned on) is the caller's own act. Any other change (a higher `limitUsd`, `null`, or
+  `enforced` turned off) is the operator's: the call carries the decision in `_meta.decision` (AP-2), and without it
+  the service refuses `operator-decision-required`. Refusals: `unknown-limit` (no `budgets[]` entry has the id),
+  `limit-not-editable` (the entry is not `editable: true`), `invalid-amount` (outside `minUsd`..`maxUsd`, or `null` for
+  a kind that is a dollar amount), `operator-decision-required`, `decision-invalid` (AP-2). The dashboard's edit
+  performs the same act with the same checks and record. The decision travels in `_meta`, not in the input, as every
+  relayed action's does.
+- **SL-3, which limits are editable.** `editable: true` on a `budgets[]` entry says the service takes `spend.limits.set`
+  for it; absent or `false`, a host offers no edit. `minUsd` and `maxUsd` MAY bound the amount it takes, only on an
+  editable limit and the lower not above the upper (`FAC-SEM-031`).
+- **SL-4, the change history.** `limitChanges` lists the latest changes of the limits, newest first, at most 64, each
+  `{id, at, by, byRef?, via, limitId, before, after, reason}`: `by` is whose decision it was (`operator`, at the
+  dashboard or relayed by an agent with a decision; `agent`, a tightening without one; `service`, a default or its
+  configuration), `via` the door (`dashboard`, `agent`, `config`), `before` `null` when the change created the limit.
+  `byRef` is an opaque reference (a grant, an audit record), never a name, an email or a session id (DL-22). Ids are
+  unique and no change is after `generatedAt` (`FAC-SEM-031`). Every change through either door is in it.
+- **SL-5, the emergency stop.** A service that spends money SHOULD carry two limits of kind `emergency`, scope
+  `machine`, enforced unless lifted: `emergency.day` (`period: "day"`, 500 USD) and `emergency.month`
+  (`period: "month"`, 1000 USD), the estate's defaults of 2026-11-18. Raising or lifting one goes through
+  `spend.limits.set` with the operator's decision (SL-2); a lifted one stays in `budgets` with `enforced: false`. A
+  report without them is not invalid: whether a service spends is not in the report, so it is a host's or an audit's
+  finding, not `FAC-SEM-031`'s.
+- **SL-6, months for a chart.** `months` MAY carry money per UTC month for up to the last 12, oldest first, each month
+  once, the report's month last and partial (`FAC-SEM-031`); `costUsd` is money as above (rows not on a subscription,
+  DEC-0110), `null` when none is priced and a lower bound while `unpricedCalls` is above 0. A host MAY keep its own
+  history instead; `days` stays at 31.
+
+A report or an answer carrying these members is read by a checker pinned at or after DEC-0183; one pinned before
+refuses them (the objects are closed), so a service sends them from that pin.
 
 ### Load
 

@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0182` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0184` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -13514,3 +13514,53 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   `idempotent`, `degraded`), which is sshlg-skills' to align or to bring here as a request.
 - **Source:** CT-342; the board request `ae5f6132` (thread `45f885f5`). DEC-0182 was reserved by git CAS
   (`agent_sync.py reserve DEC`, key `ae5f6132-two-door-probe`).
+
+### DEC-0183: spending limits a person and an agent change the same way: the week, `spend.limits.set`, the history, the emergency stop and months
+
+- **Date:** 2026-11-18
+- **Status:** Accepted 2026-11-18 (CT-343): the gate `pnpm run check` green in the run that answered the board request
+  `395c11bd`; no blind reading ran in that run, so further readings are CT-343's open part.
+- **Context:** the agents database asked on the board (request `395c11bd`, thread `f112ec7c`, 2026-11-18), relaying the
+  operator's words of 2026-11-18 (its request `030aa246`, thread `45c20d5c`, trusted provenance): every agent that
+  spends shows a Costs section on its dashboard with limits per day, week and month and a chart, the emergency stop
+  (500 USD a day, 1000 USD a month) stays on every agent, and a limit is changed from the dashboard without touching
+  the code. Fabric Dashboards took the view side (FD-324) and waits on the form. DEC-0021 and DEC-0027 give the report
+  and `budgets[]`, but no week, no change action, no marker of what is editable, no history and 31 days only.
+- **Decision:** [service, changing a limit](specification/service.md#changing-a-limit-dec-0183) SL-1 to SL-6;
+  `spend-limits-set.schema.json`; `editable`, `minUsd`, `maxUsd`, `limitChanges` and `months` in
+  `service-usage.schema.json`; `FAC-SEM-031` extended (`usageLimits` in `src/semantic-rules.ts`):
+  1. **SL-1, the week.** `period: "week"` (ISO week from Monday 00:00 UTC) and the known kind `weekly` (period week or
+     `windowSeconds: 604800`, a dollar amount).
+  2. **SL-2, one change action.** The capability and action `spend.limits.set` (`gate: relayed`), input `{limitId,
+     limitUsd?, enforced?, reason, idempotencyKey}`, answer `{change, repeated?}`. Tightening is the caller's own act;
+     raising, clearing or turning a limit off is the operator's, carried in `_meta.decision` (AP-2). Refusals
+     `unknown-limit`, `limit-not-editable`, `invalid-amount`, `operator-decision-required`, `decision-invalid`.
+  3. **SL-3.** `editable: true` on a `budgets[]` entry, with optional `minUsd` and `maxUsd` only on an editable limit,
+     the lower not above the upper.
+  4. **SL-4.** `limitChanges[]`, newest first, at most 64: `{id, at, by, byRef?, via, limitId, before, after,
+     reason}`; `by` whose decision, `via` the door; `byRef` opaque (DL-22); unique ids, none after `generatedAt`.
+  5. **SL-5.** A spending service SHOULD carry `emergency.day` (500 USD, period day) and `emergency.month` (1000 USD,
+     period month), enforced unless lifted through SL-2 with the operator's decision, then shown `enforced: false`.
+  6. **SL-6.** `months[]`, up to the last 12 UTC months of money, oldest first, the report's month last; or the host
+     keeps its own history.
+- **Not taken:** `decision` as a member of the input, as the request proposed: every relayed action carries the
+  operator's decision in `_meta.decision` (DEC-0121 AP-2), so one validator and one record serve this action too. A
+  semantic rule that refuses a report without the emergency limits: the report does not say whether the service
+  spends, so the absence is a host's or an audit's finding. Paging the history: 64 entries answer the Costs section.
+- **Why:** the base's pattern `costs-panel` and Fabric Dashboards need one shape to read and one door to write; making
+  the dashboard's edit and the agent's call one action keeps AP-1 parity, and letting a tightening pass without a
+  decision keeps the safe direction fast while every loosening stays the operator's.
+- **Compatibility:** additive within `fabric-service/0.1`: every new member is optional and `week` is a new enum value.
+  A checker pinned before this decision refuses a report carrying them (the objects are closed), so a service sends
+  them from a pin carrying DEC-0183; until then SL-1's `since` form states a week truthfully.
+- **Evidence:** `test/service-rules.test.ts` (the five DEC-0183 cases of `FAC-SEM-031`), `test/schema-compilation.test.ts`
+  (163 schemas); fixtures `positive/service-usage-limits-edit.json`, `positive/spend-limits-set.json`,
+  `negative/service-usage-budgets-bad-period.json`, `negative/service-usage-limit-change-unknown-via.json`,
+  `negative/service-usage-month-bad.json`, `negative/spend-limits-set-no-change.json`,
+  `negative/spend-limits-set-zero.json` (`fixtures/catalogue.json`); `docs/specification/service.md` (Limits, Changing
+  a limit), `docs/backlog.md` (CT-343).
+- **Consequences:** Fabric Dashboards (FD-324) reads `editable`, `limitChanges` and `months` and calls
+  `spend.limits.set` from its Costs section; the base's pattern `costs-panel` follows as a patch; each spending agent
+  adopts it at its next pin through the base's rollout.
+- **Source:** CT-343; the board request `395c11bd` (thread `f112ec7c`). DEC-0183 was reserved by git CAS
+  (`agent_sync.py reserve DEC`, key `395c11bd-spend-limits`).

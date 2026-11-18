@@ -1,0 +1,7 @@
+{
+  "limitId": "machine.monthly",
+  "limitUsd": 250,
+  "enforced": false,
+  "reason": "The operator raised the month line and lifted it for the launch week.",
+  "idempotencyKey": "limits-2026-10-04-01"
+}

@@ -1,0 +1,5 @@
+{
+  "limitId": "machine.monthly",
+  "reason": "Nothing to change.",
+  "idempotencyKey": "limits-2026-10-04-02"
+}
