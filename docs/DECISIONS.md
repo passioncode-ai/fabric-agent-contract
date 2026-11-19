@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0184` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0185` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -13564,3 +13564,44 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   adopts it at its next pin through the base's rollout.
 - **Source:** CT-343; the board request `395c11bd` (thread `f112ec7c`). DEC-0183 was reserved by git CAS
   (`agent_sync.py reserve DEC`, key `395c11bd-spend-limits`).
+
+### DEC-0184: a button behind execute names its operation in `tool`; no `operation` member
+
+- **Date:** 2026-11-19
+- **Status:** Accepted 2026-11-19 (CT-347): the gate `pnpm run check` green in the run that answered the board request
+  `e13bb350`; no blind reading ran in that run, so further readings are CT-347's open part.
+- **Context:** the sound-engine Hub's agent asked on the board (request `e13bb350`, thread `a7fb9229`, 2026-11-19).
+  The operator's two-door canon of 2026-11-18 leaves only `search` and `execute` in `tools/list`; DEC-0121 AP-1 gives
+  every dashboard button an agent twin; an action is `{id, title, tool, gate, humanStep?}`, closed (the adapter's
+  `fabric_actions.py`, 0.96.0). The Hub declares `tool: "execute"` for a button whose twin is an operation behind
+  execute, the adapter's `interop.action-tools` passes it because `execute` is in `tools/list`, and the operation the
+  button runs is written nowhere. The ask: an optional `operation` member beside `tool: "execute"`, checked by
+  `FAC-SEM-142`.
+- **Decision:**
+  1. **AO-1.** On a compact surface (DEC-0180, a two-door one by DEC-0182 TD-1) an action's `tool` names the operation
+     the button runs: a capability `surfaces.mcp.capabilities` lists (CM-2) and search answers (CM-3), called through
+     execute (CM-4, CM-5) or by its own name. It never names the surface's search or execute tool. `FAC-SEM-142`
+     refuses an action whose `tool` equals a declared `surfaces.mcp.compact.search` or `.execute`, with a finding that
+     says so (`actionsExtensionRules` in `src/actions.ts`).
+  2. **AO-2, a host's probe.** `interop.action-tools` reads a compact surface's operations from search (DEC-0180
+     CM-6, DEC-0182 TD-5) and passes an action only when its `tool` is one of them; the search or execute tool being
+     in `tools/list` is not a twin.
+- **Not taken:** the `operation` member. `tool` is already the capability that performs the action, and CM-2 keeps
+  every operation in `capabilities`, so `tool: "<operation>"` passes `FAC-SEM-142` today and a probe that reads
+  search finds it by name. A second member would let `tool` and `operation` disagree, would make `tool: "execute"`
+  name a door that every compact button shares, and would change the closed action object for every reader pinned
+  before it.
+- **Why:** the declaration keeps one name per act, the name the person's button and the agent's execute call share,
+  and the rule and the probe read it the same way on a listed and on a compact surface.
+- **Compatibility:** no schema changes. A document that declares `compact` and an action with `tool` equal to its
+  execute or search tool already failed `FAC-SEM-142` (CM-2 keeps those names out of `capabilities`, which a compact
+  surface must carry, `FAC-SEM-182`); the finding now names the cause. A service that declares no `compact` (pinned
+  before DEC-0180) moves its actions to the operation names when it declares the mode.
+- **Evidence:** `test/actions.test.ts` ("names the operation, not the compact surface's execute tool, as a button's
+  twin"); fixtures `fixtures/semantic/service-well-known-actions-compact-operation.json`,
+  `fixtures/semantic/service-well-known-actions-compact-execute-door.json`; `docs/specification/service.md` (Actions,
+  AP-1), `docs/specification/conformance.md` (the service's row), `docs/backlog.md` (CT-347).
+- **Consequences:** the adapter's `interop.action-tools` and its port of `FAC-SEM-142` take AO-1 and AO-2 at their
+  next pin (asked on the board); the Hub's `action_table` declares the operation (`hub.pipeline_audit`) in `tool`.
+- **Source:** CT-347; the board request `e13bb350` (thread `a7fb9229`). DEC-0184 was reserved by git CAS
+  (`agent_sync.py reserve DEC`, key `e13bb350-action-operation`).

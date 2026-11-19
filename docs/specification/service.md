@@ -1403,7 +1403,9 @@ Every button a person has, the person's agent has (except the operator's move of
   instruction that names the action satisfies it (DEC-0121). `FAC-SEM-142` refuses a declaration that is not its
   schema's (a reader treats it as not declared and reports it, as `FAC-SEM-133` does for load), whose ids repeat,
   whose `humanStep` disagrees with `gate`, or whose `tool` is missing from a present `surfaces.mcp.capabilities`: a
-  button without an agent twin (DEC-0121). The rule sees only declared actions; a host reports a service that serves a
+  button without an agent twin (DEC-0121). On a compact surface (DEC-0180) `tool` names the operation the button
+  runs, the capability `capabilities` lists and search answers, never the surface's search or execute tool, which
+  `FAC-SEM-142` refuses there (DEC-0184 AO-1). The rule sees only declared actions; a host reports a service that serves a
   dashboard and declares none (CT-126). `actionsView` is the host reader.
 - **AP-2, the relayed decision.** A call carries the operator's decision in `_meta.decision`
   ([`decision.schema.json`](../../schemas/decision.schema.json), a member of

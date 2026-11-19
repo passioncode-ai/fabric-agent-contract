@@ -353,7 +353,8 @@ const flag = (instancePath: string, message: string): Finding => ({ code: "FAC-S
  * FAC-SEM-142 on a well-known document (kind `service-well-known`) that carries the actions key: a value that is not
  * its schema's (a reader treats it as not declared and reports it, as FAC-SEM-133 does for load); an `id` named twice; a
  * `humanStep` present without `gate: human` or absent with it; a `tool` that a present `surfaces.mcp.capabilities` does
- * not list: a button without an agent twin (DEC-0121 AP-1). The authority key is `authorityExtensionRules`'s.
+ * not list: a button without an agent twin (DEC-0121 AP-1); a `tool` that names a declared compact surface's search or
+ * execute tool rather than the operation behind it (DEC-0184 AO-1). The authority key is `authorityExtensionRules`'s.
  */
 export function actionsExtensionRules(wellKnown: JsonObject): Finding[] {
   return actionsKeyFindings(wellKnown);
@@ -445,6 +446,8 @@ function actionsKeyFindings(wellKnown: JsonObject): Finding[] {
   const surfaces = isObject(wellKnown.surfaces) ? wellKnown.surfaces : {};
   const mcp = isObject(surfaces.mcp) ? surfaces.mcp : {};
   const capabilities = Array.isArray(mcp.capabilities) ? (mcp.capabilities as unknown[]) : undefined;
+  const compact = isObject(mcp.compact) ? mcp.compact : {};
+  const doors = new Set([compact.search, compact.execute].filter((name): name is string => typeof name === "string"));
   const findings: Finding[] = [];
   const seen = new Set<string>();
   view.actions.forEach((action, i) => {
@@ -452,7 +455,8 @@ function actionsKeyFindings(wellKnown: JsonObject): Finding[] {
     if (seen.has(action.id)) findings.push(flag(`${at}/id`, `action ${action.id} is declared twice`));
     seen.add(action.id);
     if ((action.gate === "human") !== (action.humanStep !== undefined)) findings.push(flag(`${at}/humanStep`, "humanStep is present exactly when gate is human (DEC-0121 AP-4)"));
-    if (capabilities !== undefined && !capabilities.includes(action.tool)) findings.push(flag(`${at}/tool`, `the MCP surface does not serve ${action.tool}: a button without an agent twin (DEC-0121 AP-1)`));
+    if (doors.has(action.tool)) findings.push(flag(`${at}/tool`, `${action.tool} is the compact surface's search or execute tool, not a capability: tool names the operation the button runs, one of capabilities (DEC-0184 AO-1, DEC-0180 CM-6)`));
+    else if (capabilities !== undefined && !capabilities.includes(action.tool)) findings.push(flag(`${at}/tool`, `the MCP surface does not serve ${action.tool}: a button without an agent twin (DEC-0121 AP-1)`));
   });
   return findings;
 }
