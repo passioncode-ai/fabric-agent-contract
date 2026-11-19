@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0186` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0187` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -13676,3 +13676,52 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   applies DC-7; the two threads are told this decision's number.
 - **Source:** CT-339; the board requests `80429475` (thread `92e6c78a`) and `6a1c4b6f` (thread `a4f07b9c`). DEC-0185
   was reserved by git CAS (`agent_sync.py reserve DEC`, run `r-b219cc47cbfa`).
+
+### DEC-0186: an agent chooses how it pays for each model's work, a subscription or tokens, on measured volume and price, and reviews the choice
+
+- **Date:** 2026-11-19
+- **Status:** Accepted 2026-11-19 (CT-349): the gate `pnpm run check` green in the run that answered the board request
+  `34bac787`; no blind reading ran in that run, so further readings are CT-349's open part.
+- **Context:** the operator's PM agent asked on the board (request `34bac787`, thread `307a5e7a`, 2026-11-19), relaying
+  the operator's words of 2026-11-19 about 11:45 UTC in the passioncode-pm-agent session `2378f99b`, trusted
+  provenance: «Давай на всех агентах сделаем правила. предварительного выбора, когда мы строим и в дальнейшем, типа,
+  передай это всем агентам правила, в контракт, возможно, или еще куда-то, проверять, что выгоднее, платить токены или
+  подписку за тот объем задачки, который, типа, делается на той модели, которая делается. И у каждого агента будет
+  индивидуально. Передай это на базу знаний, на фабриконтракт». The contract had the route of a usage row (DEC-0046,
+  DEC-0061) and money apart from a subscription's estimate (DEC-0110), but no record of why a route was chosen, on what
+  volume and price, or when it is looked at again. The rule for templates and the rollout to agents are the agents
+  base's (its request `efd05264`).
+- **Decision:** [service, choosing a payment route](specification/service.md#choosing-a-payment-route-dec-0186) RC-1 to
+  RC-6; `routeChoices`, `routeChoice` and `routeMeasure` in `service-usage.schema.json`; `FAC-SEM-184` and the reference
+  comparison `cheaperRoute` (`src/route-choice-rules.ts`):
+  1. **RC-1.** An agent chooses per work and model before its first run, on an estimate, and again on its own receipts
+     once the work has run; a service with the usage report SHOULD carry the choices in `routeChoices`.
+  2. **RC-2.** A choice rests on a window, the volume in it and both prices for one 30-day month of it
+     (`tokensUsdMonth`, `subscriptionUsdMonth`), an unknown price `null`, and `quotaFits`.
+  3. **RC-3.** One entry per work and model, ids unique; a `subscription` choice names its runner (DEC-0046 item 3).
+  4. **RC-4.** The cheaper route by the entry's numbers is the default; `reason` says why the chosen one; the dearer
+     route is allowed and shown with `cheaperRoute`; `previous` records a changed route.
+  5. **RC-5.** `reviewBy` within 92 days of the decision; an earlier review when volume or a price moves; an overdue
+     review is valid and shown first.
+  6. **RC-6.** A record, not a meter: DEC-0110's money, DEC-0027's and DEC-0183's limits unchanged; no person, account
+     or login in an entry (DL-22).
+- **Not taken:** a semantic finding for a dearer choice or an overdue review: a report may truthfully show either, and
+  the reason a price leaves out (a shared quota, a vendor's terms) is the agent's to state, so a host shows the
+  comparison and the date instead of refusing the report. A choice per runner profile in the well-known
+  `configuration` (DEC-0046 item 6): the measurement comes from the usage receipts, so the record sits beside them.
+  A subscription price list in the contract: prices change and belong to the catalogue's price feed (DEC-0046 item 2).
+- **Why:** the operator wants every agent to check, for its own volume on its own model, whether tokens or a subscription
+  cost less, at build time and later; one shape lets Fabric Dashboards show it beside the Costs section and the agents
+  base's audit read it the same way in every agent, and the 92-day bound keeps a choice from going stale unseen.
+- **Compatibility:** additive within `fabric-service/0.1`: `routeChoices` is optional. A checker pinned before this
+  decision refuses a report carrying it (the report object is closed), so a service sends it from a pin carrying
+  DEC-0186; until then RC-1's record lives in the agent's repository.
+- **Evidence:** `test/route-choice-rules.test.ts` (FAC-SEM-184 and `cheaperRoute`); fixtures
+  `positive/service-usage-route-choices.json`, `negative/service-usage-route-choice-unknown-route.json`,
+  `negative/service-usage-route-choice-no-price.json` (`fixtures/catalogue.json`); `docs/specification/service.md`
+  (Choosing a payment route, Semantic rules), `docs/specification/conformance.md` (`FAC-SEM-184`), `docs/backlog.md`
+  (CT-349).
+- **Consequences:** the agents base's rule and rollout (request `efd05264`) point at RC-1 to RC-6; Fabric Dashboards may
+  show `routeChoices` with `cheaperRoute` beside the Costs section; each agent adopts it at its next pin.
+- **Source:** CT-349; the board request `34bac787` (thread `307a5e7a`). DEC-0186 and `FAC-SEM-184` were reserved by git
+  CAS (`agent_sync.py reserve`, keys `34bac787-payment-route` and `34bac787-payment-route-sem`).

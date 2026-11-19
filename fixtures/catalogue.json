@@ -1203,5 +1203,8 @@
   {"name": "comms-message-via-on-message", "schema": "comms-message.schema.json", "path": "negative/comms-message-via-on-message.json", "valid": false, "keyword": "const"},
   {"name": "comms-message-via-with-deliver", "schema": "comms-message.schema.json", "path": "negative/comms-message-via-with-deliver.json", "valid": false, "keyword": "false schema"},
   {"name": "comms-message-via-unknown", "schema": "comms-message.schema.json", "path": "negative/comms-message-via-unknown.json", "valid": false, "keyword": "enum"},
-  {"name": "comms-message-via-without-reply-to", "schema": "comms-message.schema.json", "path": "negative/comms-message-via-without-reply-to.json", "valid": false, "keyword": "required"}
+  {"name": "comms-message-via-without-reply-to", "schema": "comms-message.schema.json", "path": "negative/comms-message-via-without-reply-to.json", "valid": false, "keyword": "required"},
+  {"name": "service-usage-route-choices", "schema": "service-usage.schema.json", "path": "positive/service-usage-route-choices.json", "valid": true},
+  {"name": "service-usage-route-choice-unknown-route", "schema": "service-usage.schema.json", "path": "negative/service-usage-route-choice-unknown-route.json", "valid": false, "keyword": "enum"},
+  {"name": "service-usage-route-choice-no-price", "schema": "service-usage.schema.json", "path": "negative/service-usage-route-choice-no-price.json", "valid": false, "keyword": "required"}
 ]

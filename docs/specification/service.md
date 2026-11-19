@@ -490,6 +490,50 @@ the same through the service's agent surface (AP-1). Schemas: the input and answ
 A report or an answer carrying these members is read by a checker pinned at or after DEC-0183; one pinned before
 refuses them (the objects are closed), so a service sends them from that pin.
 
+### Choosing a payment route (DEC-0186)
+
+Every agent that calls models chooses, per piece of work and per model, whether that work pays with tokens (a key or the
+platform's metered models) or runs on a subscription, by measuring which costs less for the volume the work has, and
+measures again later. The choice is the agent's own: two agents on one model may choose differently. Schema:
+`routeChoices` and its `routeChoice` and `routeMeasure` definitions in
+[`service-usage.schema.json`](../../schemas/service-usage.schema.json); the rule `FAC-SEM-184`; the reference
+comparison `cheaperRoute` in [`src/route-choice-rules.ts`](../../src/route-choice-rules.ts).
+
+- **RC-1, at build and after.** An agent chooses before its first run on a model (when it is built, or when a model or
+  a pipeline is added), on an estimate (`measured.basis: "estimate"`: a trial run, a plan's volume), and chooses again
+  on its own receipts once the work has run (`basis: "measured"`). A service that offers the usage report SHOULD carry
+  its choices in `routeChoices`; an agent without the report keeps the same record in its repository.
+- **RC-2, what a choice rests on.** `measured` gives the window (`from`, `to`, UTC dates, `to` not after the day of the
+  decision), the volume in it (`calls`, `inputTokens`, `outputTokens`, optional `cacheReadTokens`, counted as the usage
+  report counts them), and both prices for one 30-day month of that volume: `tokensUsdMonth` at the provider's or the
+  price list's price, and `subscriptionUsdMonth`, the plan's monthly price or the share of it the agent attributes to
+  this work (said in `reason`). An unknown price is `null`, never `0` (DEC-0021); `subscriptionUsdMonth` is `null` when
+  no subscription serves the model. `quotaFits` says whether the volume fits the subscription's quota beside the other
+  work it serves (`null` when not known).
+- **RC-3, one choice per work and model.** Each entry names the `work` (the agent's own words: a pipeline, a job kind,
+  all its calls), `provider` and `model` by the usage rows' names, and `chosen` by a usage row's `route` names
+  (`subscription`, `key`, `platform-metered`). One work on one model has one entry, ids are unique (`FAC-SEM-184`). A
+  `subscription` choice names its `runner`: a subscription runs only in its vendor's runner and is never used for an
+  offered service (DEC-0046 item 3, `FAC-SEM-059`, `FAC-SEM-087`).
+- **RC-4, the comparison and the reason.** The cheaper route by the entry's numbers is the default choice. `reason`
+  says in one or two sentences why the chosen route, the comparison included, and anything the prices leave out: a
+  quota the volume does not fit, a vendor's terms, a runner the work cannot leave. Choosing the dearer route is allowed
+  and is not a finding; a host shows `cheaperRoute(choice)` beside it (which side is cheaper, whether the choice is,
+  the monthly difference, and whether a cheaper subscription is ruled out by `quotaFits: false`). `previous` records the
+  route before a review that changed it.
+- **RC-5, the review.** `decidedAt` is when the choice was made (not after `generatedAt`); `reviewBy` is the UTC date by
+  which the agent measures again, after the day of the decision and at most 92 days after it (`FAC-SEM-184`). An agent
+  also reviews before `reviewBy` when the volume or a price moves enough to change the comparison (a new model, a new
+  plan, a price change). A past `reviewBy` is overdue: the report stays valid and a host shows it first, as it shows a
+  tripped limit.
+- **RC-6, what it does not change.** The choice is a record, not a meter: money is still summed from the rows by route
+  (DEC-0110), a subscription row's `costUsd` stays an estimate, and limits stay in `budgets` (DEC-0027, DEC-0183). The
+  entry names no person, account or login (DL-22): which subscription serves the work is the runner's and the account
+  manager's.
+
+A report carrying `routeChoices` is read by a checker pinned at or after DEC-0186; one pinned before refuses it (the
+report object is closed), so a service sends it from that pin.
+
 ### Load
 
 Beside the usage report, not part of it: a service that queues calls to its agents (DEC-0104) carries the extension key
@@ -1660,4 +1704,5 @@ It answers the operator's rule of 2026-11-18 (the agents database's R33 O13, dec
 | <a id="fac-sem-142"></a>`FAC-SEM-142` | `service-well-known`, `action-call` | an actions declaration is its schema's, names each `id` once, carries `humanStep` exactly when `gate` is `human` and names only tools a present `surfaces.mcp.capabilities` lists; a service answers an action call as `actionDecision` does (DEC-0121), except a source hand-over ([source](source.md#handing-over)), out of this rule until a service pins a contract revision carrying CT-181: `--kind action-call` cannot tell a hand-over and is not run on a hand-over's calls until then; and in the authority key, `extensions/authority/0.1` (`authorityExtensionRules`, DEC-0162 LV-5, LV-7), a value its schema refuses, an organization named twice in `levels`, and a level in `actionLevels` for an id that is not a relayed action of the actions declaration |
 | <a id="fac-sem-176"></a>`FAC-SEM-176` | `service-well-known` | a service that serves `surfaces.dashboard` serves `surfaces.mcp` or `surfaces.a2a` beside it, and a present `surfaces.mcp.capabilities` is not empty (DEC-0169 RP-3) |
 | <a id="fac-sem-182"></a>`FAC-SEM-182` | `service-well-known` | a present `surfaces.mcp.compact` stands beside `capabilities`, names two different tools for search and execute, neither of them among `capabilities`, and only direct capabilities `capabilities` names (DEC-0180 CM-2) |
+| <a id="fac-sem-184"></a>`FAC-SEM-184` | `service-usage` | route choices: ids unique and one per work and model; a subscription choice names its runner; `previous` differs from `chosen`; the measured window is ordered and ends by the day of the decision; `decidedAt` not after `generatedAt`; `reviewBy` after the day of the decision and within 92 days (DEC-0186 RC-3, RC-5) |
 | <a id="fac-sem-180"></a>`FAC-SEM-180` | `service-descriptor`, `service-well-known`, `service-observation` | the instance facts are their schema's and no clause of [IF-6](#instance-facts) refuses a value: `audience` against `peer`, the placement and the runner, `entry` against the dashboard's `login`, `shared` and `system` only remote, the label never credential-shaped nor in a local well-known document, no fact that serves others beside a `subscription` runner (DEC-0173, DEC-0174) |
