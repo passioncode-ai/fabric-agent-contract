@@ -161,6 +161,13 @@ describe("kind action-call (FAC-SEM-142)", () => {
   it("answers nothing for another kind", () => {
     expect(actionRules("service-well-known", {})).toBeUndefined();
   });
+  it("names the operation, not the compact surface's execute tool, as a button's twin (DEC-0184 AO-1)", () => {
+    const read = (name: string) => (JSON.parse(readFileSync(path.join(dir, name), "utf8")) as { input: Json }).input;
+    expect(actionsExtensionRules(read("service-well-known-actions-compact-operation.json"))).toEqual([]);
+    const [door] = actionsExtensionRules(read("service-well-known-actions-compact-execute-door.json"));
+    expect(door?.instancePath).toMatch(/\/actions\/0\/tool$/);
+    expect(door?.message).toContain("records.execute is the compact surface's search or execute tool, not a capability");
+  });
 });
 
 describe("delegation-refusal keeps DL-19's open data for every other code (DEC-0121)", () => {
