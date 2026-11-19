@@ -1,6 +1,6 @@
 # Design: the organization a key-issuing door proves (CT-339)
 
-**Status:** draft, 2026-11-17 (DC-7 added the same day for board request `6a1c4b6f`), no blind reading yet; to be read on three tiers until two consecutive rounds are clean,
+**Status:** decided as DEC-0185 on 2026-11-19 (DC-1 to DC-3, DC-5, DC-7; DC-4 and DC-7's semantic rule are CT-348). Before: draft, 2026-11-17 (DC-7 added the same day for board request `6a1c4b6f`), no blind reading yet; to be read on three tiers until two consecutive rounds are clean,
 then proposed as a DEC (the DEC is normative where the two differ). Row [CT-339](../../backlog.md); the request:
 fabric-agents-database's board message `80429475` (thread `92e6c78a`, answer due 2026-11-24), relaying the operator's
 rule from board request `c612a3e2` (thread `4a5879bd`, session `a1c9849b`, 2026-11-17).

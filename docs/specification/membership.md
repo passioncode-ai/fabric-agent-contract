@@ -674,6 +674,23 @@ fetches: a reader that fetches only when `refreshDue` may serve a retired instan
 `expiresAt`, at most 7 days; a reader that needs less fetches more often, and an issuer may state shorter lives. How a
 statement reaches the platform and the instance's product is not decided here.
 
+## Doors (DEC-0185)
+
+DEC-0185 · code [`src/door-context.ts`](../../src/door-context.ts) · vectors
+[`fixtures/vectors/door-context.json`](../../fixtures/vectors/door-context.json), written by
+[`tools/vectors/door-context.ts`](../../tools/vectors/door-context.ts)
+
+A door is what an issuing agent issues a key through: a remote service of an organization at its own `https://` origin,
+or a vault slot on a machine of the estate. `doorContext(door, asked, trust)` reads the context a door proves only from
+an `org-instance/1` statement (above) that verifies under the key set the caller applied for its organization, reads
+`active` and names the origin called, or from a secret placement of an estate record `verifyEstateRecord` accepted
+(DEC-0082); never from a name, a configuration row or a member the door writes about itself (DC-1). An issuer issuing
+in a context uses a door only when the reading answers that context, read per issue (DC-2). Its refusals, in order:
+`context-invalid`, `door-claim-absent`, `door-claim-invalid` (with the verifier's problem, `retired`, `wrong-origin`,
+`no-key-set` or `record-<problem>`), `door-organization-mismatch` (with the context the door proves) (DC-3). An
+organization's door that offers `*.keys.issue` binds each issue key to its own context and refuses a call from a key
+bound to another context or to none, `issuer-organization-mismatch`, before any provider call (DC-7).
+
 ## Semantic rules
 
 | Code | Kind | Rule |
@@ -766,6 +783,7 @@ each) let the platform, and an organization server that signs for both, link the
   to the platform (`instance_put`) and to the instance's product, whether a reader fetches it or the server pushes a
   retirement, and how an instance is created and billed (the platform's and the product's). How an instance that has
   no `https://` name of its own (one reachable only at a port, or a local instance on a member's machine) is stated.
+  How a key-issuing door hands its statement to a caller (DEC-0185 DC-4, a well-known extension) is CT-348.
 
 - **The proof a member-key door asks in an organization's context.** A member's key for an instance the organization deploys is issued and rotated only by the owner or an administrator, in person, a member's own machine included (LV-7, the operator's answer of 2026-11-13). CF-3's doors (the instance's CLI and page) authenticate whoever holds the descriptor, which on a member's machine is the member, and nothing yet tells the owner or an administrator apart there, nor says whether in person admits a remote session. Until DEC-0159's lander, Fabric (CT-208, CO-523) and the organization product name that proof (for example the owner's or an administrator's own credential the organization's key set lists, OM-3), the page and CLI of an instance the organization deploys on a member's machine offer no member-key issue or rotation; revocation stays the level route.
 
