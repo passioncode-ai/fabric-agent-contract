@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0187` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0188` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -13725,3 +13725,62 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   show `routeChoices` with `cheaperRoute` beside the Costs section; each agent adopts it at its next pin.
 - **Source:** CT-349; the board request `34bac787` (thread `307a5e7a`). DEC-0186 and `FAC-SEM-184` were reserved by git
   CAS (`agent_sync.py reserve`, keys `34bac787-payment-route` and `34bac787-payment-route-sem`).
+
+### DEC-0187: one answer shape for every product that issues access, `access-grants/1`, holders named by service key
+
+- **Date:** 2026-11-19
+- **Status:** Accepted 2026-11-19 (CT-350): the gate `pnpm run check` green in the run that answered the board request
+  `5cb69724`; no blind reading ran in that run, so further readings are CT-350's open part.
+- **Context:** Fabric Dashboards asked on the board (request `5cb69724`, thread `99218b8c`, 2026-11-19; its backlog
+  FD-351, `main` `787e6b46`), relaying the operator's words of 2026-11-19 in a Dashboards session, trusted provenance:
+  «проверка достопок и как делегировать дсоутп и смотрет ькому он деленирован гед это видно по разным агентоам».
+  Each product that issues access keeps its own list (Fabric's agent access, account seats, a media or text service's
+  client keys through `keys.list`, a vault's provider keys), and each writes the holder as a free label, so no host can
+  show on an agent's page, or on one page, what an agent holds and who holds access to it. The ask: one answer form
+  every such product gives through its `search`/`execute` doors and a button twin, with the holder, scopes, ceiling and
+  the day's spend, who issued it and when, whether it was revoked, and the door to issue or revoke under the operator's
+  decision; no key values; policy, budget and roles stay in FD-40 and FD-164.
+- **Decision:** [service, access grants](specification/service.md#access-grants-dec-0187) AG-1 to AG-7;
+  `access-grants.schema.json` (`access-grants/1`, `$defs/listInput`, `$defs/revokeInput`, `$defs/revokeResult`);
+  `FAC-SEM-185` and the reader `grantState` (`src/access-grants-rules.ts`):
+  1. **AG-1.** A service that issues access SHOULD serve `access.grants.list`, answering `access-grants/1` with its own
+     service key as `issuer`, paged at 500.
+  2. **AG-2.** The holder is an agent by service key `<id>.<instance>`, a person or a machine by kind and opaque
+     reference (DL-22), or `unresolved` with the product's earlier label until it maps it; a host never guesses.
+  3. **AG-3.** The subject is the issuer itself when absent, another agent by service key, or a provider's account by
+     provider and opaque reference.
+  4. **AG-4.** `limitUsd` (`null`: none) with `limitPeriod` exactly when it is a number; `spentDayUsd` for the UTC day,
+     `null` when unknown; a breach shown, not refused; the service's own limits stay in `budgets`.
+  5. **AG-5.** `issued` and `revoked` as acts `{at, by, via, agent?, ref?}`, `agent` exactly with `via: "agent"`; ids
+     unique and stable; times ordered; revoked and expired grants listable for 90 days.
+  6. **AG-6.** `doors.issue` names the product's own issue operation (input from its search, answer without a key
+     value); `doors.revoke` takes `{grantId, reason, idempotencyKey}`; both are relayed actions (AP-1); issuing,
+     widening and revoking another holder's grant carry the operator's decision (AP-2); a holder giving up its own
+     grant and a product revoking an exposed one act on their own account.
+  7. **AG-7.** No key value, prefix, hash or digits, no person's name or address, no session id; policy, budget and
+     roles are not in the record.
+- **Not taken:** one registry of every grant kept by Fabric or the host: each product stays the owner of what it
+  issued and enforces, and the host joins the answers by service key, as the request asked. A fixed issue input: what
+  an issue takes differs by product (scopes, chats, a provider), and a compact surface's search already hands a host
+  the input schema (DEC-0180 CM-3). A well-known extension announcing the list: the capability name is enough for
+  search and for a listed surface's `capabilities`. A key's prefix or last digits to tell keys apart: the grant id does
+  that without any part of a secret.
+- **Why:** the operator wants to check, delegate and see who holds access across all his agents in one place; a host
+  can only do that when every product answers the same fields with the same holder names, and the service key is the
+  name every host and the estate already use for an agent. Keeping the doors in each product keeps enforcement where
+  the grant lives, and the AP-2 decision keeps every widening the operator's.
+- **Compatibility:** additive: a new schema, rule and reader; no existing schema or rule changes. A product keeps its
+  own list operations (`keys.list`) and adds `access.grants.list` beside them; a host reads the new answer from a
+  product pinned at or after DEC-0187 and shows the others as not reporting.
+- **Evidence:** `test/access-grants-rules.test.ts` (FAC-SEM-185, `grantState`, the three `$defs`); fixtures
+  `positive/access-grants.json`, `negative/access-grants-free-label-holder.json`, `negative/access-grants-key-value.json`,
+  `negative/access-grants-person-label.json`, `negative/access-grants-ref-email.json`,
+  `negative/access-grants-unknown-protocol.json` (`fixtures/catalogue.json`); `test/schema-compilation.test.ts` (164
+  schemas); `docs/specification/service.md` (Access grants, Semantic rules), `docs/specification/conformance.md`
+  (`FAC-SEM-185`), `docs/backlog.md` (CT-350).
+- **Consequences:** Fabric Dashboards (FD-351) builds the agent's Access tab and the Access page from these answers;
+  Fabric's agent access, Switchboard's seats, Observatory's provider keys and the media and text services' client keys
+  add `access.grants.list` at their next pin (each asked on the board by the host that reads them); the agents base's
+  templates take it through their rollout.
+- **Source:** CT-350; the board request `5cb69724` (thread `99218b8c`). DEC-0187 and `FAC-SEM-185` were reserved by git
+  CAS (`agent_sync.py reserve`, keys `5cb69724-access-grants` and `5cb69724-access-grants-sem`).

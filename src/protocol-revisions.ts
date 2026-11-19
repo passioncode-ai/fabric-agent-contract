@@ -13,6 +13,7 @@ import { type Finding, type JsonObject, isObject } from "./findings.js";
  * pinned by a schema `const`; `NAMED_ONLY` lists those a specification names without a schema pin.
  */
 export const PROTOCOL_REVISIONS: ReadonlyMap<string, readonly string[]> = new Map([
+  ["access-grants", ["1"]],
   ["access-log", ["1"]],
   ["activity-inventory", ["1"]],
   ["activity-summary", ["1", "2"]],

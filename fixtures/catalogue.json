@@ -1206,5 +1206,11 @@
   {"name": "comms-message-via-without-reply-to", "schema": "comms-message.schema.json", "path": "negative/comms-message-via-without-reply-to.json", "valid": false, "keyword": "required"},
   {"name": "service-usage-route-choices", "schema": "service-usage.schema.json", "path": "positive/service-usage-route-choices.json", "valid": true},
   {"name": "service-usage-route-choice-unknown-route", "schema": "service-usage.schema.json", "path": "negative/service-usage-route-choice-unknown-route.json", "valid": false, "keyword": "enum"},
-  {"name": "service-usage-route-choice-no-price", "schema": "service-usage.schema.json", "path": "negative/service-usage-route-choice-no-price.json", "valid": false, "keyword": "required"}
+  {"name": "service-usage-route-choice-no-price", "schema": "service-usage.schema.json", "path": "negative/service-usage-route-choice-no-price.json", "valid": false, "keyword": "required"},
+  {"name": "access-grants", "schema": "access-grants.schema.json", "path": "positive/access-grants.json", "valid": true},
+  {"name": "access-grants-free-label-holder", "schema": "access-grants.schema.json", "path": "negative/access-grants-free-label-holder.json", "valid": false, "keyword": "pattern"},
+  {"name": "access-grants-key-value", "schema": "access-grants.schema.json", "path": "negative/access-grants-key-value.json", "valid": false, "keyword": "additionalProperties"},
+  {"name": "access-grants-person-label", "schema": "access-grants.schema.json", "path": "negative/access-grants-person-label.json", "valid": false, "keyword": "additionalProperties"},
+  {"name": "access-grants-ref-email", "schema": "access-grants.schema.json", "path": "negative/access-grants-ref-email.json", "valid": false, "keyword": "pattern"},
+  {"name": "access-grants-unknown-protocol", "schema": "access-grants.schema.json", "path": "negative/access-grants-unknown-protocol.json", "valid": false, "keyword": "const"}
 ]
