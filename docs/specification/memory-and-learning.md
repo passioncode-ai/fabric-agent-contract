@@ -354,3 +354,53 @@ ADR-0105).
   intersects `X-Fabric-Projects` with the binding's projects and never widens them.
 - Memory text is data, never instructions. A write is a proposal, and only the operator or an
   independent corroboration promotes it.
+
+## Knowledge layer (DEC-0188)
+
+An optional profile for an agent that keeps a knowledge base others ask (docs, decisions, specs, patterns, records). The
+contract requires it of no agent; the estate's rule that every such project serves it is the agents base's (R33 O17,
+its decision D-84). An agent that adopts it serves the operations below behind its MCP surface, through a compact
+surface's search and execute ([service](service.md#compact-mcp-surface-dec-0180), CM-3 to CM-5) or as tools of their own,
+and names them in `surfaces.mcp.capabilities`. Schemas: [`kb-search.schema.json`](../../schemas/kb-search.schema.json)
+(`kb-search/1`, with `$defs/searchInput`, `$defs/ragCheckInput`, `$defs/ragCheckResult` for `kb-rag-check/1`),
+[`kb-check.schema.json`](../../schemas/kb-check.schema.json) (`kb-check/1`) and
+[`knowledge-map.schema.json`](../../schemas/knowledge-map.schema.json) (`knowledge-map/1`). Member names are the
+agents base reference implementation's (`tools/knowledge_map.py`, pattern `hybrid-retrieval`), snake case included.
+
+| Operation | Input | Answer |
+|---|---|---|
+| `kb.search` | `$defs/searchInput`: `{query, limit?, hops?, as_of?}` | `kb-search/1` |
+| `kb.rag` | the same input | `kb-search/1`: the passages the caller's own model answers from |
+| `kb.rag_check` | `$defs/ragCheckInput`: `{claims[{text, quote, path}], revision?}` | `kb-rag-check/1`: `kept` and `dropped` with a reason |
+| `kb.check` | the agent's own (the change's head and the base revision) | `kb-check/1` |
+| `kb.map` | none, or the agent's own filter | `knowledge-map/1` |
+
+- **KL-1, the profile.** An agent serving any `kb.*` operation serves `kb.search` and `kb.map` at least, each answering
+  its schema. The operations are reads (DL-3 `read`); none spends the caller's or the operator's money.
+- **KL-2, search.** `kb.search` SHOULD fuse BM25 with stemming, trigrams and local vectors by reciprocal rank fusion
+  (k = 60) and rerank the top 30 to 50 with a local reranker; with `hops`, it adds personalized PageRank over the link
+  graph, for multi-step questions only. Each result carries the passage verbatim (`quote`), its repository-relative
+  `path`, `lines`, `date` and `revision`. `methods` names the legs that ran and `degraded` each leg that should have run
+  and did not; an answer from fewer legs says so and is never presented as the whole hybrid.
+- **KL-3, answers the caller's model writes.** The server spends nothing on an answer: `kb.rag` returns passages and
+  the caller's own model writes the answer. `kb.rag_check` keeps a claim only when its `quote` is found verbatim in
+  `path` at the revision and every number the claim states appears in that quote; the others are `dropped` with
+  `quote-not-found` or `number-not-in-quote`.
+- **KL-4, facts in two times.** A fact carries `valid_from`, `valid_to` (absent while it holds) and `recorded_at`. A
+  changed fact is replaced, never deleted: the old record gains `valid_to` (and `replaced_by`) and a new record starts.
+  `kb.search` with `as_of` returns only facts valid at that time.
+- **KL-5, the gate and the map.** `kb.check` runs the golden set per language against the base revision and the head,
+  recall@5 and MRR@10 on each; a change that lowers recall@5 on any language does not pass and does not merge.
+  `kb.map` answers the nodes, the explicit edges (a file names the other) and the semantic edges (nearest neighbours by
+  local embeddings that no file names), with the clusters.
+- **KL-6, local embeddings.** Embeddings are computed on the agent's own machine (`embedder.local: true`); the text of
+  people and records is never sent to a cloud model to be embedded. Without a local model the search answers
+  `degraded` naming `vector` and stays lexical, and the map answers `embedder: null` with `semantic` in `degraded`.
+- **KL-7, what a map holds.** A `knowledge-map/1` answer holds ids, kinds, short labels (at most 120 characters) and
+  coordinates, never a record's text; a search answer's `path` is repository-relative, never an absolute or home path.
+
+### Semantic rules
+
+| Code | Kind | Rule |
+|---|---|---|
+| <a id="fac-sem-186"></a>`FAC-SEM-186` | `knowledge-map`, `kb-search`, `kb-check` | a map: node and cluster ids unique, every edge joins two different nodes of the answer, a node's `cluster` is one of the answer's, with `embedder: null` no semantic edge and `semantic` in `degraded`; a search: result ids unique, `lines.from` not after `lines.to`, no leg in both `methods` and `degraded`, without a local embedder `vector` in `degraded` and not in `methods`, a call with `hops` names `graph` in one of them, `valid_to` after `valid_from`, with `as_of` every fact valid then; a check: each language once, `pass` false when recall@5 fell on any language (DEC-0188 KL-2, KL-4 to KL-6). Code: `src/knowledge-layer-rules.ts`; tests: `test/knowledge-layer-rules.test.ts` |

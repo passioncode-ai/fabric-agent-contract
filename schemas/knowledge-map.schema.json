@@ -1,0 +1,220 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/knowledge-map.schema.json",
+  "title": "knowledge-map/1 (DEC-0188): the graph of an agent's knowledge base, as kb.map answers it",
+  "description": "What the operation kb.map of an agent's knowledge layer answers: the records of its knowledge base as nodes (id, kind, a short label, a position and a cluster), the links between them as edges (explicit: a file names the other; semantic: nearest neighbours by local embeddings that no file names), and the clusters. Only ids, kinds, short labels and coordinates: never the text of a record (KL-7). embedder names the local model the semantic edges came from, null when none ran; degraded names each part that did not run. field names follow the reference implementation of the agents base (tools/knowledge_map.py). Semantic rule FAC-SEM-186. docs/specification/memory-and-learning.md#knowledge-layer-dec-0188.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "built_at",
+    "revision",
+    "embedder",
+    "nodes",
+    "edges",
+    "clusters",
+    "degraded"
+  ],
+  "properties": {
+    "schema": {
+      "const": "knowledge-map/1"
+    },
+    "built_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "revision": {
+      "$ref": "#/$defs/revision"
+    },
+    "embedder": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/embedder"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "The local model the semantic edges were computed with; null when none ran, and then degraded names semantic (KL-6)."
+    },
+    "nodes": {
+      "type": "array",
+      "maxItems": 20000,
+      "items": {
+        "$ref": "#/$defs/node"
+      }
+    },
+    "edges": {
+      "type": "array",
+      "maxItems": 200000,
+      "items": {
+        "$ref": "#/$defs/edge"
+      }
+    },
+    "clusters": {
+      "type": "array",
+      "maxItems": 2000,
+      "items": {
+        "$ref": "#/$defs/cluster"
+      }
+    },
+    "degraded": {
+      "$ref": "#/$defs/degraded"
+    }
+  },
+  "$defs": {
+    "revision": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[A-Za-z0-9._:-]+$",
+      "description": "The revision of the knowledge base the answer was built from: a commit or the store's own revision."
+    },
+    "embedder": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "local"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "local": {
+          "const": true,
+          "description": "Embeddings are computed on the agent's own machine (KL-6): a cloud embedder is never named here."
+        },
+        "dimensions": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65536
+        }
+      }
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "pattern": "^[^\\s]+$"
+    },
+    "node": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "kind",
+        "label",
+        "x",
+        "y",
+        "cluster",
+        "degree"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "kind": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^[a-z][a-z0-9_-]*$",
+          "description": "The record's kind in the knowledge base (a decision, a pattern, a template, a rule, a report)."
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120,
+          "description": "A short title, never the record's text (KL-7)."
+        },
+        "x": {
+          "type": "number"
+        },
+        "y": {
+          "type": "number"
+        },
+        "cluster": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/id"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "degree": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "edge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source",
+        "target",
+        "kind",
+        "weight"
+      ],
+      "properties": {
+        "source": {
+          "$ref": "#/$defs/id"
+        },
+        "target": {
+          "$ref": "#/$defs/id"
+        },
+        "kind": {
+          "enum": [
+            "explicit",
+            "semantic"
+          ],
+          "description": "explicit: a file names the other record; semantic: nearest neighbours by local embeddings that no file names (KL-5)."
+        },
+        "weight": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "cluster": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "label",
+        "size"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "size": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "degraded": {
+      "type": "array",
+      "uniqueItems": true,
+      "maxItems": 16,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 64,
+        "pattern": "^[a-z][a-z0-9_-]*$"
+      },
+      "description": "Each part that did not run (for a map: semantic, layout, clusters; for a search: bm25, trigram, vector, rerank, graph); empty when everything ran."
+    }
+  }
+}

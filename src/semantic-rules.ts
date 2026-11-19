@@ -4,6 +4,7 @@ import { normalIdentifier, sameIdentifier } from "./identifiers.js";
 import { usageRules } from "./usage-rules.js";
 import { routeChoiceRules } from "./route-choice-rules.js";
 import { accessGrantsRules } from "./access-grants-rules.js";
+import { kbCheckRules, kbSearchRules, knowledgeMapRules } from "./knowledge-layer-rules.js";
 import { supportQualityRules } from "./support-quality-rules.js";
 import { interopRules } from "./interop-rules.js";
 import { registryRules } from "./registry-rules.js";
@@ -235,6 +236,9 @@ export function evaluateSemanticRules(kind: string, value: unknown): Finding[] {
   if (kind === "manifest") findings.push(...channelAgentRules(value));
   if (kind === "service-usage") findings.push(...usageRules(value), ...usageLimits(value), ...routeChoiceRules(value));
   if (kind === "access-grants") findings.push(...accessGrantsRules(value));
+  if (kind === "knowledge-map") findings.push(...knowledgeMapRules(value));
+  if (kind === "kb-search") findings.push(...kbSearchRules(value));
+  if (kind === "kb-check") findings.push(...kbCheckRules(value));
   if (kind === "support-quality-daily") findings.push(...supportQualityRules(value));
   if (kind === "service-feed-request") findings.push(...feedRequestRules(value));
   if (kind === "settings-backup") findings.push(...settingsBackupRules(value));

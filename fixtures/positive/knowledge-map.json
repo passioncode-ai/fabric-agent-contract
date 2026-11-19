@@ -1,0 +1,72 @@
+{
+  "schema": "knowledge-map/1",
+  "built_at": "2026-11-19T12:00:00Z",
+  "revision": "1be06d9e",
+  "embedder": {
+    "name": "multilingual-e5-small",
+    "local": true,
+    "dimensions": 384
+  },
+  "nodes": [
+    {
+      "id": "decision:D-84",
+      "kind": "decision",
+      "label": "Knowledge layer and graphs",
+      "x": 0.12,
+      "y": -0.4,
+      "cluster": "c1",
+      "degree": 2
+    },
+    {
+      "id": "pattern:hybrid-retrieval",
+      "kind": "pattern",
+      "label": "Hybrid retrieval",
+      "x": 0.2,
+      "y": -0.35,
+      "cluster": "c1",
+      "degree": 2
+    },
+    {
+      "id": "report:2026-11-19-memory-graphs",
+      "kind": "report",
+      "label": "Memory graphs research",
+      "x": -0.5,
+      "y": 0.3,
+      "cluster": "c2",
+      "degree": 2
+    }
+  ],
+  "edges": [
+    {
+      "source": "decision:D-84",
+      "target": "pattern:hybrid-retrieval",
+      "kind": "explicit",
+      "weight": 1
+    },
+    {
+      "source": "decision:D-84",
+      "target": "report:2026-11-19-memory-graphs",
+      "kind": "explicit",
+      "weight": 1
+    },
+    {
+      "source": "pattern:hybrid-retrieval",
+      "target": "report:2026-11-19-memory-graphs",
+      "kind": "semantic",
+      "weight": 0.82
+    }
+  ],
+  "clusters": [
+    {
+      "id": "c1",
+      "label": "Retrieval",
+      "size": 2
+    },
+    {
+      "id": "c2",
+      "label": "Research",
+      "size": 1
+    }
+  ],
+  "degraded": []
+}

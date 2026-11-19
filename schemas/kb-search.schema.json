@@ -1,0 +1,297 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/kb-search.schema.json",
+  "title": "kb-search/1 (DEC-0188): what kb.search and kb.rag of an agent's knowledge layer answer",
+  "description": "The answer of kb.search (and of kb.rag, which answers the same passages for the caller's own model): each result a verbatim passage of the knowledge base with its path, lines, date and revision, and, for a fact, its bitemporal times. methods names the retrieval legs the answer used; degraded names each leg that did not run, so a lexical-only answer says so (KL-2, KL-6). $defs/searchInput is the input of kb.search and kb.rag; $defs/ragCheckInput and $defs/ragCheckResult the input and answer of kb.rag_check, which keeps only claims whose quote is found verbatim and whose numbers the quote holds (KL-3). Semantic rule FAC-SEM-186. docs/specification/memory-and-learning.md#knowledge-layer-dec-0188.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "query",
+    "revision",
+    "methods",
+    "results",
+    "degraded"
+  ],
+  "properties": {
+    "schema": {
+      "const": "kb-search/1"
+    },
+    "query": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "revision": {
+      "$ref": "knowledge-map.schema.json#/$defs/revision"
+    },
+    "as_of": {
+      "type": "string",
+      "format": "date-time",
+      "description": "The call's as_of, when it sent one: every fact in results was valid at that time (KL-4)."
+    },
+    "hops": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 4,
+      "description": "The call's hops, when it sent one: the graph leg (personalized PageRank) ran for a multi-step question (KL-2)."
+    },
+    "embedder": {
+      "oneOf": [
+        {
+          "$ref": "knowledge-map.schema.json#/$defs/embedder"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "methods": {
+      "type": "array",
+      "uniqueItems": true,
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/method"
+      },
+      "description": "The legs that ran for this answer (KL-2)."
+    },
+    "results": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "$ref": "#/$defs/result"
+      }
+    },
+    "degraded": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/method"
+      },
+      "description": "Each leg that should have run and did not; empty when the hybrid ran whole (KL-2, KL-6)."
+    }
+  },
+  "$defs": {
+    "method": {
+      "enum": [
+        "bm25",
+        "trigram",
+        "vector",
+        "rerank",
+        "graph"
+      ]
+    },
+    "lines": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "from",
+        "to"
+      ],
+      "properties": {
+        "from": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "to": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "fact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "valid_from",
+        "recorded_at"
+      ],
+      "properties": {
+        "valid_from": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "valid_to": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Absent: the fact still holds. A replaced fact keeps its record and gains valid_to; it is never deleted (KL-4)."
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "replaced_by": {
+          "$ref": "knowledge-map.schema.json#/$defs/id"
+        }
+      }
+    },
+    "result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "path",
+        "lines",
+        "quote",
+        "date",
+        "revision",
+        "score"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "knowledge-map.schema.json#/$defs/id"
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 400,
+          "pattern": "^(?![/\\\\~])(?![\\s\\S]*\\.\\.)[^\\s][\\s\\S]*$",
+          "description": "Repository-relative path of the record; never an absolute or home path."
+        },
+        "lines": {
+          "$ref": "#/$defs/lines"
+        },
+        "quote": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4000,
+          "description": "The passage, verbatim from path at revision, lines from to to (KL-2)."
+        },
+        "date": {
+          "type": "string",
+          "format": "date"
+        },
+        "revision": {
+          "$ref": "knowledge-map.schema.json#/$defs/revision"
+        },
+        "score": {
+          "type": "number",
+          "minimum": 0
+        },
+        "fact": {
+          "$ref": "#/$defs/fact"
+        }
+      }
+    },
+    "searchInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "query"
+      ],
+      "properties": {
+        "query": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "hops": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "text",
+        "quote",
+        "path"
+      ],
+      "properties": {
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4000
+        },
+        "quote": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4000
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 400
+        }
+      }
+    },
+    "ragCheckInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "claims"
+      ],
+      "properties": {
+        "claims": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 200,
+          "items": {
+            "$ref": "#/$defs/claim"
+          }
+        },
+        "revision": {
+          "$ref": "knowledge-map.schema.json#/$defs/revision"
+        }
+      }
+    },
+    "ragCheckResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "revision",
+        "kept",
+        "dropped"
+      ],
+      "properties": {
+        "schema": {
+          "const": "kb-rag-check/1"
+        },
+        "revision": {
+          "$ref": "knowledge-map.schema.json#/$defs/revision"
+        },
+        "kept": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/claim"
+          }
+        },
+        "dropped": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "claim",
+              "reason"
+            ],
+            "properties": {
+              "claim": {
+                "$ref": "#/$defs/claim"
+              },
+              "reason": {
+                "enum": [
+                  "quote-not-found",
+                  "number-not-in-quote"
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

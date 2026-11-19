@@ -1,0 +1,54 @@
+{
+  "schema": "kb-search/1",
+  "query": "how is a passage cited",
+  "revision": "1be06d9e",
+  "hops": 1,
+  "as_of": "2026-11-19T00:00:00Z",
+  "embedder": {
+    "name": "multilingual-e5-small",
+    "local": true
+  },
+  "methods": [
+    "bm25",
+    "trigram",
+    "vector",
+    "rerank",
+    "graph"
+  ],
+  "results": [
+    {
+      "id": "pattern:hybrid-retrieval#3",
+      "path": "/srv/base/README.md",
+      "lines": {
+        "from": 12,
+        "to": 16
+      },
+      "quote": "Only claims whose quote is found verbatim are kept.",
+      "date": "2026-11-19",
+      "revision": "1be06d9e",
+      "score": 0.031,
+      "fact": {
+        "valid_from": "2026-11-19T00:00:00Z",
+        "recorded_at": "2026-11-19T10:00:00Z"
+      }
+    },
+    {
+      "id": "decision:D-78#1",
+      "path": "docs/decisions.md",
+      "lines": {
+        "from": 40,
+        "to": 44
+      },
+      "quote": "A cited search behind search and execute.",
+      "date": "2026-11-18",
+      "revision": "1be06d9e",
+      "score": 0.029,
+      "fact": {
+        "valid_from": "2026-11-18T00:00:00Z",
+        "valid_to": "2026-12-01T00:00:00Z",
+        "recorded_at": "2026-11-18T09:00:00Z"
+      }
+    }
+  ],
+  "degraded": []
+}

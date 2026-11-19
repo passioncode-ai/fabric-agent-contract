@@ -42,6 +42,8 @@ export default defineConfig({
         "src/door-context.ts": { branches: 100 },
         // CT-350: DEC-0187's access-grants rule and reader, held at 100 by test/access-grants-rules.test.ts.
         "src/access-grants-rules.ts": { branches: 100 },
+        // CT-351: DEC-0188's knowledge-layer rules, held at 100 by test/knowledge-layer-rules.test.ts.
+        "src/knowledge-layer-rules.ts": { branches: 100 },
         // CT-323: DEC-0172's verdict checks, measured at 97.07 (199 of 205 branches) when they joined the set; the six
         // left are one side of a ternary each. The floor sits just under the measurement and leaves no branch of slack.
         "src/decision-verdict.ts": { branches: 97 },
