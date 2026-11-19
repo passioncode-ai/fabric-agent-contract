@@ -21,6 +21,7 @@ const doc = (schema?: string): SemanticKind => (schema === undefined ? { input: 
 const wrap = (...members: string[]): SemanticKind => ({ input: "wrapper", members });
 
 export const SEMANTIC_KINDS: Readonly<Record<string, SemanticKind>> = Object.freeze({
+  "access-grants": doc("access-grants.schema.json"),
   "access-log-disclosure": wrap("log", "consents"),
   "action-call": wrap("action", "tier", "caller", "decision", "target", "elicited", "approval", "actionDigest", "humanStepUrl", "now", "answer", "mandate", "self", "callerAgent", "effect", "spendUsd", "project", "mandateCapability", "levels", "tokenMem", "actionLevel", "context", "standing", "tokenProf"),
   "activity-ack": wrap("known", "batch", "ack"),

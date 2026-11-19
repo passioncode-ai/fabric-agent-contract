@@ -5,8 +5,8 @@ import { createValidator } from "../src/validator.js";
 describe("schema catalogue", () => {
   it("loads 162 unique Draft 2020-12 schemas under the contract prefix", async () => {
     const schemas = await loadSchemas();
-    expect(schemas).toHaveLength(163);
-    expect(new Set(schemas.map((schema) => schema.$id)).size).toBe(163);
+    expect(schemas).toHaveLength(164);
+    expect(new Set(schemas.map((schema) => schema.$id)).size).toBe(164);
     expect(schemas.every((schema) => schema.$schema === "https://json-schema.org/draft/2020-12/schema")).toBe(true);
     expect(schemas.every((schema) => schema.$id.startsWith(SCHEMA_PREFIX))).toBe(true);
     expect(CONTRACT_VERSION).toBe("0.1.0");

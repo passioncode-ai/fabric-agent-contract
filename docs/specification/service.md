@@ -542,6 +542,61 @@ limits}`, where it declares the queue's limits, and serves at `path`, under the 
 running, completed and failed jobs per window and context, with p50 and p95 wait and run time, and no person, caller or
 prompt. A service that does not queue carries neither. The [agent network](agent-network.md#load) defines both, `FAC-SEM-132` and `FAC-SEM-133`; the usage report is unchanged.
 
+## Access grants (DEC-0187)
+
+Every product that issues access to others keeps its own list: Fabric's agent access, the account seats of an account
+manager, a media or text service's client keys, a vault's provider keys. Each answers who holds what in one shape, so a
+host joins the answers by agent: Fabric Dashboards shows an agent's Access tab (what it holds and who holds access to
+it) and one Access page across every agent. Schema:
+[`access-grants.schema.json`](../../schemas/access-grants.schema.json) (`access-grants/1`, with `$defs/listInput`,
+`$defs/revokeInput` and `$defs/revokeResult`); the rule `FAC-SEM-185` and the reader `grantState` in
+[`src/access-grants-rules.ts`](../../src/access-grants-rules.ts).
+
+- **AG-1, who answers.** A service that issues access to others (keys, tokens, seats, grants) SHOULD serve the
+  capability `access.grants.list`: input `$defs/listInput` (`holder`, `subject`, `includeRevoked`, `cursor`, `limit`,
+  each optional), answer an `access-grants/1` document whose `issuer` is its own service key, at most 500 grants a page
+  and `nextCursor` while more match. On a compact surface (DEC-0180) search finds it by name, as every operation. A
+  service lists every grant it issued that the caller may read; `degraded` names what it could not read.
+- **AG-2, the holder.** An agent is named by its service key `<id>.<instance>` (`kind: "agent"`), the key Fabric
+  Dashboards and the estate know it by; a person or a machine by its kind and an opaque reference the product keeps
+  (`kind: "person"` or `"machine"`, `ref`), never a name or an email address (DL-22; the reference's pattern admits no
+  `@` and no space). A grant the product cannot yet map from an earlier free label is `kind: "unresolved"` with that
+  `label` as written: a host shows it as unresolved and never guesses an agent from it, and the product maps it at its
+  next change.
+- **AG-3, what it opens.** `subject` absent: the issuing service itself (a client key of a media service opens that
+  service). `kind: "agent"` names another agent by service key (Fabric's agent access to a callee); `kind: "account"`
+  names a provider's account by `provider` and an opaque `ref` (a vault's provider key, an account seat).
+- **AG-4, money.** `limitUsd` is the grant's own ceiling (`null`: none), with `limitPeriod` its window (`day`, `week`,
+  `month` as DEC-0183 SL-1, or `total` for the grant's life), present exactly when `limitUsd` is a number
+  (`FAC-SEM-185`); `spentDayUsd` is the spend in the UTC day of `generatedAt`, `null` when unknown, never `0` for
+  unknown (DEC-0021). Both absent: the product does not meter money on the grant. A spend above the ceiling is shown,
+  not refused. A grant's ceiling is the product's per-holder line; the service's own limits stay in `budgets`
+  (DEC-0027, DEC-0183).
+- **AG-5, who issued it, and whether it still admits.** `issued` and `revoked` are acts `{at, by, via, agent?, ref?}`:
+  `by` whose decision (`operator`, at the dashboard or relayed with a decision; `person`, another person of the context
+  such as an organization's administrator, `ref` naming them opaquely; `agent`, on its own account; `service`, a
+  default, its configuration or an exposure it found), `via` the door (`dashboard`, `agent`, `config`, `automatic`),
+  `agent` the calling agent's service key exactly when `via` is `agent`, and an act decided `by: "agent"` came through
+  its call. `revoked` adds `reason`. Ids are unique in an answer and stable across answers; `issued.at` is not after
+  `generatedAt`, `revoked.at` lies between them, and `expiresAt` is after `issued.at` (`FAC-SEM-185`). A revoked grant
+  never admits again (a new grant is a new id), and a product keeps revoked and expired grants listable with
+  `includeRevoked` for at least 90 days. `grantState(grant, now)` answers `revoked`, `expired` or `active`.
+- **AG-6, the doors.** `doors.issue` names the product's own issue operation, whose input is its own and is read from
+  its search (DEC-0180 CM-3); its answer carries the grant, never a key value (a key goes to the holder through its
+  vault slot, [credentials](credentials.md)). `doors.revoke` names an operation taking `$defs/revokeInput`
+  (`{grantId, reason, idempotencyKey}`) and answering `$defs/revokeResult` (`{grant, repeated?}`; a retry, or a grant
+  already revoked, answers its first revocation with `repeated: true`); its refusals are `unknown-grant`,
+  `operator-decision-required` and `decision-invalid`. Each door is also a dashboard action (AP-1) with `gate:
+  "relayed"`. Issuing, widening and revoking another holder's grant are the operator's acts: the call carries the
+  decision in `_meta.decision` (AP-2) and is recorded `by: "operator"`, `via: "agent"`. Two revocations are the
+  caller's own: a holder giving up its own grant (`by: "agent"`), and a product revoking a grant it found exposed
+  (`by: "service"`, `via: "automatic"`, with the reason).
+- **AG-7, no values.** A record carries no key value, prefix, hash or digits of one (the grant schema is closed), no
+  person's name or address, and no session id. Policy, budget and roles are not in it: they stay the host's (Fabric
+  Dashboards FD-40, FD-164) and the authority extension's (DEC-0162).
+
+An answer carrying `access-grants/1` is read by a checker pinned at or after DEC-0187.
+
 ## Operator login
 
 Schema: [`service-login-code.schema.json`](../../schemas/service-login-code.schema.json).
@@ -1705,4 +1760,5 @@ It answers the operator's rule of 2026-11-18 (the agents database's R33 O13, dec
 | <a id="fac-sem-176"></a>`FAC-SEM-176` | `service-well-known` | a service that serves `surfaces.dashboard` serves `surfaces.mcp` or `surfaces.a2a` beside it, and a present `surfaces.mcp.capabilities` is not empty (DEC-0169 RP-3) |
 | <a id="fac-sem-182"></a>`FAC-SEM-182` | `service-well-known` | a present `surfaces.mcp.compact` stands beside `capabilities`, names two different tools for search and execute, neither of them among `capabilities`, and only direct capabilities `capabilities` names (DEC-0180 CM-2) |
 | <a id="fac-sem-184"></a>`FAC-SEM-184` | `service-usage` | route choices: ids unique and one per work and model; a subscription choice names its runner; `previous` differs from `chosen`; the measured window is ordered and ends by the day of the decision; `decidedAt` not after `generatedAt`; `reviewBy` after the day of the decision and within 92 days (DEC-0186 RC-3, RC-5) |
+| <a id="fac-sem-185"></a>`FAC-SEM-185` | `access-grants` | access grants: ids unique; `limitPeriod` exactly with a numeric `limitUsd`; an act names its calling `agent` exactly when `via` is `agent`, and one decided `by: "agent"` came through that call; issue not after `generatedAt`, revocation between issue and `generatedAt`, expiry after issue (DEC-0187 AG-4, AG-5) |
 | <a id="fac-sem-180"></a>`FAC-SEM-180` | `service-descriptor`, `service-well-known`, `service-observation` | the instance facts are their schema's and no clause of [IF-6](#instance-facts) refuses a value: `audience` against `peer`, the placement and the runner, `entry` against the dashboard's `login`, `shared` and `system` only remote, the label never credential-shaped nor in a local well-known document, no fact that serves others beside a `subscription` runner (DEC-0173, DEC-0174) |

@@ -429,7 +429,7 @@ decision names `FAC-SEM-142`, reserved after it. `FAC-SEM-161` was reserved (rec
 were reserved by DEC-0150's run (receipts SEM-0162 to SEM-0165). `FAC-SEM-183` is not used: origin's SEM counter
 stood at 170 while this marker read 183, and DEC-0186's reservation answered SEM-0184 (counter commit `63791d77`).
 
-**Next free rule code:** `FAC-SEM-185` (the CAS counter's next value when this line was last written, after DEC-0186 reserved `SEM-0184`; read
+**Next free rule code:** `FAC-SEM-186` (the CAS counter's next value when this line was last written, after DEC-0187 reserved `SEM-0185`; read
 `refs/agent-sync/ids/SEM` on origin for the current one)
 
 | Code | Kind | Defined in | Receipt |
@@ -610,6 +610,7 @@ stood at 170 while this marker read 183, and DEC-0186's reservation answered SEM
 | `FAC-SEM-181` | `agent-health`, `agent-health-service` | [agent health](agent-health.md#semantic-rules) | SEM-0181 |
 | `FAC-SEM-182` | `service-well-known` | [service](service.md#semantic-rules) | SEM-0182 |
 | `FAC-SEM-184` | `service-usage` | [service](service.md#semantic-rules) | SEM-0184 |
+| `FAC-SEM-185` | `access-grants` | [service](service.md#semantic-rules) | SEM-0185 |
 
 ## Compatibility policy
 
