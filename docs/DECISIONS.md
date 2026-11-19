@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0188` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0189` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -13784,3 +13784,54 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   templates take it through their rollout.
 - **Source:** CT-350; the board request `5cb69724` (thread `99218b8c`). DEC-0187 and `FAC-SEM-185` were reserved by git
   CAS (`agent_sync.py reserve`, keys `5cb69724-access-grants` and `5cb69724-access-grants-sem`).
+
+### DEC-0188: an agent's knowledge layer, `kb.*` behind search and execute, `knowledge-map/1`, facts in two times
+
+- **Date:** 2026-11-19
+- **Status:** Accepted 2026-11-19 (CT-351): the gate `pnpm run check` green in the run that answered the board request
+  `61235cc4`; no blind reading ran in that run, so further readings are CT-351's open part.
+- **Context:** fabric-agents-database asked on the board (request `61235cc4`, thread `72ff57ad`, 2026-11-19; its
+  decision D-84, `main` `1be06d9e`), relaying the operator's words of 2026-11-19 in its session `98bdce84`, trusted
+  provenance: «вносим это в базу, типа, вносим это в контракт агента, вносим в адаптер, там, где мы рассказываем, где мы
+  строим вот это, везде переходим на эти графы, на технологии». Scope: the knowledge layer and graphs in the contract,
+  as an optional profile for an agent with a knowledge base. The ask: `kb.search`, `kb.rag`, `kb.rag_check`, `kb.check`
+  behind the search and execute doors (beside its O15 and O17); `knowledge-map/1` through `kb.map`; bitemporal facts
+  with an `as_of` filter; local embeddings only. Its evidence: its report `docs/reports/2026-11-19-memory-graphs/README.md`
+  and the reference implementation `tools/knowledge_map.py` with pattern `hybrid-retrieval`.
+- **Decision:** [knowledge layer](specification/memory-and-learning.md#knowledge-layer-dec-0188) KL-1 to KL-7; schemas
+  `kb-search.schema.json` (`kb-search/1`, `$defs/searchInput`, `$defs/ragCheckInput`, `$defs/ragCheckResult` as
+  `kb-rag-check/1`), `kb-check.schema.json` (`kb-check/1`), `knowledge-map.schema.json` (`knowledge-map/1`); rule
+  `FAC-SEM-186` (`src/knowledge-layer-rules.ts`):
+  1. **KL-1.** The profile is optional; an agent serving any `kb.*` operation serves `kb.search` and `kb.map` at least,
+     reads only, spending nothing.
+  2. **KL-2.** Search SHOULD be the hybrid (BM25 with stemming, trigrams, local vectors, RRF k = 60, a local reranker on
+     the top 30 to 50, personalized PageRank only with `hops`); each result a verbatim passage with path, lines, date and
+     revision; `methods` and `degraded` say which legs ran.
+  3. **KL-3.** `kb.rag` answers passages for the caller's model; `kb.rag_check` keeps a claim only when its quote is
+     found verbatim and holds every number the claim states.
+  4. **KL-4.** Facts carry `valid_from`, `valid_to`, `recorded_at`; replaced, never deleted; `as_of` filters.
+  5. **KL-5.** `kb.check` per language, recall@5 and MRR@10 against the base revision; a fall in recall@5 does not pass.
+     `kb.map` answers explicit and semantic edges.
+  6. **KL-6.** Embeddings are local (`embedder.local: true`); without a local model the answer is `degraded` and lexical.
+  7. **KL-7.** A map holds ids, kinds, short labels and coordinates, never a record's text; paths are repository-relative.
+- **Not taken:** a required profile for every agent (the ask names an agent with a knowledge base, and the contract
+  stands on its own for any host; the estate's rule is the base's). Fixed retrieval parameters as a conformance check
+  (the answer's shape and its `methods`/`degraded` honesty are checkable; RRF's k and the rerank depth are SHOULD, since
+  a better measured setting must not make an agent nonconformant; the gate KL-5 is what holds quality). A ban on
+  "Western cloud models" written as a provider list (the checkable form is that the embedder is local; which hosted
+  models may read people's text for answers is the operator's model map, not the contract's). camelCase member names
+  (the base's reference implementation already writes snake case, and a second spelling would split the estate).
+- **Why:** agents ask each other through these doors instead of reading another repository (the operator's rule of
+  2026-11-19, the base's R33 O17); one answer shape lets a host or another agent read any knowledge base the same way,
+  and the verbatim quote, `degraded` and the recall gate keep a search from presenting less than it did.
+- **Compatibility:** additive: three new schemas, four protocol names (`kb-search/1`, `kb-rag-check/1`, `kb-check/1`,
+  `knowledge-map/1`), one rule; no existing schema or rule changes. `contractVersion` stays `0.1.0`.
+- **Evidence:** `test/knowledge-layer-rules.test.ts` (FAC-SEM-186 on the three kinds, the `$defs`); fixtures
+  `positive/{knowledge-map,kb-search,kb-check}.json` and six negatives (`fixtures/catalogue.json`);
+  `test/schema-compilation.test.ts` (167 schemas); `docs/specification/memory-and-learning.md` (Knowledge layer),
+  `docs/specification/conformance.md` (`FAC-SEM-186`), `docs/backlog.md` (CT-351).
+- **Consequences:** the agents base tracks adoption in its rollout row; the adapter's kits and probe take the profile at
+  their next pin (the base asked the adapter in parallel); an agent pinned before DEC-0188 serves the operations without
+  the contract checking their answers.
+- **Source:** CT-351; the board request `61235cc4` (thread `72ff57ad`). DEC-0188 and `FAC-SEM-186` were reserved by git
+  CAS (`agent_sync.py reserve`, keys `61235cc4-knowledge-layer` and `61235cc4-knowledge-layer-sem`).

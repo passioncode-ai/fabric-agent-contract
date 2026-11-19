@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/kb-check.schema.json",
+  "title": "kb-check/1 (DEC-0188): the retrieval gate of an agent's knowledge layer, as kb.check answers it",
+  "description": "What kb.check answers for a change to a knowledge base or to its search: the golden set per language run against the base revision (main) and the change's head, recall@5 and MRR@10 on each. pass is false when recall@5 fell on any language; such a change does not merge (KL-5). Semantic rule FAC-SEM-186. docs/specification/memory-and-learning.md#knowledge-layer-dec-0188.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "base",
+    "head",
+    "languages",
+    "pass"
+  ],
+  "properties": {
+    "schema": {
+      "const": "kb-check/1"
+    },
+    "base": {
+      "$ref": "knowledge-map.schema.json#/$defs/revision",
+      "description": "The revision compared against: the integration branch's head."
+    },
+    "head": {
+      "$ref": "knowledge-map.schema.json#/$defs/revision",
+      "description": "The change's revision."
+    },
+    "languages": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 64,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "language",
+          "queries",
+          "recall_at_5",
+          "mrr_at_10"
+        ],
+        "properties": {
+          "language": {
+            "type": "string",
+            "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$"
+          },
+          "queries": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "recall_at_5": {
+            "$ref": "#/$defs/pair"
+          },
+          "mrr_at_10": {
+            "$ref": "#/$defs/pair"
+          }
+        }
+      }
+    },
+    "pass": {
+      "type": "boolean"
+    }
+  },
+  "$defs": {
+    "pair": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "base",
+        "head"
+      ],
+      "properties": {
+        "base": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "head": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    }
+  }
+}

@@ -1212,5 +1212,14 @@
   {"name": "access-grants-key-value", "schema": "access-grants.schema.json", "path": "negative/access-grants-key-value.json", "valid": false, "keyword": "additionalProperties"},
   {"name": "access-grants-person-label", "schema": "access-grants.schema.json", "path": "negative/access-grants-person-label.json", "valid": false, "keyword": "additionalProperties"},
   {"name": "access-grants-ref-email", "schema": "access-grants.schema.json", "path": "negative/access-grants-ref-email.json", "valid": false, "keyword": "pattern"},
-  {"name": "access-grants-unknown-protocol", "schema": "access-grants.schema.json", "path": "negative/access-grants-unknown-protocol.json", "valid": false, "keyword": "const"}
+  {"name": "access-grants-unknown-protocol", "schema": "access-grants.schema.json", "path": "negative/access-grants-unknown-protocol.json", "valid": false, "keyword": "const"},
+  {"name": "knowledge-map", "schema": "knowledge-map.schema.json", "path": "positive/knowledge-map.json", "valid": true},
+  {"name": "knowledge-map-cloud-embedder", "schema": "knowledge-map.schema.json", "path": "negative/knowledge-map-cloud-embedder.json", "valid": false, "keyword": "oneOf"},
+  {"name": "knowledge-map-record-text", "schema": "knowledge-map.schema.json", "path": "negative/knowledge-map-record-text.json", "valid": false, "keyword": "additionalProperties"},
+  {"name": "knowledge-map-unknown-edge-kind", "schema": "knowledge-map.schema.json", "path": "negative/knowledge-map-unknown-edge-kind.json", "valid": false, "keyword": "enum"},
+  {"name": "kb-search", "schema": "kb-search.schema.json", "path": "positive/kb-search.json", "valid": true},
+  {"name": "kb-search-no-quote", "schema": "kb-search.schema.json", "path": "negative/kb-search-no-quote.json", "valid": false, "keyword": "required"},
+  {"name": "kb-search-absolute-path", "schema": "kb-search.schema.json", "path": "negative/kb-search-absolute-path.json", "valid": false, "keyword": "pattern"},
+  {"name": "kb-check", "schema": "kb-check.schema.json", "path": "positive/kb-check.json", "valid": true},
+  {"name": "kb-check-recall-above-one", "schema": "kb-check.schema.json", "path": "negative/kb-check-recall-above-one.json", "valid": false, "keyword": "maximum"}
 ]
