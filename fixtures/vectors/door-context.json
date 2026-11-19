@@ -1,0 +1,1157 @@
+{
+  "about": "Vectors for the context a key-issuing door proves (DEC-0185), written by tools/vectors/door-context.ts, never by hand. keys: Ed25519 test keys, each seed the SHA-256 of a published label (anyone can derive them; nothing trusts them). keySets: the org-key-set/1 each organization's root signed, keyed by context; read cases name the ones the caller applied (trust.keySets). estates: the estate record a caller holds with the verdict verifyEstateRecord gave it (the record here is cut to what the reading looks at: its digest and its machines' secret placements); trust.estate names one, or null for none. read cases: doorContext(door, asked, trust), trust.now an RFC 3339 string a port parses strictly. issue cases: issueKeyAdmitted(doorOwn, keyContext), null a key bound to no context. expected is exactly what the reference returns.",
+  "keys": {
+    "rootA": {
+      "seed": "988cd4348b67cde67c153d23adb19f486c1aa6af111102d070db13ee39053693",
+      "kid": "root-org-a-1",
+      "x": "UIKHQOAa8XH0fX0SRC3683GIo55pSwA5FJpFbhLURyQ"
+    },
+    "rootB": {
+      "seed": "492d3ff5e7c753393707697b4453bfd390ea2f518ab3810b23b86f1c2ab49e5e",
+      "kid": "root-org-b-1",
+      "x": "TXJuLENVv-Z0k7jzYW1muRcs-FszRrtm4aHxjUYBNlY"
+    },
+    "a1": {
+      "seed": "b4f696eb65cadfccf888d62aba6140980cb761b7abdd3a23e46ad6e0615e5e70",
+      "kid": "a-ins-1",
+      "x": "NVTSXAYzWaaTs4Ou42BTqA0MN9PJZC7CLeErgSx9EoE"
+    },
+    "a0": {
+      "seed": "d0ca43d39babaacfe52c268fd26e30217d2a6c0cebe0f7427c18f9396c4b9b32",
+      "kid": "a-ins-0",
+      "x": "zjnDuYzlPeweQAfXEPfesDxC3MK6RxPfiy27Cf4VPWg"
+    },
+    "b1": {
+      "seed": "d5653bc6b9b05a9996e9fe0fae0aa1e0b40edb4101a277f7b78e0abaf53b5982",
+      "kid": "b-ins-1",
+      "x": "xX1P28dahP6AOF_lF8bfemNzu_35lVaDGdW3M4dYxRc"
+    },
+    "rogue": {
+      "seed": "d28389afbb5f3cc865f96f3a28a4d7db8e60f2c074c8f7f717c4be320e3485ca",
+      "kid": "a-ins-rogue",
+      "x": "MkOuhffTZF9O6rOyVB9ppPvzwQ8w5FCrVzPAuVyIJLw"
+    }
+  },
+  "keySets": {
+    "org:org-a": {
+      "type": "org-key-set/1",
+      "issuer": "https://orgs-a.example",
+      "org": "org:org-a",
+      "revision": 1,
+      "issuedAt": "2026-10-01T00:00:00Z",
+      "keys": [
+        {
+          "kid": "a-ins-1",
+          "alg": "EdDSA",
+          "x": "NVTSXAYzWaaTs4Ou42BTqA0MN9PJZC7CLeErgSx9EoE",
+          "notBefore": "2026-10-01T00:00:00Z",
+          "notAfter": "2027-01-01T00:00:00Z"
+        }
+      ],
+      "revoked": [
+        "a-ins-0"
+      ],
+      "administrators": [
+        {
+          "credentialId": "gcboNDVdChvGD6icy0fTeQ",
+          "alg": "EdDSA",
+          "publicKey": {
+            "kty": "OKP",
+            "crv": "Ed25519",
+            "x": "-WABvVAm6AOdzWsSIyTg4n_kAjPY0uruFXS1_zKO97g"
+          },
+          "rpId": "sign.orgs-a.example",
+          "origins": [
+            "https://sign.orgs-a.example"
+          ]
+        }
+      ],
+      "alg": "EdDSA",
+      "kid": "root-org-a-1",
+      "sig": "FH3IeBodc9NBleagsvqy0Q9s_pkIXytnhja3qRQ4UOIAewCbLefh_PMEXX9d_iPFncFZIu18w9lJ3kSqWFEEBA"
+    },
+    "org:org-b": {
+      "type": "org-key-set/1",
+      "issuer": "https://orgs-b.example",
+      "org": "org:org-b",
+      "revision": 1,
+      "issuedAt": "2026-10-01T00:00:00Z",
+      "keys": [
+        {
+          "kid": "b-ins-1",
+          "alg": "EdDSA",
+          "x": "xX1P28dahP6AOF_lF8bfemNzu_35lVaDGdW3M4dYxRc",
+          "notBefore": "2026-10-01T00:00:00Z",
+          "notAfter": "2027-01-01T00:00:00Z"
+        }
+      ],
+      "revoked": [],
+      "administrators": [
+        {
+          "credentialId": "MgoEJ6p4lkBLPOV0vnTysg",
+          "alg": "EdDSA",
+          "publicKey": {
+            "kty": "OKP",
+            "crv": "Ed25519",
+            "x": "-WABvVAm6AOdzWsSIyTg4n_kAjPY0uruFXS1_zKO97g"
+          },
+          "rpId": "sign.orgs-b.example",
+          "origins": [
+            "https://sign.orgs-b.example"
+          ]
+        }
+      ],
+      "alg": "EdDSA",
+      "kid": "root-org-b-1",
+      "sig": "HPAU1PloX3eBJout6Sby_t7JB6qyMhE1BajgHjUEW6fiunI2txaMHHFlPb6WfDubbQhlGx_nNPC8GnSxurCSDg"
+    }
+  },
+  "estates": {
+    "verified": {
+      "record": {
+        "digest": "sha256:2e750c80c45b74f7297b0cb70cd10aa7e40e95fc57c72454a2487ab52ebf17e4",
+        "machines": [
+          {
+            "id": "mac-1",
+            "secrets": [
+              {
+                "agentRef": "observatory",
+                "slot": "OPENROUTER_MANAGEMENT_KEY",
+                "from": "mac-1"
+              },
+              {
+                "agentRef": "org-admin",
+                "slot": "OPENROUTER_MANAGEMENT_KEY",
+                "from": "mac-1",
+                "context": "org:org-a"
+              },
+              {
+                "agentRef": "shared-door",
+                "slot": "ISSUER_KEY",
+                "from": "mac-1"
+              },
+              {
+                "agentRef": "shared-door",
+                "slot": "ISSUER_KEY",
+                "from": "mac-1",
+                "context": "org:org-a"
+              }
+            ]
+          }
+        ]
+      },
+      "verdict": {
+        "ok": true,
+        "digest": "sha256:2e750c80c45b74f7297b0cb70cd10aa7e40e95fc57c72454a2487ab52ebf17e4"
+      }
+    },
+    "refused": {
+      "record": {
+        "digest": "sha256:2e750c80c45b74f7297b0cb70cd10aa7e40e95fc57c72454a2487ab52ebf17e4",
+        "machines": [
+          {
+            "id": "mac-1",
+            "secrets": [
+              {
+                "agentRef": "observatory",
+                "slot": "OPENROUTER_MANAGEMENT_KEY",
+                "from": "mac-1"
+              },
+              {
+                "agentRef": "org-admin",
+                "slot": "OPENROUTER_MANAGEMENT_KEY",
+                "from": "mac-1",
+                "context": "org:org-a"
+              },
+              {
+                "agentRef": "shared-door",
+                "slot": "ISSUER_KEY",
+                "from": "mac-1"
+              },
+              {
+                "agentRef": "shared-door",
+                "slot": "ISSUER_KEY",
+                "from": "mac-1",
+                "context": "org:org-a"
+              }
+            ]
+          }
+        ]
+      },
+      "verdict": {
+        "ok": false,
+        "problem": "expired"
+      }
+    },
+    "otherDigest": {
+      "record": {
+        "digest": "sha256:2e750c80c45b74f7297b0cb70cd10aa7e40e95fc57c72454a2487ab52ebf17e4",
+        "machines": [
+          {
+            "id": "mac-1",
+            "secrets": [
+              {
+                "agentRef": "observatory",
+                "slot": "OPENROUTER_MANAGEMENT_KEY",
+                "from": "mac-1"
+              },
+              {
+                "agentRef": "org-admin",
+                "slot": "OPENROUTER_MANAGEMENT_KEY",
+                "from": "mac-1",
+                "context": "org:org-a"
+              },
+              {
+                "agentRef": "shared-door",
+                "slot": "ISSUER_KEY",
+                "from": "mac-1"
+              },
+              {
+                "agentRef": "shared-door",
+                "slot": "ISSUER_KEY",
+                "from": "mac-1",
+                "context": "org:org-a"
+              }
+            ]
+          }
+        ]
+      },
+      "verdict": {
+        "ok": true,
+        "digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+      }
+    }
+  },
+  "read": [
+    {
+      "name": "remote: a door of the same organization",
+      "door": {
+        "kind": "remote",
+        "origin": "https://keys.org-a.example",
+        "statement": {
+          "type": "org-instance/1",
+          "issuer": "https://orgs-a.example",
+          "org": "org:org-a",
+          "instanceId": "keys-a",
+          "product": "key-door",
+          "origin": "https://keys.org-a.example",
+          "placement": "org-cloud",
+          "status": "active",
+          "revision": 1,
+          "issuedAt": "2026-11-18T00:00:00Z",
+          "notBefore": "2026-11-18T00:00:00Z",
+          "expiresAt": "2026-11-25T00:00:00Z",
+          "alg": "EdDSA",
+          "kid": "a-ins-1",
+          "sig": "hhNICLuhUPIpGiEfDn13kX3jcAtt3drWx9YZleLR9O6AWN6n-s7XRHqSSCv8kM_6ES2SCiYSYrK9Lzl6twYnAQ"
+        }
+      },
+      "asked": "org:org-a",
+      "trust": {
+        "now": "2026-11-19T12:00:00Z",
+        "keySets": [
+          "org:org-a",
+          "org:org-b"
+        ],
+        "estate": "verified"
+      },
+      "expected": {
+        "ok": true,
+        "context": "org:org-a",
+        "source": "org-instance"
+      }
+    },
+    {
+      "name": "remote: a door of another organization",
+      "door": {
+        "kind": "remote",
+        "origin": "https://keys.org-b.example",
+        "statement": {
+          "type": "org-instance/1",
+          "issuer": "https://orgs-b.example",
+          "org": "org:org-b",
+          "instanceId": "keys-b",
+          "product": "key-door",
+          "origin": "https://keys.org-b.example",
+          "placement": "org-cloud",
+          "status": "active",
+          "revision": 1,
+          "issuedAt": "2026-11-18T00:00:00Z",
+          "notBefore": "2026-11-18T00:00:00Z",
+          "expiresAt": "2026-11-25T00:00:00Z",
+          "alg": "EdDSA",
+          "kid": "b-ins-1",
+          "sig": "3fSmn4PdSd3f4wj-M9vblzRjI-rMW42OkUocxVZt_IXEQ4C04ghH2_qKIcJt3u3UC-uwkyNTG5QMNQmFJKsfAA"
+        }
+      },
+      "asked": "org:org-a",
+      "trust": {
+        "now": "2026-11-19T12:00:00Z",
+        "keySets": [
+          "org:org-a",
+          "org:org-b"
+        ],
+        "estate": "verified"
+      },
+      "expected": {
+        "ok": false,
+        "refusal": "door-organization-mismatch",
+        "context": "org:org-b"
+      }
+    },
+    {
+      "name": "remote: an organization's door asked for the personal context",
+      "door": {
+        "kind": "remote",
+        "origin": "https://keys.org-a.example",
+        "statement": {
+          "type": "org-instance/1",
+          "issuer": "https://orgs-a.example",
+          "org": "org:org-a",
+          "instanceId": "keys-a",
+          "product": "key-door",
+          "origin": "https://keys.org-a.example",
+          "placement": "org-cloud",
+          "status": "active",
+          "revision": 1,
+          "issuedAt": "2026-11-18T00:00:00Z",
+          "notBefore": "2026-11-18T00:00:00Z",
+          "expiresAt": "2026-11-25T00:00:00Z",
+          "alg": "EdDSA",
+          "kid": "a-ins-1",
+          "sig": "hhNICLuhUPIpGiEfDn13kX3jcAtt3drWx9YZleLR9O6AWN6n-s7XRHqSSCv8kM_6ES2SCiYSYrK9Lzl6twYnAQ"
+        }
+      },
+      "asked": "personal",
+      "trust": {
+        "now": "2026-11-19T12:00:00Z",
+        "keySets": [
+          "org:org-a",
+          "org:org-b"
+        ],
+        "estate": "verified"
+      },
+      "expected": {
+        "ok": false,
+        "refusal": "door-organization-mismatch",
+        "context": "org:org-a"
+      }
+    },
+    {
+      "name": "remote: no statement handed over",
+      "door": {
+        "kind": "remote",
+        "origin": "https://keys.org-a.example"
+      },
+      "asked": "org:org-a",
+      "trust": {
+        "now": "2026-11-19T12:00:00Z",
+        "keySets": [
+          "org:org-a",
+          "org:org-b"
+        ],
+        "estate": "verified"
+      },
+      "expected": {
+        "ok": false,
+        "refusal": "door-claim-absent"
+      }
+    },
+    {
+      "name": "remote: a forged statement (the listed kid, a key nobody lists)",
+      "door": {
+        "kind": "remote",
+        "origin": "https://keys.org-a.example",
+        "statement": {
+          "type": "org-instance/1",
+          "issuer": "https://orgs-a.example",
+          "org": "org:org-a",
+          "instanceId": "keys-a",
+          "product": "key-door",
+          "origin": "https://keys.org-a.example",
+          "placement": "org-cloud",
+          "status": "active",
+          "revision": 1,
+          "issuedAt": "2026-11-18T00:00:00Z",
+          "notBefore": "2026-11-18T00:00:00Z",
+          "expiresAt": "2026-11-25T00:00:00Z",
+          "alg": "EdDSA",
+          "kid": "a-ins-1",
+          "sig": "LhBGWEtccl3y80kTnUYLOvZDnZjXfKkOFqmjn8Gs3ggyzPXk5d3QHM4IQIYpcWE_ZqdFVu9ajq5mR7S1JqH4CA"
+        }
+      },
+      "asked": "org:org-a",
+      "trust": {
+        "now": "2026-11-19T12:00:00Z",
+        "keySets": [
+          "org:org-a",
+          "org:org-b"
+        ],
+        "estate": "verified"
+      },
+      "expected": {
+        "ok": false,
+        "refusal": "door-claim-invalid",
+        "detail": "bad-signature"
+      }
+    },
+    {
+      "name": "remote: a member changed after signing",
+      "door": {
+        "kind": "remote",
+        "origin": "https://keys.org-a.example",
+        "statement": {
+          "type": "org-instance/1",
+          "issuer": "https://orgs-a.example",
+          "org": "org:org-a",
+          "instanceId": "keys-a",
+          "product": "other",
+          "origin": "https://keys.org-a.example",
+          "placement": "org-cloud",
+          "status": "active",
+          "revision": 1,
+          "issuedAt": "2026-11-18T00:00:00Z",
+          "notBefore": "2026-11-18T00:00:00Z",
+          "expiresAt": "2026-11-25T00:00:00Z",
+          "alg": "EdDSA",
+          "kid": "a-ins-1",
+          "sig": "hhNICLuhUPIpGiEfDn13kX3jcAtt3drWx9YZleLR9O6AWN6n-s7XRHqSSCv8kM_6ES2SCiYSYrK9Lzl6twYnAQ"
+        }
+      },
+      "asked": "org:org-a",
+      "trust": {
+        "now": "2026-11-19T12:00:00Z",
+        "keySets": [
+          "org:org-a",
+          "org:org-b"
+        ],
+        "estate": "verified"
+      },
+      "expected": {
+        "ok": false,
+        "refusal": "door-claim-invalid",
+        "detail": "bad-signature"
+      }
+    },
+    {
+      "name": "remote: signed by a revoked key",
+      "door": {
+        "kind": "remote",
+        "origin": "https://keys.org-a.example",
+        "statement": {
+          "type": "org-instance/1",
+          "issuer": "https://orgs-a.example",
+          "org": "org:org-a",
+          "instanceId": "keys-a",
+          "product": "key-door",
+          "origin": "https://keys.org-a.example",
+          "placement": "org-cloud",
+          "status": "active",
+          "revision": 1,
+          "issuedAt": "2026-11-18T00:00:00Z",
+          "notBefore": "2026-11-18T00:00:00Z",
+          "expiresAt": "2026-11-25T00:00:00Z",
+          "alg": "EdDSA",
+          "kid": "a-ins-0",
+          "sig": "N-TTdfSsS1Pk1MNayooLqEY9UPePsK_soIUUbc-5K7eyMEi1mJ31ewsIztSCHMOuU2Mi8kcpr82XngP8YOt7Dw"
+        }
+      },
+      "asked": "org:org-a",
+      "trust": {
+        "now": "2026-11-19T12:00:00Z",
+        "keySets": [
+          "org:org-a",
+          "org:org-b"
+        ],
+        "estate": "verified"
+      },
+      "expected": {
+        "ok": false,
+        "refusal": "door-claim-invalid",
+        "detail": "key-revoked"
+      }
+    },
+    {
+      "name": "remote: an expired statement",
+      "door": {
+        "kind": "remote",
+        "origin": "https://keys.org-a.example",
+        "statement": {
+          "type": "org-instance/1",
+          "issuer": "https://orgs-a.example",
+          "org": "org:org-a",
+          "instanceId": "keys-a",
+          "product": "key-door",
+          "origin": "https://keys.org-a.example",
+          "placement": "org-cloud",
+          "status": "active",
+          "revision": 1,
+          "issuedAt": "2026-11-18T00:00:00Z",
+          "notBefore": "2026-11-18T00:00:00Z",
+          "expiresAt": "2026-11-25T00:00:00Z",
+          "alg": "EdDSA",
+          "kid": "a-ins-1",
+          "sig": "hhNICLuhUPIpGiEfDn13kX3jcAtt3drWx9YZleLR9O6AWN6n-s7XRHqSSCv8kM_6ES2SCiYSYrK9Lzl6twYnAQ"
+        }
+      },
+      "asked": "org:org-a",
+      "trust": {
+        "now": "2026-11-25T00:00:00Z",
+        "keySets": [
+          "org:org-a",
+          "org:org-b"
+        ],
+        "estate": "verified"
+      },
+      "expected": {
+        "ok": false,
+        "refusal": "door-claim-invalid",
+        "detail": "expired"
+      }
+    },
+    {
+      "name": "remote: a retired instance",
+      "door": {
+        "kind": "remote",
+        "origin": "https://keys.org-a.example",
+        "statement": {
+          "type": "org-instance/1",
+          "issuer": "https://orgs-a.example",
+          "org": "org:org-a",
+          "instanceId": "keys-a",
+          "product": "key-door",
+          "origin": "https://keys.org-a.example",
+          "placement": "org-cloud",
+          "status": "retired",
+          "revision": 2,
+          "issuedAt": "2026-11-18T00:00:00Z",
+          "notBefore": "2026-11-18T00:00:00Z",
+          "expiresAt": "2026-11-25T00:00:00Z",
+          "alg": "EdDSA",
+          "kid": "a-ins-1",
+          "sig": "6b4Ftl8AHgvEA8llOHRCbSzyEKELLstnk30gOWvjc9nR5fRpaWdHanak2Wnkf4hvgNEvXATff9kBJYv1EI8VDw"
+        }
+      },
+      "asked": "org:org-a",
+      "trust": {
+        "now": "2026-11-19T12:00:00Z",
+        "keySets": [
+          "org:org-a",
+          "org:org-b"
+        ],
+        "estate": "verified"
+      },
+      "expected": {
+        "ok": false,
+        "refusal": "door-claim-invalid",
+        "detail": "retired"
+      }
+    },
+    {
+      "name": "remote: a statement for another origin than the one called",
+      "door": {
+        "kind": "remote",
+        "origin": "https://keys.elsewhere.example",
+        "statement": {
+          "type": "org-instance/1",
+          "issuer": "https://orgs-a.example",
+          "org": "org:org-a",
+          "instanceId": "keys-a",
+          "product": "key-door",
+          "origin": "https://keys.org-a.example",
+          "placement": "org-cloud",
+          "status": "active",
+          "revision": 1,
+          "issuedAt": "2026-11-18T00:00:00Z",
+          "notBefore": "2026-11-18T00:00:00Z",
+          "expiresAt": "2026-11-25T00:00:00Z",
+          "alg": "EdDSA",
+          "kid": "a-ins-1",
+          "sig": "hhNICLuhUPIpGiEfDn13kX3jcAtt3drWx9YZleLR9O6AWN6n-s7XRHqSSCv8kM_6ES2SCiYSYrK9Lzl6twYnAQ"
+        }
+      },
+      "asked": "org:org-a",
+      "trust": {
+        "now": "2026-11-19T12:00:00Z",
+        "keySets": [
+          "org:org-a",
+          "org:org-b"
+        ],
+        "estate": "verified"
+      },
+      "expected": {
+        "ok": false,
+        "refusal": "door-claim-invalid",
+        "detail": "wrong-origin"
+      }
+    },
+    {
+      "name": "remote: no key set applied for the statement's organization",
+      "door": {
+        "kind": "remote",
+        "origin": "https://keys.org-b.example",
+        "statement": {
+          "type": "org-instance/1",
+          "issuer": "https://orgs-b.example",
+          "org": "org:org-b",
+          "instanceId": "keys-b",
+          "product": "key-door",
+          "origin": "https://keys.org-b.example",
+          "placement": "org-cloud",
+          "status": "active",
+          "revision": 1,
+          "issuedAt": "2026-11-18T00:00:00Z",
+          "notBefore": "2026-11-18T00:00:00Z",
+          "expiresAt": "2026-11-25T00:00:00Z",
+          "alg": "EdDSA",
+          "kid": "b-ins-1",
+          "sig": "3fSmn4PdSd3f4wj-M9vblzRjI-rMW42OkUocxVZt_IXEQ4C04ghH2_qKIcJt3u3UC-uwkyNTG5QMNQmFJKsfAA"
+        }
+      },
+      "asked": "org:org-a",
+      "trust": {
+        "now": "2026-11-19T12:00:00Z",
+        "keySets": [
+          "org:org-a"
+        ],
+        "estate": "verified"
+      },
+      "expected": {
+        "ok": false,
+        "refusal": "door-claim-invalid",
+        "detail": "no-key-set"
+      }
+    },
+    {
+      "name": "remote: a statement with no organization",
+      "door": {
+        "kind": "remote",
+        "origin": "https://keys.org-a.example",
+        "statement": "not a statement"
+      },
+      "asked": "org:org-a",
+      "trust": {
+        "now": "2026-11-19T12:00:00Z",
+        "keySets": [
+          "org:org-a",
+          "org:org-b"
+        ],
+        "estate": "verified"
+      },
+      "expected": {
+        "ok": false,
+        "refusal": "door-claim-invalid",
+        "detail": "malformed"
+      }
+    },
+    {
+      "name": "remote: a statement held at a higher revision",
+      "door": {
+        "kind": "remote",
+        "origin": "https://keys.org-a.example",
+        "statement": {
+          "type": "org-instance/1",
+          "issuer": "https://orgs-a.example",
+          "org": "org:org-a",
+          "instanceId": "keys-a",
+          "product": "key-door",
+          "origin": "https://keys.org-a.example",
+          "placement": "org-cloud",
+          "status": "active",
+          "revision": 1,
+          "issuedAt": "2026-11-18T00:00:00Z",
+          "notBefore": "2026-11-18T00:00:00Z",
+          "expiresAt": "2026-11-25T00:00:00Z",
+          "alg": "EdDSA",
+          "kid": "a-ins-1",
+          "sig": "hhNICLuhUPIpGiEfDn13kX3jcAtt3drWx9YZleLR9O6AWN6n-s7XRHqSSCv8kM_6ES2SCiYSYrK9Lzl6twYnAQ"
+        },
+        "held": {
+          "revision": 2,
+          "digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111"
+        }
+      },
+      "asked": "org:org-a",
+      "trust": {
+        "now": "2026-11-19T12:00:00Z",
+        "keySets": [
+          "org:org-a",
+          "org:org-b"
+        ],
+        "estate": "verified"
+      },
+      "expected": {
+        "ok": false,
+        "refusal": "door-claim-invalid",
+        "detail": "stale-revision"
+      }
+    },
+    {
+      "name": "local: an organization's slot",
+      "door": {
+        "kind": "local",
+        "machineId": "mac-1",
+        "agentRef": "org-admin",
+        "slot": "OPENROUTER_MANAGEMENT_KEY"
+      },
+      "asked": "org:org-a",
+      "trust": {
+        "now": "2026-11-19T12:00:00Z",
+        "keySets": [
+          "org:org-a",
+          "org:org-b"
+        ],
+        "estate": "verified"
+      },
+      "expected": {
+        "ok": true,
+        "context": "org:org-a",
+        "source": "estate-record"
+      }
+    },
+    {
+      "name": "local: a personal slot",
+      "door": {
+        "kind": "local",
+        "machineId": "mac-1",
+        "agentRef": "observatory",
+        "slot": "OPENROUTER_MANAGEMENT_KEY"
+      },
+      "asked": "personal",
+      "trust": {
+        "now": "2026-11-19T12:00:00Z",
+        "keySets": [
+          "org:org-a",
+          "org:org-b"
+        ],
+        "estate": "verified"
+      },
+      "expected": {
+        "ok": true,
+        "context": "personal",
+        "source": "estate-record"
+      }
+    },
+    {
+      "name": "local: a personal slot asked for an organization",
+      "door": {
+        "kind": "local",
+        "machineId": "mac-1",
+        "agentRef": "observatory",
+        "slot": "OPENROUTER_MANAGEMENT_KEY"
+      },
+      "asked": "org:org-a",
+      "trust": {
+        "now": "2026-11-19T12:00:00Z",
+        "keySets": [
+          "org:org-a",
+          "org:org-b"
+        ],
+        "estate": "verified"
+      },
+      "expected": {
+        "ok": false,
+        "refusal": "door-organization-mismatch",
+        "context": "personal"
+      }
+    },
+    {
+      "name": "local: an organization's slot asked for the personal context",
+      "door": {
+        "kind": "local",
+        "machineId": "mac-1",
+        "agentRef": "org-admin",
+        "slot": "OPENROUTER_MANAGEMENT_KEY"
+      },
+      "asked": "personal",
+      "trust": {
+        "now": "2026-11-19T12:00:00Z",
+        "keySets": [
+          "org:org-a",
+          "org:org-b"
+        ],
+        "estate": "verified"
+      },
+      "expected": {
+        "ok": false,
+        "refusal": "door-organization-mismatch",
+        "context": "org:org-a"
+      }
+    },
+    {
+      "name": "local: an organization's slot asked for another organization",
+      "door": {
+        "kind": "local",
+        "machineId": "mac-1",
+        "agentRef": "org-admin",
+        "slot": "OPENROUTER_MANAGEMENT_KEY"
+      },
+      "asked": "org:org-b",
+      "trust": {
+        "now": "2026-11-19T12:00:00Z",
+        "keySets": [
+          "org:org-a",
+          "org:org-b"
+        ],
+        "estate": "verified"
+      },
+      "expected": {
+        "ok": false,
+        "refusal": "door-organization-mismatch",
+        "context": "org:org-a"
+      }
+    },
+    {
+      "name": "local: a slot placed in two contexts, read for the personal one",
+      "door": {
+        "kind": "local",
+        "machineId": "mac-1",
+        "agentRef": "shared-door",
+        "slot": "ISSUER_KEY"
+      },
+      "asked": "personal",
+      "trust": {
+        "now": "2026-11-19T12:00:00Z",
+        "keySets": [
+          "org:org-a",
+          "org:org-b"
+        ],
+        "estate": "verified"
+      },
+      "expected": {
+        "ok": true,
+        "context": "personal",
+        "source": "estate-record"
+      }
+    },
+    {
+      "name": "local: a slot placed in two contexts, read for the organization",
+      "door": {
+        "kind": "local",
+        "machineId": "mac-1",
+        "agentRef": "shared-door",
+        "slot": "ISSUER_KEY"
+      },
+      "asked": "org:org-a",
+      "trust": {
+        "now": "2026-11-19T12:00:00Z",
+        "keySets": [
+          "org:org-a",
+          "org:org-b"
+        ],
+        "estate": "verified"
+      },
+      "expected": {
+        "ok": true,
+        "context": "org:org-a",
+        "source": "estate-record"
+      }
+    },
+    {
+      "name": "local: a slot no placement names",
+      "door": {
+        "kind": "local",
+        "machineId": "mac-1",
+        "agentRef": "org-admin",
+        "slot": "OTHER_KEY"
+      },
+      "asked": "org:org-a",
+      "trust": {
+        "now": "2026-11-19T12:00:00Z",
+        "keySets": [
+          "org:org-a",
+          "org:org-b"
+        ],
+        "estate": "verified"
+      },
+      "expected": {
+        "ok": false,
+        "refusal": "door-claim-absent"
+      }
+    },
+    {
+      "name": "local: a machine the record does not hold",
+      "door": {
+        "kind": "local",
+        "machineId": "mac-2",
+        "agentRef": "org-admin",
+        "slot": "OPENROUTER_MANAGEMENT_KEY"
+      },
+      "asked": "org:org-a",
+      "trust": {
+        "now": "2026-11-19T12:00:00Z",
+        "keySets": [
+          "org:org-a",
+          "org:org-b"
+        ],
+        "estate": "verified"
+      },
+      "expected": {
+        "ok": false,
+        "refusal": "door-claim-absent"
+      }
+    },
+    {
+      "name": "local: no estate record",
+      "door": {
+        "kind": "local",
+        "machineId": "mac-1",
+        "agentRef": "org-admin",
+        "slot": "OPENROUTER_MANAGEMENT_KEY"
+      },
+      "asked": "org:org-a",
+      "trust": {
+        "now": "2026-11-19T12:00:00Z",
+        "keySets": [
+          "org:org-a",
+          "org:org-b"
+        ],
+        "estate": null
+      },
+      "expected": {
+        "ok": false,
+        "refusal": "door-claim-absent"
+      }
+    },
+    {
+      "name": "local: a record its verifier refused",
+      "door": {
+        "kind": "local",
+        "machineId": "mac-1",
+        "agentRef": "org-admin",
+        "slot": "OPENROUTER_MANAGEMENT_KEY"
+      },
+      "asked": "org:org-a",
+      "trust": {
+        "now": "2026-11-19T12:00:00Z",
+        "keySets": [
+          "org:org-a",
+          "org:org-b"
+        ],
+        "estate": "refused"
+      },
+      "expected": {
+        "ok": false,
+        "refusal": "door-claim-invalid",
+        "detail": "record-expired"
+      }
+    },
+    {
+      "name": "local: a verdict over another record",
+      "door": {
+        "kind": "local",
+        "machineId": "mac-1",
+        "agentRef": "org-admin",
+        "slot": "OPENROUTER_MANAGEMENT_KEY"
+      },
+      "asked": "org:org-a",
+      "trust": {
+        "now": "2026-11-19T12:00:00Z",
+        "keySets": [
+          "org:org-a",
+          "org:org-b"
+        ],
+        "estate": "otherDigest"
+      },
+      "expected": {
+        "ok": false,
+        "refusal": "door-claim-invalid",
+        "detail": "record-unverified"
+      }
+    },
+    {
+      "name": "input: a context written in another case",
+      "door": {
+        "kind": "remote",
+        "origin": "https://keys.org-a.example",
+        "statement": {
+          "type": "org-instance/1",
+          "issuer": "https://orgs-a.example",
+          "org": "org:org-a",
+          "instanceId": "keys-a",
+          "product": "key-door",
+          "origin": "https://keys.org-a.example",
+          "placement": "org-cloud",
+          "status": "active",
+          "revision": 1,
+          "issuedAt": "2026-11-18T00:00:00Z",
+          "notBefore": "2026-11-18T00:00:00Z",
+          "expiresAt": "2026-11-25T00:00:00Z",
+          "alg": "EdDSA",
+          "kid": "a-ins-1",
+          "sig": "hhNICLuhUPIpGiEfDn13kX3jcAtt3drWx9YZleLR9O6AWN6n-s7XRHqSSCv8kM_6ES2SCiYSYrK9Lzl6twYnAQ"
+        }
+      },
+      "asked": "Personal",
+      "trust": {
+        "now": "2026-11-19T12:00:00Z",
+        "keySets": [
+          "org:org-a",
+          "org:org-b"
+        ],
+        "estate": "verified"
+      },
+      "expected": {
+        "ok": false,
+        "refusal": "context-invalid"
+      }
+    },
+    {
+      "name": "input: an organization context with no id",
+      "door": {
+        "kind": "remote",
+        "origin": "https://keys.org-a.example",
+        "statement": {
+          "type": "org-instance/1",
+          "issuer": "https://orgs-a.example",
+          "org": "org:org-a",
+          "instanceId": "keys-a",
+          "product": "key-door",
+          "origin": "https://keys.org-a.example",
+          "placement": "org-cloud",
+          "status": "active",
+          "revision": 1,
+          "issuedAt": "2026-11-18T00:00:00Z",
+          "notBefore": "2026-11-18T00:00:00Z",
+          "expiresAt": "2026-11-25T00:00:00Z",
+          "alg": "EdDSA",
+          "kid": "a-ins-1",
+          "sig": "hhNICLuhUPIpGiEfDn13kX3jcAtt3drWx9YZleLR9O6AWN6n-s7XRHqSSCv8kM_6ES2SCiYSYrK9Lzl6twYnAQ"
+        }
+      },
+      "asked": "org:",
+      "trust": {
+        "now": "2026-11-19T12:00:00Z",
+        "keySets": [
+          "org:org-a",
+          "org:org-b"
+        ],
+        "estate": "verified"
+      },
+      "expected": {
+        "ok": false,
+        "refusal": "context-invalid"
+      }
+    },
+    {
+      "name": "input: a door of no known kind",
+      "door": {
+        "kind": "port",
+        "port": 8080
+      },
+      "asked": "org:org-a",
+      "trust": {
+        "now": "2026-11-19T12:00:00Z",
+        "keySets": [
+          "org:org-a",
+          "org:org-b"
+        ],
+        "estate": "verified"
+      },
+      "expected": {
+        "ok": false,
+        "refusal": "context-invalid"
+      }
+    },
+    {
+      "name": "input: no door",
+      "door": null,
+      "asked": "org:org-a",
+      "trust": {
+        "now": "2026-11-19T12:00:00Z",
+        "keySets": [
+          "org:org-a",
+          "org:org-b"
+        ],
+        "estate": "verified"
+      },
+      "expected": {
+        "ok": false,
+        "refusal": "context-invalid"
+      }
+    },
+    {
+      "name": "input: an unreadable clock",
+      "door": {
+        "kind": "remote",
+        "origin": "https://keys.org-a.example",
+        "statement": {
+          "type": "org-instance/1",
+          "issuer": "https://orgs-a.example",
+          "org": "org:org-a",
+          "instanceId": "keys-a",
+          "product": "key-door",
+          "origin": "https://keys.org-a.example",
+          "placement": "org-cloud",
+          "status": "active",
+          "revision": 1,
+          "issuedAt": "2026-11-18T00:00:00Z",
+          "notBefore": "2026-11-18T00:00:00Z",
+          "expiresAt": "2026-11-25T00:00:00Z",
+          "alg": "EdDSA",
+          "kid": "a-ins-1",
+          "sig": "hhNICLuhUPIpGiEfDn13kX3jcAtt3drWx9YZleLR9O6AWN6n-s7XRHqSSCv8kM_6ES2SCiYSYrK9Lzl6twYnAQ"
+        }
+      },
+      "asked": "org:org-a",
+      "trust": {
+        "now": "2026-11-19 12:00:00",
+        "keySets": [
+          "org:org-a",
+          "org:org-b"
+        ],
+        "estate": "verified"
+      },
+      "expected": {
+        "ok": false,
+        "refusal": "context-invalid"
+      }
+    }
+  ],
+  "issue": [
+    {
+      "name": "an issue key of the door's own organization",
+      "doorOwn": "org:org-a",
+      "keyContext": "org:org-a",
+      "expected": {
+        "ok": true
+      }
+    },
+    {
+      "name": "an issue key of another organization",
+      "doorOwn": "org:org-a",
+      "keyContext": "org:org-b",
+      "expected": {
+        "ok": false,
+        "refusal": "issuer-organization-mismatch"
+      }
+    },
+    {
+      "name": "an issue key of the personal context",
+      "doorOwn": "org:org-a",
+      "keyContext": "personal",
+      "expected": {
+        "ok": false,
+        "refusal": "issuer-organization-mismatch"
+      }
+    },
+    {
+      "name": "an issue key bound to no context (issued before DEC-0185)",
+      "doorOwn": "org:org-a",
+      "keyContext": null,
+      "expected": {
+        "ok": false,
+        "refusal": "issuer-organization-mismatch"
+      }
+    },
+    {
+      "name": "a door whose own context is personal checks nothing here",
+      "doorOwn": "personal",
+      "keyContext": "personal",
+      "expected": {
+        "ok": false,
+        "refusal": "context-invalid"
+      }
+    }
+  ]
+}

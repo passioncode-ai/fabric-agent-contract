@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0185` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0186` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -13605,3 +13605,74 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   next pin (asked on the board); the Hub's `action_table` declares the operation (`hub.pipeline_audit`) in `tool`.
 - **Source:** CT-347; the board request `e13bb350` (thread `a7fb9229`). DEC-0184 was reserved by git CAS
   (`agent_sync.py reserve DEC`, key `e13bb350-action-operation`).
+
+### DEC-0185: the context a key-issuing door proves, read only from a signed statement or the estate record
+
+- **Date:** 2026-11-19
+- **Status:** Accepted 2026-11-19 (CT-339): the gate `pnpm run check` green in the run that answered the board request
+  `80429475`; the design draft (`docs/evidence/plans/2026-11-17-ct339-door-context.md`) had no blind reading, so further
+  readings are CT-348.
+- **Context:** fabric-agents-database asked on the board (request `80429475`, thread `92e6c78a`, 2026-11-17), relaying
+  the operator's rule (board request `c612a3e2`, thread `4a5879bd`, session `a1c9849b`, 2026-11-17): an
+  organization's PM agent issues access only to its own organization's agents, a machine that hosts several
+  organizations never mixes them, and the hard gate sits at the contract level. Its pattern `org-key-doors` 1.0.0 (its
+  D-57) reads a door's name and the organization its configuration row declares; its hook `prove(door)` had no claim to
+  verify. An organization's PM agent asked the door's side of the same rule (board request `6a1c4b6f`, thread
+  `a4f07b9c`, 2026-11-17). The contract already holds both claims a caller can verify: `org-instance/1` (DEC-0170),
+  which the organization's own keys sign, for a door at its own origin, and the estate record's secret placement
+  (DEC-0082), which the person's passkeys sign, for a vault slot on a machine of the estate.
+- **Decision:**
+  1. **DC-1, the reading.** `doorContext(door, asked, trust)` (`src/door-context.ts`) answers `{ok: true, context,
+     source}` or a refusal. It reads a remote door's context only from an `org-instance/1` statement the door handed
+     over that `verifyOrgInstance` accepts under the key set the caller applied for the statement's organization (each
+     accepted by `verifyOrgKeySet` under the root the estate record pins), that reads `status: "active"`, and whose
+     `origin` equals the origin the caller calls, compared as written. It reads a local door's context only from the
+     secret placements `{agentRef, slot, from, context?}` of an estate record that `verifyEstateRecord` accepted (the
+     verdict's digest is the record's), on that machine for that `agentRef` and slot; a slot placed in several contexts
+     proves each of them. Never from a door's name, a configuration row, a member the door writes about itself or an
+     inventory's map: those stay hints a caller may show.
+  2. **DC-2, the rule.** An issuer issuing in context C (`personal` or `org:<orgId>`, DEC-0082; DEC-0172's
+     `asked.context` carries the same value) uses a door only when `doorContext` answers C (`doorAdmits`). So
+     `personal` never issues for an organization, an organization never issues for `personal`, and one organization
+     never issues for another. An issuer that serves several contexts on one machine reads per issue, never once per
+     door at start.
+  3. **DC-3, the refusals,** one closed list in this order: `context-invalid` (the caller's own input: a context
+     written in another form, no door of a known kind, an unreadable clock); `door-claim-absent` (a remote door that
+     handed over no statement, a local slot no verified placement names, no estate record; a door reachable only at a
+     port is here until membership.md's open point is decided); `door-claim-invalid` with `detail` (the verifier's
+     problem, `retired`, `wrong-origin`, `no-key-set` when the caller applied no key set for the statement's
+     organization, or `record-<problem>` when the estate record was not accepted); `door-organization-mismatch` with
+     the `context` the door does prove (the personal context included).
+  4. **DC-7, the door's own side.** An organization's door that offers `*.keys.issue` binds every key carrying scope
+     `issue` to its own context when it issues that key, and on every `*.keys.issue` call admits the calling key only
+     when its bound context equals the door's own verified context (the organization its `org-instance/1` statement
+     names) (`issueKeyAdmitted`). A key bound to another context, to `personal`, or to none (issued before this
+     decision) is refused `issuer-organization-mismatch` before any provider call; an unbound key is reissued.
+  5. **Vectors** (`fixtures/vectors/door-context.json`, written by `tools/vectors/door-context.ts`): a remote door of
+     the same organization, of another one, asked for `personal`, with no statement, forged, changed after signing,
+     signed by a revoked key, expired, retired, at another origin, with no key set applied, held at a higher revision;
+     a local slot of an organization, a personal one, each asked for the other context, one asked for another
+     organization, one placed in two contexts read for each, no placement, no machine, no record, a refused record, a
+     verdict over another record; the input refusals; and DC-7's own organization, another one, the personal context
+     and an unbound key.
+- **Not taken here:** DC-4, the route by which a remote door hands its statement to a caller (a well-known extension
+  `extensions/org-instance/0.1` with its schema and rule), and DC-7's semantic rule that `*.keys.issue` declares
+  `admin` at least in an organization's context; both are CT-348. Until then a caller obtains the statement by the
+  route it has (the organization server, or the door's own answer) and verifies it itself: the signature, not the
+  route, is the proof. A new hub-signed `door-claim/1`: refused for a remote door, which the organization's own keys
+  already sign; kept as the candidate for a local door should the estate record prove not enough. A member on the
+  descriptor naming the organization: refused, it is the door's own word.
+- **Why:** the claim means the same to every issuing agent of every organization and every door of every template,
+  across machines, because both sources are signed documents the contract already owns, verified offline, and
+  neither can be written by the door it describes. A local door rests on the person's own record: on the operator's
+  machine the operator's passkeys decide which slot serves which context, the trust DEC-0082 already gives a placement.
+- **Compatibility:** additive: a new module, vector file and test; no schema, rule or verifier changes;
+  `org-instance/1` and the estate record are read as they stand. An issuing agent that runs a name check today keeps
+  it until it plugs in `doorContext`; a door's issue keys issued before DC-7 are refused until reissued.
+- **Evidence:** `test/door-context.test.ts` (every vector, the closed list covered, branch coverage held at 100 by
+  `vitest.config.ts`); `docs/specification/membership.md` (*Doors (DEC-0185)*); `docs/backlog.md` (CT-339, CT-348).
+- **Consequences:** fabric-agents-database plugs `doorContext` into `org-key-doors` as `prove` and raises the
+  pattern; the organizations' PM agents take it through the `org-administrator` template; an organization's door
+  applies DC-7; the two threads are told this decision's number.
+- **Source:** CT-339; the board requests `80429475` (thread `92e6c78a`) and `6a1c4b6f` (thread `a4f07b9c`). DEC-0185
+  was reserved by git CAS (`agent_sync.py reserve DEC`, run `r-b219cc47cbfa`).
