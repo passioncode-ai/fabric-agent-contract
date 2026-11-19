@@ -71,6 +71,14 @@
       },
       "description": "DEC-0183 SL-6: money per UTC month for up to the last 12 months, oldest first, the current month last and partial, so a host can chart beyond the 31 days of days[] (FAC-SEM-031)."
     },
+    "routeChoices": {
+      "type": "array",
+      "maxItems": 64,
+      "items": {
+        "$ref": "#/$defs/routeChoice"
+      },
+      "description": "DEC-0186 RC-1 to RC-6: how the service pays for each model's work, a subscription or tokens, chosen on measured or estimated volume and price and reviewed by a date. One entry per piece of work and model; ids unique (FAC-SEM-184)."
+    },
     "byGrant": {
       "type": "array",
       "description": "DEC-0037: cost in the report's window attributed to each grant that authorized it (grant check receipts), a subscription's estimate included (DEC-0110).",
@@ -524,6 +532,137 @@
         }
       },
       "additionalProperties": false
+    },
+    "routeChoice": {
+      "type": "object",
+      "description": "One choice of a payment route (DEC-0186): the work and the model it covers, the route chosen, the volume and prices it was chosen on, why, and when it is reviewed. It names no person and no account (DL-22).",
+      "required": [
+        "id",
+        "work",
+        "provider",
+        "model",
+        "chosen",
+        "decidedAt",
+        "reviewBy",
+        "measured",
+        "reason"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        "work": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "description": "The piece of work this choice covers, in the service's own words (a pipeline, a job kind, all of the service's calls)."
+        },
+        "provider": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9._-]{0,63}$"
+        },
+        "model": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "runner": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9._-]{0,63}$",
+          "description": "The runner the work runs in (runners.schema.json). Required when chosen is subscription: a subscription runs only in its vendor's runner (DEC-0046 item 3)."
+        },
+        "chosen": {
+          "enum": [
+            "subscription",
+            "key",
+            "platform-metered"
+          ],
+          "description": "The route chosen, by the names of a usage row's route (DEC-0046, DEC-0061)."
+        },
+        "decidedAt": {
+          "$ref": "common.schema.json#/$defs/timestamp"
+        },
+        "reviewBy": {
+          "$ref": "#/$defs/date",
+          "description": "The UTC date by which the choice is measured again; after decidedAt and at most 92 days after it (FAC-SEM-184). A past reviewBy is overdue: a host shows it, the report stays valid (RC-5)."
+        },
+        "measured": {
+          "$ref": "#/$defs/routeMeasure"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500,
+          "description": "Why this route, in one or two sentences: the comparison, and anything the prices leave out (a quota the subscription shares with other work, a vendor's terms)."
+        },
+        "previous": {
+          "enum": [
+            "subscription",
+            "key",
+            "platform-metered"
+          ],
+          "description": "The route chosen before this review, when it changed."
+        }
+      },
+      "unevaluatedProperties": false
+    },
+    "routeMeasure": {
+      "type": "object",
+      "description": "The volume and prices a route choice rests on (DEC-0186 RC-2): over a window of UTC dates, measured from the service's own usage receipts or estimated before the first run, and both routes priced for one 30-day month of that volume. An unknown price is null, never 0 (DEC-0021).",
+      "required": [
+        "basis",
+        "from",
+        "to",
+        "calls",
+        "inputTokens",
+        "outputTokens",
+        "tokensUsdMonth",
+        "subscriptionUsdMonth"
+      ],
+      "properties": {
+        "basis": {
+          "enum": [
+            "measured",
+            "estimate"
+          ],
+          "description": "measured: counted from the service's own receipts in the window; estimate: before the work ran, from a trial or a plan (RC-1)."
+        },
+        "from": {
+          "$ref": "#/$defs/date"
+        },
+        "to": {
+          "$ref": "#/$defs/date"
+        },
+        "calls": {
+          "$ref": "#/$defs/count"
+        },
+        "inputTokens": {
+          "$ref": "#/$defs/count"
+        },
+        "outputTokens": {
+          "$ref": "#/$defs/count"
+        },
+        "cacheReadTokens": {
+          "$ref": "#/$defs/count"
+        },
+        "tokensUsdMonth": {
+          "$ref": "#/$defs/money",
+          "description": "What one 30-day month of the window's volume costs on tokens (a key, or the platform's metered models) at the provider's or the price list's price; null when it could not be priced."
+        },
+        "subscriptionUsdMonth": {
+          "$ref": "#/$defs/money",
+          "description": "The monthly price of the subscription this work would use, or the share of it the service attributes to this work (said in reason); null when no subscription serves this model."
+        },
+        "quotaFits": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "Whether the volume fits the subscription's usage quota beside the other work it serves: true, false, or null when not known. Absent: not stated."
+        }
+      },
+      "unevaluatedProperties": false
     }
   }
 }
