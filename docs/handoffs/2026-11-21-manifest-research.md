@@ -58,3 +58,26 @@ and at creation in Fabric; self-healing written into the protocol; then an AI-na
 
 When the plan names this work: reserve-check the four ids (same keys), move the drafts into `docs/specification/`,
 `schemas/` and `src/`, register the kinds and rule codes, write fixtures and tests, run `pnpm run check`, open the PR.
+
+## Update of 2026-11-21: the system plan named this work
+
+The system plan's spec for this project ([fabric-workspace `docs/plans/2026-11-21-system-design/specs/fabric-agent-contract.md`](https://github.com/passioncode-ai/fabric-workspace/blob/main/docs/plans/2026-11-21-system-design/specs/fabric-agent-contract.md),
+board request `d99e709d`, thread `5bbb6b96`) lifts the pause for SD-CON-01 to SD-CON-05 and orders seven features. Each
+has its row in [`docs/backlog.md`](../backlog.md):
+
+| SD id | Row | Due |
+|---|---|---|
+| SD-CON-01 `incident/1` | CT-355 | 2026-11-28 |
+| SD-CON-02 dispatch acknowledgement, `estate-notice/1` | CT-356 | 2026-12-01 |
+| SD-CON-03 `self-heal/1` | CT-354 (this branch) | 2026-12-03 |
+| SD-CON-04 `agent-manifest/1`, `project-manifest/1` | CT-353 (this branch) | 2026-12-05 |
+| SD-CON-05 `model-policy/1` | CT-357 | 2026-12-05 |
+| SD-CON-06 `update-graph/1` | CT-358 | 2026-12-19, starts 2026-12-08 |
+| SD-CON-07 Memory profiles | CT-359 | 2026-12-19, starts 2026-12-08, waits on SD-FAB-07 |
+
+DEC-0190 and DEC-0191 stay reserved for CT-353 and CT-354 (the spec's "next free decision: DEC-0190" predates that
+reservation); CT-355 takes the next free id when it lands.
+
+**Exact next task:** CT-355 (SD-CON-01, `incident/1`): reserve a DEC, write the schema beside `agent-health/1` with its
+examples, a mapping test from an `agent-health/1` episode and a refusal test for free text in a code field, run
+`pnpm run check`, open the PR. Then CT-356, CT-354, CT-353, CT-357 in the spec's order.
