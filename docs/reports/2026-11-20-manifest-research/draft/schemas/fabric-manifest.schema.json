@@ -1,0 +1,365 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/fabric-manifest.schema.json",
+  "title": "fabric-manifest/1 (proposed DEC-0190): an agent's or project's declaration of the twelve manifest articles",
+  "description": "fabric.manifest.json at the root of an agent's or project's repository: for each article M-1 to M-12 of the manifest, met with its evidence, owed with its backlog row and date, or not applicable with a reason; and the bindings a machine checks: the two MCP doors, the placement and local operator, the health surface, the secret slots by name, the forks, the decision register. Closed at every level. Semantic rule FAC-SEM-187. docs/specification/manifest.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "kind",
+    "name",
+    "organization",
+    "contract",
+    "rendered",
+    "placement",
+    "articles",
+    "surface",
+    "health",
+    "secrets",
+    "forks",
+    "decisions"
+  ],
+  "properties": {
+    "format": {
+      "const": "fabric-manifest/1"
+    },
+    "kind": {
+      "enum": [
+        "agent",
+        "project"
+      ],
+      "description": "agent: a program that acts for someone (serves a surface, runs work, holds a model budget); project: anything else kept in a repository (an app, a site, a library, a contract, a knowledge base). It decides which articles may be not-applicable (MF-2)."
+    },
+    "name": {
+      "$ref": "common.schema.json#/$defs/slug",
+      "description": "The repository's slug."
+    },
+    "organization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "org",
+        "project"
+      ],
+      "properties": {
+        "org": {
+          "$ref": "common.schema.json#/$defs/slug"
+        },
+        "project": {
+          "$ref": "common.schema.json#/$defs/slug"
+        }
+      },
+      "description": "The scope label org/project every entity of this repository carries (M-4)."
+    },
+    "contract": {
+      "type": "string",
+      "pattern": "^(v(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\+[0-9]{4}-[0-9]{2}-[0-9]{2}(\\.[1-9][0-9]*)?|[0-9a-f]{40})$",
+      "description": "The fabric-agent-contract tag (v<version>+<YYYY-MM-DD>[.<n>]) or commit the articles were rendered from."
+    },
+    "rendered": {
+      "$ref": "#/$defs/path",
+      "description": "The path of the rendered MANIFEST.md."
+    },
+    "placement": {
+      "type": "array",
+      "maxItems": 2,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "local",
+          "cloud"
+        ]
+      },
+      "description": "Where the agent runs (M-1, MF-5): local, cloud or both; an agent names at least one, a project that runs nothing gives an empty list (FAC-SEM-187)."
+    },
+    "operator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "local"
+      ],
+      "properties": {
+        "local": {
+          "type": "string",
+          "pattern": "^(any|[a-z][a-z0-9-]{1,62})$",
+          "description": "The coding agent that may drive a local placement: a runner kind of the runners register (claude-code, hermes, ...) or any."
+        }
+      },
+      "description": "Who operates a local placement (M-1, MF-5); absent when no coding agent drives it."
+    },
+    "articles": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "M-1",
+        "M-2",
+        "M-3",
+        "M-4",
+        "M-5",
+        "M-6",
+        "M-7",
+        "M-8",
+        "M-9",
+        "M-10",
+        "M-11",
+        "M-12"
+      ],
+      "properties": {
+        "M-1": {
+          "$ref": "#/$defs/article"
+        },
+        "M-2": {
+          "$ref": "#/$defs/article"
+        },
+        "M-3": {
+          "$ref": "#/$defs/article"
+        },
+        "M-4": {
+          "$ref": "#/$defs/article"
+        },
+        "M-5": {
+          "$ref": "#/$defs/article"
+        },
+        "M-6": {
+          "$ref": "#/$defs/article"
+        },
+        "M-7": {
+          "$ref": "#/$defs/article"
+        },
+        "M-8": {
+          "$ref": "#/$defs/article"
+        },
+        "M-9": {
+          "$ref": "#/$defs/article"
+        },
+        "M-10": {
+          "$ref": "#/$defs/article"
+        },
+        "M-11": {
+          "$ref": "#/$defs/article"
+        },
+        "M-12": {
+          "$ref": "#/$defs/article"
+        }
+      },
+      "description": "All twelve articles, each once (MF-1)."
+    },
+    "surface": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mcp",
+        "inventory"
+      ],
+      "properties": {
+        "mcp": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "doors",
+                "direct"
+              ],
+              "properties": {
+                "doors": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "items": {
+                    "$ref": "#/$defs/tool"
+                  },
+                  "description": "The two doors of one domain, one ending in search and one in execute (MF-4, FAC-SEM-187)."
+                },
+                "direct": {
+                  "type": "array",
+                  "maxItems": 3,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "name",
+                      "reason"
+                    ],
+                    "properties": {
+                      "name": {
+                        "$ref": "#/$defs/tool"
+                      },
+                      "reason": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      }
+                    }
+                  },
+                  "description": "At most three tools served beside the doors, each with its reason: the measured case of DEC-0180 or a name the contract defines."
+                }
+              }
+            }
+          ],
+          "description": "The MCP surface (M-1): null when the repository serves no MCP server."
+        },
+        "inventory": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/path"
+            }
+          ],
+          "description": "The inventory pairing every function a person reaches with the operation behind it (docs/agent-surface.md, agent-surface/1); null when nothing is reached by a person."
+        }
+      }
+    },
+    "health": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "tool": {
+          "$ref": "#/$defs/tool",
+          "description": "The MCP tool or operation answering agent-health/1."
+        },
+        "cli": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.-]{1,64}( [A-Za-z0-9_.=-]{1,64}){0,4}$",
+          "description": "The command answering agent-health/1, such as 'example health --json'."
+        }
+      },
+      "description": "Where agent-health/1 is answered (M-3, MF-5): an empty object when nothing is."
+    },
+    "secrets": {
+      "type": "array",
+      "maxItems": 64,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^([a-z0-9][a-z0-9._-]{0,62}/[a-z0-9][a-z0-9_-]{0,31}/)?[A-Z][A-Z0-9_]{0,127}$"
+      },
+      "description": "The secret slots this repository needs, by name only (M-5, MF-6): <project>/<env>/<NAME> or <NAME>."
+    },
+    "forks": {
+      "type": "array",
+      "maxItems": 64,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "upstream",
+          "commit",
+          "licence",
+          "changes"
+        ],
+        "properties": {
+          "path": {
+            "oneOf": [
+              {
+                "const": "."
+              },
+              {
+                "$ref": "#/$defs/path"
+              }
+            ],
+            "description": "Where the foreign code lives in the repository, or . for a repository that is itself a fork."
+          },
+          "upstream": {
+            "type": "string",
+            "pattern": "^https://[A-Za-z0-9.-]+(:[0-9]{1,5})?/[A-Za-z0-9._~/%-]{1,400}$",
+            "description": "The upstream repository, an https URL without credentials or query."
+          },
+          "commit": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{40}$",
+            "description": "The exact upstream commit the fork or copy is pinned to."
+          },
+          "licence": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9.+-]{1,64}( (AND|OR|WITH) [A-Za-z0-9.+-]{1,64}){0,4}$",
+            "description": "The upstream's SPDX licence expression."
+          },
+          "changes": {
+            "$ref": "#/$defs/path",
+            "description": "The file recording our changes to the upstream code."
+          }
+        }
+      },
+      "description": "Foreign code used through a fork or a pinned copy (M-6, MF-7)."
+    },
+    "decisions": {
+      "$ref": "#/$defs/path",
+      "description": "The decision register (M-7, MF-8)."
+    }
+  },
+  "$defs": {
+    "path": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^(?![/~])(?!.*//)(?!(.*/)?\\.{1,2}(/|$))[^\\\\:\\u0000-\\u001f]+$",
+      "description": "A path relative to the repository root (MF-3): forward slashes, no leading / or ~, no . or .. segment, no backslash, colon or control character; a trailing / names a folder."
+    },
+    "tool": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_.-]{1,128}$",
+      "description": "An MCP tool or operation name (1 to 128 of ASCII letters, digits, '_', '-' and '.')."
+    },
+    "article": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "evidence"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "met",
+            "owed",
+            "not-applicable"
+          ]
+        },
+        "evidence": {
+          "type": "array",
+          "maxItems": 16,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/path"
+          },
+          "description": "Paths that show the article is met; at least one when met (FAC-SEM-187)."
+        },
+        "owed": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "row",
+            "by"
+          ],
+          "properties": {
+            "row": {
+              "type": "string",
+              "pattern": "^[A-Za-z][A-Za-z0-9]{0,15}-[0-9]{1,6}$",
+              "description": "The backlog row that meets the article, such as CT-353."
+            },
+            "by": {
+              "type": "string",
+              "format": "date",
+              "description": "The date by which the article is met."
+            }
+          },
+          "description": "Present exactly when status is owed (FAC-SEM-187)."
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "description": "Why the article does not apply; present exactly when status is not-applicable (FAC-SEM-187)."
+        }
+      }
+    }
+  }
+}
