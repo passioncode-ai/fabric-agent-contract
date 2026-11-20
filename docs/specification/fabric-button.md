@@ -1,6 +1,6 @@
 # Fabric's button and `fabric://` links
 
-DEC-0040, the cookie's scope DEC-0059, the page's language DEC-0124 · Fabric 0.4.0 REQ-42 · schema [`fabric-link.schema.json`](../../schemas/fabric-link.schema.json) · rule code
+DEC-0040, the cookie's scope DEC-0059, the page's language DEC-0124, session links DEC-0189 · Fabric 0.4.0 REQ-42 · schema [`fabric-link.schema.json`](../../schemas/fabric-link.schema.json) · rule code
 `FAC-SEM-052` · parser and builder [`src/fabric-links.ts`](../../src/fabric-links.ts) · builds on
 [`fabric-dashboard/0.1`](embedded-dashboard.md) and [`fabric-service/0.1`](service.md)
 
@@ -19,6 +19,8 @@ The key words MUST, MUST NOT, SHOULD and MAY are used as in RFC 2119. A *CSS pix
 flowchart LR
   B[Fabric's button on a dashboard] -- fabric://chat?service=…&project=… --> C[Fabric: conversation with the manager]
   B -- fabric://session/new?project=…&runner=… --> S[Fabric: session view of the project]
+  A[Fabric Dashboards, Inbox, Switchboard, Observatory] -- fabric://session/open?session=…&from=… --> V[Fabric: that session's view]
+  A -- fabric://session/continue?session=…&from=… --> T[Fabric: move the runner's session into Fabric's console, the person confirms]
   C -- fabric-dashboards://service/id.instance?path=… --> D[Fabric Dashboards shows the page]
   C -- the service's own URL, only where the host is absent or unsupported --> W[Browser]
 ```
@@ -107,7 +109,7 @@ The grammar, after RFC 3986:
 
 ```text
 fabric-link = "fabric://" action [ "/" ] [ "?" query ] [ "#" fragment ]
-action      = "chat" / "session/new"
+action      = "chat" / "session/new" / "session/open" / "session/continue"
 query       = param *( "&" param )      ; application/x-www-form-urlencoded
 param       = name "=" value
 ```
@@ -118,9 +120,16 @@ param       = name "=" value
 | `chat` | `project` | | a project id or slug (`^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$`: no slash, no space) |
 | `session/new` | `project` | yes | a project id or slug |
 | `session/new` | `runner` | no | a runner kind from the [runner catalogue](runners.md) (`^[a-z][a-z0-9-]{1,62}$`) |
+| `session/new` | `from` | no | the app the link came from, an agent id (SL-1, DEC-0189) |
+| `session/open` | `session` | yes | a Fabric session's id or a runner session's id: a UUID (SL-2) |
+| `session/open` | `from` | no | as for `session/new` |
+| `session/continue` | `session` | yes | a runner session's id: a UUID (SL-2) |
+| `session/continue` | `from` | no | as for `session/new` |
 
 Examples: `fabric://chat?service=example-agent.default&project=project-a`,
-`fabric://session/new?project=project-a&runner=claude-code`.
+`fabric://session/new?project=project-a&runner=claude-code&from=fabric-dashboards`,
+`fabric://session/open?session=3f2b8c1e-9a47-4d2e-b5c6-0e1f2a3b4c5d&from=observatory`,
+`fabric://session/continue?session=7c9e6679-7425-40de-944b-e07fc1f90ae7&from=switchboard`.
 
 **FL-1 — Shape.** The scheme is case-insensitive (RFC 3986 §3.1); the action is lowercase and exact. A trailing
 slash and a fragment are ignored, except that a fragment carrying a credential refuses the link (FL-4). A link is at most 2 048 characters.
@@ -134,10 +143,13 @@ action refuses the whole link: Fabric comes to the front, says the link was refu
 else.
 
 **FL-4 — Never a secret, never words to act on.** A link carries ids only: never a token, a login code, a key,
-a password, a cookie or a session id, and never a prompt or an instruction. The whole link is refused, even
+a password, a cookie or a sign-in session's id, and never a prompt or an instruction. The UUID of a Fabric or runner
+session record that `session/open` and `session/continue` name is an id of a view, like a project id, and grants
+nothing (SL-3). The whole link is refused, even
 when the action does not define the parameter (`FAC-SEM-052`), when:
 
-- a parameter's name can only carry a credential. The name is split into words — at `.`, `_`, `-` and
+- a parameter's name can only carry a credential, except the one name an action defines that this list holds:
+  `session` of `session/open` and `session/continue`, whose value MUST be a UUID (SL-3). The name is split into words — at `.`, `_`, `-` and
   camelCase humps, lowercased, so `refreshToken`, `refresh_token` and `refresh-token` are all `refresh token` —
   and a credential word must be a **whole word** of it (DEC-0041, Fabric CO-260). A word ending in `s` also
   counts as its singular (`secrets`, `tokens`, `apiKeys`):
@@ -175,8 +187,41 @@ when the action does not define the parameter (`FAC-SEM-052`), when:
 - `session/new`: the project's coding-agent session view with that runner chosen, or the project's live
   session in that runner. An unknown or uninstalled runner falls back to the project's default runner, and
   Fabric says so. The runner starts only when the person starts it (FB-8).
+- `session/open` and `session/continue`: SL-4 and SL-5.
 - A service or project Fabric does not know is named as unknown with a choice of the known ones; Fabric never
   guesses.
+
+### Session links
+
+Fabric Dashboards, Inbox, Switchboard, Observatory and any other app hand a person to a session in Fabric by one
+path: the links below (DEC-0189, Fabric's `fabric-session-links/1`, the operator's order of 2026-11-19). DEC-0040's
+rules hold unchanged: ids only, no words and no secret, and a link opens a view and acts on nothing by itself (FB-8).
+
+**SL-1 — `from` names the app.** `session/new`, `session/open` and `session/continue` take an optional `from`: the
+app the link came from, an agent id (`^[a-z][a-z0-9-]{1,62}(\.[a-z][a-z0-9-]{0,31})?$`, such as `fabric-dashboards`,
+`switchboard` or `observatory.default`). Fabric records it in its launch journal. Any page can write any `from`, so
+it is the page's claim: Fabric shows and records it, and never grants, skips a confirmation or chooses what opens on
+it. `chat` does not define `from`, so there it is an unknown parameter and ignored (FL-2).
+
+**SL-2 — A session is named by its UUID.** `session` is a UUID in its 8-4-4-4-12 hex form (RFC 9562 §4), in either
+case; the parser returns it in lower case, and the parsed link (`fabric-link.schema.json`) holds it in lower case. A
+value in any other form (braces, `urn:uuid:`, no hyphens, a name) refuses the link (FL-3).
+
+**SL-3 — `session` is an id here, a credential name everywhere else.** FL-4 reads a parameter named `session` alone as
+one that can carry a credential. `session/open` and `session/continue` define it, so there it passes when its value is
+a UUID; in `chat`, `session/new` and every other name (`session_id`, `sessionToken`) it still refuses the link.
+Every other FL-4 check still applies to its value, and a value shaped like a credential refuses the link.
+
+**SL-4 — `session/open` opens a session's view.** The id is a Fabric session's or a runner session's (a coding
+agent's own session id); the two are UUIDs from different issuers, so Fabric looks the id up among its sessions
+first and then among the runner sessions it knows. It opens that session's view, the Fabric session that holds a
+runner session where there is one, and starts, sends or resumes nothing (FB-8). An id Fabric does not know is named
+as unknown; Fabric never guesses.
+
+**SL-5 — `session/continue` asks to move a runner's session into Fabric's console.** The id is a runner session's.
+Fabric opens the view that moves that session into its console, naming the session and `from`; the move happens only
+when the person confirms it in Fabric. Until then nothing runs, and the runner session is left as it was. An id
+Fabric does not know, or a session it cannot move, is said so in that view.
 
 **FL-6 — Built by the kit.** `buildFabricLink` refuses to produce a link the grammar refuses, and
 `parseFabricLink` is the reader Fabric applies. Both are in [`src/fabric-links.ts`](../../src/fabric-links.ts).
@@ -213,5 +258,6 @@ Fixtures: the `fabric-link-*` entries of [`fixtures/catalogue.json`](../../fixtu
 
 - A message or prompt prefilled by a chat link: refused today, because a link carries ids only (FL-4).
 - Links for other Fabric views (a task, an approval request, a grant).
+- `from` on `chat`, and how Fabric shows a `from` it does not know as an app.
 - A per-service choice to hide the button, and where a host offers it.
 - Links followed on a phone: a custom scheme opens on the device that receives it.
