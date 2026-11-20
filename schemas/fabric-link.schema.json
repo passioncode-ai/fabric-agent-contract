@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/fabric-link.schema.json",
-  "title": "A parsed fabric:// deep link (DEC-0040)",
-  "description": "What a fabric:// link asks Fabric to open, after parsing: a conversation with Fabric scoped to a service, a project or both (fabric://chat), or a coding-agent session in a project (fabric://session/new). It names ids only and never a credential, a prompt or an instruction.",
+  "title": "A parsed fabric:// deep link (DEC-0040, DEC-0189)",
+  "description": "What a fabric:// link asks Fabric to open, after parsing: a conversation with Fabric scoped to a service, a project or both (fabric://chat), a new coding-agent session in a project (fabric://session/new), an existing Fabric or runner session's view (fabric://session/open), or the view that moves a runner's session into Fabric's console, which the person confirms there (fabric://session/continue). It names ids only and never a credential, a prompt or an instruction; `from` names the app the link came from, as the page claims it.",
   "oneOf": [
     {
       "type": "object",
@@ -21,12 +21,35 @@
       "properties": {
         "action": { "const": "session.new" },
         "project": { "$ref": "#/$defs/projectRef" },
-        "runner": { "$ref": "common.schema.json#/$defs/slug", "description": "A runner kind from the runner catalogue." }
+        "runner": { "$ref": "common.schema.json#/$defs/slug", "description": "A runner kind from the runner catalogue." },
+        "from": { "$ref": "#/$defs/from" }
+      },
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "required": ["action", "session"],
+      "properties": {
+        "action": { "const": "session.open" },
+        "session": { "$ref": "#/$defs/sessionId", "description": "A Fabric session's id or a runner session's id." },
+        "from": { "$ref": "#/$defs/from" }
+      },
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "required": ["action", "session"],
+      "properties": {
+        "action": { "const": "session.continue" },
+        "session": { "$ref": "#/$defs/sessionId", "description": "The runner session's id." },
+        "from": { "$ref": "#/$defs/from" }
       },
       "additionalProperties": false
     }
   ],
   "$defs": {
-    "projectRef": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$", "description": "A project id or slug: no slash, no space." }
+    "projectRef": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$", "description": "A project id or slug: no slash, no space." },
+    "sessionId": { "type": "string", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", "description": "A session's UUID in lower case (RFC 9562 §4); the parser lowers the link's value (DEC-0189 SL-2)." },
+    "from": { "$ref": "common.schema.json#/$defs/agentId", "description": "The app the link came from, an agent id (DEC-0189 SL-1). The page claims it: Fabric records it and grants nothing on it." }
   }
 }

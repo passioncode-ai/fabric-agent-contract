@@ -3,7 +3,7 @@
 Append-only decision home for this repository. Reversals add a new decision and
 annotate only the old status; decision bodies are never rewritten.
 
-**Next free ID:** `DEC-0189` (the CAS counter's next value when this line was last written; read
+**Next free ID:** `DEC-0190` (the CAS counter's next value when this line was last written; read
 `refs/agent-sync/ids/DEC` on origin for the current one)
 
 
@@ -13835,3 +13835,55 @@ origin `SEM` counter existed; its first record on origin is `SEM-0037` (`38c432b
   the contract checking their answers.
 - **Source:** CT-351; the board request `61235cc4` (thread `72ff57ad`). DEC-0188 and `FAC-SEM-186` were reserved by git
   CAS (`agent_sync.py reserve`, keys `61235cc4-knowledge-layer` and `61235cc4-knowledge-layer-sem`).
+
+### DEC-0189: session links, `fabric://session/open` and `session/continue`, and `from` on the session actions
+
+- **Date:** 2026-11-20
+- **Status:** Accepted 2026-11-20 (CT-352): the gate `pnpm run check` green in the run that answered the board request
+  `ff159b76`; no blind reading ran in that run, so further readings are CT-352's open part.
+- **Context:** Fabric asked on the board (request `ff159b76`, thread `430a0054`, 2026-11-19, trusted provenance), relaying
+  the owner's order of 2026-11-19 (message `57445717` in thread `3ca40854` of the Fabric CEO project): a session is started
+  and opened from Fabric Dashboards, Inbox, Switchboard and Observatory by one path; Fabric published its side there as
+  `fabric-session-links/1` (message `b37c7dce`). Fabric vendors `src/fabric-links.ts` as
+  `apps/desktop/src/shared/contract/fabricLinks.ts` and asked for three things with DEC-0040's rules unchanged: an
+  optional `from` (the `AGENT_ID` grammar) on `session/new` and the new actions; `fabric://session/open?session=<id>`
+  for a Fabric session's or a runner session's id, both UUIDs; `fabric://session/continue?session=<runner session id>`
+  for moving the session into Fabric's console, which the person confirms in Fabric.
+- **Decision:** [Fabric's button, Session links](specification/fabric-button.md#session-links) SL-1 to SL-5; the
+  grammar's two new actions and `from` (`src/fabric-links.ts`: `SESSION_ID`, the `FabricLink` union,
+  `parseFabricLink`, `buildFabricLink`); `fabric-link.schema.json` gains the `session.open` and `session.continue`
+  branches and `from` on `session.new`. `FAC-SEM-052` reads the new actions through the same parser; no new rule code.
+  1. **SL-1.** `from` is optional on the three session actions, an agent id; Fabric records it in its launch journal. It
+     is the page's claim, so Fabric grants nothing, skips no confirmation and chooses nothing on it. `chat` does not
+     define it (FL-2 ignores it there), since the ask named the session actions only.
+  2. **SL-2.** `session` is a UUID (RFC 9562 §4) in either case; the parser returns it in lower case, the schema holds
+     lower case.
+  3. **SL-3.** FL-4 reads the name `session` alone as a credential name. The two new actions define it and it passes
+     there only with a UUID value; in `chat`, `session/new` and every other spelling (`session_id`, `sessionToken`) it
+     still refuses the link, and every value check still applies.
+  4. **SL-4.** `session/open` opens that session's view (a runner session's through the Fabric session that holds it)
+     and starts, sends or resumes nothing.
+  5. **SL-5.** `session/continue` opens the move view; the move happens only on the person's confirmation in Fabric.
+- **Not taken:** another parameter name than `session` (such as `sessionRef`), which FL-4 would pass without SL-3:
+  Fabric has published `fabric-session-links/1` with `session=` and parses it today, so a second name would split the
+  estate's links; the exception is narrow (two actions, a UUID value) and the record a UUID names grants nothing (FB-8).
+  A `runner` beside `session` to say whose id it is: the ask names one id for both issuers and UUIDs do not collide, so
+  Fabric looks the id up (SL-4). Lower case only for the UUID: a sender written in Swift gets upper case from
+  `UUID().uuidString`, and RFC 9562 §4 reads a UUID in either case.
+- **Why:** one path for every app that hands a person to a session; the links stay ids only and open views only, so a
+  page that emits one cannot start, send or move anything.
+- **Compatibility:** additive for every valid link: each link DEC-0040 accepted parses to the same value, except that a
+  `session/new` link carrying a valid `from` now returns it (it was ignored and listed). The refusal text for an
+  unknown action names the four actions (`not fabric://chat, fabric://session/new, fabric://session/open or
+  fabric://session/continue`); a reader matching the old text takes the new one at its next vendoring. A link that names
+  `session/open` or `session/continue` was refused before and is read now. `contractVersion` stays `0.1.0`.
+- **Evidence:** `test/fabric-button.test.ts` (the `session links` block, SL-1 to SL-5 each stated once in the
+  specification); fixtures `positive/fabric-link-session-{open,continue}.json`,
+  `negative/fabric-link-{session-open-not-uuid,chat-with-from}.json`, `semantic/deep-link-session-{open,on-chat}.json`;
+  `test/meter-grant.test.ts` (`session` on a chat link still refused); the gate's output in the pull request.
+- **Consequences:** Fabric re-vendors `src/fabric-links.ts` and retires its interim parser of the two actions; Fabric
+  Dashboards, which vendors the same file, and the adapter's dashboard kit (`fabric-button.js`) take the grammar at their
+  next pin. Each sending app builds its links with `buildFabricLink` or a port of it.
+- **Source:** CT-352; the board request `ff159b76` (thread `430a0054`). DEC-0189 was reserved by git CAS
+  (`agent_sync.py reserve DEC --key session-links-20261120`); edited under the agent-sync leases `CT-352`,
+  `docs/DECISIONS.md`, `docs/backlog.md` and `docs/specification/conformance.md`.
