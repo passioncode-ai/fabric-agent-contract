@@ -1,0 +1,133 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.passioncode.ai/agent-contract/0.1.0/schemas/heal-attempt.schema.json",
+  "title": "heal-attempt/1 (DEC-0191): one attempt of a product, dashboard or report to repair itself, and its outcome",
+  "description": "What a product records each time it acts on a failing agent-health/1 check of its own: the episode, the attempt's number, the fix it called or why it called none, the outcome and the check's state after. Counts, kinds and codes only (DEC-0157): no account label, path, session id, host name or free text, so every object is closed. Semantic rule FAC-SEM-188. docs/specification/agent-health.md#self-healing-dec-0191.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "product",
+    "check",
+    "episode",
+    "attempt",
+    "at",
+    "action",
+    "outcome",
+    "after"
+  ],
+  "properties": {
+    "schema": {
+      "const": "heal-attempt/1"
+    },
+    "product": {
+      "$ref": "common.schema.json#/$defs/slug",
+      "description": "The product, agent, dashboard or report that repaired itself, by its product id (DEC-0016)."
+    },
+    "check": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]{0,63}$",
+      "description": "The id of the agent-health/1 check the attempt acted on."
+    },
+    "episode": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{1,62}:[a-z][a-z0-9_]{0,63}@[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+      "description": "The episode key <product>:<check id>@<YYYY-MM-DD> (HL-6, episodeKey), the UTC day of the reading that opened it; the product and check id are this record's (FAC-SEM-188)."
+    },
+    "attempt": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 3,
+      "description": "The attempt's number within the episode: at most three automatic attempts (HEAL-2)."
+    },
+    "at": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 253402300799,
+      "description": "When the attempt ended, whole Unix seconds."
+    },
+    "action": {
+      "description": "The fix the product called: an MCP tool of its own or a board capability of its owning project, or null when it called none (outcome skipped-human, skipped-gated or escalated without a call).",
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "tool"
+          ],
+          "properties": {
+            "tool": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_.-]{1,128}$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "capability"
+          ],
+          "properties": {
+            "capability": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9._-]{1,127}$"
+            }
+          }
+        }
+      ]
+    },
+    "outcome": {
+      "enum": [
+        "recovered",
+        "not-recovered",
+        "escalated",
+        "skipped-human",
+        "skipped-gated"
+      ],
+      "description": "recovered: the check reads ok after the fix; not-recovered: the fix ran and the check is still bad; escalated: handed to the owning project or the person, once per episode (HEAL-4); skipped-human: the fix is a human step, never called for the person; skipped-gated: the fix would spend money, delete, publish or act on another product, so it was not called (HEAL-3)."
+    },
+    "after": {
+      "enum": [
+        "ok",
+        "warn",
+        "fail",
+        "unknown"
+      ],
+      "description": "The check's state read again after the attempt (agent-health/1 HL-2)."
+    },
+    "to": {
+      "description": "Where an escalated episode went: the owning project's board capability, or the operator channel. Present exactly when outcome is escalated (FAC-SEM-188).",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "capability"
+          ],
+          "properties": {
+            "capability": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9._-]{1,127}$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "channel"
+          ],
+          "properties": {
+            "channel": {
+              "const": "operator"
+            }
+          }
+        }
+      ]
+    }
+  }
+}
